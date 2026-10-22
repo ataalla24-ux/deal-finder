@@ -1,7 +1,10 @@
 const BASE = 'https://api.apify.com/v2';
 export const DISCOVERY_ACTOR = 'apify~instagram-scraper';
 export const HASHTAG_ACTOR = 'apify~instagram-hashtag-scraper';
-export const RUN_CAP_USD = 0.04;
+export const PROFILE_CAP_USD = 0.0625;
+export const HASHTAG_CAP_USD = 0.0125;
+export const RUN_CAP_USD = 0.075;
+export const CREDIT_RESERVE_USD = 0.35;
 
 export class ApifyDiscoveryClient {
   constructor(token, fetchImpl = fetch) {
@@ -56,12 +59,13 @@ export function budgetCheck({ user, limits, actor }, now = new Date(), runCap = 
     .filter(p => Date.parse(p.startedAt) <= +now)
     .sort((a, b) => Date.parse(b.startedAt) - Date.parse(a.startedAt))[0];
   let reason = '';
-  if (![credits, used, ceiling].every(v => typeof v === 'number' && Number.isFinite(v) && v >= 0)
+  if (!Number.isFinite(runCap) || runCap <= 0 || runCap > RUN_CAP_USD) reason = 'invalid-run-cap';
+  else if (![credits, used, ceiling].every(v => typeof v === 'number' && Number.isFinite(v) && v >= 0)
       || !Number.isFinite(Date.parse(limits?.monthlyUsageCycle?.startAt))
       || !Number.isFinite(Date.parse(limits?.monthlyUsageCycle?.endAt))) reason = 'unknown-account-budget';
   else if (+now < Date.parse(limits.monthlyUsageCycle.startAt) || +now > Date.parse(limits.monthlyUsageCycle.endAt)) reason = 'stale-budget-cycle';
   else if (ceiling > credits) reason = 'account-limit-exceeds-included-credit';
-  else if (Math.min(credits, ceiling) - used < runCap + 0.25) reason = 'included-credit-reserve';
+  else if (Math.min(credits, ceiling) - used < runCap + CREDIT_RESERVE_USD) reason = 'included-credit-reserve';
   else if (pricing?.pricingModel !== 'PAY_PER_EVENT'
       || !Number.isFinite(pricing?.minimalMaxTotalChargeUsd)
       || pricing.minimalMaxTotalChargeUsd > runCap) reason = 'unsupported-cost-cap';
@@ -74,6 +78,7 @@ export function budgetCheck({ user, limits, actor }, now = new Date(), runCap = 
     accountLimitUsd: Number.isFinite(ceiling) ? ceiling : null,
     cycle: limits?.monthlyUsageCycle || null,
     runCapUsd: runCap,
+    creditReserveUsd: CREDIT_RESERVE_USD,
     pricingModel: pricing?.pricingModel || null,
   };
 }

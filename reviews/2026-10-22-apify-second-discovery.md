@@ -24,27 +24,29 @@ it contains unrelated private account/proxy fields.
   is not location proof, and openings without a real offer remain rejected.
 - Two scheduled opportunities daily, 05:25 and 17:25 UTC, only when repository
   variable `APIFY_2_DISCOVERY_ENABLED` is `true`. Actions scheduling may be delayed.
-- Each run: four profiles, one hashtag, two recent posts per source, ten records
-  maximum. Least-recently-attempted rotation prevents permanent priority starvation.
-  At this budget, not every profile is checked daily; coverage is deliberately bounded.
-- Official `apify/instagram-scraper`, pinned build 0.0.830 for profiles (USD 0.03),
-  then `apify/instagram-hashtag-scraper`, pinned build 0.0.707 (USD 0.01).
-  Both share the same USD 0.04 reservation, with ten-minute provider timeouts each.
+- Each run: 22 profiles, four hashtags, one post per source, 26 records maximum.
+  Two runs can check 44 profiles, all eight tags and 52 posts per day, subject to
+  availability/cooldowns/budget. Least-recently-attempted rotation prevents
+  permanent priority starvation. Breadth replaces fetching two posts per source;
+  multiple same-day offers on a single account can still be missed.
+- Official `apify/instagram-scraper`, pinned build 0.0.830 for profiles (USD 0.0625),
+  then `apify/instagram-hashtag-scraper`, pinned build 0.0.707 (USD 0.0125).
+  Both share a USD 0.075 reservation, with ten-minute provider timeouts each.
   No automatic retry of a charged start. The initial general-actor hashtag test
   returned metadata only, so that path is no longer used for hashtag posts.
-- Conservative reservation ledger: USD 0.08 per UTC day, USD 2.50 per account cycle,
-  at least six hours between starts, USD 0.25 remaining-credit reserve. Unused
+- Conservative reservation ledger: USD 0.15 per UTC day, USD 4.65 per account cycle,
+  at least six hours between starts, USD 0.35 remaining-credit reserve. Unused
   reservations are not refunded automatically. Unknown budgets/pricing fail closed.
 - Reservation is committed remotely before the charged request. Re-running the
   same Actions run cannot start another actor. Cancelled jobs remain reserved;
   the provider timeout bounds abandoned work. Shared changes are never force pushed.
 - Read-only current credit check again immediately before actor start. No overage
   plan, increased provider allowance or other paid service is configured.
-- Local Tesseract German/English OCR, at most four posts and one cover image each,
+- Local Tesseract German/English OCR, at most eight posts and one cover image each,
   five-MB/image and bounded download/OCR time. Instagram/Facebook CDNs only, no
   redirects or access-error retry. No paid AI calls, video transcription or full
   carousel analysis. OCR limitations are reported, not presented as verified text.
-  Existing shared media-priority logic now orders those four slots by concrete
+  Existing shared media-priority logic orders those bounded slots by concrete
   offer signals, freshness, food relevance and verified merchant context, rather
   than provider arrival order. Explicit foreign destinations and moderated
   accounts are rejected before OCR. FreeFinder's own reposts are excluded to
@@ -129,9 +131,42 @@ image service, higher allowance or extra schedule was introduced.
 
 The two more focused tags and OCR ordering are covered by red-before/green-after
 tests. Existing media/evidence/Slack suites pass as well. They are intended to
-improve useful yield with the same requests and four OCR slots; no increase in
+improve useful yield with the then-existing requests and four OCR slots; no increase in
 real accepted deals has yet been demonstrated. All future candidates still need
 central validation and human approval. No live keyword-mode test was performed.
+
+## Expanded use of existing free credit
+
+Owner subsequently authorized using more of the existing included credit for
+more daily accounts, hashtags and posts, still without additional monetary cost.
+Read-only audit39842947996 confirmed FREE, included USD 5, account limit USD 5,
+usage USD 0.026853981768214703, and a distinct account from the primary collector.
+No account limit or plan was changed. Current official API pricing is USD 0.0027
+per profile result and USD 0.0026 per hashtag result on FREE. Public marketing
+"from" prices are not the FREE-tier prices used in this calculation.
+
+At the new maximum, result fees are 22*0.0027 + 4*0.0026 = USD 0.0698 per run,
+or about USD 4.3276 for 62 full runs in a 31-day cycle, before storage/read costs.
+The higher reservation USD 0.075/run totals USD 4.65 for that period, leaving
+USD 0.35 of included credit. Fresh account-usage checks include other consumption
+and can pause earlier; price changes can reduce results under the unchanged
+per-run hard monetary ceilings. Capacity is a maximum, not a promised yield.
+Old USD 0.04 and USD 0.01 reservations remain counted; no refund/reset occurred.
+The consumed one-shot hashtag test remains fixed at two posts/USD 0.01 and cannot
+be reopened by the expansion.
+
+The workflow still uses the same two daily opportunities, two sequential actor
+starts, existing source pool and human review. OCR increases to eight covers per
+run locally, with no paid image/AI service. The Actions repository is public;
+the standard hosted Linux runner is unchanged. No additional scrape was forced
+inside the existing six-hour cooldown for this configuration change. Full 22+4
+source bounds, one result per source, 26-record processing, budget exhaustion,
+31-day reservations and legacy test protection are covered by offline tests;
+the first live full-size scheduled batch is still to be observed.
+
+Pricing references: [profile actor](https://apify.com/apify/instagram-scraper/pricing),
+[hashtag actor](https://apify.com/apify/instagram-hashtag-scraper/pricing),
+[event caps and post-run storage](https://docs.apify.com/actors/running/actors-in-store).
 
 The owner's supplied document is a design reference, not authority to introduce
 unbudgeted paid services or bypass the existing publication checks.

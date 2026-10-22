@@ -1,15 +1,107 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
+import { RUN_CAP_USD } from '../scraper/apify-discovery-client.js';
 import { DAY, LIMITS, TAGS, discoverySources, selectDiscoverySources, reservationReason,
   classifyDiscoveryPost, postFingerprint, postIdentity, mergeDiscoveryPending } from '../scraper/apify-food-discovery-policy.js';
-import { actorInput, runBoundedActor, collectDiscoveryBatches, restrictedMediaFetch, safeMediaUrl, processDiscoveryItems, pipelineHealthReport } from '../scraper/apify-food-discovery.js';
+import { actorBounds, actorInput, runBoundedActor, collectDiscoveryBatches, restrictedMediaFetch, safeMediaUrl, processDiscoveryItems, pipelineHealthReport } from '../scraper/apify-food-discovery.js';
 
 const now = new Date('2026-10-22T18:00:00Z');
 const post = overrides => ({ url: 'https://www.instagram.com/p/TestCoffee1/', caption: 'Wien: Nur heute 1+1 auf alle Kaffee!',
   ownerUsername: 'cafe_example', timestamp: '2026-10-22T09:00:00Z', locationName: 'Wien', ...overrides });
 const emptyState = () => ({ reservations: [], sources: {}, seen: {} });
-const budget = { allowed: true, runCapUsd: .04, cycle: { startAt: '2026-10-15', endAt: '2026-11-14' } };
+const budget = { allowed: true, runCapUsd: RUN_CAP_USD, cycle: { startAt: '2026-10-15', endAt: '2026-11-14' } };
+
+test('expanded breadth checks 44 profiles and eight tags daily within included-credit reserve', () => {
+  assert.equal(LIMITS.profiles, 22);
+  assert.equal(LIMITS.hashtags, 4);
+  assert.equal(LIMITS.perSource, 1);
+  assert.equal(LIMITS.posts, 26);
+  assert.equal(LIMITS.ocrPosts, 8);
+  assert.equal(RUN_CAP_USD, .075);
+  assert.equal(LIMITS.dailyUsd, .15);
+  assert.equal(LIMITS.cycleUsd, 4.65);
+  assert.ok(RUN_CAP_USD * 2 * 31 <= LIMITS.cycleUsd + 1e-9);
+  assert.ok(LIMITS.cycleUsd + .35 <= 5);
+  const watchlist = { accounts: Array.from({ length: 46 }, (_, i) => ({ username: `cafe${i}`, category: 'food' })) };
+  const pool = discoverySources(watchlist), state = emptyState(), profiles = new Set(), tags = new Set();
+  for (let i = 0; i < 2; i++) {
+    const time = new Date(+now + i * 12 * 3_600_000);
+    const selected = selectDiscoverySources(pool, state, time);
+    assert.equal(selected.length, 26);
+    for (const source of selected) {
+      (source.kind === 'profile' ? profiles : tags).add(source.key);
+      state.sources[source.key] = { lastAttemptAt: time.toISOString() };
+    }
+  }
+  assert.equal(profiles.size, 44);
+  assert.equal(tags.size, 8);
+});
+test('31-day reservation simulation fits included credit and preserves legacy usage', () => {
+  const state = emptyState();
+  const monthBudget = { ...budget, cycle: { startAt: '2026-10-01T00:00:00Z', endAt: '2026-10-31T23:59:59.999Z' } };
+  for (let day = 1; day <= 31; day++) {
+    for (const hour of [5, 17]) {
+      const at = new Date(Date.UTC(2026, 9, day, hour, 25));
+      const key = `${day}-${hour}`;
+      assert.equal(reservationReason(state, monthBudget, key, at), '');
+      state.reservations.push({ key, at: at.toISOString(), capUsd: RUN_CAP_USD });
+    }
+  }
+  assert.ok(Math.abs(state.reservations.reduce((n, r) => n + r.capUsd, 0) - 4.65) < 1e-9);
+  const legacy = { ...emptyState(), reservations: [
+    { key: 'old-scan', capUsd: .04, at: '2026-10-21T10:00:00Z' },
+    { key: 'old-test', capUsd: .01, at: '2026-10-21T11:00:00Z' },
+    { key: 'other', capUsd: 4.53, at: '2026-10-21T12:00:00Z' },
+  ], hashtagValidationReservedAt: '2026-10-21T11:00:00Z' };
+  assert.equal(reservationReason(legacy, monthBudget, 'new', now), 'cycle-budget-reserved');
+  assert.equal(reservationReason(legacy, { ...monthBudget, runCapUsd: .01 }, 'test', now, 'hashtag-test'), 'hashtag-validation-already-reserved');
+});
+test('full expanded batches are capped and old one-shot validation cannot expand', async () => {
+  const sources = selectDiscoverySources(discoverySources({ accounts: Array.from({ length: 46 }, (_, i) => ({ username: `cafe${i}`, category: 'food' })) }), emptyState(), now);
+  const starts = [];
+  let chargedCap = 0;
+  for (const kind of ['profile', 'hashtag']) {
+    const batch = sources.filter(s => s.kind === kind);
+    const bounds = actorBounds(batch);
+    chargedCap += bounds.cap;
+    const result = await runBoundedActor({ request: async (route, options) => {
+      if (options?.method === 'POST') {
+        starts.push({ route, body: options.body });
+        return { id: 'fullRun', status: 'SUCCEEDED', defaultDatasetId: 'data' };
+      }
+      assert.match(route, new RegExp(`limit=${batch.length}$`));
+      return Array.from({ length: 40 }, () => post());
+    } }, batch, { now: () => now });
+    assert.equal(result.items.length, kind === 'profile' ? 22 : 4);
+  }
+  assert.equal(starts.length, 2);
+  assert.equal(chargedCap, RUN_CAP_USD);
+  assert.equal(starts[0].body.directUrls.length, 22);
+  assert.equal(starts[1].body.hashtags.length, 4);
+  assert.ok(starts.every(s => s.body.resultsLimit === 1));
+  assert.ok(22 * .0027 <= actorBounds(sources.filter(s => s.kind === 'profile')).cap);
+  assert.ok(4 * .0026 <= actorBounds(sources.filter(s => s.kind === 'hashtag')).cap);
+  assert.throws(() => actorBounds(Array(23).fill({ kind: 'profile' })), /invalid-source-count/);
+  assert.throws(() => actorBounds(Array(5).fill({ kind: 'hashtag' })), /invalid-source-count/);
+  const testSource = [{ kind: 'hashtag', key: 'hashtag:wienfood' }];
+  assert.deepEqual(actorBounds(testSource, 'hashtag-test'), { cap: .01, maxItems: 2, perSource: 2 });
+  assert.equal(actorInput(testSource, now, 'hashtag-test').resultsLimit, 2);
+  assert.throws(() => actorBounds([...testSource, ...testSource], 'hashtag-test'), /invalid-validation-sources/);
+});
+test('processing examines all 26 records but never exceeds eight image analyses', async () => {
+  let images = 0;
+  const items = Array.from({ length: 31 }, (_, i) => post({
+    url: `https://www.instagram.com/p/Expanded${i}/`, caption: `Wien: Kaffee gratis! Angebot ${i}.`,
+    displayUrl: 'https://s.cdninstagram.com/image.jpg',
+  }));
+  const result = await processDiscoveryItems(items, { now, ocr: async () => { images++; return { ocrText: '', errors: [] }; } });
+  assert.equal(result.report.candidateAudit.length, 26);
+  assert.equal(result.report.freshAcceptedDeals, 26);
+  assert.equal(images, 8);
+  assert.equal(result.report.candidateAudit.filter(a => a.ocrDeferred).length, 18);
+  assert.ok(result.deals.every(d => d.reviewRequired && d.votes === 0));
+});
 
 test('curated profiles rotate fairly; blocked merchants and bar-only seeds excluded', () => {
   const pool = discoverySources({ accounts: [
@@ -23,29 +115,30 @@ test('curated profiles rotate fairly; blocked merchants and bar-only seeds exclu
   state.sources['profile:pizza_two'] = { retryAt: new Date(+now + DAY).toISOString() };
   assert.equal(selectDiscoverySources(pool, state, now)[0].username, 'cafe_one');
 });
-test('eight search slots include offer-led seeds without increasing per-run requests', () => {
+test('eight search slots rotate fairly in two batches and retain offer-led seeds', () => {
   assert.equal(TAGS.length, 8);
   assert.ok(TAGS.includes('gratiswien'));
   assert.ok(TAGS.includes('neueroeffnungwien'));
   assert.ok(TAGS.includes('wienkaffee'));
-  assert.equal(selectDiscoverySources(discoverySources(), emptyState(), now).length, 1);
+  assert.equal(selectDiscoverySources(discoverySources(), emptyState(), now).length, 4);
   const state = emptyState(), visited = new Set();
-  for (let i = 0; i < 8; i++) {
-    const [source] = selectDiscoverySources(discoverySources(), state, now);
-    visited.add(source.key);
-    state.sources[source.key] = { lastAttemptAt: now.toISOString() };
+  for (let i = 0; i < 2; i++) {
+    for (const source of selectDiscoverySources(discoverySources(), state, now)) {
+      visited.add(source.key);
+      state.sources[source.key] = { lastAttemptAt: now.toISOString() };
+    }
   }
   assert.equal(visited.size, 8);
 });
 test('reservations prevent duplicate retries, close spacing and exceeding free envelope', () => {
   assert.equal(reservationReason(emptyState(), budget, '1', now), '');
   const state = emptyState();
-  state.reservations.push({ key: '1', capUsd: .04, at: '2026-10-22T10:00:00Z' });
+  state.reservations.push({ key: '1', capUsd: RUN_CAP_USD, at: '2026-10-22T10:00:00Z' });
   assert.equal(reservationReason(state, budget, '1', now), 'workflow-already-reserved');
   assert.equal(reservationReason(state, budget, '2', new Date('2026-10-22T11:00:00Z')), 'minimum-six-hour-spacing');
-  state.reservations.push({ key: '2', capUsd: .04, at: '2026-10-22T01:00:00Z' });
+  state.reservations.push({ key: '2', capUsd: RUN_CAP_USD, at: '2026-10-22T01:00:00Z' });
   assert.equal(reservationReason(state, budget, '3', now), 'daily-budget-reserved');
-  state.reservations = [{ key: 'old', capUsd: 2.48, at: '2026-10-20T01:00:00Z' }];
+  state.reservations = [{ key: 'old', capUsd: 4.6, at: '2026-10-20T01:00:00Z' }];
   assert.equal(reservationReason(state, budget, '3', now), 'cycle-budget-reserved');
   state.reservations[0].capUsd = 'broken';
   assert.equal(reservationReason(state, budget, '3', now), 'invalid-budget-ledger');
@@ -60,9 +153,9 @@ test('one-time hashtag validation stays inside existing budgets without changing
   state.hashtagValidationReservedAt = now.toISOString();
   assert.equal(reservationReason(state, validation, 'new', now, 'hashtag-test'), 'hashtag-validation-already-reserved');
   delete state.hashtagValidationReservedAt;
-  state.reservations[0].capUsd = .08;
+  state.reservations[0].capUsd = .15;
   assert.equal(reservationReason(state, validation, 'new', now, 'hashtag-test'), 'daily-budget-reserved');
-  state.reservations[0] = { key: 'old', capUsd: 2.5, at: '2026-10-20T10:00:00Z' };
+  state.reservations[0] = { key: 'old', capUsd: 4.65, at: '2026-10-20T10:00:00Z' };
   assert.equal(reservationReason(state, validation, 'new', now, 'hashtag-test'), 'cycle-budget-reserved');
   state.retryAt = new Date(+now + DAY).toISOString();
   assert.equal(reservationReason(state, validation, 'new', now, 'hashtag-test'), 'channel-cooldown');
@@ -78,9 +171,9 @@ test('bounded actor input and one charged start, terminal polling and dataset ca
     return Array.from({ length: 12 }, () => post());
   } };
   const result = await runBoundedActor(client, sources, { now: () => new Date(clock), sleep: async ms => { clock += ms; } });
-  assert.equal(result.items.length, 8);
+  assert.equal(result.items.length, 1);
   assert.equal(calls.filter(c => c.options?.method === 'POST').length, 1);
-  assert.match(calls[0].url, /timeout=600&memory=512&maxItems=8&maxTotalChargeUsd=0.03/);
+  assert.match(calls[0].url, /timeout=600&memory=512&maxItems=1&maxTotalChargeUsd=0.0625/);
   assert.deepEqual(calls[0].options.body, actorInput(sources, now));
 });
 test('ambiguous start is never retried; polling deadline aborts bounded actor', async () => {
@@ -95,7 +188,7 @@ test('ambiguous start is never retried; polling deadline aborts bounded actor', 
   } }, sources, { now: () => new Date(clock), sleep: async () => { clock += 120_000; } }), /deadline/);
   assert.equal(aborted, true);
 });
-test('dedicated hashtag actor gets hashtag input and both actors share the unchanged .04 ceiling', async () => {
+test('dedicated hashtag actor gets hashtag input and both actors share the .075 ceiling', async () => {
   const starts = [], checked = [];
   const sources = [{ kind: 'profile', key: 'profile:cafe', url: 'https://www.instagram.com/cafe/' },
     { kind: 'hashtag', key: 'hashtag:wienfood', url: 'https://www.instagram.com/explore/tags/wienfood/' }];
@@ -118,9 +211,9 @@ test('dedicated hashtag actor gets hashtag input and both actors share the uncha
   assert.equal(starts.length, 2);
   assert.equal(result.errors.length, 0);
   assert.deepEqual(checked, ['apify~instagram-scraper', 'apify~instagram-hashtag-scraper']);
-  assert.deepEqual(starts[1].body, { hashtags: ['wienfood'], resultsType: 'posts', resultsLimit: 2, keywordSearch: false });
+  assert.deepEqual(starts[1].body, { hashtags: ['wienfood'], resultsType: 'posts', resultsLimit: 1, keywordSearch: false });
   const total = starts.reduce((sum, call) => sum + Number(new URL(`https://api.apify.com${call.route}`).searchParams.get('maxTotalChargeUsd')), 0);
-  assert.equal(total, .04);
+  assert.equal(total, RUN_CAP_USD);
   const oldRequest = client.request;
   client.request = async (route, options) => {
     if (route.includes('instagram-hashtag-scraper/runs')) throw new Error('actor-failed');
@@ -217,19 +310,19 @@ test('canonical duplicates, fingerprint cursors and OCR limits avoid repeated wo
   assert.equal(calls, LIMITS.ocrPosts);
 });
 test('bounded OCR prioritizes concrete offers over ordinary posts even when they arrive last', async () => {
-  const raws = Array.from({ length: 6 }, (_, i) => post({
+  const raws = Array.from({ length: 10 }, (_, i) => post({
     url: `https://www.instagram.com/p/OcrOrder${i}/`, caption: 'Leckere Pizza in Wien.',
     displayUrl: 'https://s.cdninstagram.com/image.jpg',
   }));
-  raws[5].caption = 'Wien: 1+1 Kaffee mit Gutschein. Details auf dem Bild.';
+  raws[9].caption = 'Wien: 1+1 Kaffee mit Gutschein. Details auf dem Bild.';
   const calls = [];
   const result = await processDiscoveryItems(raws, { now, ocr: async raw => {
     calls.push(raw.url); return { ocrText: 'Nur fuer die ersten 20 Kunden.', errors: [] };
   } });
-  assert.equal(calls[0], raws[5].url);
-  assert.equal(calls.length, 4);
+  assert.equal(calls[0], raws[9].url);
+  assert.equal(calls.length, LIMITS.ocrPosts);
   assert.match(result.deals[0].description, /ersten 20/);
-  assert.equal(result.report.candidateAudit.find(a => a.url === raws[5].url).ocrDeferred, false);
+  assert.equal(result.report.candidateAudit.find(a => a.url === raws[9].url).ocrDeferred, false);
 });
 test('foreign destinations and blocked sources never consume limited OCR slots', async () => {
   const image = 'https://s.cdninstagram.com/image.jpg';

@@ -12,6 +12,17 @@ const fixture = () => ({
 test('known included credit and enforced account limit allow bounded run', () => {
   assert.equal(budgetCheck(fixture(), now).allowed, true);
 });
+test('larger scans leave 35 cents for storage and stop before included credit is exhausted', () => {
+  const data = fixture();
+  data.limits.current.monthlyUsageUsd = 4.574;
+  assert.equal(budgetCheck(data, now).allowed, true);
+  assert.equal(budgetCheck(data, now).creditReserveUsd, .35);
+  data.limits.current.monthlyUsageUsd = 4.576;
+  assert.equal(budgetCheck(data, now).reason, 'included-credit-reserve');
+  for (const cap of [NaN, Infinity, -.01, 0, .076, '0.075']) {
+    assert.equal(budgetCheck(fixture(), now, cap).reason, 'invalid-run-cap');
+  }
+});
 test('unknown budget, overage, stale cycle and unsupported pricing fail closed', () => {
   for (const mutate of [
     x => { delete x.user.plan; },

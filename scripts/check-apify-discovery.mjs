@@ -1,5 +1,6 @@
 import fs from 'node:fs';
-import { ApifyDiscoveryClient, HASHTAG_ACTOR, budgetCheck } from '../scraper/apify-discovery-client.js';
+import { ApifyDiscoveryClient, HASHTAG_ACTOR, PROFILE_CAP_USD, HASHTAG_CAP_USD, budgetCheck } from '../scraper/apify-discovery-client.js';
+import { LIMITS } from '../scraper/apify-food-discovery-policy.js';
 
 let report;
 try {
@@ -11,7 +12,8 @@ try {
     sameAccountAsPrimary = Boolean(primary.id && current.user.id && primary.id === current.user.id);
   }
   report = { checkedAt: new Date().toISOString(), credentialAccepted: true, sameAccountAsPrimary, ...budgetCheck(current) };
-  report.hashtagBudget = budgetCheck(await client.preflight(HASHTAG_ACTOR), new Date(), .01);
+  report.hashtagBudget = budgetCheck(await client.preflight(HASHTAG_ACTOR), new Date(), HASHTAG_CAP_USD);
+  report.configuredLimits = { ...LIMITS, profileCapUsd: PROFILE_CAP_USD, hashtagCapUsd: HASHTAG_CAP_USD };
   if (fs.existsSync('docs/apify-discovery-report.json')) {
     const last = JSON.parse(fs.readFileSync('docs/apify-discovery-report.json', 'utf8'));
     const lastId = last.actorRuns?.at(-1)?.id || last.actorRunId;

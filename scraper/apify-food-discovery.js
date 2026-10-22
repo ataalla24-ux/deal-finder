@@ -1,7 +1,7 @@
 import fs from 'node:fs/promises';
 import path from 'node:path';
 import { pathToFileURL } from 'node:url';
-import { ApifyDiscoveryClient, DISCOVERY_ACTOR, HASHTAG_ACTOR, budgetCheck } from './apify-discovery-client.js';
+import { ApifyDiscoveryClient, DISCOVERY_ACTOR, HASHTAG_ACTOR, PROFILE_CAP_USD, HASHTAG_CAP_USD, RUN_CAP_USD, budgetCheck } from './apify-discovery-client.js';
 import {
   DAY, LIMITS, discoverySources, selectDiscoverySources, reservationReason,
   postIdentity, postFingerprint, earlyPostRejection, classifyDiscoveryPost, mergeDiscoveryPending,
@@ -29,13 +29,28 @@ async function write(file, value) {
   await fs.rename(`${file}.tmp`, file);
 }
 
-export function actorInput(sources, now = new Date()) {
+export function actorBounds(sources, purpose = 'scan') {
+  if (!sources.length || !['profile', 'hashtag'].includes(sources[0].kind)
+      || sources.some(s => s.kind !== sources[0].kind)) throw new Error('invalid-mixed-source-batch');
+  const hashtag = sources[0].kind === 'hashtag';
+  if (purpose === 'hashtag-test') {
+    if (!hashtag || sources.length !== 1 || sources[0].key !== 'hashtag:wienfood') throw new Error('invalid-validation-sources');
+    return { cap: .01, maxItems: 2, perSource: 2 };
+  }
+  if (purpose !== 'scan') throw new Error('invalid-purpose');
+  if (sources.length > (hashtag ? LIMITS.hashtags : LIMITS.profiles)) throw new Error('invalid-source-count');
+  return { cap: hashtag ? HASHTAG_CAP_USD : PROFILE_CAP_USD,
+    maxItems: sources.length * LIMITS.perSource, perSource: LIMITS.perSource };
+}
+
+export function actorInput(sources, now = new Date(), purpose = 'scan') {
+  const { perSource } = actorBounds(sources, purpose);
   if (sources.every(s => s.kind === 'hashtag')) return {
     hashtags: sources.map(s => s.key.split(':')[1]), resultsType: 'posts',
-    resultsLimit: LIMITS.perSource, keywordSearch: false,
+    resultsLimit: perSource, keywordSearch: false,
   };
   return {
-    directUrls: sources.map(s => s.url), resultsType: 'posts', resultsLimit: LIMITS.perSource,
+    directUrls: sources.map(s => s.url), resultsType: 'posts', resultsLimit: perSource,
     onlyPostsNewerThan: new Date(+now - 7 * DAY).toISOString(), addParentData: false,
   };
 }
@@ -55,18 +70,16 @@ export function pipelineHealthReport(report) {
 }
 
 export async function runBoundedActor(client, sources, {
-  now = () => new Date(), sleep = ms => new Promise(resolve => setTimeout(resolve, ms)), onStarted = async () => {},
+  now = () => new Date(), sleep = ms => new Promise(resolve => setTimeout(resolve, ms)), onStarted = async () => {}, purpose = 'scan',
 } = {}) {
-  if (!sources.length || sources.some(s => s.kind !== sources[0].kind)) throw new Error('invalid-mixed-source-batch');
+  const { cap, maxItems } = actorBounds(sources, purpose);
   const hashtag = sources[0].kind === 'hashtag';
   const actorId = hashtag ? HASHTAG_ACTOR : DISCOVERY_ACTOR;
   const build = hashtag ? HASHTAG_BUILD : ACTOR_BUILD;
-  const cap = hashtag ? 0.01 : 0.03;
-  const maxItems = hashtag ? 2 : 8;
   const start = +now();
   // One POST only. Provider timeout also bounds abandoned/cancelled GitHub jobs.
   let run = await client.request(`/acts/${actorId}/runs?build=${build}&timeout=600&memory=512&maxItems=${maxItems}&maxTotalChargeUsd=${cap}`, {
-    method: 'POST', body: actorInput(sources, now()),
+    method: 'POST', body: actorInput(sources, now(), purpose),
   });
   if (!/^[A-Za-z0-9]+$/.test(run?.id || '')) throw Object.assign(new Error('missing-run-id'), { uncertainStart: true });
   await onStarted(run.id);
@@ -93,8 +106,9 @@ export async function collectDiscoveryBatches(client, sources, options = {}) {
     const selected = sources.filter(s => s.kind === kind);
     if (!selected.length) continue;
     try {
+      const { cap } = actorBounds(selected, options.purpose);
       const check = budgetCheck(await client.preflight(kind === 'profile' ? DISCOVERY_ACTOR : HASHTAG_ACTOR),
-        options.now?.() || new Date(), kind === 'profile' ? .03 : .01);
+        options.now?.() || new Date(), cap);
       if (!check.allowed) throw new Error(`apify-budget-${check.reason}`);
       const run = await runBoundedActor(client, selected, options);
       items.push(...run.items);
@@ -153,7 +167,7 @@ export async function processDiscoveryItems(items, {
   const fresh = [], rejected = [], audit = [];
   const batch = new Set();
   let ocrCalls = 0, unchanged = 0, duplicates = 0, providerErrors = 0;
-  // Spend the same four OCR slots on likely offers first, not provider arrival order.
+  // Spend bounded OCR slots on likely offers first, not provider arrival order.
   const ordered = items.slice(0, LIMITS.posts).map((raw, index) => {
     const account = (registry.accounts || []).find(a => String(a.username).toLowerCase() === String(raw?.ownerUsername || '').toLowerCase());
     return { raw, index, priority: entryMediaPriority({ item: raw,
@@ -206,7 +220,7 @@ export async function main(mode = '--plan') {
   if (validation && process.env.GITHUB_EVENT_NAME !== 'workflow_dispatch') throw new Error('validation-requires-manual-dispatch');
   const runKey = process.env.GITHUB_RUN_ID;
   const client = new ApifyDiscoveryClient(process.env.APIFY_2);
-  const budget = budgetCheck(await client.preflight(validation ? HASHTAG_ACTOR : DISCOVERY_ACTOR), now, validation ? .01 : .04);
+  const budget = budgetCheck(await client.preflight(validation ? HASHTAG_ACTOR : DISCOVERY_ACTOR), now, validation ? .01 : RUN_CAP_USD);
   if (mode === '--reserve') {
     const sources = validation
       ? pool.filter(s => s.key === 'hashtag:wienfood' && !(Date.parse(state.sources[s.key]?.retryAt) > +now))
@@ -238,7 +252,7 @@ export async function main(mode = '--plan') {
   for (const source of plan.sources) state.sources[source.key] = { ...state.sources[source.key], lastAttemptAt: now.toISOString() };
   await write(FILES.state, state);
   try {
-    const result = await collectDiscoveryBatches(client, plan.sources, { onStarted: async id => {
+    const result = await collectDiscoveryBatches(client, plan.sources, { purpose, onStarted: async id => {
       reservation.runId = id;
       reservation.startedRuns = [...(reservation.startedRuns || []), id];
       await write(FILES.state, state);

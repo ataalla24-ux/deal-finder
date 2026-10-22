@@ -9,7 +9,7 @@ import { concreteFoodOfferTitle } from './offer-title-utils.js';
 
 export const DAY = 86_400_000;
 export const TAGS = ['wienfood', 'viennafood', 'esseninwien', 'wienisst', 'gratiswien', 'wienkaffee', 'neueroeffnungwien', 'wienpizza'];
-export const LIMITS = Object.freeze({ profiles: 4, hashtags: 1, perSource: 2, posts: 10, ocrPosts: 4, dailyUsd: 0.08, cycleUsd: 2.5 });
+export const LIMITS = Object.freeze({ profiles: 22, hashtags: 4, perSource: 1, posts: 26, ocrPosts: 8, dailyUsd: 0.15, cycleUsd: 4.65 });
 const handle = value => String(value || '').replace(/^@/, '').toLowerCase();
 const plain = value => String(value || '').replace(/#[\p{L}\p{N}_]+/gu, ' ').trim();
 const vienna = value => /\b(?:wien|vienna|1(?:0[1-9]|1\d|2[0-3])0)\b/i.test(value);
