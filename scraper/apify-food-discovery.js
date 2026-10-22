@@ -6,7 +6,7 @@ import {
   DAY, LIMITS, discoverySources, selectDiscoverySources, reservationReason,
   postIdentity, postFingerprint, earlyPostRejection, classifyDiscoveryPost, mergeDiscoveryPending,
 } from './apify-food-discovery-policy.js';
-import { analyzeInstagramMediaItem, detectMediaTools } from './instagram-media-evidence.js';
+import { analyzeInstagramMediaItem, detectMediaTools, entryMediaPriority } from './instagram-media-evidence.js';
 import { buildPipelineRunReport, writePipelineRunReport } from './pipeline-run-report-utils.js';
 
 export const ACTOR_BUILD = '0.0.830';
@@ -153,13 +153,19 @@ export async function processDiscoveryItems(items, {
   const fresh = [], rejected = [], audit = [];
   const batch = new Set();
   let ocrCalls = 0, unchanged = 0, duplicates = 0, providerErrors = 0;
-  for (const raw of items.slice(0, LIMITS.posts)) {
+  // Spend the same four OCR slots on likely offers first, not provider arrival order.
+  const ordered = items.slice(0, LIMITS.posts).map((raw, index) => {
+    const account = (registry.accounts || []).find(a => String(a.username).toLowerCase() === String(raw?.ownerUsername || '').toLowerCase());
+    return { raw, index, priority: entryMediaPriority({ item: raw,
+      context: { account: { ...account, verifiedVienna: account?.viennaVerified === true } } }, now) };
+  }).sort((a, b) => b.priority - a.priority || a.index - b.index);
+  for (const { raw } of ordered) {
     if (!raw || typeof raw !== 'object' || raw.error || raw.errorDescription) { providerErrors++; continue; }
     const key = postIdentity(raw);
     const fingerprint = postFingerprint(raw);
     if (key && (batch.has(key) || knownPostKeys.has(key))) { duplicates++; continue; }
     if (key) batch.add(key);
-    const early = earlyPostRejection(raw, now);
+    const early = earlyPostRejection(raw, now, registry);
     if (!early && seen[key]?.hash === fingerprint && !seen[key]?.ocrIncomplete) { unchanged++; continue; }
     let media = { ocrText: '', errors: [] }, deferredOcr = false;
     if (!early && safeMediaUrl(raw.displayUrl || raw.childPosts?.[0]?.displayUrl)) {

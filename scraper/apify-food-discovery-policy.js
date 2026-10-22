@@ -8,7 +8,7 @@ import { relativeCaptionValidity } from '../apify/instagram-vienna-food-offers/s
 import { concreteFoodOfferTitle } from './offer-title-utils.js';
 
 export const DAY = 86_400_000;
-export const TAGS = ['wienfood', 'viennafood', 'esseninwien', 'wienisst', 'wienfoodguide', 'wienkaffee', 'viennafoodguide', 'wienpizza'];
+export const TAGS = ['wienfood', 'viennafood', 'esseninwien', 'wienisst', 'gratiswien', 'wienkaffee', 'neueroeffnungwien', 'wienpizza'];
 export const LIMITS = Object.freeze({ profiles: 4, hashtags: 1, perSource: 2, posts: 10, ocrPosts: 4, dailyUsd: 0.08, cycleUsd: 2.5 });
 const handle = value => String(value || '').replace(/^@/, '').toLowerCase();
 const plain = value => String(value || '').replace(/#[\p{L}\p{N}_]+/gu, ' ').trim();
@@ -69,13 +69,27 @@ export function postFingerprint(raw) {
   ])).digest('hex');
 }
 
-export function earlyPostRejection(raw, now = new Date()) {
+function nonViennaRejection(signal, location) {
+  if (!vienna(signal) && /\b(?:in|aus|nach|to)\s+(?:graz|linz|salzburg|innsbruck|berlin|muenchen|münchen|munich)\b/i.test(signal)) {
+    return 'non-vienna-offer-text';
+  }
+  if (/\b(?:graz|linz|salzburg|innsbruck|berlin|muenchen|münchen|munich)\b/i.test(location) && !vienna(location)) {
+    return 'non-vienna-location';
+  }
+  return '';
+}
+
+export function earlyPostRejection(raw, now = new Date(), registry = {}) {
   if (!postIdentity(raw)) return 'missing-post-url';
+  if (handle(raw.ownerUsername) === 'freefinder.at') return 'own-promotional-repost';
   const date = Date.parse(realPostTimestamp(raw).iso);
   if (!Number.isFinite(date)) return 'missing-real-post-date';
   if (date > +now + 600_000) return 'future-post-date';
   if (date < +now - 7 * DAY) return 'post-older-than-seven-days';
-  return discoveryRejection(String(raw.caption || '')) || (/\b(?:gewinnspiel|verlosung|giveaway)\b/i.test(raw.caption || '') ? 'giveaway' : '');
+  if ((registry.accounts || []).some(a => handle(a.username) === handle(raw.ownerUsername) && a.blockedByModeration)) return 'moderation-blocked-account';
+  return discoveryRejection(String(raw.caption || ''))
+    || (/\b(?:gewinnspiel|verlosung|giveaway)\b/i.test(raw.caption || '') ? 'giveaway' : '')
+    || nonViennaRejection(plain(raw.caption), plain(raw.locationName));
 }
 
 // Calendar dates refer to Vienna, not the runner's UTC midnight (also across DST).
@@ -96,11 +110,10 @@ function viennaBoundary(date, end) {
 }
 
 export function classifyDiscoveryPost(raw, { now = new Date(), registry = {}, ocrText = '' } = {}) {
-  const reject = earlyPostRejection(raw, now);
+  const reject = earlyPostRejection(raw, now, registry);
   if (reject) return { deal: null, rejectReason: reject };
   const username = handle(raw.ownerUsername);
   const account = (registry.accounts || []).find(a => handle(a.username) === username);
-  if (account?.blockedByModeration) return { deal: null, rejectReason: 'moderation-blocked-account' };
   const signal = [plain(raw.caption), plain(ocrText)].filter(Boolean).join('\n');
   if (/\b(?:kein\w*|nicht|no|not)\s+(?:1\s*[+&]\s*1|2\s*(?:für|fuer|for)\s*1|bogo)\b/i.test(signal)) {
     return { deal: null, rejectReason: 'negated-offer' };
@@ -110,12 +123,8 @@ export function classifyDiscoveryPost(raw, { now = new Date(), registry = {}, oc
   if (foodReason) return { deal: null, rejectReason: foodReason };
   const location = plain(raw.locationName);
   const trusted = account?.accountType === 'merchant' && account.viennaVerified === true;
-  if (!vienna(signal) && /\b(?:in|aus|nach|to)\s+(?:graz|linz|salzburg|innsbruck|berlin|muenchen|münchen|munich)\b/i.test(signal)) {
-    return { deal: null, rejectReason: 'non-vienna-offer-text' };
-  }
-  if (/\b(?:graz|linz|salzburg|innsbruck|berlin|muenchen|münchen|munich)\b/i.test(location) && !vienna(location)) {
-    return { deal: null, rejectReason: 'non-vienna-location' };
-  }
+  const foreign = nonViennaRejection(signal, location);
+  if (foreign) return { deal: null, rejectReason: foreign };
   if (!vienna(location) && !vienna(signal) && !trusted) return { deal: null, rejectReason: 'missing-vienna-evidence' };
   const published = realPostTimestamp(raw).iso;
   const timing = evaluateInstagramOfferTiming({ signal, pubDate: published, now, maxAgeDays: 7 });

@@ -17,7 +17,11 @@ it contains unrelated private account/proxy fields.
 
 - Existing curated watchlist, restricted to food/coffee/discovery sources and
   excluding moderated accounts and drinks-only bars. Current snapshot: 46 profiles.
-- Eight Vienna food/coffee hashtags. A hashtag alone is not location proof.
+- Eight rotating seeds: `wienfood`, `viennafood`, `esseninwien`, `wienisst`,
+  `gratiswien`, `wienkaffee`, `neueroeffnungwien`, `wienpizza`. The two offer/opening
+  seeds replace the similar foodguide tags; they are hypotheses to measure on
+  subsequent normal runs, not demonstrated high-yield sources. A hashtag alone
+  is not location proof, and openings without a real offer remain rejected.
 - Two scheduled opportunities daily, 05:25 and 17:25 UTC, only when repository
   variable `APIFY_2_DISCOVERY_ENABLED` is `true`. Actions scheduling may be delayed.
 - Each run: four profiles, one hashtag, two recent posts per source, ten records
@@ -40,6 +44,11 @@ it contains unrelated private account/proxy fields.
   five-MB/image and bounded download/OCR time. Instagram/Facebook CDNs only, no
   redirects or access-error retry. No paid AI calls, video transcription or full
   carousel analysis. OCR limitations are reported, not presented as verified text.
+  Existing shared media-priority logic now orders those four slots by concrete
+  offer signals, freshness, food relevance and verified merchant context, rather
+  than provider arrival order. Explicit foreign destinations and moderated
+  accounts are rejected before OCR. FreeFinder's own reposts are excluded to
+  prevent circular offer evidence. This does not loosen acceptance criteria.
 - Real publication time mandatory, at most seven days old. Undated offers get a
   review lifetime anchored to publication, not refreshed by a later crawl. Dates
   are interpreted in Vienna's timezone; unknown expiry is not proven validity.
@@ -57,6 +66,13 @@ it contains unrelated private account/proxy fields.
 Workflow dispatch defaults to `audit` (read-only account check); `mode=scan`
 requests one run subject to the same reservation limits. No local paid command
 is allowed outside the audited GitHub workflow.
+
+The explicitly requested `mode=hashtag-test` commissioning run is permanently
+one-shot, manual-only, one fixed `wienfood` source and at most USD 0.01. It bypasses
+only the six-hour regular cadence, not daily/cycle/account limits or cooldowns.
+Its reservation was committed before starting and its consumed marker survives
+ledger pruning. It cannot be used for repeated test starts; normal scans retain
+the six-hour rule. No reservation was erased or refunded.
 
 - `docs/apify-discovery-state.json`: reservations, source rotation/cooldowns,
   bounded post fingerprints. Do not delete/reset to work around a budget pause.
@@ -88,14 +104,34 @@ Actions 39834960816 completed successfully with a **partial** collector result:
 six public posts from three profiles, four successful OCR analyses, zero eligible
 new deals. `corner_xvi` returned `no_items` and received a 24-hour source cooldown.
 The hashtag URL returned metadata, not posts. Read-only follow-up 39835578453
-confirmed the shape, and led to the dedicated hashtag actor above. Its real next
-scheduled execution remains to be observed; do not claim a completed live hashtag
-test from the general actor's metadata result.
+confirmed the shape, and led to the dedicated hashtag actor above. The subsequent
+live validation below supplies actual hashtag proof, unlike that metadata result.
 
 The settled first actor charge was USD 0.0216; total second-account consumption
 including storage/read overhead was about USD 0.02163 of the included USD 5.
 All fresh candidates were rejected (no concrete food benefit); no new deal was
 approved or put in the app by this test. Rules are not relaxed to manufacture yield.
+
+## Dedicated hashtag validation and quality follow-up
+
+Owner explicitly requested the remaining real hashtag test. Actions **39841211619**
+completed successfully using dedicated actor run `ntSKcodLafosb3sCV` and build
+0.0.707: two actual current public posts for `wienfood`, two successful local OCR
+analyses, zero provider errors, **zero eligible deals**. One bakery promoted tacos
+and sandwiches without an offer; the other described a weekend pastry without a
+concrete benefit. Neither was sent as an Apify 2 candidate or published.
+
+The immediate run response showed zero usage before settlement. Read-only audit
+**39841421454** subsequently confirmed a settled actor charge of **USD 0.0052**,
+and total second-account usage **USD 0.026841690557587148** of the included USD 5.
+The monetary reservation remains the full USD 0.01. No additional plan, paid
+image service, higher allowance or extra schedule was introduced.
+
+The two more focused tags and OCR ordering are covered by red-before/green-after
+tests. Existing media/evidence/Slack suites pass as well. They are intended to
+improve useful yield with the same requests and four OCR slots; no increase in
+real accepted deals has yet been demonstrated. All future candidates still need
+central validation and human approval. No live keyword-mode test was performed.
 
 The owner's supplied document is a design reference, not authority to introduce
 unbudgeted paid services or bypass the existing publication checks.

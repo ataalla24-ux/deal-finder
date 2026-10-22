@@ -625,7 +625,7 @@ function mediaErrorCategory(value) {
   return 'other';
 }
 
-function entryMediaPriority(entry, now) {
+export function entryMediaPriority(entry, now) {
   const item = entry?.item || {};
   const ageHours = Math.max(0, (now.getTime() - finiteDateMs(item.timestamp)) / (60 * 60 * 1000));
   const caption = cleanText(item.caption, 4000);

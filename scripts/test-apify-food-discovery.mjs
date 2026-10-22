@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
-import { DAY, LIMITS, discoverySources, selectDiscoverySources, reservationReason,
+import { DAY, LIMITS, TAGS, discoverySources, selectDiscoverySources, reservationReason,
   classifyDiscoveryPost, postFingerprint, postIdentity, mergeDiscoveryPending } from '../scraper/apify-food-discovery-policy.js';
 import { actorInput, runBoundedActor, collectDiscoveryBatches, restrictedMediaFetch, safeMediaUrl, processDiscoveryItems, pipelineHealthReport } from '../scraper/apify-food-discovery.js';
 
@@ -22,6 +22,20 @@ test('curated profiles rotate fairly; blocked merchants and bar-only seeds exclu
   assert.equal(selectDiscoverySources(pool, state, now)[0].username, 'pizza_two');
   state.sources['profile:pizza_two'] = { retryAt: new Date(+now + DAY).toISOString() };
   assert.equal(selectDiscoverySources(pool, state, now)[0].username, 'cafe_one');
+});
+test('eight search slots include offer-led seeds without increasing per-run requests', () => {
+  assert.equal(TAGS.length, 8);
+  assert.ok(TAGS.includes('gratiswien'));
+  assert.ok(TAGS.includes('neueroeffnungwien'));
+  assert.ok(TAGS.includes('wienkaffee'));
+  assert.equal(selectDiscoverySources(discoverySources(), emptyState(), now).length, 1);
+  const state = emptyState(), visited = new Set();
+  for (let i = 0; i < 8; i++) {
+    const [source] = selectDiscoverySources(discoverySources(), state, now);
+    visited.add(source.key);
+    state.sources[source.key] = { lastAttemptAt: now.toISOString() };
+  }
+  assert.equal(visited.size, 8);
 });
 test('reservations prevent duplicate retries, close spacing and exceeding free envelope', () => {
   assert.equal(reservationReason(emptyState(), budget, '1', now), '');
@@ -201,6 +215,42 @@ test('canonical duplicates, fingerprint cursors and OCR limits avoid repeated wo
   calls = 0;
   await processDiscoveryItems(Array.from({ length: 10 }, (_, i) => ({ ...raw, url: `https://www.instagram.com/p/Test${i}/` })), { now, ocr });
   assert.equal(calls, LIMITS.ocrPosts);
+});
+test('bounded OCR prioritizes concrete offers over ordinary posts even when they arrive last', async () => {
+  const raws = Array.from({ length: 6 }, (_, i) => post({
+    url: `https://www.instagram.com/p/OcrOrder${i}/`, caption: 'Leckere Pizza in Wien.',
+    displayUrl: 'https://s.cdninstagram.com/image.jpg',
+  }));
+  raws[5].caption = 'Wien: 1+1 Kaffee mit Gutschein. Details auf dem Bild.';
+  const calls = [];
+  const result = await processDiscoveryItems(raws, { now, ocr: async raw => {
+    calls.push(raw.url); return { ocrText: 'Nur fuer die ersten 20 Kunden.', errors: [] };
+  } });
+  assert.equal(calls[0], raws[5].url);
+  assert.equal(calls.length, 4);
+  assert.match(result.deals[0].description, /ersten 20/);
+  assert.equal(result.report.candidateAudit.find(a => a.url === raws[5].url).ocrDeferred, false);
+});
+test('foreign destinations and blocked sources never consume limited OCR slots', async () => {
+  const image = 'https://s.cdninstagram.com/image.jpg';
+  const raws = [post({ caption: 'Gratis Kaffee in Berlin', locationName: 'Wien', displayUrl: image }),
+    post({ url: 'https://www.instagram.com/p/Blocked1/', ownerUsername: 'blocked', displayUrl: image })];
+  let calls = 0;
+  const result = await processDiscoveryItems(raws, { now,
+    registry: { accounts: [{ username: 'blocked', blockedByModeration: true }] },
+    ocr: async () => { calls++; return { ocrText: '', errors: [] }; } });
+  assert.equal(calls, 0);
+  assert.equal(result.deals.length, 0);
+  assert.ok(result.report.candidateAudit.some(a => a.reason === 'non-vienna-offer-text'));
+  assert.ok(result.report.candidateAudit.some(a => a.reason === 'moderation-blocked-account'));
+});
+test('our own reposts cannot become new independent deal evidence through hashtags', async () => {
+  let calls = 0;
+  const result = await processDiscoveryItems([post({ ownerUsername: 'FreeFinder.AT',
+    displayUrl: 'https://s.cdninstagram.com/image.jpg' })], { now, ocr: async () => { calls++; return { ocrText: '', errors: [] }; } });
+  assert.equal(result.deals.length, 0);
+  assert.equal(calls, 0);
+  assert.equal(result.report.candidateAudit[0].reason, 'own-promotional-repost');
 });
 test('changed expired caption removes pending item; incomplete OCR retries, source errors retain pending', async () => {
   const raw = post({ displayUrl: 'https://s.cdninstagram.com/image.jpg' });
