@@ -2,9 +2,92 @@
   "schemaVersion": 1,
   "sourceKey": "wien-combined",
   "sourceLabel": "Wien Deals Combined",
-  "updatedAt": "2026-10-22T12:19:22.940Z",
+  "updatedAt": "2026-10-22T18:07:38.238Z",
   "runCount": 90,
   "runs": [
+    {
+      "schemaVersion": 1,
+      "runId": "wien-combined-2026-10-22T18:07:38.238Z",
+      "sourceKey": "wien-combined",
+      "sourceLabel": "Wien Deals Combined",
+      "status": "completed-with-errors",
+      "startedAt": "2026-10-22T18:05:57.336Z",
+      "finishedAt": "2026-10-22T18:07:38.238Z",
+      "durationMs": 100902,
+      "outputFile": "docs/deals-pending-wien-combined.json",
+      "counts": {
+        "rawCandidates": 3,
+        "normalizedCandidates": 0,
+        "verifiedCandidates": 0,
+        "previousDeals": 0,
+        "acceptedDeals": 0,
+        "rejectedDeals": 3
+      },
+      "rejectedByReason": {
+        "no-concrete-offer": 3
+      },
+      "rejectedSamples": [
+        {
+          "reason": "no-concrete-offer",
+          "deal": {
+            "id": "17925553980439251",
+            "title": "When Domenico approves, we know its good 🫡 Neu auf unserer Karte: PITA! Mit in gochujang mariniertem pulled Chicken, gegrillten Waldpilze, Wildpreiselbeer-Relish, eingelegten rote",
+            "brand": "",
+            "url": "https://www.instagram.com/reel/DeyhGZysp9w/",
+            "source": "#essenwien",
+            "pubDate": "2026-10-22T08:10:47+0000",
+            "expires": "",
+            "postVerificationStatus": ""
+          }
+        },
+        {
+          "reason": "no-concrete-offer",
+          "deal": {
+            "id": "17936475810396265",
+            "title": "Trust the process. Den Rest übernehmen deine Stäbchen. 🍣🥢 #SushiLovers #SushiVienna #AsianFood #SweetnSour #AsianRestaurantVienna #EssenWien",
+            "brand": "",
+            "url": "https://www.instagram.com/reel/Deyglk8EoKc/",
+            "source": "#essenwien",
+            "pubDate": "2026-10-22T08:04:45+0000",
+            "expires": "",
+            "postVerificationStatus": ""
+          }
+        },
+        {
+          "reason": "no-concrete-offer",
+          "deal": {
+            "id": "18131500099793578",
+            "title": "Ein guter Wirt bringt nicht nur Erfahrung mit. Neugier, Geschichten und ein Blick über den Tellerrand prägen auch ein Lokal. Die ganze Podcast-Folge findest du auf unserem YouTube-",
+            "brand": "",
+            "url": "https://www.instagram.com/reel/DezfRsmAdT8/",
+            "source": "#wienergastro",
+            "pubDate": "2026-10-22T17:11:59+0000",
+            "expires": "",
+            "postVerificationStatus": ""
+          }
+        }
+      ],
+      "diagnostics": {
+        "hashtags": 10,
+        "successfulSources": 3,
+        "failedSources": 1,
+        "uniquePosts": 3,
+        "rescueEligible": 0,
+        "rescuedDeals": 0,
+        "mediaAnalyzed": 0,
+        "mediaAiCalls": 0,
+        "mediaVisionCalls": 0,
+        "mediaTokens": 0,
+        "graphVersion": "v26.0"
+      },
+      "constraints": {
+        "maxSocialPostAgeDays": 7
+      },
+      "errors": [
+        "#viennaeats: Meta Graph 400: HTTP 400",
+        "#viennafood: Instagram shared quota paused: request or quota unavailable"
+      ]
+    },
     {
       "schemaVersion": 1,
       "runId": "wien-combined-2026-10-22T12:19:22.940Z",
@@ -34512,42 +34595,6 @@
       },
       "errors": [
         "#wienhappyhour: Meta Graph 24: The requested resource does not exist",
-        "#viennafooddeals: Meta Graph 24: The requested resource does not exist"
-      ]
-    },
-    {
-      "schemaVersion": 1,
-      "runId": "wien-combined-2026-08-22T14:12:11.626Z",
-      "sourceKey": "wien-combined",
-      "sourceLabel": "Wien Deals Combined",
-      "status": "completed-with-errors",
-      "startedAt": "2026-08-22T14:12:00.753Z",
-      "finishedAt": "2026-08-22T14:12:11.626Z",
-      "durationMs": 10873,
-      "outputFile": "docs/deals-pending-wien-combined.json",
-      "counts": {
-        "rawCandidates": 0,
-        "normalizedCandidates": 0,
-        "verifiedCandidates": 0,
-        "previousDeals": 0,
-        "acceptedDeals": 0,
-        "rejectedDeals": 0
-      },
-      "rejectedByReason": {},
-      "rejectedSamples": [],
-      "diagnostics": {
-        "hashtags": 12,
-        "successfulSources": 8,
-        "failedSources": 4,
-        "graphVersion": "v26.0"
-      },
-      "constraints": {
-        "maxSocialPostAgeDays": 7
-      },
-      "errors": [
-        "#gratiswien: Meta Graph 100: (#100) Please read documentation for supported fields.",
-        "#wienhappyhour: Meta Graph 24: The requested resource does not exist",
-        "#gratisinwien: Meta Graph 100: (#100) Please read documentation for supported fields.",
         "#viennafooddeals: Meta Graph 24: The requested resource does not exist"
       ]
     }
