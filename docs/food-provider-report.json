@@ -1,8 +1,22 @@
 {
-  "runId": "39848781475",
+  "runId": "39851542283",
   "mode": "scan",
-  "createdAt": "2026-10-22T20:26:08.992Z",
+  "createdAt": "2026-10-22T20:45:23.751Z",
   "usage": {
+    "scrapingbee": {
+      "provider": "scrapingbee",
+      "status": "authenticated",
+      "maximum": 1000,
+      "used": 10,
+      "concurrency": 0
+    },
+    "zyte": {
+      "provider": "zyte",
+      "credentialPresent": true,
+      "credentialFingerprint": "0781603e834b27f27dbaefdcdc9b2a4117ac9fdbe1509d4a657c8b51e52ae60d",
+      "trialKeyBound": true,
+      "status": "provider-blocking-limit-not-live-usage"
+    },
     "scraperapi": {
       "provider": "scraperapi",
       "status": "authenticated",
@@ -31,6 +45,14 @@
   },
   "tasks": [],
   "skipped": [
+    {
+      "provider": "scrapingbee",
+      "reason": "scrapingbee-local-trial-cap"
+    },
+    {
+      "provider": "zyte",
+      "reason": "zyte-local-trial-cap"
+    },
     {
       "provider": "scraperapi",
       "reason": "scraperapi-local-credit-cap"
