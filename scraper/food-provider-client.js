@@ -1,6 +1,7 @@
 import { createHash } from 'node:crypto';
 import { isAllowedFoodUrl } from './power-food-sources.js';
 import { retryAfterAt } from './source-http-policy.js';
+import { setTimeout as delay } from 'node:timers/promises';
 const PROVIDERS = ['scraperapi', 'scrapingbee', 'zyte'];
 const KEYS = { scraperapi: 'SCRAPINGAPI', scrapingbee: 'SCRAPINGBEE', zyte: 'ZYSTE' };
 
@@ -25,12 +26,16 @@ async function boundedText(response, max = 3_000_000) {
 // Never propagate provider response bodies, URLs or fetch exceptions: they can
 // contain credentials. Credentials go only to the fixed official API endpoints.
 export class FoodProviderClient {
-  constructor(provider, { env = process.env, fetchImpl = fetch } = {}) {
+  constructor(provider, { env = process.env, fetchImpl = fetch, clock = Date.now, sleep = delay } = {}) {
     if (!PROVIDERS.includes(provider)) throw new ProviderError('unknown-provider');
     this.provider = provider;
     this.key = env[KEYS[provider]];
     this.trialKeyFingerprint = env.ZYTE_FREE_TRIAL_KEY_SHA256;
     this.fetchImpl = fetchImpl;
+    this.clock = clock;
+    this.sleep = sleep;
+    this.lastUsageAt = -Infinity;
+    this.lastScrapeAt = -Infinity;
   }
   async request(url, options = {}) {
     if (!this.key) throw new ProviderError('missing-credential');
@@ -52,6 +57,11 @@ export class FoodProviderClient {
         trialKeyBound: Boolean(credentialFingerprint && credentialFingerprint === this.trialKeyFingerprint),
         status: 'provider-blocking-limit-not-live-usage' };
     }
+    // Bee allows six usage checks/minute. ScraperAPI's usage counter can lag
+    // 15 seconds after extraction; wait for that before trusting the next audit.
+    const due = this.provider === 'scrapingbee' ? this.lastUsageAt + 13_000 : this.lastScrapeAt + 16_000;
+    if (due > this.clock()) await this.sleep(due - this.clock());
+    this.lastUsageAt = this.clock();
     const url = this.provider === 'scraperapi'
       ? new URL('https://api.scraperapi.com/account') : new URL('https://app.scrapingbee.com/api/v1/usage');
     const headers = {};
@@ -64,6 +74,7 @@ export class FoodProviderClient {
   }
   async scrape(source, target = source.url) {
     if (!isAllowedFoodUrl(target, source)) throw new ProviderError('untrusted-target');
+    try {
     let result, html, finalUrl, cost, status = 200;
     if (this.provider === 'scraperapi') {
       const url = new URL('https://api.scraperapi.com/');
@@ -100,6 +111,9 @@ export class FoodProviderClient {
     if (this.provider !== 'zyte' && (!Number.isFinite(cost) || cost <= 0 || cost > (this.provider === 'scraperapi' ? 10 : 5)))
       throw new ProviderError('unexpected-provider-cost');
     return { html, finalUrl, cost };
+    } finally {
+      this.lastScrapeAt = this.clock();
+    }
   }
 }
 

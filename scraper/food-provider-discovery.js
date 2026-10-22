@@ -2,7 +2,7 @@ import fs from 'node:fs/promises';
 import { pathToFileURL } from 'node:url';
 import { load } from 'cheerio';
 import { FoodProviderClient, ProviderError } from './food-provider-client.js';
-import { DAY, SCAN_PROVIDERS, freeBudget, planRequests, validateLedger, sourceAvailable } from './food-provider-policy.js';
+import { DAY, SCAN_PROVIDERS, freeBudget, planRequests, validateLedger, sourceAvailable, canonicalPage, taskKey } from './food-provider-policy.js';
 import { POWER_FOOD_SOURCES } from './power-food-sources.js';
 import { extractFoodOffers, discoverFoodLinks } from './power-food-extraction.js';
 import { fetchOfficialFoodPage, verifyOfficialFoodDeal } from './power-food-verification.js';
@@ -17,19 +17,36 @@ async function write(file, data) {
 }
 const reason = error => error instanceof ProviderError ? error.message : 'source-or-processing-error';
 export function applyYieldCooldown(state, results, now) {
-  for (const source of new Set(results.map(row => row.source))) {
-    const rows = results.filter(row => row.source === source);
+  state.pages ||= {};
+  for (const key of new Set(results.map(taskKey))) {
+    const rows = results.filter(row => taskKey(row) === key);
+    // Keep legacy root-only benchmark evidence compatible, but new page checks
+    // must not pause every other promotion at the same merchant.
+    const target = rows[0].url ? state.pages : state.sources;
+    const entry = rows[0].url ? key : rows[0].source;
     if (rows.some(row => row.status === 'failed' || row.status === 'source-paused')) continue;
     const examined = rows.filter(row => ['fetched', 'direct-sufficient'].includes(row.status));
     if (!examined.length) continue;
     if (examined.some(row => row.verifiedIncrementalCandidates > 0)) {
-      state.sources[source] = { attemptedAt: now.toISOString(), noGainCount: 0 };
+      target[entry] = { attemptedAt: now.toISOString(), noGainCount: 0,
+        retryAt: new Date(+now + DAY).toISOString() };
     } else {
-      const noGainCount = Math.min(3, (state.sources[source]?.noGainCount || 0) + 1);
-      state.sources[source] = { attemptedAt: now.toISOString(), noGainCount,
+      const noGainCount = Math.min(3, (target[entry]?.noGainCount || 0) + 1);
+      target[entry] = { attemptedAt: now.toISOString(), noGainCount,
         retryAt: new Date(+now + Math.min(30, 7 * 2 ** (noGainCount - 1)) * DAY).toISOString(), reason: 'no-incremental-offers' };
     }
   }
+}
+
+export function rememberLinks(state, source, links, now) {
+  state.discoveredPages ||= {};
+  const pages = new Map((state.discoveredPages[source.name] || [])
+    .filter(p => Date.parse(p.seenAt) >= +now - 14 * DAY && canonicalPage(p.url, source) === p.url).map(p => [p.url, p]));
+  for (const value of links) {
+    const url = canonicalPage(value, source);
+    if (url) pages.set(url, { url, seenAt: now.toISOString() });
+  }
+  state.discoveredPages[source.name] = [...pages.values()].slice(-40);
 }
 
 export function mergeProviderPending(previous, fresh, known, now) {
@@ -52,36 +69,75 @@ async function usages(providers) {
 
 export async function collectPlan(plan, state, powerReport, {
   now = new Date(), clientFor = provider => new FoodProviderClient(provider), fetchPage = fetchOfficialFoodPage,
-  verify = verifyOfficialFoodDeal, save = async () => {},
+  verify = verifyOfficialFoodDeal, save = async () => {}, clock = Date.now, maxRuntimeMs = 18 * 60_000,
 } = {}) {
   const results = [], candidates = [], direct = new Map(), verificationCache = new Map();
+  const clients = new Map(), attemptedFinalUrls = new Set(), started = clock(), deadline = started + maxRuntimeMs;
+  const currentTime = () => new Date(+now + Math.max(0, clock() - started));
+  async function confirm(deals, row, directIds, transport) {
+    row.verifiedCandidates = 0;
+    row.verifiedIncrementalCandidates = 0;
+    row.unverifiedCandidates = 0;
+    row.candidates = [];
+    for (const deal of deals) {
+      if (clock() >= deadline) { row.verificationStopped = true; break; }
+      const confirmation = await verify(deal, { now: currentTime(), cache: verificationCache });
+      row.candidates.push({ id: deal.id, title: deal.title, confirmed: confirmation?.ok === true,
+        reason: confirmation?.ok ? '' : confirmation?.reason || 'verification-unavailable' });
+      if (!confirmation?.ok) { row.unverifiedCandidates++; continue; }
+      row.verifiedCandidates++;
+      if (!directIds.has(deal.id)) row.verifiedIncrementalCandidates++;
+      candidates.push({ ...confirmation.deal, votes: 0, approved: false, reviewRequired: true,
+        providerDiscovery: { provider: transport === 'direct' ? 'direct' : row.provider, checkedAt: currentTime().toISOString() } });
+    }
+  }
+  validateLedger(state);
   const reservation = state.reservations.find(r => r.runId === plan.runId);
   if (!reservation || reservation.startedAt || reservation.mode !== plan.mode
       || JSON.stringify(reservation.tasks) !== JSON.stringify(plan.tasks)) throw new Error('reservation-mismatch-or-started');
   if (+now - Date.parse(reservation.at) > 30 * 60_000 || Date.parse(reservation.at) > +now) throw new Error('stale-reservation');
   reservation.startedAt = now.toISOString();
   await save();
-  for (const task of plan.tasks) {
+  for (const [index, task] of plan.tasks.entries()) {
     const source = POWER_FOOD_SOURCES.find(s => s.name === task.source);
-    const row = { provider: task.provider, source: source.name, url: source.url, reserved: task.cap };
-    if (!sourceAvailable(source, powerReport, state, now)) { results.push({ ...row, status: 'source-paused' }); continue; }
+    const url = task.url || source.url;
+    const row = { provider: task.provider, source: source.name, url, reserved: task.cap };
+    const unspent = () => { reservation.unspent ||= []; reservation.unspent.push(index); };
+    let chargedAttempted = false;
+    if (clock() >= deadline || !sourceAvailable(source, powerReport, state, currentTime())) {
+      results.push({ ...row, status: clock() >= deadline ? 'runtime-stopped' : 'source-paused' });
+      unspent(); await save(); continue;
+    }
     try {
-      if (!direct.has(source.name)) direct.set(source.name, await fetchPage(source.url, source));
-      const baseline = direct.get(source.name);
+      if (!direct.has(url)) direct.set(url, await fetchPage(url, source));
+      const baseline = direct.get(url);
       const parsedDirect = extractFoodOffers(baseline.html, source, { now, pageUrl: baseline.finalUrl });
+      rememberLinks(state, source, discoverFoodLinks(baseline.html, source, baseline.finalUrl, 40), now);
       state.sources[source.name] = { ...state.sources[source.name], attemptedAt: now.toISOString() };
       if (plan.mode === 'scan' && parsedDirect.deals.length) {
-        results.push({ ...row, status: 'direct-sufficient', directCandidates: parsedDirect.deals.length });
+        row.status = 'direct-sufficient'; row.directCandidates = parsedDirect.deals.length;
+        unspent();
+        await confirm(parsedDirect.deals, row, new Set(parsedDirect.deals.map(d => d.id)), 'direct');
+        results.push(row);
         continue;
       }
-      const client = clientFor(task.provider);
+      const finalKey = `${source.name}|${canonicalPage(baseline.finalUrl, source)}`;
+      if (plan.mode === 'scan' && attemptedFinalUrls.has(finalKey)) {
+        results.push({ ...row, status: 'duplicate-final-url' }); unspent(); continue;
+      }
+      if (!clients.has(task.provider)) clients.set(task.provider, clientFor(task.provider));
+      const client = clients.get(task.provider);
       const usage = await client.usage();
       // This request's allocation is already reserved. Keep all other allocations
       // charged, including timeouts and cancelled runs; never refund optimistically.
       const remainingState = { ...state, reservations: state.reservations.map(r => r !== reservation ? r :
-        { ...r, tasks: r.tasks.filter(t => t !== task && !(t.provider === task.provider && t.source === task.source)) }) };
-      const blocked = freeBudget(task.provider, usage, remainingState, task.cap, now, plan.mode);
-      if (blocked) { results.push({ ...row, status: 'budget-stopped', reason: blocked }); continue; }
+        { ...r, unspent: [...(r.unspent || []), index] }) };
+      const blocked = freeBudget(task.provider, usage, remainingState, task.cap, currentTime(), plan.mode);
+      if (blocked || clock() >= deadline) {
+        results.push({ ...row, status: 'budget-stopped', reason: blocked || 'runtime-window' }); unspent(); continue;
+      }
+      attemptedFinalUrls.add(finalKey);
+      chargedAttempted = true;
       const page = await client.scrape(source, baseline.finalUrl);
       const parsed = extractFoodOffers(page.html, source, { now, pageUrl: page.finalUrl });
       const $ = load(page.html);
@@ -93,24 +149,13 @@ export async function collectPlan(plan, state, powerReport, {
       row.directCandidates = parsedDirect.deals.length;
       row.extractedCandidates = parsed.deals.length;
       row.incrementalCandidates = parsed.deals.filter(d => !parsedDirect.deals.some(existing => existing.id === d.id)).length;
-      row.offerLinks = discoverFoodLinks(page.html, source, page.finalUrl, 10);
+      row.offerLinks = discoverFoodLinks(page.html, source, page.finalUrl, 40);
+      rememberLinks(state, source, row.offerLinks, now);
       row.rejected = parsed.rejected;
-      row.verifiedCandidates = 0;
-      row.verifiedIncrementalCandidates = 0;
-      row.unverifiedCandidates = 0;
-      row.candidates = [];
-      for (const deal of parsed.deals) {
-        const confirmation = await verify(deal, { now, cache: verificationCache });
-        row.candidates.push({ id: deal.id, title: deal.title, confirmed: confirmation?.ok === true,
-          reason: confirmation?.ok ? '' : confirmation?.reason || 'verification-unavailable' });
-        if (!confirmation?.ok) { row.unverifiedCandidates++; continue; }
-        row.verifiedCandidates++;
-        if (!parsedDirect.deals.some(existing => existing.id === deal.id)) row.verifiedIncrementalCandidates++;
-        candidates.push({ ...confirmation.deal, votes: 0, approved: false, reviewRequired: true,
-          providerDiscovery: { provider: task.provider, checkedAt: now.toISOString() } });
-      }
+      await confirm(parsed.deals, row, new Set(parsedDirect.deals.map(d => d.id)), 'provider');
       results.push(row);
     } catch (error) {
+      if (!chargedAttempted && !reservation.unspent?.includes(index)) unspent();
       const status = Number(error.httpStatus) || 0;
       const retryAt = new Date(Math.max(Date.parse(error.retryAt) || 0,
         +now + ([401, 403, 404, 410].includes(status) ? 3 * DAY : DAY))).toISOString();
@@ -118,8 +163,11 @@ export async function collectPlan(plan, state, powerReport, {
       if (error instanceof ProviderError && (/cost/.test(error.message) || [401, 403, 429].includes(status)))
         state.providerPauses[task.provider] = retryAt;
       results.push({ ...row, status: 'failed', reason: reason(error), httpStatus: status, retryAt });
+    } finally {
+      // Only proven pre-request skips are released. Failed, timed-out or
+      // interrupted requests keep their full reservation, even if likely free.
+      await save();
     }
-    await save();
   }
   applyYieldCooldown(state, results, now);
   if (plan.mode === 'benchmark') state.benchmarkYieldApplied = true;

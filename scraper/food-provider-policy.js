@@ -1,7 +1,11 @@
-import { POWER_FOOD_SOURCES } from './power-food-sources.js';
+import { POWER_FOOD_SOURCES, isAllowedFoodUrl } from './power-food-sources.js';
 
 export const DAY = 86_400_000;
-export const CAPS = Object.freeze({ scraperapi: 10, scrapingbee: 5, zyte: 0.05 });
+// Plain browser HTML only; Zyte's highest published tier is USD .01608.
+// Old .05 allocations remain valid and fully charged in the ledger.
+export const CAPS = Object.freeze({ scraperapi: 10, scrapingbee: 5, zyte: 0.02 });
+export const MAX_SCAN_TASKS = 32;
+export const SCRAPER_TRIAL_END = '2026-10-29T00:00:00Z';
 export const BENCHMARK_SOURCES = ['Burger King', 'KFC'];
 export const SCAN_SOURCES = POWER_FOOD_SOURCES.filter(s => ['essen', 'kaffee'].includes(s.category)).map(s => s.name);
 // Dashboard-verified organization-wide BLOCKING limit, not a paid plan limit.
@@ -12,6 +16,16 @@ export const ZYTE_TRIAL_CHECK = Object.freeze({ checkedAt: '2026-10-22T20:41:00Z
 export const BEE_TRIAL_END = '2026-11-05T00:00:00Z';
 export const SCAN_PROVIDERS = ['scrapingbee', 'zyte', 'scraperapi'];
 
+export function canonicalPage(value, source) {
+  if (!isAllowedFoodUrl(value, source)) return null;
+  const url = new URL(value);
+  url.hash = '';
+  for (const key of [...url.searchParams.keys()]) if (/^(utm_|fbclid$|gclid$)/i.test(key)) url.searchParams.delete(key);
+  url.searchParams.sort();
+  return url.href;
+}
+export const taskKey = task => `${task.source}|${task.url || POWER_FOOD_SOURCES.find(s => s.name === task.source)?.url}`;
+
 export function validateLedger(state) {
   if (state?.version !== 1 || !Array.isArray(state.reservations) || !state.sources || !state.providerPauses)
     throw new Error('invalid-food-provider-ledger');
@@ -19,9 +33,13 @@ export function validateLedger(state) {
     if (!/^\d+$/.test(r.runId) || !Number.isFinite(Date.parse(r.at)) || !['benchmark', 'scan'].includes(r.mode) || !Array.isArray(r.tasks))
       throw new Error('invalid-food-provider-reservation');
     for (const t of r.tasks) {
-      if (!(t.provider in CAPS) || t.cap !== CAPS[t.provider] || !POWER_FOOD_SOURCES.some(s => s.name === t.source))
+      const source = POWER_FOOD_SOURCES.find(s => s.name === t.source);
+      if (!Object.hasOwn(CAPS, t.provider) || !(t.cap === CAPS[t.provider] || t.provider === 'zyte' && t.cap === .05)
+          || !source || !SCAN_SOURCES.includes(t.source) || t.url !== undefined && canonicalPage(t.url, source) !== t.url)
         throw new Error('invalid-food-provider-task');
     }
+    if (r.unspent !== undefined && (!Array.isArray(r.unspent) || new Set(r.unspent).size !== r.unspent.length
+        || r.unspent.some(i => !Number.isInteger(i) || i < 0 || i >= r.tasks.length))) throw new Error('invalid-unspent-allocation');
   }
 }
 
@@ -29,26 +47,54 @@ export function freeBudget(provider, usage, state, amount, now = new Date(), mod
   validateLedger(state);
   if (!Object.hasOwn(CAPS, provider) || !Number.isFinite(amount) || amount < 0 || !Number.isFinite(+now)) return 'invalid-budget-request';
   if (Date.parse(state.providerPauses[provider] || '') > +now) return 'provider-paused';
-  const all = state.reservations.flatMap(r => r.tasks.filter(t => t.provider === provider).map(t => ({ at: r.at, cap: t.cap })));
+  const all = state.reservations.flatMap(r => r.tasks.filter((t, i) => t.provider === provider && !r.unspent?.includes(i)).map(t => ({ at: r.at, cap: t.cap })));
   const spent = since => all.filter(t => Date.parse(t.at) > since).reduce((sum, t) => sum + t.cap, 0);
-  const dayStart = Math.floor(+now / DAY) * DAY;
   if (provider === 'zyte') {
     if (!usage?.credentialPresent || usage.trialKeyBound !== true
       || usage.status !== 'provider-blocking-limit-not-live-usage'
       || +now < Date.parse(ZYTE_TRIAL_CHECK.checkedAt) || +now >= Date.parse(ZYTE_TRIAL_CHECK.validUntil)) return 'zyte-trial-guard-unverified-or-expired';
-    if (spent(dayStart - 1) + amount > .1 + 1e-9 || spent(0) + amount > 3 + 1e-9) return 'zyte-local-trial-cap';
+    if (spent(0) + amount > 3.9 + 1e-9) return 'zyte-local-trial-cap';
     return '';
   }
   if (usage?.status !== 'authenticated' || !Number.isFinite(usage.used) || !Number.isFinite(usage.maximum)
       || usage.used < 0 || usage.maximum - usage.used < amount + 100 || usage.concurrency !== 0) return 'free-credit-unverified-or-low';
   if (provider === 'scraperapi') {
     if (![1000, 5000].includes(usage.maximum) || usage.payAsYouGoEnabled !== false || usage.autoUpgradeEnabled !== false) return 'not-confirmed-free-plan';
-    if (spent(dayStart - 1) + amount > 25 || spent(+now - 31 * DAY) + amount > 900) return 'scraperapi-local-credit-cap';
+    if (usage.maximum === 5000) {
+      if (+now >= Date.parse(SCRAPER_TRIAL_END)) return 'scraperapi-trial-expired';
+      if (spent(0) + amount > 4900) return 'scraperapi-local-credit-cap';
+    } else {
+      // Do not assume a monthly reset. Live account usage and a rolling local
+      // ceiling must both fit; the separately dated signup trial is not recurring.
+      const since = +now >= Date.parse(SCRAPER_TRIAL_END) ? Math.max(+now - 31 * DAY, Date.parse(SCRAPER_TRIAL_END) - 1) : +now - 31 * DAY;
+      if (spent(since) + amount > 900) return 'scraperapi-local-credit-cap';
+    }
   } else {
     if (usage.maximum !== 1000 || +now >= Date.parse(BEE_TRIAL_END)) return 'scrapingbee-trial-unverified-or-expired';
-    if (spent(dayStart - 1) + amount > 10 || spent(0) + amount > 900) return 'scrapingbee-local-trial-cap';
+    if (spent(0) + amount > 900) return 'scrapingbee-local-trial-cap';
   }
   return '';
+}
+
+export function scanTargets(state, powerReport, now) {
+  const targets = new Map();
+  for (const source of POWER_FOOD_SOURCES.filter(s => SCAN_SOURCES.includes(s.name) && sourceAvailable(s, powerReport, state, now))) {
+    const report = powerReport.sources.find(r => r.source === source.name);
+    // A failed child page is not permission to try it through another service.
+    const denied = new Set((report.pages || []).filter(p => p.status !== 'ok')
+      .flatMap(p => [canonicalPage(p.url, source), canonicalPage(p.finalUrl, source)]));
+    const saved = (state.discoveredPages?.[source.name] || []).filter(p => Date.parse(p.seenAt) <= +now && Date.parse(p.seenAt) >= +now - 14 * DAY);
+    const urls = [source.url, ...(source.seeds || []), ...(report.pages || []).filter(p => p.status === 'ok').map(p => p.finalUrl || p.url), ...saved.map(p => p.url)];
+    for (const value of urls) {
+      const url = canonicalPage(value, source);
+      if (!url || denied.has(url)) continue;
+      const target = { source: source.name, url };
+      if (Date.parse(state.pages?.[taskKey(target)]?.retryAt || '') > +now) continue;
+      targets.set(taskKey(target), target);
+    }
+  }
+  return [...targets.values()].sort((a, b) => (Date.parse(state.pages?.[taskKey(a)]?.attemptedAt || '') || 0)
+    - (Date.parse(state.pages?.[taskKey(b)]?.attemptedAt || '') || 0));
 }
 
 export function sourceAvailable(source, powerReport, state, now) {
@@ -70,6 +116,25 @@ export function planRequests(state, powerReport, usages, mode, now, runId) {
   const sources = POWER_FOOD_SOURCES.filter(s => names.includes(s.name) && sourceAvailable(s, powerReport, state, now))
     .sort((a, b) => (Date.parse(state.sources[a.name]?.attemptedAt || '') || 0) - (Date.parse(state.sources[b.name]?.attemptedAt || '') || 0));
   const tasks = [], skipped = [];
+  if (mode === 'scan') {
+    const targets = scanTargets(state, powerReport, now);
+    const allocated = Object.fromEntries(SCAN_PROVIDERS.map(p => [p, 0]));
+    const blocked = new Set();
+    while (targets.length && tasks.length < MAX_SCAN_TASKS) {
+      let added = false;
+      for (const provider of SCAN_PROVIDERS) {
+        if (blocked.has(provider) || !targets.length || tasks.length >= MAX_SCAN_TASKS) continue;
+        const amount = allocated[provider] + CAPS[provider];
+        const reason = freeBudget(provider, usages[provider], state, amount, now, mode);
+        if (reason) { blocked.add(provider); skipped.push({ provider, reason }); continue; }
+        tasks.push({ ...targets.shift(), provider, cap: CAPS[provider] });
+        allocated[provider] = amount;
+        added = true;
+      }
+      if (!added) break;
+    }
+    return { tasks, skipped, eligiblePages: scanTargets(state, powerReport, now).length };
+  }
   for (const provider of mode === 'benchmark' ? ['scraperapi', 'scrapingbee', 'zyte'] : SCAN_PROVIDERS) {
     // Expiring trial credits get first choice, but never duplicate a page across
     // services in a scan or rotate providers to work around a source cooldown.

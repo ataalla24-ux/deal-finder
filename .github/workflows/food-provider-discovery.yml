@@ -8,7 +8,7 @@ on:
         options: [audit, benchmark, scan]
         default: audit
   schedule:
-    - cron: '45 7 * * *'
+    - cron: '45 7,11,15,19 * * *'
 permissions:
   contents: write
 concurrency:
@@ -18,7 +18,7 @@ jobs:
   discovery:
     if: ${{ github.event_name == 'workflow_dispatch' || vars.FOOD_PROVIDER_DISCOVERY_ENABLED == 'true' }}
     runs-on: ubuntu-latest
-    timeout-minutes: 15
+    timeout-minutes: 30
     env:
       SENTRY_DISABLED: '1'
       FOOD_PROVIDER_MODE: ${{ inputs.mode == 'benchmark' && 'benchmark' || 'scan' }}
