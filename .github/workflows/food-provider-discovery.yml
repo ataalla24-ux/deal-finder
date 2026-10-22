@@ -1,15 +1,27 @@
 name: Free Food Provider Discovery
 on:
   workflow_dispatch:
+    inputs:
+      mode:
+        description: Read-only audit, one-shot trial comparison, or capped scan
+        type: choice
+        options: [audit, benchmark, scan]
+        default: audit
+  schedule:
+    - cron: '45 7 * * *'
 permissions:
-  contents: read
+  contents: write
 concurrency:
   group: free-food-provider-discovery
   cancel-in-progress: false
 jobs:
-  audit:
+  discovery:
+    if: ${{ github.event_name == 'workflow_dispatch' || vars.FOOD_PROVIDER_DISCOVERY_ENABLED == 'true' }}
     runs-on: ubuntu-latest
-    timeout-minutes: 5
+    timeout-minutes: 15
+    env:
+      SENTRY_DISABLED: '1'
+      FOOD_PROVIDER_MODE: ${{ inputs.mode == 'benchmark' && 'benchmark' || 'scan' }}
     steps:
       - uses: actions/checkout@v4
         with:
@@ -17,15 +29,46 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
+      - run: npm ci
+      - name: Test cost, retry, source and quality boundaries
+        run: node --test scripts/test-food-provider-discovery.mjs
       - name: Read-only free-credit checks (no scraped pages)
+        if: ${{ inputs.mode == 'audit' }}
         env:
           SCRAPINGAPI: ${{ secrets.SCRAPINGAPI }}
           SCRAPINGBEE: ${{ secrets.SCRAPINGBEE }}
           ZYSTE: ${{ secrets.ZYSTE }}
         run: node scripts/check-food-providers.mjs
+      - name: Reserve included credit before requesting pages
+        id: reserve
+        if: ${{ github.event_name == 'schedule' || inputs.mode == 'benchmark' || inputs.mode == 'scan' }}
+        env:
+          SCRAPINGAPI: ${{ secrets.SCRAPINGAPI }}
+          SCRAPINGBEE: ${{ secrets.SCRAPINGBEE }}
+          ZYSTE: ${{ secrets.ZYSTE }}
+        run: node scraper/food-provider-discovery.js --reserve
+      - name: Persist budget reservation before any charged request
+        if: steps.reserve.outputs.allowed == 'true'
+        run: |
+          node scripts/commit-generated.mjs --message "Reserve bounded food provider credits [skip ci]" --files docs/food-provider-state.json
+          git add docs/food-provider-state.json
+          git -c user.name='Deal Bot' -c user.email='bot@freefinder.wien' commit -m 'Checkpoint food provider reservation'
+      - name: Compare or scan official food pages; no automatic publishing
+        if: steps.reserve.outputs.allowed == 'true'
+        env:
+          SCRAPINGAPI: ${{ secrets.SCRAPINGAPI }}
+          SCRAPINGBEE: ${{ secrets.SCRAPINGBEE }}
+          ZYSTE: ${{ secrets.ZYSTE }}
+        run: node scraper/food-provider-discovery.js --run
+      - name: Persist conservative ledger and review candidates
+        if: ${{ always() && steps.reserve.outcome == 'success' }}
+        run: node scripts/commit-generated.mjs --message "Update bounded food provider discovery [skip ci]" --files docs/food-provider-state.json docs/food-provider-report.json docs/deals-pending-food-providers.json
       - uses: actions/upload-artifact@v4
         if: always()
         with:
-          name: food-provider-audit
-          path: output/food-provider-audit.json
+          name: food-provider-evidence
+          path: |
+            output/food-provider-audit.json
+            output/food-provider-plan.json
+            docs/food-provider-report.json
           retention-days: 7
