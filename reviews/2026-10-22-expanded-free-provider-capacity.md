@@ -77,6 +77,21 @@ without logging response content and pause the source only. Unknown403,401,429
 and unexpected reported costs still stop the provider. A targeted regression
 checks both branches and secret redaction.
 
+Correction3490f8cc1bca065e9d6bf49e385bf31de978d703 and Power Food CI39855579606
+succeeded. Second live scan39855595897 completed:23/23 successful page requests
+(ScraperAPI7, Bee8, Zyte8), no errors, no newly verified candidates. No provider
+pause remains; IKEA stays quarantined. Combined this turn:29 successful provider
+calls plus one403 refusal; zero new pending deals/Slack messages/publications.
+
+Final read-only audit39856183434 succeeded at21:20:06UTC. Bee70/1000; ScraperAPI
+observed80/5000, concurrency0, overage and auto-upgrade false; Zyte key pin valid.
+ScraperAPI80 is below90 inferred from successful response headers including the
+earlier benchmark, so it is not a reconciled billing total. Conservative ledger
+retains100 ScraperAPI credits,70 Bee credits and.30USD Zyte reservations; no refund
+or balance invention. No payment/plan change. All required local/manual jobs ended.
+Evidence: root output/expanded-food-providers-2026-10-22/{scan,second-scan,audit,
+final-audit,STATUS.json}. Primary/Apify schedules and follow-up unchanged.
+
 ## Primary references
 
 - https://docs.scraperapi.com/resources/faq/plans-and-billing
