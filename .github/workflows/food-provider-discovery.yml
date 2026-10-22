@@ -1,0 +1,31 @@
+name: Free Food Provider Discovery
+on:
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: free-food-provider-discovery
+  cancel-in-progress: false
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Read-only free-credit checks (no scraped pages)
+        env:
+          SCRAPINGAPI: ${{ secrets.SCRAPINGAPI }}
+          SCRAPINGBEE: ${{ secrets.SCRAPINGBEE }}
+          ZYSTE: ${{ secrets.ZYSTE }}
+        run: node scripts/check-food-providers.mjs
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: food-provider-audit
+          path: output/food-provider-audit.json
+          retention-days: 7
