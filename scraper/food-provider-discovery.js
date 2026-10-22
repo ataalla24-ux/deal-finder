@@ -2,7 +2,7 @@ import fs from 'node:fs/promises';
 import { pathToFileURL } from 'node:url';
 import { load } from 'cheerio';
 import { FoodProviderClient, ProviderError } from './food-provider-client.js';
-import { CAPS, DAY, freeBudget, planRequests, validateLedger, sourceAvailable } from './food-provider-policy.js';
+import { DAY, SCAN_PROVIDERS, freeBudget, planRequests, validateLedger, sourceAvailable } from './food-provider-policy.js';
 import { POWER_FOOD_SOURCES } from './power-food-sources.js';
 import { extractFoodOffers, discoverFoodLinks } from './power-food-extraction.js';
 import { fetchOfficialFoodPage, verifyOfficialFoodDeal } from './power-food-verification.js';
@@ -146,7 +146,7 @@ export async function main(command = '--reserve') {
         state.benchmarkYieldApplied = true;
       }
     } catch (error) { if (error.code !== 'ENOENT') throw error; }
-    const usage = await usages(mode === 'benchmark' ? ['scraperapi', 'scrapingbee', 'zyte'] : ['scraperapi']);
+    const usage = await usages(SCAN_PROVIDERS);
     const plan = { runId, mode, createdAt: now.toISOString(), usage, ...planRequests(state, powerReport, usage, mode, now, runId) };
     if (plan.tasks.length) state.reservations.push({ runId, mode, at: now.toISOString(), tasks: plan.tasks });
     await write(FILES.state, state);

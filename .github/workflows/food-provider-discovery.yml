@@ -22,6 +22,7 @@ jobs:
     env:
       SENTRY_DISABLED: '1'
       FOOD_PROVIDER_MODE: ${{ inputs.mode == 'benchmark' && 'benchmark' || 'scan' }}
+      ZYTE_FREE_TRIAL_KEY_SHA256: ${{ vars.ZYTE_FREE_TRIAL_KEY_SHA256 }}
     steps:
       - uses: actions/checkout@v4
         with:

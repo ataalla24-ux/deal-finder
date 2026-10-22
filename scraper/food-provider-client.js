@@ -1,3 +1,4 @@
+import { createHash } from 'node:crypto';
 import { isAllowedFoodUrl } from './power-food-sources.js';
 import { retryAfterAt } from './source-http-policy.js';
 const PROVIDERS = ['scraperapi', 'scrapingbee', 'zyte'];
@@ -28,6 +29,7 @@ export class FoodProviderClient {
     if (!PROVIDERS.includes(provider)) throw new ProviderError('unknown-provider');
     this.provider = provider;
     this.key = env[KEYS[provider]];
+    this.trialKeyFingerprint = env.ZYTE_FREE_TRIAL_KEY_SHA256;
     this.fetchImpl = fetchImpl;
   }
   async request(url, options = {}) {
@@ -44,7 +46,12 @@ export class FoodProviderClient {
     return { text, headers: response.headers };
   }
   async usage() {
-    if (this.provider === 'zyte') return { provider: 'zyte', credentialPresent: Boolean(this.key), status: 'dashboard-trial-check-required' };
+    if (this.provider === 'zyte') {
+      const credentialFingerprint = this.key ? createHash('sha256').update(this.key).digest('hex') : null;
+      return { provider: 'zyte', credentialPresent: Boolean(this.key), credentialFingerprint,
+        trialKeyBound: Boolean(credentialFingerprint && credentialFingerprint === this.trialKeyFingerprint),
+        status: 'provider-blocking-limit-not-live-usage' };
+    }
     const url = this.provider === 'scraperapi'
       ? new URL('https://api.scraperapi.com/account') : new URL('https://app.scrapingbee.com/api/v1/usage');
     const headers = {};

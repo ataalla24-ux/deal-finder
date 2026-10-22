@@ -1,7 +1,8 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
+import { createHash } from 'node:crypto';
 import { FoodProviderClient, usageSummary } from '../scraper/food-provider-client.js';
-import { freeBudget, planRequests, sourceAvailable, DAY } from '../scraper/food-provider-policy.js';
+import { freeBudget, planRequests, sourceAvailable, DAY, ZYTE_TRIAL_CHECK, BEE_TRIAL_END } from '../scraper/food-provider-policy.js';
 import { collectPlan, applyYieldCooldown, mergeProviderPending } from '../scraper/food-provider-discovery.js';
 import { POWER_FOOD_SOURCES } from '../scraper/power-food-sources.js';
 const now = new Date('2026-10-22T21:00:00Z');
@@ -9,7 +10,7 @@ const empty = () => ({ version: 1, reservations: [], sources: {}, providerPauses
 const usages = {
   scraperapi: { status: 'authenticated', maximum: 5000, used: 0, concurrency: 0, payAsYouGoEnabled: false, autoUpgradeEnabled: false },
   scrapingbee: { status: 'authenticated', maximum: 1000, used: 0, concurrency: 0 },
-  zyte: { credentialPresent: true },
+  zyte: { credentialPresent: true, trialKeyBound: true, status: 'provider-blocking-limit-not-live-usage' },
 };
 const power = () => ({ finishedAt: now.toISOString(), sources: POWER_FOOD_SOURCES.map(s => ({ source: s.name, url: s.url, status: 'ok' })) });
 const source = POWER_FOOD_SOURCES.find(s => s.name === 'KFC');
@@ -38,8 +39,11 @@ test('audit is read-only, fixed host, no redirects and sanitized errors', async 
 test('missing key cannot make a request; Zyte audit does not pretend extraction key is stats key', async () => {
   const fetchImpl = () => { throw new Error('unexpected-fetch'); };
   await assert.rejects(new FoodProviderClient('scraperapi', { env: {}, fetchImpl }).usage(), /missing-credential/);
-  assert.equal((await new FoodProviderClient('zyte', { env: { ZYSTE: 'private' }, fetchImpl }).usage()).status,
-    'dashboard-trial-check-required');
+  const value = await new FoodProviderClient('zyte', { env: { ZYSTE: 'private' }, fetchImpl }).usage();
+  assert.equal(value.status, 'provider-blocking-limit-not-live-usage');
+  assert.equal(value.trialKeyBound, false);
+  assert.doesNotMatch(JSON.stringify(value), /private/);
+  assert.match(value.credentialFingerprint, /^[a-f0-9]{64}$/);
 });
 test('all three adapters send fixed bounded options without paid extras', async () => {
   for (const provider of ['scraperapi', 'scrapingbee', 'zyte']) {
@@ -83,12 +87,40 @@ test('no paid plan, overage, missing usage or concurrency accepted', () => {
   assert.equal(freeBudget('scraperapi', usages.scraperapi, empty(), 20, now), '');
   assert.equal(freeBudget('scraperapi', { ...usages.scraperapi, maximum: 1000 }, empty(), 20, now), '');
 });
-test('trial services never enter unattended scan and expire closed', () => {
+test('recurring trials require verified guards and expire without renewal', () => {
   for (const provider of ['scrapingbee', 'zyte']) {
-    assert.notEqual(freeBudget(provider, usages[provider], empty(), 5, now), '');
+    const amount = provider === 'zyte' ? .1 : 10;
+    assert.equal(freeBudget(provider, usages[provider], empty(), amount, now), '');
     assert.notEqual(freeBudget(provider, usages[provider], empty(), .05, new Date('2026-12-01'), 'benchmark'), '');
   }
   assert.equal(freeBudget('zyte', usages.zyte, empty(), .1, now, 'benchmark'), '');
+  assert.notEqual(freeBudget('zyte', usages.zyte, empty(), .05, new Date(ZYTE_TRIAL_CHECK.validUntil)), '');
+  assert.notEqual(freeBudget('zyte', usages.zyte, empty(), .05, new Date(+new Date(ZYTE_TRIAL_CHECK.checkedAt) - 1)), '');
+  assert.notEqual(freeBudget('scrapingbee', usages.scrapingbee, empty(), 5, new Date(BEE_TRIAL_END)), '');
+  for (const change of [{ trialKeyBound: false }, { credentialPresent: false }, { status: 'unknown' }])
+    assert.notEqual(freeBudget('zyte', { ...usages.zyte, ...change }, empty(), .05, now), '');
+  for (const change of [{ maximum: 100000 }, { used: 900 }, { status: 'unavailable' }, { concurrency: 1 }])
+    assert.notEqual(freeBudget('scrapingbee', { ...usages.scrapingbee, ...change }, empty(), 5, now), '');
+});
+test('Zyte pin is bound to the reviewed extraction credential; rotation stops calls', async () => {
+  const fingerprint = createHash('sha256').update('reviewed-key').digest('hex');
+  for (const key of ['reviewed-key', 'replacement-key', undefined]) {
+    const usage = await new FoodProviderClient('zyte', { env: { ZYSTE: key, ZYTE_FREE_TRIAL_KEY_SHA256: fingerprint },
+      fetchImpl: () => { throw new Error('audit-is-not-a-cost-call'); } }).usage();
+    assert.equal(usage.trialKeyBound, key === 'reviewed-key');
+  }
+});
+test('trial daily and lifetime reservations cannot be reset by the next month or a failed call', () => {
+  for (const [provider, cap, lifetime] of [['scrapingbee', 5, 900], ['zyte', .05, 3]]) {
+    const state = empty();
+    const r = (id, date) => ({ runId: String(id), mode: 'scan', at: date.toISOString(),
+      tasks: [{ provider, source: 'KFC', cap }, { provider, source: 'Burger King', cap }] });
+    state.reservations.push(r(1, now));
+    assert.notEqual(freeBudget(provider, usages[provider], state, cap, now), '');
+    assert.equal(freeBudget(provider, usages[provider], state, 2 * cap, new Date(+now + DAY)), '');
+    state.reservations = Array.from({ length: Math.round(lifetime / (2 * cap)) }, (_, i) => r(i + 2, new Date(+now - (i + 1) * DAY)));
+    assert.notEqual(freeBudget(provider, usages[provider], state, cap, now), '');
+  }
 });
 test('daily and rolling caps count failed/uncertain reservations and reject corrupt ledger', () => {
   const state = empty();
@@ -100,15 +132,37 @@ test('daily and rolling caps count failed/uncertain reservations and reject corr
   assert.notEqual(freeBudget('scraperapi', usages.scraperapi, state, 10, now), '');
   assert.throws(() => freeBudget('scraperapi', usages.scraperapi, {}, 10, now), /invalid-food-provider-ledger/);
 });
-test('benchmark max six calls once; scan two calls without trial services', () => {
+test('benchmark stays one-shot; daily scan uses six distinct food pages with two per provider', () => {
   const state = empty();
   const plan = planRequests(state, power(), usages, 'benchmark', now, '123');
   assert.equal(plan.tasks.length, 6);
   state.reservations.push({ runId: '123', mode: 'benchmark', at: now.toISOString(), tasks: plan.tasks });
   assert.equal(planRequests(state, power(), usages, 'benchmark', now, '124').tasks.length, 0);
   const scan = planRequests(empty(), power(), usages, 'scan', now, '124');
+  assert.equal(scan.tasks.length, 6);
+  assert.equal(new Set(scan.tasks.map(t => t.source)).size, 6);
+  for (const p of ['scrapingbee', 'zyte', 'scraperapi']) assert.equal(scan.tasks.filter(t => t.provider === p).length, 2);
+  assert.deepEqual(scan.tasks.map(t => t.provider), ['scrapingbee', 'scrapingbee', 'zyte', 'zyte', 'scraperapi', 'scraperapi']);
+  assert.ok(scan.tasks.every(t => ['essen', 'kaffee'].includes(POWER_FOOD_SOURCES.find(s => s.name === t.source).category)));
+});
+test('expired trial services leave normal free discovery running; missing guard does not claim success', () => {
+  const later = new Date('2026-11-22T10:00:00Z');
+  const report = { ...power(), finishedAt: later.toISOString() };
+  const scan = planRequests(empty(), report, usages, 'scan', later, '999');
   assert.equal(scan.tasks.length, 2);
   assert.ok(scan.tasks.every(t => t.provider === 'scraperapi'));
+  assert.ok(scan.skipped.find(row => row.provider === 'scrapingbee' && /expired/.test(row.reason)));
+  assert.ok(scan.skipped.find(row => row.provider === 'zyte' && /expired/.test(row.reason)));
+  const unbound = planRequests(empty(), power(), { ...usages, zyte: { ...usages.zyte, trialKeyBound: false } }, 'scan', now, '1000');
+  assert.equal(unbound.tasks.length, 4);
+});
+test('source cooldowns remain shared across every provider and rotation favors oldest attempts', () => {
+  const state = empty(), report = power();
+  state.sources['Cafe Hummel'] = { retryAt: new Date(+now + DAY).toISOString() };
+  state.sources['IKEA Food'] = { attemptedAt: now.toISOString() };
+  report.sources.find(s => s.source === 'Ströck').status = 'deferred';
+  const plan = planRequests(state, report, usages, 'scan', now, '999');
+  assert.ok(plan.tasks.every(t => !['Cafe Hummel', 'Ströck', 'IKEA Food'].includes(t.source)));
 });
 test('known cooldown, failed source or stale Power report never triggers a proxy', () => {
   const report = power();
@@ -145,6 +199,44 @@ test('reservation saved before request; no replay or unverified candidate enters
   assert.equal(output.candidates.length, 0);
   assert.equal(output.results[0].unverifiedCandidates, 1);
   await assert.rejects(collectPlan(plan, state, power(), options), /reservation-mismatch-or-started/);
+});
+test('both trial services use the recurring collector and preserve independent verification and review', async () => {
+  for (const [provider, cap] of [['scrapingbee', 5], ['zyte', .05]]) {
+    const state = empty(), tasks = [{ provider, source: source.name, cap }];
+    state.reservations.push({ runId: '123', mode: 'scan', at: now.toISOString(), tasks });
+    let saved = false, checked = 0, requested = 0;
+    const output = await collectPlan({ runId: '123', mode: 'scan', tasks }, state, power(), { now,
+      save: async () => { saved = true; },
+      fetchPage: async () => ({ html: '<html><body>Welcome</body></html>', finalUrl: source.url }),
+      clientFor: () => ({ usage: async () => usages[provider], scrape: async () => {
+        assert.equal(saved, true); requested++;
+        return { html: '<html><body><main><section><img alt="Aktion: Burger um 1 Euro in Wien" /></section></main></body></html>',
+          finalUrl: source.url, cost: provider === 'zyte' ? null : 5 };
+      } }),
+      verify: async deal => { checked++; return { ok: true, deal }; },
+    });
+    assert.equal(requested, 1);
+    assert.equal(checked, 1);
+    assert.equal(output.candidates.length, 1);
+    assert.equal(output.candidates[0].approved, false);
+    assert.equal(output.candidates[0].reviewRequired, true);
+    assert.equal(output.candidates[0].votes, 0);
+    assert.equal(state.sources[source.name].noGainCount, 0);
+  }
+});
+test('fresh low credit or missing Zyte pin stops the reserved request without any scrape', async () => {
+  for (const [provider, cap] of [['scrapingbee', 5], ['zyte', .05]]) {
+    const state = empty(), tasks = [{ provider, source: source.name, cap }];
+    state.reservations.push({ runId: '123', mode: 'scan', at: now.toISOString(), tasks });
+    const output = await collectPlan({ runId: '123', mode: 'scan', tasks }, state, power(), { now,
+      fetchPage: async () => ({ html: '<html><body>Welcome</body></html>', finalUrl: source.url }),
+      clientFor: () => ({ usage: async () => ({ ...usages[provider], used: 999, trialKeyBound: false }),
+        scrape: () => { throw new Error('must-not-scrape'); } }),
+    });
+    assert.equal(output.results[0].status, 'budget-stopped');
+    assert.equal(output.candidates.length, 0);
+    assert.equal(state.reservations[0].tasks.length, 1, 'uncertain reservations are never refunded');
+  }
 });
 test('empty or duplicate pages pause for 7/14/28 days, verified incremental offers reset', () => {
   const state = empty();
