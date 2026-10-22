@@ -101,10 +101,14 @@ export function classifyDiscoveryPost(raw, { now = new Date(), registry = {}, oc
   if (/\b(?:kein\w*|nicht|no|not)\s+(?:1\s*[+&]\s*1|2\s*(?:für|fuer|for)\s*1|bogo)\b/i.test(signal)) {
     return { deal: null, rejectReason: 'negated-offer' };
   }
-  const foodReason = getAdFoodBenefitRejection(signal);
+  // Inflected German product names are classification aliases, never rewritten evidence.
+  const foodReason = getAdFoodBenefitRejection(signal.replace(/\bBurgers\b/gi, 'Burger').replace(/\bKaffees\b/gi, 'Kaffee'));
   if (foodReason) return { deal: null, rejectReason: foodReason };
   const location = plain(raw.locationName);
   const trusted = account?.accountType === 'merchant' && account.viennaVerified === true;
+  if (!vienna(signal) && /\b(?:in|aus|nach|to)\s+(?:graz|linz|salzburg|innsbruck|berlin|muenchen|münchen|munich)\b/i.test(signal)) {
+    return { deal: null, rejectReason: 'non-vienna-offer-text' };
+  }
   if (/\b(?:graz|linz|salzburg|innsbruck|berlin|muenchen|münchen|munich)\b/i.test(location) && !vienna(location)) {
     return { deal: null, rejectReason: 'non-vienna-location' };
   }

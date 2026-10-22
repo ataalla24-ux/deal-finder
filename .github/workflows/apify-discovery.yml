@@ -22,7 +22,7 @@ jobs:
   discover:
     if: ${{ github.event_name == 'workflow_dispatch' || vars.APIFY_2_DISCOVERY_ENABLED == 'true' }}
     runs-on: ubuntu-latest
-    timeout-minutes: 20
+    timeout-minutes: 30
     env:
       SENTRY_DISABLED: '1'
     steps:

@@ -23,8 +23,11 @@ it contains unrelated private account/proxy fields.
 - Each run: four profiles, one hashtag, two recent posts per source, ten records
   maximum. Least-recently-attempted rotation prevents permanent priority starvation.
   At this budget, not every profile is checked daily; coverage is deliberately bounded.
-- Official `apify/instagram-scraper`, pinned build 0.0.830, ten-minute provider
-  timeout, USD 0.04 maximum charge per run. No automatic retry of a charged start.
+- Official `apify/instagram-scraper`, pinned build 0.0.830 for profiles (USD 0.03),
+  then `apify/instagram-hashtag-scraper`, pinned build 0.0.707 (USD 0.01).
+  Both share the same USD 0.04 reservation, with ten-minute provider timeouts each.
+  No automatic retry of a charged start. The initial general-actor hashtag test
+  returned metadata only, so that path is no longer used for hashtag posts.
 - Conservative reservation ledger: USD 0.08 per UTC day, USD 2.50 per account cycle,
   at least six hours between starts, USD 0.25 remaining-credit reserve. Unused
   reservations are not refunded automatically. Unknown budgets/pricing fail closed.
@@ -59,9 +62,12 @@ is allowed outside the audited GitHub workflow.
   bounded post fingerprints. Do not delete/reset to work around a budget pause.
 - `docs/apify-discovery-report.json`: latest status, counts, rejections and OCR gaps.
 - `docs/deals-pending-instagram-apify2.json`: pending review candidates, never the
-  live app feed. Central Deal Dispatch discovers this file and retains its existing
+  live app feed. Central Deal Dispatch discovers this file on its existing cadence
+  (no extra dispatch triggered by account audits) and retains its existing
   validation, deduplication, Slack delivery and human approval rules/limits.
 - Actions artifact: sanitized plan/report; no tokens, raw comments or follower lists.
+- Existing pipeline-health files record fresh counts separately from retained
+  candidates. Provider errors are not reclassified as healthy zero-result sources.
 
 Pause: set `APIFY_2_DISCOVERY_ENABLED=false`; the first pipeline continues unchanged.
 After a failed or uncertain run, inspect its recorded actor ID and report. Do not
@@ -75,6 +81,21 @@ publication path. The first pipeline's other search/discovery channels remain.
 No claim that a chosen account will yield ten legitimate current offers, that all
 Vienna deals are covered, or that passing actor execution guarantees good deals.
 Discovery yield, actual media access and Slack review remain measured separately.
+
+## Initial live evidence
+
+Actions 39834960816 completed successfully with a **partial** collector result:
+six public posts from three profiles, four successful OCR analyses, zero eligible
+new deals. `corner_xvi` returned `no_items` and received a 24-hour source cooldown.
+The hashtag URL returned metadata, not posts. Read-only follow-up 39835578453
+confirmed the shape, and led to the dedicated hashtag actor above. Its real next
+scheduled execution remains to be observed; do not claim a completed live hashtag
+test from the general actor's metadata result.
+
+The settled first actor charge was USD 0.0216; total second-account consumption
+including storage/read overhead was about USD 0.02163 of the included USD 5.
+All fresh candidates were rejected (no concrete food benefit); no new deal was
+approved or put in the app by this test. Rules are not relaxed to manufacture yield.
 
 The owner's supplied document is a design reference, not authority to introduce
 unbudgeted paid services or bypass the existing publication checks.

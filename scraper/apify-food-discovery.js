@@ -1,7 +1,7 @@
 import fs from 'node:fs/promises';
 import path from 'node:path';
 import { pathToFileURL } from 'node:url';
-import { ApifyDiscoveryClient, DISCOVERY_ACTOR, budgetCheck } from './apify-discovery-client.js';
+import { ApifyDiscoveryClient, DISCOVERY_ACTOR, HASHTAG_ACTOR, budgetCheck } from './apify-discovery-client.js';
 import {
   DAY, LIMITS, discoverySources, selectDiscoverySources, reservationReason,
   postIdentity, postFingerprint, earlyPostRejection, classifyDiscoveryPost, mergeDiscoveryPending,
@@ -10,6 +10,7 @@ import { analyzeInstagramMediaItem, detectMediaTools } from './instagram-media-e
 import { buildPipelineRunReport, writePipelineRunReport } from './pipeline-run-report-utils.js';
 
 export const ACTOR_BUILD = '0.0.830';
+export const HASHTAG_BUILD = '0.0.707';
 const TERMINAL = new Set(['SUCCEEDED', 'FAILED', 'TIMED-OUT', 'ABORTED']);
 const FILES = {
   state: 'docs/apify-discovery-state.json', report: 'docs/apify-discovery-report.json',
@@ -29,6 +30,10 @@ async function write(file, value) {
 }
 
 export function actorInput(sources, now = new Date()) {
+  if (sources.every(s => s.kind === 'hashtag')) return {
+    hashtags: sources.map(s => s.key.split(':')[1]), resultsType: 'posts',
+    resultsLimit: LIMITS.perSource, keywordSearch: false,
+  };
   return {
     directUrls: sources.map(s => s.url), resultsType: 'posts', resultsLimit: LIMITS.perSource,
     onlyPostsNewerThan: new Date(+now - 7 * DAY).toISOString(), addParentData: false,
@@ -45,16 +50,22 @@ export function pipelineHealthReport(report) {
     rejected: (report.candidateAudit || []).filter(row => row.status === 'rejected'),
     diagnostics: { pendingDeals: report.pendingDeals || 0, unchangedPosts: report.unchangedPosts || 0,
       providerErrors: report.providerErrors || 0, ocrCalls: report.ocrCalls || 0, sources: report.sources || [] },
-    constraints: LIMITS, errors: report.error ? [report.error] : [],
+    constraints: LIMITS, errors: [report.error, ...(report.batchErrors || []).map(e => e.reason)].filter(Boolean),
   });
 }
 
 export async function runBoundedActor(client, sources, {
   now = () => new Date(), sleep = ms => new Promise(resolve => setTimeout(resolve, ms)), onStarted = async () => {},
 } = {}) {
+  if (!sources.length || sources.some(s => s.kind !== sources[0].kind)) throw new Error('invalid-mixed-source-batch');
+  const hashtag = sources[0].kind === 'hashtag';
+  const actorId = hashtag ? HASHTAG_ACTOR : DISCOVERY_ACTOR;
+  const build = hashtag ? HASHTAG_BUILD : ACTOR_BUILD;
+  const cap = hashtag ? 0.01 : 0.03;
+  const maxItems = hashtag ? 2 : 8;
   const start = +now();
   // One POST only. Provider timeout also bounds abandoned/cancelled GitHub jobs.
-  let run = await client.request(`/acts/${DISCOVERY_ACTOR}/runs?build=${ACTOR_BUILD}&timeout=600&memory=512&maxItems=${LIMITS.posts}&maxTotalChargeUsd=0.04`, {
+  let run = await client.request(`/acts/${actorId}/runs?build=${build}&timeout=600&memory=512&maxItems=${maxItems}&maxTotalChargeUsd=${cap}`, {
     method: 'POST', body: actorInput(sources, now()),
   });
   if (!/^[A-Za-z0-9]+$/.test(run?.id || '')) throw Object.assign(new Error('missing-run-id'), { uncertainStart: true });
@@ -69,10 +80,35 @@ export async function runBoundedActor(client, sources, {
   }
   if (run.status !== 'SUCCEEDED') throw new Error(`actor-${run.status.toLowerCase()}`);
   if (!/^[A-Za-z0-9]+$/.test(run.defaultDatasetId || '')) throw new Error('missing-dataset-id');
-  const items = await client.request(`/datasets/${run.defaultDatasetId}/items?clean=true&format=json&limit=${LIMITS.posts}`);
+  const items = await client.request(`/datasets/${run.defaultDatasetId}/items?clean=true&format=json&limit=${maxItems}`);
   if (!Array.isArray(items)) throw new Error('invalid-dataset');
-  return { runId: run.id, status: run.status, items: items.slice(0, LIMITS.posts),
+  return { runId: run.id, actorId, status: run.status, items: items.slice(0, maxItems),
     reportedChargeUsd: Number.isFinite(run.usageTotalUsd) ? run.usageTotalUsd : null };
+}
+
+export async function collectDiscoveryBatches(client, sources, options = {}) {
+  const items = [], runs = [], errors = [], failedSources = new Set();
+  let retryAt = '';
+  for (const kind of ['profile', 'hashtag']) {
+    const selected = sources.filter(s => s.kind === kind);
+    if (!selected.length) continue;
+    try {
+      const check = budgetCheck(await client.preflight(kind === 'profile' ? DISCOVERY_ACTOR : HASHTAG_ACTOR),
+        options.now?.() || new Date(), kind === 'profile' ? .03 : .01);
+      if (!check.allowed) throw new Error(`apify-budget-${check.reason}`);
+      const run = await runBoundedActor(client, selected, options);
+      items.push(...run.items);
+      runs.push({ id: run.runId, actorId: run.actorId, reportedChargeUsd: run.reportedChargeUsd });
+    } catch (error) {
+      selected.forEach(s => failedSources.add(s.key));
+      errors.push({ kind, reason: /^apify-|^actor-|^missing-|^invalid-/.test(error.message) ? error.message : 'collector-processing-failed' });
+      if (error.uncertainStart || [401, 403, 429].includes(error.httpStatus)) {
+        retryAt = new Date(Math.max(+(options.now?.() || new Date()) + DAY, Date.parse(error.retryAt) || 0)).toISOString();
+        break;
+      }
+    }
+  }
+  return { items, runs, errors, failedSources, retryAt };
 }
 
 export function safeMediaUrl(value) {
@@ -186,8 +222,9 @@ export async function main(mode = '--plan') {
   for (const source of plan.sources) state.sources[source.key] = { ...state.sources[source.key], lastAttemptAt: now.toISOString() };
   await write(FILES.state, state);
   try {
-    const result = await runBoundedActor(client, plan.sources, { onStarted: async id => {
+    const result = await collectDiscoveryBatches(client, plan.sources, { onStarted: async id => {
       reservation.runId = id;
+      reservation.startedRuns = [...(reservation.startedRuns || []), id];
       await write(FILES.state, state);
     } });
     const known = new Set();
@@ -202,21 +239,26 @@ export async function main(mode = '--plan') {
     const processed = await processDiscoveryItems(result.items, { now: new Date(), state, registry, previous,
       knownPostKeys: known, ocr: raw => localOcr(raw, tools) });
     state.seen = processed.seen;
-    state.retryAt = '';
-    reservation.status = processed.report.providerErrors ? 'partial' : 'succeeded';
+    state.retryAt = result.retryAt;
+    reservation.status = result.errors.length && !result.runs.length ? 'failed'
+      : processed.report.providerErrors || result.errors.length ? 'partial' : 'succeeded';
     for (const source of plan.sources) {
-      const rows = result.items.filter(raw => raw.inputUrl === source.url || (source.kind === 'profile' && raw.ownerUsername?.toLowerCase() === source.username));
+      const rows = result.items.filter(raw => String(raw.inputUrl || '').replace(/\/$/, '') === source.url.replace(/\/$/, '')
+        || (source.kind === 'profile' && raw.ownerUsername?.toLowerCase() === source.username));
       const failures = rows.filter(row => row.error || row.errorDescription);
       const entry = state.sources[source.key];
-      entry.status = failures.length ? 'failed' : rows.length ? 'posts-returned' : 'no-attributed-results';
-      entry.postsReturned = rows.filter(row => !row.error && !row.errorDescription).length;
-      if (failures.length) {
+      entry.postsReturned = rows.filter(row => postIdentity(row) && !row.error && !row.errorDescription).length;
+      entry.status = failures.length || result.failedSources.has(source.key) ? 'failed'
+        : entry.postsReturned ? 'posts-returned' : 'no-attributed-results';
+      if (entry.status === 'failed') {
         entry.consecutiveFailures = (entry.consecutiveFailures || 0) + 1;
         entry.retryAt = new Date(+now + Math.min(7, 2 ** (entry.consecutiveFailures - 1)) * DAY).toISOString();
       } else if (rows.length) { entry.consecutiveFailures = 0; entry.retryAt = ''; }
     }
-    Object.assign(report, processed.report, { status: reservation.status, actorRunId: result.runId,
-      reportedChargeUsd: result.reportedChargeUsd, tools, sources: plan.sources.map(s => ({ key: s.key, ...state.sources[s.key] })) });
+    Object.assign(report, processed.report, { status: reservation.status, actorRuns: result.runs, batchErrors: result.errors,
+      reportedChargeUsd: result.runs.reduce((sum, run) => sum + (run.reportedChargeUsd || 0), 0),
+      tools, sources: plan.sources.map(s => ({ key: s.key, ...state.sources[s.key] })) });
+    if (reservation.status === 'failed') process.exitCode = 1;
     await write(FILES.pending, { source: 'Apify 2 Vienna Food Discovery', lastUpdated: new Date().toISOString(), deals: processed.deals });
   } catch (error) {
     reservation.status = error.uncertainStart ? 'uncertain-start' : 'failed';

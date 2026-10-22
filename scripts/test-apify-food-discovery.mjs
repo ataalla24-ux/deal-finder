@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import { DAY, LIMITS, discoverySources, selectDiscoverySources, reservationReason,
   classifyDiscoveryPost, postFingerprint, postIdentity, mergeDiscoveryPending } from '../scraper/apify-food-discovery-policy.js';
-import { actorInput, runBoundedActor, restrictedMediaFetch, safeMediaUrl, processDiscoveryItems, pipelineHealthReport } from '../scraper/apify-food-discovery.js';
+import { actorInput, runBoundedActor, collectDiscoveryBatches, restrictedMediaFetch, safeMediaUrl, processDiscoveryItems, pipelineHealthReport } from '../scraper/apify-food-discovery.js';
 
 const now = new Date('2026-10-22T18:00:00Z');
 const post = overrides => ({ url: 'https://www.instagram.com/p/TestCoffee1/', caption: 'Wien: Nur heute 1+1 auf alle Kaffee!',
@@ -39,7 +39,7 @@ test('reservations prevent duplicate retries, close spacing and exceeding free e
 test('bounded actor input and one charged start, terminal polling and dataset cap', async () => {
   const calls = [];
   let clock = +now;
-  const sources = [{ url: 'https://www.instagram.com/cafe_example/' }];
+  const sources = [{ kind: 'profile', url: 'https://www.instagram.com/cafe_example/' }];
   const client = { request: async (url, options) => {
     calls.push({ url, options });
     if (options?.method === 'POST') return { id: 'run123', status: 'RUNNING' };
@@ -47,21 +47,62 @@ test('bounded actor input and one charged start, terminal polling and dataset ca
     return Array.from({ length: 12 }, () => post());
   } };
   const result = await runBoundedActor(client, sources, { now: () => new Date(clock), sleep: async ms => { clock += ms; } });
-  assert.equal(result.items.length, LIMITS.posts);
+  assert.equal(result.items.length, 8);
   assert.equal(calls.filter(c => c.options?.method === 'POST').length, 1);
-  assert.match(calls[0].url, /timeout=600&memory=512&maxItems=10&maxTotalChargeUsd=0.04/);
+  assert.match(calls[0].url, /timeout=600&memory=512&maxItems=8&maxTotalChargeUsd=0.03/);
   assert.deepEqual(calls[0].options.body, actorInput(sources, now));
 });
 test('ambiguous start is never retried; polling deadline aborts bounded actor', async () => {
   let count = 0;
-  await assert.rejects(runBoundedActor({ request: async () => { count++; throw new Error('uncertain'); } }, []));
+  const sources = [{ kind: 'profile', url: 'https://www.instagram.com/test/' }];
+  await assert.rejects(runBoundedActor({ request: async () => { count++; throw new Error('uncertain'); } }, sources));
   assert.equal(count, 1);
   let clock = +now, aborted = false;
   await assert.rejects(runBoundedActor({ request: async url => {
     if (url.endsWith('/abort')) aborted = true;
     return { id: 'run123', status: 'RUNNING' };
-  } }, [], { now: () => new Date(clock), sleep: async () => { clock += 120_000; } }), /deadline/);
+  } }, sources, { now: () => new Date(clock), sleep: async () => { clock += 120_000; } }), /deadline/);
   assert.equal(aborted, true);
+});
+test('dedicated hashtag actor gets hashtag input and both actors share the unchanged .04 ceiling', async () => {
+  const starts = [], checked = [];
+  const sources = [{ kind: 'profile', key: 'profile:cafe', url: 'https://www.instagram.com/cafe/' },
+    { kind: 'hashtag', key: 'hashtag:wienfood', url: 'https://www.instagram.com/explore/tags/wienfood/' }];
+  const client = {
+    preflight: async actor => {
+      checked.push(actor);
+      return { user: { plan: { monthlyUsageCreditsUsd: 5 } }, limits: { current: { monthlyUsageUsd: 0 },
+        limits: { maxMonthlyUsageUsd: 5 }, monthlyUsageCycle: { startAt: '2026-10-01', endAt: '2026-11-01' } },
+      actor: { pricingInfos: [{ startedAt: '2026-01-01', pricingModel: 'PAY_PER_EVENT', minimalMaxTotalChargeUsd: .0027 }] } };
+    },
+    request: async (route, options) => {
+      if (options?.method === 'POST') {
+        starts.push({ route, body: options.body });
+        return { id: `run${starts.length}`, status: 'SUCCEEDED', defaultDatasetId: `data${starts.length}` };
+      }
+      return [post()];
+    },
+  };
+  const result = await collectDiscoveryBatches(client, sources, { now: () => now });
+  assert.equal(starts.length, 2);
+  assert.equal(result.errors.length, 0);
+  assert.deepEqual(checked, ['apify~instagram-scraper', 'apify~instagram-hashtag-scraper']);
+  assert.deepEqual(starts[1].body, { hashtags: ['wienfood'], resultsType: 'posts', resultsLimit: 2, keywordSearch: false });
+  const total = starts.reduce((sum, call) => sum + Number(new URL(`https://api.apify.com${call.route}`).searchParams.get('maxTotalChargeUsd')), 0);
+  assert.equal(total, .04);
+  const oldRequest = client.request;
+  client.request = async (route, options) => {
+    if (route.includes('instagram-hashtag-scraper/runs')) throw new Error('actor-failed');
+    return oldRequest(route, options);
+  };
+  const partial = await collectDiscoveryBatches(client, sources, { now: () => now });
+  assert.equal(partial.items.length, 1);
+  assert.equal(partial.errors.length, 1);
+  assert.equal(partial.failedSources.has('hashtag:wienfood'), true);
+  client.preflight = async () => { throw Object.assign(new Error('apify-http-429'), { httpStatus: 429 }); };
+  const paused = await collectDiscoveryBatches(client, sources, { now: () => now });
+  assert.equal(paused.runs.length, 0);
+  assert.ok(Date.parse(paused.retryAt) >= +now + DAY);
 });
 test('concrete coffee BOGO is evidenced, not automatically published or fake voted', () => {
   const { deal } = classifyDiscoveryPost(post(), { now });
@@ -71,6 +112,13 @@ test('concrete coffee BOGO is evidenced, not automatically published or fake vot
   assert.equal(deal.reviewRequired, true);
   assert.equal(deal.expires, '2026-10-22T21:59:59.999Z');
   assert.ok(deal.qualityScore >= 85);
+});
+test('German inflection in the supplied free-sample example retains original evidence', () => {
+  const caption = 'Gratis Probe unseres neuen veganen Burgers in Wien';
+  const { deal } = classifyDiscoveryPost(post({ caption }), { now });
+  assert.ok(deal);
+  assert.equal(deal.type, 'gratis');
+  assert.match(deal.description, /Burgers/);
 });
 test('alcohol, mixed alcohol, giveaways, ordinary meals, negations and nonfood are excluded', () => {
   for (const caption of [
@@ -99,6 +147,7 @@ test('hashtag or unverified discovery profile alone is not Vienna proof', () => 
   const registry = { accounts: [{ username: 'cafe_example', accountType: 'merchant', viennaVerified: true }] };
   assert.ok(classifyDiscoveryPost(raw, { now, registry }).deal);
   assert.equal(classifyDiscoveryPost({ ...raw, locationName: 'Graz' }, { now, registry }).deal, null);
+  assert.equal(classifyDiscoveryPost(post({ caption: 'Gratis Kaffee in Berlin', locationName: 'Wien' }), { now, registry }).deal, null);
 });
 test('OCR adds evidence while caption, conditions and actual publication date survive', () => {
   const raw = post({ caption: 'Unsere Aktion in Wien.' });

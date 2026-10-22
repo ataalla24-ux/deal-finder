@@ -1,5 +1,5 @@
 import fs from 'node:fs';
-import { ApifyDiscoveryClient, budgetCheck } from '../scraper/apify-discovery-client.js';
+import { ApifyDiscoveryClient, HASHTAG_ACTOR, budgetCheck } from '../scraper/apify-discovery-client.js';
 
 let report;
 try {
@@ -11,10 +11,12 @@ try {
     sameAccountAsPrimary = Boolean(primary.id && current.user.id && primary.id === current.user.id);
   }
   report = { checkedAt: new Date().toISOString(), credentialAccepted: true, sameAccountAsPrimary, ...budgetCheck(current) };
+  report.hashtagBudget = budgetCheck(await client.preflight(HASHTAG_ACTOR), new Date(), .01);
   if (fs.existsSync('docs/apify-discovery-report.json')) {
     const last = JSON.parse(fs.readFileSync('docs/apify-discovery-report.json', 'utf8'));
-    if (/^[A-Za-z0-9]+$/.test(last.actorRunId || '')) {
-      const run = await client.request(`/actor-runs/${last.actorRunId}`);
+    const lastId = last.actorRuns?.at(-1)?.id || last.actorRunId;
+    if (/^[A-Za-z0-9]+$/.test(lastId || '')) {
+      const run = await client.request(`/actor-runs/${lastId}`);
       report.lastRun = { id: run.id, status: run.status, usageTotalUsd: run.usageTotalUsd };
       if (/^[A-Za-z0-9]+$/.test(run.defaultDatasetId || '')) {
         const items = await client.request(`/datasets/${run.defaultDatasetId}/items?clean=true&format=json&limit=10`);

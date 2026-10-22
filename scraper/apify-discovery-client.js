@@ -1,5 +1,6 @@
 const BASE = 'https://api.apify.com/v2';
 export const DISCOVERY_ACTOR = 'apify~instagram-scraper';
+export const HASHTAG_ACTOR = 'apify~instagram-hashtag-scraper';
 export const RUN_CAP_USD = 0.04;
 
 export class ApifyDiscoveryClient {
@@ -38,15 +39,16 @@ export class ApifyDiscoveryClient {
     return json.data ?? json;
   }
 
-  async preflight() {
+  async preflight(actorId = DISCOVERY_ACTOR) {
+    if (![DISCOVERY_ACTOR, HASHTAG_ACTOR].includes(actorId)) throw new Error('invalid-actor');
     const user = await this.request('/users/me');
     const limits = await this.request('/users/me/limits');
-    const actor = await this.request(`/acts/${DISCOVERY_ACTOR}`);
+    const actor = await this.request(`/acts/${actorId}`);
     return { user, limits, actor };
   }
 }
 
-export function budgetCheck({ user, limits, actor }, now = new Date()) {
+export function budgetCheck({ user, limits, actor }, now = new Date(), runCap = RUN_CAP_USD) {
   const credits = user?.plan?.monthlyUsageCreditsUsd;
   const used = limits?.current?.monthlyUsageUsd;
   const ceiling = limits?.limits?.maxMonthlyUsageUsd;
@@ -59,10 +61,10 @@ export function budgetCheck({ user, limits, actor }, now = new Date()) {
       || !Number.isFinite(Date.parse(limits?.monthlyUsageCycle?.endAt))) reason = 'unknown-account-budget';
   else if (+now < Date.parse(limits.monthlyUsageCycle.startAt) || +now > Date.parse(limits.monthlyUsageCycle.endAt)) reason = 'stale-budget-cycle';
   else if (ceiling > credits) reason = 'account-limit-exceeds-included-credit';
-  else if (Math.min(credits, ceiling) - used < RUN_CAP_USD + 0.25) reason = 'included-credit-reserve';
+  else if (Math.min(credits, ceiling) - used < runCap + 0.25) reason = 'included-credit-reserve';
   else if (pricing?.pricingModel !== 'PAY_PER_EVENT'
       || !Number.isFinite(pricing?.minimalMaxTotalChargeUsd)
-      || pricing.minimalMaxTotalChargeUsd > RUN_CAP_USD) reason = 'unsupported-cost-cap';
+      || pricing.minimalMaxTotalChargeUsd > runCap) reason = 'unsupported-cost-cap';
   return {
     allowed: !reason,
     reason,
@@ -71,7 +73,7 @@ export function budgetCheck({ user, limits, actor }, now = new Date()) {
     accountUsageUsd: Number.isFinite(used) ? used : null,
     accountLimitUsd: Number.isFinite(ceiling) ? ceiling : null,
     cycle: limits?.monthlyUsageCycle || null,
-    runCapUsd: RUN_CAP_USD,
+    runCapUsd: runCap,
     pricingModel: pricing?.pricingModel || null,
   };
 }
