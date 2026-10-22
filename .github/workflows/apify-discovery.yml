@@ -65,7 +65,7 @@ jobs:
         run: node scraper/apify-food-discovery.js --run
       - name: Persist results and conservative budget ledger
         if: ${{ always() && steps.reserve.outcome == 'success' }}
-        run: node scripts/commit-generated.mjs --message "Update Apify 2 discovery evidence [skip ci]" --files docs/apify-discovery-state.json docs/apify-discovery-report.json docs/deals-pending-instagram-apify2.json
+        run: node scripts/commit-generated.mjs --message "Update Apify 2 discovery evidence [skip ci]" --files docs/apify-discovery-state.json docs/apify-discovery-report.json docs/deals-pending-instagram-apify2.json docs/deal-pipeline-last-run-instagram-apify2.json docs/deal-pipeline-runs-instagram-apify2.json
       - uses: actions/upload-artifact@v4
         if: always()
         with:

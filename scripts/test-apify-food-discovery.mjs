@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import { DAY, LIMITS, discoverySources, selectDiscoverySources, reservationReason,
   classifyDiscoveryPost, postFingerprint, postIdentity, mergeDiscoveryPending } from '../scraper/apify-food-discovery-policy.js';
-import { actorInput, runBoundedActor, restrictedMediaFetch, safeMediaUrl, processDiscoveryItems } from '../scraper/apify-food-discovery.js';
+import { actorInput, runBoundedActor, restrictedMediaFetch, safeMediaUrl, processDiscoveryItems, pipelineHealthReport } from '../scraper/apify-food-discovery.js';
 
 const now = new Date('2026-10-22T18:00:00Z');
 const post = overrides => ({ url: 'https://www.instagram.com/p/TestCoffee1/', caption: 'Wien: Nur heute 1+1 auf alle Kaffee!',
@@ -161,4 +161,12 @@ test('workflow separates secrets, persists reservation before start, keeps manua
   assert.match(workflow, /25 5,17 \* \* \*/);
   assert.doesNotMatch(workflow, /SLACK_BOT_TOKEN|OPENAI_API_KEY|SCRAPINGBEE/);
   assert.match(fs.readFileSync('.github/workflows/daily-digest.yml', 'utf8'), /Apify 2 Vienna Food Discovery/);
+});
+test('health separates fresh accepted candidates from retained queue and source failures', () => {
+  const health = pipelineHealthReport({ generatedAt: now.toISOString(), status: 'partial', fetchedRecords: 5,
+    freshAcceptedDeals: 0, pendingDeals: 8, providerErrors: 1 });
+  assert.equal(health.status, 'completed-with-errors');
+  assert.equal(health.counts.acceptedDeals, 0);
+  assert.equal(health.diagnostics.pendingDeals, 8);
+  assert.equal(health.diagnostics.providerErrors, 1);
 });

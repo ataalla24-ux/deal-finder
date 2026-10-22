@@ -7,6 +7,7 @@ import {
   postIdentity, postFingerprint, earlyPostRejection, classifyDiscoveryPost, mergeDiscoveryPending,
 } from './apify-food-discovery-policy.js';
 import { analyzeInstagramMediaItem, detectMediaTools } from './instagram-media-evidence.js';
+import { buildPipelineRunReport, writePipelineRunReport } from './pipeline-run-report-utils.js';
 
 export const ACTOR_BUILD = '0.0.830';
 const TERMINAL = new Set(['SUCCEEDED', 'FAILED', 'TIMED-OUT', 'ABORTED']);
@@ -32,6 +33,20 @@ export function actorInput(sources, now = new Date()) {
     directUrls: sources.map(s => s.url), resultsType: 'posts', resultsLimit: LIMITS.perSource,
     onlyPostsNewerThan: new Date(+now - 7 * DAY).toISOString(), addParentData: false,
   };
+}
+
+export function pipelineHealthReport(report) {
+  return buildPipelineRunReport({
+    sourceKey: 'instagram-apify2', sourceLabel: 'Apify 2 Vienna Food Discovery',
+    startedAt: report.generatedAt, finishedAt: new Date(), outputFile: FILES.pending,
+    status: report.status === 'succeeded' ? 'completed' : report.status === 'partial' ? 'completed-with-errors' : 'failed',
+    rawCandidates: report.fetchedRecords || 0, normalizedCandidates: report.candidateAudit?.length || 0,
+    acceptedDeals: report.freshAcceptedDeals || 0,
+    rejected: (report.candidateAudit || []).filter(row => row.status === 'rejected'),
+    diagnostics: { pendingDeals: report.pendingDeals || 0, unchangedPosts: report.unchangedPosts || 0,
+      providerErrors: report.providerErrors || 0, ocrCalls: report.ocrCalls || 0, sources: report.sources || [] },
+    constraints: LIMITS, errors: report.error ? [report.error] : [],
+  });
 }
 
 export async function runBoundedActor(client, sources, {
@@ -214,6 +229,7 @@ export async function main(mode = '--plan') {
   } finally {
     await write(FILES.state, state);
     await write(FILES.report, report);
+    writePipelineRunReport(pipelineHealthReport(report));
     console.log(JSON.stringify(report, null, 2));
   }
 }
