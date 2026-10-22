@@ -52,12 +52,30 @@ customer consent/messaging, app binaries and Store releases.
 
 ## Verification
 
-Local provider regression suite: 32 tests passed, including legacy ledger,
+Local provider regression suite: 33 tests passed, including legacy ledger,
 allocation exhaustion, exact trial boundaries, failed/unknown calls, multiple
 pages at one merchant, rate limits, direct discovery and no automatic approval.
 All 15 existing food/source/evidence/Slack regression scripts passed.
 
-Production rollout and actual run evidence to be recorded after deployment.
+Source e9e38b40726aa7f25edaece896964c1151c585b5 deployed nonforce. Power Food CI
+39854675657 succeeded. Live run 39854690150 succeeded operationally, with a PARTIAL
+collector report: 19 planned pages, six successful provider page calls (four Bee,
+two Zyte), one ScraperAPI HTTP403, 18 independently confirmed existing offers,
+zero new candidates/Slack messages. Audit 39855145687 verified ScraperAPI20/5000,
+Bee30/1000 and Zyte key pin; both ScraperAPI overage switches remained false.
+
+The ScraperAPI dashboard's free Domain Credit Costs lookup for ikea.com showed
+Standard Rendered=20 credits, above our fixed max_cost=10. This explains a possible
+cost refusal, but the original 403 body was not retained, so its exact reason is
+not proven. The healthy account audit and independent domain quote justify
+removing ONLY the global provider pause raised by this one call. IKEA's shared
+source pause until Oct25 stays intact; no retry or rotation around it, no max_cost
+increase and no refund of the uncertain 10-credit reservation.
+
+Future documented `This request exceeds your max_cost.` messages are classified
+without logging response content and pause the source only. Unknown403,401,429
+and unexpected reported costs still stop the provider. A targeted regression
+checks both branches and secret redaction.
 
 ## Primary references
 

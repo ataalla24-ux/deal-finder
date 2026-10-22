@@ -160,7 +160,7 @@ export async function collectPlan(plan, state, powerReport, {
       const retryAt = new Date(Math.max(Date.parse(error.retryAt) || 0,
         +now + ([401, 403, 404, 410].includes(status) ? 3 * DAY : DAY))).toISOString();
       state.sources[source.name] = { attemptedAt: now.toISOString(), retryAt };
-      if (error instanceof ProviderError && (/cost/.test(error.message) || [401, 403, 429].includes(status)))
+      if (error instanceof ProviderError && error.message !== 'provider-cost-limit' && (/cost/.test(error.message) || [401, 403, 429].includes(status)))
         state.providerPauses[task.provider] = retryAt;
       results.push({ ...row, status: 'failed', reason: reason(error), httpStatus: status, retryAt });
     } finally {

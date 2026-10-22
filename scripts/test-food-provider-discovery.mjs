@@ -437,3 +437,21 @@ test('canonical redirects do not spend a second provider allocation on the same 
   assert.equal(output.results[1].status, 'duplicate-final-url');
   assert.deepEqual(state.reservations[0].unspent, [1]);
 });
+
+test('documented cost refusal pauses its source, not the healthy provider; unknown 403 still stops globally', async () => {
+  for (const message of ['This request exceeds your max_cost. secret-value', 'Forbidden secret-value']) {
+    const client = new FoodProviderClient('scraperapi', { env: { SCRAPINGAPI: 'private' },
+      fetchImpl: async () => new Response(message, { status: 403 }) });
+    const state = empty(), tasks = [{ provider: 'scraperapi', source: source.name, cap: 10 }];
+    state.reservations.push({ runId: '807', mode: 'scan', at: now.toISOString(), tasks });
+    const output = await collectPlan({ runId: '807', mode: 'scan', tasks }, state, power(), { now,
+      fetchPage: async () => ({ html: '<html><body>Welcome</body></html>', finalUrl: source.url }),
+      clientFor: () => ({ usage: async () => usages.scraperapi, scrape: (...args) => client.scrape(...args) }),
+    });
+    assert.doesNotMatch(JSON.stringify(output), /secret-value|private/);
+    assert.ok(state.sources.KFC.retryAt);
+    assert.equal(Boolean(state.providerPauses.scraperapi), message.startsWith('Forbidden'));
+    assert.equal(output.results[0].reason, message.startsWith('Forbidden') ? 'provider-http-403' : 'provider-cost-limit');
+    assert.equal(state.reservations[0].unspent, undefined, 'failed requests remain conservatively charged');
+  }
+});
