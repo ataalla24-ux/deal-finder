@@ -38,15 +38,19 @@ export function selectDiscoverySources(pool, state, now = new Date()) {
   return [...ordered('profile').slice(0, LIMITS.profiles), ...ordered('hashtag').slice(0, LIMITS.hashtags)];
 }
 
-export function reservationReason(state, budget, runKey, now = new Date()) {
+export function reservationReason(state, budget, runKey, now = new Date(), purpose = 'scan') {
+  if (!['scan', 'hashtag-test'].includes(purpose)) return 'invalid-purpose';
   if (!budget.allowed) return budget.reason;
   if (Date.parse(state.retryAt) > +now) return 'channel-cooldown';
   const reservations = state.reservations || [];
   if (reservations.some(r => r.key === runKey)) return 'workflow-already-reserved';
-  if (reservations.some(r => +now - Date.parse(r.at) < 6 * 3_600_000)) return 'minimum-six-hour-spacing';
+  if (purpose === 'hashtag-test') {
+    if (budget.runCapUsd !== .01) return 'invalid-validation-cap';
+    if (state.hashtagValidationReservedAt) return 'hashtag-validation-already-reserved';
+  } else if (reservations.some(r => +now - Date.parse(r.at) < 6 * 3_600_000)) return 'minimum-six-hour-spacing';
   const day = now.toISOString().slice(0, 10);
   const sum = rows => rows.reduce((n, r) => n + Number(r.capUsd), 0);
-  if (reservations.some(r => !Number.isFinite(r.capUsd) || !Number.isFinite(Date.parse(r.at)))) return 'invalid-budget-ledger';
+  if (reservations.some(r => !Number.isFinite(r.capUsd) || r.capUsd < 0 || !Number.isFinite(Date.parse(r.at)))) return 'invalid-budget-ledger';
   if (sum(reservations.filter(r => r.at.startsWith(day))) + budget.runCapUsd > LIMITS.dailyUsd + 1e-9) return 'daily-budget-reserved';
   if (sum(reservations.filter(r => Date.parse(r.at) >= Date.parse(budget.cycle.startAt))) + budget.runCapUsd > LIMITS.cycleUsd + 1e-9) return 'cycle-budget-reserved';
   return '';

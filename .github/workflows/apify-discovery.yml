@@ -4,9 +4,9 @@ on:
   workflow_dispatch:
     inputs:
       mode:
-        description: Read-only audit or one capped discovery scan
+        description: Read-only audit, capped scan, or one-time hashtag validation
         type: choice
-        options: [audit, scan]
+        options: [audit, scan, hashtag-test]
         default: audit
   schedule:
     - cron: '25 5,17 * * *'
@@ -25,6 +25,7 @@ jobs:
     timeout-minutes: 30
     env:
       SENTRY_DISABLED: '1'
+      APIFY_DISCOVERY_PURPOSE: ${{ inputs.mode == 'hashtag-test' && 'hashtag-test' || 'scan' }}
     steps:
       - uses: actions/checkout@v4
         with:
@@ -43,7 +44,7 @@ jobs:
         run: node scripts/check-apify-discovery.mjs
       - name: Reserve bounded included credit
         id: reserve
-        if: ${{ github.event_name == 'schedule' || inputs.mode == 'scan' }}
+        if: ${{ github.event_name == 'schedule' || inputs.mode == 'scan' || inputs.mode == 'hashtag-test' }}
         env:
           APIFY_2: ${{ secrets.APIFY_2 }}
         run: node scraper/apify-food-discovery.js --reserve

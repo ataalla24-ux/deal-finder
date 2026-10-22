@@ -36,6 +36,23 @@ test('reservations prevent duplicate retries, close spacing and exceeding free e
   state.reservations[0].capUsd = 'broken';
   assert.equal(reservationReason(state, budget, '3', now), 'invalid-budget-ledger');
 });
+test('one-time hashtag validation stays inside existing budgets without changing scan cadence', () => {
+  const state = emptyState();
+  state.reservations.push({ key: 'old', capUsd: .04, at: now.toISOString() });
+  const validation = { ...budget, runCapUsd: .01 };
+  assert.equal(reservationReason(state, validation, 'new', now, 'hashtag-test'), '');
+  assert.equal(reservationReason(state, budget, 'new', now), 'minimum-six-hour-spacing');
+  assert.equal(reservationReason(state, budget, 'new', now, 'hashtag-test'), 'invalid-validation-cap');
+  state.hashtagValidationReservedAt = now.toISOString();
+  assert.equal(reservationReason(state, validation, 'new', now, 'hashtag-test'), 'hashtag-validation-already-reserved');
+  delete state.hashtagValidationReservedAt;
+  state.reservations[0].capUsd = .08;
+  assert.equal(reservationReason(state, validation, 'new', now, 'hashtag-test'), 'daily-budget-reserved');
+  state.reservations[0] = { key: 'old', capUsd: 2.5, at: '2026-10-20T10:00:00Z' };
+  assert.equal(reservationReason(state, validation, 'new', now, 'hashtag-test'), 'cycle-budget-reserved');
+  state.retryAt = new Date(+now + DAY).toISOString();
+  assert.equal(reservationReason(state, validation, 'new', now, 'hashtag-test'), 'channel-cooldown');
+});
 test('bounded actor input and one charged start, terminal polling and dataset cap', async () => {
   const calls = [];
   let clock = +now;

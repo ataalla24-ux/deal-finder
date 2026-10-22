@@ -194,16 +194,24 @@ export async function main(mode = '--plan') {
   }
   if (!['--reserve', '--run'].includes(mode)) throw new Error('invalid-mode');
   if (!/^\d+$/.test(process.env.GITHUB_RUN_ID || '')) throw new Error('requires-audited-github-workflow');
+  const purpose = process.env.APIFY_DISCOVERY_PURPOSE || 'scan';
+  if (!['scan', 'hashtag-test'].includes(purpose)) throw new Error('invalid-purpose');
+  const validation = purpose === 'hashtag-test';
+  if (validation && process.env.GITHUB_EVENT_NAME !== 'workflow_dispatch') throw new Error('validation-requires-manual-dispatch');
   const runKey = process.env.GITHUB_RUN_ID;
   const client = new ApifyDiscoveryClient(process.env.APIFY_2);
-  const budget = budgetCheck(await client.preflight(), now);
+  const budget = budgetCheck(await client.preflight(validation ? HASHTAG_ACTOR : DISCOVERY_ACTOR), now, validation ? .01 : .04);
   if (mode === '--reserve') {
-    const sources = selectDiscoverySources(pool, state, now);
-    const reason = reservationReason(state, budget, runKey, now) || (!sources.length ? 'no-available-sources' : '');
-    const plan = { allowed: !reason, reason, generatedAt: now.toISOString(), runKey, sources, budget, limits: LIMITS };
+    const sources = validation
+      ? pool.filter(s => s.key === 'hashtag:wienfood' && !(Date.parse(state.sources[s.key]?.retryAt) > +now))
+      : selectDiscoverySources(pool, state, now);
+    const reason = reservationReason(state, budget, runKey, now, purpose) || (!sources.length ? 'no-available-sources' : '');
+    const plan = { allowed: !reason, reason, generatedAt: now.toISOString(), runKey, purpose, sources, budget, limits: LIMITS };
     if (!reason) {
       state.reservations = state.reservations.filter(r => Date.parse(r.at) >= +now - 40 * DAY);
-      state.reservations.push({ key: runKey, at: now.toISOString(), capUsd: budget.runCapUsd, status: 'reserved' });
+      state.reservations.push({ key: runKey, at: now.toISOString(), capUsd: budget.runCapUsd, purpose, status: 'reserved' });
+      // Permanent marker: pruning the monetary ledger must never reopen this one-shot test.
+      if (validation) state.hashtagValidationReservedAt = now.toISOString();
       await write(FILES.state, state);
     }
     await write(FILES.plan, plan);
@@ -214,10 +222,12 @@ export async function main(mode = '--plan') {
   }
   const plan = await read(FILES.plan, null);
   const reservation = state.reservations.find(r => r.key === runKey);
-  if (!budget.allowed || !plan?.allowed || plan.runKey !== runKey || reservation?.status !== 'reserved'
+  if (!budget.allowed || !plan?.allowed || plan.runKey !== runKey || plan.purpose !== purpose
+      || reservation?.status !== 'reserved' || reservation.purpose !== purpose || reservation.capUsd !== budget.runCapUsd
+      || (validation && (plan.sources.length !== 1 || plan.sources[0].key !== 'hashtag:wienfood'))
       || +now - Date.parse(reservation.at) > 30 * 60_000) throw new Error('missing-or-invalid-committed-reservation');
   const previous = (await read(FILES.pending, { deals: [] })).deals;
-  const report = { generatedAt: now.toISOString(), limits: LIMITS, budget, selectedSources: plan.sources, status: 'starting' };
+  const report = { generatedAt: now.toISOString(), purpose, limits: LIMITS, budget, selectedSources: plan.sources, status: 'starting' };
   reservation.status = 'attempted';
   for (const source of plan.sources) state.sources[source.key] = { ...state.sources[source.key], lastAttemptAt: now.toISOString() };
   await write(FILES.state, state);
