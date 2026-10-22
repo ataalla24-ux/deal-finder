@@ -25,7 +25,7 @@ export function applyYieldCooldown(state, results, now) {
     const target = rows[0].url ? state.pages : state.sources;
     const entry = rows[0].url ? key : rows[0].source;
     if (rows.some(row => row.status === 'failed' || row.status === 'source-paused')) continue;
-    const examined = rows.filter(row => ['fetched', 'direct-sufficient'].includes(row.status));
+    const examined = rows.filter(row => ['fetched', 'direct-sufficient', 'direct-no-offer'].includes(row.status));
     if (!examined.length) continue;
     if (examined.some(row => row.verifiedIncrementalCandidates > 0)) {
       target[entry] = { attemptedAt: now.toISOString(), noGainCount: 0,
@@ -57,6 +57,23 @@ export function mergeProviderPending(previous, fresh, known, now) {
     combined.set(d.id, d);
   }
   return [...combined.values()].slice(-50);
+}
+
+export function summarizeProviderResults(results) {
+  const summary = { pagesBySource: {}, statuses: {}, rejectionReasons: {}, verificationReasons: {},
+    directCandidates: 0, renderedCandidates: 0, verifiedCandidates: 0 };
+  for (const row of results) {
+    summary.pagesBySource[row.source] = (summary.pagesBySource[row.source] || 0) + 1;
+    summary.statuses[row.status] = (summary.statuses[row.status] || 0) + 1;
+    summary.directCandidates += row.directCandidates || 0;
+    summary.renderedCandidates += row.extractedCandidates || 0;
+    summary.verifiedCandidates += row.verifiedCandidates || 0;
+    for (const rejected of [...(row.directRejected || []), ...(row.rejected || [])])
+      summary.rejectionReasons[rejected.reason] = (summary.rejectionReasons[rejected.reason] || 0) + 1;
+    for (const candidate of row.candidates || []) if (!candidate.confirmed)
+      summary.verificationReasons[candidate.reason] = (summary.verificationReasons[candidate.reason] || 0) + 1;
+  }
+  return summary;
 }
 async function usages(providers) {
   const result = {};
@@ -112,6 +129,9 @@ export async function collectPlan(plan, state, powerReport, {
       if (!direct.has(url)) direct.set(url, await fetchPage(url, source));
       const baseline = direct.get(url);
       const parsedDirect = extractFoodOffers(baseline.html, source, { now, pageUrl: baseline.finalUrl });
+      row.directCandidates = parsedDirect.deals.length;
+      row.directRejected = parsedDirect.rejected;
+      row.directVisibleTextCharacters = parsedDirect.pageText?.length || 0;
       rememberLinks(state, source, discoverFoodLinks(baseline.html, source, baseline.finalUrl, 40), now);
       state.sources[source.name] = { ...state.sources[source.name], attemptedAt: now.toISOString() };
       if (plan.mode === 'scan' && parsedDirect.deals.length) {
@@ -120,6 +140,13 @@ export async function collectPlan(plan, state, powerReport, {
         await confirm(parsedDirect.deals, row, new Set(parsedDirect.deals.map(d => d.id)), 'direct');
         results.push(row);
         continue;
+      }
+      if (plan.mode === 'scan' && !source.render && row.directVisibleTextCharacters >= 400
+          && !/enable javascript|javascript.{0,20}(?:required|aktivieren)/i.test(parsedDirect.pageText)) {
+        row.status = 'direct-no-offer';
+        row.reason = parsedDirect.rejected.length ? 'extracted-offers-rejected' : 'readable-page-without-extractable-offer';
+        row.note = 'No browser credit spent; image/PDF-only offers are not established by this HTML check.';
+        unspent(); results.push(row); continue;
       }
       const finalKey = `${source.name}|${canonicalPage(baseline.finalUrl, source)}`;
       if (plan.mode === 'scan' && attemptedFinalUrls.has(finalKey)) {
@@ -221,7 +248,7 @@ export async function main(command = '--reserve') {
   const deals = mergeProviderPending(previous, output.candidates, known, now);
   await write(FILES.pending, { updatedAt: now.toISOString(), deals, totalDeals: deals.length });
   const report = { ...plan, finishedAt: new Date().toISOString(), status: output.results.some(r => r.status === 'failed') ? 'partial' : 'completed',
-    results: output.results, uniqueVerifiedCandidates: output.candidates.length,
+    results: output.results, funnel: summarizeProviderResults(output.results), uniqueVerifiedCandidates: output.candidates.length,
     alreadyKnown: output.candidates.filter(d => known.has(d.id)).length,
     newPendingCandidates: output.candidates.filter(d => !known.has(d.id) && !previous.some(old => old.id === d.id)).length,
     pendingCandidates: deals.length,

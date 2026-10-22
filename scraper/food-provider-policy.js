@@ -5,6 +5,7 @@ export const DAY = 86_400_000;
 // Old .05 allocations remain valid and fully charged in the ledger.
 export const CAPS = Object.freeze({ scraperapi: 10, scrapingbee: 5, zyte: 0.02 });
 export const MAX_SCAN_TASKS = 32;
+export const MAX_PAGES_PER_SOURCE = 4;
 export const SCRAPER_TRIAL_END = '2026-10-29T00:00:00Z';
 export const BENCHMARK_SOURCES = ['Burger King', 'KFC'];
 export const SCAN_SOURCES = POWER_FOOD_SOURCES.filter(s => ['essen', 'kaffee'].includes(s.category)).map(s => s.name);
@@ -88,13 +89,24 @@ export function scanTargets(state, powerReport, now) {
     for (const value of urls) {
       const url = canonicalPage(value, source);
       if (!url || denied.has(url)) continue;
+      if (url !== source.url && !(source.seeds || []).includes(url)
+          && source.providerPagePattern && !source.providerPagePattern.test(url)) continue;
       const target = { source: source.name, url };
       if (Date.parse(state.pages?.[taskKey(target)]?.retryAt || '') > +now) continue;
       targets.set(taskKey(target), target);
     }
   }
-  return [...targets.values()].sort((a, b) => (Date.parse(state.pages?.[taskKey(a)]?.attemptedAt || '') || 0)
+  const ordered = [...targets.values()].sort((a, b) => (Date.parse(state.pages?.[taskKey(a)]?.attemptedAt || '') || 0)
     - (Date.parse(state.pages?.[taskKey(b)]?.attemptedAt || '') || 0));
+  const groups = new Map();
+  for (const target of ordered) {
+    if (!groups.has(target.source)) groups.set(target.source, []);
+    groups.get(target.source).push(target);
+  }
+  // Give every merchant a first slot before a second page, and never let a
+  // large news archive exhaust a run's included credit.
+  return Array.from({ length: MAX_PAGES_PER_SOURCE }, (_, i) =>
+    [...groups.values()].flatMap(group => group[i] ? [group[i]] : [])).flat();
 }
 
 export function sourceAvailable(source, powerReport, state, now) {

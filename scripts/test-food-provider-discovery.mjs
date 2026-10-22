@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import { createHash } from 'node:crypto';
 import { FoodProviderClient, usageSummary } from '../scraper/food-provider-client.js';
 import { freeBudget, planRequests, sourceAvailable, DAY, ZYTE_TRIAL_CHECK, BEE_TRIAL_END, SCRAPER_TRIAL_END, CAPS, MAX_SCAN_TASKS, scanTargets, taskKey, validateLedger } from '../scraper/food-provider-policy.js';
-import { collectPlan, applyYieldCooldown, mergeProviderPending, rememberLinks } from '../scraper/food-provider-discovery.js';
+import { collectPlan, applyYieldCooldown, mergeProviderPending, rememberLinks, summarizeProviderResults } from '../scraper/food-provider-discovery.js';
 import { POWER_FOOD_SOURCES } from '../scraper/power-food-sources.js';
 const now = new Date('2026-10-22T21:00:00Z');
 const empty = () => ({ version: 1, reservations: [], sources: {}, providerPauses: {} });
@@ -142,9 +142,9 @@ test('benchmark stays one-shot; scans expand to distinct allowlisted food pages 
   state.reservations.push({ runId: '123', mode: 'benchmark', at: now.toISOString(), tasks: plan.tasks });
   assert.equal(planRequests(state, power(), usages, 'benchmark', now, '124').tasks.length, 0);
   const scan = planRequests(empty(), power(), usages, 'scan', now, '124');
-  assert.equal(scan.tasks.length, 15);
-  assert.equal(new Set(scan.tasks.map(taskKey)).size, 15);
-  for (const p of ['scrapingbee', 'zyte', 'scraperapi']) assert.equal(scan.tasks.filter(t => t.provider === p).length, 5);
+  assert.equal(scan.tasks.length, 18);
+  assert.equal(new Set(scan.tasks.map(taskKey)).size, 18);
+  for (const p of ['scrapingbee', 'zyte', 'scraperapi']) assert.equal(scan.tasks.filter(t => t.provider === p).length, 6);
   assert.deepEqual(scan.tasks.slice(0, 3).map(t => t.provider), ['scrapingbee', 'zyte', 'scraperapi']);
   assert.ok(scan.tasks.every(t => ['essen', 'kaffee'].includes(POWER_FOOD_SOURCES.find(s => s.name === t.source).category)));
 });
@@ -152,12 +152,12 @@ test('expired trial services leave normal free discovery running; missing guard 
   const later = new Date('2026-11-22T10:00:00Z');
   const report = { ...power(), finishedAt: later.toISOString() };
   const scan = planRequests(empty(), report, { ...usages, scraperapi: { ...usages.scraperapi, maximum: 1000 } }, 'scan', later, '999');
-  assert.equal(scan.tasks.length, 15);
+  assert.equal(scan.tasks.length, 18);
   assert.ok(scan.tasks.every(t => t.provider === 'scraperapi'));
   assert.ok(scan.skipped.find(row => row.provider === 'scrapingbee' && /expired/.test(row.reason)));
   assert.ok(scan.skipped.find(row => row.provider === 'zyte' && /expired/.test(row.reason)));
   const unbound = planRequests(empty(), power(), { ...usages, zyte: { ...usages.zyte, trialKeyBound: false } }, 'scan', now, '1000');
-  assert.equal(unbound.tasks.length, 15);
+  assert.equal(unbound.tasks.length, 18);
   assert.ok(unbound.tasks.every(t => t.provider !== 'zyte'));
 });
 test('source cooldowns remain shared across every provider and rotation favors oldest attempts', () => {
@@ -167,7 +167,8 @@ test('source cooldowns remain shared across every provider and rotation favors o
   report.sources.find(s => s.source === 'Ströck').status = 'deferred';
   const plan = planRequests(state, report, usages, 'scan', now, '999');
   assert.ok(plan.tasks.every(t => !['Cafe Hummel', 'Ströck'].includes(t.source)));
-  assert.equal(plan.tasks.at(-1).source, 'IKEA Food');
+  const firstPerSource = plan.tasks.filter((t, i, all) => all.findIndex(other => other.source === t.source) === i);
+  assert.equal(firstPerSource.at(-1).source, 'IKEA Food');
 });
 test('known cooldown, failed source or stale Power report never triggers a proxy', () => {
   const report = power();
@@ -278,7 +279,10 @@ test('JavaScript sources wait for content, preserving the same fixed price cap',
 
 test('credit-shaped allocation fills 32 slots without duplicates or exceeding live available credit', () => {
   const state = empty();
-  rememberLinks(state, source, Array.from({ length: 40 }, (_, i) => `${source.url}aktion/${i}`), now);
+  for (const s of POWER_FOOD_SOURCES.filter(s => ['essen', 'kaffee'].includes(s.category))) {
+    const links = Array.from({ length: 40 }, (_, i) => new URL(`aktion/${i}`, s.url).href);
+    rememberLinks(state, s, links, now);
+  }
   const scan = planRequests(state, power(), { ...usages, scrapingbee: { ...usages.scrapingbee, used: 890 } }, 'scan', now, '701');
   assert.equal(scan.tasks.length, MAX_SCAN_TASKS);
   assert.equal(scan.tasks.filter(t => t.provider === 'scrapingbee').length, 2);
@@ -289,6 +293,49 @@ test('credit-shaped allocation fills 32 slots without duplicates or exceeding li
     const amount = scan.tasks.filter(t => t.provider === provider).reduce((sum, t) => sum + t.cap, 0);
     assert.equal(freeBudget(provider, provider === 'scrapingbee' ? { ...usages[provider], used: 890 } : usages[provider], state, amount, now), '');
   }
+});
+
+test('one merchant archive cannot dominate a run; stale generic news are filtered', () => {
+  const state = empty();
+  const backwerk = POWER_FOOD_SOURCES.find(s => s.name === 'BackWerk');
+  rememberLinks(state, backwerk, ['https://www.back-werk.at/de/news/die-grosse-backwerk-kaffee-wiki-585',
+    'https://www.back-werk.at/de/news/zweiter-backwerk-store-in-salzburg-1564',
+    'https://www.back-werk.at/de/news/detail.php',
+    ...Array.from({ length: 40 }, (_, i) => `https://www.back-werk.at/de/news/aktion-${i}`)], now);
+  const plan = planRequests(state, power(), usages, 'scan', now, '990');
+  assert.ok(plan.tasks.filter(t => t.source === 'BackWerk').length <= 4);
+  assert.ok(plan.tasks.some(t => t.source === 'Cafe Hummel'));
+  assert.ok(!plan.tasks.some(t => /wiki|salzburg|detail.php/.test(t.url)));
+  const firstSources = plan.tasks.slice(0, new Set(plan.tasks.map(t => t.source)).size).map(t => t.source);
+  assert.equal(new Set(firstSources).size, firstSources.length);
+});
+
+test('readable no-offer page reports its outcome without consuming API credit', async () => {
+  const state = empty(), tasks = [{ provider: 'scrapingbee', source: source.name, url: source.url, cap: 5 }];
+  state.reservations.push({ runId: '991', mode: 'scan', at: now.toISOString(), tasks });
+  const output = await collectPlan({ runId: '991', mode: 'scan', tasks }, state, power(), { now,
+    fetchPage: async () => ({ html: `<body><main><h1>Unsere Geschichte</h1><p>${'Wir stellen unser Unternehmen vor. '.repeat(30)}</p></main></body>`, finalUrl: source.url }),
+    clientFor: () => { throw new Error('no-credit-for-readable-non-offer'); },
+  });
+  assert.equal(output.results[0].status, 'direct-no-offer');
+  assert.equal(output.results[0].reason, 'readable-page-without-extractable-offer');
+  assert.deepEqual(state.reservations[0].unspent, [0]);
+  assert.ok(state.pages[taskKey(tasks[0])].retryAt);
+});
+
+test('report separates source concentration, extraction rejection and missing independent proof', () => {
+  const summary = summarizeProviderResults([
+    { source: 'BackWerk', status: 'direct-no-offer', directRejected: [{ reason: 'outside-vienna' }] },
+    { source: 'BackWerk', status: 'direct-no-offer', directCandidates: 0 },
+    { source: 'KFC', status: 'fetched', extractedCandidates: 1, verifiedCandidates: 0,
+      candidates: [{ confirmed: false, reason: 'offer-not-on-current-page' }] },
+  ]);
+  assert.equal(summary.pagesBySource.BackWerk, 2);
+  assert.equal(summary.statuses['direct-no-offer'], 2);
+  assert.equal(summary.rejectionReasons['outside-vienna'], 1);
+  assert.equal(summary.verificationReasons['offer-not-on-current-page'], 1);
+  assert.equal(summary.renderedCandidates, 1);
+  assert.equal(summary.verifiedCandidates, 0);
 });
 
 test('trial expiry is not a renewable credit grant; later verified free account keeps 100 credits in reserve', () => {

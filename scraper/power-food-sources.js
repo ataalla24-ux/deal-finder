@@ -2,6 +2,40 @@
 // proof that every promotion on the domain applies in Vienna.
 export const POWER_FOOD_SOURCES = [
   {
+    name: 'Gasthaus Maria',
+    url: 'https://www.gasthaus-maria.at/',
+    allowedHosts: ['www.gasthaus-maria.at', 'gasthaus-maria.at'],
+    selector: '#m3402',
+    titleSelector: 'p:first-child',
+    address: 'Wolfganggasse 16, 1120 Wien',
+    locationEvidenceUrl: 'https://www.gasthaus-maria.at/',
+    linkPattern: /aktion|angebot/i,
+    category: 'essen',
+  },
+  {
+    name: 'Salieri',
+    url: 'https://www.salieri.at/',
+    allowedHosts: ['www.salieri.at', 'salieri.at'],
+    selector: '.e-con:has(> .elementor-widget-price-list)',
+    address: 'Seilerstätte 17, 1010 Wien',
+    locationEvidenceUrl: 'https://www.salieri.at/',
+    linkPattern: /aktion|angebot|mittagsmenu/i,
+    category: 'essen',
+  },
+  {
+    name: 'Weltcafe',
+    brand: 'WeltCafé',
+    url: 'https://weltcafe.at/',
+    allowedHosts: ['weltcafe.at', 'www.weltcafe.at'],
+    // Two adjacent heading widgets form one coffee offer, separate from the
+    // preceding alcoholic happy hour. Both widgets must still be present.
+    adjacentOfferSelector: '.elementor-widget-heading:has(h1:contains("Tägliches Angebot: KAFFEE UND KUCHEN"))',
+    address: 'Schwarzspanierstraße 15, 1090 Wien',
+    locationEvidenceUrl: 'https://weltcafe.at/',
+    linkPattern: /aktion|angebot/i,
+    category: 'kaffee',
+  },
+  {
     name: 'Cafe Hummel',
     brand: 'Cafe Hummel',
     url: 'https://cafehummel.at/',
@@ -124,7 +158,9 @@ export const POWER_FOOD_SOURCES = [
     url: "https://www.back-werk.at/de/home/",
     category: "essen",
     allowedHosts: ["www.back-werk.at", "back-werk.at"],
-    linkPattern: /\/de\/news\//,
+    // The archive also contains generic product news and non-Vienna openings.
+    linkPattern: /\/de\/news\/[^/?]*(?:aktion|angebot|rabatt|coupon|gutschein|snackbox|deal)/i,
+    providerPagePattern: /\/de\/news\/[^/?]*(?:aktion|angebot|rabatt|coupon|gutschein|snackbox|deal)/i,
   },
   {
     name: "Shibuya",

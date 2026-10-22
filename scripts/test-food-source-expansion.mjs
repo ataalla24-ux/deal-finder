@@ -66,3 +66,26 @@ assert.notEqual(mocktail.deals[0].type, 'gratis', 'paid first drink must not bec
 assert.match(mocktail.deals[0].description, /Beim Kauf/);
 assert.equal(mocktail.deals[0].evidence.offerTiming.kind, 'recurring');
 console.log('Food source expansion checks passed');
+
+const welt = POWER_FOOD_SOURCES.find(s => s.name === 'Weltcafe');
+assert.ok(welt, 'include a verified local coffee offer source');
+const widget = text => `<div class="elementor-widget-heading"><h1>${text}</h1></div>`;
+const coffeePage = `<main><div>${widget('HAPPY HOUR')}${widget('Alle Longdrinks 7,90 Euro')}${widget('Tägliches Angebot: KAFFEE UND KUCHEN')}${widget('Veganer Apfelkuchen und Cappuccino oder Schoko-Kuchen und Cappuccino 7,90 Euro')}</div></main>`;
+const coffeeOffers = extractFoodOffers(coffeePage, welt, { now });
+assert.equal(coffeeOffers.deals.length, 1);
+assert.match(coffeeOffers.deals[0].description, /Apfelkuchen.*7,90/);
+assert.doesNotMatch(coffeeOffers.deals[0].description, /Longdrinks/);
+assert.match(coffeeOffers.deals[0].address, /1090 Wien/);
+assert.equal(extractFoodOffers(`<main>${widget('Tägliches Angebot: KAFFEE UND KUCHEN')}</main>`, welt, { now }).deals.length, 0);
+assert.equal(extractFoodOffers(coffeePage.replace('Cappuccino 7,90', 'Cappuccino und Bier 7,90'), welt, { now }).deals.length, 0);
+const maria = POWER_FOOD_SOURCES.find(s => s.name === 'Gasthaus Maria');
+assert.ok(maria);
+const schnitzel = extractFoodOffers('<div id="m3402"><p>Mitt\u00adwoch ist Schnit\u00adzeltag:</p><p>ab 16:00 Uhr</p><p>Schweineschnitzel mit Kartoffelsalat um 8,20 Euro</p><p>Für Stammgäste ist das 12. Menü gratis</p></div>', maria, { now });
+assert.equal(schnitzel.deals.length, 1);
+assert.equal(schnitzel.deals[0].type, 'rabatt', 'loyalty benefit does not make the paid meal free');
+assert.match(schnitzel.deals[0].description, /12\. Menü gratis/);
+assert.equal(schnitzel.deals[0].evidence.offerTiming.recurring, true);
+assert.doesNotMatch(schnitzel.deals[0].description, /\u00ad/);
+const salieri = POWER_FOOD_SOURCES.find(s => s.name === 'Salieri');
+assert.ok(salieri);
+assert.equal(isAllowedFoodUrl('https://www.salieri.at.evil.test/', salieri), false);

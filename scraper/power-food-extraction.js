@@ -24,7 +24,7 @@ const FOREIGN =
   /(?:nur|ausschließlich|exklusiv)\s+(?:in\s+)?(?:deutschland|graz|salzburg|linz|innsbruck)|\b(?:USD|CHF|\$)\b/i;
 export const foodText = (value) =>
   String(value || "")
-    .replace(/[\u200b-\u200d\ufeff]/g, "")
+    .replace(/[\u00ad\u200b-\u200d\ufeff]/g, "")
     .replace(/\s+/g, " ")
     .trim();
 function textOf($, el) {
@@ -109,7 +109,7 @@ export function extractFoodExpiry(text, now) {
     validUntil,
     raw: end?.[0] || start?.[0] || compact?.[0] || "",
     recurring:
-      /bis auf widerruf|bis auf wiederuf|jeden|täglich|montag bis|freitag und samstag|daily|everyday/i.test(
+      /bis auf widerruf|bis auf wiederuf|jeden|täglich|wochentags|montag bis|freitag und samstag|(?:montag|dienstag|mittwoch|donnerstag|freitag|samstag|sonntag) ist \w+tag|daily|everyday/i.test(
         text,
       ),
   };
@@ -146,11 +146,16 @@ export function extractFoodOffers(html, source, options = {}) {
     if (text.length >= 18 && text.length <= 16000)
       blocks.push({
         text,
-        title: foodText(title || $(el).find("h1,h2,h3,h4").first().text()),
+        title: foodText(title || $(el).find(source.titleSelector || "h1,h2,h3,h4").first().text()),
         method,
       });
   };
-  if (source.singleOfferPattern?.test(pageUrl))
+  if (source.adjacentOfferSelector) {
+    $(source.adjacentOfferSelector).each((i, el) => {
+      const next = $(el).next('.elementor-widget-heading');
+      if (next.length) add($(el).add(next), 'merchant-card');
+    });
+  } else if (source.singleOfferPattern?.test(pageUrl))
     add($("main").length ? $("main") : $("body"), "official-detail");
   else {
     if (source.selector)
