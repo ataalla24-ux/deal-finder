@@ -46,6 +46,7 @@ const SOURCE_LABEL_OVERRIDES = {
   'instagram-discovery': 'Daily Sync Instagram Discovery',
   'instagram-ai': 'Instagram AI Agent',
   'instagram-apify': 'Apify Instagram',
+  'instagram-apify2': 'Apify 2 Vienna Food Discovery',
   'instagram-web': 'Daily Sync Instagram Web',
   joe: 'jö Bonus Club',
   'member-benefits': 'Member Benefits',

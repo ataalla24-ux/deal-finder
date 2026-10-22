@@ -26,6 +26,7 @@ const SOURCE_FILES = [
   { key: 'instagram-discovery', file: 'deals-pending-instagram-discovery.json' },
   { key: 'instagram-ai', file: 'deals-pending-instagram-ai.json' },
   { key: 'instagram-apify', file: 'deals-pending-instagram-apify.json' },
+  { key: 'instagram-apify2', file: 'deals-pending-instagram-apify2.json' },
   { key: 'meta-instagram', file: 'deals-pending-meta-instagram.json' },
 ];
 

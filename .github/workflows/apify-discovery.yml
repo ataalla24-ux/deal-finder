@@ -2,33 +2,76 @@ name: Apify 2 Vienna Food Discovery
 
 on:
   workflow_dispatch:
+    inputs:
+      mode:
+        description: Read-only audit or one capped discovery scan
+        type: choice
+        options: [audit, scan]
+        default: audit
+  schedule:
+    - cron: '25 5,17 * * *'
 
 concurrency:
   group: apify-2-discovery
   cancel-in-progress: false
 
 permissions:
-  contents: read
+  contents: write
 
 jobs:
-  preflight:
+  discover:
+    if: ${{ github.event_name == 'workflow_dispatch' || vars.APIFY_2_DISCOVERY_ENABLED == 'true' }}
     runs-on: ubuntu-latest
-    timeout-minutes: 5
+    timeout-minutes: 20
+    env:
+      SENTRY_DISABLED: '1'
     steps:
       - uses: actions/checkout@v4
+        with:
+          ref: main
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
+      - run: npm ci
       - name: Test second-channel cost and secret guards
-        run: node --test scripts/test-apify-discovery.mjs
+        run: node --test scripts/test-apify-discovery.mjs scripts/test-apify-food-discovery.mjs
       - name: Read-only credential and included-credit check
+        if: ${{ github.event_name == 'workflow_dispatch' && inputs.mode == 'audit' }}
         env:
           APIFY_2: ${{ secrets.APIFY_2 }}
           APIFY_TOKEN: ${{ secrets.APIFY_TOKEN }}
         run: node scripts/check-apify-discovery.mjs
+      - name: Reserve bounded included credit
+        id: reserve
+        if: ${{ github.event_name == 'schedule' || inputs.mode == 'scan' }}
+        env:
+          APIFY_2: ${{ secrets.APIFY_2 }}
+        run: node scraper/apify-food-discovery.js --reserve
+      - name: Persist reservation before any charged API request
+        if: steps.reserve.outputs.allowed == 'true'
+        run: |
+          node scripts/commit-generated.mjs --message "Reserve capped Apify 2 discovery credit [skip ci]" --files docs/apify-discovery-state.json
+          git add docs/apify-discovery-state.json
+          git -c user.name='Deal Bot' -c user.email='bot@freefinder.wien' commit -m 'Checkpoint persisted discovery reservation'
+      - name: Install local OCR without a paid image service
+        if: steps.reserve.outputs.allowed == 'true'
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y --no-install-recommends tesseract-ocr tesseract-ocr-deu tesseract-ocr-eng
+      - name: Scan profiles and hashtag, OCR, validate and queue only
+        if: steps.reserve.outputs.allowed == 'true'
+        env:
+          APIFY_2: ${{ secrets.APIFY_2 }}
+        run: node scraper/apify-food-discovery.js --run
+      - name: Persist results and conservative budget ledger
+        if: ${{ always() && steps.reserve.outcome == 'success' }}
+        run: node scripts/commit-generated.mjs --message "Update Apify 2 discovery evidence [skip ci]" --files docs/apify-discovery-state.json docs/apify-discovery-report.json docs/deals-pending-instagram-apify2.json
       - uses: actions/upload-artifact@v4
         if: always()
         with:
-          name: apify-2-preflight
-          path: output/apify-discovery-preflight.json
+          name: apify-2-discovery
+          path: |
+            output/apify-discovery-preflight.json
+            output/apify-discovery-plan.json
+            docs/apify-discovery-report.json
           retention-days: 7

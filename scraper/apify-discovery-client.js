@@ -32,7 +32,9 @@ export class ApifyDiscoveryClient {
       });
     }
     let json;
-    try { json = await response.json(); } catch { throw new Error('apify-invalid-json'); }
+    try { json = await response.json(); } catch {
+      throw Object.assign(new Error('apify-invalid-json'), { uncertainStart: method === 'POST' && route.includes('/runs?') });
+    }
     return json.data ?? json;
   }
 

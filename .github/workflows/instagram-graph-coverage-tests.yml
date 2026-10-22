@@ -5,6 +5,8 @@ on:
     branches: [main]
     paths:
       - 'scraper/**'
+      - 'scripts/test-apify*'
+      - '.github/workflows/apify-discovery.yml'
       - 'scripts/test-slack-food-improvements.mjs'
       - 'scripts/test-instagram-media-budget.mjs'
       - 'scripts/test-instagram-max-coverage.mjs'
@@ -15,6 +17,8 @@ on:
   pull_request:
     paths:
       - 'scraper/**'
+      - 'scripts/test-apify*'
+      - '.github/workflows/apify-discovery.yml'
       - 'scripts/test-instagram-graph*.mjs'
       - 'scripts/test-instagram-shared-quota.mjs'
       - 'scripts/test-instagram-media-budget.mjs'
@@ -56,6 +60,7 @@ jobs:
           node scripts/test-slack-deal-quality.mjs
           node scripts/test-deal-review-feedback.mjs
           node scripts/test-apify-instagram-reliability.mjs
+          node --test scripts/test-apify-discovery.mjs scripts/test-apify-food-discovery.mjs
           node scripts/test-instagram-max-coverage.mjs
           node scripts/test-instagram-media-budget.mjs
           node scripts/test-meta-token-health.mjs
