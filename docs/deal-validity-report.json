@@ -1,20 +1,20 @@
 {
-  "generatedAt": "2026-10-22T05:25:18.375Z",
+  "generatedAt": "2026-10-22T05:26:50.345Z",
   "summary": {
     "maxAgeDays": 7,
-    "total": 299,
-    "allowed": 1,
+    "total": 298,
+    "allowed": 0,
     "blocked": 298,
-    "warnings": 1,
+    "warnings": 0,
     "reasonCounts": {
-      "kein konkretes Angebot erkennbar": 217,
+      "kein konkretes Angebot erkennbar": 220,
       "älter als 7 Tage (2026-02-22)": 82,
       "URL ungültig (fehlende Ziel-URL)": 2,
       "älter als 7 Tage (2017-04-20)": 1,
       "älter als 7 Tage (2026-09-14)": 1,
       "Gottesdienste nur im Wochenlauf": 33,
       "älter als 7 Tage (2025-07-30)": 1,
-      "URL ungültig (HTTP 404)": 7,
+      "URL ungültig (HTTP 404)": 10,
       "redaktioneller Mehrfach-Roundup statt eindeutigem Einzelangebot": 1,
       "älter als 7 Tage (2025-11-09)": 1,
       "URL ungültig (HTTP 410)": 2,
@@ -56,9 +56,9 @@
       "ausgeschlossene Quelle (gastro.news)": 20
     },
     "reasonCategoryCounts": {
-      "kein konkreter Deal": 218,
+      "kein konkreter Deal": 221,
       "älter als 7 Tage": 145,
-      "ungültige URL": 17,
+      "ungültige URL": 20,
       "Gottesdienste außerhalb Wochenlauf": 33,
       "sonstiges": 9,
       "abgelaufen": 13,
@@ -119,10 +119,10 @@
         "blocked": 32,
         "warnings": 0,
         "reasonCategoryCounts": {
-          "kein konkreter Deal": 30,
+          "kein konkreter Deal": 31,
           "Gottesdienste außerhalb Wochenlauf": 32,
           "älter als 7 Tage": 31,
-          "ungültige URL": 1,
+          "ungültige URL": 2,
           "sonstiges": 1
         }
       },
@@ -174,9 +174,9 @@
         "blocked": 97,
         "warnings": 0,
         "reasonCategoryCounts": {
-          "kein konkreter Deal": 92,
+          "kein konkreter Deal": 94,
           "älter als 7 Tage": 95,
-          "ungültige URL": 5,
+          "ungültige URL": 7,
           "Gottesdienste außerhalb Wochenlauf": 1,
           "sonstiges": 2,
           "nicht Wien": 1
@@ -239,35 +239,10 @@
         "reasonCategoryCounts": {
           "kein konkreter Deal": 1
         }
-      },
-      "Wien Deals Combined Graph": {
-        "total": 1,
-        "allowed": 1,
-        "blocked": 0,
-        "warnings": 1,
-        "reasonCategoryCounts": {}
       }
     }
   },
-  "allowed": [
-    {
-      "id": "meta-ig-18118469035962410",
-      "title": "50% o del 100%",
-      "brand": "Benvenutiavienna",
-      "source": "Wien Deals Combined Graph",
-      "url": "https://www.instagram.com/p/DeyF3NOiOMn/",
-      "reasons": [],
-      "warnings": [
-        "Inhalt prüfen: Caption-Reste oder Emoji-Codes im sichtbaren Text"
-      ],
-      "sourceDate": "2026-10-22T04:09:46.000Z",
-      "sourceDateSource": "url.instagramShortcode",
-      "sourceAgeDays": 0,
-      "expiryDate": "2026-10-25T05:16:52.783Z",
-      "expirySource": "deal.structured",
-      "urlStatus": "HTTP 200"
-    }
-  ],
+  "allowed": [],
   "blocked": [
     {
       "id": "events-0-20260222",
@@ -1161,16 +1136,19 @@
       "source": "Freikirchen Wien",
       "url": "https://www.fcgwien.at",
       "reasons": [
+        "kein konkretes Angebot erkennbar",
         "Gottesdienste nur im Wochenlauf",
         "älter als 7 Tage (2026-04-19)"
       ],
-      "warnings": [],
+      "warnings": [
+        "URL nicht eindeutig prüfbar (HTTP 403)"
+      ],
       "sourceDate": "2026-04-19T08:59:47.145Z",
       "sourceDateSource": "deal.pubDate",
       "sourceAgeDays": 186,
       "expiryDate": "",
       "expirySource": "deal.expires",
-      "urlStatus": "HTTP 200"
+      "urlStatus": "unklar: HTTP 403"
     },
     {
       "id": "freikirche-4-20260419",
@@ -1219,6 +1197,7 @@
       "source": "Freikirchen Wien",
       "url": "https://www.baptisten.at/wien",
       "reasons": [
+        "URL ungültig (HTTP 404)",
         "kein konkretes Angebot erkennbar",
         "Gottesdienste nur im Wochenlauf",
         "älter als 7 Tage (2026-04-19)"
@@ -1229,7 +1208,7 @@
       "sourceAgeDays": 186,
       "expiryDate": "",
       "expirySource": "deal.expires",
-      "urlStatus": "HTTP 200"
+      "urlStatus": "ungültig: HTTP 404"
     },
     {
       "id": "freikirche-7-20260419",
@@ -2259,6 +2238,7 @@
       "source": "Kirchen Verzeichnis",
       "url": "https://www.baptisten.at/wien",
       "reasons": [
+        "URL ungültig (HTTP 404)",
         "kein konkretes Angebot erkennbar",
         "älter als 7 Tage (2026-02-22)"
       ],
@@ -2268,7 +2248,7 @@
       "sourceAgeDays": 242,
       "expiryDate": "",
       "expirySource": "deal.expires",
-      "urlStatus": "HTTP 200"
+      "urlStatus": "ungültig: HTTP 404"
     },
     {
       "id": "gemeinde-9-20260222",
@@ -2277,15 +2257,18 @@
       "source": "Kirchen Verzeichnis",
       "url": "https://www.fcgwien.at",
       "reasons": [
+        "kein konkretes Angebot erkennbar",
         "älter als 7 Tage (2026-02-22)"
       ],
-      "warnings": [],
+      "warnings": [
+        "URL nicht eindeutig prüfbar (HTTP 403)"
+      ],
       "sourceDate": "2026-02-22T21:12:35.964Z",
       "sourceDateSource": "deal.pubDate",
       "sourceAgeDays": 242,
       "expiryDate": "",
       "expirySource": "deal.expires",
-      "urlStatus": "HTTP 200"
+      "urlStatus": "unklar: HTTP 403"
     },
     {
       "id": "gemeinde-10-20260222",
@@ -3055,6 +3038,7 @@
       "source": "Kirchen Verzeichnis",
       "url": "https://www.baptisten.at/wien",
       "reasons": [
+        "URL ungültig (HTTP 404)",
         "kein konkretes Angebot erkennbar",
         "älter als 7 Tage (2026-02-22)"
       ],
@@ -3064,7 +3048,7 @@
       "sourceAgeDays": 242,
       "expiryDate": "",
       "expirySource": "deal.expires",
-      "urlStatus": "HTTP 200"
+      "urlStatus": "ungültig: HTTP 404"
     },
     {
       "id": "gottesdienste-17-20260222",
@@ -3073,15 +3057,18 @@
       "source": "Kirchen Verzeichnis",
       "url": "https://www.fcgwien.at",
       "reasons": [
+        "kein konkretes Angebot erkennbar",
         "älter als 7 Tage (2026-02-22)"
       ],
-      "warnings": [],
+      "warnings": [
+        "URL nicht eindeutig prüfbar (HTTP 403)"
+      ],
       "sourceDate": "2026-02-22T21:12:35.964Z",
       "sourceDateSource": "deal.pubDate",
       "sourceAgeDays": 242,
       "expiryDate": "",
       "expirySource": "deal.expires",
-      "urlStatus": "HTTP 200"
+      "urlStatus": "unklar: HTTP 403"
     },
     {
       "id": "gottesdienste-18-20260222",
