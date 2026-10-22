@@ -1,7 +1,7 @@
 {
-  "runId": "39851542283",
+  "runId": "39854690150",
   "mode": "scan",
-  "createdAt": "2026-10-22T20:45:23.751Z",
+  "createdAt": "2026-10-22T21:07:56.278Z",
   "usage": {
     "scrapingbee": {
       "provider": "scrapingbee",
@@ -43,20 +43,531 @@
       "planFields": []
     }
   },
-  "tasks": [],
-  "skipped": [
+  "tasks": [
+    {
+      "source": "Cafe Hummel",
+      "url": "https://cafehummel.at/",
+      "provider": "scrapingbee",
+      "cap": 5
+    },
+    {
+      "source": "IKEA Food",
+      "url": "https://www.ikea.com/at/de/food/",
+      "provider": "zyte",
+      "cap": 0.02
+    },
+    {
+      "source": "IKEA Food",
+      "url": "https://www.ikea.com/at/de/food/salesareas/restaurant/",
+      "provider": "scraperapi",
+      "cap": 10
+    },
+    {
+      "source": "IKEA Food",
+      "url": "https://www.ikea.com/at/de/food/salesareas/swedish-food-market/",
+      "provider": "scrapingbee",
+      "cap": 5
+    },
+    {
+      "source": "IKEA Food",
+      "url": "https://www.ikea.com/at/de/food/salesareas/bistro/",
+      "provider": "zyte",
+      "cap": 0.02
+    },
+    {
+      "source": "IKEA Food",
+      "url": "https://www.ikea.com/at/de/food/salesareas/swedish-cafe/",
+      "provider": "scraperapi",
+      "cap": 10
+    },
+    {
+      "source": "Ströck",
+      "url": "https://stroeck.at/",
+      "provider": "scrapingbee",
+      "cap": 5
+    },
+    {
+      "source": "Der Mann",
+      "url": "https://www.dermann.at/",
+      "provider": "zyte",
+      "cap": 0.02
+    },
+    {
+      "source": "Der Mann",
+      "url": "https://l.dermann.at/rabattmarkerl/",
+      "provider": "scraperapi",
+      "cap": 10
+    },
+    {
+      "source": "Der Mann",
+      "url": "https://www.dermann.at/aktion/pro-juventute-erdbeertorte/",
+      "provider": "scrapingbee",
+      "cap": 5
+    },
+    {
+      "source": "ANKER",
+      "url": "https://www.ankerbrot.at/aktionen",
+      "provider": "zyte",
+      "cap": 0.02
+    },
+    {
+      "source": "Bäckerei Schwarz",
+      "url": "https://www.bswien.at/aktionen",
+      "provider": "scraperapi",
+      "cap": 10
+    },
+    {
+      "source": "NORDSEE",
+      "url": "https://www.nordsee.com/at/coupons",
+      "provider": "scrapingbee",
+      "cap": 5
+    },
+    {
+      "source": "McDonald's",
+      "url": "https://www.mcdonalds.at/mymcdonalds",
+      "provider": "zyte",
+      "cap": 0.02
+    },
+    {
+      "source": "BackWerk",
+      "url": "https://www.back-werk.at/de/home/",
+      "provider": "scraperapi",
+      "cap": 10
+    },
+    {
+      "source": "BackWerk",
+      "url": "https://www.back-werk.at/de/news/",
+      "provider": "scrapingbee",
+      "cap": 5
+    },
+    {
+      "source": "BackWerk",
+      "url": "https://www.back-werk.at/de/news/es-ist-snackbox-zeit-2618?lang=de",
+      "provider": "zyte",
+      "cap": 0.02
+    },
+    {
+      "source": "BackWerk",
+      "url": "https://www.back-werk.at/de/news/fairtrade-kaffee-586?lang=de",
+      "provider": "scraperapi",
+      "cap": 10
+    },
+    {
+      "source": "BackWerk",
+      "url": "https://www.back-werk.at/de/news/heiss-herzhaft-2485?lang=de",
+      "provider": "scrapingbee",
+      "cap": 5
+    }
+  ],
+  "skipped": [],
+  "eligiblePages": 19,
+  "finishedAt": "2026-10-22T21:09:12.138Z",
+  "status": "partial",
+  "results": [
     {
       "provider": "scrapingbee",
-      "reason": "scrapingbee-local-trial-cap"
+      "source": "Cafe Hummel",
+      "url": "https://cafehummel.at/",
+      "reserved": 5,
+      "status": "direct-sufficient",
+      "directCandidates": 1,
+      "verifiedCandidates": 1,
+      "verifiedIncrementalCandidates": 0,
+      "unverifiedCandidates": 0,
+      "candidates": [
+        {
+          "id": "power-food-59969e313103",
+          "title": "Early Hummel Aktion Montag bis Freitag von 08:00 bis 09:00 Uhr kostet jeder Kaffee nur €2,50.",
+          "confirmed": true,
+          "reason": ""
+        }
+      ]
     },
     {
       "provider": "zyte",
-      "reason": "zyte-local-trial-cap"
+      "source": "IKEA Food",
+      "url": "https://www.ikea.com/at/de/food/",
+      "reserved": 0.02,
+      "status": "direct-sufficient",
+      "directCandidates": 2,
+      "verifiedCandidates": 2,
+      "verifiedIncrementalCandidates": 0,
+      "unverifiedCandidates": 0,
+      "candidates": [
+        {
+          "id": "power-food-6d190fdfafde",
+          "title": "Fish & Chips Menü um €12,99*",
+          "confirmed": true,
+          "reason": ""
+        },
+        {
+          "id": "power-food-f5cf8903aaf1",
+          "title": "Kindermenü mit MÅLA um €3,99*",
+          "confirmed": true,
+          "reason": ""
+        }
+      ]
     },
     {
       "provider": "scraperapi",
-      "reason": "scraperapi-local-credit-cap"
+      "source": "IKEA Food",
+      "url": "https://www.ikea.com/at/de/food/salesareas/restaurant/",
+      "reserved": 10,
+      "status": "failed",
+      "reason": "provider-http-403",
+      "httpStatus": 403,
+      "retryAt": "2026-10-25T21:07:58.932Z"
+    },
+    {
+      "provider": "scrapingbee",
+      "source": "IKEA Food",
+      "url": "https://www.ikea.com/at/de/food/salesareas/swedish-food-market/",
+      "reserved": 5,
+      "status": "source-paused"
+    },
+    {
+      "provider": "zyte",
+      "source": "IKEA Food",
+      "url": "https://www.ikea.com/at/de/food/salesareas/bistro/",
+      "reserved": 0.02,
+      "status": "source-paused"
+    },
+    {
+      "provider": "scraperapi",
+      "source": "IKEA Food",
+      "url": "https://www.ikea.com/at/de/food/salesareas/swedish-cafe/",
+      "reserved": 10,
+      "status": "source-paused"
+    },
+    {
+      "provider": "scrapingbee",
+      "source": "Ströck",
+      "url": "https://stroeck.at/",
+      "reserved": 5,
+      "status": "direct-sufficient",
+      "directCandidates": 8,
+      "verifiedCandidates": 8,
+      "verifiedIncrementalCandidates": 0,
+      "unverifiedCandidates": 0,
+      "candidates": [
+        {
+          "id": "power-food-c97cdff95f8d",
+          "title": "Dachsteinbrot 750 g um nur € 3,20",
+          "confirmed": true,
+          "reason": ""
+        },
+        {
+          "id": "power-food-97327359c25c",
+          "title": "Baguette ab 2 Stück um € 2,30 pro Stück",
+          "confirmed": true,
+          "reason": ""
+        },
+        {
+          "id": "power-food-5414617d3f01",
+          "title": "Bio-Wiederbaguette ab 2 Stück um € 2,80 pro Stück",
+          "confirmed": true,
+          "reason": ""
+        },
+        {
+          "id": "power-food-ff66b215cdf5",
+          "title": "Bäckerjause Laugenkipferl gefüllt + Topfengolatsche + Römerquelle Emotion Marille-Holunderblüte (0,5 l PET) um € 7,75 (ausgenommen Sonn- & Feiertage)",
+          "confirmed": true,
+          "reason": ""
+        },
+        {
+          "id": "power-food-70b73ee60213",
+          "title": "Kaffeejause Schokocroissant + kleines Heißgetränk um € 5,60 (ausgenommen Sonn- & Feiertage)",
+          "confirmed": true,
+          "reason": ""
+        },
+        {
+          "id": "power-food-f2d9746f9d39",
+          "title": "Kaffeejause Zwetschken Eck + kleines Heißgetränk um € 5,60 (ausgenommen Sonn- & Feiertage)",
+          "confirmed": true,
+          "reason": ""
+        },
+        {
+          "id": "power-food-4b30e3969a97",
+          "title": "Bio-Dinkelbrot 500 g um nur € 2,95",
+          "confirmed": true,
+          "reason": ""
+        },
+        {
+          "id": "power-food-551e0fbcadc4",
+          "title": "Bio-Frankenbrot 750 g um nur € 2,95",
+          "confirmed": true,
+          "reason": ""
+        }
+      ]
+    },
+    {
+      "provider": "zyte",
+      "source": "Der Mann",
+      "url": "https://www.dermann.at/",
+      "reserved": 0.02,
+      "status": "fetched",
+      "bytes": 117677,
+      "visibleTextCharacters": 1958,
+      "reportedCredits": null,
+      "directCandidates": 0,
+      "extractedCandidates": 0,
+      "incrementalCandidates": 0,
+      "offerLinks": [
+        "https://www.dermann.at/aktion/pro-juventute-erdbeertorte/"
+      ],
+      "rejected": [],
+      "verifiedCandidates": 0,
+      "verifiedIncrementalCandidates": 0,
+      "unverifiedCandidates": 0,
+      "candidates": []
+    },
+    {
+      "provider": "scraperapi",
+      "source": "Der Mann",
+      "url": "https://l.dermann.at/rabattmarkerl/",
+      "reserved": 10,
+      "status": "budget-stopped",
+      "reason": "provider-paused"
+    },
+    {
+      "provider": "scrapingbee",
+      "source": "Der Mann",
+      "url": "https://www.dermann.at/aktion/pro-juventute-erdbeertorte/",
+      "reserved": 5,
+      "status": "fetched",
+      "bytes": 97217,
+      "visibleTextCharacters": 656,
+      "reportedCredits": 5,
+      "directCandidates": 0,
+      "extractedCandidates": 0,
+      "incrementalCandidates": 0,
+      "offerLinks": [],
+      "rejected": [],
+      "verifiedCandidates": 0,
+      "verifiedIncrementalCandidates": 0,
+      "unverifiedCandidates": 0,
+      "candidates": []
+    },
+    {
+      "provider": "zyte",
+      "source": "ANKER",
+      "url": "https://www.ankerbrot.at/aktionen",
+      "reserved": 0.02,
+      "status": "direct-sufficient",
+      "directCandidates": 2,
+      "verifiedCandidates": 2,
+      "verifiedIncrementalCandidates": 0,
+      "unverifiedCandidates": 0,
+      "candidates": [
+        {
+          "id": "power-food-49c40a1ec22d",
+          "title": "Jetzt probieren: Minis XXL 5+1 gratis!",
+          "confirmed": true,
+          "reason": ""
+        },
+        {
+          "id": "power-food-9ef8a6a99ba5",
+          "title": "Im Aktionszeitraum gibt es den Brettljausen-Spitz oder den Fernweh-Spitz zum Probierpreis um € 3,00.",
+          "confirmed": true,
+          "reason": ""
+        }
+      ]
+    },
+    {
+      "provider": "scraperapi",
+      "source": "Bäckerei Schwarz",
+      "url": "https://www.bswien.at/aktionen",
+      "reserved": 10,
+      "status": "direct-sufficient",
+      "directCandidates": 4,
+      "verifiedCandidates": 4,
+      "verifiedIncrementalCandidates": 0,
+      "unverifiedCandidates": 0,
+      "candidates": [
+        {
+          "id": "power-food-326fbaac542f",
+          "title": "Bäckersemmel Aktion 8 Maschinsemmeln nur € 4,00 Bei unserer Bäckersemmel-Aktion* können Sie ab einem Kauf von mindestens 8 Bäckersemmeln, pro Stück 19c sparen.",
+          "confirmed": true,
+          "reason": ""
+        },
+        {
+          "id": "power-food-18b3d86d8172",
+          "title": "Baguette Aktion - 3+1 Gratis Perfekt für jeden Anlass!",
+          "confirmed": true,
+          "reason": ""
+        },
+        {
+          "id": "power-food-f89853780076",
+          "title": "Kaiserjause - Kaffee und Kuchen Wöchentlich wechselnde Spezialitäten aus unserer Backstube und Konditorei bekommen Sie zum Sonderpreis von € 5,90.",
+          "confirmed": true,
+          "reason": ""
+        },
+        {
+          "id": "power-food-bb450a338762",
+          "title": "Topfini Aktion Die kleinen, fluffigen Topfini sind besonders bei den Kindern sehr beliebt.",
+          "confirmed": true,
+          "reason": ""
+        }
+      ]
+    },
+    {
+      "provider": "scrapingbee",
+      "source": "NORDSEE",
+      "url": "https://www.nordsee.com/at/coupons",
+      "reserved": 5,
+      "status": "fetched",
+      "bytes": 47766,
+      "visibleTextCharacters": 782,
+      "reportedCredits": 5,
+      "directCandidates": 0,
+      "extractedCandidates": 0,
+      "incrementalCandidates": 0,
+      "offerLinks": [],
+      "rejected": [],
+      "verifiedCandidates": 0,
+      "verifiedIncrementalCandidates": 0,
+      "unverifiedCandidates": 0,
+      "candidates": []
+    },
+    {
+      "provider": "zyte",
+      "source": "McDonald's",
+      "url": "https://www.mcdonalds.at/mymcdonalds",
+      "reserved": 0.02,
+      "status": "fetched",
+      "bytes": 1447915,
+      "visibleTextCharacters": 3607,
+      "reportedCredits": null,
+      "directCandidates": 0,
+      "extractedCandidates": 0,
+      "incrementalCandidates": 0,
+      "offerLinks": [],
+      "rejected": [
+        {
+          "reason": "not-food-drink",
+          "title": "My McDonalds",
+          "text": "My McDonalds Belohnt jeden Besuch! Als MyMcDonald’s Mitglied sammelst du Ms, die du ganz einfach gegen heißgeliebte Klassiker, saftige Prämien oder freshen Merch einlösen kannst. Deal?"
+        },
+        {
+          "reason": "not-food-drink",
+          "title": "So einfach geht's:",
+          "text": "So einfach geht's:"
+        },
+        {
+          "reason": "Gewinnspiel/Verlosung statt direkt nutzbarem Deal",
+          "title": "Sammle Ms und hole dir Big Mac, Pommes, Merch & Co gratis*!",
+          "text": "Sammle Ms und hole dir Big Mac, Pommes, Merch & Co gratis*! * Nähere Infos findest du in den App-AGB. Gratis bedeutet, dass die Produkte ohne Zuzahlung eines Geldbetrages, nur durch Einlösung von Punkten bezogen werden k"
+        }
+      ],
+      "verifiedCandidates": 0,
+      "verifiedIncrementalCandidates": 0,
+      "unverifiedCandidates": 0,
+      "candidates": []
+    },
+    {
+      "provider": "scraperapi",
+      "source": "BackWerk",
+      "url": "https://www.back-werk.at/de/home/",
+      "reserved": 10,
+      "status": "budget-stopped",
+      "reason": "provider-paused"
+    },
+    {
+      "provider": "scrapingbee",
+      "source": "BackWerk",
+      "url": "https://www.back-werk.at/de/news/",
+      "reserved": 5,
+      "status": "fetched",
+      "bytes": 92210,
+      "visibleTextCharacters": 7502,
+      "reportedCredits": 5,
+      "directCandidates": 0,
+      "extractedCandidates": 0,
+      "incrementalCandidates": 0,
+      "offerLinks": [
+        "https://www.back-werk.at/de/news/index.php",
+        "https://www.back-werk.at/de/news/es-ist-snackbox-zeit-2618?lang=de",
+        "https://www.back-werk.at/de/news/heiss-herzhaft-2485?lang=de",
+        "https://www.back-werk.at/de/news/pane-2420?lang=de",
+        "https://www.back-werk.at/de/news/boules-3-neue-kostlichkeiten-1936?lang=de",
+        "https://back-werk.at/de/news/veganuary-1572?lang=de",
+        "https://www.back-werk.at/de/news/baguette-hot-sandwich-1569?lang=de",
+        "https://www.back-werk.at/de/news/neueroffnung-westfield-donau-zentrum-1568?lang=de",
+        "https://www.back-werk.at/de/news/borek-verbesserte-rezeptur-1567?lang=de",
+        "https://www.back-werk.at/de/news/zweiter-backwerk-store-in-salzburg-1564?lang=de",
+        "https://www.back-werk.at/de/news/jausenbrote-1565?lang=de",
+        "https://www.back-werk.at/de/news/hot-dogs-1563?lang=de",
+        "https://www.back-werk.at/de/news/gut-aufgelegt-1562?lang=de",
+        "https://www.back-werk.at/de/news/heissbegehrt-unsere-neuen-hot-sandwiches-599?lang=de",
+        "https://www.back-werk.at/de/news/einfach-kostlich-598?lang=de",
+        "https://www.back-werk.at/de/news/frischverliebt-erdbeerzeit-bei-backwerk-597?lang=de",
+        "https://www.back-werk.at/de/news/frischgegrillt-unsere-neuen-hot-sandwiches-596?lang=de",
+        "https://www.back-werk.at/de/news/frischbelegt-unsere-neuen-belegten-brotchen-589?lang=de",
+        "https://www.back-werk.at/de/news/unsere-neuen-belegten-brotchen-schon-probiert-587?lang=de",
+        "https://www.back-werk.at/de/news/fairtrade-kaffee-586?lang=de",
+        "https://www.back-werk.at/de/news/die-grosse-backwerk-kaffee-wiki-585?lang=de",
+        "https://www.back-werk.at/de/news/wichtige-tipps-fur-vegane-ernahrung-unterwegs-517?lang=de"
+      ],
+      "rejected": [],
+      "verifiedCandidates": 0,
+      "verifiedIncrementalCandidates": 0,
+      "unverifiedCandidates": 0,
+      "candidates": []
+    },
+    {
+      "provider": "zyte",
+      "source": "BackWerk",
+      "url": "https://www.back-werk.at/de/news/es-ist-snackbox-zeit-2618?lang=de",
+      "reserved": 0.02,
+      "status": "direct-sufficient",
+      "directCandidates": 1,
+      "verifiedCandidates": 1,
+      "verifiedIncrementalCandidates": 0,
+      "unverifiedCandidates": 0,
+      "candidates": [
+        {
+          "id": "power-food-6cf0daece239",
+          "title": "BackWerk: Angebot – Details ansehen",
+          "confirmed": true,
+          "reason": ""
+        }
+      ]
+    },
+    {
+      "provider": "scraperapi",
+      "source": "BackWerk",
+      "url": "https://www.back-werk.at/de/news/fairtrade-kaffee-586?lang=de",
+      "reserved": 10,
+      "status": "budget-stopped",
+      "reason": "provider-paused"
+    },
+    {
+      "provider": "scrapingbee",
+      "source": "BackWerk",
+      "url": "https://www.back-werk.at/de/news/heiss-herzhaft-2485?lang=de",
+      "reserved": 5,
+      "status": "fetched",
+      "bytes": 86448,
+      "visibleTextCharacters": 6587,
+      "reportedCredits": 5,
+      "directCandidates": 0,
+      "extractedCandidates": 0,
+      "incrementalCandidates": 0,
+      "offerLinks": [
+        "https://www.back-werk.at/de/news/",
+        "https://www.back-werk.at/de/news/detail.php"
+      ],
+      "rejected": [],
+      "verifiedCandidates": 0,
+      "verifiedIncrementalCandidates": 0,
+      "unverifiedCandidates": 0,
+      "candidates": []
     }
   ],
-  "status": "skipped"
+  "uniqueVerifiedCandidates": 18,
+  "alreadyKnown": 18,
+  "newPendingCandidates": 0,
+  "pendingCandidates": 0,
+  "slackMessagesSent": 0,
+  "note": "New pending candidates still require central Slack validation and human approval."
 }
