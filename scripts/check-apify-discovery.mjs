@@ -24,6 +24,11 @@ try {
           ownerUsername: row.ownerUsername, timestamp: row.timestamp,
           caption: String(row.caption || '').slice(0, 1800), locationName: row.locationName,
           errorCode: /^[a-zA-Z0-9_-]{1,100}$/.test(row.error || '') ? row.error : Boolean(row.error),
+          nestedPostsType: typeof row.posts, nestedPostsCount: Array.isArray(row.posts) ? row.posts.length : null,
+          nestedPosts: Array.isArray(row.posts) ? row.posts.slice(0, 2).map(p => typeof p === 'string' ? p : ({
+            keys: Object.keys(p || {}), url: p?.url, shortcode: p?.shortcode || p?.shortCode,
+            timestamp: p?.timestamp, caption: String(p?.caption || '').slice(0, 1000), ownerUsername: p?.ownerUsername,
+          })) : [],
         }));
       }
     }

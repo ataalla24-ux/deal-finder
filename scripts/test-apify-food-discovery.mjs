@@ -160,7 +160,8 @@ test('workflow separates secrets, persists reservation before start, keeps manua
   assert.match(workflow, /APIFY_2_DISCOVERY_ENABLED/);
   assert.match(workflow, /25 5,17 \* \* \*/);
   assert.doesNotMatch(workflow, /SLACK_BOT_TOKEN|OPENAI_API_KEY|SCRAPINGBEE/);
-  assert.match(fs.readFileSync('.github/workflows/daily-digest.yml', 'utf8'), /Apify 2 Vienna Food Discovery/);
+  assert.doesNotMatch(fs.readFileSync('.github/workflows/daily-digest.yml', 'utf8'), /Apify 2 Vienna Food Discovery/);
+  assert.match(fs.readFileSync('scraper/slack-notify.js', 'utf8'), /file\.startsWith\('deals-pending-'\)/);
 });
 test('health separates fresh accepted candidates from retained queue and source failures', () => {
   const health = pipelineHealthReport({ generatedAt: now.toISOString(), status: 'partial', fetchedRecords: 5,
