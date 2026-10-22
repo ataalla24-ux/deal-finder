@@ -1,12 +1,18 @@
 {
-  "generatedAt": "2026-10-22T04:50:51.150Z",
+  "generatedAt": "2026-10-22T05:19:50.030Z",
   "summary": {
     "filesConsidered": 30,
-    "totalCandidates": 748,
-    "uniqueCandidates": 669,
-    "distinctCandidates": 703,
+    "totalCandidates": 750,
+    "uniqueCandidates": 671,
+    "distinctCandidates": 705,
     "duplicateClusters": 34,
     "topHealthySources": [
+      {
+        "sourceKey": "wien-combined",
+        "sourceLabel": "Wien Deals Combined Graph",
+        "healthScore": 90,
+        "totalDeals": 2
+      },
       {
         "sourceKey": "tiktok",
         "sourceLabel": "TikTok Scanner",
@@ -30,15 +36,15 @@
         "sourceLabel": "Apify Instagram",
         "healthScore": 62,
         "totalDeals": 11
-      },
-      {
-        "sourceKey": "joe",
-        "sourceLabel": "jö Bonus Club",
-        "healthScore": 61,
-        "totalDeals": 10
       }
     ],
     "topMissionSources": [
+      {
+        "sourceKey": "wien-combined",
+        "sourceLabel": "Wien Deals Combined Graph",
+        "missionFitScore": 83,
+        "totalDeals": 2
+      },
       {
         "sourceKey": "instagram-ai",
         "sourceLabel": "Instagram AI Agent",
@@ -62,12 +68,6 @@
         "sourceLabel": "jö Bonus Club",
         "missionFitScore": 57,
         "totalDeals": 10
-      },
-      {
-        "sourceKey": "meta-instagram",
-        "sourceLabel": "Meta Instagram Graph",
-        "missionFitScore": 54,
-        "totalDeals": 122
       }
     ],
     "topCoverageSources": [
@@ -109,6 +109,12 @@
     ],
     "topPrecisionSources": [
       {
+        "sourceKey": "wien-combined",
+        "sourceLabel": "Wien Deals Combined Graph",
+        "precisionScore": 88,
+        "totalDeals": 2
+      },
+      {
         "sourceKey": "instagram-ai",
         "sourceLabel": "Instagram AI Agent",
         "precisionScore": 78,
@@ -131,15 +137,15 @@
         "sourceLabel": "Apify Instagram",
         "precisionScore": 61,
         "totalDeals": 11
-      },
-      {
-        "sourceKey": "community",
-        "sourceLabel": "Community Submission",
-        "precisionScore": 57,
-        "totalDeals": 22
       }
     ],
     "topWeightedSources": [
+      {
+        "sourceKey": "wien-combined",
+        "sourceLabel": "Wien Deals Combined Graph",
+        "sourceWeightScore": 72,
+        "totalDeals": 2
+      },
       {
         "sourceKey": "instagram-ai",
         "sourceLabel": "Instagram AI Agent",
@@ -163,12 +169,6 @@
         "sourceLabel": "Firecrawl Key 1 - Gastro",
         "sourceWeightScore": 52,
         "totalDeals": 133
-      },
-      {
-        "sourceKey": "instagram-apify",
-        "sourceLabel": "Apify Instagram",
-        "sourceWeightScore": 51,
-        "totalDeals": 11
       }
     ],
     "topSourcesToFix": [
@@ -238,6 +238,87 @@
     }
   },
   "sources": [
+    {
+      "sourceKey": "wien-combined",
+      "file": "deals-pending-wien-combined.json",
+      "sourceLabel": "Wien Deals Combined Graph",
+      "totalDeals": 2,
+      "uniqueDeals": 2,
+      "duplicateDeals": 0,
+      "duplicateAcrossSources": 0,
+      "fresh1dCount": 2,
+      "fresh7dCount": 2,
+      "viennaCount": 2,
+      "foodDrinkCount": 1,
+      "promoCount": 2,
+      "missingUrlCount": 0,
+      "sampleTitles": [
+        "Bei haikky.wien in Floridsdorf gibt’s aktuell All You Can Eat & Drink für 19,90 €.",
+        "50% o del 100%"
+      ],
+      "lastRun": {
+        "status": "completed-with-errors",
+        "startedAt": "2026-10-22T05:16:52.782Z",
+        "finishedAt": "2026-10-22T05:19:08.855Z",
+        "durationMs": 136073,
+        "counts": {
+          "rawCandidates": 51,
+          "normalizedCandidates": 2,
+          "verifiedCandidates": 2,
+          "previousDeals": 0,
+          "acceptedDeals": 2,
+          "rejectedDeals": 49
+        },
+        "rejectedByReason": {
+          "no-concrete-offer": 41,
+          "general-recommendation": 2,
+          "excluded-promotion-type": 2,
+          "non-vienna-location": 1,
+          "missing-text": 2,
+          "missing-vienna-evidence": 1
+        },
+        "errors": [
+          "#viennaeats: Meta Graph 400: HTTP 400",
+          "#wien: Instagram scan paused: request-budget"
+        ],
+        "reportFile": "deal-pipeline-last-run-wien-combined.json"
+      },
+      "uniqueRate": 1,
+      "duplicateRate": 0,
+      "fresh1dRate": 1,
+      "fresh7dRate": 1,
+      "viennaRate": 1,
+      "foodDrinkRate": 0.5,
+      "promoRate": 1,
+      "missingUrlRate": 0,
+      "averageQualityScore": 84.5,
+      "topCategories": [
+        {
+          "value": "essen",
+          "count": 1
+        },
+        {
+          "value": "shopping",
+          "count": 1
+        }
+      ],
+      "topTypes": [
+        {
+          "value": "gratis",
+          "count": 1
+        },
+        {
+          "value": "rabatt",
+          "count": 1
+        }
+      ],
+      "issues": [],
+      "healthScore": 90,
+      "missionFitScore": 83,
+      "coverageScore": 15,
+      "precisionScore": 88,
+      "sourceWeightScore": 72
+    },
     {
       "sourceKey": "tiktok",
       "file": "deals-pending-tiktok.json",
@@ -1988,63 +2069,6 @@
       "topCategories": [],
       "topTypes": [],
       "issues": [
-        "liefert aktuell 0 Deals"
-      ],
-      "healthScore": 0,
-      "missionFitScore": 0,
-      "coverageScore": 0,
-      "precisionScore": 0,
-      "sourceWeightScore": 0
-    },
-    {
-      "sourceKey": "wien-combined",
-      "file": "deals-pending-wien-combined.json",
-      "sourceLabel": "Wien Deals Combined Graph",
-      "totalDeals": 0,
-      "uniqueDeals": 0,
-      "duplicateDeals": 0,
-      "duplicateAcrossSources": 0,
-      "fresh1dCount": 0,
-      "fresh7dCount": 0,
-      "viennaCount": 0,
-      "foodDrinkCount": 0,
-      "promoCount": 0,
-      "missingUrlCount": 0,
-      "sampleTitles": [],
-      "lastRun": {
-        "status": "completed-with-errors",
-        "startedAt": "2026-10-21T21:57:03.870Z",
-        "finishedAt": "2026-10-21T21:57:29.506Z",
-        "durationMs": 25636,
-        "counts": {
-          "rawCandidates": 1,
-          "normalizedCandidates": 0,
-          "verifiedCandidates": 0,
-          "previousDeals": 0,
-          "acceptedDeals": 0,
-          "rejectedDeals": 1
-        },
-        "rejectedByReason": {
-          "no-concrete-offer": 1
-        },
-        "errors": [
-          "#vienna: Instagram shared quota paused: request or quota unavailable"
-        ],
-        "reportFile": "deal-pipeline-last-run-wien-combined.json"
-      },
-      "uniqueRate": 0,
-      "duplicateRate": 0,
-      "fresh1dRate": 0,
-      "fresh7dRate": 0,
-      "viennaRate": 0,
-      "foodDrinkRate": 0,
-      "promoRate": 0,
-      "missingUrlRate": 0,
-      "averageQualityScore": 0,
-      "topCategories": [],
-      "topTypes": [],
-      "issues": [
-        "letzter Lauf fand Kandidaten, aber akzeptierte keinen Deal",
         "liefert aktuell 0 Deals"
       ],
       "healthScore": 0,
