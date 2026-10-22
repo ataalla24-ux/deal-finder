@@ -43,6 +43,8 @@ jobs:
       - name: 📦 Install Dependencies
         run: npm ci
 
+      - uses: ./.github/actions/coupon-tools
+
       - name: Test immediate approval safeguards
         run: |
           SENTRY_DISABLED=1 node scripts/test-slack-fast-approval.mjs

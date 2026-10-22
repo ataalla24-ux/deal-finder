@@ -53,6 +53,8 @@ jobs:
       - name: Install Dependencies
         run: npm ci
 
+      - uses: ./.github/actions/coupon-tools
+
       - name: Refresh Instagram merchant registry
         run: npm run instagram:merchant-registry
 

@@ -1,0 +1,34 @@
+{
+  "scope": "Owner requested image/PDF offers and removal of exactly eight expired records, without additional costs",
+  "retirementCommit": "95ef8517d06c76fd652833d0771a72d38ae36f6b",
+  "retirement": {
+    "before": 64,
+    "after": 56,
+    "archive": "reviews/expired-owner-2026-10-23.json",
+    "manualEditsPreserved": true,
+    "datesExtended": false,
+    "productionFeedCi": 39862520493,
+    "productionFeedResult": "success",
+    "publicFeedVerified": "HTTP 200; none of the eight IDs present"
+  },
+  "media": {
+    "enabledSource": "NORDSEE Austria coupons, explicit layout opt-in",
+    "tools": ["Poppler pdfinfo/pdfimages", "Tesseract deu+eng", "FFmpeg/FFprobe"],
+    "paidOcrOrProviderCalls": 0,
+    "limits": {"assetBytes":8388608,"pdfPages":2,"couponImages":12,"imagePixels":6000000,"totalPdfImagePixels":24000000,"ocrBudgetSeconds":180,"childTimeoutSeconds":20},
+    "sourcePolicy": "Direct allowlisted official links only. No redirect/proxy retry after refusal. PDF preferred; at most six individual images when no PDF is linked.",
+    "verification": "Current page link plus a fresh download, re-extraction, exact coupon-byte hash and exact OCR-derived facts. PDF container hash retained for audit but not equality because the official endpoint regenerates CreationDate on every request.",
+    "publication": "Existing Slack manual approval remains required. No automatic public offers.",
+    "schedule": "Existing Power Scraper twice daily; no new schedule or API budget increase.",
+    "localRealPdf": {"cards":11,"eligible":4,"withheld":7},
+    "eligibleTitles": [
+      "Garnelen-Box normal: Mehr als 19 % Rabatt",
+      "2 Alaska-Seelachsfilets gebacken & Beilage: 1+1 gratis",
+      "2 Fish & Chips normal: Mehr als 22 % Rabatt",
+      "2 Backfisch-Baguettes Kalt oder heiss: 1+1 gratis"
+    ],
+    "limitsNotClaimed": ["Not a universal PDF layout parser", "Superscript prices are not guessed", "Illegible quantities/conditions remain withheld", "Participating Vienna branch requires review", "Production Slack receipt must be checked separately"]
+  },
+  "tests": "Ten new offline cases plus existing Power, source scheduling, food discovery, official verification, source-backed content, approval and provider-budget suites passed locally.",
+  "evidenceDirectory": "output/food-media-2026-10-23/"
+}

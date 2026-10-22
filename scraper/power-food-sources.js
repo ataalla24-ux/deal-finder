@@ -123,6 +123,7 @@ export const POWER_FOOD_SOURCES = [
   },
   {
     name: "NORDSEE",
+    couponMedia: 'nordsee-at-v1',
     url: "https://www.nordsee.com/at/coupons",
     category: "essen",
     allowedHosts: ["www.nordsee.com"],

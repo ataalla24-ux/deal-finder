@@ -4,6 +4,7 @@ import {
 } from "./power-food-extraction.js";
 import { isAllowedFoodUrl } from "./power-food-sources.js";
 import { sourceFailureFields } from "./source-http-policy.js";
+import { extractCouponMediaOffers } from './official-coupon-media.js';
 
 export async function crawlFoodSource(source, options) {
   const now = options.now || new Date();
@@ -43,13 +44,26 @@ export async function crawlFoodSource(source, options) {
       });
       candidates.push(...parsed.deals);
       rejected.push(...parsed.rejected);
+      const media = source.couponMedia ? await extractCouponMediaOffers(response.html,source,{
+        now, pageUrl:response.finalUrl || url,
+        ...(options.couponMedia || {}),
+      }) : null;
+      if (media) {
+        candidates.push(...media.deals);
+        rejected.push(...media.rejected);
+      }
+      const mediaFailed = media?.assets.filter(a=>a.status==='error') || [];
       pages.push({
         url,
         finalUrl: response.finalUrl || url,
-        status: "ok",
-        candidates: parsed.deals.length,
+        status: mediaFailed.length ? 'error' : 'ok',
+        candidates: parsed.deals.length + (media?.deals.length || 0),
         bytes: response.bytes || response.html.length,
+        ...(media ? {media:media.assets} : {}),
+        ...(mediaFailed.length ? {error:mediaFailed.map(a=>a.error).join('; '),
+          httpStatus:mediaFailed[0].httpStatus,retryAt:mediaFailed[0].retryAt} : {}),
       });
+      if (mediaFailed.some(a=>/HTTP (401|403|429)/.test(a.error))) break;
       for (const link of discoverFoodLinks(
         response.html,
         source,

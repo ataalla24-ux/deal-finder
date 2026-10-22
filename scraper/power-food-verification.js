@@ -2,6 +2,7 @@ import { load } from "cheerio";
 import { POWER_FOOD_SOURCES, isAllowedFoodUrl } from "./power-food-sources.js";
 import { extractFoodOffers } from "./power-food-extraction.js";
 import { sourceHttpError } from "./source-http-policy.js";
+import { extractCouponMediaOffers } from './official-coupon-media.js';
 
 export async function fetchOfficialFoodPage(url, source) {
   // Check every redirect before requesting it; a merchant must not redirect
@@ -65,10 +66,18 @@ export async function verifyOfficialFoodDeal(deal, options = {}) {
   const response = await cache.get(key);
   if (response.error) return { ok: false, reason: "source-unavailable" };
   const now = options.now || new Date();
-  const parsed = extractFoodOffers(response.html, source, {
+  let parsed = extractFoodOffers(response.html, source, {
     now,
     pageUrl: response.finalUrl || deal.url,
   });
+  if (deal.evidence?.media) {
+    const mediaKey = key + '|media|' + deal.evidence.media.url;
+    if (!cache.has(mediaKey)) cache.set(mediaKey, extractCouponMediaOffers(response.html,source,{
+      now, pageUrl:response.finalUrl || deal.url,assetUrl:deal.evidence.media.url,
+      ...(options.couponMedia || {}),
+    }));
+    parsed = await cache.get(mediaKey);
+  }
   // Re-extract from the current official page. A caller-supplied hash or
   // freshly stamped crawler date alone can never relax freshness checks.
   const match = parsed.deals.find(
@@ -76,7 +85,13 @@ export async function verifyOfficialFoodDeal(deal, options = {}) {
       d.description === deal.description &&
       d.title === deal.title &&
       d.brand === deal.brand &&
-      d.evidence.contentHash === deal.evidence?.contentHash,
+      d.evidence.contentHash === deal.evidence?.contentHash &&
+      (!deal.evidence?.media || /^[a-f0-9]{64}$/.test(deal.evidence.media.cardSha256 || '')
+        && d.evidence.media?.cardSha256 === deal.evidence.media.cardSha256
+        && d.evidence.media?.index === deal.evidence.media.index
+        // The generated PDF has a new CreationDate on every download. Compare
+        // the freshly extracted coupon bytes, not only its container metadata.
+        && (deal.evidence.media.kind === 'pdf' || d.evidence.media?.sha256 === deal.evidence.media.sha256)),
   );
   if (!match) return { ok: false, reason: "offer-not-on-current-page" };
   const timing = match.evidence.offerTiming;

@@ -1,0 +1,28 @@
+name: Free local coupon OCR tools
+description: Install open-source tools only when coupon evidence needs verification
+inputs:
+  force:
+    description: Collector always needs the tools
+    default: 'false'
+runs:
+  using: composite
+  steps:
+    - id: need
+      shell: bash
+      env:
+        FORCE_COUPON_TOOLS: ${{ inputs.force }}
+      run: |
+        node --input-type=module <<'NODE'
+        import fs from 'node:fs';
+        let needed = process.env.FORCE_COUPON_TOOLS === 'true';
+        for (const f of fs.readdirSync('docs').filter(f=>/^deals-pending.*\.json$/.test(f))) {
+          const b = JSON.parse(fs.readFileSync('docs/'+f,'utf8'));
+          if ((Array.isArray(b)?b:b.deals||[]).some(d=>d.evidence?.media)) needed = true;
+        }
+        fs.appendFileSync(process.env.GITHUB_OUTPUT,`needed=${needed}\n`);
+        NODE
+    - if: steps.need.outputs.needed == 'true'
+      shell: bash
+      run: |
+        sudo apt-get update -qq
+        sudo apt-get install -y --no-install-recommends ffmpeg poppler-utils tesseract-ocr tesseract-ocr-deu tesseract-ocr-eng

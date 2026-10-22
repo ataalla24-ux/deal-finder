@@ -2,6 +2,9 @@ name: Power Food Discovery Tests
 on:
   pull_request:
     paths:
+      - "scraper/official-coupon-media.js"
+      - "scripts/test-official-coupon-media.mjs"
+      - ".github/actions/coupon-tools/**"
       - "scraper/power-*.js"
       - "scraper/food-provider-*.js"
       - "scripts/test-food-provider-discovery.mjs"
@@ -29,6 +32,9 @@ on:
   push:
     branches: [main]
     paths:
+      - "scraper/official-coupon-media.js"
+      - "scripts/test-official-coupon-media.mjs"
+      - ".github/actions/coupon-tools/**"
       - "scraper/power-*.js"
       - "scraper/food-provider-*.js"
       - "scripts/test-food-provider-discovery.mjs"
@@ -78,6 +84,7 @@ jobs:
           node scripts/test-instagram-ai-agent.mjs
           node scripts/test-wien-deals-combined.mjs
           node scripts/test-power-food.mjs
+          node --test scripts/test-official-coupon-media.mjs
           node scripts/test-deal-validity-evidence.mjs
           node scripts/test-slack-approval-validation.mjs
           node scripts/test-source-backed-content.mjs

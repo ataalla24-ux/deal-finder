@@ -1114,6 +1114,7 @@ async function validateDeal(deal, context) {
   if (reviewedCommunity && deal.communityApprovalIssue) reasons.push(deal.communityApprovalIssue);
   if (officialFood && !officialFood.ok) reasons.push(`Offizielle Aktion nicht erneut bestätigt (${officialFood.reason})`);
   if (officialFood?.current) warnings.push('Aktueller Angebotsblock auf offizieller Anbieterseite erneut bestätigt; Abrufdatum ist kein Veröffentlichungsdatum');
+  if (officialFood?.ok && deal.evidence?.media) warnings.push('Lokale Coupon-OCR: Produkt, Mengen, Bedingungen und Wiener Filialteilnahme am verlinkten Original vor Freigabe prüfen; kein garantierter OCR-Preis');
 
   const graphBlockingReason = cleanText(deal.metaGraphBlockingReason);
   if (graphBlockingReason) {
