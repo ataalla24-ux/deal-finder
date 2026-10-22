@@ -56,6 +56,24 @@ expiry, daily/lifetime exhaustion, low balance, no paid options, distinct-source
 assignment, shared cooldowns, replay prevention and independent human-review
 queuing. Live activation/audit evidence is recorded separately after deployment.
 
+- Source 74fcdb0b110b39e162c72e1ecae302986058e8cd pushed nonforce, preserving
+  concurrent generated-feed changes. 21 provider tests and six relevant existing
+  suites passed locally; full Power Food CI 39851372924 succeeded.
+- Read-only audit 39851392794 succeeded: Bee 10/1000, ScraperAPI 20/5000 with
+  both overage switches OFF. Zyte key fingerprint obtained in Actions without
+  exporting the key; bound as the repository variable above.
+- Activated scan 39851542283 succeeded, confirmed trialKeyBound=true and correctly
+  skipped all three services because today's benchmark already reserved their
+  daily allowance. Zero additional scraped pages, candidates or Slack sends.
+- FOOD_PROVIDER_DISCOVERY_ENABLED remains true. The existing 07:45 UTC daily
+  schedule is unchanged. First expanded scheduled opportunity is October 23,
+  09:45 Vienna; DST later changes the local clock time, not the UTC schedule.
+- A local tomorrow-plan dry run selects six distinct pages with unchanged current
+  usage. This is NOT a live full-batch run or proof of future Slack delivery.
+- Evidence: root output/recurring-food-trials-2026-10-22/, downloaded before-binding
+  audit and activated-scan artifacts. No payment, plan upgrade, new key, customer
+  message, public-deal approval, native/Store/device/OS action or new automation.
+
 Official references checked October 22, 2026:
 - https://docs.zyte.com/zyte-api/pricing.html#spending-alerts-and-limits
 - https://docs.zyte.com/zyte-api/usage/stats/index.html

@@ -1,5 +1,9 @@
 # Supplemental food providers: bounded free-credit rollout
 
+Historical initial rollout below. The later owner-authorized recurring Bee/Zyte
+extension and provider-side blocking limit are documented in
+[Recurring food trials](2026-10-22-recurring-food-trials.md).
+
 ## Owner request
 
 Implement and test the supplied ScraperAPI, ScrapingBee and Zyte credentials to
