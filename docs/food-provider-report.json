@@ -1,13 +1,13 @@
 {
-  "runId": "39847658729",
-  "mode": "benchmark",
-  "createdAt": "2026-10-22T20:18:28.445Z",
+  "runId": "39848781475",
+  "mode": "scan",
+  "createdAt": "2026-10-22T20:26:08.992Z",
   "usage": {
     "scraperapi": {
       "provider": "scraperapi",
       "status": "authenticated",
       "maximum": 5000,
-      "used": 0,
+      "used": 20,
       "concurrency": 0,
       "payAsYouGoEnabled": false,
       "autoUpgradeEnabled": false,
@@ -27,177 +27,14 @@
         "nextBillingDate"
       ],
       "planFields": []
-    },
-    "scrapingbee": {
-      "provider": "scrapingbee",
-      "status": "authenticated",
-      "maximum": 1000,
-      "used": 0,
-      "concurrency": 0
-    },
-    "zyte": {
-      "provider": "zyte",
-      "credentialPresent": true,
-      "status": "dashboard-trial-check-required"
     }
   },
-  "tasks": [
+  "tasks": [],
+  "skipped": [
     {
       "provider": "scraperapi",
-      "source": "Burger King",
-      "cap": 10
-    },
-    {
-      "provider": "scraperapi",
-      "source": "KFC",
-      "cap": 10
-    },
-    {
-      "provider": "scrapingbee",
-      "source": "Burger King",
-      "cap": 5
-    },
-    {
-      "provider": "scrapingbee",
-      "source": "KFC",
-      "cap": 5
-    },
-    {
-      "provider": "zyte",
-      "source": "Burger King",
-      "cap": 0.05
-    },
-    {
-      "provider": "zyte",
-      "source": "KFC",
-      "cap": 0.05
+      "reason": "scraperapi-local-credit-cap"
     }
   ],
-  "skipped": [],
-  "finishedAt": "2026-10-22T20:19:48.596Z",
-  "status": "completed",
-  "results": [
-    {
-      "provider": "scraperapi",
-      "source": "Burger King",
-      "url": "https://www.burgerking.at/de/bkapp",
-      "reserved": 10,
-      "status": "fetched",
-      "bytes": 2164,
-      "visibleTextCharacters": 0,
-      "reportedCredits": 10,
-      "directCandidates": 0,
-      "extractedCandidates": 0,
-      "rejected": [],
-      "verifiedCandidates": 0,
-      "unverifiedCandidates": 0,
-      "candidates": []
-    },
-    {
-      "provider": "scraperapi",
-      "source": "KFC",
-      "url": "https://kfc.co.at/",
-      "reserved": 10,
-      "status": "fetched",
-      "bytes": 372487,
-      "visibleTextCharacters": 7791,
-      "reportedCredits": 10,
-      "directCandidates": 1,
-      "extractedCandidates": 1,
-      "rejected": [],
-      "verifiedCandidates": 1,
-      "unverifiedCandidates": 0,
-      "candidates": [
-        {
-          "id": "power-food-73cf88790a2d",
-          "title": "Unser Preiskracher: Crispy Cheese Burger mit Käse, Gurkerl und Ketchup um 1,70 Euro",
-          "confirmed": true,
-          "reason": ""
-        }
-      ]
-    },
-    {
-      "provider": "scrapingbee",
-      "source": "Burger King",
-      "url": "https://www.burgerking.at/de/bkapp",
-      "reserved": 5,
-      "status": "fetched",
-      "bytes": 2268,
-      "visibleTextCharacters": 0,
-      "reportedCredits": 5,
-      "directCandidates": 0,
-      "extractedCandidates": 0,
-      "rejected": [],
-      "verifiedCandidates": 0,
-      "unverifiedCandidates": 0,
-      "candidates": []
-    },
-    {
-      "provider": "scrapingbee",
-      "source": "KFC",
-      "url": "https://kfc.co.at/",
-      "reserved": 5,
-      "status": "fetched",
-      "bytes": 373384,
-      "visibleTextCharacters": 7630,
-      "reportedCredits": 5,
-      "directCandidates": 1,
-      "extractedCandidates": 1,
-      "rejected": [],
-      "verifiedCandidates": 1,
-      "unverifiedCandidates": 0,
-      "candidates": [
-        {
-          "id": "power-food-73cf88790a2d",
-          "title": "Unser Preiskracher: Crispy Cheese Burger mit Käse, Gurkerl und Ketchup um 1,70 Euro",
-          "confirmed": true,
-          "reason": ""
-        }
-      ]
-    },
-    {
-      "provider": "zyte",
-      "source": "Burger King",
-      "url": "https://www.burgerking.at/de/bkapp",
-      "reserved": 0.05,
-      "status": "fetched",
-      "bytes": 74053,
-      "visibleTextCharacters": 1236,
-      "reportedCredits": null,
-      "directCandidates": 0,
-      "extractedCandidates": 0,
-      "rejected": [],
-      "verifiedCandidates": 0,
-      "unverifiedCandidates": 0,
-      "candidates": []
-    },
-    {
-      "provider": "zyte",
-      "source": "KFC",
-      "url": "https://kfc.co.at/",
-      "reserved": 0.05,
-      "status": "fetched",
-      "bytes": 372694,
-      "visibleTextCharacters": 7791,
-      "reportedCredits": null,
-      "directCandidates": 1,
-      "extractedCandidates": 1,
-      "rejected": [],
-      "verifiedCandidates": 1,
-      "unverifiedCandidates": 0,
-      "candidates": [
-        {
-          "id": "power-food-73cf88790a2d",
-          "title": "Unser Preiskracher: Crispy Cheese Burger mit Käse, Gurkerl und Ketchup um 1,70 Euro",
-          "confirmed": true,
-          "reason": ""
-        }
-      ]
-    }
-  ],
-  "uniqueVerifiedCandidates": 1,
-  "alreadyKnown": 1,
-  "newPendingCandidates": 0,
-  "slackMessagesSent": 0,
-  "note": "New pending candidates still require central Slack validation and human approval."
+  "status": "skipped"
 }
