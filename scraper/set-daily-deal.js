@@ -11,9 +11,12 @@ import { fileURLToPath } from 'url';
 import { cleanText, extractDealsFromThreadMessages, extractSlackMessageText } from './slack-digest-utils.js';
 import { normalizeDealRecord } from './deal-normalization-utils.js';
 import { inspectDealUrlHealth } from './expiry-utils.js';
+import { cachedSourceReview, loadSourceReviewCache, rememberSourceReview, reviewClockContext,
+    reviewFingerprint, saveSourceReviewCache } from './source-review-cache.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
+const REVIEW_CACHE_PATH = path.join(__dirname, '..', 'docs', 'source-review-cache.json');
 
 const SLACK_BOT_TOKEN = process.env.SLACK_BOT_TOKEN || '';
 const SLACK_CHANNEL_ID = process.env.SLACK_CHANNEL_ID || '';
@@ -466,7 +469,7 @@ async function reviewWeeklyDealActiveWithLLM(deal, options = {}) {
     let evidence = null;
     if (/^https?:\/\//i.test(url)) {
         try {
-            evidence = compactFeaturedEvidence(await inspectDealUrlHealth(url, { timeoutMs: FEATURED_TARGET_TIMEOUT_MS }));
+            evidence = compactFeaturedEvidence(await (options.inspectUrl || inspectDealUrlHealth)(url, { timeoutMs: FEATURED_TARGET_TIMEOUT_MS }));
         } catch (error) {
             evidence = {
                 invalid: false,
@@ -499,8 +502,22 @@ async function reviewWeeklyDealActiveWithLLM(deal, options = {}) {
         };
     }
 
+    const cache = options.cache || loadSourceReviewCache(REVIEW_CACHE_PATH);
+    const cacheable = evidence?.status >= 200 && evidence.status < 300 && !evidence.invalid
+        && !evidence.transientError && !evidence.blockedByProtection
+        && Boolean(evidence.pageTitle || evidence.pageHeading || evidence.textSnippet);
+    const cacheKey = reviewFingerprint({ kind: 'weekly-active', model: FEATURED_LLM_MODEL,
+        policy: reviewWeeklyDealActiveWithLLM.toString(), threshold: FEATURED_WEEKLY_LLM_MIN_CONFIDENCE,
+        deal: normalized, evidence, day: getViennaDayKey(now), clock: reviewClockContext({ deal: normalized, evidence }, now) });
+    const validate = value => value?.decision === 'active' && value.allowed === true
+        && Number.isFinite(value.confidence) && value.confidence >= FEATURED_WEEKLY_LLM_MIN_CONFIDENCE
+        && typeof value.reason === 'string';
+    const cached = cacheable ? cachedSourceReview(cache, cacheKey, { now, maxAgeMs: 6 * 3600000, validate }) : null;
+    if (cached) return { ...cached.result, evidence, cacheHit: true,
+        reusedAt: now.toISOString(), reviewedAt: cached.reviewedAt };
+
     try {
-        const response = await fetch('https://api.openai.com/v1/chat/completions', {
+        const response = await (options.request || fetch)('https://api.openai.com/v1/chat/completions', {
             method: 'POST',
             headers: {
                 'content-type': 'application/json',
@@ -571,7 +588,7 @@ async function reviewWeeklyDealActiveWithLLM(deal, options = {}) {
         const decision = cleanText(parsed.decision || '').toLowerCase();
         const confidence = Math.max(0, Math.min(1, Number(parsed.confidence) || 0));
         const allowed = decision === 'active' && confidence >= FEATURED_WEEKLY_LLM_MIN_CONFIDENCE;
-        return {
+        const result = {
             ...resultBase,
             decision,
             confidence,
@@ -579,6 +596,11 @@ async function reviewWeeklyDealActiveWithLLM(deal, options = {}) {
             evidence,
             allowed,
         };
+        if (cacheable && validate(result)) {
+            rememberSourceReview(cache, cacheKey, result, now);
+            if (!options.cache) saveSourceReviewCache(REVIEW_CACHE_PATH, cache, now);
+        }
+        return { ...result, cacheHit: false };
     } catch (error) {
         return {
             ...resultBase,
@@ -615,7 +637,7 @@ async function getFeaturedDealEligibility(deal, kind = 'daily', options = {}) {
         };
     }
 
-    const llmActiveCheck = await reviewWeeklyDealActiveWithLLM(normalized, { now });
+    const llmActiveCheck = await reviewWeeklyDealActiveWithLLM(normalized, { ...options, now });
     return {
         eligible: Boolean(llmActiveCheck.allowed),
         reason: llmActiveCheck.allowed ? 'weekly_food_or_drink_llm_active' : 'weekly_llm_not_active',

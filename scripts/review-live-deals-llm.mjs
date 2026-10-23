@@ -4,6 +4,8 @@ import { fileURLToPath } from 'node:url';
 
 import { inspectDealUrlHealth } from '../scraper/expiry-utils.js';
 import { sanitizeLlmProposedPatch } from './live-deal-llm-patch-utils.mjs';
+import { cachedSourceReview, loadSourceReviewCache, rememberSourceReview, reviewClockContext,
+  reviewFingerprint, saveSourceReviewCache } from '../scraper/source-review-cache.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -11,6 +13,7 @@ const ROOT = path.resolve(__dirname, '..');
 const DOCS_DIR = path.join(ROOT, 'docs');
 const DEALS_PATH = path.join(DOCS_DIR, 'deals.json');
 const REPORT_PATH = path.join(DOCS_DIR, 'live-deal-llm-review.json');
+const CACHE_PATH = path.join(DOCS_DIR, 'source-review-cache.json');
 
 const MODEL = cleanText(process.env.DEAL_REVIEW_MODEL || process.env.OPENAI_MODEL || 'gpt-4.1-mini');
 const MAX_DEALS = numberEnv('DEAL_REVIEW_MAX_DEALS', 160);
@@ -566,7 +569,7 @@ function shouldRemove(review) {
     && review.confidence >= MIN_REMOVE_CONFIDENCE;
 }
 
-async function classifyChunk(deals, referenceDate) {
+async function requestLiveDealChunk(deals, referenceDate) {
   const response = await fetch('https://api.openai.com/v1/chat/completions', {
     method: 'POST',
     headers: {
@@ -703,6 +706,62 @@ async function classifyChunk(deals, referenceDate) {
   };
 }
 
+function completeReviews(value, deals) {
+  const ids = new Set(deals.map(deal => deal.id));
+  const rows = value?.reviews;
+  return Array.isArray(rows) && rows.length === ids.size
+    && new Set(rows.map(row => row?.dealID)).size === ids.size
+    && rows.every(row => ids.has(row?.dealID)
+      && ['keep', 'flag', 'remove'].includes(row.decision)
+      && [...AUTO_REMOVE_REASONS, 'ok', 'weak_evidence', 'wrong_category', 'unclear'].includes(row.reason)
+      && Number.isFinite(row.confidence) && row.confidence >= 0 && row.confidence <= 1
+      && typeof row.message === 'string' && typeof row.suggestion === 'string'
+      && row.proposedPatch && !Array.isArray(row.proposedPatch) && typeof row.proposedPatch === 'object'
+      && Object.values(row.proposedPatch).every(value => typeof value === 'string'));
+}
+
+// Preserve each original comparison group; a changed member invalidates that
+// group's decisions rather than silently dropping duplicate/context checks.
+export async function reviewLiveDealBatches(compactDeals, { cache, originals = compactDeals,
+  now = new Date(), model = MODEL, chunkSize = CHUNK_SIZE, classify = requestLiveDealChunk } = {}) {
+  const store = cache || { version: 1, entries: {} };
+  const originalById = new Map(originals.map(deal => [deal.id, deal]));
+  const reviews = [];
+  const errors = [];
+  const usage = { prompt_tokens: 0, completion_tokens: 0, total_tokens: 0 };
+  const stats = { aiCalls: 0, aiReviewedDeals: 0, cachedDeals: 0, cachedGroups: 0, uncachedIncompleteGroups: 0,
+    maxReviewAgeHours: 72, requiresMatchingInputEvidence: true, reusedReviews: [] };
+  for (const chunk of chunked(compactDeals, chunkSize)) {
+    const originalGroup = chunk.map(deal => originalById.get(deal.id));
+    const key = reviewFingerprint({ kind: 'live-review-group', model, policy: requestLiveDealChunk.toString(),
+      minConfidence: MIN_REMOVE_CONFIDENCE, reasons: [...AUTO_REMOVE_REASONS],
+      input: chunk, originals: originalGroup, clock: reviewClockContext({ chunk, originalGroup }, now) });
+    const cached = cachedSourceReview(store, key, { now, validate: value => completeReviews(value, chunk) });
+    if (cached) {
+      reviews.push(...cached.result.reviews);
+      stats.cachedDeals += chunk.length;
+      stats.cachedGroups += 1;
+      stats.reusedReviews.push({ dealIDs: chunk.map(deal => deal.id), reviewedAt: cached.reviewedAt });
+      continue;
+    }
+    try {
+      stats.aiCalls += 1;
+      stats.aiReviewedDeals += chunk.length;
+      const result = await classify(chunk, now.toISOString());
+      reviews.push(...(Array.isArray(result.parsed?.reviews) ? result.parsed.reviews : []));
+      for (const field of Object.keys(usage)) usage[field] += Number(result.usage?.[field] || 0);
+      if (completeReviews(result.parsed, chunk)) rememberSourceReview(store, key, result.parsed, now);
+      else {
+        stats.uncachedIncompleteGroups += 1;
+        errors.push(`Incomplete or invalid AI review group: ${chunk.map(deal => deal.id).join(', ')}`);
+      }
+    } catch (error) {
+      errors.push(cleanText(error?.message || error, 500));
+    }
+  }
+  return { reviews, usage, errors, stats, cache: store };
+}
+
 async function writeJson(filePath, value) {
   await writeFile(filePath, `${JSON.stringify(value, null, 2)}\n`);
 }
@@ -719,31 +778,22 @@ async function main() {
     return compactDeal(deal, targetEvidence.byDealId.get(dealID));
   });
   const errors = [];
-  const reviews = [];
-  const usage = {
-    prompt_tokens: 0,
-    completion_tokens: 0,
-    total_tokens: 0,
-  };
+  let reviews = [];
+  let usage = { prompt_tokens: 0, completion_tokens: 0, total_tokens: 0 };
+  let reviewCache = { aiCalls: 0, aiReviewedDeals: 0, cachedDeals: 0, cachedGroups: 0 };
 
   if (!process.env.OPENAI_API_KEY) {
     errors.push('OPENAI_API_KEY fehlt, LLM-Review uebersprungen.');
   } else if (!compactDeals.length) {
     errors.push('Keine Deals im Live-Feed gefunden.');
   } else {
-    for (const chunk of chunked(compactDeals, CHUNK_SIZE)) {
-      try {
-        const result = await classifyChunk(chunk, generatedAt);
-        reviews.push(...normalizeReviews(result.parsed?.reviews, dealById));
-        if (result.usage) {
-          usage.prompt_tokens += Number(result.usage.prompt_tokens || 0);
-          usage.completion_tokens += Number(result.usage.completion_tokens || 0);
-          usage.total_tokens += Number(result.usage.total_tokens || 0);
-        }
-      } catch (error) {
-        errors.push(cleanText(error?.message || error, 500));
-      }
-    }
+    const result = await reviewLiveDealBatches(compactDeals, { cache: loadSourceReviewCache(CACHE_PATH),
+      originals: selectedDeals, now: new Date(generatedAt) });
+    reviews = normalizeReviews(result.reviews, dealById);
+    usage = result.usage;
+    errors.push(...result.errors);
+    reviewCache = result.stats;
+    saveSourceReviewCache(CACHE_PATH, result.cache, new Date(generatedAt));
   }
 
   const policyResult = applyPolicyOverrides(reviews, dealById, targetEvidence.byDealId);
@@ -852,6 +902,8 @@ async function main() {
     targetEvidenceErrors: targetEvidence.errors.slice(0, 50),
     errors,
     usage,
+    reviewCache,
+    freshTargetEvidenceChecks: targetEvidence.summary.checkedDeals,
     patchSanitization: {
       rawFieldCount: rawPatchFieldCount,
       acceptedFieldCount: acceptedPatchFieldCount,
@@ -872,7 +924,7 @@ async function main() {
   }
 
   await writeJson(REPORT_PATH, report);
-  console.log(`LLM live deal review: ${reviews.length} reviewed, ${APPLY ? removedDeals.length : 0} removed, ${APPLY ? 0 : removedDeals.length} would remove, ${errors.length} errors.`);
+  console.log(`LLM live deal review: ${reviewCache.aiReviewedDeals} newly reviewed, ${reviewCache.cachedDeals} reused, ${APPLY ? removedDeals.length : 0} removed, ${APPLY ? 0 : removedDeals.length} would remove, ${errors.length} errors.`);
 }
 
 if (process.argv[1] && path.resolve(process.argv[1]) === __filename) {

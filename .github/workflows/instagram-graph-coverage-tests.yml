@@ -5,6 +5,10 @@ on:
     branches: [main]
     paths:
       - 'scraper/**'
+      - 'scripts/review-live-deals-llm.mjs'
+      - 'scripts/test-source-review-cache.mjs'
+      - '.github/workflows/daily-deal-pick.yml'
+      - '.github/workflows/validate-live-deals.yml'
       - 'scripts/test-apify*'
       - '.github/workflows/apify-discovery.yml'
       - 'scripts/test-slack-food-improvements.mjs'
@@ -25,6 +29,10 @@ on:
   pull_request:
     paths:
       - 'scraper/**'
+      - 'scripts/review-live-deals-llm.mjs'
+      - 'scripts/test-source-review-cache.mjs'
+      - '.github/workflows/daily-deal-pick.yml'
+      - '.github/workflows/validate-live-deals.yml'
       - 'scripts/test-apify*'
       - '.github/workflows/apify-discovery.yml'
       - 'scripts/test-instagram-graph*.mjs'
@@ -69,6 +77,7 @@ jobs:
       - run: npm ci
       - name: Test pagination and both collector integrations without network credentials
         run: |
+          node --test scripts/test-source-review-cache.mjs
           node scripts/test-slack-food-improvements.mjs
           node scripts/test-deal-evidence.mjs
           node scripts/test-slack-deal-quality.mjs

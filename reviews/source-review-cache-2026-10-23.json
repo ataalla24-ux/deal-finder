@@ -1,0 +1,34 @@
+{
+  "date": "2026-10-23",
+  "request": "Reduce redundant weekly featured and daily live-feed OpenAI reviews without changing budgets or evidence policy.",
+  "credentialAuthorization": "Owner explicitly approved reusing the existing GitHub OpenAI key with unchanged limits. No plaintext key retrieved.",
+  "weekly": {
+    "reuseHours": 6,
+    "sameViennaDay": true,
+    "positiveActiveResultOnly": true,
+    "freshReadableSourceEvidenceRequired": true
+  },
+  "daily": {
+    "reuseHoursMaximum": 72,
+    "originalComparisonGroupPreserved": true,
+    "matchingFullOriginalInputAndFreshCompactSourceEvidenceRequired": true,
+    "modelAndPolicyInvalidation": true,
+    "timeBoundariesAndPublicationAgeInvalidate": true,
+    "relativeUndatedOrUncertainEvidenceDailyRecheck": true,
+    "currentPolicyOverridesAndPatchSanitizationRerun": true
+  },
+  "storage": "Bounded shared versioned public review cache, serialized existing writers; no credentials or customer records.",
+  "reports": "New AI calls and tokens are separate from reused results; original review timestamps retained.",
+  "localVerification": [
+    "7 offline cache tests passed, including corrupt cache, fresh evidence, changed terms, expiry, errors, six-hour and 72-hour limits",
+    "Featured selection passed",
+    "Live LLM policy and proposed-patch safety passed",
+    "Feed contract, production feed and generated-state merge passed"
+  ],
+  "limitations": [
+    "No real API calls or manual production review runs forced for proof.",
+    "First natural cache warmup and actual billing savings not yet observed.",
+    "Volatile or blocked source evidence and changed comparison groups may reduce cache hit rate. No fixed saving or identical future model output promised."
+  ],
+  "unchanged": ["API model and monetary limits", "scraper schedules", "paid title editor shutdown", "human publication approval", "native apps and Store binaries", "customer messaging and consents"]
+}
