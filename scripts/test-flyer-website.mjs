@@ -22,6 +22,12 @@ assert.match($('.eligibility').text(), /berechtigte Neukunden/);
 assert.match($('details').text(), /24 Stunden/);
 assert.doesNotMatch(html, /current-ios\/deals-home|Testangebot in der App öffnen/);
 assert.doesNotMatch(code, /fetch\(|localStorage|sessionStorage|setTimeout|location\.search|document\.cookie/);
+for (const file of ['flyer-food-20261023-portrait.webp', 'flyer-food-20261023-wide.webp']) {
+  const image = fs.readFileSync(new URL(`../docs/assets/campaigns/${file}`, import.meta.url));
+  assert.equal(image.toString('ascii', 8, 12), 'WEBP');
+  assert.ok(image.length < 300000, 'lightweight background, not the multi-megabyte original');
+  assert.ok(html.includes(file));
+}
 const cases = [
   ['iPhone', 'Mozilla/5.0 (iPhone; CPU iPhone OS 18_0 like Mac OS X)', 'iPhone', 5, apple],
   ['iPad', 'Mozilla/5.0 (iPad; CPU OS 18_0 like Mac OS X)', 'iPad', 5, apple],
