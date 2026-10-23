@@ -45,7 +45,8 @@ try {
   fs.mkdirSync(seedDir, { recursive: true });
   run('git', ['init', '--initial-branch=main'], seedDir);
   writeQueue(seedDir, [{ id: 'approved-old', slackTs: '100.1', title: 'Old queue row' }], '2026-08-22T09:00:00.000Z');
-  run('git', ['add', 'docs/deals-pending-all.json'], seedDir);
+  fs.writeFileSync(path.join(seedDir, 'docs/vienna-food-benefit-pause.json'), '{"retryAt":""}\n');
+  run('git', ['add', 'docs/deals-pending-all.json', 'docs/vienna-food-benefit-pause.json'], seedDir);
   run('git', ['commit', '-m', 'seed queue'], seedDir);
   fs.mkdirSync(remoteDir, { recursive: true });
   run('git', ['init', '--bare'], remoteDir);
@@ -57,7 +58,8 @@ try {
 
   // A concurrent approval removes the old row and another source adds a row.
   writeQueue(concurrentDir, [{ id: 'remote-new', slackTs: '200.1', title: 'Remote deal' }], '2026-08-22T10:00:00.000Z');
-  run('git', ['add', 'docs/deals-pending-all.json'], concurrentDir);
+  fs.writeFileSync(path.join(concurrentDir, 'docs/vienna-food-benefit-pause.json'), '{"retryAt":"2026-11-10T00:00:00Z"}\n');
+  run('git', ['add', 'docs/deals-pending-all.json', 'docs/vienna-food-benefit-pause.json'], concurrentDir);
   run('git', ['commit', '-m', 'approve old and add remote'], concurrentDir);
   run('git', ['push', 'origin', 'main'], concurrentDir);
 
@@ -67,6 +69,7 @@ try {
     { id: 'approved-old', slackTs: '100.1', title: 'Old queue row' },
     { id: 'local-new', slackTs: '300.1', title: 'Local deal' },
   ], '2026-08-22T11:00:00.000Z');
+  fs.writeFileSync(path.join(localDir, 'docs/vienna-food-benefit-pause.json'), '{"retryAt":"2026-10-24T00:00:00Z"}\n');
   run(process.execPath, [
     SCRIPT_PATH,
     '--skip-conflicts',
@@ -78,21 +81,25 @@ try {
     'main',
     '--files',
     'docs/deals-pending-all.json',
+    'docs/vienna-food-benefit-pause.json',
   ], localDir);
 
   run('git', ['clone', '--branch', 'main', remoteDir, verifyDir], tempDir);
   const payload = JSON.parse(fs.readFileSync(path.join(verifyDir, 'docs/deals-pending-all.json'), 'utf8'));
   assert.deepEqual(payload.deals.map((deal) => deal.id).sort(), ['local-new', 'remote-new']);
   assert.equal(payload.totalDeals, 2);
+  assert.equal(JSON.parse(fs.readFileSync(path.join(verifyDir, 'docs/vienna-food-benefit-pause.json'))).retryAt, '2026-11-10T00:00:00Z');
 
   // A source-owned collector may intentionally replace its own generated file
   // even if a verifier enriched the previous version while the collector ran.
   writeQueue(verifyDir, [{ id: 'remote-verification', title: 'Concurrent verifier output' }], '2026-08-22T12:00:00.000Z');
-  run('git', ['add', 'docs/deals-pending-all.json'], verifyDir);
+  fs.writeFileSync(path.join(verifyDir, 'docs/vienna-food-benefit-pause.json'), '{"retryAt":"2026-11-12T00:00:00Z"}\n');
+  run('git', ['add', 'docs/deals-pending-all.json', 'docs/vienna-food-benefit-pause.json'], verifyDir);
   run('git', ['commit', '-m', 'concurrent verifier output'], verifyDir);
   run('git', ['push', 'origin', 'main'], verifyDir);
 
   writeQueue(localDir, [{ id: 'source-owned', title: 'Fresh collector output' }], '2026-08-22T13:00:00.000Z');
+  fs.writeFileSync(path.join(localDir, 'docs/vienna-food-benefit-pause.json'), '{"retryAt":"2026-11-11T00:00:00Z"}\n');
   run(process.execPath, [
     SCRIPT_PATH,
     '--replace-conflicts',
@@ -104,12 +111,14 @@ try {
     'main',
     '--files',
     'docs/deals-pending-all.json',
+    'docs/vienna-food-benefit-pause.json',
   ], localDir);
 
   run('git', ['clone', '--branch', 'main', remoteDir, replaceVerifyDir], tempDir);
   const replacedPayload = JSON.parse(fs.readFileSync(path.join(replaceVerifyDir, 'docs/deals-pending-all.json'), 'utf8'));
   assert.deepEqual(replacedPayload.deals.map((deal) => deal.id), ['source-owned']);
   assert.equal(replacedPayload.totalDeals, 1);
+  assert.equal(JSON.parse(fs.readFileSync(path.join(replaceVerifyDir, 'docs/vienna-food-benefit-pause.json'))).retryAt, '2026-11-12T00:00:00Z', 'replace mode must not shorten a source pause');
 } finally {
   fs.rmSync(tempDir, { recursive: true, force: true });
 }

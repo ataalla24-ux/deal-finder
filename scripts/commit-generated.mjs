@@ -364,6 +364,14 @@ function mergeKnownGeneratedJson(state, ref, baseRef) {
     return null;
   }
 
+  if (state.path === 'docs/vienna-food-benefit-pause.json') {
+    const localAt = localPayload.retryAt ? Date.parse(localPayload.retryAt) : 0;
+    const remoteAt = remotePayload.retryAt ? Date.parse(remotePayload.retryAt) : 0;
+    if (!Number.isFinite(localAt) || !Number.isFinite(remoteAt)) return null;
+    const payload = localAt >= remoteAt ? localPayload : remotePayload;
+    return { ...state, content: Buffer.from(`${JSON.stringify(payload, null, 2)}\n`) };
+  }
+
   if (state.path === 'docs/deals-pending-all.json') {
     const baseDeals = Array.isArray(basePayload?.deals) ? basePayload.deals : [];
     const remoteDeals = Array.isArray(remotePayload?.deals) ? remotePayload.deals : [];
@@ -415,6 +423,14 @@ function resolveSameFileRemoteChanges(states, baseRef, headRef, options = {}) {
   for (const state of states) {
     const changedRemotely = pathChangedBetween(baseRef, headRef, state.path);
     if (changedRemotely && !capturedMatchesRemote(state, headRef)) {
+      if (state.path === 'docs/vienna-food-benefit-pause.json') {
+        const mergedState = mergeKnownGeneratedJson(state, headRef, baseRef);
+        if (mergedState) {
+          safeStates.push(mergedState);
+          mergedFiles.push(state.path);
+        } else conflicts.push(state.path);
+        continue;
+      }
       if (options.replaceConflicts) {
         safeStates.push(state);
         replacedFiles.push(state.path);

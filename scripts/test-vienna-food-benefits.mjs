@@ -1,6 +1,9 @@
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
-import { isViennaBenefitUrl, parseViennaBenefitListing, parseViennaFoodBenefit, collectViennaFoodBenefits, verifyViennaFoodBenefit, fetchViennaBenefitPage } from '../scraper/vienna-food-benefits.js';
+import fs from 'node:fs';
+import os from 'node:os';
+import path from 'node:path';
+import { isViennaBenefitUrl, parseViennaBenefitListing, parseViennaFoodBenefit, collectViennaFoodBenefits, verifyViennaFoodBenefit, fetchViennaBenefitPage, readViennaFoodPause, recordViennaFoodPause } from '../scraper/vienna-food-benefits.js';
 import { validateDealsForSlack } from '../scraper/deal-validity-agent.js';
 
 const url='https://vorteilsclub.wien.at/meine-vorteile/pizzeria-test';
@@ -59,9 +62,20 @@ test('collector keeps cap, counts rejected entries and stops on denial without p
   assert.equal(bounded.deals.length,2);assert.equal(bounded.report.limited,true);assert.ok(bounded.report.requests<=96);
 });
 test('HTTP wrapper rejects redirect, large bodies and records Retry-After',async()=>{
-  const opts={sleep:async()=>{}};
+  let pause;
+  const opts={sleep:async()=>{},recordPause:error=>{pause=error.retryAt;}};
   await assert.rejects(fetchViennaBenefitPage(url,{...opts,fetchImpl:async()=>new Response('',{status:302,headers:{location:'https://evil.test/'}})}),/HTTP 302/);
   await assert.rejects(fetchViennaBenefitPage(url,{...opts,fetchImpl:async()=>new Response('x'.repeat(2500001),{headers:{'content-type':'text/html'}})}),/HTML limit/);
   await assert.rejects(fetchViennaBenefitPage(url,{...opts,fetchImpl:async()=>new Response('',{status:429,headers:{'retry-after':'172800'}})}),error=>error.httpStatus===429&&Date.parse(error.retryAt)>Date.now()+86400000);
+  assert.ok(Date.parse(pause)>Date.now()+86400000);
   await assert.rejects(fetchViennaBenefitPage(url,{...opts,fetchImpl:async()=>{throw new Error('must not fetch');}}),/cooldown/);
+});
+test('source pause survives another reader and cannot be shortened or silently ignored',()=>{
+  const dir=fs.mkdtempSync(path.join(os.tmpdir(),'vienna-benefit-pause-'));const file=path.join(dir,'pause.json');
+  try {
+    recordViennaFoodPause({httpStatus:429,retryAt:'2026-11-10T00:00:00Z'},file);
+    recordViennaFoodPause({httpStatus:403,retryAt:'2026-10-24T00:00:00Z'},file);
+    assert.equal(readViennaFoodPause(file),Date.parse('2026-11-10T00:00:00Z'));
+    fs.writeFileSync(file,'{"retryAt":"invalid"}');assert.throws(()=>readViennaFoodPause(file),/Invalid benefit source pause/);
+  } finally {fs.rmSync(dir,{recursive:true,force:true});}
 });

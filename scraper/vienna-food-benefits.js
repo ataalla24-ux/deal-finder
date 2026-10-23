@@ -1,6 +1,6 @@
 import { load } from 'cheerio';
 import { createHash } from 'node:crypto';
-import { readFileSync } from 'node:fs';
+import { readFileSync, writeFileSync } from 'node:fs';
 import { discoveryRejection } from './deal-discovery-policy.js';
 import { extractFoodExpiry } from './power-food-extraction.js';
 import { sourceHttpError, sourceFailureFields } from './source-http-policy.js';
@@ -84,6 +84,23 @@ export function parseViennaFoodBenefit(html, url, { now = new Date() } = {}) {
 // One polite direct-request lane, also shared by concurrent Slack verification.
 let nextRequest = Promise.resolve();
 let blockedUntil = 0;
+const PAUSE_PATH = new URL('../docs/vienna-food-benefit-pause.json', import.meta.url);
+export function readViennaFoodPause(file = PAUSE_PATH) {
+  try {
+    const {retryAt} = JSON.parse(readFileSync(file));
+    if (!retryAt) return 0;
+    if (typeof retryAt !== 'string') throw new Error('Invalid benefit source pause');
+    const parsed = Date.parse(retryAt);
+    if (!Number.isFinite(parsed)) throw new Error('Invalid benefit source pause');
+    return parsed;
+  } catch(error) { if(error.code==='ENOENT') return 0; throw error; }
+}
+export function recordViennaFoodPause(error, file = PAUSE_PATH) {
+  const retryAt = Date.parse(error.retryAt);
+  if (!Number.isFinite(retryAt)) throw new Error('Missing benefit source pause');
+  if (readViennaFoodPause(file) >= retryAt) return;
+  writeFileSync(file, JSON.stringify({retryAt:new Date(retryAt).toISOString(),httpStatus:error.httpStatus || 0,checkedAt:new Date().toISOString()},null,2)+'\n');
+}
 function savedCooldown() {
   try {
     const value = JSON.parse(readFileSync(new URL('../docs/deals-pending-member-benefits.json', import.meta.url))).viennaFoodReport?.retryAt;
@@ -96,10 +113,10 @@ function savedCooldown() {
     throw error;
   }
 }
-export function fetchViennaBenefitPage(url, { sleep = ms => new Promise(r => setTimeout(r,ms)), fetchImpl = fetch } = {}) {
+export function fetchViennaBenefitPage(url, { sleep = ms => new Promise(r => setTimeout(r,ms)), fetchImpl = fetch, recordPause = recordViennaFoodPause } = {}) {
   if (!isViennaBenefitUrl(url) && !isViennaBenefitUrl(url,false)) return Promise.reject(new Error('Untrusted benefit URL'));
   const request = nextRequest.catch(() => {}).then(async () => {
-    const pause = Math.max(blockedUntil, savedCooldown());
+    const pause = Math.max(blockedUntil, savedCooldown(), readViennaFoodPause());
     if (pause > Date.now()) throw Object.assign(new Error('Benefit source cooldown'), { retryAt:new Date(pause).toISOString() });
     await sleep(650);
     const response = await fetchImpl(url,{ redirect:'manual', signal:AbortSignal.timeout(10000), headers:{ 'user-agent':'FreeFinder/1.0 (+https://freefinder.at)', 'accept-language':'de-AT,de;q=0.9' } });
@@ -109,6 +126,7 @@ export function fetchViennaBenefitPage(url, { sleep = ms => new Promise(r => set
       if ([401,403,429].includes(response.status) || error.retryAt) {
         blockedUntil = Math.max(Date.now()+86400000,Date.parse(error.retryAt)||0);
         error.retryAt = new Date(blockedUntil).toISOString();
+        recordPause(error);
       }
       throw error;
     }
