@@ -1,12 +1,18 @@
 {
-  "generatedAt": "2026-10-23T20:21:21.144Z",
+  "generatedAt": "2026-10-23T21:23:53.742Z",
   "summary": {
     "filesConsidered": 32,
-    "totalCandidates": 838,
-    "uniqueCandidates": 760,
-    "distinctCandidates": 795,
+    "totalCandidates": 841,
+    "uniqueCandidates": 763,
+    "distinctCandidates": 798,
     "duplicateClusters": 35,
     "topHealthySources": [
+      {
+        "sourceKey": "instagram-apify2",
+        "sourceLabel": "Apify 2 Vienna Food Discovery",
+        "healthScore": 100,
+        "totalDeals": 1
+      },
       {
         "sourceKey": "wien-combined",
         "sourceLabel": "Wien Deals Combined Graph",
@@ -30,15 +36,15 @@
         "sourceLabel": "Instagram AI Agent",
         "healthScore": 72,
         "totalDeals": 50
-      },
-      {
-        "sourceKey": "meta-instagram",
-        "sourceLabel": "Meta Instagram Graph",
-        "healthScore": 67,
-        "totalDeals": 119
       }
     ],
     "topMissionSources": [
+      {
+        "sourceKey": "instagram-apify2",
+        "sourceLabel": "Apify 2 Vienna Food Discovery",
+        "missionFitScore": 100,
+        "totalDeals": 1
+      },
       {
         "sourceKey": "wien-combined",
         "sourceLabel": "Wien Deals Combined Graph",
@@ -62,12 +68,6 @@
         "sourceLabel": "Instagram AI Agent",
         "missionFitScore": 68,
         "totalDeals": 50
-      },
-      {
-        "sourceKey": "instagram-apify",
-        "sourceLabel": "Apify Instagram",
-        "missionFitScore": 66,
-        "totalDeals": 6
       }
     ],
     "topCoverageSources": [
@@ -81,9 +81,9 @@
       {
         "sourceKey": "meta-instagram",
         "sourceLabel": "Meta Instagram Graph",
-        "coverageScore": 76,
-        "totalDeals": 119,
-        "fresh1dCount": 11
+        "coverageScore": 80,
+        "totalDeals": 121,
+        "fresh1dCount": 13
       },
       {
         "sourceKey": "gastro2",
@@ -109,6 +109,12 @@
     ],
     "topPrecisionSources": [
       {
+        "sourceKey": "instagram-apify2",
+        "sourceLabel": "Apify 2 Vienna Food Discovery",
+        "precisionScore": 100,
+        "totalDeals": 1
+      },
+      {
         "sourceKey": "wien-combined",
         "sourceLabel": "Wien Deals Combined Graph",
         "precisionScore": 84,
@@ -131,15 +137,15 @@
         "sourceLabel": "TikTok Scanner",
         "precisionScore": 77,
         "totalDeals": 13
-      },
-      {
-        "sourceKey": "member-benefits",
-        "sourceLabel": "Member Benefits",
-        "precisionScore": 74,
-        "totalDeals": 109
       }
     ],
     "topWeightedSources": [
+      {
+        "sourceKey": "instagram-apify2",
+        "sourceLabel": "Apify 2 Vienna Food Discovery",
+        "sourceWeightScore": 83,
+        "totalDeals": 1
+      },
       {
         "sourceKey": "member-benefits",
         "sourceLabel": "Member Benefits",
@@ -153,22 +159,16 @@
         "totalDeals": 2
       },
       {
+        "sourceKey": "meta-instagram",
+        "sourceLabel": "Meta Instagram Graph",
+        "sourceWeightScore": 67,
+        "totalDeals": 121
+      },
+      {
         "sourceKey": "instagram-ai",
         "sourceLabel": "Instagram AI Agent",
         "sourceWeightScore": 66,
         "totalDeals": 50
-      },
-      {
-        "sourceKey": "meta-instagram",
-        "sourceLabel": "Meta Instagram Graph",
-        "sourceWeightScore": 64,
-        "totalDeals": 119
-      },
-      {
-        "sourceKey": "firecrawl5",
-        "sourceLabel": "Firecrawl Key 5 - Instagram Gastro",
-        "sourceWeightScore": 62,
-        "totalDeals": 1
       }
     ],
     "topSourcesToFix": [
@@ -200,16 +200,6 @@
         "sampleTitles": []
       },
       {
-        "sourceKey": "instagram-apify2",
-        "sourceLabel": "Apify 2 Vienna Food Discovery",
-        "healthScore": 0,
-        "issues": [
-          "letzter Lauf fand Kandidaten, aber akzeptierte keinen Deal",
-          "liefert aktuell 0 Deals"
-        ],
-        "sampleTitles": []
-      },
-      {
         "sourceKey": "instagram-discovery",
         "sourceLabel": "Daily Sync Instagram Discovery",
         "healthScore": 0,
@@ -221,6 +211,15 @@
       {
         "sourceKey": "instagram-web",
         "sourceLabel": "Daily Sync Instagram Web",
+        "healthScore": 0,
+        "issues": [
+          "liefert aktuell 0 Deals"
+        ],
+        "sampleTitles": []
+      },
+      {
+        "sourceKey": "telegram",
+        "sourceLabel": "telegram",
         "healthScore": 0,
         "issues": [
           "liefert aktuell 0 Deals"
@@ -241,6 +240,74 @@
     }
   },
   "sources": [
+    {
+      "sourceKey": "instagram-apify2",
+      "file": "deals-pending-instagram-apify2.json",
+      "sourceLabel": "Apify 2 Vienna Food Discovery",
+      "totalDeals": 1,
+      "uniqueDeals": 1,
+      "duplicateDeals": 0,
+      "duplicateAcrossSources": 0,
+      "fresh1dCount": 1,
+      "fresh7dCount": 1,
+      "viennaCount": 1,
+      "foodDrinkCount": 1,
+      "promoCount": 1,
+      "missingUrlCount": 0,
+      "sampleTitles": [
+        "GRATIS DÖNER"
+      ],
+      "lastRun": {
+        "status": "completed-with-errors",
+        "startedAt": "2026-10-23T20:33:33.433Z",
+        "finishedAt": "2026-10-23T20:35:22.344Z",
+        "durationMs": 108911,
+        "counts": {
+          "rawCandidates": 26,
+          "normalizedCandidates": 15,
+          "verifiedCandidates": 0,
+          "previousDeals": 0,
+          "acceptedDeals": 1,
+          "rejectedDeals": 14
+        },
+        "rejectedByReason": {
+          "non-vienna-offer-text": 1,
+          "no-consumer-food-benefit": 3,
+          "post-older-than-seven-days": 2,
+          "alcohol-offer": 1,
+          "non-food-ad": 7
+        },
+        "errors": [],
+        "reportFile": "deal-pipeline-last-run-instagram-apify2.json"
+      },
+      "uniqueRate": 1,
+      "duplicateRate": 0,
+      "fresh1dRate": 1,
+      "fresh7dRate": 1,
+      "viennaRate": 1,
+      "foodDrinkRate": 1,
+      "promoRate": 1,
+      "missingUrlRate": 0,
+      "averageQualityScore": 85,
+      "topCategories": [
+        {
+          "value": "essen",
+          "count": 1
+        }
+      ],
+      "topTypes": [
+        {
+          "value": "gewinnspiel",
+          "count": 1
+        }
+      ],
+      "issues": [],
+      "healthScore": 100,
+      "missionFitScore": 100,
+      "coverageScore": 16,
+      "precisionScore": 100,
+      "sourceWeightScore": 83
+    },
     {
       "sourceKey": "wien-combined",
       "file": "deals-pending-wien-combined.json",
@@ -531,20 +598,20 @@
       "sourceKey": "meta-instagram",
       "file": "deals-pending-meta-instagram.json",
       "sourceLabel": "Meta Instagram Graph",
-      "totalDeals": 119,
-      "uniqueDeals": 94,
+      "totalDeals": 121,
+      "uniqueDeals": 96,
       "duplicateDeals": 25,
       "duplicateAcrossSources": 13,
-      "fresh1dCount": 11,
-      "fresh7dCount": 115,
-      "viennaCount": 119,
-      "foodDrinkCount": 77,
-      "promoCount": 63,
+      "fresh1dCount": 13,
+      "fresh7dCount": 117,
+      "viennaCount": 121,
+      "foodDrinkCount": 79,
+      "promoCount": 64,
       "missingUrlCount": 0,
       "sampleTitles": [
-        "🍰 TIRAMISU GRATIS ZUM DÖNER!",
-        "With the crew ticket, four of you get in for € 150 instead of € 180, each with a welcome drink and snacks.",
-        "Prüf deinen Anspruch kostenlos in 2 Minuten auf flugninja.at – 100 % risikofrei, keine Vorkosten."
+        "Bei uns steht’s an der Wand – und ist definitiv einen Blick wert👀 🍽️ Daily Lunch: Mo–Fr von 11–15 Uhr + gratis Tagessuppe 🥂 Happy Hour: t",
+        "20 % Rabatt Kennst du ein Lokal, das eine neue Website braucht",
+        "🍰 TIRAMISU GRATIS ZUM DÖNER!"
       ],
       "lastRun": null,
       "uniqueRate": 0.8,
@@ -552,7 +619,7 @@
       "fresh1dRate": 0.1,
       "fresh7dRate": 1,
       "viennaRate": 1,
-      "foodDrinkRate": 0.6,
+      "foodDrinkRate": 0.7,
       "promoRate": 0.5,
       "missingUrlRate": 0,
       "averageQualityScore": 87.4,
@@ -575,21 +642,21 @@
         },
         {
           "value": "kaffee",
-          "count": 6
+          "count": 7
         },
         {
           "value": "fitness",
-          "count": 3
+          "count": 4
         }
       ],
       "topTypes": [
         {
           "value": "rabatt",
-          "count": 65
+          "count": 66
         },
         {
           "value": "gratis",
-          "count": 46
+          "count": 47
         },
         {
           "value": "bogo",
@@ -607,11 +674,11 @@
       "issues": [
         "wenige Deals sind frischer als 1 Tag"
       ],
-      "healthScore": 67,
-      "missionFitScore": 52,
-      "coverageScore": 76,
-      "precisionScore": 68,
-      "sourceWeightScore": 64
+      "healthScore": 69,
+      "missionFitScore": 56,
+      "coverageScore": 80,
+      "precisionScore": 70,
+      "sourceWeightScore": 67
     },
     {
       "sourceKey": "instagram-apify",
@@ -1985,63 +2052,6 @@
       "topCategories": [],
       "topTypes": [],
       "issues": [
-        "liefert aktuell 0 Deals"
-      ],
-      "healthScore": 0,
-      "missionFitScore": 0,
-      "coverageScore": 0,
-      "precisionScore": 0,
-      "sourceWeightScore": 0
-    },
-    {
-      "sourceKey": "instagram-apify2",
-      "file": "deals-pending-instagram-apify2.json",
-      "sourceLabel": "Apify 2 Vienna Food Discovery",
-      "totalDeals": 0,
-      "uniqueDeals": 0,
-      "duplicateDeals": 0,
-      "duplicateAcrossSources": 0,
-      "fresh1dCount": 0,
-      "fresh7dCount": 0,
-      "viennaCount": 0,
-      "foodDrinkCount": 0,
-      "promoCount": 0,
-      "missingUrlCount": 0,
-      "sampleTitles": [],
-      "lastRun": {
-        "status": "completed-with-errors",
-        "startedAt": "2026-10-23T10:21:31.587Z",
-        "finishedAt": "2026-10-23T10:23:09.882Z",
-        "durationMs": 98295,
-        "counts": {
-          "rawCandidates": 26,
-          "normalizedCandidates": 16,
-          "verifiedCandidates": 0,
-          "previousDeals": 0,
-          "acceptedDeals": 0,
-          "rejectedDeals": 16
-        },
-        "rejectedByReason": {
-          "post-older-than-seven-days": 1,
-          "non-food-ad": 11,
-          "no-consumer-food-benefit": 4
-        },
-        "errors": [],
-        "reportFile": "deal-pipeline-last-run-instagram-apify2.json"
-      },
-      "uniqueRate": 0,
-      "duplicateRate": 0,
-      "fresh1dRate": 0,
-      "fresh7dRate": 0,
-      "viennaRate": 0,
-      "foodDrinkRate": 0,
-      "promoRate": 0,
-      "missingUrlRate": 0,
-      "averageQualityScore": 0,
-      "topCategories": [],
-      "topTypes": [],
-      "issues": [
-        "letzter Lauf fand Kandidaten, aber akzeptierte keinen Deal",
         "liefert aktuell 0 Deals"
       ],
       "healthScore": 0,

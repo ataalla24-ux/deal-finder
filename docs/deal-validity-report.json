@@ -1,13 +1,13 @@
 {
-  "generatedAt": "2026-10-23T20:22:05.354Z",
+  "generatedAt": "2026-10-23T21:29:44.953Z",
   "summary": {
     "maxAgeDays": 7,
-    "total": 306,
-    "allowed": 0,
-    "blocked": 306,
-    "warnings": 0,
+    "total": 309,
+    "allowed": 2,
+    "blocked": 307,
+    "warnings": 2,
     "reasonCounts": {
-      "kein konkretes Angebot erkennbar": 227,
+      "kein konkretes Angebot erkennbar": 230,
       "Gottesdienste nur im Wochenlauf": 36,
       "älter als 7 Tage (2020-04-25)": 1,
       "älter als 7 Tage (2026-02-22)": 83,
@@ -47,17 +47,18 @@
       "älter als 7 Tage (2025-12-30)": 1,
       "ausgeschlossene Quelle (gastro.news)": 22,
       "Engagement-Aktion ohne garantierte Gegenleistung": 2,
+      "Meta-Graph-Widerspruch (excluded-promotion-type)": 1,
+      "Gewinnspiel/Verlosung statt direkt nutzbarem Deal": 4,
       "älter als 7 Tage (2026-10-08)": 4,
       "abgelaufen (2026-08-30)": 4,
       "selbst syndizierter FreeFinder-Post": 2,
-      "Gewinnspiel/Verlosung statt direkt nutzbarem Deal": 3,
       "ausgeschlossene Quelle (TheFork)": 1,
       "allgemeine Empfehlung/Gratis-Event statt konkreter Aktion": 2,
       "kein verlässliches Quell-/Post-Datum gefunden": 117,
       "Ortswiderspruch: Originalangebot nennt einen Standort ausserhalb Wiens": 1
     },
     "reasonCategoryCounts": {
-      "kein konkreter Deal": 229,
+      "kein konkreter Deal": 232,
       "Gottesdienste außerhalb Wochenlauf": 36,
       "älter als 7 Tage": 145,
       "ungültige URL": 20,
@@ -65,11 +66,22 @@
       "abgelaufen": 10,
       "nicht Wien": 10,
       "ausgeschlossene Quelle": 23,
+      "Meta-Graph-Widerspruch": 1,
+      "Gewinnspiel": 4,
       "selbst syndiziert": 2,
-      "Gewinnspiel": 3,
       "kein echtes Post-Datum": 117
     },
     "sourceCounts": {
+      "Apify 2 Vienna Food Discovery": {
+        "total": 1,
+        "allowed": 0,
+        "blocked": 1,
+        "warnings": 0,
+        "reasonCategoryCounts": {
+          "Meta-Graph-Widerspruch": 1,
+          "Gewinnspiel": 1
+        }
+      },
       "Firecrawl Gastro #2": {
         "total": 17,
         "allowed": 0,
@@ -110,7 +122,7 @@
         "blocked": 35,
         "warnings": 0,
         "reasonCategoryCounts": {
-          "kein konkreter Deal": 33,
+          "kein konkreter Deal": 34,
           "Gottesdienste außerhalb Wochenlauf": 35,
           "älter als 7 Tage": 33,
           "ungültige URL": 2,
@@ -167,7 +179,7 @@
         "blocked": 97,
         "warnings": 0,
         "reasonCategoryCounts": {
-          "kein konkreter Deal": 92,
+          "kein konkreter Deal": 94,
           "älter als 7 Tage": 97,
           "ungültige URL": 7,
           "Gottesdienste außerhalb Wochenlauf": 1,
@@ -205,10 +217,10 @@
         }
       },
       "Meta Instagram Hashtag API": {
-        "total": 4,
-        "allowed": 0,
+        "total": 6,
+        "allowed": 2,
         "blocked": 4,
-        "warnings": 0,
+        "warnings": 2,
         "reasonCategoryCounts": {
           "kein konkreter Deal": 3,
           "ausgeschlossene Quelle": 1
@@ -234,7 +246,43 @@
       }
     }
   },
-  "allowed": [],
+  "allowed": [
+    {
+      "id": "meta-ig-18109103129624319",
+      "title": "Bei uns steht’s an der Wand – und ist definitiv einen Blick wert👀 🍽️ Daily Lunch: Mo–Fr von 11–15 Uhr + gratis Tagessuppe 🥂 Happy Hour: t",
+      "brand": "Café VOTIV",
+      "source": "Meta Instagram Hashtag API",
+      "url": "https://www.instagram.com/reel/De2NF3FRT_l/",
+      "reasons": [],
+      "warnings": [
+        "Inhalt prüfen: Titel zu lang; Angebot kurz benennen, Bedingungen in den Details behalten; Caption-Reste oder Emoji-Codes im sichtbaren Text; Gültigkeitszeitraum nicht belegt; nicht als unbegrenzt gültig behandeln",
+        "kein Ablaufdatum gefunden"
+      ],
+      "sourceDate": "2026-10-23T18:29:54.000Z",
+      "sourceDateSource": "url.instagramShortcode",
+      "sourceAgeDays": 0,
+      "expiryDate": "",
+      "expirySource": "",
+      "urlStatus": "HTTP 200"
+    },
+    {
+      "id": "meta-ig-18148404193603468",
+      "title": "20 % Rabatt Kennst du ein Lokal, das eine neue Website braucht",
+      "brand": "Lokalcrew",
+      "source": "Meta Instagram Hashtag API",
+      "url": "https://www.instagram.com/p/De2H8rFiOGG/",
+      "reasons": [],
+      "warnings": [
+        "Inhalt prüfen: Caption-Reste oder Emoji-Codes im sichtbaren Text"
+      ],
+      "sourceDate": "2026-10-23T17:44:57.000Z",
+      "sourceDateSource": "url.instagramShortcode",
+      "sourceAgeDays": 0,
+      "expiryDate": "2026-10-26T20:40:03.091Z",
+      "expirySource": "deal.structured",
+      "urlStatus": "HTTP 200"
+    }
+  ],
   "blocked": [
     {
       "id": "jesuszentrum-events-20261019",
@@ -919,6 +967,7 @@
         "älter als 7 Tage (2026-02-22)"
       ],
       "warnings": [
+        "URL nicht eindeutig prüfbar (temporärer Fehler)",
         "kein Ablaufdatum gefunden"
       ],
       "sourceDate": "2026-02-22T21:13:07.698Z",
@@ -926,7 +975,7 @@
       "sourceAgeDays": 243,
       "expiryDate": "",
       "expirySource": "",
-      "urlStatus": "HTTP 200"
+      "urlStatus": "unklar: temporärer URL-Fehler"
     },
     {
       "id": "extra-32-20260222",
@@ -1190,16 +1239,19 @@
       "source": "Freikirchen Wien",
       "url": "https://www.fcgwien.at",
       "reasons": [
+        "kein konkretes Angebot erkennbar",
         "Gottesdienste nur im Wochenlauf",
         "älter als 7 Tage (2026-04-19)"
       ],
-      "warnings": [],
+      "warnings": [
+        "URL nicht eindeutig prüfbar (HTTP 403)"
+      ],
       "sourceDate": "2026-04-19T08:59:47.145Z",
       "sourceDateSource": "deal.pubDate",
       "sourceAgeDays": 187,
       "expiryDate": "",
       "expirySource": "deal.expires",
-      "urlStatus": "HTTP 200"
+      "urlStatus": "unklar: HTTP 403"
     },
     {
       "id": "freikirche-4-20260419",
@@ -2273,15 +2325,18 @@
       "source": "Kirchen Verzeichnis",
       "url": "https://www.fcgwien.at",
       "reasons": [
+        "kein konkretes Angebot erkennbar",
         "älter als 7 Tage (2026-02-22)"
       ],
-      "warnings": [],
+      "warnings": [
+        "URL nicht eindeutig prüfbar (HTTP 403)"
+      ],
       "sourceDate": "2026-02-22T21:12:35.964Z",
       "sourceDateSource": "deal.pubDate",
       "sourceAgeDays": 243,
       "expiryDate": "",
       "expirySource": "deal.expires",
-      "urlStatus": "HTTP 200"
+      "urlStatus": "unklar: HTTP 403"
     },
     {
       "id": "gemeinde-10-20260222",
@@ -3071,15 +3126,18 @@
       "source": "Kirchen Verzeichnis",
       "url": "https://www.fcgwien.at",
       "reasons": [
+        "kein konkretes Angebot erkennbar",
         "älter als 7 Tage (2026-02-22)"
       ],
-      "warnings": [],
+      "warnings": [
+        "URL nicht eindeutig prüfbar (HTTP 403)"
+      ],
       "sourceDate": "2026-02-22T21:12:35.964Z",
       "sourceDateSource": "deal.pubDate",
       "sourceAgeDays": 243,
       "expiryDate": "",
       "expirySource": "deal.expires",
-      "urlStatus": "HTTP 200"
+      "urlStatus": "unklar: HTTP 403"
     },
     {
       "id": "gottesdienste-18-20260222",
@@ -3417,6 +3475,26 @@
       "sourceAgeDays": 1,
       "expiryDate": "",
       "expirySource": "deal.evidence.offerTiming",
+      "urlStatus": "HTTP 200"
+    },
+    {
+      "id": "igap-e7ucs5",
+      "title": "GRATIS DÖNER",
+      "brand": "CIO‘S",
+      "source": "Apify 2 Vienna Food Discovery",
+      "url": "https://www.instagram.com/p/De1FQtgRiju/",
+      "reasons": [
+        "Meta-Graph-Widerspruch (excluded-promotion-type)",
+        "Gewinnspiel/Verlosung statt direkt nutzbarem Deal"
+      ],
+      "warnings": [
+        "Inhalt prüfen: Nur Stadt/Region angegeben; Filiale oder teilnehmende Standorte prüfen"
+      ],
+      "sourceDate": "2026-10-23T08:02:14.000Z",
+      "sourceDateSource": "url.instagramShortcode",
+      "sourceAgeDays": 0,
+      "expiryDate": "2026-10-26T08:03:50.000Z",
+      "expirySource": "deal.structured",
       "urlStatus": "HTTP 200"
     },
     {
