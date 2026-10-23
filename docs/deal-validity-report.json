@@ -1,22 +1,23 @@
 {
-  "generatedAt": "2026-10-23T13:25:31.957Z",
+  "generatedAt": "2026-10-23T13:28:31.310Z",
   "summary": {
     "maxAgeDays": 7,
     "total": 301,
-    "allowed": 1,
-    "blocked": 300,
-    "warnings": 1,
+    "allowed": 0,
+    "blocked": 301,
+    "warnings": 0,
     "reasonCounts": {
       "kein konkretes Angebot erkennbar": 225,
       "Gottesdienste nur im Wochenlauf": 36,
       "älter als 7 Tage (2020-04-25)": 1,
-      "älter als 7 Tage (2026-02-22)": 84,
+      "älter als 7 Tage (2026-02-22)": 83,
       "URL ungültig (fehlende Ziel-URL)": 2,
       "älter als 7 Tage (2017-04-20)": 1,
       "älter als 7 Tage (2026-09-14)": 1,
       "älter als 7 Tage (2026-10-14)": 1,
+      "älter als 7 Tage (2025-07-30)": 1,
       "URL ungültig (HTTP 404)": 8,
-      "redaktioneller Mehrfach-Roundup statt eindeutigem Einzelangebot": 2,
+      "redaktioneller Mehrfach-Roundup statt eindeutigem Einzelangebot": 3,
       "URL ungültig (Inhalt nicht mehr verfügbar)": 7,
       "älter als 7 Tage (2025-11-09)": 1,
       "URL ungültig (HTTP 410)": 2,
@@ -60,7 +61,7 @@
       "Gottesdienste außerhalb Wochenlauf": 36,
       "älter als 7 Tage": 145,
       "ungültige URL": 20,
-      "sonstiges": 8,
+      "sonstiges": 9,
       "abgelaufen": 10,
       "nicht Wien": 11,
       "selbst syndiziert": 1,
@@ -83,10 +84,10 @@
         }
       },
       "Firecrawl Gastro #4": {
-        "total": 8,
-        "allowed": 1,
+        "total": 7,
+        "allowed": 0,
         "blocked": 7,
-        "warnings": 1,
+        "warnings": 0,
         "reasonCategoryCounts": {
           "sonstiges": 1,
           "ungültige URL": 3,
@@ -140,11 +141,12 @@
         }
       },
       "instagram-ai-agent": {
-        "total": 1,
+        "total": 2,
         "allowed": 0,
-        "blocked": 1,
+        "blocked": 2,
         "warnings": 0,
         "reasonCategoryCounts": {
+          "sonstiges": 1,
           "kein konkreter Deal": 1
         }
       },
@@ -239,25 +241,7 @@
       }
     }
   },
-  "allowed": [
-    {
-      "id": "fc4g-150sn68",
-      "title": "25 % Rabatt auf den Relax-Tagesurlaub plus Gourmetgutschein",
-      "brand": "Therme Wien",
-      "source": "Firecrawl Gastro #4",
-      "url": "https://www.preisjaeger.at/deals/relaxday-therme-wien-25-auf-den-relax-tagesurlaub-369533",
-      "reasons": [],
-      "warnings": [
-        "Post ist 31 Tage alt; zugelassen wegen ausdrücklich noch aktive Gültigkeit"
-      ],
-      "sourceDate": "2026-09-22T12:42:34.000Z",
-      "sourceDateSource": "url.publicationDate",
-      "sourceAgeDays": 31,
-      "expiryDate": "2026-10-23",
-      "expirySource": "deal.expires",
-      "urlStatus": "HTTP 200"
-    }
-  ],
+  "allowed": [],
   "blocked": [
     {
       "id": "jesuszentrum-events-20261019",
@@ -709,18 +693,17 @@
       "reasons": [
         "kein konkretes Angebot erkennbar",
         "Gottesdienste nur im Wochenlauf",
-        "älter als 7 Tage (2026-02-22)"
+        "älter als 7 Tage (2025-07-30)"
       ],
       "warnings": [
-        "URL nicht eindeutig prüfbar (HTTP 500)",
         "kein Ablaufdatum gefunden"
       ],
-      "sourceDate": "2026-02-22T21:13:07.698Z",
-      "sourceDateSource": "deal.pubDate",
-      "sourceAgeDays": 243,
+      "sourceDate": "2025-07-30T05:18:47.000Z",
+      "sourceDateSource": "url.publicationDate",
+      "sourceAgeDays": 450,
       "expiryDate": "",
       "expirySource": "",
-      "urlStatus": "unklar: HTTP 500"
+      "urlStatus": "HTTP 200"
     },
     {
       "id": "extra-21-20260222",
@@ -3350,6 +3333,25 @@
       "expiryDate": "",
       "expirySource": "deal.expires",
       "urlStatus": "ungültig: HTTP 404"
+    },
+    {
+      "id": "instagram-ai-9a991b22fcf4",
+      "title": "Kostenlose Würstel beim Oktoberfest-Event.",
+      "brand": "Garten",
+      "source": "instagram-ai-agent",
+      "url": "https://www.instagram.com/p/DerkMIsE-x6/",
+      "reasons": [
+        "redaktioneller Mehrfach-Roundup statt eindeutigem Einzelangebot"
+      ],
+      "warnings": [
+        "Inhalt prüfen: Nur Stadt/Region angegeben; Filiale oder teilnehmende Standorte prüfen"
+      ],
+      "sourceDate": "2026-10-19T15:20:05.000Z",
+      "sourceDateSource": "url.instagramShortcode",
+      "sourceAgeDays": 4,
+      "expiryDate": "2026-10-24",
+      "expirySource": "deal.evidence.offerTiming",
+      "urlStatus": "HTTP 200"
     },
     {
       "id": "instagram-ai-5a4ddd530b48",
