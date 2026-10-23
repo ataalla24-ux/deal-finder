@@ -2,9 +2,80 @@
   "schemaVersion": 1,
   "sourceKey": "food3",
   "sourceLabel": "Firecrawl Key 2 - Food",
-  "updatedAt": "2026-10-22T07:20:08.127Z",
-  "runCount": 86,
+  "updatedAt": "2026-10-23T07:13:45.988Z",
+  "runCount": 87,
   "runs": [
+    {
+      "schemaVersion": 1,
+      "runId": "food3-2026-10-23T07:13:45.988Z",
+      "sourceKey": "food3",
+      "sourceLabel": "Firecrawl Key 2 - Food",
+      "status": "completed-with-errors",
+      "startedAt": "2026-10-23T07:12:53.411Z",
+      "finishedAt": "2026-10-23T07:13:45.988Z",
+      "durationMs": 52577,
+      "outputFile": "docs/deals-pending-food3.json",
+      "counts": {
+        "rawCandidates": 0,
+        "normalizedCandidates": 0,
+        "verifiedCandidates": 1,
+        "previousDeals": 1,
+        "acceptedDeals": 1,
+        "rejectedDeals": 0
+      },
+      "rejectedByReason": {},
+      "rejectedSamples": [],
+      "diagnostics": {
+        "agentStatus": "completed-with-errors",
+        "creditsUsed": 0,
+        "configuredSources": 6,
+        "attemptedSources": 3,
+        "completedSources": 2,
+        "targetsPerRun": 3,
+        "agentTimeoutSeconds": 120,
+        "maxCreditsPerTarget": 300,
+        "sourceStats": [
+          {
+            "url": "https://www.instagram.com/explore/tags/happyhourwien/",
+            "status": "completed",
+            "rawCandidates": 0,
+            "searchCandidates": 0,
+            "creditsUsed": 0
+          },
+          {
+            "url": "https://www.instagram.com/explore/tags/lunchdealwien/",
+            "status": "completed",
+            "rawCandidates": 0,
+            "searchCandidates": 0,
+            "creditsUsed": 0
+          },
+          {
+            "url": "https://www.instagram.com/explore/tags/neueröffnungwien/",
+            "status": "failed",
+            "rawCandidates": 0,
+            "searchCandidates": 0,
+            "creditsUsed": 0,
+            "error": "Rate limit exceeded. Consumed (req/min): 3, Remaining (req/min): 0. Upgrade your plan at https://firecrawl.dev/pricing for increased rate limits or please retry after 9s, resets at Fri Oct 23 2026 07:13:54 GMT+0000 (Coordinated Universal Time)"
+          }
+        ],
+        "retainedPreviousDeals": 1,
+        "prunedPreviousDeals": 0,
+        "duplicateCandidatesMerged": 0,
+        "verifier": {
+          "statusCounts": {
+            "verified-meta-graph": 1
+          },
+          "verifiedOriginalPosts": 0,
+          "timestampOnlyPosts": 0,
+          "unavailableOriginalPosts": 0,
+          "registryViennaEvidence": 0
+        }
+      },
+      "constraints": {},
+      "errors": [
+        "https://www.instagram.com/explore/tags/neueröffnungwien/: Rate limit exceeded. Consumed (req/min): 3, Remaining (req/min): 0. Upgrade your plan at https://firecrawl.dev/pricing for increased rate limits or please retry after 9s, resets at Fri Oct 23 2026 07:13:54 GMT+0000 (Coordinated Universal Time)"
+      ]
+    },
     {
       "schemaVersion": 1,
       "runId": "food3-2026-10-22T07:20:08.127Z",
