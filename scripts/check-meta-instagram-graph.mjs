@@ -82,6 +82,12 @@ function classifyMetaError(error) {
   const status = Number(error?.status || 0);
   const code = cleanText(error?.code, 40);
   const message = cleanText(error?.message, 1200);
+  if (code === 'SCAN_BUDGET') {
+    if (error?.storage) return 'quota-storage-unavailable';
+    const reason = message.replace(/^Instagram shared quota paused: /, '');
+    return /^(?:shared cooldown|rolling-hour budget exhausted|quota contention|Meta rate limit|Meta usage headroom)$/.test(reason)
+      ? 'quota-deferred' : 'quota-unavailable';
+  }
   if (code === '190' || /bad signature|invalid oauth|expired token|malformed access token/i.test(message)) {
     return 'invalid-token';
   }
@@ -90,7 +96,18 @@ function classifyMetaError(error) {
   if (/instagram_business_account|no linked instagram|does not exist|unsupported get request/i.test(message)) {
     return 'wrong-token-type-or-missing-page-link';
   }
-  return status >= 500 || status === 429 ? 'temporary-meta-error' : 'meta-api-error';
+  return status >= 500 || status === 429 || ['4', '17', '32', '613', '80002'].includes(code)
+    ? 'temporary-meta-error' : 'meta-api-error';
+}
+
+function failureAction(status) {
+  if (status === 'quota-deferred') return 'Wait for the existing shared Meta cooldown or rolling-hour allowance; collection will resume on a later scheduled run.';
+  if (status === 'quota-storage-unavailable') return 'Check shared GitHub quota storage availability before retrying; retain the existing reservations.';
+  if (status === 'quota-unavailable') return 'Check the shared quota or transport failure before retrying; token validity has not been established.';
+  if (status === 'temporary-meta-error') return 'Wait for Meta service recovery or the reported retry time before retrying.';
+  return status === 'invalid-token'
+    ? 'Replace the GitHub secret INSTAGRAM_ACCESS_TOKEN with a fresh Meta Graph access token.'
+    : 'Check the token type and Meta app permissions.';
 }
 
 function graphUrl(config, pathname, params = {}, token = config.instagramAccessToken) {
@@ -179,6 +196,23 @@ async function runCheck(options = {}) {
     checks: [],
     nextAction: '',
   };
+  const finish = (ok) => {
+    if (fetchImpl.quotaStats) {
+      const stats = fetchImpl.quotaStats;
+      report.sharedQuota = {
+        requests: stats.requests, reserved: stats.reserved, stopped: stats.stopped,
+        reason: redact(stats.reason, secrets), retryAt: stats.retryAt,
+        storageFailure: stats.storageFailure,
+      };
+      if (stats.stopped && report.status === 'ok') {
+        report.status = classifyMetaError({ code: 'SCAN_BUDGET', message: stats.reason, storage: stats.storageFailure });
+        report.nextAction = failureAction(report.status);
+        ok = false;
+      }
+    }
+    if (options.write !== false) writeJsonAtomic(config.reportPath, report);
+    return { report, ok, deferred: report.status === 'quota-deferred' };
+  };
 
   const tokenExpiryTimestamp = Date.parse(config.tokenExpiresAt);
   if (Number.isFinite(tokenExpiryTimestamp)) {
@@ -213,8 +247,7 @@ async function runCheck(options = {}) {
       status: report.status,
       detail: report.nextAction,
     });
-    if (options.write !== false) writeJsonAtomic(config.reportPath, report);
-    return { report, ok: report.status === 'skipped' };
+    return finish(report.status === 'skipped');
   }
 
   let graphToken = config.instagramAccessToken;
@@ -238,9 +271,7 @@ async function runCheck(options = {}) {
     });
   } catch (error) {
     report.status = classifyMetaError(error);
-    report.nextAction = report.status === 'invalid-token'
-      ? 'Replace the GitHub secret INSTAGRAM_ACCESS_TOKEN with a fresh Meta Graph access token.'
-      : 'Check the token type and Meta app permissions.';
+    report.nextAction = failureAction(report.status);
     addCheck(report, {
       name: 'token-basic',
       status: report.status,
@@ -248,8 +279,7 @@ async function runCheck(options = {}) {
       code: error?.code,
       httpStatus: error?.status,
     });
-    if (options.write !== false) writeJsonAtomic(config.reportPath, report);
-    return { report, ok: false };
+    return finish(false);
   }
 
   // Meta permits an app developer's user token to inspect tokens for that app.
@@ -266,8 +296,7 @@ async function runCheck(options = {}) {
       report.status = !data.is_valid ? 'invalid-token' : 'wrong-token-app';
       report.nextAction = 'Generate a valid token for the configured Meta app before replacing INSTAGRAM_ACCESS_TOKEN.';
       addCheck(report, { name: 'token-inspection', status: report.status, detail: report.nextAction });
-      if (options.write !== false) writeJsonAtomic(config.reportPath, report);
-      return { report, ok: false };
+      return finish(false);
     }
     const expiryIso = (value) => Number.isFinite(Number(value)) && Number(value) > 0 && Number(value) < 8640000000000
       ? new Date(Number(value) * 1000).toISOString() : '';
@@ -354,8 +383,7 @@ async function runCheck(options = {}) {
   if (!igUserId) {
     report.status = 'no-linked-instagram-account';
     report.nextAction = 'Use a Business/Creator Instagram account linked to a Facebook Page, or set INSTAGRAM_USER_ID with a matching Page token.';
-    if (options.write !== false) writeJsonAtomic(config.reportPath, report);
-    return { report, ok: false };
+    return finish(false);
   }
 
   try {
@@ -478,6 +506,10 @@ async function runCheck(options = {}) {
     'wrong-token-type-or-missing-page-link',
     'no-linked-instagram-account',
     'meta-api-error',
+    'temporary-meta-error',
+    'quota-deferred',
+    'quota-storage-unavailable',
+    'quota-unavailable',
   ]);
   const failedChecks = report.checks.filter((check) => hardFailures.has(check.status));
   const requiredChecks = new Set([
@@ -491,7 +523,7 @@ async function runCheck(options = {}) {
     report.nextAction = `Renew INSTAGRAM_ACCESS_TOKEN and update META_INSTAGRAM_TOKEN_EXPIRES_AT; ${report.tokenExpiry.source} expiry was ${report.tokenExpiry.expiresAt}.`;
   } else if (requiredFailures.length) {
     report.status = requiredFailures[0].status;
-    report.nextAction = 'Fix the Meta Graph token permissions before enabling scheduled discovery.';
+    report.nextAction = failureAction(report.status);
   } else {
     report.status = 'ok';
     report.nextAction = report.tokenExpiry?.status === 'expiring-soon'
@@ -499,12 +531,13 @@ async function runCheck(options = {}) {
       : 'Meta Instagram Graph is ready for the deal collector.';
   }
 
-  if (options.write !== false) writeJsonAtomic(config.reportPath, report);
-  return { report, ok: report.status === 'ok' };
+  return finish(report.status === 'ok');
 }
 
 if (import.meta.url === `file://${process.argv[1]}`) {
-  runCheck().then(({ report, ok }) => {
+  runCheck().then(({ report, ok, deferred }) => {
+    if (process.env.GITHUB_OUTPUT) fs.appendFileSync(process.env.GITHUB_OUTPUT,
+      `ready=${report.status === 'ok'}\nstatus=${report.status}\n`);
     console.log(`Meta Instagram Graph health: ${report.status}`);
     for (const check of report.checks) {
       const detail = check.detail ? ` - ${check.detail}` : '';
@@ -512,7 +545,10 @@ if (import.meta.url === `file://${process.argv[1]}`) {
       if (check.url) console.log(`    ${safeUrl(check.url, [])}`);
     }
     console.log(`  next: ${report.nextAction}`);
-    if (!ok) process.exitCode = 1;
+    if (report.sharedQuota?.retryAt) console.log(`  retry after: ${report.sharedQuota.retryAt}`);
+    if (process.env.GITHUB_STEP_SUMMARY) fs.appendFileSync(process.env.GITHUB_STEP_SUMMARY,
+      `## Meta Graph health\n\n- Status: **${report.status}**\n- Ready for collection: ${report.status === 'ok'}\n- ${report.nextAction}\n${report.sharedQuota?.retryAt ? `- Retry after: ${report.sharedQuota.retryAt}\n` : ''}`);
+    if (!ok && !deferred) process.exitCode = 1;
   }).catch((error) => {
     console.error(`Meta Instagram Graph health failed: ${cleanText(error?.stack || error?.message || error, 2000)}`);
     process.exitCode = 1;

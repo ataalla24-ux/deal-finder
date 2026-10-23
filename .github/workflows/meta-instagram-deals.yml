@@ -9,6 +9,10 @@ on:
         description: 'Bounded live validation: 64 accounts, 80 requests, two AI calls'
         type: boolean
         default: false
+      health_only:
+        description: 'Read-only Graph health check: no collection, AI, Slack sends or main-branch state commit'
+        type: boolean
+        default: false
 
 concurrency:
   group: meta-instagram-scan
@@ -43,11 +47,13 @@ jobs:
           SENTRY_DISABLED=1 node scripts/test-instagram-max-coverage.mjs
           node scripts/test-instagram-media-budget.mjs
           node scripts/test-meta-token-health.mjs
+          node scripts/test-meta-instagram-health-alert.mjs
           npm run test:instagram-shared-quota
           npm run test:meta-ad-coverage
           npm run test:meta-recall
 
       - name: Refresh Instagram merchant registry
+        if: ${{ !inputs.health_only }}
         run: npm run instagram:merchant-registry
 
       - name: Check Meta Instagram Graph token
@@ -70,7 +76,7 @@ jobs:
         run: npm run instagram:meta:check
 
       - name: Alert Slack about Meta Graph health
-        if: always()
+        if: ${{ always() && !inputs.health_only }}
         env:
           SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
           SLACK_CHANNEL_ID: ${{ secrets.SLACK_CHANNEL_ID }}
@@ -81,11 +87,13 @@ jobs:
         run: exit 1
 
       - name: Install Instagram media OCR tools
+        if: ${{ steps.meta_graph_health.outputs.ready == 'true' && !inputs.health_only }}
         run: |
           sudo apt-get update
           sudo apt-get install -y --no-install-recommends ffmpeg tesseract-ocr tesseract-ocr-deu tesseract-ocr-eng
 
       - name: Collect official Meta Instagram deals
+        if: ${{ steps.meta_graph_health.outputs.ready == 'true' && !inputs.health_only }}
         env:
           META_AD_LIBRARY_ACCESS_TOKEN: ${{ secrets.META_AD_LIBRARY_ACCESS_TOKEN }}
           META_AD_LIBRARY_TRY_INSTAGRAM_TOKEN: '1'
@@ -149,9 +157,18 @@ jobs:
         run: node scraper/meta-instagram-deals.js
 
       - name: Verify factual collector status
+        if: ${{ steps.meta_graph_health.outputs.ready == 'true' && !inputs.health_only }}
         run: node scripts/verify-meta-instagram-report.mjs
 
+      - name: Upload read-only Graph health report
+        if: ${{ always() && inputs.health_only }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: meta-graph-health
+          path: docs/meta-instagram-auth-health.json
+          retention-days: 7
+
       - name: Commit collector state
-        if: always()
+        if: ${{ always() && !inputs.health_only }}
         run: |
           node scripts/commit-generated.mjs --skip-conflicts --message "Meta Instagram deals $(date +%Y-%m-%dT%H:%MZ)" --files docs/deals-pending-meta-instagram.json docs/meta-instagram-report.json docs/meta-instagram-auth-health.json docs/meta-instagram-alert-state.json docs/meta-instagram-state.json docs/meta-instagram-scan-state.json docs/instagram-merchant-registry.json docs/instagram-graph-post-evidence.json

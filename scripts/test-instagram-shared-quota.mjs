@@ -56,6 +56,7 @@ const other = worker(); await other('unused');
 await worker(store, async () => Response.json({ error: { code: 4 } }, { status: 400 }))('unused');
 await assert.rejects(other('unused'), { code: 'SCAN_BUDGET' });
 assert.equal(calls, 1);
+assert.equal(other.quotaStats.retryAt, new Date(now + HOUR).toISOString(), 'shared cooldown exposes its actual retry time');
 now += HOUR + 1;
 await worker()('unused');
 assert.equal(calls, 2);

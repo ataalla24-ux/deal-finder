@@ -1,4 +1,8 @@
 import assert from 'node:assert/strict';
+import { spawnSync } from 'node:child_process';
+import fs from 'node:fs';
+import os from 'node:os';
+import path from 'node:path';
 import { runCheck } from './check-meta-instagram-graph.mjs';
 
 const now = new Date('2026-10-16T00:00:00Z');
@@ -55,3 +59,70 @@ assert.equal(malformed.report.tokenExpiry.source, 'configured-metadata');
 const noExpiry = await check({ ...data, expires_at: 0, data_access_expires_at: 0 });
 assert.equal(noExpiry.report.tokenExpiry.status, 'unknown', 'zero expiry is not a made-up sixty-day renewal');
 console.log('Meta token health: provider expiry, data-access deadline, short/expired/invalid/wrong-app tokens, permission fallback and secret redaction passed');
+
+const futureExpiry = '2026-12-14T22:55:36Z';
+const quotaFailure = (message, extra = {}) => Object.assign(new Error(message), { code: 'SCAN_BUDGET', ...extra });
+const failAt = (endpoint, error) => runCheck({
+  env: { ...env, META_INSTAGRAM_TOKEN_EXPIRES_AT: futureExpiry }, now, write: false,
+  fetchImpl: async (rawUrl) => {
+    const url = new URL(rawUrl);
+    if (url.pathname.endsWith(endpoint)) throw error;
+    if (url.pathname.endsWith('/me')) return Response.json({ id: 'fixture-user' });
+    if (url.pathname.endsWith('/debug_token')) return Response.json({ data });
+    if (url.pathname.endsWith('/permissions')) return Response.json({ data: [] });
+    if (url.pathname.endsWith('/media')) return Response.json({ data: [] });
+    return Response.json({ business_discovery: { media: { data: [] } } });
+  },
+});
+for (const reason of ['shared cooldown', 'rolling-hour budget exhausted', 'quota contention', 'Meta rate limit', 'Meta usage headroom']) {
+  const result = await failAt('/me', quotaFailure(`Instagram shared quota paused: ${reason}`));
+  assert.equal(result.report.status, 'quota-deferred', reason);
+  assert.equal(result.ok, false, 'a deferred check is not verified healthy');
+  assert.equal(result.deferred, true, 'an expected pause does not fail the workflow');
+  assert.doesNotMatch(result.report.nextAction, /token type|permissions|replace|renew/i);
+}
+const midCheckPause = await failAt('/media', quotaFailure('Instagram shared quota paused: shared cooldown'));
+assert.equal(midCheckPause.report.status, 'quota-deferred', 'a pause after token inspection still blocks collection');
+assert.equal(midCheckPause.ok, false);
+const unavailable = await failAt('/me', quotaFailure('Instagram shared quota paused: request or quota unavailable'));
+assert.equal(unavailable.report.status, 'quota-unavailable', 'an ambiguous transport failure is not a normal cooldown');
+assert.equal(unavailable.deferred, false);
+const storage = await failAt('/me', quotaFailure('Instagram shared quota paused: GitHub quota storage read-state: HTTP 500', {
+  storage: { provider: 'github', operation: 'read-state', httpStatus: 500, rateLimited: false, retryAt: '' },
+}));
+assert.equal(storage.report.status, 'quota-storage-unavailable');
+assert.equal(storage.deferred, false, 'storage failure must remain visible');
+
+console.log('Meta health distinguishes shared pauses, partial checks, quota storage and ambiguous transport failures');
+
+const temporary = fs.mkdtempSync(path.join(os.tmpdir(), 'meta-health-cli-'));
+try {
+  for (const fixture of [
+    { status: 'quota-deferred', exitCode: 0, error: { code: 'SCAN_BUDGET', message: 'Instagram shared quota paused: shared cooldown' } },
+    { status: 'quota-unavailable', exitCode: 1, error: { code: 'SCAN_BUDGET', message: 'Instagram shared quota paused: request or quota unavailable' } },
+    { status: 'invalid-token', exitCode: 1, response: { code: 190, message: 'Invalid OAuth access token' } },
+    { status: 'temporary-meta-error', exitCode: 1, response: { code: 4, message: 'Application request limit reached' } },
+  ]) {
+    const reportPath = path.join(temporary, `${fixture.status}.json`);
+    const outputPath = path.join(temporary, `${fixture.status}-output`);
+    const bootstrap = `globalThis.fetch = async () => {
+      const fixture = ${JSON.stringify(fixture)};
+      if (fixture.error) throw Object.assign(new Error(fixture.error.message), { code: fixture.error.code });
+      return Response.json({ error: fixture.response }, { status: 400 });
+    };`;
+    const result = spawnSync(process.execPath, [
+      '--import', `data:text/javascript,${encodeURIComponent(bootstrap)}`,
+      'scripts/check-meta-instagram-graph.mjs',
+    ], { cwd: process.cwd(), encoding: 'utf8', env: {
+      ...process.env, ...env, META_INSTAGRAM_TOKEN_EXPIRES_AT: futureExpiry,
+      META_INSTAGRAM_AUTH_REPORT_PATH: reportPath, GITHUB_OUTPUT: outputPath, GITHUB_STEP_SUMMARY: '',
+    } });
+    assert.equal(result.status, fixture.exitCode, result.stderr);
+    assert.equal(JSON.parse(fs.readFileSync(reportPath)).status, fixture.status);
+    assert.equal(fs.readFileSync(outputPath, 'utf8'), `ready=false\nstatus=${fixture.status}\n`);
+    assert.doesNotMatch(result.stdout, new RegExp(token));
+  }
+} finally {
+  fs.rmSync(temporary, { recursive: true, force: true });
+}
+console.log('Meta health CLI: expected pause exits successfully with collection disabled; real failures remain nonzero');

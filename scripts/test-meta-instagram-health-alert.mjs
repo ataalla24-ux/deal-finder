@@ -52,5 +52,28 @@ const healthy = await notifyMetaInstagramHealth({ now, reportPath, statePath, en
 assert.equal(healthy.reason, 'healthy');
 assert.equal(JSON.parse(fs.readFileSync(statePath, 'utf8')).activeKey, '');
 
+fs.writeFileSync(statePath, JSON.stringify({ activeKey: 'missing-permission|ok|', lastSentAt: now.toISOString() }));
+fs.writeFileSync(reportPath, JSON.stringify({
+  status: 'quota-deferred', tokenExpiry: { status: 'ok' },
+  checks: [{ name: 'token-basic', status: 'quota-deferred', code: 'SCAN_BUDGET' }],
+  nextAction: 'Wait for the existing shared Meta cooldown.',
+}));
+const paused = await notifyMetaInstagramHealth({
+  now, reportPath, statePath, env: { SLACK_BOT_TOKEN: 'test-token', SLACK_CHANNEL_ID: 'C123' },
+  fetchImpl: async () => { calls += 1; throw new Error('must not notify for an expected cooldown'); },
+});
+assert.equal(paused.reason, 'quota-deferred');
+assert.equal(calls, 1, 'expected quota pauses do not send token-error alerts');
+assert.equal(JSON.parse(fs.readFileSync(statePath, 'utf8')).activeKey, 'missing-permission|ok|',
+  'a pause cannot clear a previous real failure as recovered');
+
+fs.writeFileSync(reportPath, JSON.stringify({ status: 'invalid-token', tokenExpiry: { status: 'ok' }, checks: [] }));
+const invalid = await notifyMetaInstagramHealth({
+  now, reportPath, statePath, env: { SLACK_BOT_TOKEN: 'test-token', SLACK_CHANNEL_ID: 'C123' },
+  fetchImpl: async () => { calls += 1; return { ok: true, json: async () => ({ ok: true }) }; },
+});
+assert.equal(invalid.sent, true, 'real token failures still notify');
+assert.equal(calls, 2);
+
 fs.rmSync(tempDir, { recursive: true, force: true });
 console.log('meta instagram health alert tests passed');

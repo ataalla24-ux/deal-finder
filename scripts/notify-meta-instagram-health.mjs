@@ -36,6 +36,8 @@ export async function notifyMetaInstagramHealth(options = {}) {
   const unhealthy = cleanText(report.status, 80) !== 'ok';
   const expiring = expiryStatus === 'expiring-soon' || expiryStatus === 'expired';
 
+  if (report.status === 'quota-deferred' && !expiring) return { sent: false, reason: 'quota-deferred' };
+
   if (!unhealthy && !expiring) {
     if (previous.activeKey) {
       writeJsonAtomic(statePath, {

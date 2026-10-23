@@ -157,7 +157,10 @@ export function createSharedQuotaFetch(fetchImpl, { store, clock = Date.now, blo
     for (let attempt = 0; attempt < 8; attempt += 1) {
       const { state, revision } = await store.read();
       const now = clock();
-      if (state.pausedUntil > now) throw pause('shared cooldown');
+      if (state.pausedUntil > now) {
+        stats.retryAt = new Date(state.pausedUntil).toISOString();
+        throw pause('shared cooldown');
+      }
       // Even a previously reserved block observes other jobs' cooldowns.
       if (remaining > 0 && now < leaseUntil) { remaining -= 1; return; }
       const reservations = state.reservations.filter((r) => r.expiresAt > now);
