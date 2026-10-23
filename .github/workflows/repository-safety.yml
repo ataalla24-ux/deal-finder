@@ -3,9 +3,9 @@ name: Repository Safety
 on:
   push:
     branches: [main]
-    paths: ['.github/workflows/**', 'scripts/test-workflow-permissions.rb']
+    paths: ['.github/workflows/**', 'scripts/test-workflow-permissions.rb', 'scripts/*launch-readiness.mjs']
   pull_request:
-    paths: ['.github/workflows/**', 'scripts/test-workflow-permissions.rb']
+    paths: ['.github/workflows/**', 'scripts/test-workflow-permissions.rb', 'scripts/*launch-readiness.mjs']
   workflow_dispatch:
 
 permissions:
@@ -21,3 +21,15 @@ jobs:
         with:
           ruby-version: '3.3'
       - run: ruby scripts/test-workflow-permissions.rb
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: node --test scripts/test-launch-readiness.mjs
+      - name: Read-only operations overview
+        if: ${{ github.event_name != 'pull_request' }}
+        run: node scripts/check-launch-readiness.mjs
+      - uses: actions/upload-artifact@v4
+        if: ${{ always() && github.event_name != 'pull_request' }}
+        with:
+          name: launch-readiness
+          path: output/launch-readiness.json

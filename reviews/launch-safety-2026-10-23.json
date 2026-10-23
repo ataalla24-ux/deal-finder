@@ -19,10 +19,12 @@
       "requiredReviews": null,
       "requiredStatusChecks": null
     },
-    "permissionTransition": "Reduce repository token default from write to read only after explicit writer scopes are published. Preserve existing explicit contents:write jobs; add missing scopes for Slack approval and the two church collectors. Actor deployment needs read only.",
+    "permissionTransition": "Completed and read back: default_workflow_permissions=read, can_approve_pull_request_reviews=false. Applied only after f82be22750b20a71d221522854283cbb236a7a24 published the explicit writer scopes. Existing generated-state writers retain contents:write. Actor deployment has read only.",
     "regression": "Structured YAML audit of every workflow job; reject implicit permissions and unreviewed pull_request_target; generated writers must retain explicit contents:write.",
     "limitations": "Not PR-only protection and not proof against owner/token compromise. No collaborators, credentials, secrets, visibility or paid plans changed."
   },
   "tests": "Official-logo normalization, feed contract/integrity, queue workflow safety and all 50 workflow/51 job permission declarations passed locally.",
+  "operationsOverview": "Read-only sanitized snapshots and one bounded public feed GET, GitHub job summary/artifact at the existing daily validation cadence and source-safety checks. Distinguishes source failures, deliberate budget/cooldown stops and legitimate zero new candidates. No new cron, provider requests, raw error bodies, credentials or customer records. Missing/stale/partial reports are warnings, broken public feed fails the check. Not proof of Slack delivery, current credit balance or native runtime.",
+  "nativeChecks": "Full mixed native logic runner passed, including Swift model/method fixtures, account ownership, referral flow, interaction outbox, search/sort, submission rules and paywall exit. Not a fresh handset/simulator UI test; submitted Android78/iOS80 binaries remain unchanged.",
   "budgets": "No scraper/AI budget or paid-service change, no test/customer messages."
 }

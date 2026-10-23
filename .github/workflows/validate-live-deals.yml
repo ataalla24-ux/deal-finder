@@ -101,3 +101,15 @@ jobs:
       - name: Commit validated live deals
         run: |
           node scripts/commit-generated.mjs --message "Validate live deals $(date +%Y-%m-%d)" --files docs/deals.json docs/live-deal-validation-report.json docs/live-deal-review-candidates.json docs/live-deal-llm-review.json docs/live-deal-edit-report.json docs/verified-expiry-review.json docs/source-review-cache.json reviews/verified-expiry-state.json reviews/verified-expiry-report.json reviews/verified-expiry-archive.json
+
+      - name: Read-only operations overview
+        if: ${{ always() }}
+        run: node scripts/check-launch-readiness.mjs
+
+      - name: Preserve operations overview
+        uses: actions/upload-artifact@v4
+        if: ${{ always() }}
+        with:
+          name: launch-readiness
+          path: output/launch-readiness.json
+          retention-days: 30
