@@ -1,11 +1,11 @@
 {
-  "generatedAt": "2026-10-23T10:13:27.792Z",
+  "generatedAt": "2026-10-23T10:19:46.441Z",
   "summary": {
     "maxAgeDays": 7,
-    "total": 303,
-    "allowed": 0,
+    "total": 304,
+    "allowed": 1,
     "blocked": 303,
-    "warnings": 0,
+    "warnings": 1,
     "reasonCounts": {
       "kein konkretes Angebot erkennbar": 226,
       "Gottesdienste nur im Wochenlauf": 36,
@@ -16,7 +16,7 @@
       "älter als 7 Tage (2026-09-14)": 1,
       "älter als 7 Tage (2026-10-14)": 1,
       "älter als 7 Tage (2025-07-30)": 1,
-      "URL ungültig (HTTP 404)": 12,
+      "URL ungültig (HTTP 404)": 9,
       "redaktioneller Mehrfach-Roundup statt eindeutigem Einzelangebot": 1,
       "URL ungültig (Inhalt nicht mehr verfügbar)": 7,
       "älter als 7 Tage (2025-11-09)": 1,
@@ -60,7 +60,7 @@
       "kein konkreter Deal": 228,
       "Gottesdienste außerhalb Wochenlauf": 36,
       "älter als 7 Tage": 146,
-      "ungültige URL": 24,
+      "ungültige URL": 21,
       "sonstiges": 6,
       "abgelaufen": 10,
       "nicht Wien": 11,
@@ -113,7 +113,7 @@
           "kein konkreter Deal": 33,
           "Gottesdienste außerhalb Wochenlauf": 35,
           "älter als 7 Tage": 33,
-          "ungültige URL": 2,
+          "ungültige URL": 1,
           "sonstiges": 1
         }
       },
@@ -167,7 +167,7 @@
         "reasonCategoryCounts": {
           "kein konkreter Deal": 92,
           "älter als 7 Tage": 97,
-          "ungültige URL": 7,
+          "ungültige URL": 5,
           "Gottesdienste außerhalb Wochenlauf": 1,
           "sonstiges": 2,
           "nicht Wien": 1
@@ -212,10 +212,10 @@
         }
       },
       "power-official-food": {
-        "total": 1,
-        "allowed": 0,
+        "total": 2,
+        "allowed": 1,
         "blocked": 1,
-        "warnings": 0,
+        "warnings": 1,
         "reasonCategoryCounts": {
           "nicht Wien": 1
         }
@@ -231,7 +231,25 @@
       }
     }
   },
-  "allowed": [],
+  "allowed": [
+    {
+      "id": "power-food-9e109bce4885",
+      "title": "IKEA Family Angebot: Gratis Kindermenü*",
+      "brand": "IKEA",
+      "source": "power-official-food",
+      "url": "https://www.ikea.com/at/de/food/",
+      "reasons": [],
+      "warnings": [
+        "Aktueller Angebotsblock auf offizieller Anbieterseite erneut bestätigt; Abrufdatum ist kein Veröffentlichungsdatum"
+      ],
+      "sourceDate": "2026-10-23T10:17:39.496Z",
+      "sourceDateSource": "deal.discoveredAt",
+      "sourceAgeDays": 0,
+      "expiryDate": "2026-11-02",
+      "expirySource": "deal.evidence.offerTiming",
+      "urlStatus": "HTTP 200"
+    }
+  ],
   "blocked": [
     {
       "id": "jesuszentrum-events-20261019",
@@ -1243,18 +1261,19 @@
       "source": "Freikirchen Wien",
       "url": "https://www.baptisten.at/wien",
       "reasons": [
-        "URL ungültig (HTTP 404)",
         "kein konkretes Angebot erkennbar",
         "Gottesdienste nur im Wochenlauf",
         "älter als 7 Tage (2026-04-19)"
       ],
-      "warnings": [],
+      "warnings": [
+        "URL nicht eindeutig prüfbar (temporärer Fehler)"
+      ],
       "sourceDate": "2026-04-19T08:59:47.145Z",
       "sourceDateSource": "deal.pubDate",
       "sourceAgeDays": 187,
       "expiryDate": "",
       "expirySource": "deal.expires",
-      "urlStatus": "ungültig: HTTP 404"
+      "urlStatus": "unklar: temporärer URL-Fehler"
     },
     {
       "id": "freikirche-7-20260419",
@@ -2249,17 +2268,18 @@
       "source": "Kirchen Verzeichnis",
       "url": "https://www.baptisten.at/wien",
       "reasons": [
-        "URL ungültig (HTTP 404)",
         "kein konkretes Angebot erkennbar",
         "älter als 7 Tage (2026-02-22)"
       ],
-      "warnings": [],
+      "warnings": [
+        "URL nicht eindeutig prüfbar (temporärer Fehler)"
+      ],
       "sourceDate": "2026-02-22T21:12:35.964Z",
       "sourceDateSource": "deal.pubDate",
       "sourceAgeDays": 243,
       "expiryDate": "",
       "expirySource": "deal.expires",
-      "urlStatus": "ungültig: HTTP 404"
+      "urlStatus": "unklar: temporärer URL-Fehler"
     },
     {
       "id": "gemeinde-9-20260222",
@@ -3047,17 +3067,18 @@
       "source": "Kirchen Verzeichnis",
       "url": "https://www.baptisten.at/wien",
       "reasons": [
-        "URL ungültig (HTTP 404)",
         "kein konkretes Angebot erkennbar",
         "älter als 7 Tage (2026-02-22)"
       ],
-      "warnings": [],
+      "warnings": [
+        "URL nicht eindeutig prüfbar (temporärer Fehler)"
+      ],
       "sourceDate": "2026-02-22T21:12:35.964Z",
       "sourceDateSource": "deal.pubDate",
       "sourceAgeDays": 243,
       "expiryDate": "",
       "expirySource": "deal.expires",
-      "urlStatus": "ungültig: HTTP 404"
+      "urlStatus": "unklar: temporärer URL-Fehler"
     },
     {
       "id": "gottesdienste-17-20260222",
@@ -3802,9 +3823,9 @@
         "nicht eindeutig in Wien"
       ],
       "warnings": [],
-      "sourceDate": "2026-10-22T22:20:55.190Z",
+      "sourceDate": "2026-10-23T10:17:46.205Z",
       "sourceDateSource": "deal.discoveredAt",
-      "sourceAgeDays": 1,
+      "sourceAgeDays": 0,
       "expiryDate": "",
       "expirySource": "deal.expires",
       "urlStatus": "HTTP 200"
