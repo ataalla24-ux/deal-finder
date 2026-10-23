@@ -49,6 +49,8 @@ test('missing, malformed, old and future reports never claim healthy', () => fix
   assert.equal(build().sources.filter(row => row.status === 'warning').length, 4);
 }));
 test('no raw errors, credentials, customer data or credential hashes enter output', () => fixture(({ write, build, reports }) => {
+  write('apify-discovery-report.json', { ...reports['apify-discovery-report.json'],
+    budget: { runCapUsd: { key: 'DO-NOT-PRINT' }, accountUsageUsd: 'DO-NOT-PRINT' } });
   write('food-provider-report.json', { ...reports['food-provider-report.json'],
     secret: 'sk-DO-NOT-PRINT', results: [{ status: 'failed', reason: 'secret=DO-NOT-PRINT' }],
     usage: { zyte: { credentialFingerprint: 'DO-NOT-PRINT' } },

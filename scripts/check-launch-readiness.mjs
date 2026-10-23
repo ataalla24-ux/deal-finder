@@ -13,6 +13,7 @@ const REPORTS = [
   ['Pipeline overview', 'deal-source-health.json', 36],
 ];
 const count = value => Number.isInteger(value) && value >= 0 ? value : null;
+const amount = value => typeof value === 'number' && Number.isFinite(value) && value >= 0 ? value : null;
 const code = value => /^[a-z0-9_-]{1,80}$/i.test(String(value || '')) ? String(value) : 'unspecified';
 const codes = values => [...new Set(values.filter(Boolean).map(code))].slice(0, 20);
 
@@ -63,8 +64,8 @@ function summarize(name, raw) {
     if (raw.budget?.allowed === false) row.holds.push(raw.budget.reason || 'budget-denied');
     row.budget = {
       kind: 'report-snapshot-not-live-balance',
-      reportedUsageUsd: Number.isFinite(raw.budget?.accountUsageUsd) ? raw.budget.accountUsageUsd : null,
-      configuredRunCapUsd: raw.budget?.runCapUsd ?? null,
+      reportedUsageUsd: amount(raw.budget?.accountUsageUsd),
+      configuredRunCapUsd: amount(raw.budget?.runCapUsd),
     };
     if (raw.providerErrors > 0 || raw.batchErrors?.length) row.issues.push('source-or-batch-errors');
   } else if (name === 'Food providers') {
