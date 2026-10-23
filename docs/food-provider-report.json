@@ -1,7 +1,7 @@
 {
-  "runId": "39956637126",
+  "runId": "40012319412",
   "mode": "scan",
-  "createdAt": "2026-10-23T12:52:48.972Z",
+  "createdAt": "2026-10-23T19:33:36.211Z",
   "usage": {
     "scrapingbee": {
       "provider": "scrapingbee",
@@ -45,45 +45,56 @@
   },
   "tasks": [
     {
-      "source": "Gasthaus Maria",
-      "url": "https://www.gasthaus-maria.at/",
+      "source": "Lets be Frank",
+      "url": "https://letsbefrank.at/specials/",
       "provider": "scrapingbee",
       "cap": 5
     },
     {
-      "source": "Salieri",
-      "url": "https://www.salieri.at/",
+      "source": "Mussty",
+      "url": "https://www.mussty.at/spezialangebot/",
       "provider": "zyte",
       "cap": 0.02
-    },
-    {
-      "source": "Weltcafe",
-      "url": "https://weltcafe.at/",
-      "provider": "scraperapi",
-      "cap": 10
     }
   ],
   "skipped": [],
-  "eligiblePages": 3,
-  "finishedAt": "2026-10-23T12:52:58.692Z",
+  "eligiblePages": 2,
+  "finishedAt": "2026-10-23T19:33:45.966Z",
   "status": "completed",
   "results": [
     {
       "provider": "scrapingbee",
-      "source": "Gasthaus Maria",
-      "url": "https://www.gasthaus-maria.at/",
+      "source": "Lets be Frank",
+      "url": "https://letsbefrank.at/specials/",
       "reserved": 5,
-      "directCandidates": 1,
-      "directRejected": [],
-      "directVisibleTextCharacters": 5251,
+      "directCandidates": 2,
+      "directRejected": [
+        {
+          "reason": "alcohol-offer",
+          "title": "Frank’s Apéro Hour",
+          "text": "Frank’s Apéro Hour Every day · 5:00–7:00 PM Prosecco Spritz for just €5.00 . Choose your favourite from Aperol, Campari, Sarti, Limoncello, St-Germain or Lillet and kick off your evening the Frank way. Make it a Spritz T"
+        },
+        {
+          "reason": "alcohol-offer",
+          "title": "Frank’s 3-Course Menu",
+          "text": "Frank’s 3-Course Menu Every day · 6:00–9:30 PM Three courses of seasonal specials · €39 per person Enjoy a delicious three-course menu featuring our seasonal specials, with something new and exciting to discover. Include"
+        }
+      ],
+      "directVisibleTextCharacters": 1214,
       "status": "direct-sufficient",
-      "verifiedCandidates": 1,
+      "verifiedCandidates": 2,
       "verifiedIncrementalCandidates": 0,
       "unverifiedCandidates": 0,
       "candidates": [
         {
-          "id": "power-food-cf3423c45cd4",
-          "title": "Mittwoch ist Schnitzeltag: ab 16:00 Uhr Gebackenes Schweineschnitzel mit Kartoffelsalat (A,C,G) um 8,20 Euro",
+          "id": "power-food-bd5ac1d4b0fe",
+          "title": "Late Night Dinner Special Every day · 9:30–10:30 PM Enjoy 30% off our regular à la carte food menu.",
+          "confirmed": true,
+          "reason": ""
+        },
+        {
+          "id": "power-food-6bc916f54770",
+          "title": "Wednesday Burger Special Every Wednesday · 5:00–9:30 PM All our mouthwatering burgers for just €9.90 .",
           "confirmed": true,
           "reason": ""
         }
@@ -91,47 +102,38 @@
     },
     {
       "provider": "zyte",
-      "source": "Salieri",
-      "url": "https://www.salieri.at/",
+      "source": "Mussty",
+      "url": "https://www.mussty.at/spezialangebot/",
       "reserved": 0.02,
-      "directCandidates": 1,
-      "directRejected": [
-        {
-          "reason": "no-concrete-benefit",
-          "title": "",
-          "text": "MITTAGSMENÜ 1 11,90 € Suppe – Hauptspeise – Dessert MITTAGSMENÜ 2 14,90 € Suppe – Hauptspeise – Dessert"
-        }
-      ],
-      "directVisibleTextCharacters": 2652,
+      "directCandidates": 4,
+      "directRejected": [],
+      "directVisibleTextCharacters": 1647,
       "status": "direct-sufficient",
-      "verifiedCandidates": 1,
+      "verifiedCandidates": 4,
       "verifiedIncrementalCandidates": 0,
       "unverifiedCandidates": 0,
       "candidates": [
         {
-          "id": "power-food-19c0f0c63622",
-          "title": "MITTAGSMENÜ aktion Wochentags, von Mo-Fr von 12:00 – 15.00 Uhr MITTAGSMENÜ 1 11,90 €",
+          "id": "power-food-7354b5175812",
+          "title": "PASTA MENU €9,90 Bolognese I Carbonara I Fungi I Napolitana Auswahl 0.25L Soda/Zitrone, Soda/Himbeer, Apfelsaft gesprıtzt, Orangensaft gesprıtzt Inkl.",
           "confirmed": true,
           "reason": ""
-        }
-      ]
-    },
-    {
-      "provider": "scraperapi",
-      "source": "Weltcafe",
-      "url": "https://weltcafe.at/",
-      "reserved": 10,
-      "directCandidates": 1,
-      "directRejected": [],
-      "directVisibleTextCharacters": 2645,
-      "status": "direct-sufficient",
-      "verifiedCandidates": 1,
-      "verifiedIncrementalCandidates": 0,
-      "unverifiedCandidates": 0,
-      "candidates": [
+        },
         {
-          "id": "power-food-019d2503bc2d",
-          "title": "Tägliches Angebot: KAFFEE UND KUCHEN Veganer Apfelkuchen und Cappuccino oder Schoko-Kuchen und Cappuccino € 7,90",
+          "id": "power-food-b1450cd29249",
+          "title": "BURGER MENU €9,90 Classic Burger I Crispy Cihken I Fish Burger 0.25L Soda/Zitrone, Soda/Himbeer, Apfelsaft gesprıtzt, Orangensaft gesprıtzt Inkl.",
+          "confirmed": true,
+          "reason": ""
+        },
+        {
+          "id": "power-food-d4bf19c416e9",
+          "title": "PIZZA MENU €9,90 Margherita I Salami I Cardinale I Fungi 0.25L Soda/Zitrone, Soda/Himbeer, Apfelsaft gesprıtzt, Orangensaft gesprıtzt Inkl.",
+          "confirmed": true,
+          "reason": ""
+        },
+        {
+          "id": "power-food-5261e7f5922c",
+          "title": "SANDWICH MENU €8,90 Hühner I Köfte I Falafel 0.25L Soda/Zitrone, Soda/Himbeer, Apfelsaft gesprıtzt, Orangensaft gesprıtzt Inkl.",
           "confirmed": true,
           "reason": ""
         }
@@ -140,23 +142,22 @@
   ],
   "funnel": {
     "pagesBySource": {
-      "Gasthaus Maria": 1,
-      "Salieri": 1,
-      "Weltcafe": 1
+      "Lets be Frank": 1,
+      "Mussty": 1
     },
     "statuses": {
-      "direct-sufficient": 3
+      "direct-sufficient": 2
     },
     "rejectionReasons": {
-      "no-concrete-benefit": 1
+      "alcohol-offer": 2
     },
     "verificationReasons": {},
-    "directCandidates": 3,
+    "directCandidates": 6,
     "renderedCandidates": 0,
-    "verifiedCandidates": 3
+    "verifiedCandidates": 6
   },
-  "uniqueVerifiedCandidates": 3,
-  "alreadyKnown": 3,
+  "uniqueVerifiedCandidates": 6,
+  "alreadyKnown": 6,
   "newPendingCandidates": 0,
   "pendingCandidates": 0,
   "slackMessagesSent": 0,
