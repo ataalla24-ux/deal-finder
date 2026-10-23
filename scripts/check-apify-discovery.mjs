@@ -16,14 +16,17 @@ try {
   report.configuredLimits = { ...LIMITS, profileCapUsd: PROFILE_CAP_USD, hashtagCapUsd: HASHTAG_CAP_USD };
   if (fs.existsSync('docs/apify-discovery-report.json')) {
     const last = JSON.parse(fs.readFileSync('docs/apify-discovery-report.json', 'utf8'));
-    const lastId = last.actorRuns?.at(-1)?.id || last.actorRunId;
-    if (/^[A-Za-z0-9]+$/.test(lastId || '')) {
+    const lastIds = [...new Set((last.actorRuns?.map(row => row.id) || [last.actorRunId])
+      .filter(id => /^[A-Za-z0-9]+$/.test(id || '')))].slice(-2);
+    report.lastRuns = [];
+    for (const lastId of lastIds) {
       const run = await client.request(`/actor-runs/${lastId}`);
-      report.lastRun = { id: run.id, status: run.status, usageTotalUsd: run.usageTotalUsd };
+      const evidence = { id: run.id, status: run.status, usageTotalUsd: run.usageTotalUsd };
+      report.lastRuns.push(evidence);
       if (/^[A-Za-z0-9]+$/.test(run.defaultDatasetId || '')) {
-        const items = await client.request(`/datasets/${run.defaultDatasetId}/items?clean=true&format=json&limit=10`);
+        const items = await client.request(`/datasets/${run.defaultDatasetId}/items?clean=true&format=json&limit=${LIMITS.posts}`);
         // Only public business-post evidence; never persist comments, profiles or proxy fields.
-        report.lastRun.records = items.map(row => ({
+        evidence.records = items.map(row => ({
           keys: Object.keys(row), inputUrl: row.inputUrl, url: row.url,
           ownerUsername: row.ownerUsername, timestamp: row.timestamp,
           caption: String(row.caption || '').slice(0, 1800), locationName: row.locationName,
@@ -36,6 +39,7 @@ try {
         }));
       }
     }
+    report.lastRun = report.lastRuns.at(-1) || null;
   }
 } catch (error) {
   report = { checkedAt: new Date().toISOString(), credentialAccepted: false, allowed: false, reason: error.message };
