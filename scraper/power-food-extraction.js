@@ -109,7 +109,7 @@ export function extractFoodExpiry(text, now) {
     validUntil,
     raw: end?.[0] || start?.[0] || compact?.[0] || "",
     recurring:
-      /bis auf widerruf|bis auf wiederuf|jeden|täglich|wochentags|montag bis|freitag und samstag|(?:montag|dienstag|mittwoch|donnerstag|freitag|samstag|sonntag) ist \w+tag|daily|everyday/i.test(
+      /bis auf widerruf|bis auf wiederuf|jeden|täglich|wochentags|montag bis|freitag und samstag|(?:montag|dienstag|mittwoch|donnerstag|freitag|samstag|sonntag) ist \w+tag|\b(?:daily|everyday|every\s+(?:day|monday|tuesday|wednesday|thursday|friday|saturday|sunday))\b/i.test(
         text,
       ),
   };
@@ -127,6 +127,17 @@ export function extractFoodOffers(html, source, options = {}) {
   const $ = load(html);
   $("script,style,noscript,nav,footer,header").remove();
   const bodyText = textOf($, $("body"));
+  // Some merchant cards share a restrictive heading, such as lunch only.
+  // Never lose that condition or guess it after the page layout changes.
+  let offerContext = '';
+  if (source.offerContextSelector) {
+    const context = $(source.offerContextSelector);
+    offerContext = textOf($, context);
+    if (context.length !== 1 || !offerContext || offerContext.length > 300
+        || !source.offerContextPattern?.test(offerContext)) {
+      return { deals: [], rejected: [{ reason: 'missing-offer-context', url: pageUrl }], links: [] };
+    }
+  }
   const blocks = [];
   const rejected = [];
   // Only opt-in merchants with verified promotional image captions. Keep the
@@ -142,7 +153,7 @@ export function extractFoodOffers(html, source, options = {}) {
     });
   }
   const add = (el, method, title) => {
-    const text = textOf($, el);
+    const text = foodText([offerContext, textOf($, el)].filter(Boolean).join(' '));
     if (text.length >= 18 && text.length <= 16000)
       blocks.push({
         text,
@@ -343,7 +354,7 @@ export function extractFoodOffers(html, source, options = {}) {
       lastCheckedAt: now.toISOString(),
       qualityScore: scope ? 78 : 48,
       priority: 2,
-      votes: 1,
+      votes: 0,
       hot: false,
       isNew: true,
       distance: registered

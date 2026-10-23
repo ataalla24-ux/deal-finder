@@ -1,0 +1,61 @@
+{
+  "date": "2026-10-23",
+  "request": "More good Vienna food and non-alcoholic drink offers following the flyer campaign, without additional monetary cost.",
+  "scope": "Two newly covered official merchant specials pages; six exact, independently re-fetched offer blocks prepared for the existing pending queue. No public approvals.",
+  "sources": [
+    {
+      "source": "Lets be Frank",
+      "url": "https://letsbefrank.at/specials/",
+      "locationEvidenceUrl": "https://letsbefrank.at/contact/",
+      "address": "Haidmannsgasse 8, 1150 Wien",
+      "offers": [
+        {
+          "id": "power-food-6bc916f54770",
+          "summary": "Wednesday burgers EUR 9.90, 17:00-21:30; sides and drinks not included."
+        },
+        {
+          "id": "power-food-bd5ac1d4b0fe",
+          "summary": "30% off a la carte food, 21:30-22:30 on opening days; reservation through the merchant website required; drinks excluded."
+        }
+      ],
+      "notes": "Merchant contact page currently lists Tuesday-Saturday opening. No fixed offer end. Two separate alcohol-containing offers excluded, not merged into the food offers."
+    },
+    {
+      "source": "Mussty",
+      "url": "https://www.mussty.at/spezialangebot/",
+      "address": "Favoritenstrasse 133, 1100 Wien",
+      "offers": [
+        { "id": "power-food-7354b5175812", "summary": "Pasta lunch menu EUR 9.90 including a listed 0.25 l non-alcoholic drink." },
+        { "id": "power-food-b1450cd29249", "summary": "Burger lunch menu EUR 9.90 including a listed 0.25 l non-alcoholic drink; no fries promised." },
+        { "id": "power-food-d4bf19c416e9", "summary": "Pizza lunch menu EUR 9.90 including a listed 0.25 l non-alcoholic drink." },
+        { "id": "power-food-5261e7f5922c", "summary": "Sandwich lunch menu EUR 8.90 including a listed 0.25 l non-alcoholic drink." }
+      ],
+      "notes": "These are four menu variants at ONE merchant, not four new locations or percentage discounts. Exact lunch hours and end date not stated; do not infer all-day validity from opening hours. Shared lunch heading retained verbatim; missing, changed or duplicate heading fails closed."
+    }
+  ],
+  "implementation": [
+    "Register the two allowlisted official sources with scoped merchant-card selectors.",
+    "Retain the mandatory shared lunch context; never combine unrelated offer or alcohol blocks.",
+    "Recognize explicit English Every day/weekday recurrence without manufacturing a publication or expiry date.",
+    "Initialize newly extracted official food offers with zero user votes, leaving existing live votes unchanged."
+  ],
+  "verification": {
+    "checkedAt": "2026-10-23T17:43:37.020Z",
+    "freshExactMerchantRevalidation": "6/6 passed",
+    "localSuites": "12/12 passed, including 37 provider budget/cooldown tests and the production feed validator",
+    "pending": "32 existing records preserved exactly, six appended, 38 total",
+    "slackDelivery": "Not yet observed at preparation time; read actual messages after the normal central dispatcher.",
+    "publicAvailability": "Not approved or published by this work."
+  },
+  "constraints": {
+    "providerOrAiBudgetChanges": false,
+    "manualPaidProviderCalls": false,
+    "manualOpenAiCalls": false,
+    "newSchedules": false,
+    "manualSlackDispatch": false,
+    "customerMessages": false,
+    "nativeOrStoreChanges": false,
+    "note": "Only bounded direct official HTTP research and local extraction used. Existing scheduled background jobs continue normally. This is not a guarantee of merchant stock, redemption, daily yield or future zero credit consumption."
+  },
+  "evidence": "output/new-food-offers-2026-10-23/ in the native workspace: actual official HTML, independent fresh revalidation HTML, candidates, before-queue archive, STATUS.json and 12 suite logs/tests.json."
+}

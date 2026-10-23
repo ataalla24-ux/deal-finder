@@ -2,6 +2,31 @@
 // proof that every promotion on the domain applies in Vienna.
 export const POWER_FOOD_SOURCES = [
   {
+    name: 'Lets be Frank',
+    brand: "Let's be Frank",
+    url: 'https://letsbefrank.at/specials/',
+    allowedHosts: ['letsbefrank.at'],
+    selector: '.lbf-content-text-block',
+    address: 'Haidmannsgasse 8, 1150 Wien',
+    locationEvidenceUrl: 'https://letsbefrank.at/contact/',
+    linkPattern: /\/specials\//,
+    category: 'essen',
+  },
+  {
+    name: 'Mussty',
+    url: 'https://www.mussty.at/spezialangebot/',
+    allowedHosts: ['www.mussty.at', 'mussty.at'],
+    selector: '.elementor-top-column > .elementor-widget-wrap:has(.elementor-inner-section h2):has(.elementor-inner-section h3)',
+    offerContextSelector: '.elementor-element-2d78f329 h2',
+    offerContextPattern: /^MITTAGS\s+ANGEBOTE!?$/i,
+    currentOffers: true,
+    address: 'Favoritenstraße 133, 1100 Wien',
+    locationEvidenceUrl: 'https://www.mussty.at/spezialangebot/',
+    pathPrefix: '/spezialangebot/',
+    linkPattern: /\/spezialangebot\//,
+    category: 'essen',
+  },
+  {
     name: 'Gasthaus Maria',
     url: 'https://www.gasthaus-maria.at/',
     allowedHosts: ['www.gasthaus-maria.at', 'gasthaus-maria.at'],
