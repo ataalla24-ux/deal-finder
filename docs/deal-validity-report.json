@@ -1,11 +1,11 @@
 {
-  "generatedAt": "2026-10-23T16:58:16.671Z",
+  "generatedAt": "2026-10-23T17:21:33.090Z",
   "summary": {
     "maxAgeDays": 7,
-    "total": 302,
-    "allowed": 0,
-    "blocked": 302,
-    "warnings": 0,
+    "total": 304,
+    "allowed": 1,
+    "blocked": 303,
+    "warnings": 1,
     "reasonCounts": {
       "kein konkretes Angebot erkennbar": 226,
       "Gottesdienste nur im Wochenlauf": 36,
@@ -47,13 +47,14 @@
       "älter als 7 Tage (2025-12-30)": 1,
       "älter als 7 Tage (2026-10-08)": 4,
       "abgelaufen (2026-08-30)": 4,
+      "ausgeschlossene Quelle (gastro.news)": 21,
       "selbst syndizierter FreeFinder-Post": 1,
       "Gewinnspiel/Verlosung statt direkt nutzbarem Deal": 3,
       "ausgeschlossene Quelle (TheFork)": 1,
+      "Offizielle Aktion nicht erneut bestätigt (source-unavailable)": 1,
       "allgemeine Empfehlung/Gratis-Event statt konkreter Aktion": 2,
       "kein verlässliches Quell-/Post-Datum gefunden": 117,
       "Ortswiderspruch: Originalangebot nennt einen Standort ausserhalb Wiens": 1,
-      "ausgeschlossene Quelle (gastro.news)": 20,
       "Engagement-Aktion ohne garantierte Gegenleistung": 1
     },
     "reasonCategoryCounts": {
@@ -61,12 +62,12 @@
       "Gottesdienste außerhalb Wochenlauf": 36,
       "älter als 7 Tage": 145,
       "ungültige URL": 20,
-      "sonstiges": 9,
+      "sonstiges": 10,
       "abgelaufen": 10,
       "nicht Wien": 11,
+      "ausgeschlossene Quelle": 22,
       "selbst syndiziert": 1,
       "Gewinnspiel": 3,
-      "ausgeschlossene Quelle": 21,
       "kein echtes Post-Datum": 117
     },
     "sourceCounts": {
@@ -193,23 +194,24 @@
         }
       },
       "Meta Instagram Business Discovery": {
-        "total": 11,
+        "total": 10,
         "allowed": 0,
-        "blocked": 11,
+        "blocked": 10,
         "warnings": 0,
         "reasonCategoryCounts": {
           "kein konkreter Deal": 9,
-          "selbst syndiziert": 1,
           "Gewinnspiel": 1
         }
       },
       "Meta Instagram Hashtag API": {
-        "total": 2,
-        "allowed": 0,
-        "blocked": 2,
-        "warnings": 0,
+        "total": 5,
+        "allowed": 1,
+        "blocked": 4,
+        "warnings": 1,
         "reasonCategoryCounts": {
-          "kein konkreter Deal": 2
+          "ausgeschlossene Quelle": 1,
+          "kein konkreter Deal": 2,
+          "selbst syndiziert": 1
         }
       },
       "power-official-food": {
@@ -218,6 +220,7 @@
         "blocked": 1,
         "warnings": 0,
         "reasonCategoryCounts": {
+          "sonstiges": 1,
           "nicht Wien": 1
         }
       },
@@ -241,7 +244,25 @@
       }
     }
   },
-  "allowed": [],
+  "allowed": [
+    {
+      "id": "meta-ig-18012741215767606",
+      "title": "🥙💯 The Doner Special Sandwich at Türkis – Hauptbahnhof was one of the most satisfying bites of our entire Europe trip.",
+      "brand": "Instagram",
+      "source": "Meta Instagram Hashtag API",
+      "url": "https://www.instagram.com/p/De1sDx5gE_K/",
+      "reasons": [],
+      "warnings": [
+        "Inhalt prüfen: Titel zu lang; Angebot kurz benennen, Bedingungen in den Details behalten; Caption-Reste oder Emoji-Codes im sichtbaren Text"
+      ],
+      "sourceDate": "2026-10-23T13:41:15.000Z",
+      "sourceDateSource": "url.instagramShortcode",
+      "sourceAgeDays": 0,
+      "expiryDate": "2026-10-26T16:59:58.065Z",
+      "expirySource": "deal.structured",
+      "urlStatus": "HTTP 200"
+    }
+  ],
   "blocked": [
     {
       "id": "jesuszentrum-events-20261019",
@@ -3503,6 +3524,25 @@
       "urlStatus": "HTTP 200"
     },
     {
+      "id": "meta-ig-17920410261242697",
+      "title": "6-Gänge-Trüffelmenü um € 86 statt € 115 pro Person Bis 6.",
+      "brand": "Panigl",
+      "source": "Meta Instagram Hashtag API",
+      "url": "https://www.instagram.com/p/De1b82ylTuU/",
+      "reasons": [
+        "ausgeschlossene Quelle (gastro.news)"
+      ],
+      "warnings": [
+        "Inhalt prüfen: Caption-Reste oder Emoji-Codes im sichtbaren Text"
+      ],
+      "sourceDate": "2026-10-23T11:20:30.000Z",
+      "sourceDateSource": "url.instagramShortcode",
+      "sourceAgeDays": 0,
+      "expiryDate": "2026-11-06",
+      "expirySource": "url.contentHints.title",
+      "urlStatus": "HTTP 200"
+    },
+    {
       "id": "meta-ig-18114505463017116",
       "title": "Soul Lover Tickets um 5 € sind noch bis Do.",
       "brand": "Solid Soul Afterwork",
@@ -3565,7 +3605,7 @@
       "id": "meta-ig-17928381090423402",
       "title": "🥙 2+1 DÖNER GRATIS!",
       "brand": "Rußbergstraße 9",
-      "source": "Meta Instagram Business Discovery",
+      "source": "Meta Instagram Hashtag API",
       "url": "https://www.instagram.com/reel/DezlAwmE1Mq/",
       "reasons": [
         "selbst syndizierter FreeFinder-Post"
@@ -3781,15 +3821,18 @@
       "source": "power-official-food",
       "url": "https://www.back-werk.at/de/news/es-ist-snackbox-zeit-2618?lang=de",
       "reasons": [
+        "Offizielle Aktion nicht erneut bestätigt (source-unavailable)",
         "nicht eindeutig in Wien"
       ],
-      "warnings": [],
+      "warnings": [
+        "URL nicht eindeutig prüfbar (temporärer Fehler)"
+      ],
       "sourceDate": "2026-10-23T10:17:46.205Z",
       "sourceDateSource": "deal.discoveredAt",
       "sourceAgeDays": 0,
       "expiryDate": "",
       "expirySource": "deal.expires",
-      "urlStatus": "HTTP 200"
+      "urlStatus": "unklar: temporärer URL-Fehler"
     },
     {
       "id": "tiktok-1pyap29",
