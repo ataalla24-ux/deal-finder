@@ -16,7 +16,8 @@ assert.equal($('a[href^="freefinder:"]').length, 0, 'new-customer QR does not op
 assert.equal($('script[src^="pro-test.js"][defer]').length, 1);
 assert.equal($('details').length, 3);
 assert.match($('.reassurance').text(), /Heute zahlst du nichts.*Jederzeit kündbar/);
-assert.match($('.price').text(), /4,99.*pro Monat.*Automatische monatliche Verlängerung/s);
+assert.equal($('.hero .price').length, 0);
+assert.match($('details').text(), /automatisch für 4,99.*pro Monat/);
 assert.match($('.eligibility').text(), /berechtigte Neukunden/);
 assert.match($('details').text(), /24 Stunden/);
 assert.doesNotMatch(html, /current-ios\/deals-home|Testangebot in der App öffnen/);
