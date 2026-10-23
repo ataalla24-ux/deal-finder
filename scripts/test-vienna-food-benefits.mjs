@@ -63,7 +63,8 @@ test('collector keeps cap, counts rejected entries and stops on denial without p
 });
 test('HTTP wrapper rejects redirect, large bodies and records Retry-After',async()=>{
   let pause;
-  const opts={sleep:async()=>{},recordPause:error=>{pause=error.retryAt;}};
+  const opts={sleep:async()=>{},recordPause:error=>{pause=error.retryAt;},readPause:()=>0};
+  await assert.rejects(fetchViennaBenefitPage(url,{...opts,readPause:()=>Date.now()+86400000,fetchImpl:async()=>{throw Error('Persisted pause must stop before HTTP');}}),/cooldown/);
   await assert.rejects(fetchViennaBenefitPage(url,{...opts,fetchImpl:async()=>new Response('',{status:302,headers:{location:'https://evil.test/'}})}),/HTTP 302/);
   await assert.rejects(fetchViennaBenefitPage(url,{...opts,fetchImpl:async()=>new Response('x'.repeat(2500001),{headers:{'content-type':'text/html'}})}),/HTML limit/);
   await assert.rejects(fetchViennaBenefitPage(url,{...opts,fetchImpl:async()=>new Response('',{status:429,headers:{'retry-after':'172800'}})}),error=>error.httpStatus===429&&Date.parse(error.retryAt)>Date.now()+86400000);

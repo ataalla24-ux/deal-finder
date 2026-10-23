@@ -113,10 +113,10 @@ function savedCooldown() {
     throw error;
   }
 }
-export function fetchViennaBenefitPage(url, { sleep = ms => new Promise(r => setTimeout(r,ms)), fetchImpl = fetch, recordPause = recordViennaFoodPause } = {}) {
+export function fetchViennaBenefitPage(url, { sleep = ms => new Promise(r => setTimeout(r,ms)), fetchImpl = fetch, recordPause = recordViennaFoodPause, readPause = () => Math.max(savedCooldown(),readViennaFoodPause()) } = {}) {
   if (!isViennaBenefitUrl(url) && !isViennaBenefitUrl(url,false)) return Promise.reject(new Error('Untrusted benefit URL'));
   const request = nextRequest.catch(() => {}).then(async () => {
-    const pause = Math.max(blockedUntil, savedCooldown(), readViennaFoodPause());
+    const pause = Math.max(blockedUntil, readPause());
     if (pause > Date.now()) throw Object.assign(new Error('Benefit source cooldown'), { retryAt:new Date(pause).toISOString() });
     await sleep(650);
     const response = await fetchImpl(url,{ redirect:'manual', signal:AbortSignal.timeout(10000), headers:{ 'user-agent':'FreeFinder/1.0 (+https://freefinder.at)', 'accept-language':'de-AT,de;q=0.9' } });
