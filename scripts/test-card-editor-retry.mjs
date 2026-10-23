@@ -5,7 +5,7 @@ import { retryQueuedEditorial } from '../scraper/card-editor-retry.js';
 const deal = { id: 'a', title: 'old', slackTs: '2', slackThreadTs: '1', cardEditorial: { version: 1 } };
 function dependencies(overrides = {}) {
   const events = [];
-  return { events, editCard: async d => ({ ...d, title: 'new' }),
+  return { events, enabled: true, editCard: async d => ({ ...d, title: 'new' }),
     isUntouched: async () => true, updateMessage: async d => { events.push(['update', d.title]); return true; },
     persist: async ds => events.push(['persist', ds[0].title]), ...overrides };
 }

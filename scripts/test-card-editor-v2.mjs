@@ -1,8 +1,10 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { applyCardEditorial, createCardEditor, editorialKey, needsCardEditorial, titleClaimGuard } from '../scraper/deal-card-editor.js';
+import { applyCardEditorial, createCardEditor as optionalCardEditor, editorialKey, needsCardEditorial, titleClaimGuard } from '../scraper/deal-card-editor.js';
 import { normalizeDealRecord } from '../scraper/deal-normalization-utils.js';
 import { normalizeDealExpiry } from '../scraper/expiry-utils.js';
+
+const createCardEditor = options => optionalCardEditor({ enabled: true, ...options });
 
 const now = new Date('2026-10-07T12:00:00Z');
 const verified = { titleVerified: true, whenVerified: true, now };

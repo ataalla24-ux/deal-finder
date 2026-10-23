@@ -1,6 +1,8 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { applyCardEditorial, createCardEditor, editorialKey } from '../scraper/deal-card-editor.js';
+import { applyCardEditorial, createCardEditor as optionalCardEditor, editorialKey } from '../scraper/deal-card-editor.js';
+
+const createCardEditor = options => optionalCardEditor({ enabled: true, ...options });
 
 const deal = { id: 'a', title: 'Wien, macht euch bereit für diesen Deal', brand: 'Box 16',
   description: 'Chicken Döner für 3,50 €. Maximal 1 Stück. Gutschein BOX16 erforderlich.',

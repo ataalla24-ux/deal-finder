@@ -7,6 +7,8 @@ jobs:
   check:
     runs-on: ubuntu-latest
     timeout-minutes: 5
+    env:
+      DEAL_CARD_EDITOR_ENABLED: '0'
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -15,6 +17,7 @@ jobs:
       - run: npm ci --ignore-scripts
       - run: node --test scripts/test-deal-card-editor.mjs scripts/test-card-editor-v2.mjs scripts/test-card-editor-retry.mjs scripts/test-card-editor-approval.mjs
       - name: Check two isolated source-backed drafts
+        if: ${{ env.DEAL_CARD_EDITOR_ENABLED == '1' }}
         env:
           OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
         run: node scripts/check-card-editor-live.mjs

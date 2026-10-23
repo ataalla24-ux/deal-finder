@@ -1985,7 +1985,10 @@ async function main() {
   let editorialCache = {};
   try { editorialCache = JSON.parse(fs.readFileSync(editorialCachePath, 'utf8')); }
   catch (error) { if (error.code !== 'ENOENT') console.warn('Text editor cache unreadable; starting fresh'); }
+  const editorialEnabled = process.env.DEAL_CARD_EDITOR_ENABLED === '1';
+  console.log(`AI card editor: ${editorialEnabled ? 'enabled' : 'disabled; no AI drafts or retries'}`);
   const editCard = createCardEditor({
+    enabled: editorialEnabled,
     cache: editorialCache,
     onCache: cache => {
       const entries = Object.entries(cache).slice(-1000);
@@ -1995,6 +1998,7 @@ async function main() {
     },
   });
   const retryEditorial = deals => retryQueuedEditorial(deals, {
+    enabled: editorialEnabled,
     editCard, isUntouched: untouchedEditorialThread, updateMessage: updateEditorialMessage,
     persist: writePendingAll, liveIds: new Set(liveDeals.map(deal => deal.id)),
   });

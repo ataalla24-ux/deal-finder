@@ -1,0 +1,29 @@
+{
+  "date": "2026-10-23",
+  "request": "Replace recurring paid AI title drafting with the owner's daily in-thread editorial review and save API credit for other uses",
+  "scope": "Title drafting and its second-pass verification and queued-card retries only",
+  "productionMode": "disabled",
+  "explicitEnableValue": "DEAL_CARD_EDITOR_ENABLED=1",
+  "changes": [
+    "Title editor is an identity operation by default, with no request, cache callback or clock work",
+    "Queued editorial retries stop before Slack reads, AI requests, message updates and persistence",
+    "Central Slack delivery explicitly disables the editor and no longer receives OPENAI_API_KEY",
+    "Manual paid diagnostic is disabled by default and guarded before any credentials or network use",
+    "Existing offline editor tests opt in only with mocked requests",
+    "Daily in-thread editorial review remains the replacement; original wording may be visible between daily runs"
+  ],
+  "preserved": [
+    "All other existing AI workflows and their budgets and secrets",
+    "Source, validity, alcohol, deduplication and human Slack approval checks",
+    "Persistent approved live title edits, original evidence and all public deal data",
+    "Ordinary validated new-deal delivery to Slack",
+    "Daily review automation at 09:30 Europe/Vienna"
+  ],
+  "verificationPolicy": "Offline request spies and a diagnostic-only Actions workflow with the live AI step skipped. No paid API or real Slack delivery run for testing.",
+  "limitations": [
+    "No fixed monetary saving claimed; avoided requests depend on the number of new drafts and retries",
+    "Other AI workflows may still consume OpenAI API credit",
+    "Already-running jobs checked out before the change may retain old behavior; spent usage is not reversible",
+    "The daily local review depends on the Mac being awake and the desktop app running and uses the signed-in app account's usage limits"
+  ]
+}

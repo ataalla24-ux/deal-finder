@@ -2,6 +2,7 @@ import fs from 'node:fs';
 import assert from 'node:assert/strict';
 import { createCardEditor } from '../scraper/deal-card-editor.js';
 
+assert.equal(process.env.DEAL_CARD_EDITOR_ENABLED, '1', 'Paid card-editor requests are disabled; explicit owner authorization is required to re-enable them');
 assert.ok(process.env.OPENAI_API_KEY, 'Configure the existing OPENAI_API_KEY secret');
 const manifest = JSON.parse(fs.readFileSync('reviews/2026-10-07-card-titles.json', 'utf8'));
 const edit = createCardEditor({ maxCalls: 4 });

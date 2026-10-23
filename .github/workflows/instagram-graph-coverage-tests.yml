@@ -15,6 +15,8 @@ on:
       - 'scripts/test-meta-token-health.mjs'
       - 'scripts/apply-reviewed-deal-copy.mjs'
       - 'scripts/test-reviewed-deal-copy.mjs'
+      - 'scripts/test-*card-editor*'
+      - '.github/workflows/card-editor-check.yml'
       - 'scripts/notify-meta-instagram-health.mjs'
       - 'scripts/test-meta-instagram-health-alert.mjs'
       - '.github/workflows/instagram-graph-coverage-tests.yml'
@@ -32,6 +34,8 @@ on:
       - 'scripts/test-meta-token-health.mjs'
       - 'scripts/apply-reviewed-deal-copy.mjs'
       - 'scripts/test-reviewed-deal-copy.mjs'
+      - 'scripts/test-*card-editor*'
+      - '.github/workflows/card-editor-check.yml'
       - 'scripts/notify-meta-instagram-health.mjs'
       - 'scripts/test-meta-instagram-health-alert.mjs'
       - 'scripts/test-meta-ad-coverage.mjs'
@@ -76,6 +80,7 @@ jobs:
           node scripts/test-meta-token-health.mjs
           node scripts/test-meta-instagram-health-alert.mjs
           node scripts/test-reviewed-deal-copy.mjs
+          node --test scripts/test-deal-card-editor.mjs scripts/test-card-editor-v2.mjs scripts/test-card-editor-retry.mjs scripts/test-card-editor-disabled.mjs
           node scripts/test-instagram-entity-resolution.mjs
           node scripts/test-slack-approval-validation.mjs
           npm run test:instagram-shared-quota

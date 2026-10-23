@@ -90,12 +90,12 @@ jobs:
         # The regression test runs before any message is sent.
         run: |
           node scripts/test-slack-unicode.mjs
-          node --test scripts/test-deal-card-editor.mjs scripts/test-card-editor-v2.mjs scripts/test-card-editor-retry.mjs
+          node --test scripts/test-deal-card-editor.mjs scripts/test-card-editor-v2.mjs scripts/test-card-editor-retry.mjs scripts/test-card-editor-disabled.mjs
           node scripts/test-card-editor-approval.mjs
 
       - name: Deliver validated new deals to Slack
         env:
-          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+          DEAL_CARD_EDITOR_ENABLED: '0'
           SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
           DEAL_REMOVE_LINK_SECRET: ${{ secrets.DEAL_REMOVE_LINK_SECRET }}
           SLACK_CHANNEL_ID: ${{ secrets.SLACK_CHANNEL_ID }}

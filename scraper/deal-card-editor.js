@@ -150,9 +150,11 @@ export function applyCardEditorial(deal, proposal, { status = 'draft', now = new
   return next;
 }
 
-export function createCardEditor({ apiKey = process.env.OPENAI_API_KEY, request = fetch,
+export function createCardEditor({ enabled = process.env.DEAL_CARD_EDITOR_ENABLED === '1',
+  apiKey = process.env.OPENAI_API_KEY, request = fetch,
   model = process.env.DEAL_CARD_EDITOR_MODEL || 'gpt-4.1-mini', maxCalls = 40,
   cache = {}, onCache = () => {}, maxDurationMs = 120000, clock = Date.now } = {}) {
+  if (enabled !== true) return async deal => deal;
   let calls = 0;
   const startedAt = clock();
   async function complete(name, properties, system, input) {

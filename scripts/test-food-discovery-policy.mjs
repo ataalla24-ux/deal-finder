@@ -74,6 +74,7 @@ assert.deepEqual(filtered.reasonCounts, { 'alcohol-offer': 1, 'business-lead-gen
 assert.equal(JSON.stringify(pending), baseline, 'filter must not edit stored evidence or Slack history');
 let editorCalls = 0;
 await retryQueuedEditorial([{ title: 'Gratis Bier', cardEditorial: {}, slackTs: '1', slackThreadTs: '1' }], {
+  enabled: true,
   editCard: async d => { editorCalls++; return d; },
   isUntouched: async () => { editorCalls++; return true; },
   updateMessage: async () => { editorCalls++; return true; },
