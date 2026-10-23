@@ -1,7 +1,7 @@
 {
-  "generatedAt": "2026-10-23T12:04:54.276Z",
+  "generatedAt": "2026-10-23T12:37:53.808Z",
   "source": "instagram-graph-cross-source-verification",
-  "status": "ok",
+  "status": "degraded",
   "configured": true,
   "scannedFiles": [
     "deals-pending-church-events.json",
@@ -140,7 +140,7 @@
     },
     "deals-pending-meta-instagram.json": {
       "deals": 120,
-      "candidates": 17
+      "candidates": 15
     },
     "deals-pending-power.json": {
       "deals": 34,
@@ -167,8 +167,8 @@
       "candidates": 0
     }
   },
-  "candidatePosts": 19,
-  "candidateAccounts": 11,
+  "candidatePosts": 17,
+  "candidateAccounts": 9,
   "skippedAccountCooldowns": 0,
   "selectedAccounts": [
     {
@@ -196,10 +196,15 @@
       "candidates": 1
     }
   ],
-  "fetchedPosts": 150,
-  "exactMatches": 7,
+  "fetchedPosts": 125,
+  "exactMatches": 6,
   "retainedEvidencePosts": 2000,
-  "errors": [],
+  "errors": [
+    {
+      "username": "magazin_wien",
+      "message": "Instagram shared quota paused: Meta usage headroom"
+    }
+  ],
   "accountFailures": {
     "tantisaluti.wien": {
       "count": 2,
@@ -230,19 +235,25 @@
   "sharedQuota": {
     "limitPerHour": 190,
     "usageThreshold": 95,
-    "requests": 6,
-    "reserved": 10,
-    "stopped": false,
-    "reason": "",
-    "highestUsagePercent": 34,
+    "requests": 5,
+    "reserved": 5,
+    "stopped": true,
+    "reason": "Instagram shared quota paused: Meta usage headroom",
+    "highestUsagePercent": 95,
     "waitedMs": 0,
     "pacingMs": 0,
-    "retryAt": "",
+    "retryAt": "2026-10-23T12:48:02.925Z",
     "adaptiveSafetyCeiling": 190,
     "adaptiveIncreases": 0,
     "storageFailure": null
   },
+  "globalError": {
+    "username": "magazin_wien",
+    "status": 0,
+    "code": "SCAN_BUDGET",
+    "message": "Instagram shared quota paused: Meta usage headroom"
+  },
   "blockedEvidencePosts": 81,
-  "unmatchedCandidatePosts": 12,
-  "message": "7/19 fresh cross-source Instagram candidates matched exactly via Graph API."
+  "unmatchedCandidatePosts": 11,
+  "message": "6/17 fresh cross-source Instagram candidates matched exactly via Graph API."
 }
