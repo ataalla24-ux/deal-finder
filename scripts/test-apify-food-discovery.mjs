@@ -4,7 +4,7 @@ import fs from 'node:fs';
 import { RUN_CAP_USD } from '../scraper/apify-discovery-client.js';
 import { DAY, LIMITS, TAGS, discoverySources, selectDiscoverySources, reservationReason,
   classifyDiscoveryPost, postFingerprint, postIdentity, mergeDiscoveryPending } from '../scraper/apify-food-discovery-policy.js';
-import { actorBounds, actorInput, runBoundedActor, collectDiscoveryBatches, restrictedMediaFetch, safeMediaUrl, processDiscoveryItems, pipelineHealthReport } from '../scraper/apify-food-discovery.js';
+import { actorBounds, actorInput, runBoundedActor, collectDiscoveryBatches, restrictedMediaFetch, safeMediaUrl, processDiscoveryItems, pipelineHealthReport, discoverySourceOutcomes } from '../scraper/apify-food-discovery.js';
 
 const now = new Date('2026-10-22T18:00:00Z');
 const post = overrides => ({ url: 'https://www.instagram.com/p/TestCoffee1/', caption: 'Wien: Nur heute 1+1 auf alle Kaffee!',
@@ -353,6 +353,42 @@ test('changed expired caption removes pending item; incomplete OCR retries, sour
   assert.equal(failed.report.providerErrors, 1); assert.equal(failed.deals.length, 1);
   const changed = await processDiscoveryItems([{ ...raw, caption: 'Wien: Kaffee gratis am 20.10.2026!' }], { now, previous: first.deals });
   assert.equal(changed.deals.length, 0);
+});
+test('empty and missing sources are attributed and pause without fabricating healthy coverage', async () => {
+  const sources = [
+    { key: 'profile:empty', kind: 'profile', username: 'empty', url: 'https://www.instagram.com/empty/' },
+    { key: 'profile:gone', kind: 'profile', username: 'gone', url: 'https://www.instagram.com/gone/' },
+    { key: 'hashtag:oldfood', kind: 'hashtag', url: 'https://www.instagram.com/explore/tags/oldfood/' },
+  ];
+  const items = [{ error: 'no_items', inputUrl: sources[0].url },
+    { error: 'not_found', url: sources[1].url },
+    post({ inputUrl: sources[2].url, timestamp: '2026-09-01T09:00:00Z' })];
+  const first = discoverySourceOutcomes(sources, items, {}, new Set(), now);
+  assert.equal(first['profile:empty'].status, 'no-items');
+  assert.equal(first['profile:gone'].status, 'not-found');
+  assert.equal(first['hashtag:oldfood'].status, 'stale-results');
+  assert.equal(first['profile:empty'].retryAt, new Date(+now + 2 * DAY).toISOString());
+  assert.equal(first['profile:gone'].retryAt, new Date(+now + 30 * DAY).toISOString());
+  assert.equal(selectDiscoverySources(sources, { sources: first }, new Date(+now + DAY)).length, 0);
+  const processed = await processDiscoveryItems(items, { now });
+  assert.equal(processed.report.providerErrors, 1);
+  assert.equal(processed.report.emptySourceRecords, 1);
+  assert.equal(processed.deals.length, 0);
+  const again = discoverySourceOutcomes(sources, items, first, new Set(), new Date(+now + 2 * DAY));
+  assert.equal(again['profile:empty'].consecutiveEmpty, 2);
+  assert.equal(again['profile:empty'].retryAt, new Date(+now + 6 * DAY).toISOString());
+  const recovery = discoverySourceOutcomes([sources[0]], [post({ ownerUsername: 'empty', inputUrl: sources[0].url })], again, new Set(), now);
+  assert.equal(recovery['profile:empty'].status, 'posts-returned');
+  assert.equal(recovery['profile:empty'].consecutiveEmpty, 0);
+  assert.equal(recovery['profile:empty'].retryAt, '');
+});
+test('source attribution rejects lookalikes and never retries an unavailable batch early', () => {
+  const source = { key: 'profile:cafe', kind: 'profile', username: 'cafe', url: 'https://www.instagram.com/cafe/' };
+  const result = discoverySourceOutcomes([source], [{ error: 'not_found', url: 'https://instagram.com.evil.test/cafe/' }], {}, new Set(), now);
+  assert.equal(result[source.key].status, 'no-attributed-results');
+  const failed = discoverySourceOutcomes([source], [], {}, new Set([source.key]), now);
+  assert.equal(failed[source.key].status, 'failed');
+  assert(Date.parse(failed[source.key].retryAt) >= +now + DAY);
 });
 test('unknown expiry is anchored to post date, no TTL refresh; content clones dedupe', () => {
   const raw = post({ caption: 'Wien: Kaffee gratis!' });

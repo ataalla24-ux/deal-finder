@@ -102,10 +102,6 @@ export const POWER_FOOD_SOURCES = [
   {
     name: "Vapiano",
     url: "https://www.vapiano.at/news/",
-    seeds: [
-      "https://www.vapiano.at/vapiano-happy-hour/",
-      "https://www.vapiano.at/aufgepassta-jeder-tag-ist-pasta-tag/",
-    ],
     category: "essen",
     allowedHosts: ["www.vapiano.at", "vapiano.at"],
     linkPattern: /happy-hour|pasta-tag|angebot|aktion/i,

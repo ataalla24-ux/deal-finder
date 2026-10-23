@@ -32,6 +32,20 @@ const recovered = await runScheduledPowerSource(source, report(second), async ()
   source: source.name, url: source.url, status: 'ok', rows: [], deals: 0,
 }), new Date('2026-10-23T12:00:00Z'));
 assert.equal(recovered.cooldown, null, 'success resets the failure count, even with no offer');
+const partialMissing = { source: source.name, url: source.url, status: 'ok', deals: 0, rows: [],
+  error: 'HTTP 404', pages: [{ url: source.url, status: 'ok' },
+    { url: 'https://example.test/old-offer', status: 'error', error: 'HTTP 404', httpStatus: 404 }] };
+const partialSource = await runScheduledPowerSource(source, {}, async () => partialMissing, now);
+assert.equal(partialSource.cooldown, null, 'a dead optional offer page must not pause the healthy merchant');
+assert(partialSource.pageCooldowns['https://example.test/old-offer'].nextRetryAt);
+const pageRequests = [];
+const partialRetry = await runScheduledPowerSource(source, report(partialSource), async configured =>
+  crawlFoodSource({ ...configured, seeds: ['https://example.test/old-offer'] }, {
+    now: new Date(+now + hour), fetchPage: async url => { pageRequests.push(url); return { html: '<body>No offers</body>' }; },
+    pageCooldowns: configured.pageCooldowns,
+  }), new Date(+now + hour));
+assert.deepEqual(pageRequests, [source.url], 'retry the healthy root but not a quarantined optional page');
+assert(partialRetry.pageCooldowns['https://example.test/old-offer'].nextRetryAt);
 const longRetry = await runScheduledPowerSource(source, {}, async () => ({
   ...await fail(), retryAt: '2026-11-20T12:00:00.000Z',
 }), now);
@@ -45,11 +59,18 @@ await runScheduledPowerSource(source, report({ ...await fail(), status: 'ok', er
 }, now);
 assert.equal(partialCalls, 1, 'legacy optional-page errors do not pause a reachable source');
 let correctedCalls = 0;
-await runScheduledPowerSource({ ...source, url: 'https://example.test/new' }, report(first), async () => {
+const changedBlocked = await runScheduledPowerSource({ ...source, url: 'https://example.test/new' }, report(first), async () => {
   correctedCalls++;
   return { status: 'ok' };
 }, now);
-assert.equal(correctedCalls, 1, 'an explicitly corrected endpoint is not held by an obsolete URL failure');
+assert.equal(correctedCalls, 0, 'an alternate endpoint must not bypass a merchant-wide throttle');
+assert.equal(changedBlocked.status, 'deferred');
+await runScheduledPowerSource({ ...source, url: 'https://example.test/new' },
+  report({ ...first, error: 'HTTP 404', cooldown: { ...first.cooldown, reason: 'missing-endpoint' } }), async () => {
+    correctedCalls++;
+    return { status: 'ok' };
+  }, now);
+assert.equal(correctedCalls, 1, 'an explicitly corrected missing endpoint can be tried, unlike an access denial');
 for (const status of [401, 403, 404, 410, 500, 521]) {
   const row = await runScheduledPowerSource(source, {}, async () => ({ ...await fail(), error: `HTTP ${status}` }), now);
   assert.ok(Date.parse(row.cooldown.nextRetryAt) > +now);
@@ -82,6 +103,8 @@ const noBrowser = await crawlFoodSource(jsSource, { now, maxPages: 1,
   fetchPage: async () => ({ html: '<html><body><div id="root"></div></body></html>' }) });
 assert.equal(noBrowser.pages[0].status, 'needs-browser');
 assert.equal(noBrowser.status, 'error', 'an unrendered shell is not a healthy no-offers result');
+const noBrowserScheduled = await runScheduledPowerSource(jsSource, {}, async () => noBrowser, now);
+assert.equal(noBrowserScheduled.cooldown.reason, 'source-error', 'missing browser errors still pause repeated failed work');
 let aliasCalls = 0;
 await crawlFoodSource({ ...source, seeds: ['https://example.test/angebote'] }, {
   now, fetchPage: async () => {

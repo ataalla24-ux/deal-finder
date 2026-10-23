@@ -1729,7 +1729,10 @@ async function collectInstagramGraph(config, accountCatalog, state, now, fetchIm
     }
     return !globalError;
   };
-  for (const account of accountQueue) {
+  // The shared Meta CPU/usage guard can stop us far below maxGraphRequests.
+  // Give due hashtags a turn after a small merchant head, not after 300 accounts.
+  const accountHeadLimit = config.coverageMode && plannedHashtags.length ? 8 : accountQueue.length;
+  for (const account of accountQueue.slice(0, accountHeadLimit)) {
     if (budget.stats.stopped || globalError) break;
     if (config.coverageMode && budget.stats.requests >= accountRequestCeiling) break;
     if (successfulAccounts >= accountTarget || selectedAccounts.length >= maxAccountAttempts) break;

@@ -685,6 +685,7 @@ async function main() {
         renderPage: process.env.POWER_BROWSER_FALLBACK === '1' ? fetchHTMLWithBrowser : undefined,
         maxPages: Number(process.env.POWER_FOOD_MAX_PAGES || 5),
         maxDeals: MAX_DEALS_PER_SOURCE,
+        pageCooldowns: source.pageCooldowns,
       });
       console.log(`🍽️ ${source.name}: ${result.deals} Kandidaten (${result.operationalStatus})`);
       return result;

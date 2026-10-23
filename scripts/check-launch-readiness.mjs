@@ -60,7 +60,8 @@ export async function probeLiveFeed(fetchImpl = fetch) {
 function summarize(name, raw) {
   const row = { name, state: raw.status || 'unknown', counts: {}, holds: [], issues: [] };
   if (name === 'Apify 2') {
-    row.counts = { posts: count(raw.fetchedRecords), newCandidates: count(raw.freshAcceptedDeals), sourceErrors: count(raw.providerErrors) };
+    row.counts = { returnedRecords: count(raw.fetchedRecords), newCandidates: count(raw.freshAcceptedDeals),
+      sourceErrors: count(raw.providerErrors), emptySourceRecords: count(raw.emptySourceRecords) };
     if (raw.budget?.allowed === false) row.holds.push(raw.budget.reason || 'budget-denied');
     row.budget = {
       kind: 'report-snapshot-not-live-balance',

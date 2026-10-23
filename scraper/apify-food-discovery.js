@@ -8,6 +8,7 @@ import {
 } from './apify-food-discovery-policy.js';
 import { analyzeInstagramMediaItem, detectMediaTools, entryMediaPriority } from './instagram-media-evidence.js';
 import { buildPipelineRunReport, writePipelineRunReport } from './pipeline-run-report-utils.js';
+import { realPostTimestamp } from './import-apify-instagram-deals.js';
 
 export const ACTOR_BUILD = '0.0.830';
 export const HASHTAG_BUILD = '0.0.707';
@@ -64,7 +65,8 @@ export function pipelineHealthReport(report) {
     acceptedDeals: report.freshAcceptedDeals || 0,
     rejected: (report.candidateAudit || []).filter(row => row.status === 'rejected'),
     diagnostics: { pendingDeals: report.pendingDeals || 0, unchangedPosts: report.unchangedPosts || 0,
-      providerErrors: report.providerErrors || 0, ocrCalls: report.ocrCalls || 0, sources: report.sources || [] },
+      providerErrors: report.providerErrors || 0, emptySourceRecords: report.emptySourceRecords || 0,
+      ocrCalls: report.ocrCalls || 0, sources: report.sources || [] },
     constraints: LIMITS, errors: [report.error, ...(report.batchErrors || []).map(e => e.reason)].filter(Boolean),
   });
 }
@@ -166,7 +168,7 @@ export async function processDiscoveryItems(items, {
   const seen = Object.fromEntries(Object.entries(state.seen || {}).filter(([, v]) => Date.parse(v.at) >= +now - 14 * DAY));
   const fresh = [], rejected = [], audit = [];
   const batch = new Set();
-  let ocrCalls = 0, unchanged = 0, duplicates = 0, providerErrors = 0;
+  let ocrCalls = 0, unchanged = 0, duplicates = 0, providerErrors = 0, emptySourceRecords = 0;
   // Spend bounded OCR slots on likely offers first, not provider arrival order.
   const ordered = items.slice(0, LIMITS.posts).map((raw, index) => {
     const account = (registry.accounts || []).find(a => String(a.username).toLowerCase() === String(raw?.ownerUsername || '').toLowerCase());
@@ -174,6 +176,7 @@ export async function processDiscoveryItems(items, {
       context: { account: { ...account, verifiedVienna: account?.viennaVerified === true } } }, now) };
   }).sort((a, b) => b.priority - a.priority || a.index - b.index);
   for (const { raw } of ordered) {
+    if (raw?.error === 'no_items') { emptySourceRecords++; continue; }
     if (!raw || typeof raw !== 'object' || raw.error || raw.errorDescription) { providerErrors++; continue; }
     const key = postIdentity(raw);
     const fingerprint = postFingerprint(raw);
@@ -199,7 +202,50 @@ export async function processDiscoveryItems(items, {
   const deals = mergeDiscoveryPending(previous.filter(d => !knownPostKeys.has(postIdentity(d))), fresh, rejected, now);
   return { deals, seen: Object.fromEntries(Object.entries(seen).sort((a, b) => b[1].at.localeCompare(a[1].at)).slice(0, 1000)),
     report: { fetchedRecords: items.length, freshAcceptedDeals: fresh.length, pendingDeals: deals.length,
-      unchangedPosts: unchanged, duplicatePosts: duplicates, providerErrors, ocrCalls, candidateAudit: audit } };
+      unchangedPosts: unchanged, duplicatePosts: duplicates, providerErrors, emptySourceRecords, ocrCalls, candidateAudit: audit } };
+}
+
+function sourceUrl(value) {
+  try {
+    const url = new URL(value);
+    return url.protocol === 'https:' && ['instagram.com', 'www.instagram.com'].includes(url.hostname)
+      && !url.username && !url.password && !url.port
+      ? url.pathname.replace(/\/+$/, '').toLowerCase() : '';
+  } catch { return ''; }
+}
+
+export function discoverySourceOutcomes(sources, items, previous, failedSources, now) {
+  return Object.fromEntries(sources.map(source => {
+    const expected = sourceUrl(source.url);
+    const rows = items.filter(raw => expected && (sourceUrl(raw?.inputUrl) === expected
+      || sourceUrl(raw?.url) === expected
+      || (source.kind === 'profile' && raw?.ownerUsername?.toLowerCase() === source.username)));
+    const posts = rows.filter(raw => postIdentity(raw) && !raw.error && !raw.errorDescription);
+    const dates = posts.map(raw => Date.parse(realPostTimestamp(raw).iso));
+    const prior = previous[source.key] || {};
+    const entry = { ...prior, lastAttemptAt: now.toISOString(), postsReturned: posts.length };
+    const notFound = rows.some(raw => raw.error === 'not_found');
+    const failed = failedSources.has(source.key) || rows.some(raw =>
+      (raw.error || raw.errorDescription) && raw.error !== 'no_items');
+    const empty = !posts.length && rows.some(raw => raw.error === 'no_items');
+    const stale = dates.length > 0 && dates.every(date => Number.isFinite(date) && date < +now - 7 * DAY);
+    entry.status = notFound ? 'not-found' : failed ? 'failed' : empty ? 'no-items'
+      : stale ? 'stale-results' : posts.length ? 'posts-returned' : 'no-attributed-results';
+    if (notFound || failed || entry.status === 'no-attributed-results') {
+      entry.consecutiveFailures = Math.min(10, Math.max(0, Math.floor(Number(prior.consecutiveFailures) || 0)) + 1);
+      entry.retryAt = new Date(+now + (notFound ? 30 : Math.min(7, 2 ** Math.min(3, entry.consecutiveFailures - 1))) * DAY).toISOString();
+    } else if (empty || stale) {
+      // Empty results can mean filters, privacy or a provider limitation. They
+      // are unverified coverage, not proof of an inactive or healthy account.
+      entry.consecutiveEmpty = Math.min(10, Math.max(0, Math.floor(Number(prior.consecutiveEmpty) || 0)) + 1);
+      entry.retryAt = new Date(+now + Math.min(7, 2 ** Math.min(3, entry.consecutiveEmpty)) * DAY).toISOString();
+    } else {
+      entry.consecutiveFailures = 0;
+      entry.consecutiveEmpty = 0;
+      entry.retryAt = '';
+    }
+    return [source.key, entry];
+  }));
 }
 
 export async function main(mode = '--plan') {
@@ -271,20 +317,8 @@ export async function main(mode = '--plan') {
     state.seen = processed.seen;
     state.retryAt = result.retryAt;
     reservation.status = result.errors.length && !result.runs.length ? 'failed'
-      : processed.report.providerErrors || result.errors.length ? 'partial' : 'succeeded';
-    for (const source of plan.sources) {
-      const rows = result.items.filter(raw => String(raw.inputUrl || '').replace(/\/$/, '') === source.url.replace(/\/$/, '')
-        || (source.kind === 'profile' && raw.ownerUsername?.toLowerCase() === source.username));
-      const failures = rows.filter(row => row.error || row.errorDescription);
-      const entry = state.sources[source.key];
-      entry.postsReturned = rows.filter(row => postIdentity(row) && !row.error && !row.errorDescription).length;
-      entry.status = failures.length || result.failedSources.has(source.key) ? 'failed'
-        : entry.postsReturned ? 'posts-returned' : 'no-attributed-results';
-      if (entry.status === 'failed') {
-        entry.consecutiveFailures = (entry.consecutiveFailures || 0) + 1;
-        entry.retryAt = new Date(+now + Math.min(7, 2 ** (entry.consecutiveFailures - 1)) * DAY).toISOString();
-      } else if (rows.length) { entry.consecutiveFailures = 0; entry.retryAt = ''; }
-    }
+      : processed.report.providerErrors || processed.report.emptySourceRecords || result.errors.length ? 'partial' : 'succeeded';
+    Object.assign(state.sources, discoverySourceOutcomes(plan.sources, result.items, state.sources, result.failedSources, now));
     Object.assign(report, processed.report, { status: reservation.status, actorRuns: result.runs, batchErrors: result.errors,
       reportedChargeUsd: result.runs.reduce((sum, run) => sum + (run.reportedChargeUsd || 0), 0),
       tools, sources: plan.sources.map(s => ({ key: s.key, ...state.sources[s.key] })) });

@@ -127,6 +127,19 @@ try {
   assert(result.report.accountCoverage.firstChecksThisRun > 0);
   assert(result.report.accountCoverage.directoryUnchecked < 891);
   assert.equal(Object.keys(result.state.accountPerformance).length, result.report.selectedAccounts.length);
+  const sharedLimitedCalls = [];
+  const sharedLimited = await runMetaInstagramCollector({ config: { ...testConfig, maxGraphRequests: 300 },
+    env: {}, now: start, paths, write: false, fetchImpl: async (url) => {
+      if (sharedLimitedCalls.length >= 12) throw Object.assign(new Error('shared budget exhausted'), { code: 'SCAN_BUDGET' });
+      const parsed = new URL(url); sharedLimitedCalls.push(parsed);
+      if (parsed.pathname.endsWith('/ig_hashtag_search')) return Response.json({ data: [{ id: `tag-${parsed.searchParams.get('q')}` }] });
+      if (parsed.pathname.endsWith('/recent_media')) return Response.json({ data: [] });
+      return Response.json({ business_discovery: { media: { data: [] } } });
+    } });
+  assert(sharedLimitedCalls.some(url => url.pathname.endsWith('/recent_media')),
+    'real shared headroom can stop well before the configured 300-call ceiling; admit hashtags early');
+  assert(sharedLimited.report.selectedAccounts.length > 0, 'hashtag coverage must retain merchant discovery');
+  assert.equal(sharedLimitedCalls.length, 12, 'never work around or extend the shared quota');
   let blockedUsername = '';
   const oneUnavailable = await runMetaInstagramCollector({ config: { ...testConfig, hashtags: [], maxAccountsPerRun: 3 }, env: {}, now: start, paths, write: false, fetchImpl: async (url) => {
     const username = new URL(url).searchParams.get('fields').match(/username\(([^)]+)\)/)[1];

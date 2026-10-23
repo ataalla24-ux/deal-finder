@@ -142,9 +142,11 @@ test('benchmark stays one-shot; scans expand to distinct allowlisted food pages 
   state.reservations.push({ runId: '123', mode: 'benchmark', at: now.toISOString(), tasks: plan.tasks });
   assert.equal(planRequests(state, power(), usages, 'benchmark', now, '124').tasks.length, 0);
   const scan = planRequests(empty(), power(), usages, 'scan', now, '124');
-  assert.equal(scan.tasks.length, 18);
-  assert.equal(new Set(scan.tasks.map(taskKey)).size, 18);
-  for (const p of ['scrapingbee', 'zyte', 'scraperapi']) assert.equal(scan.tasks.filter(t => t.provider === p).length, 6);
+  assert.equal(scan.tasks.length, 16, '15 official food roots plus one current seed; exclude obsolete/alcohol-only Vapiano seeds');
+  assert.equal(new Set(scan.tasks.map(taskKey)).size, 16);
+  for (const [p, expected] of Object.entries({ scrapingbee: 6, zyte: 5, scraperapi: 5 }))
+    assert.equal(scan.tasks.filter(t => t.provider === p).length, expected);
+  assert(!scan.tasks.some(t => /vapiano-happy-hour|aufgepassta-jeder-tag-ist-pasta-tag/.test(t.url)));
   assert.deepEqual(scan.tasks.slice(0, 3).map(t => t.provider), ['scrapingbee', 'zyte', 'scraperapi']);
   assert.ok(scan.tasks.every(t => ['essen', 'kaffee'].includes(POWER_FOOD_SOURCES.find(s => s.name === t.source).category)));
 });
@@ -152,12 +154,12 @@ test('expired trial services leave normal free discovery running; missing guard 
   const later = new Date('2026-11-22T10:00:00Z');
   const report = { ...power(), finishedAt: later.toISOString() };
   const scan = planRequests(empty(), report, { ...usages, scraperapi: { ...usages.scraperapi, maximum: 1000 } }, 'scan', later, '999');
-  assert.equal(scan.tasks.length, 18);
+  assert.equal(scan.tasks.length, 16);
   assert.ok(scan.tasks.every(t => t.provider === 'scraperapi'));
   assert.ok(scan.skipped.find(row => row.provider === 'scrapingbee' && /expired/.test(row.reason)));
   assert.ok(scan.skipped.find(row => row.provider === 'zyte' && /expired/.test(row.reason)));
   const unbound = planRequests(empty(), power(), { ...usages, zyte: { ...usages.zyte, trialKeyBound: false } }, 'scan', now, '1000');
-  assert.equal(unbound.tasks.length, 18);
+  assert.equal(unbound.tasks.length, 16);
   assert.ok(unbound.tasks.every(t => t.provider !== 'zyte'));
 });
 test('source cooldowns remain shared across every provider and rotation favors oldest attempts', () => {

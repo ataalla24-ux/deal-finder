@@ -13,12 +13,18 @@ export async function crawlFoodSource(source, options) {
   const queue = [source.url, ...(source.seeds || [])];
   const seen = new Set();
   const pages = [];
+  const deferredPages = [];
   const candidates = [];
   const rejected = [];
   while (queue.length && pages.length < maxPages) {
     const url = queue.shift();
     if (seen.has(url) || !isAllowedFoodUrl(url, source)) continue;
     seen.add(url);
+    const pageRetryAt = options.pageCooldowns?.[url]?.nextRetryAt;
+    if (url !== source.url && Date.parse(pageRetryAt) > +now) {
+      deferredPages.push({ url, retryAt: pageRetryAt });
+      continue;
+    }
     try {
       let response = await options.fetchPage(url);
       if (!isAllowedFoodUrl(response.finalUrl || url, source))
@@ -108,6 +114,7 @@ export async function crawlFoodSource(source, options) {
     deals: rows.length,
     rows,
     pages,
+    ...(deferredPages.length ? { deferredPages } : {}),
     rejected,
     rejectedCount: rejected.length,
     sourceKind: "official-food",
