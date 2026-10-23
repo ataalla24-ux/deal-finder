@@ -2,7 +2,7 @@ import fs from 'node:fs/promises';
 import { pathToFileURL } from 'node:url';
 import { load } from 'cheerio';
 import { FoodProviderClient, ProviderError } from './food-provider-client.js';
-import { DAY, SCAN_PROVIDERS, freeBudget, planRequests, validateLedger, sourceAvailable, canonicalPage, taskKey } from './food-provider-policy.js';
+import { DAY, SCAN_PROVIDERS, freeBudget, planRequests, validateLedger, sourceAvailable, powerPageAvailable, canonicalPage, taskKey } from './food-provider-policy.js';
 import { POWER_FOOD_SOURCES } from './power-food-sources.js';
 import { extractFoodOffers, discoverFoodLinks } from './power-food-extraction.js';
 import { fetchOfficialFoodPage, verifyOfficialFoodDeal } from './power-food-verification.js';
@@ -121,7 +121,8 @@ export async function collectPlan(plan, state, powerReport, {
     const row = { provider: task.provider, source: source.name, url, reserved: task.cap };
     const unspent = () => { reservation.unspent ||= []; reservation.unspent.push(index); };
     let chargedAttempted = false;
-    if (clock() >= deadline || !sourceAvailable(source, powerReport, state, currentTime())) {
+    if (clock() >= deadline || !sourceAvailable(source, powerReport, state, currentTime())
+        || !powerPageAvailable(source, powerReport, url, currentTime())) {
       results.push({ ...row, status: clock() >= deadline ? 'runtime-stopped' : 'source-paused' });
       unspent(); await save(); continue;
     }

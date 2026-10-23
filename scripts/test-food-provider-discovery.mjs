@@ -387,6 +387,24 @@ test('empty-page cooldown does not hide a different promotion at the same mercha
   assert.ok(targets.some(t => t.url === b));
   assert.equal(state.sources.KFC, undefined);
 });
+test('Power child-page pauses remain binding for every provider and a pre-reserved task', async () => {
+  const state = empty(), a = `${source.url}aktion/a`, b = `${source.url}aktion/b`, report = power();
+  rememberLinks(state, source, [a, b], now);
+  const row = report.sources.find(s => s.source === source.name);
+  row.pageCooldowns = { [a]: { nextRetryAt: new Date(+now + DAY).toISOString() } };
+  row.deferredPages = [{ url: a, retryAt: new Date(+now + DAY).toISOString() }];
+  const targets = scanTargets(state, report, now).filter(t => t.source === source.name);
+  assert(!targets.some(t => t.url === a), 'a healthy root is not permission to proxy its paused child');
+  assert(targets.some(t => t.url === b));
+  const tasks = [{ provider: 'scrapingbee', source: source.name, url: a, cap: 5 }];
+  state.reservations.push({ runId: '806', mode: 'scan', at: now.toISOString(), tasks });
+  const output = await collectPlan({ runId: '806', mode: 'scan', tasks }, state, report, { now,
+    fetchPage: () => assert.fail('no direct retry of the paused page'),
+    clientFor: () => assert.fail('no provider retry of the paused page'),
+  });
+  assert.equal(output.results[0].status, 'source-paused');
+  assert.deepEqual(state.reservations[0].unspent, [0]);
+});
 
 test('direct offers keep review evidence, discover child links, and do not consume reserved credits', async () => {
   const state = empty(), tasks = [{ provider: 'scrapingbee', source: source.name, url: source.url, cap: 5 }];

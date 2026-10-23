@@ -29,13 +29,13 @@
   },
   "power": {
     "diagnosis": "Most seven failed sources were unrelated retail403/404s, not seven broken Vienna-food merchants. Vapiano news entry now200; old Pasta-tag seed404 and Happy-hour seed alcohol-only. A failed optional child could incorrectly pause an otherwise healthy merchant.",
-    "changes": "Optional child failures get per-page persisted backoff, leaving healthy merchant pages available. Root failures, any401/403/429 and Retry-After remain merchant-wide. URL changes no longer bypass access/rate-limit pauses. Missing browser remains a failure with backoff. Remove the two obsolete/alcohol-only Vapiano seeds; keep current official news root and existing offer-only discovery.",
+    "changes": "Optional child failures get per-page persisted backoff, leaving healthy merchant pages available. The existing three provider planner AND pre-request collector inherit these child pauses, including already-reserved tasks, without proxying a held page. Root failures, any401/403/429 and Retry-After remain merchant-wide. URL changes no longer bypass access/rate-limit pauses. Missing browser remains a failure with backoff. Remove the two obsolete/alcohol-only Vapiano seeds; keep current official news root and existing offer-only discovery.",
     "freshProbe": "One bounded direct request to current official Vapiano news: HTTP200,18749bytes, healthy no-offers, zero candidates, no renderer/provider/AI or publication. Diagnostic probes before correction also confirmed old pasta URL404; no old promotion/date revived.",
     "retainedLimitations": "Retail denials and TGTG429 remain quarantined, not circumvented or hidden. Existing Vapiano root404cooldown not cleared early. A valid page with no concrete current offer is not a new deal."
   },
   "verification": {
     "newRedBeforeGreenAfter": ["shared-quota hashtag starvation", "healthy merchant paused by optional404"],
-    "localSuites": "Apify discovery33cases; provider36cases; coupon/media11cases; operations6cases; Meta collector/max-coverage/recall/ad-coverage/shared-quota/graph-scan; Power scraper/scheduling/food/expansion; workflow permission audit all passed.",
+    "localSuites": "Apify discovery33cases; provider37cases; coupon/media11cases; operations6cases; Meta collector/max-coverage/recall/ad-coverage/shared-quota/graph-scan; Power scraper/scheduling/food/expansion; workflow permission audit all passed.",
     "privacy": "Sanitized public-business dataset evidence only; no raw request errors, proxy fields, comments, tokens or customer data committed.",
     "notClaimed": "No guaranteed daily deal count, no new Slack delivery, no current merchant offer solely from a listing, no live test of the next scheduled Apify/Meta batch."
   },

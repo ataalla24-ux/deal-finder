@@ -27,6 +27,17 @@ export function canonicalPage(value, source) {
 }
 export const taskKey = task => `${task.source}|${task.url || POWER_FOOD_SOURCES.find(s => s.name === task.source)?.url}`;
 
+export function powerPageAvailable(source, powerReport, value, now) {
+  const report = powerReport?.sources?.find(row => row.source === source.name && row.url === source.url);
+  const url = canonicalPage(value, source);
+  if (!report || !url) return false;
+  const matches = page => [page.url, page.finalUrl].some(value => canonicalPage(value, source) === url);
+  if ((report.pages || []).some(page => page.status !== 'ok' && matches(page))) return false;
+  const held = [...Object.entries(report.pageCooldowns || {}).map(([url, pause]) => ({ url, retryAt: pause.nextRetryAt })),
+    ...(report.deferredPages || [])];
+  return !held.some(page => matches(page) && (!Number.isFinite(Date.parse(page.retryAt)) || Date.parse(page.retryAt) > +now));
+}
+
 export function validateLedger(state) {
   if (state?.version !== 1 || !Array.isArray(state.reservations) || !state.sources || !state.providerPauses)
     throw new Error('invalid-food-provider-ledger');
@@ -81,14 +92,11 @@ export function scanTargets(state, powerReport, now) {
   const targets = new Map();
   for (const source of POWER_FOOD_SOURCES.filter(s => SCAN_SOURCES.includes(s.name) && sourceAvailable(s, powerReport, state, now))) {
     const report = powerReport.sources.find(r => r.source === source.name);
-    // A failed child page is not permission to try it through another service.
-    const denied = new Set((report.pages || []).filter(p => p.status !== 'ok')
-      .flatMap(p => [canonicalPage(p.url, source), canonicalPage(p.finalUrl, source)]));
     const saved = (state.discoveredPages?.[source.name] || []).filter(p => Date.parse(p.seenAt) <= +now && Date.parse(p.seenAt) >= +now - 14 * DAY);
     const urls = [source.url, ...(source.seeds || []), ...(report.pages || []).filter(p => p.status === 'ok').map(p => p.finalUrl || p.url), ...saved.map(p => p.url)];
     for (const value of urls) {
       const url = canonicalPage(value, source);
-      if (!url || denied.has(url)) continue;
+      if (!url || !powerPageAvailable(source, powerReport, url, now)) continue;
       if (url !== source.url && !(source.seeds || []).includes(url)
           && source.providerPagePattern && !source.providerPagePattern.test(url)) continue;
       const target = { source: source.name, url };
