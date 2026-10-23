@@ -668,6 +668,10 @@ function inferPreferredBrand(deal = {}) {
 
 function inferLogoUrl(deal = {}, brand = '') {
   const explicitBrand = cleanUiNoiseText(brand || deal.brand || '');
+  if (/^(?:anker|ankerbrot)$/i.test(explicitBrand)
+      && extractHostFromUrl(deal.url || deal.post_url) === 'ankerbrot.at') {
+    return `${PUBLIC_BRAND_LOGO_BASE_URL}/anker-ankerbrot-at.png`;
+  }
   const hasSpecificBrand = Boolean(
     explicitBrand && !isSourceLikeBrand(explicitBrand) && !isLikelyGenericLocation(explicitBrand)
   );

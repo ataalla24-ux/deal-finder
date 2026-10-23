@@ -61,6 +61,19 @@ function expectNormalizedLogo(name, rawDeal, expected) {
   }
 }
 
+expectNormalizedLogo('official ANKER bakery uses the bundled official logo', {
+  brand: 'ANKER', title: '20 % Rabatt auf Winterheissgetraenke', category: 'kaffee',
+  url: 'https://www.ankerbrot.at/aktionen', logoUrl: '',
+}, { logoUrlIncludes: /brand-logos\/anker-ankerbrot-at\.png$/ });
+for (const url of ['https://www.anker.com/', 'https://ankerbrot.at.example.com/']) {
+  assert.notEqual(normalizeDealRecord({ brand: 'Anker', title: 'Powerbank',
+    category: 'shopping', url }).logoUrl, `${logoBaseUrl}/anker-ankerbrot-at.png`,
+  'unrelated Anker electronics and lookalike domains must not use the bakery logo');
+}
+const officialAnker = await fs.readFile(new URL('../docs/assets/brand-logos/anker-ankerbrot-at.png', import.meta.url));
+assert.equal(officialAnker.subarray(0, 8).toString('hex'), '89504e470d0a1a0a');
+assert.ok(officialAnker.readUInt32BE(16) >= 160 && officialAnker.readUInt32BE(20) >= 160);
+
 expectNormalizedLogo(
   'cached FreeFinder brand logo is preserved',
   {

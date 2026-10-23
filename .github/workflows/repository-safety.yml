@@ -1,0 +1,23 @@
+name: Repository Safety
+
+on:
+  push:
+    branches: [main]
+    paths: ['.github/workflows/**', 'scripts/test-workflow-permissions.rb']
+  pull_request:
+    paths: ['.github/workflows/**', 'scripts/test-workflow-permissions.rb']
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  workflow-permissions:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: '3.3'
+      - run: ruby scripts/test-workflow-permissions.rb
