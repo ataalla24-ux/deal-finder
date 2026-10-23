@@ -1,0 +1,27 @@
+{
+  "date": "2026-10-23",
+  "request": "Owner wants the existing printed flyer QR to lead directly to the appropriate App Store or Google Play download. No installed-app button.",
+  "unchangedEntry": "https://freefinder.at/pro-test.html",
+  "destinations": {
+    "iPhoneAndIPad": "https://apps.apple.com/app/id6758958213",
+    "android": "https://play.google.com/store/apps/details?id=com.stefanataalla.freefinderwien"
+  },
+  "behavior": [
+    "Client-side device detection and immediate location.replace, without timer or automatic purchase/app-open action.",
+    "Desktop-mode iPad recognized via MacIntel and multiple touch points.",
+    "Unknown and desktop browsers keep both manual Store links. Recognized device has a matching primary fallback if navigation is blocked.",
+    "No JavaScript still has both download links. Known bots keep the landing page.",
+    "No cookies, storage, new analytics, API calls, dependencies or payment changes.",
+    "Original page URL retained. Invitation links and referral attribution code untouched."
+  ],
+  "fallbackDesign": "Short branded page with existing food image, clear trial/eligibility/monthly price/renewal disclosure, collapsible detail questions, privacy and support. Old mockup and installed-app button removed.",
+  "verification": [
+    "20 offline routing/fallback cases passed, including iPhone, iPad, desktop-mode iPad, Android/in-app browser, desktop, unknown, preview bots and blocked navigation.",
+    "78-page website quality, Pro regression and website audit passed; existing orphan-page warning for unrelated legacy plus-gratis remains."
+  ],
+  "limitations": [
+    "User-agent detection is best-effort, not a guarantee for spoofed or unsupported embedded browsers.",
+    "A Store may present its own web page or operating-system confirmation before opening the Store app.",
+    "No physical printed-code scan or handset test performed in this task."
+  ]
+}

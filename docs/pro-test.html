@@ -1,41 +1,80 @@
 <!doctype html>
-<html lang="de">
+<html lang="de-AT">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="robots" content="noindex">
   <meta name="theme-color" content="#ffffff">
-  <meta name="apple-itunes-app" content="app-id=6758958213, app-argument=https://freefinder.at/pro-test.html">
+  <meta name="description" content="FreeFinder für iPhone oder Android laden. Entdecke Wiener Deals und teste Pro als berechtigter Neukunde einen Monat gratis.">
+  <link rel="canonical" href="https://freefinder.at/pro-test.html">
+  <link rel="icon" href="icon-192.svg">
   <title>FreeFinder Pro - 1 Monat gratis testen</title>
+  <script src="pro-test.js?v=20261023" defer></script>
   <style>
-    *{box-sizing:border-box}body{margin:0;background:#fff;color:#171717;font:17px/1.5 system-ui,sans-serif;letter-spacing:0}
-    main{max-width:540px;margin:auto;padding:32px 22px 40px}h1{font-size:32px;line-height:1.15;margin:12px 0}h2{font-size:24px;margin:20px 0 8px}
-    .price{font-size:22px;font-weight:700;margin:0 0 12px}.muted{color:#555}a{color:#9b3500}nav{display:grid;gap:12px;margin:24px 0}
-    .button{display:block;padding:14px 18px;border:1px solid #d7d7d7;border-radius:8px;text-align:center;text-decoration:none;font-weight:650;color:#171717}
-    .primary{background:#f36a24;border-color:#f36a24;color:#171717}.screen{float:right;width:92px;height:148px;object-fit:cover;object-position:top;margin:0 0 12px 18px;border-radius:8px}
-    footer{border-top:1px solid #ddd;padding-top:18px;font-size:14px;margin-top:28px}p{overflow-wrap:anywhere}
-    a:focus-visible{outline:3px solid #171717;outline-offset:3px}
+    :root{color-scheme:light;--ink:#171b19;--muted:#505852;--orange:#ff651c;--line:#dce2dd}
+    *{box-sizing:border-box}body{margin:0;background:#fff;color:var(--ink);font:17px/1.5 system-ui,sans-serif;letter-spacing:0}
+    a{color:inherit}a:focus-visible,summary:focus-visible{outline:3px solid #235d40;outline-offset:5px}
+    .hero{position:relative;isolation:isolate;overflow:hidden;border-bottom:1px solid var(--line)}
+    .hero-photo{position:absolute;inset:0;z-index:-2;width:100%;height:100%;object-fit:cover;object-position:center 32%;opacity:.27}
+    .hero-inner{max-width:660px;min-height:610px;margin:auto;padding:38px 24px 46px;text-align:center}
+    .brand-icon{display:block;width:48px;height:48px;margin:0 auto 20px}
+    h1{font-size:44px;line-height:1.15;margin:0 0 18px}.brand-free{color:#d7400d}
+    .offer{font-size:32px;line-height:1.2;font-weight:750;margin:0 0 14px}
+    .lead{max-width:410px;margin:0 auto 22px;color:var(--muted);font-size:19px}
+    .reassurance{margin:0 0 5px;font-weight:700;color:#235d40}
+    .price{margin:0 auto 5px;font-size:16px;max-width:400px}
+    .eligibility{margin:0 0 22px;color:var(--muted);font-size:14px}
+    .downloads{max-width:360px;margin:auto;display:grid;gap:12px}
+    .store-button{display:block;min-height:54px;padding:14px 18px;border:1px solid var(--orange);border-radius:8px;background:var(--orange);text-decoration:none;font-weight:750}
+    .store-button:hover{background:#f45a0e;border-color:#f45a0e}
+    .store-alternative{display:inline-flex;align-items:center;justify-content:center;min-height:44px;font-size:16px;text-underline-offset:4px}
+    .information{max-width:660px;margin:auto;padding:30px 24px 18px}
+    h2{font-size:23px;line-height:1.3;margin:0 0 20px}
+    details{border-bottom:1px solid var(--line)}summary{cursor:pointer;padding:17px 0;font-weight:650}details p{margin:0 0 20px;color:var(--muted)}
+    footer{max-width:660px;margin:auto;padding:12px 24px 28px;color:var(--muted);font-size:14px}
+    footer nav{display:flex;flex-wrap:wrap;gap:4px 20px}footer a{display:inline-flex;align-items:center;min-height:44px;text-underline-offset:4px}
+    p{overflow-wrap:break-word}noscript p{font-size:14px;color:var(--muted)}
+    @media(max-width:420px){.hero-inner{padding:24px 20px 26px;min-height:570px}.brand-icon{margin-bottom:16px}h1{font-size:34px}.offer{font-size:28px}.lead{font-size:17px;margin-bottom:20px}.price{font-size:15px}.information{padding:26px 20px 14px}footer{padding-inline:20px}}
+    @media(prefers-reduced-motion:no-preference){a{transition:background-color .15s ease}}
   </style>
 </head>
 <body>
 <main>
-  <img class="screen" src="assets/current-ios/deals-home.jpg" alt="FreeFinder Deal-Ansicht" width="736" height="1600">
-  <h1>FreeFinder Pro</h1>
-  <h2>1 Monat gratis testen</h2>
-  <p class="price">Danach 4,99 &euro; pro Monat</p>
-  <p>Automatische monatliche Verlängerung bis zur Kündigung. Aktivierung erst nach deiner Bestätigung bei Apple oder Google Play.</p>
-  <nav aria-label="Testangebot und App-Download">
-    <a class="button primary" href="freefinder://pro-test">Testangebot in der App öffnen</a>
-    <a class="button" href="https://apps.apple.com/app/id6758958213">Für iPhone laden oder aktualisieren</a>
-    <a class="button" href="https://play.google.com/store/apps/details?id=com.stefanataalla.freefinderwien">Für Android laden oder aktualisieren</a>
-  </nav>
-  <p class="muted">Installiere die aktuelle App und öffne sie. Falls das Testangebot dort noch nicht direkt erscheint, kehre zu dieser Seite zurück und tippe auf „Testangebot in der App öffnen“. Ohne aktive Bestätigung entsteht durch den QR-Scan kein Abo.</p>
-  <p>Für berechtigte Store-Konten in Österreich und Deutschland. Apple beziehungsweise Google prüft die Berechtigung und verwaltet die Zahlung. Der kostenlose Probemonat ist auch ohne Flyer in der App verfügbar. Keine Codeeingabe erforderlich.</p>
-  <p>Um eine Zahlung zu vermeiden, kündige während der kostenlosen Testphase in deinem Store-Konto; bei Apple spätestens 24 Stunden vor Ablauf. Bestehende Abos bleiben unverändert.</p>
-  <footer>
-    <p>Gratis ist der Pro-Zugang, nicht pauschal jedes Essen oder Getränk. Ausgewählte Angebote gelten nach Verfügbarkeit und den Bedingungen des jeweiligen Anbieters. Keine Essens- oder Getränkeflatrate.</p>
-    <a href="privacy.html">Datenschutz</a> &middot; <a href="support.html">Support</a>
-  </footer>
+  <section class="hero" aria-labelledby="offer-title">
+    <img class="hero-photo" src="assets/campaigns/plus30-food-background.jpg" alt="" width="1054" height="1492" fetchpriority="high">
+    <div class="hero-inner">
+      <img class="brand-icon" src="icon-192.svg" alt="" width="48" height="48">
+      <h1 id="offer-title"><span class="brand-free">Free</span>Finder Pro</h1>
+      <p class="offer">1 Monat gratis testen</p>
+      <p class="lead">Entdecke Essen, Kaffee und gute Deals in Wien.</p>
+      <p class="reassurance">Heute zahlst du nichts. Jederzeit kündbar.</p>
+      <p class="price">Danach 4,99 &euro; pro Monat.<br>Automatische monatliche Verlängerung.</p>
+      <p class="eligibility">Für berechtigte Neukunden in Österreich und Deutschland.</p>
+      <nav class="downloads" aria-label="FreeFinder herunterladen">
+        <a id="primary-store" class="store-button" href="https://apps.apple.com/app/id6758958213">Für iPhone laden</a>
+        <a id="alternative-store" class="store-alternative" href="https://play.google.com/store/apps/details?id=com.stefanataalla.freefinderwien">Für Android laden</a>
+      </nav>
+      <noscript><p>Wähle deinen Store, um FreeFinder herunterzuladen.</p></noscript>
+    </div>
+  </section>
+  <section class="information" aria-labelledby="questions-title">
+    <h2 id="questions-title">Gut zu wissen</h2>
+    <details>
+      <summary>Wie starte ich meinen Gratis-Monat?</summary>
+      <p>Lade FreeFinder und öffne die App. Wähle dort das Testangebot und bestätige es bei Apple oder Google Play. Der Store prüft deine Berechtigung. Keine Codeeingabe erforderlich; der Probemonat ist auch ohne Flyer verfügbar. Bestehende Abos bleiben unverändert.</p>
+    </details>
+    <details>
+      <summary>Was passiert nach dem Gratis-Monat?</summary>
+      <p>Das Monatsabo verlängert sich automatisch für 4,99 &euro; pro Monat, bis du kündigst. Um eine Zahlung zu vermeiden, kündige während der kostenlosen Testphase in deinem Store-Konto; bei Apple spätestens 24 Stunden vor Ablauf. Apple beziehungsweise Google verwaltet die Zahlung. Durch den QR-Scan allein entsteht kein Abo.</p>
+    </details>
+    <details>
+      <summary>Was ist mit Pro kostenlos?</summary>
+      <p>Gratis ist der Pro-Zugang im Probemonat, nicht pauschal jedes Essen oder Getränk. Ausgewählte Angebote gelten nach Verfügbarkeit und den Bedingungen des jeweiligen Anbieters. Keine Essens- oder Getränkeflatrate. Du kannst die App auch ohne Abo nutzen.</p>
+    </details>
+  </section>
 </main>
+<footer>
+  <nav aria-label="Service"><a href="privacy.html">Datenschutz</a><a href="support.html">Support</a><a href="index.html">FreeFinder entdecken</a></nav>
+</footer>
 </body>
 </html>
