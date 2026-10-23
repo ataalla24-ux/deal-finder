@@ -1,0 +1,62 @@
+{
+  "date": "2026-10-23",
+  "request": "Thorough Vienna-wide food/non-alcoholic drink deal research, including Instagram, without additional monetary cost; owner explicitly asked to take time and work carefully.",
+  "research": {
+    "officialCityListingPages": 6,
+    "officialCityDetailPages": 86,
+    "qualifiedCityCandidates": 81,
+    "districtsWithQualifiedCityCandidates": 22,
+    "districtGap": "1140 is not covered by the qualified city-club subset; not proof there are no food offers there.",
+    "heldCityEntries": [
+      "Dunkel-Restaurant VIER SINNE: ticket/gift-voucher event scope needs separate checking",
+      "FEUERDORF: group booking after 18:00, EUR150 deposit and specialized conditions",
+      "Drei Boegen: wine-focused merchant; do not broaden the food policy",
+      "Alt-Wiener Schmankerl-Reise im Hotel Stefanie: specialized package needs inclusion checks",
+      "Vino Wien: wine-focused merchant; do not broaden the food policy"
+    ],
+    "membership": "All city-club benefits require a separate free Vorteilsclub der Stadt Wien membership, age16+, residence in Austria. FreeFinder Pro does not replace it. Individual reservation, card, ordering, menu exclusions, takeaway and hidden-code conditions retained in full.",
+    "directOffers": [
+      { "merchant": "Haveli Express", "url": "https://www.haveli-express.at/", "address": "Bruennerstrasse76/3,1210Wien", "offer": "20% food pickup discount until2026-12-31; lunch and other offers excluded", "status": "official-offer-terms-confirmed-not-queued" },
+      { "merchant": "Burger Station", "url": "https://www.burger-station.at/", "address": "Ettenreichgasse38,1100Wien", "offer": "15% via direct phone/own online order, pickup or direct restaurant ordering; no explicit end", "status": "official-offer-terms-confirmed-not-queued" },
+      { "merchant": "eatalico", "url": "https://www.huthgastronomie.at/eatalico/lunch-2", "addressSource": "https://www.huthgastronomie.at/eatalico", "address": "Praterstrasse31,1020Wien", "offer": "10% food lunch Mon-Fri11:30-15:00, working days only", "status": "official-offer-terms-confirmed-not-queued" },
+      { "merchant": "GOOD FOOD", "url": "https://www.pizza-app.at/at/aktionen", "conditionsSource": "https://www.pizza-app.at/at/ueber-uns", "offer": "30% pickup or20% delivery in1100, minimumEUR20 before discount; not five locations", "status": "two-variants-held-for-current-campaign-confirmation; FAQ still says End of Summer" },
+      { "merchant": "Pizza Gusto", "url": "https://pizza-gusto.at/bestellen", "offer": "10% banner in own shop; delivery minimumEUR10 in1040/1050/1100,EUR14.90 in1110", "status": "discount-scope-needs-confirmation; no test purchase" },
+      { "merchant": "XXL Bruenner Stadl", "url": "https://www.derstadl.at/", "address": "BruennerStrasse44,1210Wien", "offer": "Free birthday cake and table decorations for celebrations of at least4people", "status": "reservation-and-redemption-details-still-for-review" }
+    ],
+    "instagram": {
+      "existingReportTimestamp": "2026-10-23T16:59:58.065Z",
+      "auditRowsAvailable": 2628,
+      "uniquePostsSinceOct16Reviewed": 1227,
+      "postsFlaggedForCloserReview": 63,
+      "newActorOrGraphScans": 0,
+      "newDealsQueuedByThisInstagramAudit": 0,
+      "conclusions": "Only Pizza free Pepsi already pending across repeated posts; Dahab is already-live/self-syndicated; MeiMei includes alcohol; Kimizu purchase condition unclear; ANKER coupon validity not established; Boca weekly menu expired this afternoon; Panigl provider ban unchanged; ordinary sandwich/menu prices and giveaways not counted as savings. Public web search was also attempted, but inaccessible stories/private accounts are not covered."
+    },
+    "otherLimits": "TheFork/NeoTaste/GastroNews bans retained. TantiSaluti403 not bypassed; SchnitzelLandmann failed fetch and CasaMama not freshly confirmed. DinosBurger located in Seekirchen, not Vienna. BILLA weekly image offers still need exact Vienna-branch/conditions mapping; no coupon prices invented from unclear image text."
+  },
+  "implementation": {
+    "reason": "Existing city-club scraper returned zero because it read one mixed listing page and did not reliably recognize Prozent Ermaessigung or fetch detail conditions.",
+    "change": "Source-specific food/category pagination, structured detail extraction, mandatory city address and complete membership/offer terms. Existing daily member-benefits workflow retained.",
+    "limits": "At most80 accepted deals and96 direct HTML requests,650ms serialized request lane,10s timeout,2.5MB page limit, exact HTTPS host/path. 401/403/429 and Retry-After stop the source, with saved cooldown honored during collection and central verification; no generic health probe before this guard.",
+    "freshVerification": "Before Slack/approval re-extract the exact current benefit and compare title, brand, complete description, membership and content hash. Restore source address and dates, reject changed/missing offer. No crawler-time publication date, invented expiry, votes or alcohol-policy relaxation.",
+    "queue": "80 manually researched candidates appended;29 previous records preserved exactly,109 total. One additional qualified candidate, Goesser Eck, retained only in research because the existing80/source cap was not raised. No public approvals or manual Slack dispatch. Not automatic discovery yield."
+  },
+  "verification": {
+    "offlineSuites": "12 local suites passed, plus exact-source checks for all80 prepared records and preservation of all29 originals;9 new focused regressions included.",
+    "centralReplay": "80 allowed against archived actual HTTP HTML, not80 new live requests or delivery proof.",
+    "independentFreshChecks": "6/6 live checks passed: Omnom,Kalimera,DIM SUM BABE,Stadtkueche,mel&koffie,KonditoreiBienchen.",
+    "firstNaturalRun": "Not yet observed for the new city collector.",
+    "slackDelivery": "Must be read separately after the normal central dispatcher; prepared does not mean delivered or publicly approved."
+  },
+  "unchanged": {
+    "paidProviderAndAiBudgets": true,
+    "paidTitleEditorDisabled": true,
+    "schedulesAndAutomations": true,
+    "humanApprovalRequired": true,
+    "liveFeedAndExistingVotes": true,
+    "nativeAppsStoresDevicesAndConsents": true,
+    "noCustomerTestMessages": true,
+    "note": "Bounded public official HTTP research did run. Existing scheduled services may continue consuming previously approved free credit. No new paid service, Actor extraction, OpenAI call, plan or budget change manually started by this task."
+  },
+  "evidence": "output/vienna-wide-deals-2026-10-23 in native workspace: RECHERCHE.md,92 original city requests and actual HTML,10 additional primary pages,qualified-city-offers.json,direct-offers.json,instagram-audit.json,member-benefits-before.json,central-validation-archived.json,fresh-six-rechecks.json,tests.json and logs."
+}

@@ -2,6 +2,7 @@ import '../sentry/instrument.mjs';
 
 import fs from 'fs';
 import path from 'path';
+import { collectViennaFoodBenefits } from './vienna-food-benefits.js';
 
 const ROOT = process.cwd();
 const OUTPUT_PATH = path.join(ROOT, 'docs', 'deals-pending-member-benefits.json');
@@ -407,6 +408,12 @@ function dedupeDeals(deals) {
 
 async function scrapeSource(source) {
   console.log(`🔎 ${source.source}: ${source.url}`);
+  if (source.key === 'vorteilsclub-wien') {
+    const result = await collectViennaFoodBenefits({ maxDeals: MAX_DEALS_PER_SOURCE });
+    source.foodReport = result.report;
+    if (result.report.errors.length && !result.deals.length) throw new Error(result.report.errors[0].error);
+    return result.deals;
+  }
   const html = await fetchHtml(source.url);
   const headingCandidates = extractHeadingCandidates(html, source);
   const compactCandidates = source.allowCompactCandidates || headingCandidates.length === 0
@@ -442,6 +449,7 @@ async function main() {
     errors,
     sources: SOURCES.map(({ key, source, url, membership }) => ({ key, source, url, membership })),
     deals,
+    viennaFoodReport: SOURCES.find(source => source.key === 'vorteilsclub-wien').foodReport,
   };
 
   fs.writeFileSync(OUTPUT_PATH, JSON.stringify(payload, null, 2));

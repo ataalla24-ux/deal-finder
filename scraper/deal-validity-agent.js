@@ -1,4 +1,5 @@
 import { verifyOfficialFoodDeal } from './power-food-verification.js';
+import { verifyViennaFoodBenefit } from './vienna-food-benefits.js';
 import { hasFreshActiveAdEvidence } from './meta-ad-library-coverage.js';
 import fs from 'fs';
 import path from 'path';
@@ -1046,10 +1047,13 @@ async function validateDeal(deal, context) {
   // malformed/dead link still runs through the regular validation gates.
   const reviewedWithoutLink = reviewedCommunity && !String(deal.url || '').trim()
     && [deal.brand, deal.title, deal.distance || deal.address].every(value => String(value || '').trim());
-  const health = reviewedWithoutLink
+  const viennaFood = await verifyViennaFoodBenefit(deal, { now, cache: context.officialFoodCache, fetchPage: context.fetchViennaBenefitPage });
+  // This source already has a strict, paced fetcher with a persistent pause.
+  // Do not issue an unpaced generic probe ahead of its own source guard.
+  const health = viennaFood ? { finalUrl:url,dateHints:{},contentHints:{},...(viennaFood.ok ? {ok:true,status:200} : {}) } : reviewedWithoutLink
     ? { reason: 'Community-Angebot ohne Link manuell freigegeben', dateHints: {}, contentHints: {} }
     : await inspectUrlWithCache(url, context.urlCache, context.urlOptions);
-  const officialFood = await verifyOfficialFoodDeal(deal, { now, cache: context.officialFoodCache, fetchPage: context.fetchOfficialFoodPage });
+  const officialFood = viennaFood || await verifyOfficialFoodDeal(deal, { now, cache: context.officialFoodCache, fetchPage: context.fetchOfficialFoodPage });
   if (officialFood?.ok) {
     // Restore extracted facts before checking and forwarding the candidate.
     // Caller-supplied location or dates cannot survive an evidence refresh.
@@ -1347,6 +1351,7 @@ async function validateDealsForSlack(deals, options = {}) {
     urlCache,
     officialFoodCache: new Map(),
     fetchOfficialFoodPage: options.fetchOfficialFoodPage,
+    fetchViennaBenefitPage: options.fetchViennaBenefitPage,
     urlOptions: {
       now,
       timeoutMs,

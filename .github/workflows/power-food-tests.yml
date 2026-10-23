@@ -2,6 +2,9 @@ name: Power Food Discovery Tests
 on:
   pull_request:
     paths:
+      - "scraper/vienna-food-benefits.js"
+      - "scraper/member-benefits-scraper.js"
+      - "scripts/test-vienna-food-benefits.mjs"
       - "scraper/official-coupon-media.js"
       - "scripts/test-official-coupon-media.mjs"
       - ".github/actions/coupon-tools/**"
@@ -32,6 +35,9 @@ on:
   push:
     branches: [main]
     paths:
+      - "scraper/vienna-food-benefits.js"
+      - "scraper/member-benefits-scraper.js"
+      - "scripts/test-vienna-food-benefits.mjs"
       - "scraper/official-coupon-media.js"
       - "scripts/test-official-coupon-media.mjs"
       - ".github/actions/coupon-tools/**"
@@ -74,6 +80,7 @@ jobs:
           node-version: "22"
       - run: npm ci
       - run: |
+          node --test scripts/test-vienna-food-benefits.mjs
           node --test scripts/test-food-provider-discovery.mjs
           node scripts/test-food-discovery-policy.mjs
           node scripts/test-instagram-food-discovery.mjs
