@@ -2,9 +2,53 @@
   "schemaVersion": 1,
   "sourceKey": "power",
   "sourceLabel": "Power Scraper",
-  "updatedAt": "2026-10-23T10:18:05.835Z",
+  "updatedAt": "2026-10-23T17:56:02.034Z",
   "runCount": 90,
   "runs": [
+    {
+      "schemaVersion": 1,
+      "runId": "power-2026-10-23T17:56:02.034Z",
+      "sourceKey": "power",
+      "sourceLabel": "Power Scraper",
+      "status": "completed-with-errors",
+      "startedAt": "2026-10-23T17:55:37.823Z",
+      "finishedAt": "2026-10-23T17:56:02.034Z",
+      "durationMs": 24211,
+      "outputFile": "docs/deals-pending-power.json",
+      "counts": {
+        "rawCandidates": 38,
+        "normalizedCandidates": 38,
+        "verifiedCandidates": 0,
+        "previousDeals": 0,
+        "acceptedDeals": 38,
+        "rejectedDeals": 0
+      },
+      "rejectedByReason": {},
+      "rejectedSamples": [],
+      "diagnostics": {
+        "healthySources": 45,
+        "failedSources": 13,
+        "sourceCount": 58,
+        "concurrency": 4,
+        "timeoutMs": 8000
+      },
+      "constraints": {},
+      "errors": [
+        "Too Good To Go: HTTP 429",
+        "Vapiano: deferred until 2026-10-23T18:03:25.645Z",
+        "BackWerk: fetch failed",
+        "MediaMarkt: deferred until 2026-10-29T10:17:52.422Z",
+        "Saturn: deferred until 2026-10-23T18:03:36.392Z",
+        "Spar: deferred until 2026-10-23T18:03:37.303Z",
+        "Conrad: deferred until 2026-10-29T10:17:55.854Z",
+        "Decathlon: deferred until 2026-10-29T10:17:55.967Z",
+        "XXXLutz: deferred until 2026-10-29T10:17:57.638Z",
+        "Möbelix: deferred until 2026-10-29T10:17:57.812Z",
+        "Lego Store: deferred until 2026-10-29T10:17:58.002Z",
+        "Thalia: deferred until 2026-10-29T10:17:58.129Z",
+        "Libro: deferred until 2026-10-26T18:03:39.312Z"
+      ]
+    },
     {
       "schemaVersion": 1,
       "runId": "power-2026-10-23T10:18:05.835Z",
@@ -3505,55 +3549,6 @@
       "constraints": {},
       "errors": [
         "Too Good To Go: Browser HTTP 429"
-      ]
-    },
-    {
-      "schemaVersion": 1,
-      "runId": "power-2026-08-29T06:03:08.379Z",
-      "sourceKey": "power",
-      "sourceLabel": "Power Scraper",
-      "status": "completed-with-errors",
-      "startedAt": "2026-08-29T06:02:48.205Z",
-      "finishedAt": "2026-08-29T06:03:08.379Z",
-      "durationMs": 20174,
-      "outputFile": "docs/deals-pending-power.json",
-      "counts": {
-        "rawCandidates": 44,
-        "normalizedCandidates": 42,
-        "verifiedCandidates": 0,
-        "previousDeals": 0,
-        "acceptedDeals": 42,
-        "rejectedDeals": 0
-      },
-      "rejectedByReason": {},
-      "rejectedSamples": [],
-      "diagnostics": {
-        "healthySources": 38,
-        "failedSources": 18,
-        "sourceCount": 56,
-        "concurrency": 8,
-        "timeoutMs": 8000
-      },
-      "constraints": {},
-      "errors": [
-        "Too Good To Go: Browser HTTP 429",
-        "Foodsharing Wien: HTTP 404",
-        "KFC: HTTP 404",
-        "H&M: Browser HTTP 403",
-        "Zara: Browser HTTP 403",
-        "Wienerwald: HTTP 404",
-        "Dean&David: page.goto: net::ERR_SSL_PROTOCOL_ERROR at https://www.deananddavid.at/aktionen/ Call log: - navigating to \"https://www.deananddavid.at/aktionen/\", waiting until \"domcontentloaded\"",
-        "Joe & the Juice: page.goto: Timeout 8000ms exceeded. Call log: - navigating to \"https://www.joeandthejuice.at/\", waiting until \"domcontentloaded\"",
-        "My Indigo: page.goto: net::ERR_SSL_UNRECOGNIZED_NAME_ALERT at https://www.myindigo.at/aktionen/ Call log: - navigating to \"https://www.myindigo.at/aktionen/\", waiting until \"domcontentloaded\"",
-        "Unimarkt: HTTP 404",
-        "Douglas: Browser HTTP 403",
-        "Sephora: page.goto: net::ERR_CONNECTION_REFUSED at https://www.sephora.at/aktionen/ Call log: - navigating to \"https://www.sephora.at/aktionen/\", waiting until \"domcontentloaded\"",
-        "About You: HTTP 404",
-        "H&M: Browser HTTP 403",
-        "Primark: HTTP 404",
-        "Cyberport: Browser HTTP 403",
-        "Sparheld: page.goto: net::ERR_CONNECTION_REFUSED at https://www.sparheld.at/ Call log: - navigating to \"https://www.sparheld.at/\", waiting until \"domcontentloaded\"",
-        "Deals: page.goto: net::ERR_CONNECTION_CLOSED at https://www.deals.at/ Call log: - navigating to \"https://www.deals.at/\", waiting until \"domcontentloaded\""
       ]
     }
   ]
