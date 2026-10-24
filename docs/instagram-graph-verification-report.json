@@ -1,7 +1,7 @@
 {
-  "generatedAt": "2026-10-24T15:24:34.391Z",
+  "generatedAt": "2026-10-24T15:51:55.787Z",
   "source": "instagram-graph-cross-source-verification",
-  "status": "ok",
+  "status": "degraded",
   "configured": true,
   "scannedFiles": [
     "deals-pending-church-events.json",
@@ -139,8 +139,8 @@
       "candidates": 0
     },
     "deals-pending-meta-instagram.json": {
-      "deals": 124,
-      "candidates": 27
+      "deals": 127,
+      "candidates": 28
     },
     "deals-pending-power.json": {
       "deals": 39,
@@ -167,8 +167,8 @@
       "candidates": 0
     }
   },
-  "candidatePosts": 36,
-  "candidateAccounts": 26,
+  "candidatePosts": 37,
+  "candidateAccounts": 27,
   "skippedAccountCooldowns": 0,
   "selectedAccounts": [
     {
@@ -188,18 +188,23 @@
       "candidates": 2
     },
     {
-      "username": "architekturzentrum_wien",
+      "username": "onlynoodle_",
       "candidates": 1
     },
     {
-      "username": "badeschiff_no.1",
+      "username": "architekturzentrum_wien",
       "candidates": 1
     }
   ],
-  "fetchedPosts": 150,
-  "exactMatches": 11,
+  "fetchedPosts": 125,
+  "exactMatches": 9,
   "retainedEvidencePosts": 2000,
-  "errors": [],
+  "errors": [
+    {
+      "username": "architekturzentrum_wien",
+      "message": "Instagram shared quota paused: rolling-hour budget exhausted"
+    }
+  ],
   "accountFailures": {
     "tantisaluti.wien": {
       "count": 2,
@@ -230,19 +235,25 @@
   "sharedQuota": {
     "limitPerHour": 190,
     "usageThreshold": 95,
-    "requests": 6,
-    "reserved": 10,
-    "stopped": false,
-    "reason": "",
-    "highestUsagePercent": 39,
+    "requests": 5,
+    "reserved": 5,
+    "stopped": true,
+    "reason": "Instagram shared quota paused: rolling-hour budget exhausted",
+    "highestUsagePercent": 35,
     "waitedMs": 0,
     "pacingMs": 0,
-    "retryAt": "",
+    "retryAt": "2026-10-24T16:29:34.936Z",
     "adaptiveSafetyCeiling": 190,
     "adaptiveIncreases": 0,
     "storageFailure": null
   },
-  "blockedEvidencePosts": 80,
-  "unmatchedCandidatePosts": 25,
-  "message": "11/36 fresh cross-source Instagram candidates matched exactly via Graph API."
+  "globalError": {
+    "username": "architekturzentrum_wien",
+    "status": 0,
+    "code": "SCAN_BUDGET",
+    "message": "Instagram shared quota paused: rolling-hour budget exhausted"
+  },
+  "blockedEvidencePosts": 81,
+  "unmatchedCandidatePosts": 28,
+  "message": "9/37 fresh cross-source Instagram candidates matched exactly via Graph API."
 }
