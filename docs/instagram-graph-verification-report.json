@@ -1,7 +1,7 @@
 {
-  "generatedAt": "2026-10-24T22:06:00.978Z",
+  "generatedAt": "2026-10-24T22:19:33.885Z",
   "source": "instagram-graph-cross-source-verification",
-  "status": "ok",
+  "status": "degraded",
   "configured": true,
   "scannedFiles": [
     "deals-pending-church-events.json",
@@ -196,10 +196,15 @@
       "candidates": 1
     }
   ],
-  "fetchedPosts": 137,
-  "exactMatches": 12,
+  "fetchedPosts": 50,
+  "exactMatches": 5,
   "retainedEvidencePosts": 2000,
-  "errors": [],
+  "errors": [
+    {
+      "username": "only.pizza.vienna",
+      "message": "Instagram shared quota paused: rolling-hour budget exhausted"
+    }
+  ],
   "accountFailures": {
     "tantisaluti.wien": {
       "count": 2,
@@ -230,19 +235,25 @@
   "sharedQuota": {
     "limitPerHour": 237,
     "usageThreshold": 95,
-    "requests": 6,
-    "reserved": 10,
-    "stopped": false,
-    "reason": "",
-    "highestUsagePercent": 80,
+    "requests": 2,
+    "reserved": 2,
+    "stopped": true,
+    "reason": "Instagram shared quota paused: rolling-hour budget exhausted",
+    "highestUsagePercent": 70,
     "waitedMs": 0,
     "pacingMs": 0,
-    "retryAt": "",
+    "retryAt": "2026-10-24T22:32:16.046Z",
     "adaptiveSafetyCeiling": 190,
     "adaptiveIncreases": 0,
     "storageFailure": null
   },
+  "globalError": {
+    "username": "only.pizza.vienna",
+    "status": 0,
+    "code": "SCAN_BUDGET",
+    "message": "Instagram shared quota paused: rolling-hour budget exhausted"
+  },
   "blockedEvidencePosts": 74,
-  "unmatchedCandidatePosts": 28,
-  "message": "12/40 fresh cross-source Instagram candidates matched exactly via Graph API."
+  "unmatchedCandidatePosts": 35,
+  "message": "5/40 fresh cross-source Instagram candidates matched exactly via Graph API."
 }
