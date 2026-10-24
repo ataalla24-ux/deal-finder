@@ -1,0 +1,172 @@
+{
+  "checkedAt": "2026-10-24T07:05:29.428549+00:00",
+  "dateVienna": "2026-10-24",
+  "scope": "Read-only source research; no form submissions, bookings, contacts, paid provider scans or OpenAI API calls.",
+  "recommendation": "Expand existing geburtstag-gratis-wien guide by one new child food benefit (15 total), Geier giant birthday salt stick, with pickup/age/branch/privacy planning. No new thin URL.",
+  "newBenefit": {
+    "source": "https://www.geier.at/de/service/kinder-bei-geier.html",
+    "httpStatus": 200,
+    "terms": [
+      "Giant birthday salt stick free for children under 12 years.",
+      "Pre-order and collect on actual birthday in a Geier shop.",
+      "No calendar expiry, fixed advance-days rule, mandatory purchase, membership or minimum companion count stated by current core service page.",
+      "No promise for same-day spontaneous availability; arrange pickup in advance.",
+      "Form requests first/last name, phone, email, address, pickup date/time/shop; required privacy acceptance checkbox; adjacent consent text for advertising/informational postal/SMS/email data use."
+    ],
+    "ageConflict": "Product page says bis 12 Jahre; core current service page clearly says unter 12 Jahren. Use conservative under-12 and confirm 12th-birthday boundary with merchant.",
+    "sizeSource": "https://www.geier.at/de/shop/produkt-detail/307/riesensalzstangerl.html",
+    "size": "60 cm; product detail alone does not describe birthday ordering procedure.",
+    "branchesSource": "https://www.geier.at/de/standorte.html",
+    "branches": [
+      {
+        "address": "Taborstraße 33, 1020 Wien",
+        "pickupFormSelectable": true,
+        "openingHours": "Mo–Fr 06:00–18:30; Sa 06:00–13:00; So/Feiertag 07:00–12:00; except 25/26 Dec, 1 Jan"
+      },
+      {
+        "address": "Donaufelder Straße 22, 1210 Wien",
+        "pickupFormSelectable": true,
+        "openingHours": "Mo–Fr 06:00–18:30; Sa 06:00–17:00; So/Feiertag 07:00–17:00; except 25/26 Dec, 1 Jan"
+      }
+    ],
+    "pdf": "https://www.geier.at/xstorage/1/system/2025_Geburtstagssalzstangerl_A5_Druck.pdf",
+    "pdfCaveat": "Live 200 PDF read and page 2 visually inspected. Says register a few days before birthday, but not linked by current service/form HTML, so do not treat as verified current fixed advance-time requirement.",
+    "validUntil": "No fixed calendar end; collect on individual birthday and reconfirm current availability."
+  },
+  "existing14": [
+    {
+      "name": "Watertuin",
+      "source": "https://www.watertuin.at/aktionen",
+      "method": "Direct HTTP 200 and primary web read today",
+      "result": "Birthday child eats/drinks free; >=1 adult full payer; reservation mandatory; birthday only with Tuesday exception Wed/Thu; until revoked. Price page 30.50 weekday /33.50 Fri/weekend/holiday adult >=16, buffet stops 15:30/21:30 unchanged."
+    },
+    {
+      "name": "Donauturm",
+      "source": "https://www.donauturm.at/public/de/events-news-and-kulinarik/events/geburtstag-am-donauturm-wien/",
+      "method": "Primary web read today, direct HTTP 403 (no bypass/retry)",
+      "result": "Free child/person birthday entry and slide, ±2 days, valid photo ID, Front Desk before ticket purchase, no retroactive refund. No calendar end."
+    },
+    {
+      "name": "Madame Tussauds",
+      "source": "https://www.madametussauds.com/wien/plane-deinen-besuch/vor-deinem-besuch/informationen-zum-besuch/",
+      "method": "Direct HTTP 200 and primary web read today",
+      "result": "All ages free entry exact birthday against official photo ID, unchanged."
+    },
+    {
+      "name": "NoWayOut",
+      "source": "https://www.nowayout-escape.at/de/special-offers/",
+      "method": "Primary web read today, direct HTTP 403 (no bypass/retry)",
+      "result": "±7 days, >=4 total, birthday player free and others regular. Additional 7 Jan–14 Feb line still present, unresolved; keep confirmation caveat."
+    },
+    {
+      "name": "Balls&Clubs",
+      "source": "https://www.ballsandclubs.at/special-offers/",
+      "method": "Primary web read today, direct HTTP 403 (no bypass/retry)",
+      "result": "±7 days, >=4 total. Special-offer FAQ says 10% guest discount, birthday page regular guest prices; conflict persists, keep caveat."
+    },
+    {
+      "name": "Therme Wien",
+      "source": "https://thermewien.at/bereich/erlebnisstein-und-wildnis/",
+      "method": "Primary web read today plus currently linked PDF direct HTTP 200",
+      "result": "Birthday form still linked at /wp-content/uploads/2025/10/Formular-Kindergeburtstag-1025.pdf; child >=5, >=5 children including birthday child, package charges and other entries excluded; birthday entry free in package, 4-week advance submission. No universal adult free entry."
+    },
+    {
+      "name": "3D PicArt",
+      "source": "https://www.3dpicart-museum.at/happy-birthday/",
+      "method": "Ordinary headless Playwright loaded current source; direct Python local certificate-chain failure; web timeout. No TLS verification bypass. Browser snapshots saved.",
+      "result": "Free ticket exact birthday. Current price page unchanged: adult>=16 14 weekday/16 weekend+holiday; child5–15.99 10/12; socks; no reservation except groups/upgrades."
+    },
+    {
+      "name": "Museum der Illusionen",
+      "source": "https://museumderillusionen.at/museum-kinder-wien/kindergeburtstag/",
+      "method": "Primary web read today, direct HTTP 403 (no bypass/retry)",
+      "result": "Birthday child free only within Deluxe package €490; up to10 invited children, additional39, max13 people wording remains; no general free entry."
+    },
+    {
+      "name": "XXL Brünner Stadl",
+      "source": "https://www.derstadl.at/feste-feiern",
+      "method": "Direct HTTP 200 and primary web read today",
+      "result": "Birthday celebration >=4 persons, cake or sparkling wine, decor/sparklers free; food focus should choose/confirm cake. Address Brünner Straße44 1210; timing not specified."
+    },
+    {
+      "name": "XXXLutz",
+      "source": "https://www.xxxlutz.at/c/preisepass-vorteile",
+      "method": "Primary web read today, direct HTTP 403 (no bypass/retry)",
+      "result": "Free birthday restaurant invitation mentioned. Personal restaurant voucher emailed separate from20-euro voucher; individual voucher determines terms and expiry. No assured same-day signup benefit or universal branch acceptance."
+    },
+    {
+      "name": "Viet Soup",
+      "source": "https://vietsoup.at/pages/geburtstagsangebot",
+      "method": "Direct HTTP 200 and primary web read today",
+      "result": "€20 off eligible bill>=€40, reservation, actual birthday; not gratis meal. No minimum head count/fixed campaign end."
+    },
+    {
+      "name": "Starbucks",
+      "source": "https://www.starbucks.at/de/rewards/rewards-terms-and-conditions",
+      "method": "Primary terms+rewards+FAQ read today; direct HTTP403 (no bypass/retry)",
+      "result": "Gold>=1500stars, one handmade birthday drink, birthday in account, issued birthday for30days, app/card, participating Austria stores; airport/Parndorf excluded perFAQ. Unchanged."
+    },
+    {
+      "name": "Cineplexx",
+      "source": "https://cineplexx.at/info/family-film-club",
+      "method": "Web JS shell; ordinary headless Playwright rendered current source and saved snapshot",
+      "result": "Free birthday child ticket, birthday child+4friends, friends €8 plus surcharges, ±14days once/year, ends13th birthday ambiguity retained, no club membership required; buy at cinema counter same show day with proof."
+    },
+    {
+      "name": "ÖBB",
+      "source": "https://www.oebb.at/de/tickets-kundenkarten/kundenkarten/vorteilscard/vorteilscard-geburtstagsaktion.html",
+      "method": "Direct HTTP 200 and primary web source+FAQ read today",
+      "result": "Valid Vorteilscard+photo ID exact birthday, second class Austria ÖBB and selected private railways, until revoked. Reservations/international portions not covered."
+    }
+  ],
+  "supplemental": [
+    {
+      "source": "https://www.wien.gv.at/amtswege/geburtstagsjubilaeum-anmeldung",
+      "method": "Direct HTTP403 and web timeout; ordinary headless browser loaded current source successfully",
+      "result": "90/95/100 and older, citizenship+Vienna main residence, letter4–6weeks before birthday, free registration; unchanged."
+    },
+    {
+      "source": "https://tramwm.wienerlinien.at/web/guest/erm%C3%A4%C3%9Figungen-und-freifahrt",
+      "method": "Direct HTTP200 and primary web read",
+      "result": "Not a birthday-specific bonus; keep separate age/calendar/school requirements."
+    }
+  ],
+  "noAdditionalNewBenefit": "Sajado leads found only secondary; current official page did not show birthday terms, withheld.",
+  "additionalConfirmations": [
+    {
+      "source": "https://www.ballsandclubs.at/minigolf/",
+      "readAt": "2026-10-24T07:06:07.984452+00:00",
+      "method": "Primary web page opened",
+      "facts": [
+        "24.90 EUR adult",
+        "19.90 EUR child",
+        "Child booking field bis14 Jahre",
+        "18 holes",
+        "Wollzeile16 1010 Vienna"
+      ]
+    },
+    {
+      "source": "https://www.xxxlutz.at/c/restaurant-mahue",
+      "readAt": "2026-10-24T07:06:07.984601+00:00",
+      "method": "Primary web page opened (directHTTP403)",
+      "facts": [
+        "Mariahilferstraße121b 1060 Vienna",
+        "Mo–Sa09–22",
+        "Hot kitchen11–21",
+        "Sunday/holidays closed"
+      ]
+    },
+    {
+      "source": "https://thermewien.at/wp-content/uploads/2025/10/Formular-Kindergeburtstag-1025.pdf",
+      "readAt": "2026-10-24T07:06:07.984604+00:00",
+      "method": "Current source link plus full direct200 PDF, extracted text",
+      "facts": [
+        "Small birthday snack39EUR5children",
+        "Large birthday snack72EUR up to12children",
+        "Birthday meal11EURper child",
+        "Other children and adult admissions NOT included",
+        "No49EUR tariff in birthday PDF"
+      ]
+    }
+  ]
+}

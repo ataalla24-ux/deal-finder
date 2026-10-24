@@ -21,7 +21,7 @@ for (const slug of slugs) {
   assert.equal($('meta[property="og:url"]').attr('content'), canonical);
   const entry = sitemap('url').filter((_, element) => sitemap(element).find('loc').text() === canonical);
   assert.equal(entry.length, 1, `${slug}: one sitemap entry`);
-  const modified = slug === 'geburtstag-gratis-wien' ? '2026-10-23' : slug === 'guenstig-essen-wien' ? '2026-10-07' : '2026-10-08';
+  const modified = slug === 'geburtstag-gratis-wien' ? '2026-10-24' : slug === 'guenstig-essen-wien' ? '2026-10-07' : '2026-10-08';
   assert.equal(entry.find('lastmod').text(), modified);
   const graph = JSON.parse($('script[type="application/ld+json"]').text())['@graph'];
   const article = graph.find(item => item['@type'] === 'Article');
@@ -51,7 +51,7 @@ for (const slug of slugs) {
 const kino = load(fs.readFileSync(path.join(docs, 'blog', `${slugs[2]}.html`), 'utf8'));
 assert.equal(kino('#wien').nextUntil('h2').find('li').length, 9);
 const birthday = load(fs.readFileSync(path.join(docs, 'blog', `${slugs[1]}.html`), 'utf8'));
-assert.equal(birthday('#adressen').next('.table-scroll').find('tbody tr').length, 11);
+assert.equal(birthday('#adressen').next('.table-scroll').find('tbody tr').length, 12);
 for (const postcode of ['1010', '1020', '1060', '1100', '1110', '1150', '1210', '1220']) assert.ok(birthday('.table-scroll').text().includes(postcode));
 const index = load(fs.readFileSync(path.join(docs, 'blog', 'index.html'), 'utf8'));
 for (const slug of slugs) {
