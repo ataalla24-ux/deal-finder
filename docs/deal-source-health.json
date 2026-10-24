@@ -1,12 +1,18 @@
 {
-  "generatedAt": "2026-10-24T21:27:31.688Z",
+  "generatedAt": "2026-10-24T21:35:31.572Z",
   "summary": {
     "filesConsidered": 32,
-    "totalCandidates": 845,
-    "uniqueCandidates": 761,
-    "distinctCandidates": 798,
-    "duplicateClusters": 37,
+    "totalCandidates": 843,
+    "uniqueCandidates": 764,
+    "distinctCandidates": 799,
+    "duplicateClusters": 35,
     "topHealthySources": [
+      {
+        "sourceKey": "wien-combined",
+        "sourceLabel": "Wien Deals Combined Graph",
+        "healthScore": 100,
+        "totalDeals": 1
+      },
       {
         "sourceKey": "member-benefits",
         "sourceLabel": "Member Benefits",
@@ -30,15 +36,15 @@
         "sourceLabel": "TikTok Scanner",
         "healthScore": 72,
         "totalDeals": 14
-      },
-      {
-        "sourceKey": "meta-instagram",
-        "sourceLabel": "Meta Instagram Graph",
-        "healthScore": 71,
-        "totalDeals": 131
       }
     ],
     "topMissionSources": [
+      {
+        "sourceKey": "wien-combined",
+        "sourceLabel": "Wien Deals Combined Graph",
+        "missionFitScore": 100,
+        "totalDeals": 1
+      },
       {
         "sourceKey": "joe",
         "sourceLabel": "jö Bonus Club",
@@ -62,12 +68,6 @@
         "sourceLabel": "Member Benefits",
         "missionFitScore": 68,
         "totalDeals": 109
-      },
-      {
-        "sourceKey": "instagram-apify",
-        "sourceLabel": "Apify Instagram",
-        "missionFitScore": 66,
-        "totalDeals": 11
       }
     ],
     "topCoverageSources": [
@@ -109,6 +109,12 @@
     ],
     "topPrecisionSources": [
       {
+        "sourceKey": "wien-combined",
+        "sourceLabel": "Wien Deals Combined Graph",
+        "precisionScore": 100,
+        "totalDeals": 1
+      },
+      {
         "sourceKey": "firecrawl5",
         "sourceLabel": "Firecrawl Key 5 - Instagram Gastro",
         "precisionScore": 80,
@@ -131,15 +137,15 @@
         "sourceLabel": "Meta Instagram Graph",
         "precisionScore": 72,
         "totalDeals": 131
-      },
-      {
-        "sourceKey": "tiktok",
-        "sourceLabel": "TikTok Scanner",
-        "precisionScore": 71,
-        "totalDeals": 14
       }
     ],
     "topWeightedSources": [
+      {
+        "sourceKey": "wien-combined",
+        "sourceLabel": "Wien Deals Combined Graph",
+        "sourceWeightScore": 83,
+        "totalDeals": 1
+      },
       {
         "sourceKey": "member-benefits",
         "sourceLabel": "Member Benefits",
@@ -163,12 +169,6 @@
         "sourceLabel": "jö Bonus Club",
         "sourceWeightScore": 64,
         "totalDeals": 10
-      },
-      {
-        "sourceKey": "firecrawl5",
-        "sourceLabel": "Firecrawl Key 5 - Instagram Gastro",
-        "sourceWeightScore": 62,
-        "totalDeals": 1
       }
     ],
     "topSourcesToFix": [
@@ -230,17 +230,85 @@
     ],
     "pipelineRuns": {
       "reportedSources": 8,
-      "failedSources": [
-        "wien-combined"
-      ],
+      "failedSources": [],
       "completedWithErrors": [
         "food3",
         "instagram-apify2",
-        "power"
+        "power",
+        "wien-combined"
       ]
     }
   },
   "sources": [
+    {
+      "sourceKey": "wien-combined",
+      "file": "deals-pending-wien-combined.json",
+      "sourceLabel": "Wien Deals Combined Graph",
+      "totalDeals": 1,
+      "uniqueDeals": 1,
+      "duplicateDeals": 0,
+      "duplicateAcrossSources": 0,
+      "fresh1dCount": 1,
+      "fresh7dCount": 1,
+      "viennaCount": 1,
+      "foodDrinkCount": 1,
+      "promoCount": 1,
+      "missingUrlCount": 0,
+      "sampleTitles": [
+        "Plus so many wonderful attractions on the big bus tours are free like the Schönbrunn Gardens, Belvedere Gardens, Hofburg Palace complex & He"
+      ],
+      "lastRun": {
+        "status": "completed-with-errors",
+        "startedAt": "2026-10-24T21:29:02.618Z",
+        "finishedAt": "2026-10-24T21:31:26.957Z",
+        "durationMs": 144339,
+        "counts": {
+          "rawCandidates": 66,
+          "normalizedCandidates": 1,
+          "verifiedCandidates": 1,
+          "previousDeals": 0,
+          "acceptedDeals": 1,
+          "rejectedDeals": 62
+        },
+        "rejectedByReason": {
+          "no-concrete-offer": 51,
+          "general-recommendation": 5,
+          "excluded-promotion-type": 2,
+          "missing-text": 4
+        },
+        "errors": [
+          "#wientipps: Instagram scan paused: request-budget"
+        ],
+        "reportFile": "deal-pipeline-last-run-wien-combined.json"
+      },
+      "uniqueRate": 1,
+      "duplicateRate": 0,
+      "fresh1dRate": 1,
+      "fresh7dRate": 1,
+      "viennaRate": 1,
+      "foodDrinkRate": 1,
+      "promoRate": 1,
+      "missingUrlRate": 0,
+      "averageQualityScore": 81,
+      "topCategories": [
+        {
+          "value": "essen",
+          "count": 1
+        }
+      ],
+      "topTypes": [
+        {
+          "value": "gratis",
+          "count": 1
+        }
+      ],
+      "issues": [],
+      "healthScore": 100,
+      "missionFitScore": 100,
+      "coverageScore": 16,
+      "precisionScore": 100,
+      "sourceWeightScore": 83
+    },
     {
       "sourceKey": "member-benefits",
       "file": "deals-pending-member-benefits.json",
@@ -531,9 +599,9 @@
       "file": "deals-pending-meta-instagram.json",
       "sourceLabel": "Meta Instagram Graph",
       "totalDeals": 131,
-      "uniqueDeals": 99,
-      "duplicateDeals": 32,
-      "duplicateAcrossSources": 16,
+      "uniqueDeals": 101,
+      "duplicateDeals": 30,
+      "duplicateAcrossSources": 14,
       "fresh1dCount": 18,
       "fresh7dCount": 128,
       "viennaCount": 131,
@@ -1170,76 +1238,6 @@
       "coverageScore": 60,
       "precisionScore": 48,
       "sourceWeightScore": 52
-    },
-    {
-      "sourceKey": "wien-combined",
-      "file": "deals-pending-wien-combined.json",
-      "sourceLabel": "Wien Deals Combined Graph",
-      "totalDeals": 3,
-      "uniqueDeals": 0,
-      "duplicateDeals": 3,
-      "duplicateAcrossSources": 3,
-      "fresh1dCount": 1,
-      "fresh7dCount": 3,
-      "viennaCount": 3,
-      "foodDrinkCount": 3,
-      "promoCount": 0,
-      "missingUrlCount": 0,
-      "sampleTitles": [
-        "Mittagsteller um 10,80 € von Montag bis Freitag",
-        "Bei The Pizzeria 2 bekommst du bei Selbstabholung jede Standard-Pizza + Pepsi Dose für nur 9,90 €.",
-        "🥙💯 The Doner Special Sandwich at Türkis – Hauptbahnhof was one of the most satisfying bites of our entire Europe trip."
-      ],
-      "lastRun": {
-        "status": "failed",
-        "startedAt": "2026-10-24T16:12:21.426Z",
-        "finishedAt": "2026-10-24T16:12:22.297Z",
-        "durationMs": 871,
-        "counts": {
-          "rawCandidates": 0,
-          "normalizedCandidates": 0,
-          "verifiedCandidates": 0,
-          "previousDeals": 0,
-          "acceptedDeals": 0,
-          "rejectedDeals": 0
-        },
-        "rejectedByReason": {},
-        "errors": [
-          "No Graph hashtag source completed successfully; last-good output was preserved. #essenwien: Instagram shared quota paused: rolling-hour budget exhausted"
-        ],
-        "reportFile": "deal-pipeline-last-run-wien-combined.json"
-      },
-      "uniqueRate": 0,
-      "duplicateRate": 1,
-      "fresh1dRate": 0.3,
-      "fresh7dRate": 1,
-      "viennaRate": 1,
-      "foodDrinkRate": 1,
-      "promoRate": 0,
-      "missingUrlRate": 0,
-      "averageQualityScore": 81.3,
-      "topCategories": [
-        {
-          "value": "essen",
-          "count": 3
-        }
-      ],
-      "topTypes": [
-        {
-          "value": "rabatt",
-          "count": 3
-        }
-      ],
-      "issues": [
-        "letzter Pipeline-Lauf ist fehlgeschlagen",
-        "wenige klare Gratis-/Promo-Signale",
-        "hohe Überschneidung mit anderen Quellen"
-      ],
-      "healthScore": 52,
-      "missionFitScore": 57,
-      "coverageScore": 12,
-      "precisionScore": 62,
-      "sourceWeightScore": 48
     },
     {
       "sourceKey": "church-gemeinde",
