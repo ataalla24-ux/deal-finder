@@ -1,11 +1,11 @@
 {
-  "generatedAt": "2026-10-24T09:34:29.462Z",
+  "generatedAt": "2026-10-24T09:42:48.980Z",
   "summary": {
     "maxAgeDays": 7,
-    "total": 293,
-    "allowed": 0,
-    "blocked": 293,
-    "warnings": 0,
+    "total": 297,
+    "allowed": 2,
+    "blocked": 295,
+    "warnings": 2,
     "reasonCounts": {
       "kein konkretes Angebot erkennbar": 224,
       "Gottesdienste nur im Wochenlauf": 36,
@@ -46,11 +46,12 @@
       "älter als 7 Tage (2026-10-08)": 4,
       "abgelaufen (2026-08-30)": 4,
       "selbst syndizierter FreeFinder-Post": 2,
+      "allgemeine Empfehlung/Gratis-Event statt konkreter Aktion": 2,
       "kein verlässliches Quell-/Post-Datum gefunden": 117,
       "Ortswiderspruch: Originalangebot nennt einen Standort ausserhalb Wiens": 1
     },
     "reasonCategoryCounts": {
-      "kein konkreter Deal": 224,
+      "kein konkreter Deal": 226,
       "Gottesdienste außerhalb Wochenlauf": 36,
       "älter als 7 Tage": 141,
       "ungültige URL": 16,
@@ -210,10 +211,63 @@
           "kein konkreter Deal": 3,
           "ausgeschlossene Quelle": 1
         }
+      },
+      "tiktok-deals-scanner": {
+        "total": 3,
+        "allowed": 1,
+        "blocked": 2,
+        "warnings": 1,
+        "reasonCategoryCounts": {
+          "kein konkreter Deal": 2
+        }
+      },
+      "vienna-food-benefits": {
+        "total": 1,
+        "allowed": 1,
+        "blocked": 0,
+        "warnings": 1,
+        "reasonCategoryCounts": {}
       }
     }
   },
-  "allowed": [],
+  "allowed": [
+    {
+      "id": "benefit-vienna-food-45e5137f1b00884a",
+      "title": "20 % Rabatt bei Gösser Eck im Wurstelprater (Vorteilsclub)",
+      "brand": "Gösser Eck im Wurstelprater",
+      "source": "vienna-food-benefits",
+      "url": "https://vorteilsclub.wien.at/meine-vorteile/goesser-eck-im-wurstelprater",
+      "reasons": [],
+      "warnings": [
+        "Aktueller Angebotsblock auf offizieller Anbieterseite erneut bestätigt; Abrufdatum ist kein Veröffentlichungsdatum",
+        "kein Quell-/Post-Datum gefunden",
+        "kein Ablaufdatum gefunden"
+      ],
+      "sourceDate": "",
+      "sourceDateSource": "",
+      "sourceAgeDays": null,
+      "expiryDate": "",
+      "expirySource": "",
+      "urlStatus": "HTTP 200"
+    },
+    {
+      "id": "tiktok-15w6fgg",
+      "title": "Gratis Eintritt im Justizpalast Wien",
+      "brand": "Palace of Justice Vienna",
+      "source": "tiktok-deals-scanner",
+      "url": "https://www.tiktok.com/@wienmermaid/video/7699951350351777046",
+      "reasons": [],
+      "warnings": [
+        "Inhalt prüfen: Nur Stadt/Region angegeben; Filiale oder teilnehmende Standorte prüfen"
+      ],
+      "sourceDate": "2026-10-23T19:43:49.000Z",
+      "sourceDateSource": "url.tiktokVideoId",
+      "sourceAgeDays": 1,
+      "expiryDate": "",
+      "expirySource": "deal.expires",
+      "urlStatus": "HTTP 200"
+    }
+  ],
   "blocked": [
     {
       "id": "jesuszentrum-events-20261019",
@@ -898,6 +952,7 @@
         "älter als 7 Tage (2026-02-22)"
       ],
       "warnings": [
+        "URL nicht eindeutig prüfbar (temporärer Fehler)",
         "kein Ablaufdatum gefunden"
       ],
       "sourceDate": "2026-02-22T21:13:07.698Z",
@@ -905,7 +960,7 @@
       "sourceAgeDays": 244,
       "expiryDate": "",
       "expirySource": "",
-      "urlStatus": "HTTP 200"
+      "urlStatus": "unklar: temporärer URL-Fehler"
     },
     {
       "id": "extra-32-20260222",
@@ -3651,6 +3706,44 @@
       "sourceAgeDays": 6,
       "expiryDate": "2026-11-07T23:59:59.999Z",
       "expirySource": "deal.structured",
+      "urlStatus": "HTTP 200"
+    },
+    {
+      "id": "tiktok-105aqef",
+      "title": "@tobi.eulerrolle Angebot",
+      "brand": "@tobi.eulerrolle",
+      "source": "tiktok-deals-scanner",
+      "url": "https://www.tiktok.com/@tobi.eulerrolle/video/7699903934151855382",
+      "reasons": [
+        "allgemeine Empfehlung/Gratis-Event statt konkreter Aktion"
+      ],
+      "warnings": [
+        "Inhalt prüfen: Nur Stadt/Region angegeben; Filiale oder teilnehmende Standorte prüfen"
+      ],
+      "sourceDate": "2026-10-23T16:39:49.000Z",
+      "sourceDateSource": "url.tiktokVideoId",
+      "sourceAgeDays": 1,
+      "expiryDate": "",
+      "expirySource": "deal.expires",
+      "urlStatus": "HTTP 200"
+    },
+    {
+      "id": "tiktok-15fw3ax",
+      "title": "🎄 If you’re planning a European Christmas market trip in 2026, save this list",
+      "brand": "Christmas Market Trip",
+      "source": "tiktok-deals-scanner",
+      "url": "https://www.tiktok.com/@joujoutravels/video/7698833361925688608",
+      "reasons": [
+        "allgemeine Empfehlung/Gratis-Event statt konkreter Aktion"
+      ],
+      "warnings": [
+        "Inhalt prüfen: Nur Stadt/Region angegeben; Filiale oder teilnehmende Standorte prüfen"
+      ],
+      "sourceDate": "2026-10-20T19:25:27.000Z",
+      "sourceDateSource": "url.tiktokVideoId",
+      "sourceAgeDays": 4,
+      "expiryDate": "",
+      "expirySource": "deal.expires",
       "urlStatus": "HTTP 200"
     },
     {
