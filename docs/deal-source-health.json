@@ -1,10 +1,10 @@
 {
-  "generatedAt": "2026-10-24T05:00:22.230Z",
+  "generatedAt": "2026-10-24T05:07:29.023Z",
   "summary": {
     "filesConsidered": 32,
-    "totalCandidates": 843,
-    "uniqueCandidates": 768,
-    "distinctCandidates": 801,
+    "totalCandidates": 844,
+    "uniqueCandidates": 769,
+    "distinctCandidates": 802,
     "duplicateClusters": 33,
     "topHealthySources": [
       {
@@ -32,10 +32,10 @@
         "totalDeals": 12
       },
       {
-        "sourceKey": "meta-instagram",
-        "sourceLabel": "Meta Instagram Graph",
-        "healthScore": 70,
-        "totalDeals": 123
+        "sourceKey": "instagram-apify",
+        "sourceLabel": "Apify Instagram",
+        "healthScore": 72,
+        "totalDeals": 8
       }
     ],
     "topMissionSources": [
@@ -52,6 +52,12 @@
         "totalDeals": 1
       },
       {
+        "sourceKey": "instagram-apify",
+        "sourceLabel": "Apify Instagram",
+        "missionFitScore": 75,
+        "totalDeals": 8
+      },
+      {
         "sourceKey": "instagram-ai",
         "sourceLabel": "Instagram AI Agent",
         "missionFitScore": 73,
@@ -62,12 +68,6 @@
         "sourceLabel": "Wien Deals Combined Graph",
         "missionFitScore": 72,
         "totalDeals": 2
-      },
-      {
-        "sourceKey": "member-benefits",
-        "sourceLabel": "Member Benefits",
-        "missionFitScore": 68,
-        "totalDeals": 109
       }
     ],
     "topCoverageSources": [
@@ -165,10 +165,10 @@
         "totalDeals": 123
       },
       {
-        "sourceKey": "firecrawl5",
-        "sourceLabel": "Firecrawl Key 5 - Instagram Gastro",
+        "sourceKey": "instagram-apify",
+        "sourceLabel": "Apify Instagram",
         "sourceWeightScore": 62,
-        "totalDeals": 1
+        "totalDeals": 8
       }
     ],
     "topSourcesToFix": [
@@ -520,6 +520,68 @@
       "sourceWeightScore": 58
     },
     {
+      "sourceKey": "instagram-apify",
+      "file": "deals-pending-instagram-apify.json",
+      "sourceLabel": "Apify Instagram",
+      "totalDeals": 8,
+      "uniqueDeals": 6,
+      "duplicateDeals": 2,
+      "duplicateAcrossSources": 2,
+      "fresh1dCount": 3,
+      "fresh7dCount": 8,
+      "viennaCount": 3,
+      "foodDrinkCount": 8,
+      "promoCount": 7,
+      "missingUrlCount": 0,
+      "sampleTitles": [
+        "Große Aktion: 2 + 1 Döner GRATIS auf alle Dönersorten🔥 📍Wo?: Rußbergstraße 9 , 1210 Wien ⏰ Wann?: 19.10 bis",
+        "Bei uns steht’s an der Wand – und ist definitiv einen Blick wert👀 🍽️ Daily Lunch: Mo–Fr von 11–15 Uhr + grat",
+        "🍕🦾 ANRUFEN 📞 🍕 Täglich von 16:00 bis 02:00 Uhr für euch geöffnet. 📍 Lassallestraße 11, 1020 Wien 🚗 Liefe"
+      ],
+      "lastRun": null,
+      "uniqueRate": 0.8,
+      "duplicateRate": 0.3,
+      "fresh1dRate": 0.4,
+      "fresh7dRate": 1,
+      "viennaRate": 0.4,
+      "foodDrinkRate": 1,
+      "promoRate": 0.9,
+      "missingUrlRate": 0,
+      "averageQualityScore": 93.8,
+      "topCategories": [
+        {
+          "value": "essen",
+          "count": 5
+        },
+        {
+          "value": "kaffee",
+          "count": 2
+        },
+        {
+          "value": "fitness",
+          "count": 1
+        }
+      ],
+      "topTypes": [
+        {
+          "value": "gratis",
+          "count": 7
+        },
+        {
+          "value": "rabatt",
+          "count": 1
+        }
+      ],
+      "issues": [
+        "Wien-Signal ist zu schwach"
+      ],
+      "healthScore": 72,
+      "missionFitScore": 75,
+      "coverageScore": 18,
+      "precisionScore": 71,
+      "sourceWeightScore": 62
+    },
+    {
       "sourceKey": "meta-instagram",
       "file": "deals-pending-meta-instagram.json",
       "sourceLabel": "Meta Instagram Graph",
@@ -602,65 +664,6 @@
       "coverageScore": 87,
       "precisionScore": 71,
       "sourceWeightScore": 70
-    },
-    {
-      "sourceKey": "instagram-apify",
-      "file": "deals-pending-instagram-apify.json",
-      "sourceLabel": "Apify Instagram",
-      "totalDeals": 7,
-      "uniqueDeals": 5,
-      "duplicateDeals": 2,
-      "duplicateAcrossSources": 2,
-      "fresh1dCount": 1,
-      "fresh7dCount": 7,
-      "viennaCount": 2,
-      "foodDrinkCount": 7,
-      "promoCount": 6,
-      "missingUrlCount": 0,
-      "sampleTitles": [
-        "Große Aktion: 2 + 1 Döner GRATIS auf alle Dönersorten🔥 📍Wo?: Rußbergstraße 9 , 1210 Wien ⏰ Wann?: 19.10 bis",
-        "🍕🦾 ANRUFEN 📞 🍕 Täglich von 16:00 bis 02:00 Uhr für euch geöffnet. 📍 Lassallestraße 11, 1020 Wien 🚗 Liefe",
-        "Oder doch lieber eine Calzone? 🍕 Kein Problem! Täglich von 16:00 bis 02:00 Uhr für euch geöffnet. 📍 Lassalle"
-      ],
-      "lastRun": null,
-      "uniqueRate": 0.7,
-      "duplicateRate": 0.3,
-      "fresh1dRate": 0.1,
-      "fresh7dRate": 1,
-      "viennaRate": 0.3,
-      "foodDrinkRate": 1,
-      "promoRate": 0.9,
-      "missingUrlRate": 0,
-      "averageQualityScore": 93.3,
-      "topCategories": [
-        {
-          "value": "essen",
-          "count": 6
-        },
-        {
-          "value": "kaffee",
-          "count": 1
-        }
-      ],
-      "topTypes": [
-        {
-          "value": "gratis",
-          "count": 6
-        },
-        {
-          "value": "rabatt",
-          "count": 1
-        }
-      ],
-      "issues": [
-        "wenige Deals sind frischer als 1 Tag",
-        "Wien-Signal ist zu schwach"
-      ],
-      "healthScore": 64,
-      "missionFitScore": 67,
-      "coverageScore": 15,
-      "precisionScore": 65,
-      "sourceWeightScore": 55
     },
     {
       "sourceKey": "firecrawl5",
