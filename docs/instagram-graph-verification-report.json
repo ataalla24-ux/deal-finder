@@ -1,7 +1,7 @@
 {
-  "generatedAt": "2026-10-24T16:54:23.148Z",
+  "generatedAt": "2026-10-24T17:09:20.620Z",
   "source": "instagram-graph-cross-source-verification",
-  "status": "ok",
+  "status": "degraded",
   "configured": true,
   "scannedFiles": [
     "deals-pending-church-events.json",
@@ -139,8 +139,8 @@
       "candidates": 0
     },
     "deals-pending-meta-instagram.json": {
-      "deals": 127,
-      "candidates": 27
+      "deals": 130,
+      "candidates": 29
     },
     "deals-pending-power.json": {
       "deals": 35,
@@ -167,8 +167,8 @@
       "candidates": 0
     }
   },
-  "candidatePosts": 35,
-  "candidateAccounts": 26,
+  "candidatePosts": 37,
+  "candidateAccounts": 27,
   "skippedAccountCooldowns": 0,
   "selectedAccounts": [
     {
@@ -180,6 +180,10 @@
       "candidates": 4
     },
     {
+      "username": "only.pizza.vienna",
+      "candidates": 2
+    },
+    {
       "username": "freefinder.at",
       "candidates": 2
     },
@@ -188,18 +192,19 @@
       "candidates": 2
     },
     {
-      "username": "onlynoodle_",
-      "candidates": 1
-    },
-    {
-      "username": "architekturzentrum_wien",
+      "username": "rhulo1020",
       "candidates": 1
     }
   ],
-  "fetchedPosts": 150,
-  "exactMatches": 10,
+  "fetchedPosts": 50,
+  "exactMatches": 4,
   "retainedEvidencePosts": 2000,
-  "errors": [],
+  "errors": [
+    {
+      "username": "only.pizza.vienna",
+      "message": "Instagram shared quota paused: rolling-hour budget exhausted"
+    }
+  ],
   "accountFailures": {
     "tantisaluti.wien": {
       "count": 2,
@@ -228,21 +233,27 @@
     }
   },
   "sharedQuota": {
-    "limitPerHour": 190,
+    "limitPerHour": 237,
     "usageThreshold": 95,
-    "requests": 6,
-    "reserved": 10,
-    "stopped": false,
-    "reason": "",
-    "highestUsagePercent": 17,
+    "requests": 2,
+    "reserved": 2,
+    "stopped": true,
+    "reason": "Instagram shared quota paused: rolling-hour budget exhausted",
+    "highestUsagePercent": 76,
     "waitedMs": 0,
     "pacingMs": 0,
-    "retryAt": "",
+    "retryAt": "2026-10-24T17:52:26.440Z",
     "adaptiveSafetyCeiling": 190,
     "adaptiveIncreases": 0,
     "storageFailure": null
   },
+  "globalError": {
+    "username": "only.pizza.vienna",
+    "status": 0,
+    "code": "SCAN_BUDGET",
+    "message": "Instagram shared quota paused: rolling-hour budget exhausted"
+  },
   "blockedEvidencePosts": 81,
-  "unmatchedCandidatePosts": 25,
-  "message": "10/35 fresh cross-source Instagram candidates matched exactly via Graph API."
+  "unmatchedCandidatePosts": 33,
+  "message": "4/37 fresh cross-source Instagram candidates matched exactly via Graph API."
 }
