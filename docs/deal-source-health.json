@@ -1,10 +1,10 @@
 {
-  "generatedAt": "2026-10-24T11:27:47.456Z",
+  "generatedAt": "2026-10-24T11:35:08.193Z",
   "summary": {
     "filesConsidered": 32,
-    "totalCandidates": 832,
-    "uniqueCandidates": 746,
-    "distinctCandidates": 785,
+    "totalCandidates": 833,
+    "uniqueCandidates": 747,
+    "distinctCandidates": 786,
     "duplicateClusters": 39,
     "topHealthySources": [
       {
@@ -61,7 +61,7 @@
         "sourceKey": "wien-combined",
         "sourceLabel": "Wien Deals Combined Graph",
         "missionFitScore": 72,
-        "totalDeals": 2
+        "totalDeals": 3
       },
       {
         "sourceKey": "member-benefits",
@@ -133,10 +133,10 @@
         "totalDeals": 109
       },
       {
-        "sourceKey": "instagram-apify",
-        "sourceLabel": "Apify Instagram",
-        "precisionScore": 70,
-        "totalDeals": 8
+        "sourceKey": "wien-combined",
+        "sourceLabel": "Wien Deals Combined Graph",
+        "precisionScore": 72,
+        "totalDeals": 3
       }
     ],
     "topWeightedSources": [
@@ -587,6 +587,80 @@
       "sourceWeightScore": 61
     },
     {
+      "sourceKey": "wien-combined",
+      "file": "deals-pending-wien-combined.json",
+      "sourceLabel": "Wien Deals Combined Graph",
+      "totalDeals": 3,
+      "uniqueDeals": 1,
+      "duplicateDeals": 2,
+      "duplicateAcrossSources": 2,
+      "fresh1dCount": 3,
+      "fresh7dCount": 3,
+      "viennaCount": 3,
+      "foodDrinkCount": 3,
+      "promoCount": 0,
+      "missingUrlCount": 0,
+      "sampleTitles": [
+        "Mittagsteller um 10,80 € von Montag bis Freitag",
+        "Bei The Pizzeria 2 bekommst du bei Selbstabholung jede Standard-Pizza + Pepsi Dose für nur 9,90 €.",
+        "🥙💯 The Doner Special Sandwich at Türkis – Hauptbahnhof was one of the most satisfying bites of our entire Europe trip."
+      ],
+      "lastRun": {
+        "status": "completed-with-errors",
+        "startedAt": "2026-10-24T11:30:46.122Z",
+        "finishedAt": "2026-10-24T11:32:27.392Z",
+        "durationMs": 101270,
+        "counts": {
+          "rawCandidates": 38,
+          "normalizedCandidates": 3,
+          "verifiedCandidates": 3,
+          "previousDeals": 0,
+          "acceptedDeals": 3,
+          "rejectedDeals": 31
+        },
+        "rejectedByReason": {
+          "no-concrete-offer": 24,
+          "weak-food-offer": 1,
+          "general-recommendation": 5,
+          "alcohol-offer": 1
+        },
+        "errors": [
+          "#wien: Instagram scan paused: request-budget"
+        ],
+        "reportFile": "deal-pipeline-last-run-wien-combined.json"
+      },
+      "uniqueRate": 0.3,
+      "duplicateRate": 0.7,
+      "fresh1dRate": 1,
+      "fresh7dRate": 1,
+      "viennaRate": 1,
+      "foodDrinkRate": 1,
+      "promoRate": 0,
+      "missingUrlRate": 0,
+      "averageQualityScore": 81.3,
+      "topCategories": [
+        {
+          "value": "essen",
+          "count": 3
+        }
+      ],
+      "topTypes": [
+        {
+          "value": "rabatt",
+          "count": 3
+        }
+      ],
+      "issues": [
+        "wenige klare Gratis-/Promo-Signale",
+        "hohe Überschneidung mit anderen Quellen"
+      ],
+      "healthScore": 69,
+      "missionFitScore": 72,
+      "coverageScore": 14,
+      "precisionScore": 72,
+      "sourceWeightScore": 60
+    },
+    {
       "sourceKey": "meta-instagram",
       "file": "deals-pending-meta-instagram.json",
       "sourceLabel": "Meta Instagram Graph",
@@ -738,79 +812,6 @@
       "coverageScore": 15,
       "precisionScore": 80,
       "sourceWeightScore": 62
-    },
-    {
-      "sourceKey": "wien-combined",
-      "file": "deals-pending-wien-combined.json",
-      "sourceLabel": "Wien Deals Combined Graph",
-      "totalDeals": 2,
-      "uniqueDeals": 0,
-      "duplicateDeals": 2,
-      "duplicateAcrossSources": 2,
-      "fresh1dCount": 2,
-      "fresh7dCount": 2,
-      "viennaCount": 2,
-      "foodDrinkCount": 2,
-      "promoCount": 0,
-      "missingUrlCount": 0,
-      "sampleTitles": [
-        "Mittagsteller um 10,80 € von Montag bis Freitag",
-        "🥙💯 The Doner Special Sandwich at Türkis – Hauptbahnhof was one of the most satisfying bites of our entire Europe trip."
-      ],
-      "lastRun": {
-        "status": "completed-with-errors",
-        "startedAt": "2026-10-24T04:58:20.293Z",
-        "finishedAt": "2026-10-24T04:59:28.554Z",
-        "durationMs": 68261,
-        "counts": {
-          "rawCandidates": 14,
-          "normalizedCandidates": 2,
-          "verifiedCandidates": 2,
-          "previousDeals": 0,
-          "acceptedDeals": 2,
-          "rejectedDeals": 12
-        },
-        "rejectedByReason": {
-          "no-concrete-offer": 8,
-          "general-recommendation": 2,
-          "alcohol-offer": 1,
-          "missing-vienna-evidence": 1
-        },
-        "errors": [
-          "#viennafood: Instagram shared quota paused: request or quota unavailable"
-        ],
-        "reportFile": "deal-pipeline-last-run-wien-combined.json"
-      },
-      "uniqueRate": 0,
-      "duplicateRate": 1,
-      "fresh1dRate": 1,
-      "fresh7dRate": 1,
-      "viennaRate": 1,
-      "foodDrinkRate": 1,
-      "promoRate": 0,
-      "missingUrlRate": 0,
-      "averageQualityScore": 83,
-      "topCategories": [
-        {
-          "value": "essen",
-          "count": 2
-        }
-      ],
-      "topTypes": [
-        {
-          "value": "rabatt",
-          "count": 2
-        }
-      ],
-      "issues": [
-        "wenige klare Gratis-/Promo-Signale",
-        "hohe Überschneidung mit anderen Quellen"
-      ],
-      "healthScore": 62,
-      "missionFitScore": 72,
-      "coverageScore": 12,
-      "precisionScore": 70,
-      "sourceWeightScore": 57
     },
     {
       "sourceKey": "instagram-verified",
