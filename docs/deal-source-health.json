@@ -1,11 +1,11 @@
 {
-  "generatedAt": "2026-10-24T07:01:56.476Z",
+  "generatedAt": "2026-10-24T07:09:21.011Z",
   "summary": {
     "filesConsidered": 32,
-    "totalCandidates": 833,
+    "totalCandidates": 835,
     "uniqueCandidates": 745,
-    "distinctCandidates": 784,
-    "duplicateClusters": 39,
+    "distinctCandidates": 785,
+    "duplicateClusters": 40,
     "topHealthySources": [
       {
         "sourceKey": "instagram-apify2",
@@ -1217,9 +1217,9 @@
       "file": "deals-pending-gastro2.json",
       "sourceLabel": "Firecrawl Key 1 - Gastro",
       "totalDeals": 111,
-      "uniqueDeals": 102,
-      "duplicateDeals": 9,
-      "duplicateAcrossSources": 9,
+      "uniqueDeals": 101,
+      "duplicateDeals": 10,
+      "duplicateAcrossSources": 10,
       "fresh1dCount": 0,
       "fresh7dCount": 10,
       "viennaCount": 8,
@@ -1301,6 +1301,79 @@
       "coverageScore": 64,
       "precisionScore": 49,
       "sourceWeightScore": 53
+    },
+    {
+      "sourceKey": "food3",
+      "file": "deals-pending-food3.json",
+      "sourceLabel": "Firecrawl Key 2 - Food",
+      "totalDeals": 3,
+      "uniqueDeals": 1,
+      "duplicateDeals": 2,
+      "duplicateAcrossSources": 2,
+      "fresh1dCount": 0,
+      "fresh7dCount": 3,
+      "viennaCount": 2,
+      "foodDrinkCount": 3,
+      "promoCount": 1,
+      "missingUrlCount": 0,
+      "sampleTitles": [
+        "milyn Fusionhouse Zieglergasse 42: ️ Achtung, Hunger vorprogrammiert! Swipe dich durch ... - Instagram",
+        "Tuchlauben EIS, Landstraßer Hauptstraße 2: Krapfen in Wien gesucht? Entdecke deinen neuen Vienna Food Spot ...",
+        "Beeftartare: XO BEEF TARTARE ROLL. ALL LOCATIONS #beeftartare #xobeef ..."
+      ],
+      "lastRun": {
+        "status": "completed-with-errors",
+        "startedAt": "2026-10-24T07:01:48.692Z",
+        "finishedAt": "2026-10-24T07:02:13.489Z",
+        "durationMs": 24797,
+        "counts": {
+          "rawCandidates": 18,
+          "normalizedCandidates": 18,
+          "verifiedCandidates": 3,
+          "previousDeals": 1,
+          "acceptedDeals": 3,
+          "rejectedDeals": 15
+        },
+        "rejectedByReason": {
+          "post-verification-rejected": 15
+        },
+        "errors": [
+          "https://www.instagram.com/explore/tags/fooddealsvienna/: Die angegebene Instagram-Hashtag-Seite konnte in diesem Lauf nicht abgerufen werden (der zulässige Abruf wurde von der Quelle nicht unterstützt). Da ausschließlich diese Quelle verwendet werden darf, konnte ich keine Originalposts, Aktualitätsprüfung oder verlässlichen Angebotsdaten extrahieren."
+        ],
+        "reportFile": "deal-pipeline-last-run-food3.json"
+      },
+      "uniqueRate": 0.3,
+      "duplicateRate": 0.7,
+      "fresh1dRate": 0,
+      "fresh7dRate": 1,
+      "viennaRate": 0.7,
+      "foodDrinkRate": 1,
+      "promoRate": 0.3,
+      "missingUrlRate": 0,
+      "averageQualityScore": 67.3,
+      "topCategories": [
+        {
+          "value": "essen",
+          "count": 3
+        }
+      ],
+      "topTypes": [
+        {
+          "value": "rabatt",
+          "count": 3
+        }
+      ],
+      "issues": [
+        "wenige Deals sind frischer als 1 Tag",
+        "wenige klare Gratis-/Promo-Signale",
+        "Wien-Signal ist zu schwach",
+        "hohe Überschneidung mit anderen Quellen"
+      ],
+      "healthScore": 53,
+      "missionFitScore": 54,
+      "coverageScore": 11,
+      "precisionScore": 59,
+      "sourceWeightScore": 46
     },
     {
       "sourceKey": "church-gemeinde",
@@ -1821,75 +1894,6 @@
       "coverageScore": 2,
       "precisionScore": 14,
       "sourceWeightScore": 11
-    },
-    {
-      "sourceKey": "food3",
-      "file": "deals-pending-food3.json",
-      "sourceLabel": "Firecrawl Key 2 - Food",
-      "totalDeals": 1,
-      "uniqueDeals": 0,
-      "duplicateDeals": 1,
-      "duplicateAcrossSources": 1,
-      "fresh1dCount": 0,
-      "fresh7dCount": 1,
-      "viennaCount": 0,
-      "foodDrinkCount": 1,
-      "promoCount": 0,
-      "missingUrlCount": 0,
-      "sampleTitles": [
-        "Beeftartare: XO BEEF TARTARE ROLL. ALL LOCATIONS #beeftartare #xobeef ..."
-      ],
-      "lastRun": {
-        "status": "completed-with-errors",
-        "startedAt": "2026-10-23T07:12:53.411Z",
-        "finishedAt": "2026-10-23T07:13:45.988Z",
-        "durationMs": 52577,
-        "counts": {
-          "rawCandidates": 0,
-          "normalizedCandidates": 0,
-          "verifiedCandidates": 1,
-          "previousDeals": 1,
-          "acceptedDeals": 1,
-          "rejectedDeals": 0
-        },
-        "rejectedByReason": {},
-        "errors": [
-          "https://www.instagram.com/explore/tags/neueröffnungwien/: Rate limit exceeded. Consumed (req/min): 3, Remaining (req/min): 0. Upgrade your plan at https://firecrawl.dev/pricing for increased rate limits or please retry after 9s, resets at Fri Oct 23 2026 07:13:54 GMT+0000 (Coordinated Universal Time)"
-        ],
-        "reportFile": "deal-pipeline-last-run-food3.json"
-      },
-      "uniqueRate": 0,
-      "duplicateRate": 1,
-      "fresh1dRate": 0,
-      "fresh7dRate": 1,
-      "viennaRate": 0,
-      "foodDrinkRate": 1,
-      "promoRate": 0,
-      "missingUrlRate": 0,
-      "averageQualityScore": 72,
-      "topCategories": [
-        {
-          "value": "essen",
-          "count": 1
-        }
-      ],
-      "topTypes": [
-        {
-          "value": "rabatt",
-          "count": 1
-        }
-      ],
-      "issues": [
-        "wenige Deals sind frischer als 1 Tag",
-        "wenige klare Gratis-/Promo-Signale",
-        "Wien-Signal ist zu schwach",
-        "hohe Überschneidung mit anderen Quellen"
-      ],
-      "healthScore": 26,
-      "missionFitScore": 35,
-      "coverageScore": 5,
-      "precisionScore": 30,
-      "sourceWeightScore": 25
     },
     {
       "sourceKey": "firecrawl2",
