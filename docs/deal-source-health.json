@@ -1,10 +1,10 @@
 {
-  "generatedAt": "2026-10-25T07:38:07.972Z",
+  "generatedAt": "2026-10-25T07:59:42.238Z",
   "summary": {
     "filesConsidered": 32,
-    "totalCandidates": 850,
-    "uniqueCandidates": 764,
-    "distinctCandidates": 802,
+    "totalCandidates": 853,
+    "uniqueCandidates": 767,
+    "distinctCandidates": 805,
     "duplicateClusters": 38,
     "topHealthySources": [
       {
@@ -1550,6 +1550,86 @@
       "sourceWeightScore": 33
     },
     {
+      "sourceKey": "firecrawl2",
+      "file": "deals-pending-firecrawl2.json",
+      "sourceLabel": "Firecrawl Key 3 - Consumables",
+      "totalDeals": 4,
+      "uniqueDeals": 3,
+      "duplicateDeals": 1,
+      "duplicateAcrossSources": 1,
+      "fresh1dCount": 0,
+      "fresh7dCount": 4,
+      "viennaCount": 1,
+      "foodDrinkCount": 0,
+      "promoCount": 3,
+      "missingUrlCount": 0,
+      "sampleTitles": [
+        "BIPA: 5 days ago · Bald länger einkaufen bei Billa, Bipa und Penny? Rewe fordert eine Ausweitung der erlaubten Öffnungszeiten in Öst",
+        "Eintritt Frei: 2 days ago · Gratis Eintritt Wien, jeden Monat. Museen, Parlament, Loos-Wohnung: 0 €. Wenn du weißt wann. Free on repeat, if you",
+        "Museum: 2 days ago · ... GRATIS entdecken könnt! 🏛️ PALAIS & HISTORISCHE GEBÄUDE ... #wien #wienliebe #wiengratis #reisetipps ·"
+      ],
+      "lastRun": {
+        "status": "completed",
+        "startedAt": "2026-10-25T07:55:41.989Z",
+        "finishedAt": "2026-10-25T07:56:29.304Z",
+        "durationMs": 47315,
+        "counts": {
+          "rawCandidates": 15,
+          "normalizedCandidates": 11,
+          "verifiedCandidates": 4,
+          "previousDeals": 1,
+          "acceptedDeals": 4,
+          "rejectedDeals": 12
+        },
+        "rejectedByReason": {
+          "excluded-giveaway": 2,
+          "missing-concrete-offer": 2,
+          "post-verification-rejected": 8
+        },
+        "errors": [],
+        "reportFile": "deal-pipeline-last-run-firecrawl2.json"
+      },
+      "uniqueRate": 0.8,
+      "duplicateRate": 0.3,
+      "fresh1dRate": 0,
+      "fresh7dRate": 1,
+      "viennaRate": 0.3,
+      "foodDrinkRate": 0,
+      "promoRate": 0.8,
+      "missingUrlRate": 0,
+      "averageQualityScore": 78.5,
+      "topCategories": [
+        {
+          "value": "kultur",
+          "count": 3
+        },
+        {
+          "value": "beauty",
+          "count": 1
+        }
+      ],
+      "topTypes": [
+        {
+          "value": "gratis",
+          "count": 3
+        },
+        {
+          "value": "rabatt",
+          "count": 1
+        }
+      ],
+      "issues": [
+        "wenige Deals sind frischer als 1 Tag",
+        "geringe Food-/Drink-Relevanz",
+        "Wien-Signal ist zu schwach"
+      ],
+      "healthScore": 43,
+      "missionFitScore": 27,
+      "coverageScore": 7,
+      "precisionScore": 38,
+      "sourceWeightScore": 30
+    },
+    {
       "sourceKey": "gutscheine",
       "file": "deals-pending-gutscheine.json",
       "sourceLabel": "Gutscheine.at",
@@ -1750,76 +1830,6 @@
       "coverageScore": 2,
       "precisionScore": 14,
       "sourceWeightScore": 11
-    },
-    {
-      "sourceKey": "firecrawl2",
-      "file": "deals-pending-firecrawl2.json",
-      "sourceLabel": "Firecrawl Key 3 - Consumables",
-      "totalDeals": 1,
-      "uniqueDeals": 0,
-      "duplicateDeals": 1,
-      "duplicateAcrossSources": 1,
-      "fresh1dCount": 0,
-      "fresh7dCount": 1,
-      "viennaCount": 0,
-      "foodDrinkCount": 0,
-      "promoCount": 1,
-      "missingUrlCount": 0,
-      "sampleTitles": [
-        "Nationalfeiertag: 16 hours ago · ... on October 18, 2026: \"🏛️ GRATIS INS MUSEUM AM NATIONALFEIERTAG! ✨ Markiert euch ... #wien #wienliebe #wiengra"
-      ],
-      "lastRun": {
-        "status": "completed",
-        "startedAt": "2026-10-24T07:45:19.610Z",
-        "finishedAt": "2026-10-24T07:46:53.934Z",
-        "durationMs": 94324,
-        "counts": {
-          "rawCandidates": 19,
-          "normalizedCandidates": 18,
-          "verifiedCandidates": 1,
-          "previousDeals": 1,
-          "acceptedDeals": 1,
-          "rejectedDeals": 19
-        },
-        "rejectedByReason": {
-          "missing-concrete-offer": 1,
-          "post-verification-rejected": 18
-        },
-        "errors": [],
-        "reportFile": "deal-pipeline-last-run-firecrawl2.json"
-      },
-      "uniqueRate": 0,
-      "duplicateRate": 1,
-      "fresh1dRate": 0,
-      "fresh7dRate": 1,
-      "viennaRate": 0,
-      "foodDrinkRate": 0,
-      "promoRate": 1,
-      "missingUrlRate": 0,
-      "averageQualityScore": 84,
-      "topCategories": [
-        {
-          "value": "kultur",
-          "count": 1
-        }
-      ],
-      "topTypes": [
-        {
-          "value": "gratis",
-          "count": 1
-        }
-      ],
-      "issues": [
-        "wenige Deals sind frischer als 1 Tag",
-        "geringe Food-/Drink-Relevanz",
-        "Wien-Signal ist zu schwach",
-        "hohe Überschneidung mit anderen Quellen"
-      ],
-      "healthScore": 22,
-      "missionFitScore": 28,
-      "coverageScore": 5,
-      "precisionScore": 28,
-      "sourceWeightScore": 22
     },
     {
       "sourceKey": "church-gottesdienste",
