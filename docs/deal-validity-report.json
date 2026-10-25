@@ -1,11 +1,11 @@
 {
-  "generatedAt": "2026-10-25T12:06:18.602Z",
+  "generatedAt": "2026-10-25T12:32:31.630Z",
   "summary": {
     "maxAgeDays": 7,
-    "total": 304,
-    "allowed": 0,
-    "blocked": 304,
-    "warnings": 0,
+    "total": 308,
+    "allowed": 3,
+    "blocked": 305,
+    "warnings": 2,
     "reasonCounts": {
       "kein konkretes Angebot erkennbar": 224,
       "Gottesdienste nur im Wochenlauf": 36,
@@ -17,9 +17,10 @@
       "älter als 7 Tage (2026-10-14)": 1,
       "URL ungültig (HTTP 404)": 9,
       "redaktioneller Mehrfach-Roundup statt eindeutigem Einzelangebot": 3,
+      "Gewinnspiel/Verlosung statt direkt nutzbarem Deal": 6,
+      "älter als 7 Tage (2025-11-09)": 1,
       "abgelaufen (2026-10-24)": 2,
       "URL ungültig (Inhalt nicht mehr verfügbar)": 3,
-      "älter als 7 Tage (2025-11-09)": 1,
       "URL ungültig (HTTP 410)": 2,
       "abgelaufen (2026-07-01)": 3,
       "älter als 7 Tage (2026-05-20)": 1,
@@ -30,7 +31,6 @@
       "älter als 7 Tage (2023-09-21)": 3,
       "kostenlose Infrastruktur statt Deal": 3,
       "älter als 7 Tage (2024-03-18)": 3,
-      "Gewinnspiel/Verlosung statt direkt nutzbarem Deal": 5,
       "älter als 45 Tage trotz wiederkehrender Zeitplan (2026-03-21)": 1,
       "abgelaufen (2026-08-01)": 1,
       "älter als 7 Tage (2026-10-09)": 2,
@@ -61,8 +61,8 @@
       "älter als 7 Tage": 139,
       "ungültige URL": 17,
       "sonstiges": 9,
+      "Gewinnspiel": 6,
       "abgelaufen": 12,
-      "Gewinnspiel": 5,
       "nicht Wien": 13,
       "Meta-Graph-Widerspruch": 1,
       "ausgeschlossene Quelle": 19,
@@ -94,22 +94,23 @@
         }
       },
       "Firecrawl Gastro #4": {
-        "total": 7,
+        "total": 8,
         "allowed": 0,
-        "blocked": 7,
+        "blocked": 8,
         "warnings": 0,
         "reasonCategoryCounts": {
+          "Gewinnspiel": 1,
+          "älter als 7 Tage": 3,
           "sonstiges": 1,
           "abgelaufen": 2,
-          "ungültige URL": 3,
-          "älter als 7 Tage": 3
+          "ungültige URL": 3
         }
       },
       "Firecrawl Gastro #4 Search": {
-        "total": 1,
-        "allowed": 0,
+        "total": 4,
+        "allowed": 3,
         "blocked": 1,
-        "warnings": 0,
+        "warnings": 2,
         "reasonCategoryCounts": {
           "sonstiges": 1
         }
@@ -246,7 +247,57 @@
       }
     }
   },
-  "allowed": [],
+  "allowed": [
+    {
+      "id": "fc4g-1ecodie",
+      "title": "GRATIS Kompost auf 13 verschiedenen Mistplätzen in Wien",
+      "brand": "GRATIS Kompost auf 13 verschiedenen Mistplätzen in Wien",
+      "source": "Firecrawl Gastro #4 Search",
+      "url": "https://www.preisjaeger.at/deals/gratis-kompost-auf-13-verschiedenen-mistplatzen-in-wien-371183",
+      "reasons": [],
+      "warnings": [
+        "kein Ablaufdatum gefunden"
+      ],
+      "sourceDate": "2026-10-24T20:39:50.000Z",
+      "sourceDateSource": "url.publicationDate",
+      "sourceAgeDays": 1,
+      "expiryDate": "",
+      "expirySource": "",
+      "urlStatus": "HTTP 200"
+    },
+    {
+      "id": "fc4g-jldu52",
+      "title": "Musical Maria Theresia / Die schöne und das Biest - Wien - Preisjäger",
+      "brand": "Musical Maria Theresia / Die schöne und das Biest - Wien - Preisjäger",
+      "source": "Firecrawl Gastro #4 Search",
+      "url": "https://www.preisjaeger.at/deals/musical-maria-theresia-die-schone-und-das-biest-10-371169",
+      "reasons": [],
+      "warnings": [],
+      "sourceDate": "2026-10-24T17:00:13.000Z",
+      "sourceDateSource": "url.publicationDate",
+      "sourceAgeDays": 1,
+      "expiryDate": "2026-12-31",
+      "expirySource": "url.dateHints",
+      "urlStatus": "HTTP 200"
+    },
+    {
+      "id": "fc4g-1jg67w9",
+      "title": "Lotterien Tag 27.11. GRATIS ins Naturhistorische Museum Wien",
+      "brand": "Lotterien Tag 27.11. GRATIS ins Naturhistorische Museum Wien",
+      "source": "Firecrawl Gastro #4 Search",
+      "url": "https://www.preisjaeger.at/deals/lotterien-tag-2711-gratis-ins-naturhistorische-museum-wien-371180",
+      "reasons": [],
+      "warnings": [
+        "startet am 2026-11-26"
+      ],
+      "sourceDate": "2026-10-24T20:27:20.000Z",
+      "sourceDateSource": "url.publicationDate",
+      "sourceAgeDays": 1,
+      "expiryDate": "",
+      "expirySource": "url.dateHints",
+      "urlStatus": "HTTP 200"
+    }
+  ],
   "blocked": [
     {
       "id": "jesuszentrum-events-20261019",
@@ -932,7 +983,6 @@
         "älter als 7 Tage (2026-02-22)"
       ],
       "warnings": [
-        "URL nicht eindeutig prüfbar (temporärer Fehler)",
         "kein Ablaufdatum gefunden"
       ],
       "sourceDate": "2026-02-22T21:13:07.698Z",
@@ -940,7 +990,7 @@
       "sourceAgeDays": 245,
       "expiryDate": "",
       "expirySource": "",
-      "urlStatus": "unklar: temporärer URL-Fehler"
+      "urlStatus": "HTTP 200"
     },
     {
       "id": "extra-32-20260222",
@@ -1025,6 +1075,42 @@
       "urlStatus": "HTTP 200"
     },
     {
+      "id": "fc4g-1xfy0y0",
+      "title": "Gratis Döner für verkleidete Besucher bei der Halloween-Gran",
+      "brand": "Cio's",
+      "source": "Firecrawl Gastro #4",
+      "url": "https://www.instagram.com/reel/DeuQZlZKQx2/",
+      "reasons": [
+        "Gewinnspiel/Verlosung statt direkt nutzbarem Deal"
+      ],
+      "warnings": [
+        "Inhalt prüfen: Caption-Reste oder Emoji-Codes im sichtbaren Text"
+      ],
+      "sourceDate": "2026-10-20T16:24:53.000Z",
+      "sourceDateSource": "url.instagramShortcode",
+      "sourceAgeDays": 5,
+      "expiryDate": "2026-10-31",
+      "expirySource": "deal.expires",
+      "urlStatus": "HTTP 200"
+    },
+    {
+      "id": "fc4g-hvkp6o",
+      "title": "Ein Gratis-Döner pro Person.",
+      "brand": "H11 Döner & Pizza",
+      "source": "Firecrawl Gastro #4",
+      "url": "https://www.tiktok.com/@foodiewien/video/7570663175230704918",
+      "reasons": [
+        "älter als 7 Tage (2025-11-09)"
+      ],
+      "warnings": [],
+      "sourceDate": "2025-11-09T09:59:39.000Z",
+      "sourceDateSource": "url.tiktokVideoId",
+      "sourceAgeDays": 350,
+      "expiryDate": "2026-11-11",
+      "expirySource": "deal.expires",
+      "urlStatus": "HTTP 200"
+    },
+    {
       "id": "fc4g-sd80ua",
       "title": "Kostenlose Würstel beim Oktoberfest-Event.",
       "brand": "center.21",
@@ -1063,23 +1149,6 @@
       "expiryDate": "2026-12-13",
       "expirySource": "deal.expires",
       "urlStatus": "ungültig: Inhalt nicht mehr verfügbar"
-    },
-    {
-      "id": "fc4g-ce19k3",
-      "title": "Ein Gratis-Döner pro Person.",
-      "brand": "H11 Döner & Pizza",
-      "source": "Firecrawl Gastro #4",
-      "url": "https://www.tiktok.com/@foodiewien/video/7570663175230704918",
-      "reasons": [
-        "älter als 7 Tage (2025-11-09)"
-      ],
-      "warnings": [],
-      "sourceDate": "2025-11-09T09:59:39.000Z",
-      "sourceDateSource": "url.tiktokVideoId",
-      "sourceAgeDays": 350,
-      "expiryDate": "2026-11-11",
-      "expirySource": "deal.expires",
-      "urlStatus": "HTTP 200"
     },
     {
       "id": "fc4g-qzbd50",
