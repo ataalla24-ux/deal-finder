@@ -1,18 +1,12 @@
 {
-  "generatedAt": "2026-10-25T05:12:37.836Z",
+  "generatedAt": "2026-10-25T05:14:54.673Z",
   "summary": {
     "filesConsidered": 32,
-    "totalCandidates": 837,
-    "uniqueCandidates": 761,
-    "distinctCandidates": 794,
+    "totalCandidates": 836,
+    "uniqueCandidates": 760,
+    "distinctCandidates": 793,
     "duplicateClusters": 33,
     "topHealthySources": [
-      {
-        "sourceKey": "wien-combined",
-        "sourceLabel": "Wien Deals Combined Graph",
-        "healthScore": 100,
-        "totalDeals": 1
-      },
       {
         "sourceKey": "member-benefits",
         "sourceLabel": "Member Benefits",
@@ -36,15 +30,15 @@
         "sourceLabel": "TikTok Scanner",
         "healthScore": 72,
         "totalDeals": 14
+      },
+      {
+        "sourceKey": "meta-instagram",
+        "sourceLabel": "Meta Instagram Graph",
+        "healthScore": 71,
+        "totalDeals": 125
       }
     ],
     "topMissionSources": [
-      {
-        "sourceKey": "wien-combined",
-        "sourceLabel": "Wien Deals Combined Graph",
-        "missionFitScore": 100,
-        "totalDeals": 1
-      },
       {
         "sourceKey": "joe",
         "sourceLabel": "jö Bonus Club",
@@ -68,6 +62,12 @@
         "sourceLabel": "Instagram AI Agent",
         "missionFitScore": 68,
         "totalDeals": 50
+      },
+      {
+        "sourceKey": "instagram-apify",
+        "sourceLabel": "Apify Instagram",
+        "missionFitScore": 66,
+        "totalDeals": 11
       }
     ],
     "topCoverageSources": [
@@ -109,12 +109,6 @@
     ],
     "topPrecisionSources": [
       {
-        "sourceKey": "wien-combined",
-        "sourceLabel": "Wien Deals Combined Graph",
-        "precisionScore": 100,
-        "totalDeals": 1
-      },
-      {
         "sourceKey": "firecrawl5",
         "sourceLabel": "Firecrawl Key 5 - Instagram Gastro",
         "precisionScore": 80,
@@ -137,15 +131,15 @@
         "sourceLabel": "Meta Instagram Graph",
         "precisionScore": 72,
         "totalDeals": 125
+      },
+      {
+        "sourceKey": "tiktok",
+        "sourceLabel": "TikTok Scanner",
+        "precisionScore": 71,
+        "totalDeals": 14
       }
     ],
     "topWeightedSources": [
-      {
-        "sourceKey": "wien-combined",
-        "sourceLabel": "Wien Deals Combined Graph",
-        "sourceWeightScore": 83,
-        "totalDeals": 1
-      },
       {
         "sourceKey": "member-benefits",
         "sourceLabel": "Member Benefits",
@@ -169,6 +163,12 @@
         "sourceLabel": "jö Bonus Club",
         "sourceWeightScore": 64,
         "totalDeals": 10
+      },
+      {
+        "sourceKey": "firecrawl5",
+        "sourceLabel": "Firecrawl Key 5 - Instagram Gastro",
+        "sourceWeightScore": 62,
+        "totalDeals": 1
       }
     ],
     "topSourcesToFix": [
@@ -240,75 +240,6 @@
     }
   },
   "sources": [
-    {
-      "sourceKey": "wien-combined",
-      "file": "deals-pending-wien-combined.json",
-      "sourceLabel": "Wien Deals Combined Graph",
-      "totalDeals": 1,
-      "uniqueDeals": 1,
-      "duplicateDeals": 0,
-      "duplicateAcrossSources": 0,
-      "fresh1dCount": 1,
-      "fresh7dCount": 1,
-      "viennaCount": 1,
-      "foodDrinkCount": 1,
-      "promoCount": 1,
-      "missingUrlCount": 0,
-      "sampleTitles": [
-        "Plus so many wonderful attractions on the big bus tours are free like the Schönbrunn Gardens, Belvedere Gardens, Hofburg Palace complex & He"
-      ],
-      "lastRun": {
-        "status": "completed-with-errors",
-        "startedAt": "2026-10-24T21:29:02.618Z",
-        "finishedAt": "2026-10-24T21:31:26.957Z",
-        "durationMs": 144339,
-        "counts": {
-          "rawCandidates": 66,
-          "normalizedCandidates": 1,
-          "verifiedCandidates": 1,
-          "previousDeals": 0,
-          "acceptedDeals": 1,
-          "rejectedDeals": 62
-        },
-        "rejectedByReason": {
-          "no-concrete-offer": 51,
-          "general-recommendation": 5,
-          "excluded-promotion-type": 2,
-          "missing-text": 4
-        },
-        "errors": [
-          "#wientipps: Instagram scan paused: request-budget"
-        ],
-        "reportFile": "deal-pipeline-last-run-wien-combined.json"
-      },
-      "uniqueRate": 1,
-      "duplicateRate": 0,
-      "fresh1dRate": 1,
-      "fresh7dRate": 1,
-      "viennaRate": 1,
-      "foodDrinkRate": 1,
-      "promoRate": 1,
-      "missingUrlRate": 0,
-      "averageQualityScore": 81,
-      "topCategories": [
-        {
-          "value": "essen",
-          "count": 1
-        }
-      ],
-      "topTypes": [
-        {
-          "value": "gratis",
-          "count": 1
-        }
-      ],
-      "issues": [],
-      "healthScore": 100,
-      "missionFitScore": 100,
-      "coverageScore": 16,
-      "precisionScore": 100,
-      "sourceWeightScore": 83
-    },
     {
       "sourceKey": "member-benefits",
       "file": "deals-pending-member-benefits.json",
@@ -2195,6 +2126,66 @@
       "topCategories": [],
       "topTypes": [],
       "issues": [
+        "liefert aktuell 0 Deals"
+      ],
+      "healthScore": 0,
+      "missionFitScore": 0,
+      "coverageScore": 0,
+      "precisionScore": 0,
+      "sourceWeightScore": 0
+    },
+    {
+      "sourceKey": "wien-combined",
+      "file": "deals-pending-wien-combined.json",
+      "sourceLabel": "Wien Deals Combined Graph",
+      "totalDeals": 0,
+      "uniqueDeals": 0,
+      "duplicateDeals": 0,
+      "duplicateAcrossSources": 0,
+      "fresh1dCount": 0,
+      "fresh7dCount": 0,
+      "viennaCount": 0,
+      "foodDrinkCount": 0,
+      "promoCount": 0,
+      "missingUrlCount": 0,
+      "sampleTitles": [],
+      "lastRun": {
+        "status": "completed-with-errors",
+        "startedAt": "2026-10-25T05:11:51.758Z",
+        "finishedAt": "2026-10-25T05:14:02.722Z",
+        "durationMs": 130964,
+        "counts": {
+          "rawCandidates": 65,
+          "normalizedCandidates": 0,
+          "verifiedCandidates": 0,
+          "previousDeals": 0,
+          "acceptedDeals": 0,
+          "rejectedDeals": 62
+        },
+        "rejectedByReason": {
+          "no-concrete-offer": 48,
+          "excluded-promotion-type": 1,
+          "general-recommendation": 6,
+          "missing-text": 7
+        },
+        "errors": [
+          "#wienevents: Instagram shared quota paused: request or quota unavailable"
+        ],
+        "reportFile": "deal-pipeline-last-run-wien-combined.json"
+      },
+      "uniqueRate": 0,
+      "duplicateRate": 0,
+      "fresh1dRate": 0,
+      "fresh7dRate": 0,
+      "viennaRate": 0,
+      "foodDrinkRate": 0,
+      "promoRate": 0,
+      "missingUrlRate": 0,
+      "averageQualityScore": 0,
+      "topCategories": [],
+      "topTypes": [],
+      "issues": [
+        "letzter Lauf fand Kandidaten, aber akzeptierte keinen Deal",
         "liefert aktuell 0 Deals"
       ],
       "healthScore": 0,
