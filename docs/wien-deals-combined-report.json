@@ -1,22 +1,22 @@
 {
-  "generatedAt": "2026-10-24T21:29:02.619Z",
+  "generatedAt": "2026-10-25T05:11:51.759Z",
   "status": "degraded",
-  "message": "1 fresh, evidence-checked Graph hashtag deal(s) found; 0 recovered from media.",
+  "message": "0 fresh, evidence-checked Graph hashtag deal(s) found; 0 recovered from media.",
   "hashtags": [
-    "wienergastro",
-    "essenwien",
-    "sommerinwien",
-    "viennaeats",
     "viennafood",
-    "vienna",
-    "wientipps",
+    "wienergastro",
     "wienfamilie",
+    "essenwien",
+    "viennaeats",
     "wien",
-    "wienevents"
+    "wienevents",
+    "wientipps",
+    "vienna",
+    "sommerinwien"
   ],
-  "fetchedPosts": 66,
-  "uniquePosts": 63,
-  "totalDeals": 1,
+  "fetchedPosts": 65,
+  "uniquePosts": 62,
+  "totalDeals": 0,
   "rescueEligible": 0,
   "rescuedDeals": 0,
   "mediaEvidence": {
@@ -37,21 +37,21 @@
     "warnings": []
   },
   "requestBudget": {
-    "requests": 30,
+    "requests": 24,
     "maxRequests": 30,
-    "highestUsagePercent": 52,
-    "stopped": true,
-    "reason": "request-budget"
+    "highestUsagePercent": 36,
+    "stopped": false,
+    "reason": ""
   },
   "budgetDeferred": true,
   "sharedQuota": {
     "limitPerHour": 237,
     "usageThreshold": 95,
-    "requests": 30,
-    "reserved": 30,
+    "requests": 24,
+    "reserved": 25,
     "stopped": false,
     "reason": "",
-    "highestUsagePercent": 52,
+    "highestUsagePercent": 36,
     "waitedMs": 0,
     "pacingMs": 0,
     "retryAt": "",
@@ -61,7 +61,39 @@
   },
   "sources": [
     {
+      "hashtag": "viennafood",
+      "status": "ok",
+      "coverage": {
+        "pages": 2,
+        "uniquePosts": 25,
+        "newPosts": 1,
+        "stopReason": "exhausted",
+        "incomplete": false,
+        "resumed": true
+      },
+      "fetched": 25,
+      "accepted": 0,
+      "mediaFieldMode": "full-media-with-owner",
+      "mediaLimit": 25
+    },
+    {
       "hashtag": "wienergastro",
+      "status": "ok",
+      "coverage": {
+        "pages": 1,
+        "uniquePosts": 0,
+        "newPosts": 0,
+        "stopReason": "exhausted",
+        "incomplete": false,
+        "resumed": false
+      },
+      "fetched": 0,
+      "accepted": 0,
+      "mediaFieldMode": "full-media-with-owner",
+      "mediaLimit": 25
+    },
+    {
+      "hashtag": "wienfamilie",
       "status": "ok",
       "coverage": {
         "pages": 1,
@@ -80,57 +112,39 @@
       "hashtag": "essenwien",
       "status": "ok",
       "coverage": {
-        "pages": 1,
+        "pages": 0,
         "uniquePosts": 0,
         "newPosts": 0,
         "stopReason": "exhausted",
         "incomplete": false,
-        "resumed": false
+        "resumed": false,
+        "cacheHit": true
       },
       "fetched": 0,
-      "accepted": 0,
-      "mediaFieldMode": "full-media-with-owner",
-      "mediaLimit": 25
-    },
-    {
-      "hashtag": "sommerinwien",
-      "status": "ok",
-      "coverage": {
-        "pages": 3,
-        "uniquePosts": 0,
-        "newPosts": 0,
-        "stopReason": "exhausted",
-        "incomplete": false,
-        "resumed": false
-      },
-      "fetched": 0,
-      "accepted": 0,
-      "mediaFieldMode": "full-media-with-owner",
-      "mediaLimit": 25
+      "accepted": 0
     },
     {
       "hashtag": "viennaeats",
       "status": "ok",
       "coverage": {
-        "pages": 3,
-        "uniquePosts": 16,
-        "newPosts": 2,
-        "stopReason": "page-limit",
-        "incomplete": true,
-        "resumed": true
+        "pages": 0,
+        "uniquePosts": 15,
+        "newPosts": 0,
+        "stopReason": "exhausted",
+        "incomplete": false,
+        "resumed": true,
+        "cacheHit": true
       },
-      "fetched": 16,
-      "accepted": 0,
-      "mediaFieldMode": "full-media-with-owner",
-      "mediaLimit": 25
+      "fetched": 15,
+      "accepted": 0
     },
     {
-      "hashtag": "viennafood",
+      "hashtag": "wien",
       "status": "ok",
       "coverage": {
         "pages": 3,
         "uniquePosts": 25,
-        "newPosts": 2,
+        "newPosts": 24,
         "stopReason": "page-limit",
         "incomplete": true,
         "resumed": true
@@ -141,47 +155,171 @@
       "mediaLimit": 25
     },
     {
-      "hashtag": "vienna",
-      "status": "ok",
-      "coverage": {
-        "pages": 3,
-        "uniquePosts": 25,
-        "newPosts": 25,
-        "stopReason": "page-limit",
-        "incomplete": true,
-        "resumed": true
-      },
-      "fetched": 25,
-      "accepted": 1,
-      "mediaFieldMode": "full-media-with-owner",
-      "mediaLimit": 25
-    },
-    {
-      "hashtag": "wientipps",
+      "hashtag": "wienevents",
       "status": "deferred",
       "fetched": 0,
       "accepted": 0,
-      "error": "Instagram scan paused: request-budget"
+      "error": "Instagram shared quota paused: request or quota unavailable"
     }
   ],
   "rejectionReasons": {
-    "no-concrete-offer": 51,
-    "general-recommendation": 5,
-    "excluded-promotion-type": 2,
-    "missing-text": 4
+    "no-concrete-offer": 48,
+    "excluded-promotion-type": 1,
+    "general-recommendation": 6,
+    "missing-text": 7
   },
   "candidateAudit": [
     {
-      "id": "17913812262490524",
+      "id": "18100786469373161",
       "status": "rejected",
-      "url": "https://www.instagram.com/reel/De5GjpTITzZ/",
-      "title": "#vienna #model #viralreeĺs #like",
-      "text": "#vienna #model #viralreeĺs #like",
+      "url": "https://www.instagram.com/p/De57TrHG7RY/",
+      "title": ". . . This city is pure elegance, filled with stunning architecture and rich history everywhere you turn. You can feel the classical music vibes everywhere, and there are coffee ho",
+      "text": ". . . This city is pure elegance, filled with stunning architecture and rich history everywhere you turn. You can feel the classical music vibes everywhere, and there are coffee houses showing up all over the place. I also love watching the Viennese people too; they seem to be having a blast with their families and friends, catching opera shows, dining out, and definitely rocking their personal style in a way that totally fits the city’s vibe. I’ve come across some ladies in their 80s who totally know how to own their style, almost like they’ve stepped out of a different era. They even put on bright red lipstick just to hit the grocery store, and honestly, that’s pretty inspiring. . . . . . . . #vienna #wien #austria #travel #style",
       "ownerUsername": "",
       "ownerRole": "",
       "scoutUsername": "",
       "merchantUsername": "",
-      "pubDate": "2026-10-24T21:31:00+0000",
+      "pubDate": "2026-10-25T05:11:28+0000",
+      "rejectionReason": "general-recommendation",
+      "qualityScore": 0,
+      "viennaVerified": false,
+      "mediaEvidence": {
+        "analyzedAt": "",
+        "ocrText": "",
+        "assetCount": 0,
+        "imageCount": 0,
+        "videoFrameCount": 0,
+        "downloadRetries": 0,
+        "errors": [],
+        "ai": null
+      },
+      "hashtags": [
+        "wien"
+      ]
+    },
+    {
+      "id": "18127375423861486",
+      "status": "rejected",
+      "url": "https://www.instagram.com/p/De549PRiR_n/",
+      "title": "Für besondere Dates🤍 Bestellungen per DM💌 Wien&NÖ umgebung 📍 #blumen #flowers #liebe #wien #niederöstereich",
+      "text": "Für besondere Dates🤍 Bestellungen per DM💌 Wien&NÖ umgebung 📍 #blumen #flowers #liebe #wien #niederöstereich",
+      "ownerUsername": "",
+      "ownerRole": "",
+      "scoutUsername": "",
+      "merchantUsername": "",
+      "pubDate": "2026-10-25T04:53:36+0000",
+      "rejectionReason": "no-concrete-offer",
+      "qualityScore": 0,
+      "viennaVerified": false,
+      "mediaEvidence": {
+        "analyzedAt": "",
+        "ocrText": "",
+        "assetCount": 0,
+        "imageCount": 0,
+        "videoFrameCount": 0,
+        "downloadRetries": 0,
+        "errors": [],
+        "ai": null
+      },
+      "hashtags": [
+        "wien"
+      ]
+    },
+    {
+      "id": "18113597381519636",
+      "status": "rejected",
+      "url": "https://www.instagram.com/p/De53B_kC62_/",
+      "title": "Das bedeutsamste Geschenk ist unsere Blumensträuße! Zeig deine liebe mit Taten!🫶🏻 Bestellung per DM 💌 Wien & NÖ umgebung 📍 #wien #niederöstereich #flowers #liebe #hochzeit",
+      "text": "Das bedeutsamste Geschenk ist unsere Blumensträuße! Zeig deine liebe mit Taten!🫶🏻 Bestellung per DM 💌 Wien & NÖ umgebung 📍 #wien #niederöstereich #flowers #liebe #hochzeit",
+      "ownerUsername": "",
+      "ownerRole": "",
+      "scoutUsername": "",
+      "merchantUsername": "",
+      "pubDate": "2026-10-25T04:37:19+0000",
+      "rejectionReason": "no-concrete-offer",
+      "qualityScore": 0,
+      "viennaVerified": false,
+      "mediaEvidence": {
+        "analyzedAt": "",
+        "ocrText": "",
+        "assetCount": 0,
+        "imageCount": 0,
+        "videoFrameCount": 0,
+        "downloadRetries": 0,
+        "errors": [],
+        "ai": null
+      },
+      "hashtags": [
+        "wien"
+      ]
+    },
+    {
+      "id": "18120304001007698",
+      "status": "rejected",
+      "url": "https://www.instagram.com/reel/De5vFX8srr4/",
+      "title": "Fun fact: Vienna is home to one of the world’s most advanced climatic wind tunnels, where trains and vehicles are tested against extreme winds, snow, ice, and temperatures ranging ",
+      "text": "Fun fact: Vienna is home to one of the world’s most advanced climatic wind tunnels, where trains and vehicles are tested against extreme winds, snow, ice, and temperatures ranging from −45°C to +60°C—all without leaving the building! #climaticwindtunnelvienna #wien #fyp #viral",
+      "ownerUsername": "",
+      "ownerRole": "",
+      "scoutUsername": "",
+      "merchantUsername": "",
+      "pubDate": "2026-10-25T03:29:12+0000",
+      "rejectionReason": "no-concrete-offer",
+      "qualityScore": 0,
+      "viennaVerified": false,
+      "mediaEvidence": {
+        "analyzedAt": "",
+        "ocrText": "",
+        "assetCount": 0,
+        "imageCount": 0,
+        "videoFrameCount": 0,
+        "downloadRetries": 0,
+        "errors": [],
+        "ai": null
+      },
+      "hashtags": [
+        "wien"
+      ]
+    },
+    {
+      "id": "18135977749647685",
+      "status": "rejected",
+      "url": "https://www.instagram.com/p/De5vOxQl44h/",
+      "title": "Vienna’s dining scene is embracing generous sharing, comforting classics, fresh seasonal ingredients, and menus that bring different tastes together. From grilled specialties and h",
+      "text": "Vienna’s dining scene is embracing generous sharing, comforting classics, fresh seasonal ingredients, and menus that bring different tastes together. From grilled specialties and hearty European dishes to pizza, pasta, salads, coffee, and dessert, there’s something for every appetite at the table. MOZAIK welcomes families, friends, couples, and coworkers to enjoy good food in a relaxed, friendly setting in Leopoldstadt. #ViennaDining #ViennaFood #Leopoldstadt #ViennaRestaurants #SharedDining #FamilyFriendlyDining #MOZAIK",
+      "ownerUsername": "",
+      "ownerRole": "",
+      "scoutUsername": "",
+      "merchantUsername": "",
+      "pubDate": "2026-10-25T03:26:03+0000",
+      "rejectionReason": "no-concrete-offer",
+      "qualityScore": 0,
+      "viennaVerified": false,
+      "mediaEvidence": {
+        "analyzedAt": "",
+        "ocrText": "",
+        "assetCount": 0,
+        "imageCount": 0,
+        "videoFrameCount": 0,
+        "downloadRetries": 0,
+        "errors": [],
+        "ai": null
+      },
+      "hashtags": [
+        "viennafood"
+      ]
+    },
+    {
+      "id": "18065902235789298",
+      "status": "rejected",
+      "url": "https://www.instagram.com/reel/De5svqyh4Bf/",
+      "title": "#Vienna #Wien",
+      "text": "#Vienna #Wien",
+      "ownerUsername": "",
+      "ownerRole": "",
+      "scoutUsername": "",
+      "merchantUsername": "",
+      "pubDate": "2026-10-25T03:04:39+0000",
       "rejectionReason": "missing-text",
       "qualityScore": 0,
       "viennaVerified": false,
@@ -196,20 +334,20 @@
         "ai": null
       },
       "hashtags": [
-        "vienna"
+        "wien"
       ]
     },
     {
-      "id": "18134614345662892",
+      "id": "18078189212426218",
       "status": "rejected",
-      "url": "https://www.instagram.com/p/De5GluWgFpe/",
-      "title": "#hunderdwasserhaus #wien #vienna #hundertwasser",
-      "text": "#hunderdwasserhaus #wien #vienna #hundertwasser",
+      "url": "https://www.instagram.com/reel/De5smucMtBA/",
+      "title": "#vienna #wien #відень #вена #austria",
+      "text": "#vienna #wien #відень #вена #austria",
       "ownerUsername": "",
       "ownerRole": "",
       "scoutUsername": "",
       "merchantUsername": "",
-      "pubDate": "2026-10-24T21:30:49+0000",
+      "pubDate": "2026-10-25T03:03:28+0000",
       "rejectionReason": "missing-text",
       "qualityScore": 0,
       "viennaVerified": false,
@@ -224,48 +362,20 @@
         "ai": null
       },
       "hashtags": [
-        "vienna"
+        "wien"
       ]
     },
     {
-      "id": "18124040530912339",
-      "status": "collector-accepted",
-      "url": "https://www.instagram.com/reel/De5GT6BxEfM/",
-      "title": "Plus so many wonderful attractions on the big bus tours are free like the Schönbrunn Gardens, Belvedere Gardens, Hofburg Palace complex & He",
-      "text": "♥️ I managed to cover some major tourist attractions in Vienna through a SINGLE booking. No separate queues, no euro stress or exchange rate headache. SO CONVENIENT! 👑 This covered the Schönbrunn Palace, Belvedere, the Danube cruise, Giant Ferris Wheel & the Big Bus Hop-on Hop-off. Plus so many wonderful attractions on the big bus tours are free like the Schönbrunn Gardens, Belvedere Gardens, Hofburg Palace complex & Heldenplatz, St. Stephen’s Cathedral (Stephansplatz), Parliament, City Hall (pre book), exterior of the Opera House. ✅ I found it to be a safe city, pretty accessible, mostly people understand English, and plenty of halal options everywhere. Comment “VIENNA” and I’ll DM you the full itinerary including an airport pro tip. Next reel: Vienna’s food scene #vienna #viennatravel #viennathingstodo #europetravel #austria",
-      "ownerUsername": "",
-      "ownerRole": "unknown",
-      "scoutUsername": "",
-      "merchantUsername": "",
-      "pubDate": "2026-10-24T21:29:05+0000",
-      "rejectionReason": "",
-      "qualityScore": 81,
-      "viennaVerified": true,
-      "mediaEvidence": {
-        "analyzedAt": "",
-        "ocrText": "",
-        "assetCount": 0,
-        "imageCount": 0,
-        "videoFrameCount": 0,
-        "downloadRetries": 0,
-        "errors": [],
-        "ai": null
-      },
-      "hashtags": [
-        "vienna"
-      ]
-    },
-    {
-      "id": "17908866387578730",
+      "id": "17968651068190804",
       "status": "rejected",
-      "url": "https://www.instagram.com/reel/De5GL7rsKQU/",
-      "title": "yourmuse.aliyah . . . . . . #vienna #autumn #viennalifestyle #schonbrunnpalace",
-      "text": "yourmuse.aliyah . . . . . . #vienna #autumn #viennalifestyle #schonbrunnpalace",
+      "url": "https://www.instagram.com/p/De5sUHwiHSV/",
+      "title": "FIGUR UND KOPF Leopold Museum, Wien ab 25. Okt. 2026 Mehr im ArtScendo-Kunstkalender: artscendo.de/kalender #kunst #ausstellung #kunstkalender #artscendo #wien",
+      "text": "FIGUR UND KOPF Leopold Museum, Wien ab 25. Okt. 2026 Mehr im ArtScendo-Kunstkalender: artscendo.de/kalender #kunst #ausstellung #kunstkalender #artscendo #wien",
       "ownerUsername": "",
       "ownerRole": "",
       "scoutUsername": "",
       "merchantUsername": "",
-      "pubDate": "2026-10-24T21:29:04+0000",
+      "pubDate": "2026-10-25T03:00:37+0000",
       "rejectionReason": "no-concrete-offer",
       "qualityScore": 0,
       "viennaVerified": false,
@@ -280,20 +390,20 @@
         "ai": null
       },
       "hashtags": [
-        "vienna"
+        "wien"
       ]
     },
     {
-      "id": "18142768663611914",
+      "id": "17899140006398430",
       "status": "rejected",
-      "url": "https://www.instagram.com/p/De5GYuiCHkP/",
-      "title": "Austria | 📍 Vienna #photography #vienna #architecture",
-      "text": "Austria | 📍 Vienna #photography #vienna #architecture",
+      "url": "https://www.instagram.com/p/De5rpSMCDsr/",
+      "title": "es ist noch nicht vorbei. demo, teil 2. #UnisRetten - october 2026 canon eos 6d - #streetphotography #demowien #wien #streetphotos bundesoeh oeh_uniwien oeh_wu oeh_hcw oehboku htuw",
+      "text": "es ist noch nicht vorbei. demo, teil 2. #UnisRetten - october 2026 canon eos 6d - #streetphotography #demowien #wien #streetphotos bundesoeh oeh_uniwien oeh_wu oeh_hcw oehboku htuwien oehmedwien",
       "ownerUsername": "",
       "ownerRole": "",
       "scoutUsername": "",
       "merchantUsername": "",
-      "pubDate": "2026-10-24T21:29:02+0000",
+      "pubDate": "2026-10-25T02:54:36+0000",
       "rejectionReason": "no-concrete-offer",
       "qualityScore": 0,
       "viennaVerified": false,
@@ -308,20 +418,20 @@
         "ai": null
       },
       "hashtags": [
-        "vienna"
+        "wien"
       ]
     },
     {
-      "id": "17966330576979852",
+      "id": "18132353548777382",
       "status": "rejected",
-      "url": "https://www.instagram.com/reel/De5GHVKBuF4/",
-      "title": "fizix energy drink. Jetzt ist die Zeit für Energie. “speed up” ′′beschleunigen” www.fizix.at office@fizix.at https://www.instagram.com/fizixenergydrink https://www.facebook.com/fiz",
-      "text": "fizix energy drink. Jetzt ist die Zeit für Energie. “speed up” ′′beschleunigen” www.fizix.at office@fizix.at https://www.instagram.com/fizixenergydrink https://www.facebook.com/fizixenergydrink https://www.youtube.com/c/fizixenergydrink https://www.tiktok.com/fizixenergydrink #fizix #energy #fizixenergydrink #fresh #freshdrink #fizixenergy #drinks🍹 #energydrink #speedup #speed #energydrink #berry #classic #sport #fastsport #energysport #berryenergydrink #power #fresh #holiday #fitness #drink #energyfitness #active #vitamins #european #vienna #performance #fit #energydrink #fizix #fizixenergy #fizixenergydrink",
+      "url": "https://www.instagram.com/p/De5rauwCF99/",
+      "title": "UNSERE TOP 5 ATHLETEN Keiner ist bereit aufzugeben. #fyp #backyardultra #running #event #wien",
+      "text": "UNSERE TOP 5 ATHLETEN Keiner ist bereit aufzugeben. #fyp #backyardultra #running #event #wien",
       "ownerUsername": "",
       "ownerRole": "",
       "scoutUsername": "",
       "merchantUsername": "",
-      "pubDate": "2026-10-24T21:28:30+0000",
+      "pubDate": "2026-10-25T02:52:37+0000",
       "rejectionReason": "no-concrete-offer",
       "qualityScore": 0,
       "viennaVerified": false,
@@ -336,20 +446,20 @@
         "ai": null
       },
       "hashtags": [
-        "vienna"
+        "wien"
       ]
     },
     {
-      "id": "18112357643183949",
+      "id": "18237634321319154",
       "status": "rejected",
-      "url": "https://www.instagram.com/reel/De5F0Q4xD8c/",
-      "title": "✨ Viena enamora en cada rincón… 🇦🇹❤️ ⛪ La majestuosa Catedral de San Esteban, donde la historia y la belleza se encuentran. ✨ 📍 Viena, Austria 🇦🇹 #Viena #Stephansdom #Austria ",
-      "text": "✨ Viena enamora en cada rincón… 🇦🇹❤️ ⛪ La majestuosa Catedral de San Esteban, donde la historia y la belleza se encuentran. ✨ 📍 Viena, Austria 🇦🇹 #Viena #Stephansdom #Austria #Vienna",
+      "url": "https://www.instagram.com/p/De5rCbnIj9Q/",
+      "title": "С моя брат ,завинаги love ❤️! #wien #bestfriend #moda #brothers kr1s.04",
+      "text": "С моя брат ,завинаги love ❤️! #wien #bestfriend #moda #brothers kr1s.04",
       "ownerUsername": "",
       "ownerRole": "",
       "scoutUsername": "",
       "merchantUsername": "",
-      "pubDate": "2026-10-24T21:28:24+0000",
+      "pubDate": "2026-10-25T02:49:22+0000",
       "rejectionReason": "no-concrete-offer",
       "qualityScore": 0,
       "viennaVerified": false,
@@ -364,20 +474,48 @@
         "ai": null
       },
       "hashtags": [
-        "vienna"
+        "wien"
       ]
     },
     {
-      "id": "18093278942660417",
+      "id": "18574750684074704",
       "status": "rejected",
-      "url": "https://www.instagram.com/p/De5GRhZOy4z/",
-      "title": "#vienna fkaustriawien #streetart #streetculture #soccer",
-      "text": "#vienna fkaustriawien #streetart #streetculture #soccer",
+      "url": "https://www.instagram.com/p/De5o57IsLcF/",
+      "title": "#schönbrunn #glorietta #schönbrunnpalace #wien #vienna",
+      "text": "#schönbrunn #glorietta #schönbrunnpalace #wien #vienna",
       "ownerUsername": "",
       "ownerRole": "",
       "scoutUsername": "",
       "merchantUsername": "",
-      "pubDate": "2026-10-24T21:28:05+0000",
+      "pubDate": "2026-10-25T02:33:09+0000",
+      "rejectionReason": "missing-text",
+      "qualityScore": 0,
+      "viennaVerified": false,
+      "mediaEvidence": {
+        "analyzedAt": "",
+        "ocrText": "",
+        "assetCount": 0,
+        "imageCount": 0,
+        "videoFrameCount": 0,
+        "downloadRetries": 0,
+        "errors": [],
+        "ai": null
+      },
+      "hashtags": [
+        "wien"
+      ]
+    },
+    {
+      "id": "17881192122543894",
+      "status": "rejected",
+      "url": "https://www.instagram.com/p/De5nlL9CnrP/",
+      "title": "DNF Das Rennen endet. Der Respekt bleibt. #fyp #ultrarunning #wien #backyardultra #event",
+      "text": "DNF Das Rennen endet. Der Respekt bleibt. #fyp #ultrarunning #wien #backyardultra #event",
+      "ownerUsername": "",
+      "ownerRole": "",
+      "scoutUsername": "",
+      "merchantUsername": "",
+      "pubDate": "2026-10-25T02:19:06+0000",
       "rejectionReason": "no-concrete-offer",
       "qualityScore": 0,
       "viennaVerified": false,
@@ -392,20 +530,20 @@
         "ai": null
       },
       "hashtags": [
-        "vienna"
+        "wien"
       ]
     },
     {
-      "id": "18466215961143432",
+      "id": "18147706405576772",
       "status": "rejected",
-      "url": "https://www.instagram.com/p/De5GLDhCFhd/",
-      "title": "Picasso e Bacon all’Albertina di Vienna. Opere gigantesche, una quantità impressionante, una mostra monumentale. La tensione attraversa le tele. Corpi deformati, l’orrore di cui è ",
-      "text": "Picasso e Bacon all’Albertina di Vienna. Opere gigantesche, una quantità impressionante, una mostra monumentale. La tensione attraversa le tele. Corpi deformati, l’orrore di cui è capace il genere umano, le guerre. Una pittura che ti mette davanti alla nostra fragilità e alla nostra violenza, senza lasciarti distogliere lo sguardo. #albertina #vienna #francisbacon #picasso",
+      "url": "https://www.instagram.com/reel/De5mRIFK-c5/",
+      "title": "Erschöpfung ist nur ein Zwischenstand. #fyp #running #wien #backyardultraolddanube #event",
+      "text": "Erschöpfung ist nur ein Zwischenstand. #fyp #running #wien #backyardultraolddanube #event",
       "ownerUsername": "",
       "ownerRole": "",
       "scoutUsername": "",
       "merchantUsername": "",
-      "pubDate": "2026-10-24T21:27:10+0000",
+      "pubDate": "2026-10-25T02:09:38+0000",
       "rejectionReason": "no-concrete-offer",
       "qualityScore": 0,
       "viennaVerified": false,
@@ -420,20 +558,20 @@
         "ai": null
       },
       "hashtags": [
-        "vienna"
+        "wien"
       ]
     },
     {
-      "id": "17950151838337229",
+      "id": "17951014344305492",
       "status": "rejected",
-      "url": "https://www.instagram.com/reel/De5FpMBASgd/",
-      "title": "same tank top btw ( no pump ) #gym #reels #vienna",
-      "text": "same tank top btw ( no pump ) #gym #reels #vienna",
+      "url": "https://www.instagram.com/reel/De5ickMITXt/",
+      "title": "🚘 Premium-Lenkräder für fast alle Automarken! 📍 Wien | Motunex 📲 +43 681 20293541 #Motunex #Lenkräder #AutoTuning #Wien #carstyle",
+      "text": "🚘 Premium-Lenkräder für fast alle Automarken! 📍 Wien | Motunex 📲 +43 681 20293541 #Motunex #Lenkräder #AutoTuning #Wien #carstyle",
       "ownerUsername": "",
       "ownerRole": "",
       "scoutUsername": "",
       "merchantUsername": "",
-      "pubDate": "2026-10-24T21:23:35+0000",
+      "pubDate": "2026-10-25T01:36:06+0000",
       "rejectionReason": "no-concrete-offer",
       "qualityScore": 0,
       "viennaVerified": false,
@@ -448,20 +586,356 @@
         "ai": null
       },
       "hashtags": [
-        "vienna"
+        "wien"
       ]
     },
     {
-      "id": "18135232963728485",
+      "id": "18032997836912935",
       "status": "rejected",
-      "url": "https://www.instagram.com/reel/De5FfzUySg0/",
-      "title": "Vienna at Christmas is a real-life snow globe 🎄✨ The famous Rathausplatz market opens Nov 13 — 150+ stalls, a giant tree, and skating through the park. Want my market map + where ",
-      "text": "Vienna at Christmas is a real-life snow globe 🎄✨ The famous Rathausplatz market opens Nov 13 — 150+ stalls, a giant tree, and skating through the park. Want my market map + where to stay nearby? Comment MARKET and I‘ll DM it to you 🤍 겨울 비엔나는 진짜 동화 속 같아요 — 마켓 지도랑 숙소 정보는 댓글에 MARKET 남겨주세요 🎄 📷 Photos & clips: Pexels creators Some links are affiliate links — booking through them costs you nothing extra. #Vienna #ChristmasMarket #Austria #WinterTravel #BucketListTravel",
+      "url": "https://www.instagram.com/reel/De5hGSNoESD/",
+      "title": "#oglasi #reklame #wien #anzeige #bec",
+      "text": "#oglasi #reklame #wien #anzeige #bec",
       "ownerUsername": "",
       "ownerRole": "",
       "scoutUsername": "",
       "merchantUsername": "",
-      "pubDate": "2026-10-24T21:23:33+0000",
+      "pubDate": "2026-10-25T01:23:06+0000",
+      "rejectionReason": "missing-text",
+      "qualityScore": 0,
+      "viennaVerified": false,
+      "mediaEvidence": {
+        "analyzedAt": "",
+        "ocrText": "",
+        "assetCount": 0,
+        "imageCount": 0,
+        "videoFrameCount": 0,
+        "downloadRetries": 0,
+        "errors": [],
+        "ai": null
+      },
+      "hashtags": [
+        "wien"
+      ]
+    },
+    {
+      "id": "17999348897823459",
+      "status": "rejected",
+      "url": "https://www.instagram.com/reel/De5gjj8IZY3/",
+      "title": "LOOP 16. Der Morgen kommt. Wir laufen ihm entgegen. #fyp #running #backyardultraolddanube #wien #backyardultra",
+      "text": "LOOP 16. Der Morgen kommt. Wir laufen ihm entgegen. #fyp #running #backyardultraolddanube #wien #backyardultra",
+      "ownerUsername": "",
+      "ownerRole": "",
+      "scoutUsername": "",
+      "merchantUsername": "",
+      "pubDate": "2026-10-25T01:19:32+0000",
+      "rejectionReason": "no-concrete-offer",
+      "qualityScore": 0,
+      "viennaVerified": false,
+      "mediaEvidence": {
+        "analyzedAt": "",
+        "ocrText": "",
+        "assetCount": 0,
+        "imageCount": 0,
+        "videoFrameCount": 0,
+        "downloadRetries": 0,
+        "errors": [],
+        "ai": null
+      },
+      "hashtags": [
+        "wien"
+      ]
+    },
+    {
+      "id": "18125689052313769",
+      "status": "rejected",
+      "url": "https://www.instagram.com/p/De5gW8BiOX5/",
+      "title": "Der Kampf geht weiter. Bis nur noch einer steht. #fyp #ultrarunning #backyardultra #buod #wien",
+      "text": "Der Kampf geht weiter. Bis nur noch einer steht. #fyp #ultrarunning #backyardultra #buod #wien",
+      "ownerUsername": "",
+      "ownerRole": "",
+      "scoutUsername": "",
+      "merchantUsername": "",
+      "pubDate": "2026-10-25T01:15:59+0000",
+      "rejectionReason": "no-concrete-offer",
+      "qualityScore": 0,
+      "viennaVerified": false,
+      "mediaEvidence": {
+        "analyzedAt": "",
+        "ocrText": "",
+        "assetCount": 0,
+        "imageCount": 0,
+        "videoFrameCount": 0,
+        "downloadRetries": 0,
+        "errors": [],
+        "ai": null
+      },
+      "hashtags": [
+        "wien"
+      ]
+    },
+    {
+      "id": "17905495125598592",
+      "status": "rejected",
+      "url": "https://www.instagram.com/reel/De5fD7Zoua3/",
+      "title": "#nagelstudio #nailsofinstagram #lola #wien #wimpern",
+      "text": "#nagelstudio #nailsofinstagram #lola #wien #wimpern",
+      "ownerUsername": "",
+      "ownerRole": "",
+      "scoutUsername": "",
+      "merchantUsername": "",
+      "pubDate": "2026-10-25T01:05:14+0000",
+      "rejectionReason": "missing-text",
+      "qualityScore": 0,
+      "viennaVerified": false,
+      "mediaEvidence": {
+        "analyzedAt": "",
+        "ocrText": "",
+        "assetCount": 0,
+        "imageCount": 0,
+        "videoFrameCount": 0,
+        "downloadRetries": 0,
+        "errors": [],
+        "ai": null
+      },
+      "hashtags": [
+        "wien"
+      ]
+    },
+    {
+      "id": "17958397551259900",
+      "status": "rejected",
+      "url": "https://www.instagram.com/reel/De5eyz2odD4/",
+      "title": "Vienna has it all 🥨🥩🍨☕️ . . . . . #vienna #wien #austria #visitvienna #traveler",
+      "text": "Vienna has it all 🥨🥩🍨☕️ . . . . . #vienna #wien #austria #visitvienna #traveler",
+      "ownerUsername": "",
+      "ownerRole": "",
+      "scoutUsername": "",
+      "merchantUsername": "",
+      "pubDate": "2026-10-25T01:04:21+0000",
+      "rejectionReason": "no-concrete-offer",
+      "qualityScore": 0,
+      "viennaVerified": false,
+      "mediaEvidence": {
+        "analyzedAt": "",
+        "ocrText": "",
+        "assetCount": 0,
+        "imageCount": 0,
+        "videoFrameCount": 0,
+        "downloadRetries": 0,
+        "errors": [],
+        "ai": null
+      },
+      "hashtags": [
+        "wien"
+      ]
+    },
+    {
+      "id": "17891588406458907",
+      "status": "rejected",
+      "url": "https://www.instagram.com/reel/De5efuaIuBE/",
+      "title": "#nägel #wien #nagelstudio #wimpern #lola",
+      "text": "#nägel #wien #nagelstudio #wimpern #lola",
+      "ownerUsername": "",
+      "ownerRole": "",
+      "scoutUsername": "",
+      "merchantUsername": "",
+      "pubDate": "2026-10-25T01:00:21+0000",
+      "rejectionReason": "missing-text",
+      "qualityScore": 0,
+      "viennaVerified": false,
+      "mediaEvidence": {
+        "analyzedAt": "",
+        "ocrText": "",
+        "assetCount": 0,
+        "imageCount": 0,
+        "videoFrameCount": 0,
+        "downloadRetries": 0,
+        "errors": [],
+        "ai": null
+      },
+      "hashtags": [
+        "wien"
+      ]
+    },
+    {
+      "id": "18108674771206549",
+      "status": "rejected",
+      "url": "https://www.instagram.com/reel/De5eLTHyErN/",
+      "title": "Bihari power.. #trending #wien #trending #video",
+      "text": "Bihari power.. #trending #wien #trending #video",
+      "ownerUsername": "",
+      "ownerRole": "",
+      "scoutUsername": "",
+      "merchantUsername": "",
+      "pubDate": "2026-10-25T00:58:02+0000",
+      "rejectionReason": "no-concrete-offer",
+      "qualityScore": 0,
+      "viennaVerified": false,
+      "mediaEvidence": {
+        "analyzedAt": "",
+        "ocrText": "",
+        "assetCount": 0,
+        "imageCount": 0,
+        "videoFrameCount": 0,
+        "downloadRetries": 0,
+        "errors": [],
+        "ai": null
+      },
+      "hashtags": [
+        "wien"
+      ]
+    },
+    {
+      "id": "18079797446536823",
+      "status": "rejected",
+      "url": "https://www.instagram.com/reel/De5eGqnMbL0/",
+      "title": "#nagelstudio #nägel #wien #wimpern #lola",
+      "text": "#nagelstudio #nägel #wien #wimpern #lola",
+      "ownerUsername": "",
+      "ownerRole": "",
+      "scoutUsername": "",
+      "merchantUsername": "",
+      "pubDate": "2026-10-25T00:56:47+0000",
+      "rejectionReason": "missing-text",
+      "qualityScore": 0,
+      "viennaVerified": false,
+      "mediaEvidence": {
+        "analyzedAt": "",
+        "ocrText": "",
+        "assetCount": 0,
+        "imageCount": 0,
+        "videoFrameCount": 0,
+        "downloadRetries": 0,
+        "errors": [],
+        "ai": null
+      },
+      "hashtags": [
+        "wien"
+      ]
+    },
+    {
+      "id": "18207002581374444",
+      "status": "rejected",
+      "url": "https://www.instagram.com/p/De5cWNDxTm1/",
+      "title": "DER RING STEHT Im Atrium der Lugner City steht der Ring, jetzt kommen noch Licht und Deko. In wenigen Stunden kehrt die Vienna Fight Night zurück und verwandelt die Lugner City in ",
+      "text": "DER RING STEHT Im Atrium der Lugner City steht der Ring, jetzt kommen noch Licht und Deko. In wenigen Stunden kehrt die Vienna Fight Night zurück und verwandelt die Lugner City in eine Arena, mit Profis der A- und B-Klasse aus den Niederlanden, Serbien, Bosnien und Ungarn. Vienna Fight Night, the art of fighting. Einlass 16 Uhr, erster Kampf 17 Uhr. Tickets auf viennafightnight.at, Link in der Bio, Abendkassa 45 Euro. #ViennaFightNight #VFN #K1 #Thaiboxen #Kickboxen #Wien #LugnerCity",
+      "ownerUsername": "",
+      "ownerRole": "",
+      "scoutUsername": "",
+      "merchantUsername": "",
+      "pubDate": "2026-10-25T00:40:58+0000",
+      "rejectionReason": "no-concrete-offer",
+      "qualityScore": 0,
+      "viennaVerified": false,
+      "mediaEvidence": {
+        "analyzedAt": "",
+        "ocrText": "",
+        "assetCount": 0,
+        "imageCount": 0,
+        "videoFrameCount": 0,
+        "downloadRetries": 0,
+        "errors": [],
+        "ai": null
+      },
+      "hashtags": [
+        "wien"
+      ]
+    },
+    {
+      "id": "18118681210811228",
+      "status": "rejected",
+      "url": "https://www.instagram.com/reel/De5b4eqETms/",
+      "title": "We’ve had a very busy day, but wanted to wish everyone a good night!! ❤️🐾❤️🐾❤️ #elliottandtheentourage #dachshund #wien #saturday #friendship",
+      "text": "We’ve had a very busy day, but wanted to wish everyone a good night!! ❤️🐾❤️🐾❤️ #elliottandtheentourage #dachshund #wien #saturday #friendship",
+      "ownerUsername": "",
+      "ownerRole": "",
+      "scoutUsername": "",
+      "merchantUsername": "",
+      "pubDate": "2026-10-25T00:37:23+0000",
+      "rejectionReason": "no-concrete-offer",
+      "qualityScore": 0,
+      "viennaVerified": false,
+      "mediaEvidence": {
+        "analyzedAt": "",
+        "ocrText": "",
+        "assetCount": 0,
+        "imageCount": 0,
+        "videoFrameCount": 0,
+        "downloadRetries": 0,
+        "errors": [],
+        "ai": null
+      },
+      "hashtags": [
+        "wien"
+      ]
+    },
+    {
+      "id": "18031254659883127",
+      "status": "rejected",
+      "url": "https://www.instagram.com/p/De5ZOlVOBka/",
+      "title": "GLORY-SCHWERGEWICHT ZU GAST: MILOŠ CVJETIĆANIN Beim offiziellen Wiegen der Vienna Fight Night war Miloš Cvjetićanin aus Novi Sad zu Gast, hier mit Rasul Said von Kings Muay Thai Wi",
+      "text": "GLORY-SCHWERGEWICHT ZU GAST: MILOŠ CVJETIĆANIN Beim offiziellen Wiegen der Vienna Fight Night war Miloš Cvjetićanin aus Novi Sad zu Gast, hier mit Rasul Said von Kings Muay Thai Wien. Der Serbe gewann 2024 den K-1 World Grand Prix in Sarajevo und kämpfte im Juni 2026 um den Glory-Titel im Schwergewicht. Said (9:1) trifft am Abend auf Pero Čelebić. Vienna Fight Night, Sonntag 25. Oktober, Lugner City Atrium. Einlass 16 Uhr, erster Kampf 17 Uhr. Tickets ab sofort erhältlich, Link in der Bio, viennafightnight.at Photo · bobipix #ViennaFightNight #VFN #K1 #Kickboxen #Wien #LugnerCity #Glory #MilosCvjeticanin",
+      "ownerUsername": "",
+      "ownerRole": "",
+      "scoutUsername": "",
+      "merchantUsername": "",
+      "pubDate": "2026-10-25T00:13:43+0000",
+      "rejectionReason": "no-concrete-offer",
+      "qualityScore": 0,
+      "viennaVerified": false,
+      "mediaEvidence": {
+        "analyzedAt": "",
+        "ocrText": "",
+        "assetCount": 0,
+        "imageCount": 0,
+        "videoFrameCount": 0,
+        "downloadRetries": 0,
+        "errors": [],
+        "ai": null
+      },
+      "hashtags": [
+        "wien"
+      ]
+    },
+    {
+      "id": "18140274169713196",
+      "status": "rejected",
+      "url": "https://www.instagram.com/reel/De5UpJzo1ks/",
+      "title": "Crêpes Catering in Österreich. #eventmobil_catering #crêpescatering #bergerswaffleshop #foodtruckcatering #viennafood",
+      "text": "Crêpes Catering in Österreich. #eventmobil_catering #crêpescatering #bergerswaffleshop #foodtruckcatering #viennafood",
+      "ownerUsername": "",
+      "ownerRole": "",
+      "scoutUsername": "",
+      "merchantUsername": "",
+      "pubDate": "2026-10-24T23:35:51+0000",
+      "rejectionReason": "no-concrete-offer",
+      "qualityScore": 0,
+      "viennaVerified": false,
+      "mediaEvidence": {
+        "analyzedAt": "",
+        "ocrText": "",
+        "assetCount": 0,
+        "imageCount": 0,
+        "videoFrameCount": 0,
+        "downloadRetries": 0,
+        "errors": [],
+        "ai": null
+      },
+      "hashtags": [
+        "viennafood"
+      ]
+    },
+    {
+      "id": "17951793183300289",
+      "status": "rejected",
+      "url": "https://www.instagram.com/reel/De5Q5x3BwBq/",
+      "title": "🇦🇹 European Eateries: Figlmüller, Vienna A Vienna classic, with a gluten-free twist. 🤍 We visited the original Figlmüller location to experience the restaurant famous for its ic",
+      "text": "🇦🇹 European Eateries: Figlmüller, Vienna A Vienna classic, with a gluten-free twist. 🤍 We visited the original Figlmüller location to experience the restaurant famous for its iconic, oversized Wiener Schnitzel. With two locations in Vienna, it’s a must-know stop for anyone planning a food-filled trip! While my crew tried the legendary schnitzel, I enjoyed a gluten-free chicken dish with lingonberry jam and hash browns. The sweet-and-savory combination was delicious! ✨ My favorite part of traveling with celiac disease is discovering that I can still be part of the iconic food experiences — even when I have to order a little differently. Celiac travel tip: Always confirm ingredients, preparation methods, and cross-contact precautions directly with the restaurant. A gluten-free dish on the menu doesn’t automatically mean it’s safe for celiac disease. Save this for your Vienna itinerary! 🇦🇹 #GlutenFreeVienna #CeliacTravel #GlutenFreeEurope #ViennaFood #figlmüllerschnitzel",
+      "ownerUsername": "",
+      "ownerRole": "",
+      "scoutUsername": "",
+      "merchantUsername": "",
+      "pubDate": "2026-10-24T23:00:06+0000",
       "rejectionReason": "excluded-promotion-type",
       "qualityScore": 0,
       "viennaVerified": false,
@@ -476,399 +950,7 @@
         "ai": null
       },
       "hashtags": [
-        "vienna"
-      ]
-    },
-    {
-      "id": "18112730720075028",
-      "status": "rejected",
-      "url": "https://www.instagram.com/reel/De5FeJbuAul/",
-      "title": "Picture This performing 🎙️(Winona Ryder) live in Vienna Austria 🇦🇹 on Night 2️⃣ of their European 🇪🇺 tour 👏🏻👏🏻 —————————————————————————- 📸 ankecammaerts #picturethis #vi",
-      "text": "Picture This performing 🎙️(Winona Ryder) live in Vienna Austria 🇦🇹 on Night 2️⃣ of their European 🇪🇺 tour 👏🏻👏🏻 —————————————————————————- 📸 ankecammaerts #picturethis #vienna #irishmusicscene",
-      "ownerUsername": "",
-      "ownerRole": "",
-      "scoutUsername": "",
-      "merchantUsername": "",
-      "pubDate": "2026-10-24T21:22:51+0000",
-      "rejectionReason": "no-concrete-offer",
-      "qualityScore": 0,
-      "viennaVerified": false,
-      "mediaEvidence": {
-        "analyzedAt": "",
-        "ocrText": "",
-        "assetCount": 0,
-        "imageCount": 0,
-        "videoFrameCount": 0,
-        "downloadRetries": 0,
-        "errors": [],
-        "ai": null
-      },
-      "hashtags": [
-        "vienna"
-      ]
-    },
-    {
-      "id": "18129093851307174",
-      "status": "rejected",
-      "url": "https://www.instagram.com/reel/De5EOHJMhFv/",
-      "title": "Gerstner K. u. K. Hofzuckerbäcker is a famous Viennese imperial patisserie and confectioner’s, founded in 1847 by Anton and Barbara Gerstner. The establishment, which was awarded t",
-      "text": "Gerstner K. u. K. Hofzuckerbäcker is a famous Viennese imperial patisserie and confectioner’s, founded in 1847 by Anton and Barbara Gerstner. The establishment, which was awarded the title of purveyor to the Imperial and Royal Court (K.u.K. Hofzuckerbäcker) in 1873, is situated in the Todesco Palace (Kärntner Straße 51), a stone’s throw from the Vienna State Opera. It offers a gastronomic experience spread over three floors: Ground floor: A shop selling artisanal pastries, chocolates and confectionery. First floor: A café-bar with a spectacular view of the Opera House. Second floor: A café-restaurant set in sumptuous historic rooms (the grand ballroom and private lounges). Gerstner is renowned for its traditional Viennese specialities such as Sachertorte, Apfelstrudel and the house-made cakes. The company also offers pastry-making demonstrations (the ‘Gerstner Show’) and has another branch at Schönbrunn Palace. #gerstner #gerstnervienna #gerstnercafe #viennacafe #vienna",
-      "ownerUsername": "",
-      "ownerRole": "",
-      "scoutUsername": "",
-      "merchantUsername": "",
-      "pubDate": "2026-10-24T21:16:17+0000",
-      "rejectionReason": "no-concrete-offer",
-      "qualityScore": 0,
-      "viennaVerified": false,
-      "mediaEvidence": {
-        "analyzedAt": "",
-        "ocrText": "",
-        "assetCount": 0,
-        "imageCount": 0,
-        "videoFrameCount": 0,
-        "downloadRetries": 0,
-        "errors": [],
-        "ai": null
-      },
-      "hashtags": [
-        "vienna"
-      ]
-    },
-    {
-      "id": "18118851275058322",
-      "status": "rejected",
-      "url": "https://www.instagram.com/reel/De5EcdFNt93/",
-      "title": "#vienna #austria #belvedere",
-      "text": "#vienna #austria #belvedere",
-      "ownerUsername": "",
-      "ownerRole": "",
-      "scoutUsername": "",
-      "merchantUsername": "",
-      "pubDate": "2026-10-24T21:14:39+0000",
-      "rejectionReason": "missing-text",
-      "qualityScore": 0,
-      "viennaVerified": false,
-      "mediaEvidence": {
-        "analyzedAt": "",
-        "ocrText": "",
-        "assetCount": 0,
-        "imageCount": 0,
-        "videoFrameCount": 0,
-        "downloadRetries": 0,
-        "errors": [],
-        "ai": null
-      },
-      "hashtags": [
-        "vienna"
-      ]
-    },
-    {
-      "id": "18339170338275121",
-      "status": "rejected",
-      "url": "https://www.instagram.com/p/De5EmuFkT4r/",
-      "title": "Wiener Musikverein ❤️ #wien #vienna #fromviennawithlove Architecture | Beauty | Art de Vivre",
-      "text": "Wiener Musikverein ❤️ #wien #vienna #fromviennawithlove Architecture | Beauty | Art de Vivre",
-      "ownerUsername": "",
-      "ownerRole": "",
-      "scoutUsername": "",
-      "merchantUsername": "",
-      "pubDate": "2026-10-24T21:13:28+0000",
-      "rejectionReason": "no-concrete-offer",
-      "qualityScore": 0,
-      "viennaVerified": false,
-      "mediaEvidence": {
-        "analyzedAt": "",
-        "ocrText": "",
-        "assetCount": 0,
-        "imageCount": 0,
-        "videoFrameCount": 0,
-        "downloadRetries": 0,
-        "errors": [],
-        "ai": null
-      },
-      "hashtags": [
-        "vienna"
-      ]
-    },
-    {
-      "id": "18144302554610092",
-      "status": "rejected",
-      "url": "https://www.instagram.com/reel/De5EWp3oCrE/",
-      "title": "Bollywood vibes, Vienna🇦🇹streets #fy #bollywood #vienna #europe #vacation",
-      "text": "Bollywood vibes, Vienna🇦🇹streets #fy #bollywood #vienna #europe #vacation",
-      "ownerUsername": "",
-      "ownerRole": "",
-      "scoutUsername": "",
-      "merchantUsername": "",
-      "pubDate": "2026-10-24T21:12:11+0000",
-      "rejectionReason": "no-concrete-offer",
-      "qualityScore": 0,
-      "viennaVerified": false,
-      "mediaEvidence": {
-        "analyzedAt": "",
-        "ocrText": "",
-        "assetCount": 0,
-        "imageCount": 0,
-        "videoFrameCount": 0,
-        "downloadRetries": 0,
-        "errors": [],
-        "ai": null
-      },
-      "hashtags": [
-        "vienna"
-      ]
-    },
-    {
-      "id": "17937539820402760",
-      "status": "rejected",
-      "url": "https://www.instagram.com/p/De5EalDDVvA/",
-      "title": "Model: milica.djurasinovic . . . #portrait #streetphotography #vienna #viennaphotographer",
-      "text": "Model: milica.djurasinovic . . . #portrait #streetphotography #vienna #viennaphotographer",
-      "ownerUsername": "",
-      "ownerRole": "",
-      "scoutUsername": "",
-      "merchantUsername": "",
-      "pubDate": "2026-10-24T21:11:49+0000",
-      "rejectionReason": "no-concrete-offer",
-      "qualityScore": 0,
-      "viennaVerified": false,
-      "mediaEvidence": {
-        "analyzedAt": "",
-        "ocrText": "",
-        "assetCount": 0,
-        "imageCount": 0,
-        "videoFrameCount": 0,
-        "downloadRetries": 0,
-        "errors": [],
-        "ai": null
-      },
-      "hashtags": [
-        "vienna"
-      ]
-    },
-    {
-      "id": "18125632237910272",
-      "status": "rejected",
-      "url": "https://www.instagram.com/p/De5EZ-oldh-/",
-      "title": "Old cities and old planes 🇦🇹🇨🇭 • • • #vienna #zurich #viennaaustria #zurichswitzerland",
-      "text": "Old cities and old planes 🇦🇹🇨🇭 • • • #vienna #zurich #viennaaustria #zurichswitzerland",
-      "ownerUsername": "",
-      "ownerRole": "",
-      "scoutUsername": "",
-      "merchantUsername": "",
-      "pubDate": "2026-10-24T21:11:44+0000",
-      "rejectionReason": "no-concrete-offer",
-      "qualityScore": 0,
-      "viennaVerified": false,
-      "mediaEvidence": {
-        "analyzedAt": "",
-        "ocrText": "",
-        "assetCount": 0,
-        "imageCount": 0,
-        "videoFrameCount": 0,
-        "downloadRetries": 0,
-        "errors": [],
-        "ai": null
-      },
-      "hashtags": [
-        "vienna"
-      ]
-    },
-    {
-      "id": "17962446969212158",
-      "status": "rejected",
-      "url": "https://www.instagram.com/p/De5EU6KgpC0/",
-      "title": "#peterskirchewien #stpetruschurch #wien #vienna #heiligemesse",
-      "text": "#peterskirchewien #stpetruschurch #wien #vienna #heiligemesse",
-      "ownerUsername": "",
-      "ownerRole": "",
-      "scoutUsername": "",
-      "merchantUsername": "",
-      "pubDate": "2026-10-24T21:11:12+0000",
-      "rejectionReason": "missing-text",
-      "qualityScore": 0,
-      "viennaVerified": false,
-      "mediaEvidence": {
-        "analyzedAt": "",
-        "ocrText": "",
-        "assetCount": 0,
-        "imageCount": 0,
-        "videoFrameCount": 0,
-        "downloadRetries": 0,
-        "errors": [],
-        "ai": null
-      },
-      "hashtags": [
-        "vienna"
-      ]
-    },
-    {
-      "id": "17885375727512174",
-      "status": "rejected",
-      "url": "https://www.instagram.com/p/De5D6fBt13Q/",
-      "title": "I felt like in a conservatory in-between garden furniture and greens.🌿 . . . . #patisserie #sweettooth #vienna #daytrip #weekend",
-      "text": "I felt like in a conservatory in-between garden furniture and greens.🌿 . . . . #patisserie #sweettooth #vienna #daytrip #weekend",
-      "ownerUsername": "",
-      "ownerRole": "",
-      "scoutUsername": "",
-      "merchantUsername": "",
-      "pubDate": "2026-10-24T21:09:43+0000",
-      "rejectionReason": "no-concrete-offer",
-      "qualityScore": 0,
-      "viennaVerified": false,
-      "mediaEvidence": {
-        "analyzedAt": "",
-        "ocrText": "",
-        "assetCount": 0,
-        "imageCount": 0,
-        "videoFrameCount": 0,
-        "downloadRetries": 0,
-        "errors": [],
-        "ai": null
-      },
-      "hashtags": [
-        "vienna"
-      ]
-    },
-    {
-      "id": "18024067085712527",
-      "status": "rejected",
-      "url": "https://www.instagram.com/reel/De5D5xyuqGP/",
-      "title": "#vienna #thecity #ofmyfreams #wien🇦🇹",
-      "text": "#vienna #thecity #ofmyfreams #wien🇦🇹",
-      "ownerUsername": "",
-      "ownerRole": "",
-      "scoutUsername": "",
-      "merchantUsername": "",
-      "pubDate": "2026-10-24T21:08:54+0000",
-      "rejectionReason": "no-concrete-offer",
-      "qualityScore": 0,
-      "viennaVerified": false,
-      "mediaEvidence": {
-        "analyzedAt": "",
-        "ocrText": "",
-        "assetCount": 0,
-        "imageCount": 0,
-        "videoFrameCount": 0,
-        "downloadRetries": 0,
-        "errors": [],
-        "ai": null
-      },
-      "hashtags": [
-        "vienna"
-      ]
-    },
-    {
-      "id": "18196670671395405",
-      "status": "rejected",
-      "url": "https://www.instagram.com/reel/De5DvV3tPED/",
-      "title": "Wer es findet darf es behalten. #spidey #vienna #findthemoney #spiderman #streetcomedy",
-      "text": "Wer es findet darf es behalten. #spidey #vienna #findthemoney #spiderman #streetcomedy",
-      "ownerUsername": "",
-      "ownerRole": "",
-      "scoutUsername": "",
-      "merchantUsername": "",
-      "pubDate": "2026-10-24T21:08:14+0000",
-      "rejectionReason": "no-concrete-offer",
-      "qualityScore": 0,
-      "viennaVerified": false,
-      "mediaEvidence": {
-        "analyzedAt": "",
-        "ocrText": "",
-        "assetCount": 0,
-        "imageCount": 0,
-        "videoFrameCount": 0,
-        "downloadRetries": 0,
-        "errors": [],
-        "ai": null
-      },
-      "hashtags": [
-        "vienna"
-      ]
-    },
-    {
-      "id": "18023860193715840",
-      "status": "rejected",
-      "url": "https://www.instagram.com/p/De5D_w5iJ9L/",
-      "title": "unreal.exe.. . . . . . . . . #alt #doll #schizocore #vienna #moots",
-      "text": "unreal.exe.. . . . . . . . . #alt #doll #schizocore #vienna #moots",
-      "ownerUsername": "",
-      "ownerRole": "",
-      "scoutUsername": "",
-      "merchantUsername": "",
-      "pubDate": "2026-10-24T21:08:09+0000",
-      "rejectionReason": "no-concrete-offer",
-      "qualityScore": 0,
-      "viennaVerified": false,
-      "mediaEvidence": {
-        "analyzedAt": "",
-        "ocrText": "",
-        "assetCount": 0,
-        "imageCount": 0,
-        "videoFrameCount": 0,
-        "downloadRetries": 0,
-        "errors": [],
-        "ai": null
-      },
-      "hashtags": [
-        "vienna"
-      ]
-    },
-    {
-      "id": "18015499421756002",
-      "status": "rejected",
-      "url": "https://www.instagram.com/p/De5D-gWFLUj/",
-      "title": "Finally getting around to posting our vacation in Europe last month! Our first day in Vienna Austria!❤️🤩🎉🇦🇹😍#vienna #austria #travelblogger #travelphotography #couplesgoals",
-      "text": "Finally getting around to posting our vacation in Europe last month! Our first day in Vienna Austria!❤️🤩🎉🇦🇹😍#vienna #austria #travelblogger #travelphotography #couplesgoals",
-      "ownerUsername": "",
-      "ownerRole": "",
-      "scoutUsername": "",
-      "merchantUsername": "",
-      "pubDate": "2026-10-24T21:07:59+0000",
-      "rejectionReason": "no-concrete-offer",
-      "qualityScore": 0,
-      "viennaVerified": false,
-      "mediaEvidence": {
-        "analyzedAt": "",
-        "ocrText": "",
-        "assetCount": 0,
-        "imageCount": 0,
-        "videoFrameCount": 0,
-        "downloadRetries": 0,
-        "errors": [],
-        "ai": null
-      },
-      "hashtags": [
-        "vienna"
-      ]
-    },
-    {
-      "id": "17974383975178076",
-      "status": "rejected",
-      "url": "https://www.instagram.com/reel/De5DzInxxBH/",
-      "title": "A fantastic evening at the Musikverein with the fabulous Yuja Wang ✨ Two brilliant piano concertos by Bartók and Barber, followed by two wonderful encores — and Schumann’s Second S",
-      "text": "A fantastic evening at the Musikverein with the fabulous Yuja Wang ✨ Two brilliant piano concertos by Bartók and Barber, followed by two wonderful encores — and Schumann’s Second Symphony with the Wiener Symphoniker, conducted by Petr Popelka. What a night! 🎹🌟🎶❤️ #Wien #Vienna #fromviennawithlove Music | Architecture | Art de Vivre",
-      "ownerUsername": "",
-      "ownerRole": "",
-      "scoutUsername": "",
-      "merchantUsername": "",
-      "pubDate": "2026-10-24T21:06:58+0000",
-      "rejectionReason": "no-concrete-offer",
-      "qualityScore": 0,
-      "viennaVerified": false,
-      "mediaEvidence": {
-        "analyzedAt": "",
-        "ocrText": "",
-        "assetCount": 0,
-        "imageCount": 0,
-        "videoFrameCount": 0,
-        "downloadRetries": 0,
-        "errors": [],
-        "ai": null
-      },
-      "hashtags": [
-        "vienna"
+        "viennafood"
       ]
     },
     {
@@ -1288,8 +1370,8 @@
         "ai": null
       },
       "hashtags": [
-        "viennaeats",
-        "viennafood"
+        "viennafood",
+        "viennaeats"
       ]
     },
     {
@@ -1541,8 +1623,8 @@
         "ai": null
       },
       "hashtags": [
-        "viennaeats",
-        "viennafood"
+        "viennafood",
+        "viennaeats"
       ]
     },
     {
@@ -1570,8 +1652,8 @@
         "ai": null
       },
       "hashtags": [
-        "viennaeats",
-        "viennafood"
+        "viennafood",
+        "viennaeats"
       ]
     },
     {
@@ -1670,90 +1752,6 @@
       "merchantUsername": "",
       "pubDate": "2026-10-24T13:22:39+0000",
       "rejectionReason": "general-recommendation",
-      "qualityScore": 0,
-      "viennaVerified": false,
-      "mediaEvidence": {
-        "analyzedAt": "",
-        "ocrText": "",
-        "assetCount": 0,
-        "imageCount": 0,
-        "videoFrameCount": 0,
-        "downloadRetries": 0,
-        "errors": [],
-        "ai": null
-      },
-      "hashtags": [
-        "viennafood"
-      ]
-    },
-    {
-      "id": "18113829425272540",
-      "status": "rejected",
-      "url": "https://www.instagram.com/reel/De4NJxxsMpl/",
-      "title": "5 ungeschriebene Regeln auf Wiener Christkindlmärkten 🇦🇹 Es ist bald soweit und die ersten Märkte öffnen ihre Tore 🤣… Wahnsinn oder? Und bitte du kannst natürlich deinen Kaisers",
-      "text": "5 ungeschriebene Regeln auf Wiener Christkindlmärkten 🇦🇹 Es ist bald soweit und die ersten Märkte öffnen ihre Tore 🤣… Wahnsinn oder? Und bitte du kannst natürlich deinen Kaiserschmarrn so essen wie du willst 🤣… Hauptsache er schmeckt dir! Und nein sonofbalkan mit Ketchup bitte nicht 🙏🏽 Welche Regel fällt dir noch ein? #wheretoeatinvienna #viennafood #viennafoodguide #weihnachtsmarkt #christkindlmarkt",
-      "ownerUsername": "",
-      "ownerRole": "",
-      "scoutUsername": "",
-      "merchantUsername": "",
-      "pubDate": "2026-10-24T13:11:00+0000",
-      "rejectionReason": "no-concrete-offer",
-      "qualityScore": 0,
-      "viennaVerified": false,
-      "mediaEvidence": {
-        "analyzedAt": "",
-        "ocrText": "",
-        "assetCount": 0,
-        "imageCount": 0,
-        "videoFrameCount": 0,
-        "downloadRetries": 0,
-        "errors": [],
-        "ai": null
-      },
-      "hashtags": [
-        "viennafood"
-      ]
-    },
-    {
-      "id": "18078177677723143",
-      "status": "rejected",
-      "url": "https://www.instagram.com/p/De4LVx5kTgv/",
-      "title": "Good food, a full table, and the right people around it. We love sharing dishes because you can try a bit of everything, and just stay a little longer than planned. Come hungry, br",
-      "text": "Good food, a full table, and the right people around it. We love sharing dishes because you can try a bit of everything, and just stay a little longer than planned. Come hungry, bring someone you like eating with. #viennafood #wienessen #sharing #chinesefood",
-      "ownerUsername": "",
-      "ownerRole": "",
-      "scoutUsername": "",
-      "merchantUsername": "",
-      "pubDate": "2026-10-24T12:53:05+0000",
-      "rejectionReason": "excluded-promotion-type",
-      "qualityScore": 0,
-      "viennaVerified": false,
-      "mediaEvidence": {
-        "analyzedAt": "",
-        "ocrText": "",
-        "assetCount": 0,
-        "imageCount": 0,
-        "videoFrameCount": 0,
-        "downloadRetries": 0,
-        "errors": [],
-        "ai": null
-      },
-      "hashtags": [
-        "viennafood"
-      ]
-    },
-    {
-      "id": "17993255085106263",
-      "status": "rejected",
-      "url": "https://www.instagram.com/p/De4Ks-RjsZc/",
-      "title": "Bunter Kichererbsen-Salat mit indischen Gewürzen 🥗🌈 Frisch, knackig und in 15 Minuten fertig – wisch dich durch die 7 Schritte! So geht's: 1. Gekochte Kichererbsen abspülen und g",
-      "text": "Bunter Kichererbsen-Salat mit indischen Gewürzen 🥗🌈 Frisch, knackig und in 15 Minuten fertig – wisch dich durch die 7 Schritte! So geht's: 1. Gekochte Kichererbsen abspülen und gut abtropfen lassen 2. Gurke, Tomaten und rote Paprika klein würfeln 3. Rote Zwiebel fein hacken, frischen Koriander und Minze dazugeben 4. Dressing: Zitronensaft, Olivenöl, Chaat Masala, Kreuzkümmel und Salz verrühren 5. Dressing darübergießen und vorsichtig vermischen 6. Mit Granatapfelkernen bestreuen 7. Kurz durchziehen lassen und frisch servieren Warum er dir guttut 💚 • Kichererbsen liefern pflanzliches Eiweiß und Ballaststoffe • Paprika, Zitrone und Granatapfel bringen Vitamin C – Vitamin C trägt zu einer normalen Funktion des Immunsystems bei • Vitamin C erhöht außerdem die Eisenaufnahme – praktisch, denn Kichererbsen enthalten Eisen • Viel frisches Gemüse und Kräuter, 100 % vegan Colourful chickpea salad with Indian spices – fresh, crunchy and ready in 15 minutes. Swipe for the steps! Lust, mit uns zu kochen? Schreib uns eine Nachricht – bald gibt's unseren Kochkurs in Wien 🌶️ Bilder mit KI erstellt. #kichererbsensalat #gesundessen #vegan #indischkochen #viennafood",
-      "ownerUsername": "",
-      "ownerRole": "",
-      "scoutUsername": "",
-      "merchantUsername": "",
-      "pubDate": "2026-10-24T12:47:31+0000",
-      "rejectionReason": "no-concrete-offer",
       "qualityScore": 0,
       "viennaVerified": false,
       "mediaEvidence": {
@@ -1894,34 +1892,6 @@
       "merchantUsername": "",
       "pubDate": "2026-10-24T06:44:01+0000",
       "rejectionReason": "general-recommendation",
-      "qualityScore": 0,
-      "viennaVerified": false,
-      "mediaEvidence": {
-        "analyzedAt": "",
-        "ocrText": "",
-        "assetCount": 0,
-        "imageCount": 0,
-        "videoFrameCount": 0,
-        "downloadRetries": 0,
-        "errors": [],
-        "ai": null
-      },
-      "hashtags": [
-        "viennaeats"
-      ]
-    },
-    {
-      "id": "18031565870683517",
-      "status": "rejected",
-      "url": "https://www.instagram.com/p/De2rL_2MJbr/",
-      "title": "The ultimate mashup: Burger meets wrap. 🍔🌯 Come and grab it in the 7th district! ✨ #viennafood #viennafoodguide #wien #viennaeats #lindengasse",
-      "text": "The ultimate mashup: Burger meets wrap. 🍔🌯 Come and grab it in the 7th district! ✨ #viennafood #viennafoodguide #wien #viennaeats #lindengasse",
-      "ownerUsername": "",
-      "ownerRole": "",
-      "scoutUsername": "",
-      "merchantUsername": "",
-      "pubDate": "2026-10-23T22:52:56+0000",
-      "rejectionReason": "no-concrete-offer",
       "qualityScore": 0,
       "viennaVerified": false,
       "mediaEvidence": {
