@@ -1,7 +1,7 @@
 {
-  "startedAt": "2026-10-25T09:58:33.305Z",
-  "finishedAt": "2026-10-25T09:59:01.614Z",
-  "durationMs": 28309,
+  "startedAt": "2026-10-25T17:08:09.984Z",
+  "finishedAt": "2026-10-25T17:08:43.364Z",
+  "durationMs": 33380,
   "config": {
     "includeBaseDeals": false,
     "sourceCount": 58,
@@ -11,14 +11,14 @@
     "maxDealsPerSource": 25
   },
   "summary": {
-    "healthySources": 47,
-    "failedSources": 0,
+    "healthySources": 46,
+    "failedSources": 1,
     "deferredSources": 11,
-    "rawDeals": 40,
-    "acceptedDeals": 40,
+    "rawDeals": 39,
+    "acceptedDeals": 39,
     "officialFoodSources": 24,
-    "productiveFoodSources": 14,
-    "degradedSources": 0,
+    "productiveFoodSources": 13,
+    "degradedSources": 1,
     "note": "Collector candidates only; publication still requires central validation and manual approval."
   },
   "sources": [
@@ -45,7 +45,7 @@
       "deals": 0,
       "bytes": 21133,
       "browserFallback": false,
-      "durationMs": 859,
+      "durationMs": 878,
       "cooldown": null
     },
     {
@@ -77,7 +77,7 @@
       ],
       "rejectedCount": 2,
       "sourceKind": "official-food",
-      "durationMs": 821,
+      "durationMs": 1198,
       "cooldown": null
     },
     {
@@ -98,7 +98,7 @@
       "rejected": [],
       "rejectedCount": 0,
       "sourceKind": "official-food",
-      "durationMs": 3963,
+      "durationMs": 7895,
       "cooldown": null
     },
     {
@@ -119,7 +119,7 @@
       "rejected": [],
       "rejectedCount": 0,
       "sourceKind": "official-food",
-      "durationMs": 946,
+      "durationMs": 1369,
       "cooldown": null
     },
     {
@@ -146,7 +146,7 @@
       ],
       "rejectedCount": 1,
       "sourceKind": "official-food",
-      "durationMs": 1694,
+      "durationMs": 1944,
       "cooldown": null
     },
     {
@@ -167,75 +167,37 @@
       "rejected": [],
       "rejectedCount": 0,
       "sourceKind": "official-food",
-      "durationMs": 1323,
+      "durationMs": 1567,
       "cooldown": null
     },
     {
       "source": "Cafe Hummel",
       "url": "https://cafehummel.at/",
-      "status": "ok",
-      "operationalStatus": "candidates-found",
-      "deals": 1,
+      "status": "error",
+      "operationalStatus": "degraded",
+      "deals": 0,
       "pages": [
         {
           "url": "https://cafehummel.at/",
-          "finalUrl": "https://cafehummel.at/",
-          "status": "ok",
-          "candidates": 1,
-          "bytes": 216237
+          "status": "error",
+          "candidates": 0,
+          "error": "The operation was aborted due to timeout",
+          "httpStatus": 0,
+          "retryAt": ""
         }
       ],
-      "rejected": [
-        {
-          "reason": "no-concrete-benefit",
-          "title": "Tageszeitung",
-          "text": "Tageszeitung Genießen Sie Ihren Kaffee mit sämtlichen in- und ausländischen Tageszeitungen, Bundesländer-Blättern und Journalen Ihrer Wahl. Zeitungsliste"
-        },
-        {
-          "reason": "no-concrete-benefit",
-          "title": "Take Away",
-          "text": "Take Away Alle unsere Speisen und Heißgetränke können Sie selbstverständlich auch in recycelbarer Verpackung jederzeit mitnehmen und zu Hause oder im Büro genießen."
-        },
-        {
-          "reason": "not-food-drink",
-          "title": "Free WiFi",
-          "text": "Free WiFi Heute nicht mehr wegzudenken: In unserem Café finden Sie schnelles Internet kostenfrei vor."
-        },
-        {
-          "reason": "not-food-drink",
-          "title": "Schach & Karten",
-          "text": "Schach & Karten Erleben Sie einen geselligen Moment mit Ihren Freunden bei einer Runde Karten, Backgammon oder Schach auf unseren Spieltischen!"
-        },
-        {
-          "reason": "not-food-drink",
-          "title": "Sonnenterrasse & Klimaanlage",
-          "text": "Sonnenterrasse & Klimaanlage Im Sommer lädt unsere Sonnenterrasse direkt in der Josefstädter Fußgängerzone zum Verweilen ein. Indoor erwartet dich eine kühle Erfrischung dank unserer Klimageräte."
-        },
-        {
-          "reason": "not-food-drink",
-          "title": "Veranstaltungen",
-          "text": "Veranstaltungen Unsere Bibliothek steht Ihnen liebend gerne für Ihre privaten und firmenbezogenen Feiern oder gar Pressekonferenzen zur Verfügung."
-        },
-        {
-          "reason": "not-food-drink",
-          "title": "Fußball Live",
-          "text": "Fußball Live Österreichische und Deutsche Bundesliga Live sowie alle internationalen Fussball Spiele erleben Sie bei uns über sky TV und DAZN."
-        },
-        {
-          "reason": "not-food-drink",
-          "title": "Spielecke",
-          "text": "Spielecke Ihre Kleinen sind ebenso jederzeit willkommen. Wir haben eine eigene Spielecke mit schwungvollem Schaukelpferd."
-        },
-        {
-          "reason": "not-food-drink",
-          "title": "Gutscheine",
-          "text": "Gutscheine Selbstverständlich akzeptieren wir auch Gutscheine der Firmen Sodexo und Edenred!"
-        }
-      ],
-      "rejectedCount": 9,
+      "rejected": [],
+      "rejectedCount": 0,
       "sourceKind": "official-food",
-      "durationMs": 1653,
-      "cooldown": null
+      "durationMs": 8001,
+      "error": "The operation was aborted due to timeout",
+      "cooldown": {
+        "consecutiveFailures": 1,
+        "lastAttemptAt": "2026-10-25T17:08:11.378Z",
+        "nextRetryAt": "2026-10-25T23:08:11.378Z",
+        "reason": "source-error",
+        "lastError": "The operation was aborted due to timeout"
+      }
     },
     {
       "source": "Wunderkammer Wien",
@@ -271,7 +233,7 @@
       ],
       "rejectedCount": 3,
       "sourceKind": "official-food",
-      "durationMs": 815,
+      "durationMs": 280,
       "cooldown": null
     },
     {
@@ -286,35 +248,35 @@
           "finalUrl": "https://www.ikea.com/at/de/food/",
           "status": "ok",
           "candidates": 2,
-          "bytes": 996766
+          "bytes": 996770
         },
         {
           "url": "https://www.ikea.com/at/de/food/salesareas/restaurant/",
           "finalUrl": "https://www.ikea.com/at/de/food/salesareas/restaurant/",
           "status": "ok",
           "candidates": 0,
-          "bytes": 1288573
+          "bytes": 1288577
         },
         {
           "url": "https://www.ikea.com/at/de/food/salesareas/swedish-food-market/",
           "finalUrl": "https://www.ikea.com/at/de/food/salesareas/swedish-food-market/",
           "status": "ok",
           "candidates": 0,
-          "bytes": 1448604
+          "bytes": 1448608
         },
         {
           "url": "https://www.ikea.com/at/de/food/salesareas/bistro/",
           "finalUrl": "https://www.ikea.com/at/de/food/salesareas/bistro/",
           "status": "ok",
           "candidates": 0,
-          "bytes": 1150502
+          "bytes": 1160310
         },
         {
           "url": "https://www.ikea.com/at/de/food/salesareas/swedish-cafe/",
           "finalUrl": "https://www.ikea.com/at/de/food/salesareas/swedish-cafe/",
           "status": "ok",
           "candidates": 0,
-          "bytes": 1134452
+          "bytes": 1134456
         }
       ],
       "rejected": [
@@ -331,7 +293,7 @@
       ],
       "rejectedCount": 2,
       "sourceKind": "official-food",
-      "durationMs": 5019,
+      "durationMs": 5039,
       "cooldown": null
     },
     {
@@ -352,7 +314,7 @@
       "rejected": [],
       "rejectedCount": 0,
       "sourceKind": "official-food",
-      "durationMs": 1499,
+      "durationMs": 1597,
       "cooldown": null
     },
     {
@@ -393,7 +355,7 @@
       ],
       "rejectedCount": 1,
       "sourceKind": "official-food",
-      "durationMs": 3139,
+      "durationMs": 4294,
       "cooldown": null
     },
     {
@@ -420,7 +382,7 @@
       ],
       "rejectedCount": 1,
       "sourceKind": "official-food",
-      "durationMs": 1189,
+      "durationMs": 1182,
       "cooldown": null
     },
     {
@@ -441,7 +403,7 @@
       "rejected": [],
       "rejectedCount": 0,
       "sourceKind": "official-food",
-      "durationMs": 1493,
+      "durationMs": 1095,
       "cooldown": null
     },
     {
@@ -478,7 +440,7 @@
       ],
       "rejectedCount": 3,
       "sourceKind": "official-food",
-      "durationMs": 722,
+      "durationMs": 347,
       "cooldown": null
     },
     {
@@ -501,7 +463,7 @@
               "status": "ok",
               "bytes": 5347902,
               "cards": 11,
-              "sha256": "6f151d4a35c7f74e539b635e061b08674b11b41872b6e9455425a475f0366d81"
+              "sha256": "eb5ffcd9a3c3d3b694302a1c0211912f116fc21f5432b956834bddc53e92637d"
             }
           ]
         }
@@ -545,7 +507,7 @@
       ],
       "rejectedCount": 7,
       "sourceKind": "official-food",
-      "durationMs": 22664,
+      "durationMs": 24336,
       "cooldown": null
     },
     {
@@ -560,7 +522,7 @@
           "finalUrl": "https://www.mcdonalds.at/mymcdonalds",
           "status": "ok",
           "candidates": 0,
-          "bytes": 1430326
+          "bytes": 1430325
         }
       ],
       "rejected": [
@@ -582,7 +544,7 @@
       ],
       "rejectedCount": 3,
       "sourceKind": "official-food",
-      "durationMs": 2007,
+      "durationMs": 1907,
       "cooldown": null
     },
     {
@@ -603,7 +565,7 @@
       "rejected": [],
       "rejectedCount": 0,
       "sourceKind": "official-food",
-      "durationMs": 3358,
+      "durationMs": 2749,
       "cooldown": null
     },
     {
@@ -624,7 +586,7 @@
       "rejected": [],
       "rejectedCount": 0,
       "sourceKind": "official-food",
-      "durationMs": 1734,
+      "durationMs": 1948,
       "cooldown": null
     },
     {
@@ -652,7 +614,7 @@
       "rejected": [],
       "rejectedCount": 0,
       "sourceKind": "official-food",
-      "durationMs": 1414,
+      "durationMs": 1256,
       "cooldown": null
     },
     {
@@ -679,7 +641,7 @@
       ],
       "rejectedCount": 1,
       "sourceKind": "official-food",
-      "durationMs": 257,
+      "durationMs": 297,
       "cooldown": null
     },
     {
@@ -706,7 +668,7 @@
       ],
       "rejectedCount": 1,
       "sourceKind": "official-food",
-      "durationMs": 1123,
+      "durationMs": 1176,
       "cooldown": null
     },
     {
@@ -733,7 +695,7 @@
       ],
       "rejectedCount": 1,
       "sourceKind": "official-food",
-      "durationMs": 854,
+      "durationMs": 1050,
       "cooldown": null
     },
     {
@@ -748,14 +710,14 @@
           "finalUrl": "https://evaundadam.bar/",
           "status": "ok",
           "candidates": 0,
-          "bytes": 235347
+          "bytes": 235346
         },
         {
           "url": "https://evaundadam.bar/happy-hour-cocktailbar-wien/",
           "finalUrl": "https://evaundadam.bar/happy-hour-cocktailbar-wien/",
           "status": "ok",
           "candidates": 0,
-          "bytes": 171547
+          "bytes": 171546
         }
       ],
       "rejected": [
@@ -792,7 +754,7 @@
       ],
       "rejectedCount": 6,
       "sourceKind": "official-food",
-      "durationMs": 5455,
+      "durationMs": 5313,
       "cooldown": null
     },
     {
@@ -813,7 +775,7 @@
       "rejected": [],
       "rejectedCount": 0,
       "sourceKind": "official-food",
-      "durationMs": 931,
+      "durationMs": 1029,
       "cooldown": null
     },
     {
@@ -894,7 +856,7 @@
       ],
       "rejectedCount": 9,
       "sourceKind": "official-food",
-      "durationMs": 1478,
+      "durationMs": 1667,
       "cooldown": null
     },
     {
@@ -905,7 +867,7 @@
       "deals": 0,
       "bytes": 94777,
       "browserFallback": false,
-      "durationMs": 1730,
+      "durationMs": 1856,
       "cooldown": null
     },
     {
@@ -914,9 +876,9 @@
       "finalUrl": "https://www.mqw.at/de/programm/events/",
       "status": "ok",
       "deals": 0,
-      "bytes": 174686,
+      "bytes": 174584,
       "browserFallback": false,
-      "durationMs": 2291,
+      "durationMs": 3625,
       "cooldown": null
     },
     {
@@ -925,9 +887,9 @@
       "finalUrl": "https://www.hofer.at/angebote",
       "status": "ok",
       "deals": 0,
-      "bytes": 652934,
+      "bytes": 652935,
       "browserFallback": false,
-      "durationMs": 1447,
+      "durationMs": 1471,
       "cooldown": null
     },
     {
@@ -938,7 +900,7 @@
       "deals": 1,
       "bytes": 1276317,
       "browserFallback": false,
-      "durationMs": 1858,
+      "durationMs": 2037,
       "cooldown": null
     },
     {
@@ -949,7 +911,7 @@
       "deals": 0,
       "bytes": 38263,
       "browserFallback": false,
-      "durationMs": 3693,
+      "durationMs": 3021,
       "cooldown": null
     },
     {
@@ -960,7 +922,7 @@
       "deals": 0,
       "bytes": 621851,
       "browserFallback": false,
-      "durationMs": 1619,
+      "durationMs": 1573,
       "cooldown": null
     },
     {
@@ -999,9 +961,9 @@
       "finalUrl": "https://www.gutscheine.at/",
       "status": "ok",
       "deals": 0,
-      "bytes": 911012,
+      "bytes": 911876,
       "browserFallback": false,
-      "durationMs": 1585,
+      "durationMs": 1800,
       "cooldown": null
     },
     {
@@ -1012,7 +974,7 @@
       "deals": 0,
       "bytes": 6286,
       "browserFallback": false,
-      "durationMs": 713,
+      "durationMs": 755,
       "cooldown": null
     },
     {
@@ -1038,7 +1000,7 @@
       "deals": 0,
       "bytes": 11387,
       "browserFallback": false,
-      "durationMs": 691,
+      "durationMs": 970,
       "cooldown": null
     },
     {
@@ -1047,9 +1009,9 @@
       "finalUrl": "https://www.mueller.at/aktuelles/aktionen/",
       "status": "ok",
       "deals": 1,
-      "bytes": 373815,
+      "bytes": 373785,
       "browserFallback": false,
-      "durationMs": 1845,
+      "durationMs": 1585,
       "cooldown": null
     },
     {
@@ -1060,7 +1022,7 @@
       "deals": 0,
       "bytes": 13740,
       "browserFallback": false,
-      "durationMs": 1482,
+      "durationMs": 1599,
       "cooldown": null
     },
     {
@@ -1071,7 +1033,7 @@
       "deals": 0,
       "bytes": 21851,
       "browserFallback": false,
-      "durationMs": 1361,
+      "durationMs": 1120,
       "cooldown": null
     },
     {
@@ -1095,9 +1057,9 @@
       "finalUrl": "https://www.apple.com/at-edu/store",
       "status": "ok",
       "deals": 3,
-      "bytes": 573760,
+      "bytes": 573725,
       "browserFallback": false,
-      "durationMs": 823,
+      "durationMs": 523,
       "cooldown": null
     },
     {
@@ -1123,7 +1085,7 @@
       "deals": 1,
       "bytes": 327172,
       "browserFallback": false,
-      "durationMs": 675,
+      "durationMs": 613,
       "cooldown": null
     },
     {
@@ -1134,7 +1096,7 @@
       "deals": 0,
       "bytes": 502682,
       "browserFallback": false,
-      "durationMs": 2971,
+      "durationMs": 3822,
       "cooldown": null
     },
     {
@@ -1145,7 +1107,7 @@
       "deals": 1,
       "bytes": 403688,
       "browserFallback": false,
-      "durationMs": 1206,
+      "durationMs": 1202,
       "cooldown": null
     },
     {
@@ -1229,9 +1191,9 @@
       "finalUrl": "https://citybikewien.at/de",
       "status": "ok",
       "deals": 0,
-      "bytes": 107645,
+      "bytes": 107649,
       "browserFallback": false,
-      "durationMs": 1418,
+      "durationMs": 738,
       "cooldown": null
     },
     {
@@ -1240,9 +1202,9 @@
       "finalUrl": "https://www.wienmobil.at/",
       "status": "ok",
       "deals": 0,
-      "bytes": 59223,
+      "bytes": 59225,
       "browserFallback": false,
-      "durationMs": 1167,
+      "durationMs": 1127,
       "cooldown": null
     },
     {
@@ -1253,7 +1215,7 @@
       "deals": 0,
       "bytes": 136921,
       "browserFallback": false,
-      "durationMs": 1624,
+      "durationMs": 2652,
       "cooldown": null
     },
     {
@@ -1262,9 +1224,9 @@
       "finalUrl": "https://www.erlebniswelt.at/",
       "status": "ok",
       "deals": 0,
-      "bytes": 396710,
+      "bytes": 396319,
       "browserFallback": false,
-      "durationMs": 807,
+      "durationMs": 920,
       "cooldown": null
     },
     {
@@ -1273,9 +1235,9 @@
       "finalUrl": "https://www.zoovienna.at/",
       "status": "ok",
       "deals": 0,
-      "bytes": 106175,
+      "bytes": 106001,
       "browserFallback": false,
-      "durationMs": 1695,
+      "durationMs": 1785,
       "cooldown": null
     },
     {
@@ -1286,7 +1248,7 @@
       "deals": 0,
       "bytes": 662779,
       "browserFallback": false,
-      "durationMs": 1943,
+      "durationMs": 2393,
       "cooldown": null
     }
   ]
