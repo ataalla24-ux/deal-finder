@@ -1,10 +1,10 @@
 {
-  "generatedAt": "2026-10-25T07:01:54.586Z",
+  "generatedAt": "2026-10-25T07:29:46.069Z",
   "summary": {
     "filesConsidered": 32,
-    "totalCandidates": 847,
-    "uniqueCandidates": 761,
-    "distinctCandidates": 799,
+    "totalCandidates": 849,
+    "uniqueCandidates": 763,
+    "distinctCandidates": 801,
     "duplicateClusters": 38,
     "topHealthySources": [
       {
@@ -232,7 +232,6 @@
       "reportedSources": 8,
       "failedSources": [],
       "completedWithErrors": [
-        "food3",
         "instagram-apify2",
         "power",
         "wien-combined"
@@ -1166,6 +1165,77 @@
       "sourceWeightScore": 56
     },
     {
+      "sourceKey": "food3",
+      "file": "deals-pending-food3.json",
+      "sourceLabel": "Firecrawl Key 2 - Food",
+      "totalDeals": 5,
+      "uniqueDeals": 2,
+      "duplicateDeals": 3,
+      "duplicateAcrossSources": 3,
+      "fresh1dCount": 0,
+      "fresh7dCount": 5,
+      "viennaCount": 3,
+      "foodDrinkCount": 5,
+      "promoCount": 1,
+      "missingUrlCount": 0,
+      "sampleTitles": [
+        "Aurora Rooftop Bar: Bier und Spritzer (je 3 €); spezielle Blood-Bag-Cocktails",
+        "HAIKKY Wien (@haikky.wien): All You Can Eat & Drink; im Post mit Sushi und Tacos verschlagwortet",
+        "milyn Fusionhouse Zieglergasse 42: ️ Achtung, Hunger vorprogrammiert! Swipe dich durch ... - Instagram"
+      ],
+      "lastRun": {
+        "status": "completed",
+        "startedAt": "2026-10-25T07:26:12.594Z",
+        "finishedAt": "2026-10-25T07:28:48.316Z",
+        "durationMs": 155722,
+        "counts": {
+          "rawCandidates": 3,
+          "normalizedCandidates": 3,
+          "verifiedCandidates": 5,
+          "previousDeals": 3,
+          "acceptedDeals": 5,
+          "rejectedDeals": 1
+        },
+        "rejectedByReason": {
+          "post-verification-rejected": 1
+        },
+        "errors": [],
+        "reportFile": "deal-pipeline-last-run-food3.json"
+      },
+      "uniqueRate": 0.4,
+      "duplicateRate": 0.6,
+      "fresh1dRate": 0,
+      "fresh7dRate": 1,
+      "viennaRate": 0.6,
+      "foodDrinkRate": 1,
+      "promoRate": 0.2,
+      "missingUrlRate": 0,
+      "averageQualityScore": 66.4,
+      "topCategories": [
+        {
+          "value": "essen",
+          "count": 5
+        }
+      ],
+      "topTypes": [
+        {
+          "value": "rabatt",
+          "count": 5
+        }
+      ],
+      "issues": [
+        "wenige Deals sind frischer als 1 Tag",
+        "wenige klare Gratis-/Promo-Signale",
+        "Wien-Signal ist zu schwach",
+        "hohe Überschneidung mit anderen Quellen"
+      ],
+      "healthScore": 51,
+      "missionFitScore": 50,
+      "coverageScore": 11,
+      "precisionScore": 54,
+      "sourceWeightScore": 43
+    },
+    {
       "sourceKey": "church-gemeinde",
       "file": "deals-pending-church-gemeinde.json",
       "sourceLabel": "Freikirchen Wien",
@@ -1266,79 +1336,6 @@
       "coverageScore": 6,
       "precisionScore": 42,
       "sourceWeightScore": 28
-    },
-    {
-      "sourceKey": "food3",
-      "file": "deals-pending-food3.json",
-      "sourceLabel": "Firecrawl Key 2 - Food",
-      "totalDeals": 3,
-      "uniqueDeals": 0,
-      "duplicateDeals": 3,
-      "duplicateAcrossSources": 3,
-      "fresh1dCount": 0,
-      "fresh7dCount": 3,
-      "viennaCount": 2,
-      "foodDrinkCount": 3,
-      "promoCount": 1,
-      "missingUrlCount": 0,
-      "sampleTitles": [
-        "milyn Fusionhouse Zieglergasse 42: ️ Achtung, Hunger vorprogrammiert! Swipe dich durch ... - Instagram",
-        "Tuchlauben EIS, Landstraßer Hauptstraße 2: Krapfen in Wien gesucht? Entdecke deinen neuen Vienna Food Spot ...",
-        "Beeftartare: XO BEEF TARTARE ROLL. ALL LOCATIONS #beeftartare #xobeef ..."
-      ],
-      "lastRun": {
-        "status": "completed-with-errors",
-        "startedAt": "2026-10-24T07:01:48.692Z",
-        "finishedAt": "2026-10-24T07:02:13.489Z",
-        "durationMs": 24797,
-        "counts": {
-          "rawCandidates": 18,
-          "normalizedCandidates": 18,
-          "verifiedCandidates": 3,
-          "previousDeals": 1,
-          "acceptedDeals": 3,
-          "rejectedDeals": 15
-        },
-        "rejectedByReason": {
-          "post-verification-rejected": 15
-        },
-        "errors": [
-          "https://www.instagram.com/explore/tags/fooddealsvienna/: Die angegebene Instagram-Hashtag-Seite konnte in diesem Lauf nicht abgerufen werden (der zulässige Abruf wurde von der Quelle nicht unterstützt). Da ausschließlich diese Quelle verwendet werden darf, konnte ich keine Originalposts, Aktualitätsprüfung oder verlässlichen Angebotsdaten extrahieren."
-        ],
-        "reportFile": "deal-pipeline-last-run-food3.json"
-      },
-      "uniqueRate": 0,
-      "duplicateRate": 1,
-      "fresh1dRate": 0,
-      "fresh7dRate": 1,
-      "viennaRate": 0.7,
-      "foodDrinkRate": 1,
-      "promoRate": 0.3,
-      "missingUrlRate": 0,
-      "averageQualityScore": 67.3,
-      "topCategories": [
-        {
-          "value": "essen",
-          "count": 3
-        }
-      ],
-      "topTypes": [
-        {
-          "value": "rabatt",
-          "count": 3
-        }
-      ],
-      "issues": [
-        "wenige Deals sind frischer als 1 Tag",
-        "wenige klare Gratis-/Promo-Signale",
-        "Wien-Signal ist zu schwach",
-        "hohe Überschneidung mit anderen Quellen"
-      ],
-      "healthScore": 46,
-      "missionFitScore": 54,
-      "coverageScore": 11,
-      "precisionScore": 56,
-      "sourceWeightScore": 44
     },
     {
       "sourceKey": "gemeinde",
