@@ -1,23 +1,29 @@
 {
-  "generatedAt": "2026-10-25T09:51:20.514Z",
+  "generatedAt": "2026-10-25T09:58:40.024Z",
   "summary": {
     "filesConsidered": 32,
-    "totalCandidates": 853,
-    "uniqueCandidates": 767,
-    "distinctCandidates": 804,
+    "totalCandidates": 856,
+    "uniqueCandidates": 771,
+    "distinctCandidates": 808,
     "duplicateClusters": 37,
     "topHealthySources": [
       {
         "sourceKey": "member-benefits",
         "sourceLabel": "Member Benefits",
-        "healthScore": 72,
+        "healthScore": 76,
         "totalDeals": 109
       },
       {
         "sourceKey": "tiktok",
         "sourceLabel": "TikTok Scanner",
-        "healthScore": 72,
-        "totalDeals": 14
+        "healthScore": 75,
+        "totalDeals": 17
+      },
+      {
+        "sourceKey": "joe",
+        "sourceLabel": "jö Bonus Club",
+        "healthScore": 75,
+        "totalDeals": 10
       },
       {
         "sourceKey": "instagram-ai",
@@ -30,20 +36,26 @@
         "sourceLabel": "Meta Instagram Graph",
         "healthScore": 68,
         "totalDeals": 125
-      },
-      {
-        "sourceKey": "instagram-apify",
-        "sourceLabel": "Apify Instagram",
-        "healthScore": 67,
-        "totalDeals": 13
       }
     ],
     "topMissionSources": [
+      {
+        "sourceKey": "joe",
+        "sourceLabel": "jö Bonus Club",
+        "missionFitScore": 79,
+        "totalDeals": 10
+      },
       {
         "sourceKey": "instagram-apify",
         "sourceLabel": "Apify Instagram",
         "missionFitScore": 69,
         "totalDeals": 13
+      },
+      {
+        "sourceKey": "member-benefits",
+        "sourceLabel": "Member Benefits",
+        "missionFitScore": 68,
+        "totalDeals": 109
       },
       {
         "sourceKey": "instagram-ai",
@@ -56,34 +68,22 @@
         "sourceLabel": "Firecrawl Key 5 - Instagram Gastro",
         "missionFitScore": 64,
         "totalDeals": 2
-      },
-      {
-        "sourceKey": "member-benefits",
-        "sourceLabel": "Member Benefits",
-        "missionFitScore": 61,
-        "totalDeals": 109
-      },
-      {
-        "sourceKey": "meta-instagram",
-        "sourceLabel": "Meta Instagram Graph",
-        "missionFitScore": 59,
-        "totalDeals": 125
       }
     ],
     "topCoverageSources": [
+      {
+        "sourceKey": "member-benefits",
+        "sourceLabel": "Member Benefits",
+        "coverageScore": 91,
+        "totalDeals": 109,
+        "fresh1dCount": 29
+      },
       {
         "sourceKey": "meta-instagram",
         "sourceLabel": "Meta Instagram Graph",
         "coverageScore": 82,
         "totalDeals": 125,
-        "fresh1dCount": 14
-      },
-      {
-        "sourceKey": "member-benefits",
-        "sourceLabel": "Member Benefits",
-        "coverageScore": 68,
-        "totalDeals": 109,
-        "fresh1dCount": 0
+        "fresh1dCount": 16
       },
       {
         "sourceKey": "gastro2",
@@ -115,22 +115,22 @@
         "totalDeals": 49
       },
       {
-        "sourceKey": "meta-instagram",
-        "sourceLabel": "Meta Instagram Graph",
-        "precisionScore": 72,
-        "totalDeals": 125
-      },
-      {
         "sourceKey": "tiktok",
         "sourceLabel": "TikTok Scanner",
-        "precisionScore": 71,
-        "totalDeals": 14
+        "precisionScore": 75,
+        "totalDeals": 17
       },
       {
         "sourceKey": "member-benefits",
         "sourceLabel": "Member Benefits",
-        "precisionScore": 70,
+        "precisionScore": 74,
         "totalDeals": 109
+      },
+      {
+        "sourceKey": "meta-instagram",
+        "sourceLabel": "Meta Instagram Graph",
+        "precisionScore": 72,
+        "totalDeals": 125
       },
       {
         "sourceKey": "firecrawl5",
@@ -141,16 +141,22 @@
     ],
     "topWeightedSources": [
       {
+        "sourceKey": "member-benefits",
+        "sourceLabel": "Member Benefits",
+        "sourceWeightScore": 76,
+        "totalDeals": 109
+      },
+      {
         "sourceKey": "meta-instagram",
         "sourceLabel": "Meta Instagram Graph",
         "sourceWeightScore": 69,
         "totalDeals": 125
       },
       {
-        "sourceKey": "member-benefits",
-        "sourceLabel": "Member Benefits",
-        "sourceWeightScore": 67,
-        "totalDeals": 109
+        "sourceKey": "joe",
+        "sourceLabel": "jö Bonus Club",
+        "sourceWeightScore": 64,
+        "totalDeals": 10
       },
       {
         "sourceKey": "instagram-ai",
@@ -159,16 +165,10 @@
         "totalDeals": 49
       },
       {
-        "sourceKey": "instagram-apify",
-        "sourceLabel": "Apify Instagram",
-        "sourceWeightScore": 58,
-        "totalDeals": 13
-      },
-      {
-        "sourceKey": "gastro2",
-        "sourceLabel": "Firecrawl Key 1 - Gastro",
-        "sourceWeightScore": 56,
-        "totalDeals": 118
+        "sourceKey": "tiktok",
+        "sourceLabel": "TikTok Scanner",
+        "sourceWeightScore": 59,
+        "totalDeals": 17
       }
     ],
     "topSourcesToFix": [
@@ -247,7 +247,7 @@
       "uniqueDeals": 109,
       "duplicateDeals": 0,
       "duplicateAcrossSources": 0,
-      "fresh1dCount": 0,
+      "fresh1dCount": 29,
       "fresh7dCount": 29,
       "viennaCount": 80,
       "foodDrinkCount": 83,
@@ -261,7 +261,7 @@
       "lastRun": null,
       "uniqueRate": 1,
       "duplicateRate": 0,
-      "fresh1dRate": 0,
+      "fresh1dRate": 0.3,
       "fresh7dRate": 0.3,
       "viennaRate": 0.7,
       "foodDrinkRate": 0.8,
@@ -305,45 +305,48 @@
         }
       ],
       "issues": [
-        "wenige Deals sind frischer als 1 Tag",
         "Wien-Signal ist zu schwach"
       ],
-      "healthScore": 72,
-      "missionFitScore": 61,
-      "coverageScore": 68,
-      "precisionScore": 70,
-      "sourceWeightScore": 67
+      "healthScore": 76,
+      "missionFitScore": 68,
+      "coverageScore": 91,
+      "precisionScore": 74,
+      "sourceWeightScore": 76
     },
     {
       "sourceKey": "tiktok",
       "file": "deals-pending-tiktok.json",
       "sourceLabel": "TikTok Scanner",
-      "totalDeals": 14,
-      "uniqueDeals": 14,
+      "totalDeals": 17,
+      "uniqueDeals": 17,
       "duplicateDeals": 0,
       "duplicateAcrossSources": 0,
-      "fresh1dCount": 0,
-      "fresh7dCount": 14,
-      "viennaCount": 14,
-      "foodDrinkCount": 4,
-      "promoCount": 14,
+      "fresh1dCount": 1,
+      "fresh7dCount": 17,
+      "viennaCount": 17,
+      "foodDrinkCount": 6,
+      "promoCount": 17,
       "missingUrlCount": 0,
       "sampleTitles": [
+        "🍕 Hört auf Miki und ruft jetzt an",
         "10 DINGE UNTER 12 € IN WIEN - HERBST EDITION 🍁 🎃 KÜRBISFEST AM HIMMEL 24",
-        "Gratis Eintritt bei Perfektastr. 81",
-        "🎃 Pumpkin Festival Am Himmel is back"
+        "Gratis Eintritt bei Perfektastr. 81"
       ],
       "lastRun": null,
       "uniqueRate": 1,
       "duplicateRate": 0,
-      "fresh1dRate": 0,
+      "fresh1dRate": 0.1,
       "fresh7dRate": 1,
       "viennaRate": 1,
-      "foodDrinkRate": 0.3,
+      "foodDrinkRate": 0.4,
       "promoRate": 1,
       "missingUrlRate": 0,
-      "averageQualityScore": 65.4,
+      "averageQualityScore": 65.9,
       "topCategories": [
+        {
+          "value": "essen",
+          "count": 5
+        },
         {
           "value": "kultur",
           "count": 5
@@ -353,21 +356,25 @@
           "count": 5
         },
         {
-          "value": "essen",
-          "count": 2
+          "value": "kaffee",
+          "count": 1
         },
         {
-          "value": "kaffee",
-          "count": 2
+          "value": "reisen",
+          "count": 1
         }
       ],
       "topTypes": [
         {
           "value": "gratis",
-          "count": 13
+          "count": 15
         },
         {
-          "value": "freebie",
+          "value": "bogo",
+          "count": 1
+        },
+        {
+          "value": "rabatt",
           "count": 1
         }
       ],
@@ -375,11 +382,73 @@
         "wenige Deals sind frischer als 1 Tag",
         "geringe Food-/Drink-Relevanz"
       ],
-      "healthScore": 72,
-      "missionFitScore": 54,
-      "coverageScore": 19,
-      "precisionScore": 71,
-      "sourceWeightScore": 55
+      "healthScore": 75,
+      "missionFitScore": 59,
+      "coverageScore": 22,
+      "precisionScore": 75,
+      "sourceWeightScore": 59
+    },
+    {
+      "sourceKey": "joe",
+      "file": "deals-pending-joe.json",
+      "sourceLabel": "jö Bonus Club",
+      "totalDeals": 10,
+      "uniqueDeals": 10,
+      "duplicateDeals": 0,
+      "duplicateAcrossSources": 0,
+      "fresh1dCount": 10,
+      "fresh7dCount": 10,
+      "viennaCount": 0,
+      "foodDrinkCount": 10,
+      "promoCount": 8,
+      "missingUrlCount": 0,
+      "sampleTitles": [
+        "jö Äpp Extrem Aktion bei BILLA",
+        "jö Rabattsammler",
+        "jö äpp Day"
+      ],
+      "lastRun": null,
+      "uniqueRate": 1,
+      "duplicateRate": 0,
+      "fresh1dRate": 1,
+      "fresh7dRate": 1,
+      "viennaRate": 0,
+      "foodDrinkRate": 1,
+      "promoRate": 0.8,
+      "missingUrlRate": 0,
+      "averageQualityScore": 84.3,
+      "topCategories": [
+        {
+          "value": "supermarkt",
+          "count": 5
+        },
+        {
+          "value": "kaffee",
+          "count": 4
+        },
+        {
+          "value": "essen",
+          "count": 1
+        }
+      ],
+      "topTypes": [
+        {
+          "value": "gratis",
+          "count": 5
+        },
+        {
+          "value": "rabatt",
+          "count": 5
+        }
+      ],
+      "issues": [
+        "Wien-Signal ist zu schwach"
+      ],
+      "healthScore": 75,
+      "missionFitScore": 79,
+      "coverageScore": 22,
+      "precisionScore": 68,
+      "sourceWeightScore": 64
     },
     {
       "sourceKey": "instagram-ai",
@@ -461,19 +530,19 @@
       "file": "deals-pending-meta-instagram.json",
       "sourceLabel": "Meta Instagram Graph",
       "totalDeals": 125,
-      "uniqueDeals": 92,
-      "duplicateDeals": 33,
+      "uniqueDeals": 93,
+      "duplicateDeals": 32,
       "duplicateAcrossSources": 18,
-      "fresh1dCount": 14,
-      "fresh7dCount": 120,
+      "fresh1dCount": 16,
+      "fresh7dCount": 122,
       "viennaCount": 125,
       "foodDrinkCount": 82,
-      "promoCount": 73,
+      "promoCount": 74,
       "missingUrlCount": 0,
       "sampleTitles": [
-        "Gratis-Eintritt zum Event bei Sauna",
-        "🕖 19:00 📍 Volksgartenstraße 5/2, 1010 Wien Special: Gratis-Shot für Kostüm 🥃 Einladungslink zur Gruppe: https://chat.whatsapp.com/HN3iTSq",
-        "Gratis-Eintritt zum Event bei PURPLE CLUB"
+        "35 % sparen",
+        "30% off with TheFork",
+        "Gratis-Eintritt zum Event bei Sauna"
       ],
       "lastRun": null,
       "uniqueRate": 0.7,
@@ -484,7 +553,7 @@
       "foodDrinkRate": 0.7,
       "promoRate": 0.6,
       "missingUrlRate": 0,
-      "averageQualityScore": 87.5,
+      "averageQualityScore": 87.4,
       "topCategories": [
         {
           "value": "essen",
@@ -603,69 +672,6 @@
       "coverageScore": 19,
       "precisionScore": 67,
       "sourceWeightScore": 58
-    },
-    {
-      "sourceKey": "joe",
-      "file": "deals-pending-joe.json",
-      "sourceLabel": "jö Bonus Club",
-      "totalDeals": 10,
-      "uniqueDeals": 10,
-      "duplicateDeals": 0,
-      "duplicateAcrossSources": 0,
-      "fresh1dCount": 0,
-      "fresh7dCount": 10,
-      "viennaCount": 0,
-      "foodDrinkCount": 10,
-      "promoCount": 8,
-      "missingUrlCount": 0,
-      "sampleTitles": [
-        "jö Äpp Extrem Aktion bei BILLA",
-        "jö Rabattsammler",
-        "jö äpp Day"
-      ],
-      "lastRun": null,
-      "uniqueRate": 1,
-      "duplicateRate": 0,
-      "fresh1dRate": 0,
-      "fresh7dRate": 1,
-      "viennaRate": 0,
-      "foodDrinkRate": 1,
-      "promoRate": 0.8,
-      "missingUrlRate": 0,
-      "averageQualityScore": 84.3,
-      "topCategories": [
-        {
-          "value": "supermarkt",
-          "count": 5
-        },
-        {
-          "value": "kaffee",
-          "count": 4
-        },
-        {
-          "value": "essen",
-          "count": 1
-        }
-      ],
-      "topTypes": [
-        {
-          "value": "gratis",
-          "count": 5
-        },
-        {
-          "value": "rabatt",
-          "count": 5
-        }
-      ],
-      "issues": [
-        "wenige Deals sind frischer als 1 Tag",
-        "Wien-Signal ist zu schwach"
-      ],
-      "healthScore": 61,
-      "missionFitScore": 57,
-      "coverageScore": 14,
-      "precisionScore": 56,
-      "sourceWeightScore": 49
     },
     {
       "sourceKey": "instagram-verified",
@@ -1704,7 +1710,7 @@
       ],
       "healthScore": 42,
       "missionFitScore": 22,
-      "coverageScore": 36,
+      "coverageScore": 34,
       "precisionScore": 26,
       "sourceWeightScore": 31
     },
@@ -1719,7 +1725,7 @@
       "fresh1dCount": 0,
       "fresh7dCount": 1,
       "viennaCount": 0,
-      "foodDrinkCount": 46,
+      "foodDrinkCount": 44,
       "promoCount": 34,
       "missingUrlCount": 0,
       "sampleTitles": [
@@ -1736,27 +1742,27 @@
       "foodDrinkRate": 0.4,
       "promoRate": 0.3,
       "missingUrlRate": 0,
-      "averageQualityScore": 44.1,
+      "averageQualityScore": 43.6,
       "topCategories": [
         {
           "value": "reisen",
-          "count": 40
+          "count": 37
         },
         {
           "value": "kaffee",
-          "count": 30
+          "count": 27
         },
         {
           "value": "essen",
-          "count": 15
-        },
-        {
-          "value": "shopping",
-          "count": 11
+          "count": 16
         },
         {
           "value": "fitness",
-          "count": 10
+          "count": 12
+        },
+        {
+          "value": "shopping",
+          "count": 12
         },
         {
           "value": "technik",
