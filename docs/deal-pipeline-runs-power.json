@@ -2,9 +2,53 @@
   "schemaVersion": 1,
   "sourceKey": "power",
   "sourceLabel": "Power Scraper",
-  "updatedAt": "2026-10-26T11:21:03.379Z",
+  "updatedAt": "2026-10-26T19:28:05.944Z",
   "runCount": 90,
   "runs": [
+    {
+      "schemaVersion": 1,
+      "runId": "power-2026-10-26T19:28:05.944Z",
+      "sourceKey": "power",
+      "sourceLabel": "Power Scraper",
+      "status": "completed-with-errors",
+      "startedAt": "2026-10-26T19:27:40.552Z",
+      "finishedAt": "2026-10-26T19:28:05.944Z",
+      "durationMs": 25392,
+      "outputFile": "docs/deals-pending-power.json",
+      "counts": {
+        "rawCandidates": 36,
+        "normalizedCandidates": 36,
+        "verifiedCandidates": 0,
+        "previousDeals": 0,
+        "acceptedDeals": 36,
+        "rejectedDeals": 0
+      },
+      "rejectedByReason": {},
+      "rejectedSamples": [],
+      "diagnostics": {
+        "healthySources": 45,
+        "failedSources": 13,
+        "sourceCount": 58,
+        "concurrency": 4,
+        "timeoutMs": 8000
+      },
+      "constraints": {},
+      "errors": [
+        "Too Good To Go: deferred until 2026-10-27T17:55:37.831Z",
+        "Mussty: The operation was aborted due to timeout",
+        "BackWerk: HTTP 503",
+        "MediaMarkt: deferred until 2026-10-29T10:17:52.422Z",
+        "Saturn: deferred until 2026-10-30T09:40:24.536Z",
+        "Spar: deferred until 2026-10-30T09:40:25.390Z",
+        "Conrad: deferred until 2026-10-29T10:17:55.854Z",
+        "Decathlon: deferred until 2026-10-29T10:17:55.967Z",
+        "XXXLutz: deferred until 2026-10-29T10:17:57.638Z",
+        "Möbelix: deferred until 2026-10-29T10:17:57.812Z",
+        "Lego Store: deferred until 2026-10-29T10:17:58.002Z",
+        "Thalia: deferred until 2026-10-29T10:17:58.129Z",
+        "Libro: HTTP 403"
+      ]
+    },
     {
       "schemaVersion": 1,
       "runId": "power-2026-10-26T11:21:03.379Z",
@@ -3555,38 +3599,6 @@
         "verifiedCandidates": 0,
         "previousDeals": 0,
         "acceptedDeals": 41,
-        "rejectedDeals": 0
-      },
-      "rejectedByReason": {},
-      "rejectedSamples": [],
-      "diagnostics": {
-        "healthySources": 38,
-        "failedSources": 1,
-        "sourceCount": 39,
-        "concurrency": 8,
-        "timeoutMs": 8000
-      },
-      "constraints": {},
-      "errors": [
-        "Too Good To Go: Browser HTTP 429"
-      ]
-    },
-    {
-      "schemaVersion": 1,
-      "runId": "power-2026-09-02T09:51:26.324Z",
-      "sourceKey": "power",
-      "sourceLabel": "Power Scraper",
-      "status": "completed-with-errors",
-      "startedAt": "2026-09-02T09:51:16.832Z",
-      "finishedAt": "2026-09-02T09:51:26.324Z",
-      "durationMs": 9492,
-      "outputFile": "docs/deals-pending-power.json",
-      "counts": {
-        "rawCandidates": 47,
-        "normalizedCandidates": 43,
-        "verifiedCandidates": 0,
-        "previousDeals": 0,
-        "acceptedDeals": 43,
         "rejectedDeals": 0
       },
       "rejectedByReason": {},
