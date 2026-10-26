@@ -1,0 +1,102 @@
+<!doctype html>
+<html lang="de-AT">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="robots" content="noindex, follow">
+  <meta name="referrer" content="no-referrer">
+  <title>Gratis-Anzeige in der FreeFinder-App | Für Wiener Lokale</title>
+  <meta name="description" content="Für Wiener Restaurants und Imbisse: FreeFinder laden und eine Spotlight-Anzeige mit SPOTLIGHTGRATIS 3 Tage kostenlos direkt in der App erstellen.">
+  <link rel="canonical" href="https://freefinder.at/gratis-anzeige.html">
+  <link rel="icon" href="icon-192.svg">
+  <meta property="og:title" content="Deine Anzeige in FreeFinder: 3 Tage gratis">
+  <meta property="og:description" content="SPOTLIGHTGRATIS in der FreeFinder-App einlösen. Für Wiener Restaurants und Imbisse, ohne Abo und Zahlungsdaten.">
+  <meta property="og:image" content="https://freefinder.at/assets/campaigns/flyer-food-20261023-wide.webp">
+  <meta property="og:url" content="https://freefinder.at/gratis-anzeige.html">
+  <script src="gratis-anzeige.js" defer></script>
+  <style>
+    :root { color-scheme: light; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; color: #191919; background: #fff; }
+    * { box-sizing: border-box; }
+    body { margin: 0; line-height: 1.55; }
+    a { color: inherit; text-underline-offset: 3px; }
+    button, input { font: inherit; }
+    :focus-visible { outline: 3px solid #b4350e; outline-offset: 4px; }
+    .skip-link { position: absolute; left: 16px; top: -80px; z-index: 3; background: white; padding: 12px; }
+    .skip-link:focus { top: 8px; }
+    header, .inner, footer { width: min(100% - 40px, 880px); margin-inline: auto; }
+    header { min-height: 76px; display: flex; align-items: center; justify-content: space-between; gap: 16px; }
+    .brand { font-size: 23px; font-weight: 750; text-decoration: none; }
+    .brand span { color: #e94d1a; }
+    header p { font-size: 14px; color: #575757; }
+    .hero { position: relative; isolation: isolate; overflow: hidden; padding: 52px 0 44px; }
+    .hero picture { position: absolute; inset: 0; z-index: -1; }
+    .hero img { width: 100%; height: 100%; object-fit: cover; }
+    .hero .inner { max-width: 620px; text-align: center; }
+    .eyebrow { font-size: 14px; font-weight: 650; margin: 0 0 12px; }
+    h1 { font-size: 42px; line-height: 1.14; margin: 0 0 18px; }
+    .hero p:last-child { max-width: 480px; margin: 0 auto; font-size: 18px; }
+    .download { padding: 28px 0; border-bottom: 1px solid #dedede; }
+    .store-links { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
+    .store-links a { min-height: 52px; padding: 13px 16px; border: 1px solid #191919; border-radius: 6px; font-weight: 650; text-decoration: none; text-align: center; }
+    .store-links a:first-child { color: white; background: #191919; }
+    .installed { margin: 18px 0 0; font-size: 15px; }
+    .code-line { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px; padding: 24px 0; border-bottom: 1px solid #dedede; }
+    .code-line label { display: block; font-size: 13px; color: #575757; margin-bottom: 4px; }
+    #promo-code { display: block; border: 0; padding: 0; background: transparent; color: #191919; width: 238px; max-width: 100%; font-size: 23px; font-weight: 750; }
+    #copy-code { border: 1px solid #a7a7a7; border-radius: 6px; background: #fff; color: #191919; padding: 10px 14px; cursor: pointer; }
+    #copy-status { flex-basis: 100%; min-height: 22px; margin: 0; color: #4f4f4f; font-size: 14px; }
+    .instructions { padding: 30px 0; }
+    h2 { font-size: 24px; line-height: 1.25; margin: 0 0 20px; }
+    ol { padding-left: 24px; margin: 0; }
+    li { padding-left: 6px; margin-bottom: 20px; }
+    li::marker { color: #c13a13; font-weight: 750; }
+    li strong { display: block; margin-bottom: 5px; }
+    li p { margin: 0; color: #474747; }
+    .conditions { border-block: 1px solid #dedede; padding: 22px 0; }
+    .conditions p { margin: 0 0 10px; }
+    .conditions p:last-child { margin: 0; font-size: 14px; color: #575757; }
+    footer { display: flex; flex-wrap: wrap; gap: 20px; padding: 24px 0 32px; font-size: 14px; color: #575757; }
+    @media (max-width: 600px) {
+      header, .inner, footer { width: calc(100% - 36px); }
+      header p { max-width: 100px; text-align: right; font-size: 12px; }
+      .hero { padding: 32px 0; }
+      h1 { font-size: 34px; }
+      .hero .inner { padding-inline: 14px; }
+      .hero p:last-child { font-size: 17px; }
+    }
+    @media (max-width: 360px) { .store-links { grid-template-columns: 1fr; } h1 { font-size: 30px; } }
+  </style>
+</head>
+<body>
+  <a class="skip-link" href="#main-content">Zum Inhalt</a>
+  <header><a class="brand" href="/"><span>Free</span>Finder</a><p>Für Wiener Lokale &amp; Imbisse</p></header>
+  <main id="main-content" tabindex="-1">
+    <section class="hero">
+      <picture aria-hidden="true"><source media="(max-width: 600px)" srcset="assets/campaigns/flyer-food-20261023-portrait.webp"><img src="assets/campaigns/flyer-food-20261023-wide.webp" width="1942" height="809" alt=""></picture>
+      <div class="inner"><p class="eyebrow">FREEFINDER BUSINESS</p><h1>Dein Angebot.<br>3 Tage gratis.</h1><p>Erstelle deine Spotlight-Anzeige direkt in der FreeFinder-App. Ohne Abo und ohne Zahlungsdaten.</p></div>
+    </section>
+    <section class="download inner" aria-label="FreeFinder herunterladen">
+      <div class="store-links"><a id="iphone-store" href="https://apps.apple.com/app/id6758958213">Für iPhone laden</a><a id="android-store" href="https://play.google.com/store/apps/details?id=com.stefanataalla.freefinderwien">Für Android laden</a></div>
+      <p class="installed">Schon installiert? Öffne FreeFinder auf deinem Handy und wähle im Menü <strong>Business-Anzeigen</strong>.</p>
+    </section>
+    <section class="code-line inner" aria-label="Dein Promo-Code">
+      <div><label for="promo-code">Dein Code für die App</label><input id="promo-code" value="SPOTLIGHTGRATIS" readonly spellcheck="false" aria-label="Promo-Code SPOTLIGHTGRATIS"></div>
+      <button id="copy-code" type="button">Code kopieren</button>
+      <p id="copy-status" role="status" aria-live="polite"></p>
+    </section>
+    <section class="instructions inner" aria-labelledby="steps-title">
+      <h2 id="steps-title">So erstellst du deine Anzeige</h2>
+      <ol>
+        <li><strong>FreeFinder laden und öffnen</strong><p>Ein Pro-Abo ist dafür nicht nötig. Falls beim ersten Start ein Pro-Angebot erscheint, wähle „Ohne Abo weiter“.</p></li>
+        <li><strong>Menü → Business-Anzeigen</strong><p>Trage dein Lokal, dein Angebot, die Adresse und die Angebotsbedingungen ein.</p></li>
+        <li><strong>SPOTLIGHTGRATIS eingeben und prüfen</strong><p>Die App zeigt dir das kostenlose Spotlight-Paket. Prüfe die Vorschau und bestätige deine Anzeige erst, wenn dort <strong>0 €</strong> steht.</p></li>
+      </ol>
+    </section>
+    <section class="conditions inner" aria-label="Bedingungen">
+      <p><strong>3 Tage sichtbar. Danach endet die Anzeige automatisch.</strong></p>
+      <p>Einmalig pro Lokal und Code. Kein Abo, keine Zahlungsdaten und keine automatische Verlängerung. Es gelten die <a href="anzeigenrichtlinien.html">Anzeigenrichtlinien</a>. Diese Website erklärt nur den Ablauf; deine Anzeige erstellst und bestätigst du in der App.</p>
+    </section>
+  </main>
+  <footer><a href="support.html">Kontakt &amp; Hilfe</a><a href="privacy.html">Datenschutz</a><a href="about.html">Über FreeFinder</a></footer>
+</body>
+</html>
