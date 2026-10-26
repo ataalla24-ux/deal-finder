@@ -1,6 +1,7 @@
 import crypto from 'node:crypto';
 import { canonicalInstagramPostKey } from './deal-evidence-utils.js';
 import { parseExpiryShape } from './expiry-utils.js';
+import { enrichCommunityCard } from './community-card-enrichment.js';
 
 const clean = value => String(value || '').replace(/\s+/g, ' ').trim();
 const fields = ['title', 'brand', 'description', 'address', 'validity'];
@@ -43,7 +44,7 @@ export function applyExtraction(deal, result, evidence) {
   next.missingFields = [];
   if (!title && (!deal.title || /Community-Deal|Instagram|TikTok/i.test(deal.title))) next.missingFields.push('Angebot/Titel');
   if (!brand && (!deal.brand || /^(Community Fund|Instagram|TikTok|Facebook)$/i.test(deal.brand))) next.missingFields.push('Anbieter');
-  if (!description && (!deal.description || deal.description.includes('Von der Community eingereicht'))) next.missingFields.push('Beschreibung/Bedingungen');
+  if (!description && (!clean(deal.description).replace(/https?:\/\/\S+/gi, '').trim() || deal.description.includes('Von der Community eingereicht'))) next.missingFields.push('Beschreibung/Bedingungen');
   if (!address && (!deal.distance || /^(Wien|Bitte prüfen)$/i.test(deal.distance))) next.missingFields.push('Genaue Adresse/Standorte');
   if (!validity && !deal.expires) next.missingFields.push('Gültigkeit');
   if (validity && !next.expires && !next.validFrom) next.missingFields.push('Aktionsdatum bestätigen');
@@ -78,8 +79,8 @@ export async function extractCommunityDeal(submission, deal, options = {}) {
     } catch { sourceStatus = 'unreadable'; }
   }
   const evidence = `SUBMITTED TEXT (unverified):\n${supplied}\nSOURCE TEXT:\n${source}`;
-  const fallback = () => ({ ...applyExtraction(deal, {}, evidence),
-    communityExtraction: { status: 'needs-review', sourceStatus, requiresReview: true } });
+  const fallback = () => enrichCommunityCard({ ...applyExtraction(deal, {}, evidence),
+    communityExtraction: { status: 'needs-review', sourceStatus, requiresReview: true } }, options.graphEvidence);
   if (!apiKey) return fallback();
   try {
     const property = { type: 'object', additionalProperties: false,
@@ -110,6 +111,6 @@ export async function extractCommunityDeal(submission, deal, options = {}) {
     if (body.choices?.[0]?.finish_reason !== 'stop') throw new Error('incomplete');
     const next = applyExtraction(deal, JSON.parse(body.choices[0].message.content), evidence);
     next.communityExtraction.sourceStatus = sourceStatus;
-    return next;
+    return enrichCommunityCard(next, options.graphEvidence);
   } catch { return fallback(); }
 }

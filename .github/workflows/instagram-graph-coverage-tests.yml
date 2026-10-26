@@ -78,6 +78,7 @@ jobs:
       - name: Test pagination and both collector integrations without network credentials
         run: |
           node --test scripts/test-source-review-cache.mjs
+          SENTRY_DISABLED=1 node --test scripts/test-community-card-enrichment.mjs
           node scripts/test-slack-food-improvements.mjs
           node scripts/test-deal-evidence.mjs
           node scripts/test-slack-deal-quality.mjs

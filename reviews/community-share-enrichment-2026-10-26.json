@@ -1,0 +1,41 @@
+{
+  "date": "2026-10-26",
+  "scope": "Improve Instagram shares submitted through FreeFinder before Slack deduplication; preserve human approval",
+  "diagnosis": {
+    "post": "https://www.instagram.com/p/De3-tTkN06N/",
+    "firstSubmissionId": "3d0e642b-c067-4bf0-b3a8-6dec891b4e4c",
+    "secondSubmissionId": "f469f22b-3e00-47dd-b844-4484a49c25a0",
+    "slackChannel": "C0AF8TXN2KW",
+    "slackThreadTs": "1792851412.529839",
+    "slackMessageTs": "1792851412.597619",
+    "failure": "Unreadable initial source produced generic Slack card; later complete submission and Graph evidence were suppressed as exact-post duplicates rather than merged into the existing card.",
+    "oldNormalizationDamage": "Generic Instagram brand inferred from caption address also replaced Instagram inside URL-only description.",
+    "scraperRun": 40113661562,
+    "scraperRunEvent": "workflow_dispatch",
+    "scraperRunProvesScheduledCoverage": false
+  },
+  "implementation": {
+    "newNetworkExtractionCalls": false,
+    "newPaidModelCalls": false,
+    "paidTitleEditorEnabled": false,
+    "existingExtractionCachePreserved": true,
+    "existingIntakeAndDispatchSchedulesPreserved": true,
+    "newCards": "Reuse exact-post Graph caption/OCR and existing submitted details; conservative complete food-offer headline fallback, full conditions retained as original source text.",
+    "existingCards": "Before seen/queued filters, merge missing fields from same-post community submissions and existing Graph evidence; update same Slack message only after bounded complete thread read confirms no human replies/reactions/edits/decisions.",
+    "acknowledgement": "Linked submission IDs acknowledged only after successful Slack update and persistent queue write.",
+    "maxCardChecksPerDispatch": 8,
+    "maxSuccessfulUpdatesPerDispatch": 4,
+    "guards": ["no automatic public approval", "preserve IDs, timestamps, source submissions and votes", "do not overwrite populated facts", "skip live/blocked/moderated/human-edited cards", "fail closed on Slack read/update failures", "no invented merchant, address or dates", "keep unavailable source fields explicitly unresolved"]
+  },
+  "verification": {
+    "offlineSuites": 15,
+    "nodeTestResults": 33,
+    "failures": 0,
+    "newFocusedCases": 11,
+    "gitDiffCheck": "pass",
+    "actualRecordOfflineReplay": "Correct title, merchant, address, explicit 2026-10-30 validity and stock condition; stable original Slack identity and linked second submission.",
+    "actualSlackBefore": "Read-only confirmed old generic message and no human replies/reactions.",
+    "actualSlackAfter": "not yet verified at source commit",
+    "publicDealPublication": "not authorized or performed"
+  }
+}

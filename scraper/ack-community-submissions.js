@@ -2,6 +2,7 @@ import '../sentry/instrument.mjs';
 import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
+import { postedCommunitySubmissionIds } from './community-card-enrichment.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -61,16 +62,7 @@ function loadPostedSubmissionIds() {
   try {
     const parsed = JSON.parse(fs.readFileSync(PENDING_ALL_PATH, 'utf-8'));
     const deals = ensureArray(parsed?.deals);
-    const ids = new Set();
-    for (const deal of deals) {
-      const source = cleanText(deal?.source).toLowerCase();
-      const origin = cleanText(deal?.originSource).toLowerCase();
-      if (!source.includes('community submission') && !origin.includes('community-submission')) continue;
-      if (!cleanText(deal?.slackTs)) continue;
-      const submissionId = cleanText(deal?.submissionId).replace(/^community:/, '');
-      if (submissionId) ids.add(submissionId);
-    }
-    return [...ids];
+    return postedCommunitySubmissionIds(deals);
   } catch {
     return [];
   }

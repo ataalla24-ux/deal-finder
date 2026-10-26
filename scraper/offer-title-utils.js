@@ -50,7 +50,7 @@ export function concreteFoodOfferTitle(value = '') {
   for (const raw of sentences) {
     const sentence = raw.trim().replace(/\b(?:unglaubliche|unschlagbare)\s+(?=\d)/gi, '').replace(/(\d)\s*€/g, '$1 €').replace(/\s+/g, ' ');
     if (!sentence || sentence.length > 110 || isPromotionalIntro(sentence) || isSocialInstructionTitle(sentence)) continue;
-    if (!/\b(?:döner|doner|kebap|kebab|pizza|burger|kaffee|coffee|latte|matcha|espresso|eis|eiskaffee|sushi|bowl|frühstück|getränk|drink|ayran|kuchen|cheesecake)\b/i.test(sentence)) continue;
+    if (!/\b(?:döner|doner|kebap|kebab|pizza|burger|wrap|dürüm|köfte|kaffee|coffee|latte|matcha|espresso|eis|eiskaffee|sushi|bowl|frühstück|getränk|drink|ayran|kuchen|cheesecake)\b/i.test(sentence)) continue;
     if (!/\d+(?:[,.]\d{1,2})?\s*(?:€|euro\b)|\b(?:gratis|kostenlos)\b|\b[12]\s*\+\s*1\b/i.test(sentence)) continue;
     if (/\b(?:nicht|kein|keine|vorbei|abgelaufen|statt|früher)\b/i.test(sentence) || /[=,:-]$/.test(sentence)) continue;
     return sentence;

@@ -2,6 +2,7 @@ import { officialFoodOfferKey } from './power-food-sources.js';
 import { filterDiscoveryDeals, foodDiscoveryPriority } from './deal-discovery-policy.js';
 import { normalizeDealFacts, locationConflictReason, materialOfferConditions } from './deal-factual-guards.js';
 import { isCommunitySubmission } from './community-review-utils.js';
+import { enrichCommunityCard, refreshQueuedCommunityCards, untouchedCommunityThread } from './community-card-enrichment.js';
 import { createCardEditor } from './deal-card-editor.js';
 import { retryQueuedEditorial } from './card-editor-retry.js';
 import { loadDealMapReviewContext, reviewDealMap } from '../scripts/deal-map-review.mjs';
@@ -508,7 +509,7 @@ function loadPendingDeals(files, graphEvidence = new Map()) {
     try {
       const parsed = JSON.parse(fs.readFileSync(filePath, 'utf-8'));
       const items = ensureArray(parsed.deals || parsed);
-      const normalized = items.map((deal) => normalizeDealWithGraphEvidence(deal, sourceKey, graphEvidence));
+      const normalized = items.map((deal) => normalizeDealWithGraphEvidence(enrichCommunityCard(deal, graphEvidence), sourceKey, graphEvidence));
       console.log(`  - ${file}: ${normalized.length} deals`);
       deals.push(...normalized);
     } catch (error) {
@@ -1120,6 +1121,12 @@ async function untouchedEditorialThread(deal) {
   if (!messages.length || messages.some(message => !message.bot_id || message.reactions?.length)) return false;
   const target = messages.find(message => message.ts === deal.slackTs);
   return Boolean(target?.text?.includes(`Deal-ID: ${deal.id}`) && target.text.includes(deal.title));
+}
+
+async function untouchedCommunityCard(deal, replacement) {
+  const query = new URLSearchParams({ channel: SLACK_CHANNEL_ID, ts: deal.slackThreadTs, limit: '100' });
+  const result = await slackApi(`https://slack.com/api/conversations.replies?${query}`);
+  return untouchedCommunityThread(result, deal, replacement);
 }
 
 async function updateEditorialMessage(deal) {
@@ -1868,6 +1875,14 @@ async function main() {
     [...pendingDeals, ...key4ReviewDeals, ...socialFoodArtifactDeals],
   );
   console.log(`Discovery policy: ${discoveryFilter.deals.length} candidates retained; excluded ${JSON.stringify(discoveryFilter.reasonCounts)}`);
+  const liveDeals = loadLiveDeals();
+  const communityRefresh = await refreshQueuedCommunityCards(existingQueue, discoveryFilter.deals, {
+    graphEvidence, liveDeals, now: runNow, isUntouched: untouchedCommunityCard,
+    updateMessage: updateEditorialMessage,
+    persist: writePendingAll,
+  });
+  existingQueue = communityRefresh.deals;
+  console.log(`Community card enrichment: ${communityRefresh.updated} existing cards updated, ${communityRefresh.checked} checked`);
   const seenPostKeys = await loadRecentlySeenPostKeys();
   const preSlackSeenFilter = filterRecentlySeenDeals(
     discoveryFilter.deals,
@@ -1877,7 +1892,6 @@ async function main() {
     console.log(`👀 Seen filter: ${preSlackSeenFilter.removed} bereits gesehene exakte Posts vor Slack entfernt`);
   }
 
-  const liveDeals = loadLiveDeals();
   const liveDealKeys = loadLiveDealDuplicateKeys(liveDeals);
   const preSlackLiveFilter = filterAlreadyQueuedDeals(preSlackSeenFilter.deals, liveDealKeys);
   console.log(

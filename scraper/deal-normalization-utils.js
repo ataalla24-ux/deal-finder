@@ -3,6 +3,7 @@ import { explicitFoodMerchant, isDirectMessageInstruction } from './deal-factual
 import { sanitizePublicDealText } from './public-deal-text.js';
 import { cardEditorialWhen } from './deal-card-editor.js';
 import { concreteFoodOfferTitle, isPromotionalIntro, polishOfferTitle, stripSlackEmojiCodes } from './offer-title-utils.js';
+import { isCommunitySubmission } from './community-review-utils.js';
 
 const PUBLIC_BRAND_LOGO_BASE_URL = 'https://freefinder.at/assets/brand-logos';
 
@@ -575,6 +576,9 @@ function replaceBrandMention(text, fromBrand, toBrand) {
 }
 
 function inferPreferredBrand(deal = {}) {
+  // A shared-post placeholder is not a merchant. Keep it for human review until
+  // extraction supplies an actual name; never turn a caption's address into it.
+  if (isCommunitySubmission(deal) && /^(?:Community Fund|Instagram|TikTok|Facebook)$/i.test(cleanUiNoiseText(deal.brand))) return deal.brand;
   const namedFoodMerchant = explicitFoodMerchant(deal);
   if (namedFoodMerchant && isDirectMessageInstruction(deal.description || deal.evidence?.textSample)
     && (!deal.brand || /^dm$|^@|instagram/i.test(deal.brand))) return namedFoodMerchant;

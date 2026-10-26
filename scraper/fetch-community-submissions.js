@@ -4,6 +4,7 @@ import path from 'path';
 import { fileURLToPath } from 'url';
 import { extractCommunityDeal, extractionKey } from './community-extraction.js';
 import { loadInstagramGraphEvidence } from './instagram-graph-evidence.js';
+import { enrichCommunityCard } from './community-card-enrichment.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -137,7 +138,8 @@ async function main() {
       const old = cached.get(cleanText(submission.id));
       const age = Date.now() - Date.parse(old?.communityExtraction?.checkedAt || '');
       if (old?.communityExtraction?.key === key && age >= 0 && age < 6 * 60 * 60 * 1000) {
-        deals[index] = old;
+        // New Graph evidence need not wait for, or invalidate, the paid extraction cache.
+        deals[index] = enrichCommunityCard(old, graphEvidence);
         continue;
       }
       const base = normalizeSubmissionDeal(submission);
