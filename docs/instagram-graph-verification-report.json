@@ -1,7 +1,7 @@
 {
-  "generatedAt": "2026-10-26T15:54:29.207Z",
+  "generatedAt": "2026-10-26T16:02:34.768Z",
   "source": "instagram-graph-cross-source-verification",
-  "status": "ok",
+  "status": "failed-preserved",
   "configured": true,
   "scannedFiles": [
     "deals-pending-church-events.json",
@@ -63,7 +63,7 @@
       "candidates": 2
     },
     "deals-pending-firecrawl4.json": {
-      "deals": 67,
+      "deals": 66,
       "candidates": 2
     },
     "deals-pending-firecrawl5.json": {
@@ -80,7 +80,7 @@
     },
     "deals-pending-food3.json": {
       "deals": 5,
-      "candidates": 1
+      "candidates": 2
     },
     "deals-pending-freikirchen.json": {
       "deals": 32,
@@ -108,7 +108,7 @@
     },
     "deals-pending-instagram-ai.json": {
       "deals": 50,
-      "candidates": 14
+      "candidates": 15
     },
     "deals-pending-instagram-apify.json": {
       "deals": 12,
@@ -139,8 +139,8 @@
       "candidates": 0
     },
     "deals-pending-meta-instagram.json": {
-      "deals": 110,
-      "candidates": 25
+      "deals": 112,
+      "candidates": 27
     },
     "deals-pending-power.json": {
       "deals": 40,
@@ -167,8 +167,8 @@
       "candidates": 0
     }
   },
-  "candidatePosts": 34,
-  "candidateAccounts": 24,
+  "candidatePosts": 37,
+  "candidateAccounts": 27,
   "skippedAccountCooldowns": 1,
   "selectedAccounts": [
     {
@@ -196,10 +196,15 @@
       "candidates": 1
     }
   ],
-  "fetchedPosts": 133,
-  "exactMatches": 8,
+  "fetchedPosts": 0,
+  "exactMatches": 0,
   "retainedEvidencePosts": 2000,
-  "errors": [],
+  "errors": [
+    {
+      "username": "afrivision.austria",
+      "message": "Instagram shared quota paused: shared cooldown"
+    }
+  ],
   "accountFailures": {
     "tantisaluti.wien": {
       "count": 2,
@@ -235,19 +240,25 @@
   "sharedQuota": {
     "limitPerHour": 190,
     "usageThreshold": 95,
-    "requests": 6,
-    "reserved": 10,
-    "stopped": false,
-    "reason": "",
-    "highestUsagePercent": 37,
+    "requests": 0,
+    "reserved": 0,
+    "stopped": true,
+    "reason": "Instagram shared quota paused: shared cooldown",
+    "highestUsagePercent": 0,
     "waitedMs": 0,
     "pacingMs": 0,
-    "retryAt": "",
+    "retryAt": "2026-10-26T16:08:23.998Z",
     "adaptiveSafetyCeiling": 190,
     "adaptiveIncreases": 0,
     "storageFailure": null
   },
-  "blockedEvidencePosts": 69,
-  "unmatchedCandidatePosts": 26,
-  "message": "8/34 fresh cross-source Instagram candidates matched exactly via Graph API."
+  "globalError": {
+    "username": "afrivision.austria",
+    "status": 0,
+    "code": "SCAN_BUDGET",
+    "message": "Instagram shared quota paused: shared cooldown"
+  },
+  "blockedEvidencePosts": 67,
+  "unmatchedCandidatePosts": 37,
+  "message": "0/37 fresh cross-source Instagram candidates matched exactly via Graph API."
 }
