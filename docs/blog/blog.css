@@ -671,39 +671,105 @@ h1 {
 }
 
 @media (max-width: 640px) {
+  :root {
+    --navy: #17241e;
+    --orange-soft: #f2f7f3;
+    --line: #dfe7e2;
+  }
+
   .nav {
-    width: min(100% - 24px, 1120px);
-    flex-wrap: wrap;
-    gap: 0;
+    width: min(100% - 40px, 1120px);
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: 0 12px;
+    min-height: 0;
     padding-top: 10px;
   }
 
-  .nav-links {
-    width: 100%;
-    justify-content: space-between;
+  .brand {
+    font-size: 20px;
     gap: 8px;
-    padding: 6px 0;
+  }
+
+  .brand-mark {
+    width: 34px;
+    height: 34px;
+  }
+
+  .nav-links {
+    display: contents;
+  }
+
+  .nav-links a {
+    min-height: 44px;
+    font-size: 13px;
+    grid-row: 2;
   }
 
   .nav-links a[href="/"] {
     display: none;
   }
 
-  .nav-links a { font-size: 13px; }
-  .nav-download { padding: 8px 12px; }
-  .article-body h2 { scroll-margin-top: 132px; }
+  .nav-links .nav-download {
+    grid-row: 1;
+    grid-column: 2;
+    min-height: 40px;
+    justify-content: center;
+    padding: 8px 12px;
+  }
+
+  .nav-links a[href="/blog/"] {
+    justify-self: end;
+  }
+
+  .article-body h2 { scroll-margin-top: 116px; }
 
   .hero-inner {
-    width: min(100% - 28px, 1060px);
-    padding: 54px 0 44px;
+    width: min(100% - 40px, 1060px);
+    padding: 30px 0 28px;
+  }
+
+  .article-hero {
+    background: #fff;
   }
 
   h1 {
-    font-size: 42px;
+    font-size: 34px;
+    line-height: 1.12;
   }
 
   .hero-copy {
-    font-size: 17px;
+    font-size: 16px;
+    line-height: 1.7;
+    margin-top: 16px;
+  }
+
+  .eyebrow {
+    font-size: 11px;
+  }
+
+  .topic-nav {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    gap: 4px 16px;
+    padding-top: 16px;
+    margin-top: 20px;
+    border-top: 1px solid #d4e2d9;
+  }
+
+  .topic-nav a {
+    min-height: 44px;
+    display: flex;
+    align-items: center;
+    font-size: 13px;
+    line-height: 1.5;
+  }
+
+  .article-meta,
+  .article-byline {
+    font-size: 12px;
+    gap: 6px 14px;
+    margin-top: 16px;
   }
 
   .blog-main,
@@ -711,11 +777,117 @@ h1 {
   .article-layout,
   .download-inner,
   .footer-inner {
-    width: min(100% - 28px, 1060px);
+    width: min(100% - 40px, 1060px);
+  }
+
+  .blog-main,
+  .article-layout {
+    padding: 28px 0 48px;
+  }
+
+  .blog-filters {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: 16px 12px;
+    padding: 0 0 20px;
+    margin-bottom: 24px;
+  }
+
+  .blog-search,
+  .blog-results {
+    grid-column: 1 / -1;
+  }
+
+  .blog-filters label,
+  .blog-results {
+    font-size: 13px;
+  }
+
+  .blog-filters input[type="search"],
+  .blog-filters select {
+    min-height: 48px;
+    font-size: 16px;
+    border-color: #bfcdc4;
+  }
+
+  .blog-archive {
+    align-self: end;
+    min-height: 48px;
+    gap: 6px;
+  }
+
+  .post-grid {
+    gap: 24px;
+  }
+
+  .post-card-body {
+    padding: 18px;
+  }
+
+  .post-card h2 {
+    font-size: 23px;
+    line-height: 1.2;
+  }
+
+  .post-card p {
+    font-size: 14px;
+  }
+
+  .post-card-body > a {
+    display: inline-flex;
+    align-items: center;
+    min-height: 44px;
+    margin-top: 8px;
+    font-size: 13px;
+  }
+
+  .article-layout {
+    gap: 24px;
+  }
+
+  .article-aside {
+    padding-top: 12px;
+    border-top: 1px solid #bfcdc4;
+  }
+
+  .article-aside summary {
+    font-size: 16px;
+  }
+
+  .article-body > p:first-of-type {
+    font-size: 18px;
   }
 
   .article-body h2 {
+    font-size: 26px;
+    margin-top: 36px;
+  }
+
+  .download-band {
+    background: #173b2e;
+  }
+
+  .download-inner {
+    padding: 36px 0;
+    gap: 20px;
+  }
+
+  .download-inner h2 {
     font-size: 28px;
+  }
+
+  .store-links {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  }
+
+  .store-links a {
+    min-height: 48px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 10px 8px;
+    text-align: center;
   }
 
   .article-body table {
@@ -737,6 +909,13 @@ h1 {
 
   .footer-links {
     justify-content: flex-start;
+    gap: 4px 20px;
+  }
+
+  .footer-links a {
+    display: inline-flex;
+    align-items: center;
+    min-height: 44px;
   }
 }
 

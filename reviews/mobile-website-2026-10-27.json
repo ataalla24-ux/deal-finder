@@ -1,0 +1,38 @@
+{
+  "date": "2026-10-27",
+  "scope": "Mobile visual refresh of the existing FreeFinder website",
+  "changes": [
+    "Compact homepage headline, paired Store downloads and earlier real app preview and deal selection",
+    "Flat mobile sections, consistent typography, compact menu and larger form text to avoid iOS focus zoom",
+    "Shared mobile blog and article layout, filters, navigation and download bands",
+    "Subject-specific homepage blog covers, without cropping their text",
+    "More visible existing food background and clearer Store actions on the Pro trial fallback page",
+    "Compact, height-bounded mobile consent panel without changing consent behavior",
+    "24 KiB responsive favorite-screen thumbnail derived only from the existing approved website asset"
+  ],
+  "preserved": [
+    "All deal records, conditions, prices, validity and feed generation",
+    "Printed QR destination, device routing and Store URLs",
+    "Trial eligibility, renewal disclosures and subscription prices",
+    "Business form logic, referrals and payment flow",
+    "SEO metadata, canonical URLs, sitemap and structured data",
+    "Consent defaults, analytics configuration and tracker gating",
+    "Native apps, Store listings, provider budgets and automations"
+  ],
+  "verification": {
+    "audit": "86 HTML pages, 78 indexable, zero errors; existing intentional plus-gratis.html orphan warning retained",
+    "suitesPassed": [
+      "test-website-quality.mjs",
+      "test-pro-website.mjs",
+      "test-flyer-website.mjs: 20 routing/fallback cases",
+      "test-business-app-guide-website.mjs",
+      "test-seo-deals-page.mjs",
+      "test-blog-backfill.mjs",
+      "invitation-links/links.test.js: 6 cases"
+    ],
+    "browser": "320x740, 390x844 and 1440x1000 across homepage, blog, article, deals and Pro trial page: no document overflow or broken visible images",
+    "interactions": "Menu open/Escape/link close, blog search and topic filter, deal search/district/type filters/reset, Business modal open/close without submission, consent settings and rejection",
+    "evidence": "output/mobile-website-2026-10-27/ in the parent workspace",
+    "limitations": "Browser responsive emulation, not physical-handset QA; no purchase, native upload, new Store artwork or guarantee of more search traffic"
+  }
+}
