@@ -4,7 +4,7 @@ import path from 'node:path';
 import vm from 'node:vm';
 import { fileURLToPath } from 'node:url';
 import { load } from 'cheerio';
-import { polishHtml } from './polish-website.mjs';
+import { polishHtml, polishSiteIcons } from './polish-website.mjs';
 import { blogVisual, covers } from './blog-visuals.mjs';
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
@@ -15,6 +15,9 @@ for (const file of fs.readdirSync(path.join(root, 'docs'), { recursive: true }).
   const html = read(`docs/${file}`);
   assert.equal(polishHtml(html, file, now), html, `${file}: normalization must be idempotent`);
   const $ = load(html);
+  assert.equal($('link[rel="icon"][href="/favicon.ico"]').length, 1, `${file}: legacy icon fallback`);
+  assert.equal($('link[rel="icon"][type="image/png"]').attr('href'), '/favicon-96x96.png');
+  assert.equal($('link[rel="apple-touch-icon"]').attr('href'), '/apple-touch-icon.png');
   if (/noindex/i.test($('meta[name="robots"]').attr('content') || '')) continue;
   pages++;
   assert.equal($('.skip-link').length, 1, `${file}: keyboard skip link`);
@@ -86,6 +89,27 @@ assert.equal(polishHtml(fallback, 'blog/new-cafe.html', now), fallback);
 assert.match(read('docs/blog/blog.css'), /prefers-reduced-motion/);
 assert.doesNotMatch(read('docs/blog/blog.css'), /a:not\(\.nav-download\)\s*\{\s*display:\s*none/);
 const manifest = JSON.parse(read('docs/manifest.json'));
+for (const icon of manifest.icons) {
+  assert.equal(icon.type, 'image/png');
+  const bytes = fs.readFileSync(path.join(root, 'docs', icon.src));
+  assert.equal(bytes.subarray(1, 4).toString(), 'PNG');
+  assert.equal(`${bytes.readUInt32BE(16)}x${bytes.readUInt32BE(20)}`, icon.sizes);
+}
+const touch = fs.readFileSync(path.join(root, 'docs/apple-touch-icon.png'));
+assert.equal(touch.readUInt32BE(16), 180);
+assert.equal(touch.readUInt32BE(20), 180);
+const ico = fs.readFileSync(path.join(root, 'docs/favicon.ico'));
+assert.equal(ico.readUInt16LE(2), 1);
+assert.equal(ico.readUInt16LE(4), 3);
+for (let i = 0; i < 3; i++) {
+  const offset = ico.readUInt32LE(6 + 16 * i + 12);
+  assert.equal(ico.subarray(offset + 1, offset + 4).toString(), 'PNG');
+}
+const iconFixture = '<!doctype html><html><head><meta name="robots" content="noindex"><link rel="shortcut icon" href="old.svg"><link rel="apple-touch-icon" href="old.svg"></head><body><script>keepOriginal()</script><p>Unchanged</p></body></html>';
+const normalizedIcons = polishSiteIcons(iconFixture);
+assert.equal(normalizedIcons.slice(normalizedIcons.indexOf('<body>')), iconFixture.slice(iconFixture.indexOf('<body>')));
+assert.equal(polishSiteIcons(normalizedIcons), normalizedIcons);
+assert.doesNotMatch(normalizedIcons, /old\.svg/);
 const shortcuts = manifest.shortcuts;
 assert.deepEqual(shortcuts.map(item => item.url), ['/angebote-wien-heute.html', '/blog/', '/#pro']);
 assert.equal(manifest.screenshots[0].src, 'og-home-20261007.jpg');

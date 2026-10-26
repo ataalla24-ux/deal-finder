@@ -10,6 +10,10 @@ const google = 'https://play.google.com/store/apps/details?id=com.stefanataalla.
 const $ = load(html);
 assert.equal($('h1').length, 1);
 assert.equal($('link[rel="canonical"]').attr('href'), 'https://freefinder.at/pro-test.html');
+assert.equal($('meta[property="og:image"]').attr('content'), 'https://freefinder.at/icon-512.png');
+assert.equal($('meta[property="og:url"]').attr('content'), $('link[rel="canonical"]').attr('href'));
+assert.equal($('meta[property="og:title"]').attr('content'), $('title').text());
+assert.equal($('meta[name="twitter:image"]').attr('content'), $('meta[property="og:image"]').attr('content'));
 assert.equal($('#primary-store').attr('href'), apple);
 assert.equal($('#alternative-store').attr('href'), google);
 assert.equal($('a[href^="freefinder:"]').length, 0, 'new-customer QR does not open an installed app');

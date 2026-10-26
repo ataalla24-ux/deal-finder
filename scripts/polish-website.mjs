@@ -8,9 +8,34 @@ const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const compact = value => String(value).replace(/\s+/g, ' ').trim();
 const escape = value => String(value).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
 
+const siteIcons = [
+  { rel: 'icon', href: '/favicon.ico', sizes: '16x16 32x32 48x48', type: 'image/x-icon' },
+  { rel: 'icon', href: '/favicon-96x96.png', sizes: '96x96', type: 'image/png' },
+  { rel: 'apple-touch-icon', href: '/apple-touch-icon.png', sizes: '180x180' },
+];
+const isSiteIcon = rel => String(rel || '').split(/\s+/).some(value => ['icon', 'apple-touch-icon', 'apple-touch-icon-precomposed'].includes(value.toLowerCase()));
+
+export function polishSiteIcons(source) {
+  return source.replace(/<head\b[^>]*>[\s\S]*?<\/head>/i, head => {
+    const $ = load(head);
+    const current = $('link').toArray().filter(node => isSiteIcon($(node).attr('rel')));
+    if (current.length === siteIcons.length && siteIcons.every((icon, index) =>
+      Object.entries(icon).every(([key, value]) => $(current[index]).attr(key) === value))) return head.replace(/^[ \t]+$/gm, '');
+    const markup = siteIcons.map(icon => `<link ${Object.entries(icon).map(([key, value]) => `${key}="${value}"`).join(' ')}>`).join('\n  ');
+    let inserted = false;
+    const result = head.replace(/<link\b[^>]*>/gi, tag => {
+      if (!isSiteIcon(load(tag)('link').attr('rel'))) return tag;
+      if (inserted) return '';
+      inserted = true;
+      return markup;
+    });
+    return (inserted ? result : result.replace(/<\/head>/i, `  ${markup}\n</head>`)).replace(/^[ \t]+$/gm, '');
+  });
+}
+
 // Keep hand-written HTML formatting; only replace the audited elements.
 export function polishHtml(source, filename, now = Date.now()) {
-  let html = source;
+  let html = polishSiteIcons(source);
   let $ = load(html);
   const publicPage = !/noindex/i.test($('meta[name="robots"]').attr('content') || '') || ['404.html', 'offline.html'].includes(filename);
   if (!publicPage) return html;
@@ -134,7 +159,7 @@ if (process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.me
   for (const file of fs.readdirSync(docs, { recursive: true }).filter(file => file.endsWith('.html'))) {
     const location = path.join(docs, file);
     const source = fs.readFileSync(location, 'utf8');
-    const result = polishHtml(source, file);
+    const result = process.argv.includes('--icons-only') ? polishSiteIcons(source) : polishHtml(source, file);
     if (result === source) continue;
     changed++;
     if (!process.argv.includes('--check')) fs.writeFileSync(location, result);
