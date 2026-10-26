@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-10-26T20:04:17.521Z",
+  "generatedAt": "2026-10-26T20:24:42.781Z",
   "source": "instagram-graph-cross-source-verification",
   "status": "degraded",
   "configured": true,
@@ -196,13 +196,13 @@
       "candidates": 1
     }
   ],
-  "fetchedPosts": 25,
-  "exactMatches": 2,
+  "fetchedPosts": 108,
+  "exactMatches": 7,
   "retainedEvidencePosts": 2000,
   "errors": [
     {
-      "username": "megasupermarkt.at",
-      "message": "Instagram shared quota paused: Meta usage headroom"
+      "username": "foodupwien",
+      "message": "Meta API 400: Invalid user id for https://graph.facebook.com/v26.0/17841438552673858?fields=business_discovery.username%28foodupwien%29%7Busername%2Cname%2Cmedia.limit%2825%29%7Bid%2Ccaption%2Cmedia_type%2Cpermalink%2Ctimestamp%2Clike_count%2Ccomments_count%2Cmedia_product_type%2Cmedia_url%2Cthumbnail_url%2Cchildren%7Bmedia_type%2Cmedia_url%2Cthumbnail_url%7D%7D%7D&access_token=[redacted]"
     }
   ],
   "accountFailures": {
@@ -235,30 +235,29 @@
       "count": 2,
       "lastAt": "2026-10-26T19:11:40.761Z",
       "cooldownUntil": "2026-10-27T19:11:40.761Z"
+    },
+    "foodupwien": {
+      "count": 1,
+      "lastAt": "2026-10-26T20:24:42.781Z",
+      "cooldownUntil": "2026-10-27T20:24:42.781Z"
     }
   },
   "sharedQuota": {
     "limitPerHour": 190,
     "usageThreshold": 95,
-    "requests": 1,
-    "reserved": 5,
-    "stopped": true,
-    "reason": "Instagram shared quota paused: Meta usage headroom",
-    "highestUsagePercent": 96,
+    "requests": 6,
+    "reserved": 10,
+    "stopped": false,
+    "reason": "",
+    "highestUsagePercent": 11,
     "waitedMs": 0,
     "pacingMs": 0,
-    "retryAt": "2026-10-26T20:14:30.511Z",
+    "retryAt": "",
     "adaptiveSafetyCeiling": 190,
     "adaptiveIncreases": 0,
     "storageFailure": null
   },
-  "globalError": {
-    "username": "megasupermarkt.at",
-    "status": 0,
-    "code": "SCAN_BUDGET",
-    "message": "Instagram shared quota paused: Meta usage headroom"
-  },
   "blockedEvidencePosts": 69,
-  "unmatchedCandidatePosts": 35,
-  "message": "2/37 fresh cross-source Instagram candidates matched exactly via Graph API."
+  "unmatchedCandidatePosts": 30,
+  "message": "7/37 fresh cross-source Instagram candidates matched exactly via Graph API."
 }
