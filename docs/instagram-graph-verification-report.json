@@ -1,7 +1,7 @@
 {
-  "generatedAt": "2026-10-26T17:35:15.828Z",
+  "generatedAt": "2026-10-26T18:04:41.068Z",
   "source": "instagram-graph-cross-source-verification",
-  "status": "ok",
+  "status": "failed-preserved",
   "configured": true,
   "scannedFiles": [
     "deals-pending-church-events.json",
@@ -108,7 +108,7 @@
     },
     "deals-pending-instagram-ai.json": {
       "deals": 50,
-      "candidates": 14
+      "candidates": 16
     },
     "deals-pending-instagram-apify.json": {
       "deals": 12,
@@ -139,8 +139,8 @@
       "candidates": 0
     },
     "deals-pending-meta-instagram.json": {
-      "deals": 112,
-      "candidates": 27
+      "deals": 113,
+      "candidates": 29
     },
     "deals-pending-power.json": {
       "deals": 40,
@@ -167,10 +167,14 @@
       "candidates": 0
     }
   },
-  "candidatePosts": 36,
-  "candidateAccounts": 26,
-  "skippedAccountCooldowns": 1,
+  "candidatePosts": 39,
+  "candidateAccounts": 28,
+  "skippedAccountCooldowns": 0,
   "selectedAccounts": [
+    {
+      "username": "ikazerestaurant",
+      "candidates": 4
+    },
     {
       "username": "afrivision.austria",
       "candidates": 4
@@ -184,22 +188,23 @@
       "candidates": 3
     },
     {
-      "username": "ikazerestaurant",
-      "candidates": 3
-    },
-    {
       "username": "abby.am.rochusmarkt",
       "candidates": 2
     },
     {
-      "username": "wienerwuerstelstand",
+      "username": "iris.thegoodguides",
       "candidates": 1
     }
   ],
-  "fetchedPosts": 133,
-  "exactMatches": 8,
+  "fetchedPosts": 0,
+  "exactMatches": 0,
   "retainedEvidencePosts": 2000,
-  "errors": [],
+  "errors": [
+    {
+      "username": "ikazerestaurant",
+      "message": "Instagram shared quota paused: shared cooldown"
+    }
+  ],
   "accountFailures": {
     "tantisaluti.wien": {
       "count": 2,
@@ -235,19 +240,25 @@
   "sharedQuota": {
     "limitPerHour": 190,
     "usageThreshold": 95,
-    "requests": 6,
-    "reserved": 10,
-    "stopped": false,
-    "reason": "",
-    "highestUsagePercent": 38,
+    "requests": 0,
+    "reserved": 0,
+    "stopped": true,
+    "reason": "Instagram shared quota paused: shared cooldown",
+    "highestUsagePercent": 0,
     "waitedMs": 0,
     "pacingMs": 0,
-    "retryAt": "",
+    "retryAt": "2026-10-26T18:12:02.849Z",
     "adaptiveSafetyCeiling": 190,
     "adaptiveIncreases": 0,
     "storageFailure": null
   },
-  "blockedEvidencePosts": 68,
-  "unmatchedCandidatePosts": 28,
-  "message": "8/36 fresh cross-source Instagram candidates matched exactly via Graph API."
+  "globalError": {
+    "username": "ikazerestaurant",
+    "status": 0,
+    "code": "SCAN_BUDGET",
+    "message": "Instagram shared quota paused: shared cooldown"
+  },
+  "blockedEvidencePosts": 67,
+  "unmatchedCandidatePosts": 39,
+  "message": "0/39 fresh cross-source Instagram candidates matched exactly via Graph API."
 }
