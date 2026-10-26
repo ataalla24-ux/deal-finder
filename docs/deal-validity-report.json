@@ -1,11 +1,11 @@
 {
-  "generatedAt": "2026-10-26T22:27:35.591Z",
+  "generatedAt": "2026-10-26T22:29:34.455Z",
   "summary": {
     "maxAgeDays": 7,
-    "total": 291,
-    "allowed": 1,
-    "blocked": 290,
-    "warnings": 0,
+    "total": 294,
+    "allowed": 3,
+    "blocked": 291,
+    "warnings": 3,
     "reasonCounts": {
       "kein konkretes Angebot erkennbar": 217,
       "älter als 7 Tage (2020-04-25)": 1,
@@ -15,7 +15,7 @@
       "älter als 7 Tage (2026-09-22)": 1,
       "älter als 7 Tage (2026-10-14)": 1,
       "URL ungültig (HTTP 404)": 13,
-      "Gewinnspiel/Verlosung statt direkt nutzbarem Deal": 6,
+      "Gewinnspiel/Verlosung statt direkt nutzbarem Deal": 7,
       "älter als 45 Tage trotz ausdrücklich noch aktive Gültigkeit (2026-08-04)": 2,
       "redaktioneller Mehrfach-Roundup statt eindeutigem Einzelangebot": 3,
       "älter als 7 Tage (2025-11-09)": 1,
@@ -46,7 +46,7 @@
       "älter als 7 Tage (2009-05-01)": 1,
       "älter als 7 Tage (2014-06-07)": 1,
       "älter als 7 Tage (2025-12-30)": 1,
-      "Meta-Graph-Widerspruch (excluded-promotion-type)": 2,
+      "Meta-Graph-Widerspruch (excluded-promotion-type)": 3,
       "ausgeschlossene Quelle (gastro.news)": 34,
       "ausgeschlossene Quelle (TheFork)": 2,
       "abgelaufen (2026-08-30)": 4,
@@ -60,25 +60,25 @@
       "kein konkreter Deal": 221,
       "älter als 7 Tage": 137,
       "ungültige URL": 22,
-      "Gewinnspiel": 6,
+      "Gewinnspiel": 7,
       "sonstiges": 10,
       "abgelaufen": 11,
       "Post-Datum in Zukunft": 3,
       "selbst syndiziert": 3,
       "nicht Wien": 7,
-      "Meta-Graph-Widerspruch": 2,
+      "Meta-Graph-Widerspruch": 3,
       "ausgeschlossene Quelle": 36,
       "kein echtes Post-Datum": 96
     },
     "sourceCounts": {
       "Apify 2 Vienna Food Discovery": {
-        "total": 1,
+        "total": 2,
         "allowed": 0,
-        "blocked": 1,
+        "blocked": 2,
         "warnings": 0,
         "reasonCategoryCounts": {
-          "Meta-Graph-Widerspruch": 1,
-          "Gewinnspiel": 1
+          "Meta-Graph-Widerspruch": 2,
+          "Gewinnspiel": 2
         }
       },
       "Firecrawl Food #2": {
@@ -209,8 +209,8 @@
         }
       },
       "Meta Instagram Business Discovery": {
-        "total": 14,
-        "allowed": 1,
+        "total": 13,
+        "allowed": 0,
         "blocked": 13,
         "warnings": 0,
         "reasonCategoryCounts": {
@@ -230,10 +230,10 @@
         }
       },
       "tiktok-deals-scanner": {
-        "total": 1,
-        "allowed": 0,
+        "total": 4,
+        "allowed": 3,
         "blocked": 1,
-        "warnings": 0,
+        "warnings": 3,
         "reasonCategoryCounts": {
           "kein konkreter Deal": 1
         }
@@ -242,18 +242,54 @@
   },
   "allowed": [
     {
-      "id": "meta-ig-18178564729431350",
-      "title": "10% off your first private booking",
-      "brand": "Color Social | Creative Experiences",
-      "source": "Meta Instagram Business Discovery",
-      "url": "https://www.instagram.com/p/De9CZfwMxyw/",
+      "id": "tiktok-1lq3gho",
+      "title": "1+1 Asian Pizza Donnerstag bis Ende des Jahres",
+      "brand": "Barnabitengasse 1",
+      "source": "tiktok-deals-scanner",
+      "url": "https://www.tiktok.com/@the.jenniferyang/video/7701017652260572438",
       "reasons": [],
-      "warnings": [],
-      "sourceDate": "2026-10-26T10:11:08.000Z",
-      "sourceDateSource": "url.instagramShortcode",
+      "warnings": [
+        "Inhalt prüfen: Caption-Reste oder Emoji-Codes im sichtbaren Text"
+      ],
+      "sourceDate": "2026-10-26T16:41:36.000Z",
+      "sourceDateSource": "url.tiktokVideoId",
       "sourceAgeDays": 0,
-      "expiryDate": "2026-10-29T21:39:53.361Z",
-      "expirySource": "deal.structured",
+      "expiryDate": "",
+      "expirySource": "deal.expires",
+      "urlStatus": "HTTP 200"
+    },
+    {
+      "id": "tiktok-43wc93",
+      "title": "Gratis Eintritt bei der Wohnungssuche",
+      "brand": "der Wohnungssuche",
+      "source": "tiktok-deals-scanner",
+      "url": "https://www.tiktok.com/@erste.wohnmesse/video/7699089771947379990",
+      "reasons": [],
+      "warnings": [
+        "Inhalt prüfen: Caption-Reste oder Emoji-Codes im sichtbaren Text; Nur Stadt/Region angegeben; Filiale oder teilnehmende Standorte prüfen"
+      ],
+      "sourceDate": "2026-10-21T12:00:27.000Z",
+      "sourceDateSource": "url.tiktokVideoId",
+      "sourceAgeDays": 5,
+      "expiryDate": "",
+      "expirySource": "deal.expires",
+      "urlStatus": "HTTP 200"
+    },
+    {
+      "id": "tiktok-183jb73",
+      "title": "If you’re heading to Vienna in Austria make sure you don’t skip Prater",
+      "brand": "Prater",
+      "source": "tiktok-deals-scanner",
+      "url": "https://www.tiktok.com/@ems_travel_life/video/7701050470038621462",
+      "reasons": [],
+      "warnings": [
+        "Inhalt prüfen: Caption-Reste oder Emoji-Codes im sichtbaren Text; Nur Stadt/Region angegeben; Filiale oder teilnehmende Standorte prüfen"
+      ],
+      "sourceDate": "2026-10-26T18:48:57.000Z",
+      "sourceDateSource": "url.tiktokVideoId",
+      "sourceAgeDays": 0,
+      "expiryDate": "",
+      "expirySource": "deal.expires",
       "urlStatus": "HTTP 200"
     }
   ],
@@ -707,7 +743,7 @@
         "älter als 7 Tage (2026-02-22)"
       ],
       "warnings": [
-        "URL nicht eindeutig prüfbar (temporärer Fehler)",
+        "URL nicht eindeutig prüfbar (HTTP 500)",
         "kein Ablaufdatum gefunden"
       ],
       "sourceDate": "2026-02-22T21:13:07.698Z",
@@ -715,7 +751,7 @@
       "sourceAgeDays": 246,
       "expiryDate": "",
       "expirySource": "",
-      "urlStatus": "unklar: temporärer URL-Fehler"
+      "urlStatus": "unklar: HTTP 500"
     },
     {
       "id": "extra-21-20260222",
@@ -3497,6 +3533,24 @@
       "urlStatus": "HTTP 200"
     },
     {
+      "id": "igap-1ru80on",
+      "title": "🎃 GRAND OPENING – CIO’S GRILL & KEBAP! Am 31. Oktober gibt’s von 12:00 bis 17:00 Uhr GRATIS DÖNER für alle, d",
+      "brand": "CIO‘S",
+      "source": "Apify 2 Vienna Food Discovery",
+      "url": "https://www.instagram.com/p/De98D6GxhSD/",
+      "reasons": [
+        "Meta-Graph-Widerspruch (excluded-promotion-type)",
+        "Gewinnspiel/Verlosung statt direkt nutzbarem Deal"
+      ],
+      "warnings": [],
+      "sourceDate": "2026-10-26T18:35:00.000Z",
+      "sourceDateSource": "url.instagramShortcode",
+      "sourceAgeDays": 0,
+      "expiryDate": "2026-10-29T18:35:54.000Z",
+      "expirySource": "deal.structured",
+      "urlStatus": "HTTP 200"
+    },
+    {
       "id": "joe-omv-viva-free-taste-19nkk2p",
       "title": "Gratis Coconut Strawberry Sunset testen",
       "brand": "OMV VIVA",
@@ -3976,18 +4030,18 @@
       "urlStatus": "HTTP 200"
     },
     {
-      "id": "tiktok-105aqef",
-      "title": "@tobi.eulerrolle Angebot",
-      "brand": "@tobi.eulerrolle",
+      "id": "tiktok-7hnj02",
+      "title": "Krumble Angebot",
+      "brand": "Krumble",
       "source": "tiktok-deals-scanner",
-      "url": "https://www.tiktok.com/@tobi.eulerrolle/video/7699903934151855382",
+      "url": "https://www.tiktok.com/@viennabyaleksa/video/7699802941263203597",
       "reasons": [
         "allgemeine Empfehlung/Gratis-Event statt konkreter Aktion"
       ],
       "warnings": [
-        "Inhalt prüfen: Nur Stadt/Region angegeben; Filiale oder teilnehmende Standorte prüfen"
+        "Inhalt prüfen: Caption-Reste oder Emoji-Codes im sichtbaren Text"
       ],
-      "sourceDate": "2026-10-23T16:39:49.000Z",
+      "sourceDate": "2026-10-23T10:07:54.000Z",
       "sourceDateSource": "url.tiktokVideoId",
       "sourceAgeDays": 3,
       "expiryDate": "",
