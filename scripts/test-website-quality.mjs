@@ -4,7 +4,7 @@ import path from 'node:path';
 import vm from 'node:vm';
 import { fileURLToPath } from 'node:url';
 import { load } from 'cheerio';
-import { polishHtml, polishSiteIcons } from './polish-website.mjs';
+import { polishHtml, polishSiteIcons, polishSharingMetadata } from './polish-website.mjs';
 import { blogVisual, covers } from './blog-visuals.mjs';
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
@@ -20,6 +20,12 @@ for (const file of fs.readdirSync(path.join(root, 'docs'), { recursive: true }).
   assert.equal($('link[rel="apple-touch-icon"]').attr('href'), '/apple-touch-icon.png');
   if (/noindex/i.test($('meta[name="robots"]').attr('content') || '')) continue;
   pages++;
+  for (const key of ['og:site_name', 'og:locale', 'og:image:width', 'og:image:height', 'og:image:alt']) {
+    assert.ok($(`meta[property="${key}"]`).attr('content'), `${file}: ${key}`);
+  }
+  for (const key of ['twitter:card', 'twitter:title', 'twitter:description', 'twitter:image', 'twitter:image:alt', 'apple-mobile-web-app-title']) {
+    assert.ok($(`meta[name="${key}"]`).attr('content'), `${file}: ${key}`);
+  }
   assert.equal($('.skip-link').length, 1, `${file}: keyboard skip link`);
   assert.equal($('main').attr('tabindex'), '-1');
   const expiry = $('main').attr('data-deal-expires');
@@ -110,6 +116,10 @@ const normalizedIcons = polishSiteIcons(iconFixture);
 assert.equal(normalizedIcons.slice(normalizedIcons.indexOf('<body>')), iconFixture.slice(iconFixture.indexOf('<body>')));
 assert.equal(polishSiteIcons(normalizedIcons), normalizedIcons);
 assert.doesNotMatch(normalizedIcons, /old\.svg/);
+const invitationSource = read('docs/invite.html');
+assert.equal(load(invitationSource)('meta[property="og:url"]').length, 0, 'Keep invitation-link parameters intact');
+assert.equal(polishSharingMetadata(invitationSource), invitationSource);
+assert.equal(polishSharingMetadata(iconFixture), iconFixture, 'Do not add share previews to private tools');
 const shortcuts = manifest.shortcuts;
 assert.deepEqual(shortcuts.map(item => item.url), ['/angebote-wien-heute.html', '/blog/', '/#pro']);
 assert.equal(manifest.screenshots[0].src, 'og-home-20261007.jpg');
@@ -166,19 +176,35 @@ for (const blocked of [false, true]) {
 const handlers = {};
 const cached = new Map();
 const cacheWrites = [];
+const precached = [];
+const notifications = [];
 let networkResponse = new Response('fresh');
 let offline = false;
 let quotaFull = false;
 const key = request => typeof request === 'string' ? request : request.url;
 const cache = {
+  async addAll(urls) { precached.push(...urls); },
   async match(request) { return cached.get(key(request)); },
   async put(request, response) { if (quotaFull) throw new Error('Full'); cacheWrites.push(key(request)); cached.set(key(request), response); },
 };
 vm.runInNewContext(read('docs/sw.js'), {
-  self: { location: { origin: 'https://freefinder.at' }, registration: { scope: 'https://freefinder.at/' }, addEventListener: (name, fn) => handlers[name] = fn },
+  self: { location: { origin: 'https://freefinder.at' }, registration: { scope: 'https://freefinder.at/', showNotification: async (title, options) => notifications.push({ title, options }) }, skipWaiting() {}, addEventListener: (name, fn) => handlers[name] = fn },
   caches: { open: async () => cache }, URL, Response,
   fetch: async () => { if (offline) throw new Error('Offline'); return networkResponse; },
 });
+let lifecycle;
+handlers.install({ waitUntil: promise => lifecycle = promise });
+await lifecycle;
+for (const file of ['favicon.ico', 'favicon-96x96.png', 'apple-touch-icon.png', ...manifest.icons.map(icon => icon.src)]) {
+  assert.ok(precached.includes(`./${file}`), `${file}: available after installation without a network`);
+}
+handlers.push({ data: { json: () => ({ title: 'Fixture only' }) }, waitUntil: promise => lifecycle = promise });
+await lifecycle;
+assert.equal(notifications[0].options.icon, './icon-192.png');
+handlers.push({ data: { json: () => ({ title: 'Custom fixture', icon: '/custom.png', badge: '/badge.png' }) }, waitUntil: promise => lifecycle = promise });
+await lifecycle;
+assert.equal(notifications[1].options.icon, '/custom.png');
+assert.equal(notifications[1].options.badge, '/badge.png');
 async function request(pathname, fields = {}) {
   let response;
   const request = { url: `https://freefinder.at${pathname}`, method: 'GET', mode: 'navigate', ...fields };

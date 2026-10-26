@@ -1,4 +1,4 @@
-const CACHE_NAME = 'freefinder-website-v8';
+const CACHE_NAME = 'freefinder-website-v9';
 const urlsToCache = [
   './',
   './index.html',
@@ -10,6 +10,12 @@ const urlsToCache = [
   './icon-192.svg',
   './icon-512.svg',
   './icon-maskable.svg',
+  './favicon.ico',
+  './favicon-96x96.png',
+  './apple-touch-icon.png',
+  './icon-192.png',
+  './icon-512.png',
+  './icon-maskable.png',
   './push-config.json'
 ];
 
@@ -79,8 +85,8 @@ self.addEventListener('push', event => {
   const title = payload.title || '🎁 FreeFinder';
   const options = {
     body: payload.body || 'Neue Deals warten auf dich',
-    icon: payload.icon || './icon-192.svg',
-    badge: payload.badge || './icon-192.svg',
+    icon: payload.icon || './icon-192.png',
+    badge: payload.badge || './icon-192.png',
     tag: payload.tag || 'freefinder-deals',
     renotify: true,
     data: {

@@ -33,12 +33,45 @@ export function polishSiteIcons(source) {
   });
 }
 
+export function polishSharingMetadata(source) {
+  const $ = load(source);
+  const image = $('meta[property="og:image"]').attr('content');
+  if (!image) return source;
+  const title = $('meta[property="og:title"]').attr('content') || $('title').text();
+  const description = $('meta[property="og:description"]').attr('content') || $('meta[name="description"]').attr('content');
+  const defaults = {
+    'og:site_name': 'FreeFinder',
+    'og:locale': 'de_AT',
+    'og:image:secure_url': image.startsWith('https://') ? image : undefined,
+    'twitter:card': 'summary_large_image',
+    'twitter:title': title,
+    'twitter:description': description,
+    'twitter:image': image,
+    'twitter:image:alt': $('meta[property="og:image:alt"]').attr('content'),
+    'apple-mobile-web-app-title': 'FreeFinder',
+  };
+  if (image === 'https://freefinder.at/og-home-20261007.jpg') {
+    Object.assign(defaults, {
+      'og:image:type': 'image/jpeg', 'og:image:width': '1200', 'og:image:height': '630',
+      'og:image:alt': 'FreeFinder: Gratis-Angebote und Rabatte in Wien',
+    });
+    defaults['twitter:image:alt'] ||= defaults['og:image:alt'];
+  }
+  const additions = Object.entries(defaults).flatMap(([key, value]) => {
+    const attribute = key.startsWith('og:') ? 'property' : 'name';
+    return value && !$(`meta[${attribute}="${key}"]`).length
+      ? [`  <meta ${attribute}="${key}" content="${escape(value)}">`] : [];
+  });
+  // Retain page-specific artwork, campaign copy and parameter-sensitive invitation URLs.
+  return additions.length ? source.replace(/<\/head>/i, additions.join('\n') + '\n</head>') : source;
+}
+
 // Keep hand-written HTML formatting; only replace the audited elements.
 export function polishHtml(source, filename, now = Date.now()) {
   let html = polishSiteIcons(source);
   let $ = load(html);
   const publicPage = !/noindex/i.test($('meta[name="robots"]').attr('content') || '') || ['404.html', 'offline.html'].includes(filename);
-  if (!publicPage) return html;
+  if (!publicPage) return polishSharingMetadata(html);
   html = html.replace(/https:\/\/freefinder\.at\/og-preview-stores\.png/g, 'https://freefinder.at/og-home-20261007.jpg');
   html = polishBlogVisuals(html, filename);
   if (filename === 'blog/index.html') {
@@ -150,7 +183,7 @@ export function polishHtml(source, filename, now = Date.now()) {
     const additions = Object.entries(metadata).filter(([name, value]) => value && !$(`meta[property="${name}"]`).length).map(([name, value]) => `  <meta property="${name}" content="${escape(value)}">`);
     if (additions.length) html = html.replace('</head>', additions.join('\n') + '\n</head>');
   }
-  return html.replace(/^[ \t]+$/gm, '');
+  return polishSharingMetadata(html).replace(/^[ \t]+$/gm, '');
 }
 
 if (process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.meta.url)) {
@@ -159,7 +192,8 @@ if (process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.me
   for (const file of fs.readdirSync(docs, { recursive: true }).filter(file => file.endsWith('.html'))) {
     const location = path.join(docs, file);
     const source = fs.readFileSync(location, 'utf8');
-    const result = process.argv.includes('--icons-only') ? polishSiteIcons(source) : polishHtml(source, file);
+    const result = process.argv.includes('--icons-only') ? polishSiteIcons(source)
+      : process.argv.includes('--sharing-only') ? polishSharingMetadata(source) : polishHtml(source, file);
     if (result === source) continue;
     changed++;
     if (!process.argv.includes('--check')) fs.writeFileSync(location, result);

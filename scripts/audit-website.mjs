@@ -70,8 +70,8 @@ for (const [file, $] of pages) {
     } catch (error) { report(errors, file, 'script-syntax', error.message); }
   });
 
-  $('a[href], link[href], img[src], script[src], source[srcset]').each((_, element) => {
-    const attribute = $(element).attr('href') ?? $(element).attr('src') ?? $(element).attr('srcset');
+  $('a[href], link[href], img[src], script[src], source[srcset], meta[property="og:image"][content], meta[name="twitter:image"][content]').each((_, element) => {
+    const attribute = $(element).attr('href') ?? $(element).attr('src') ?? $(element).attr('srcset') ?? $(element).attr('content');
     const values = $(element).attr('srcset') ? attribute.split(',').map(candidate => candidate.trim().split(/\s+/)[0]) : [attribute];
     for (const value of values) {
       if (/^(?:mailto:|tel:|data:|freefinder:|javascript:)/i.test(value)) continue;
