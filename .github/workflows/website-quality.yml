@@ -2,9 +2,9 @@ name: Website Quality
 on:
   push:
     branches: [main]
-    paths: ['docs/**.html', 'docs/**/*.html', 'docs/**/*.css', 'docs/**/*.js', 'docs/assets/blog/**', 'docs/manifest.json', 'docs/sitemap.xml', 'scripts/*website*.mjs', 'scripts/*seo*.mjs', 'scripts/*blog*.mjs', 'invitation-links/**', '.github/workflows/website-quality.yml']
+    paths: ['docs/**.html', 'docs/**/*.html', 'docs/**/*.css', 'docs/**/*.js', 'docs/assets/blog/**', 'docs/assets/deal-photos/**', 'docs/manifest.json', 'docs/sitemap.xml', 'scripts/*website*.mjs', 'scripts/*seo*.mjs', 'scripts/*blog*.mjs', 'scripts/deal-photos.mjs', 'invitation-links/**', '.github/workflows/website-quality.yml']
   pull_request:
-    paths: ['docs/**.html', 'docs/**/*.html', 'docs/**/*.css', 'docs/**/*.js', 'docs/assets/blog/**', 'docs/manifest.json', 'docs/sitemap.xml', 'scripts/*website*.mjs', 'scripts/*seo*.mjs', 'scripts/*blog*.mjs', 'invitation-links/**', '.github/workflows/website-quality.yml']
+    paths: ['docs/**.html', 'docs/**/*.html', 'docs/**/*.css', 'docs/**/*.js', 'docs/assets/blog/**', 'docs/assets/deal-photos/**', 'docs/manifest.json', 'docs/sitemap.xml', 'scripts/*website*.mjs', 'scripts/*seo*.mjs', 'scripts/*blog*.mjs', 'scripts/deal-photos.mjs', 'invitation-links/**', '.github/workflows/website-quality.yml']
   workflow_dispatch:
 permissions:
   contents: read

@@ -46,6 +46,12 @@
 .deals-page .live-deal-card { padding: 22px; display: flex; flex-direction: column; align-self: stretch; border-color: #dfe5e1; box-shadow: 0 2px 3px #13231a04; scroll-margin-top: 110px; transition: border-color .15s, box-shadow .15s; }
 .deals-page .live-deal-card:hover { border-color: #a9bdb0; box-shadow: 0 5px 18px #173b2409; }
 .deal-card-top { display: flex; align-items: center; justify-content: space-between; gap: 12px; min-height: 52px; margin-bottom: 16px; }
+.deal-card-top.has-photo { display: grid; grid-template-columns: 104px minmax(0, 1fr); align-items: stretch; gap: 16px; min-height: 132px; margin-bottom: 20px; }
+.deal-photo { position: relative; display: block; min-height: 132px; overflow: hidden; border-radius: 6px; background: #edf3ef; }
+.deal-photo img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+.deal-card-heading { min-width: 0; }
+.deal-card-badges { display: flex; align-items: center; justify-content: space-between; gap: 8px; min-height: 28px; }
+.deal-merchant-logo { width: 28px; height: 28px; object-fit: contain; }
 .deal-brand-image { width: 52px; height: 52px; flex: 0 0 52px; display: grid; place-items: center; color: #326550; background: #eef4ef; border-radius: 6px; overflow: hidden; font-size: 20px; font-weight: 800; }
 .deal-brand-image:has(img) { background: #fff; }
 .deal-brand-image img { width: 52px; height: 52px; object-fit: contain; }
@@ -54,13 +60,15 @@
 .live-deal-card[data-type="gratis"] .deal-type { color: #28567e; background: #eaf2ff; }
 .deals-page .live-deal-brand { margin: 0 0 8px; min-height: 20px; color: #59675f; text-transform: none; font-size: 12px; line-height: 1.5; overflow-wrap: anywhere; }
 .live-deal-card h3 { margin: 0 0 18px; font-size: 23px; line-height: 1.18; color: #17221e; }
-.deal-facts { display: grid; gap: 10px; margin-top: auto; padding-top: 4px; }
+.deal-card-heading .live-deal-brand { margin: 8px 0 6px; min-height: 0; }
+.deal-card-heading h3 { margin: 0; font-size: 21px; line-height: 1.2; }
+.deal-facts { display: grid; gap: 10px; margin: 0 0 12px; padding-top: 4px; }
 .deal-facts p, .deals-page .deal-facts .live-deal-location { display: flex; gap: 9px; align-items: start; margin: 0; color: #5e6962; font-size: 12px; line-height: 1.55; overflow-wrap: anywhere; }
 .deal-facts .deal-icon { width: 16px; height: 16px; flex-basis: 16px; margin-top: 2px; opacity: .65; }
-.deal-conditions { margin: 12px 0 0; font-size: 12px; color: #47574d; }
+.deal-conditions { margin: 0 0 12px; font-size: 12px; color: #47574d; }
 .deal-conditions summary { min-height: 44px; padding: 12px 0; cursor: pointer; font-weight: 700; }
 .deal-conditions p { margin: 0 0 10px; white-space: pre-line; overflow-wrap: anywhere; }
-.deals-page .live-deal-source { display: flex; align-items: center; justify-content: space-between; gap: 12px; min-height: 44px; margin-top: 18px; padding: 12px 0 0; border-top: 1px solid #e5ebe7; color: #086245; font-size: 14px; text-decoration: none; }
+.deals-page .live-deal-source { display: flex; align-items: center; justify-content: space-between; gap: 12px; min-height: 44px; margin-top: auto; padding: 12px 0 0; border-top: 1px solid #e5ebe7; color: #086245; font-size: 14px; text-decoration: none; }
 .deals-page .live-deal-source:hover span { text-decoration: underline; text-underline-offset: 4px; }
 .deal-selection-note { margin-top: 26px; color: #5c6860; font-size: 13px; }
 .deal-selection-note summary { min-height: 44px; padding: 10px 0; cursor: pointer; }
@@ -107,11 +115,15 @@
   .deals-page .deal-hub-head h2 { font-size: 21px; }
   .deals-page .live-deal-grid { grid-template-columns: minmax(0, 1fr); gap: 14px; }
   .deals-page .live-deal-card { padding: 20px; scroll-margin-top: 130px; }
-  .live-deal-card h3 { font-size: 23px; }
+  .deal-card-heading h3 { font-size: 21px; }
   .deal-card-top { margin-bottom: 12px; }
   .deal-facts p, .deals-page .deal-facts .live-deal-location { font-size: 13px; }
   .deals-guides nav { grid-template-columns: minmax(0, 1fr); gap: 18px; }
   .deals-guides { padding: 30px 0; }
   .deals-page .download-inner h2 { font-size: 27px; }
+}
+@media (max-width: 360px) {
+  .deal-card-top.has-photo { grid-template-columns: 80px minmax(0, 1fr); gap: 12px; }
+  .deal-card-heading h3 { font-size: 20px; }
 }
 @media (prefers-reduced-motion: reduce) { .deals-page .live-deal-card { transition: none; } }

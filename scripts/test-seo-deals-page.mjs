@@ -4,6 +4,7 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { spawnSync } from 'node:child_process';
 import { load } from 'cheerio';
+import { photoKey, photoDefinitions } from './deal-photos.mjs';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const tempRoot = path.join(ROOT, 'tmp');
@@ -15,6 +16,8 @@ fs.copyFileSync(path.join(ROOT, 'scripts/generate-seo-deals-page.mjs'), path.joi
 fs.copyFileSync(path.join(ROOT, 'scripts/polish-website.mjs'), path.join(fixtureRoot, 'scripts/polish-website.mjs'));
 fs.copyFileSync(path.join(ROOT, 'scripts/blog-visuals.mjs'), path.join(fixtureRoot, 'scripts/blog-visuals.mjs'));
 fs.copyFileSync(path.join(ROOT, 'scripts/blog-backfill-20261018.mjs'), path.join(fixtureRoot, 'scripts/blog-backfill-20261018.mjs'));
+fs.copyFileSync(path.join(ROOT, 'scripts/deal-photos.mjs'), path.join(fixtureRoot, 'scripts/deal-photos.mjs'));
+fs.cpSync(path.join(ROOT, 'docs/assets/deal-photos'), path.join(fixtureRoot, 'docs/assets/deal-photos'), { recursive: true });
 fs.symlinkSync(path.join(ROOT, 'node_modules'), path.join(fixtureRoot, 'node_modules'), 'dir');
 
 function deal(id, fields = {}) {
@@ -129,7 +132,55 @@ try {
     assert.ok(descriptions.$(source).attr('aria-label').startsWith(descriptions.$(source).text().trim()),
       'Accessible source-link name must include its visible label at the start');
   }
-  console.log('SEO deals page regression tests passed (flight scope, explicit dates, validated starts, Vienna midnight, malformed dates, verified captions, source link names, schema and feed preservation).');
+  const photos = generate([
+    deal('pizza-photo', { title: '1+1 Pizza gratis mit Gutschein' }),
+    deal('fish-photo', { title: 'Fish & Chips um 7 Euro in Wien' }),
+    deal('burger-photo', { title: 'Crispy Chicken 1+1 gratis', brand: 'Burger King', distance: 'Wien' }),
+    deal('thermal-photo', { title: 'Therme Wien Tagespaket', brand: 'BIPA', category: 'beauty' }),
+    deal('unknown-photo', { title: 'Kinderticket für den Zirkus', category: 'shopping', imageUrl: 'https://untrusted.example/image.jpg' }),
+  ]);
+  assert.match(photos.$('#deal-pizza-photo .deal-photo img').attr('src'), /\/pizza(?:-alternative)?\.webp$/);
+  assert.match(photos.$('#deal-fish-photo .deal-photo img').attr('src'), /\/fish\.webp$/);
+  assert.match(photos.$('#deal-burger-photo .deal-photo img').attr('src'), /\/crispy-chicken\.webp$/);
+  assert.match(photos.$('#deal-thermal-photo .deal-photo img').attr('src'), /\/thermal\.webp$/);
+  assert.match(photos.$('#deal-unknown-photo .deal-photo img').attr('src'), /\/gift\.webp$/,
+    'Unknown ticket offers must not inherit fashion photos from the shopping category');
+  for (const image of photos.$('.deal-photo img').toArray()) {
+    const attributes = photos.$(image).attr();
+    assert.match(attributes.src, /^\/assets\/deal-photos\/[a-z-]+\.webp$/);
+    assert.ok(fs.existsSync(path.join(ROOT, 'docs', attributes.src)));
+    assert.match(attributes.alt, /^Symbolfoto: /);
+    assert.match(attributes.srcset, /-160\.webp 160w,/);
+    assert.equal(attributes.loading, 'lazy');
+    assert.ok(Number(attributes.width) > 0 && Number(attributes.height) > 0);
+  }
+  const reordered = generate([
+    deal('unrelated-extra'), deal('pizza-photo', { title: '1+1 Pizza gratis mit Gutschein' }),
+  ]);
+  assert.equal(reordered.$('#deal-pizza-photo .deal-photo img').attr('src'), photos.$('#deal-pizza-photo .deal-photo img').attr('src'),
+    'Other feed entries and order must not change an existing offer photo');
+  fs.renameSync(path.join(fixtureRoot, 'docs/assets/deal-photos/gift.webp'), path.join(fixtureRoot, 'docs/assets/deal-photos/gift-disabled.webp'));
+  const missing = generate([deal('missing-photo', { category: 'shopping' })]);
+  assert.equal(missing.$('.deal-photo').length, 0, 'Missing local images fall back without a broken image');
+  assert.equal(missing.$('.deal-brand-image').length, 1);
+  assert.equal(photoKey({ title: '1+1 Kinotickets', brand: 'Magenta' }), 'cinema');
+  assert.ok(['restaurant', 'casual-restaurant'].includes(photoKey({ title: 'Kindermenü gratis zum Hauptgericht', brand: 'IKEA', category: 'essen' })));
+  assert.equal(photoKey({ title: '10 Euro Rabatt ab 50 Euro', brand: 'Ganesha' }), 'indian-restaurant');
+  assert.ok(['takeaway', 'delivery'].includes(photoKey({ title: '12 Euro auf die erste Bestellung', brand: 'Wolt' })));
+  const catalog = JSON.parse(fs.readFileSync(path.join(ROOT, 'docs/assets/deal-photos/sources.json'), 'utf8'));
+  assert.deepEqual(Object.keys(catalog.photos), Object.keys(photoDefinitions));
+  for (const [key, image] of Object.entries(catalog.photos)) {
+    assert.equal(image.nativeIndex, photoDefinitions[key][0]);
+    assert.ok(image.width <= image.crop.width, 'Existing native photos are not artificially upscaled');
+    assert.match(image.sourceSha256, /^[a-f0-9]{64}$/);
+    for (const [suffix, bytes] of [['', image.bytes], ['-160', image.thumbBytes]]) {
+      const data = fs.readFileSync(path.join(ROOT, 'docs/assets/deal-photos', `${key}${suffix}.webp`));
+      assert.equal(data.length, bytes);
+      assert.equal(data.toString('ascii', 0, 4), 'RIFF');
+      assert.equal(data.toString('ascii', 8, 12), 'WEBP');
+    }
+  }
+  console.log('SEO deals page regression tests passed (dates, scope, captions, schema, local app photos, stable assignments, missing-asset fallback and feed preservation).');
 } finally {
   fs.rmSync(fixtureRoot, { recursive: true, force: true });
 }

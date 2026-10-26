@@ -1,6 +1,7 @@
 #!/usr/bin/env node
 import fs from 'fs';
 import { polishHtml } from './polish-website.mjs';
+import { dealPhoto } from './deal-photos.mjs';
 import path from 'path';
 import { fileURLToPath } from 'url';
 
@@ -221,17 +222,20 @@ function renderDealCard(deal, index) {
   const id = `deal-${safeId(deal.id || `${deal.brand}-${deal.title}`)}`;
   const type = ['gratis', 'bogo', 'rabatt'].includes(deal.type) ? deal.type : 'angebot';
   const logo = localLogo(deal);
+  const photo = dealPhoto(deal);
   const initials = String(deal.brand || 'FF').split(/\s+/).filter(Boolean).slice(0, 2).map(word => Array.from(word)[0]).join('').toLocaleUpperCase('de-AT');
   const description = displayDescription(deal);
   const location = /^(?:k\.?\s?a\.?|n\/a|unknown)$/i.test(deal.displayLocation) ? 'Standort beim Anbieter prüfen' : deal.displayLocation;
   return `
         <article class="live-deal-card" id="${escapeHtml(id)}" data-type="${type}" data-districts="${districtCodes(deal).join(' ')}" data-order="${index}" data-expiry="${deal.expiryDate.getTime()}">
-          <div class="deal-card-top">
-            <span class="deal-brand-image" aria-hidden="true">${logo ? `<img src="${escapeHtml(logo)}" alt="" width="52" height="52" loading="lazy">` : `<span>${escapeHtml(initials)}</span>`}</span>
-            <span class="deal-type">${escapeHtml(typeLabel(deal.type))}</span>
+          <div class="deal-card-top${photo ? ' has-photo' : ''}">
+            ${photo ? `<picture class="deal-photo"><img src="${photo.src}" srcset="${photo.srcset}" sizes="(max-width: 360px) 80px, 104px" alt="${escapeHtml(photo.alt)}" width="${photo.width}" height="${photo.height}" loading="lazy" decoding="async"></picture>` : `<span class="deal-brand-image" aria-hidden="true">${logo ? `<img src="${escapeHtml(logo)}" alt="" width="52" height="52" loading="lazy">` : `<span>${escapeHtml(initials)}</span>`}</span>`}
+            <div class="deal-card-heading">
+              <div class="deal-card-badges"><span class="deal-type">${escapeHtml(typeLabel(deal.type))}</span>${photo && logo ? `<img class="deal-merchant-logo" src="${escapeHtml(logo)}" alt="" width="28" height="28" loading="lazy">` : ''}</div>
+              <p class="live-deal-brand">${escapeHtml(deal.brand || 'Anbieter')}</p>
+              <h3>${escapeHtml(deal.displayTitle || 'Aktuelles Angebot')}</h3>
+            </div>
           </div>
-          <p class="live-deal-brand">${escapeHtml(deal.brand || 'Anbieter')}</p>
-          <h3>${escapeHtml(deal.displayTitle || 'Aktuelles Angebot')}</h3>
           <div class="deal-facts">
             <p class="live-deal-location">${icon('map-pin')}<span>${escapeHtml(location)}</span></p>
             <p>${icon('calendar-days')}<span>${escapeHtml(deal.expiryLabel)} <time datetime="${escapeHtml(calendarDate(deal.expiryRaw) || deal.expiryDate.toISOString())}">${escapeHtml(formatExpiryDate(deal.expiryRaw))}</time></span></p>
@@ -311,7 +315,7 @@ function renderPage(feed, deals, now) {
   <noscript><link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet"></noscript>
   <link rel="stylesheet" href="/consent.css?v=5">
   <link rel="stylesheet" href="/blog/blog.css">
-  <link rel="stylesheet" href="/deals.css?v=2">
+  <link rel="stylesheet" href="/deals.css?v=3">
   <script defer src="/deals.js?v=1"></script>
   <script defer src="/analytics-config.js"></script>
   <script defer src="/consent.js?v=7"></script>
@@ -335,7 +339,7 @@ function renderPage(feed, deals, now) {
       <div class="live-deal-grid" id="dealGrid">${cards}
       </div>
       <div class="deal-empty" id="dealEmpty" hidden><h3>Kein passender Deal dabei.</h3><p>In unserer Web-Auswahl gibt es dafür gerade keine Treffer. Weitere Deals findest du <a href="/#download">in der App</a>.</p><button type="button" data-reset-filters>Web-Auswahl anzeigen</button></div>
-      <details class="deal-selection-note"><summary>Welche Angebote werden hier angezeigt?</summary><p>Eine Auswahl aus dem FreeFinder-App-Feed mit eingetragenem, noch nicht abgelaufenem Enddatum. Verfügbarkeit, teilnehmende Filialen und weitere Bedingungen können sich ändern. Prüfe die Originalquelle vor der Einlösung. Weitere Angebote ohne bekanntes Enddatum findest du in der App.</p></details>
+      <details class="deal-selection-note"><summary>Welche Angebote werden hier angezeigt?</summary><p>Eine Auswahl aus dem FreeFinder-App-Feed mit eingetragenem, noch nicht abgelaufenem Enddatum. Verfügbarkeit, teilnehmende Filialen und weitere Bedingungen können sich ändern. Prüfe die Originalquelle vor der Einlösung. Weitere Angebote ohne bekanntes Enddatum findest du in der App. Die redaktionellen Symbolfotos stammen aus der App und sind keine Originalaufnahmen der Anbieter.</p></details>
     </section>
     <section class="deals-guides" aria-labelledby="dealsGuidesTitle"><div class="deals-width"><div class="deals-guides-heading"><p class="eyebrow">Wien entdecken</p><h2 id="dealsGuidesTitle">Noch mehr für weniger.</h2></div><nav aria-label="Wiener Angebotsratgeber"><a href="/blog/guenstig-essen-wien.html"><span>Günstig essen<strong>Lieblingsplätze nach Bezirk</strong></span>${icon('chevron-right')}</a><a href="/blog/geburtstag-gratis-wien.html"><span>Geburtstag in Wien<strong>Vorteile &amp; Begleitkosten prüfen</strong></span>${icon('chevron-right')}</a><a href="/blog/kinodonnerstag-wien-drei.html"><span>KinoDonnerstag<strong>Zwei Tickets, ein Preis</strong></span>${icon('chevron-right')}</a></nav></div>
     </section>

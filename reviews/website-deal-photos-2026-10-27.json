@@ -1,0 +1,40 @@
+{
+  "date": "2026-10-27",
+  "scope": "Reuse existing native editorial photos on website offer cards",
+  "assets": {
+    "motifs": 33,
+    "variantsPerMotif": 2,
+    "webpBytes": 1107602,
+    "provenance": "docs/assets/deal-photos/sources.json",
+    "kind": "Existing generated symbol photos from the app; not merchant originals",
+    "processing": "Exact native atlas cells, proportional WebP exports, no artificial upscaling or new image generation"
+  },
+  "surfaces": [
+    "All 15 currently selected website offers",
+    "Three homepage offer previews"
+  ],
+  "behavior": [
+    "Offer-topic assignment is part of the page generator and remains stable through filtering and reordering",
+    "Unknown topics get a neutral motif, not an invented product or venue",
+    "Missing local files retain the existing logo/initial fallback",
+    "No arbitrary remote feed image URL is embedded",
+    "Lazy loading, real intrinsic dimensions and responsive image variants",
+    "Merchant logos and source links retained; symbol-photo disclosure in the existing selection note"
+  ],
+  "preserved": [
+    "All 15 original IDs/order/types/districts/expiry/brands/titles/conditions/source URLs compared equal",
+    "Feed files, eligibility and website selection rules",
+    "Subscription/business payment logic, prices, QR destinations, Store links and consent",
+    "Native source/assets, builds, Store listings, provider limits and automations"
+  ],
+  "checks": [
+    "Website audit: 86 HTML pages, 78 indexable, zero errors; intentional plus-gratis.html orphan warning retained",
+    "Website quality, blog backfill, Pro, flyer, business guide and SEO-deals suites passed",
+    "Photo subjects, thermal-versus-cosmetics, ticket-versus-fashion, stable IDs, local-file fallback and WebP/source metadata regressions passed",
+    "6 invitation-link cases and 50-workflow/51-job permission audit passed",
+    "Homepage and offer cards at 320, 390 and 1440 pixels: no page/text overflow or broken visible images",
+    "Browser search retains the assigned image; condition accordion remains usable"
+  ],
+  "evidence": "output/website-deal-photos-2026-10-27/ in the parent workspace",
+  "limitations": "Responsive browser QA, not physical-handset execution. Symbol photos do not establish merchant availability or exact product appearance. No new provider/image API calls intentionally started by this work."
+}

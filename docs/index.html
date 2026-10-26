@@ -670,6 +670,32 @@
       text-decoration: none;
     }
 
+    .deal-card.has-photo {
+      grid-template-columns: 96px minmax(0, 1fr);
+      align-items: stretch;
+      padding: 0;
+      overflow: hidden;
+    }
+
+    .deal-thumb {
+      position: relative;
+      display: block;
+      min-height: 104px;
+    }
+
+    .deal-thumb img {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    .deal-preview-copy {
+      align-self: center;
+      padding: 16px 12px 16px 0;
+    }
+
     .deal-icon {
       width: 32px;
       height: 32px;
@@ -2137,17 +2163,17 @@
                 <a href="angebote-wien-heute.html">Alle ansehen</a>
               </div>
               <div class="deal-list" id="dealList">
-                <a class="deal-card" href="blog/guenstig-essen-wien.html#1080">
-                  <div class="deal-icon" aria-hidden="true">H</div>
-                  <div><strong>Kaffee um 2,50 Euro</strong><span>Café Hummel · 1080 · Mo–Fr 8–9 Uhr</span></div>
+                <a class="deal-card has-photo" href="blog/guenstig-essen-wien.html#1080">
+                  <picture class="deal-thumb"><img src="assets/deal-photos/coffee.webp" srcset="assets/deal-photos/coffee-160.webp 160w, assets/deal-photos/coffee.webp 313w" sizes="96px" alt="Symbolfoto: Tasse Kaffee" width="313" height="313" loading="lazy" decoding="async"></picture>
+                  <div class="deal-preview-copy"><strong>Kaffee um 2,50 Euro</strong><span>Café Hummel · 1080 · Mo–Fr 8–9 Uhr</span></div>
                 </a>
-                <a class="deal-card" href="blog/ganesha-10-euro-gutschein-50-euro-wien.html">
-                  <div class="deal-icon" aria-hidden="true">G</div>
-                  <div><strong>10 Euro Rabatt ab 50 Euro</strong><span>Ganesha · 1010 · Gutschein nötig</span></div>
+                <a class="deal-card has-photo" href="blog/ganesha-10-euro-gutschein-50-euro-wien.html">
+                  <picture class="deal-thumb"><img src="assets/deal-photos/indian-restaurant.webp" srcset="assets/deal-photos/indian-restaurant-160.webp 160w, assets/deal-photos/indian-restaurant.webp 314w" sizes="96px" alt="Symbolfoto: Gedeckter Tisch in einem indischen Restaurant" width="314" height="314" loading="lazy" decoding="async"></picture>
+                  <div class="deal-preview-copy"><strong>10 Euro Rabatt ab 50 Euro</strong><span>Ganesha · 1010 · Gutschein nötig</span></div>
                 </a>
-                <a class="deal-card" href="blog/geburtstag-gratis-wien.html#aktuell">
-                  <div class="deal-icon" aria-hidden="true">W</div>
-                  <div><strong>Geburtstagsbuffet gratis</strong><span>Watertuin · 1110 · mit vollzahlender Begleitung</span></div>
+                <a class="deal-card has-photo" href="blog/geburtstag-gratis-wien.html#aktuell">
+                  <picture class="deal-thumb"><img src="assets/deal-photos/restaurant.webp" srcset="assets/deal-photos/restaurant-160.webp 160w, assets/deal-photos/restaurant.webp 314w" sizes="96px" alt="Symbolfoto: Gedeckter Restauranttisch" width="314" height="314" loading="lazy" decoding="async"></picture>
+                  <div class="deal-preview-copy"><strong>Geburtstagsbuffet gratis</strong><span>Watertuin · 1110 · mit vollzahlender Begleitung</span></div>
                 </a>
               </div>
             </aside>

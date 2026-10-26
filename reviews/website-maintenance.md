@@ -45,6 +45,19 @@ not the complete app feed. Keep the visible subset notice and both store links
 above the filters, including on mobile. Never broaden the date/source filters
 just to increase the card count; do not mutate the shared feed during website work.
 
+Offer cards and homepage previews reuse existing native editorial symbol photos
+from `docs/assets/deal-photos/`, not original merchant/product photographs.
+`scripts/deal-photos.mjs` chooses a relevant local motif without reading arbitrary
+remote image URLs. IDs keep variants stable through sorting/filtering; unknown
+subjects get a neutral motif, and missing files retain the logo/initial fallback.
+Source atlas hashes, native cell indices, exact crops and dimensions are recorded
+in `docs/assets/deal-photos/sources.json`. To re-export existing app assets, set
+`NATIVE_ASSETS_ROOT` to the iOS `Assets.xcassets` directory and run
+`node scripts/build-website-deal-photos.mjs` with Sharp available (or `SHARP_MODULE`).
+This authoring step resizes/crops existing images only; it must not alter native
+assets, call an image provider or change deal facts. The public page generator
+needs neither Sharp nor the native checkout. Keep responsive sizes and lazy loading.
+
 Homepage preview assets in `docs/assets/native-preview-20260923/` are losslessly
 encoded copies of the genuine native captures used for the September 23 approved series
 (recommendations with IKEA Family, the IKEA Westbahnhof map and favorites).
