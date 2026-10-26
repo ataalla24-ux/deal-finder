@@ -1,18 +1,12 @@
 {
-  "generatedAt": "2026-10-26T23:07:49.497Z",
+  "generatedAt": "2026-10-26T23:21:26.881Z",
   "summary": {
     "filesConsidered": 32,
-    "totalCandidates": 866,
-    "uniqueCandidates": 761,
-    "distinctCandidates": 809,
-    "duplicateClusters": 48,
+    "totalCandidates": 868,
+    "uniqueCandidates": 758,
+    "distinctCandidates": 807,
+    "duplicateClusters": 49,
     "topHealthySources": [
-      {
-        "sourceKey": "wien-combined",
-        "sourceLabel": "Wien Deals Combined Graph",
-        "healthScore": 79,
-        "totalDeals": 3
-      },
       {
         "sourceKey": "instagram-apify2",
         "sourceLabel": "Apify 2 Vienna Food Discovery",
@@ -36,6 +30,12 @@
         "sourceLabel": "TikTok Scanner",
         "healthScore": 73,
         "totalDeals": 17
+      },
+      {
+        "sourceKey": "wien-combined",
+        "sourceLabel": "Wien Deals Combined Graph",
+        "healthScore": 68,
+        "totalDeals": 5
       }
     ],
     "topMissionSources": [
@@ -46,16 +46,16 @@
         "totalDeals": 2
       },
       {
+        "sourceKey": "wien-combined",
+        "sourceLabel": "Wien Deals Combined Graph",
+        "missionFitScore": 82,
+        "totalDeals": 5
+      },
+      {
         "sourceKey": "joe",
         "sourceLabel": "jö Bonus Club",
         "missionFitScore": 79,
         "totalDeals": 10
-      },
-      {
-        "sourceKey": "wien-combined",
-        "sourceLabel": "Wien Deals Combined Graph",
-        "missionFitScore": 76,
-        "totalDeals": 3
       },
       {
         "sourceKey": "member-benefits",
@@ -88,7 +88,7 @@
       {
         "sourceKey": "meta-instagram",
         "sourceLabel": "Meta Instagram Graph",
-        "coverageScore": 68,
+        "coverageScore": 67,
         "totalDeals": 115,
         "fresh1dCount": 16
       },
@@ -117,8 +117,8 @@
       {
         "sourceKey": "wien-combined",
         "sourceLabel": "Wien Deals Combined Graph",
-        "precisionScore": 81,
-        "totalDeals": 3
+        "precisionScore": 78,
+        "totalDeals": 5
       },
       {
         "sourceKey": "member-benefits",
@@ -153,16 +153,16 @@
         "totalDeals": 109
       },
       {
-        "sourceKey": "wien-combined",
-        "sourceLabel": "Wien Deals Combined Graph",
-        "sourceWeightScore": 66,
-        "totalDeals": 3
-      },
-      {
         "sourceKey": "joe",
         "sourceLabel": "jö Bonus Club",
         "sourceWeightScore": 64,
         "totalDeals": 10
+      },
+      {
+        "sourceKey": "wien-combined",
+        "sourceLabel": "Wien Deals Combined Graph",
+        "sourceWeightScore": 64,
+        "totalDeals": 5
       },
       {
         "sourceKey": "meta-instagram",
@@ -238,92 +238,6 @@
     }
   },
   "sources": [
-    {
-      "sourceKey": "wien-combined",
-      "file": "deals-pending-wien-combined.json",
-      "sourceLabel": "Wien Deals Combined Graph",
-      "totalDeals": 3,
-      "uniqueDeals": 2,
-      "duplicateDeals": 1,
-      "duplicateAcrossSources": 1,
-      "fresh1dCount": 3,
-      "fresh7dCount": 3,
-      "viennaCount": 3,
-      "foodDrinkCount": 1,
-      "promoCount": 3,
-      "missingUrlCount": 0,
-      "sampleTitles": [
-        "10 % auf alles, online und bei uns im Geschäft in Wien",
-        "Diesen und weiteren Fragen widmen wir uns in kostenlosen Workshops – verständlich, praxisnah und gemeinsam im Austausch.",
-        "🍔 2für1 Burger Deals nur mit der NeoTaste App💚 📍Bundry Burger 📍Corner XVI 📍Buzzy Bun‘s 📍Wien"
-      ],
-      "lastRun": {
-        "status": "completed-with-errors",
-        "startedAt": "2026-10-26T13:49:29.069Z",
-        "finishedAt": "2026-10-26T13:51:07.934Z",
-        "durationMs": 98865,
-        "counts": {
-          "rawCandidates": 62,
-          "normalizedCandidates": 3,
-          "verifiedCandidates": 3,
-          "previousDeals": 0,
-          "acceptedDeals": 3,
-          "rejectedDeals": 56
-        },
-        "rejectedByReason": {
-          "no-concrete-offer": 47,
-          "general-recommendation": 3,
-          "alcohol-offer": 2,
-          "missing-text": 3,
-          "missing-vienna-evidence": 1
-        },
-        "errors": [
-          "#wien: Instagram scan paused: request-budget"
-        ],
-        "reportFile": "deal-pipeline-last-run-wien-combined.json"
-      },
-      "uniqueRate": 0.7,
-      "duplicateRate": 0.3,
-      "fresh1dRate": 1,
-      "fresh7dRate": 1,
-      "viennaRate": 1,
-      "foodDrinkRate": 0.3,
-      "promoRate": 1,
-      "missingUrlRate": 0,
-      "averageQualityScore": 83.3,
-      "topCategories": [
-        {
-          "value": "shopping",
-          "count": 2
-        },
-        {
-          "value": "essen",
-          "count": 1
-        }
-      ],
-      "topTypes": [
-        {
-          "value": "bogo",
-          "count": 1
-        },
-        {
-          "value": "gewinnspiel",
-          "count": 1
-        },
-        {
-          "value": "gratis",
-          "count": 1
-        }
-      ],
-      "issues": [
-        "geringe Food-/Drink-Relevanz"
-      ],
-      "healthScore": 79,
-      "missionFitScore": 76,
-      "coverageScore": 15,
-      "precisionScore": 81,
-      "sourceWeightScore": 66
-    },
     {
       "sourceKey": "instagram-apify2",
       "file": "deals-pending-instagram-apify2.json",
@@ -603,6 +517,92 @@
       "sourceWeightScore": 58
     },
     {
+      "sourceKey": "wien-combined",
+      "file": "deals-pending-wien-combined.json",
+      "sourceLabel": "Wien Deals Combined Graph",
+      "totalDeals": 5,
+      "uniqueDeals": 0,
+      "duplicateDeals": 5,
+      "duplicateAcrossSources": 5,
+      "fresh1dCount": 5,
+      "fresh7dCount": 5,
+      "viennaCount": 5,
+      "foodDrinkCount": 4,
+      "promoCount": 3,
+      "missingUrlCount": 0,
+      "sampleTitles": [
+        "Jeden Donnerstag gibt es bei Papa Duck bis Ende 2026 eine „1+1“-Pizza-Aktion 🍕 📍Barnabitengasse 1, 1060 Wien 🕚 Opening hours: 11:00-22:00",
+        "▸ Mo 15:00 Melodic Monday Rooftop Dayparty · Der Dachboden (melodicmonday) ▸ Mi 19:00 Pub Quiz Halloween Special · Club-U (clubu.karlundotto",
+        "Mit dem Crew-Ticket kommt ihr zu viert für 150 € statt 180 €, jede Person mit Welcome Drink und Snacks."
+      ],
+      "lastRun": {
+        "status": "completed-with-errors",
+        "startedAt": "2026-10-26T23:18:33.836Z",
+        "finishedAt": "2026-10-26T23:20:18.387Z",
+        "durationMs": 104551,
+        "counts": {
+          "rawCandidates": 64,
+          "normalizedCandidates": 5,
+          "verifiedCandidates": 5,
+          "previousDeals": 0,
+          "acceptedDeals": 5,
+          "rejectedDeals": 55
+        },
+        "rejectedByReason": {
+          "general-recommendation": 5,
+          "no-concrete-offer": 45,
+          "excluded-promotion-type": 1,
+          "alcohol-offer": 3,
+          "missing-vienna-evidence": 1
+        },
+        "errors": [
+          "#sommerinwien: Instagram scan paused: request-budget"
+        ],
+        "reportFile": "deal-pipeline-last-run-wien-combined.json"
+      },
+      "uniqueRate": 0,
+      "duplicateRate": 1,
+      "fresh1dRate": 1,
+      "fresh7dRate": 1,
+      "viennaRate": 1,
+      "foodDrinkRate": 0.8,
+      "promoRate": 0.6,
+      "missingUrlRate": 0,
+      "averageQualityScore": 87.8,
+      "topCategories": [
+        {
+          "value": "essen",
+          "count": 4
+        },
+        {
+          "value": "technik",
+          "count": 1
+        }
+      ],
+      "topTypes": [
+        {
+          "value": "bogo",
+          "count": 2
+        },
+        {
+          "value": "rabatt",
+          "count": 2
+        },
+        {
+          "value": "gratis",
+          "count": 1
+        }
+      ],
+      "issues": [
+        "hohe Überschneidung mit anderen Quellen"
+      ],
+      "healthScore": 68,
+      "missionFitScore": 82,
+      "coverageScore": 16,
+      "precisionScore": 78,
+      "sourceWeightScore": 64
+    },
+    {
       "sourceKey": "instagram-apify",
       "file": "deals-pending-instagram-apify.json",
       "sourceLabel": "Apify Instagram",
@@ -670,9 +670,9 @@
       "file": "deals-pending-meta-instagram.json",
       "sourceLabel": "Meta Instagram Graph",
       "totalDeals": 115,
-      "uniqueDeals": 71,
-      "duplicateDeals": 44,
-      "duplicateAcrossSources": 30,
+      "uniqueDeals": 70,
+      "duplicateDeals": 45,
+      "duplicateAcrossSources": 33,
       "fresh1dCount": 16,
       "fresh7dCount": 113,
       "viennaCount": 115,
@@ -747,7 +747,7 @@
       ],
       "healthScore": 64,
       "missionFitScore": 55,
-      "coverageScore": 68,
+      "coverageScore": 67,
       "precisionScore": 68,
       "sourceWeightScore": 63
     },
