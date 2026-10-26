@@ -1,7 +1,7 @@
 {
-  "generatedAt": "2026-10-26T05:38:52.591Z",
+  "generatedAt": "2026-10-26T05:46:19.336Z",
   "source": "instagram-graph-cross-source-verification",
-  "status": "ok",
+  "status": "failed-preserved",
   "configured": true,
   "scannedFiles": [
     "deals-pending-church-events.json",
@@ -111,7 +111,7 @@
       "candidates": 5
     },
     "deals-pending-instagram-apify.json": {
-      "deals": 12,
+      "deals": 13,
       "candidates": 0
     },
     "deals-pending-instagram-apify2.json": {
@@ -196,10 +196,15 @@
       "candidates": 1
     }
   ],
-  "fetchedPosts": 131,
-  "exactMatches": 7,
+  "fetchedPosts": 0,
+  "exactMatches": 0,
   "retainedEvidencePosts": 2000,
-  "errors": [],
+  "errors": [
+    {
+      "username": "afrivision.austria",
+      "message": "Instagram shared quota paused: rolling-hour budget exhausted"
+    }
+  ],
   "accountFailures": {
     "tantisaluti.wien": {
       "count": 2,
@@ -235,19 +240,25 @@
   "sharedQuota": {
     "limitPerHour": 237,
     "usageThreshold": 95,
-    "requests": 6,
-    "reserved": 10,
-    "stopped": false,
-    "reason": "",
-    "highestUsagePercent": 72,
+    "requests": 0,
+    "reserved": 0,
+    "stopped": true,
+    "reason": "Instagram shared quota paused: rolling-hour budget exhausted",
+    "highestUsagePercent": 0,
     "waitedMs": 0,
     "pacingMs": 0,
-    "retryAt": "",
+    "retryAt": "2026-10-26T05:56:49.325Z",
     "adaptiveSafetyCeiling": 190,
     "adaptiveIncreases": 0,
     "storageFailure": null
   },
+  "globalError": {
+    "username": "afrivision.austria",
+    "status": 0,
+    "code": "SCAN_BUDGET",
+    "message": "Instagram shared quota paused: rolling-hour budget exhausted"
+  },
   "blockedEvidencePosts": 74,
-  "unmatchedCandidatePosts": 26,
-  "message": "7/33 fresh cross-source Instagram candidates matched exactly via Graph API."
+  "unmatchedCandidatePosts": 33,
+  "message": "0/33 fresh cross-source Instagram candidates matched exactly via Graph API."
 }
