@@ -64,9 +64,9 @@ const timelyGuides = [
   },
 ];
 
-function makeRecentDealGuide({ slug, title, meta, eyebrow, headline, intro, modified, published, expires = '', imageAlt, offer, how, conditions, source, faqs, related }) {
+function makeRecentDealGuide({ slug, title, meta, eyebrow, headline, intro, modified, published, expires = '', imageAlt, offer, how, conditions, source, faqs, related, reviewedAt }) {
   return {
-    slug, title, meta, eyebrow, headline, intro,
+    slug, title, meta, eyebrow, headline, intro, reviewedAt,
     published, publishedLabel: '6. Oktober 2026', modified, modifiedLabel: '6. Oktober 2026', expires,
     image: '/assets/current-ios/deals-home.jpg', imageAvif: '/assets/current-ios/deals-home-400.avif 400w, /assets/current-ios/deals-home-736.avif 736w', imageWidth: 736, imageHeight: 414, imageAlt,
     sections: [
@@ -146,18 +146,18 @@ const recentDealGuides = [
     faqs: [['Was ist beim Loving Hut gratis?', 'Ein zweiter Loving Hut-dog nach Bestellung eines Loving Hut-dogs oder Menüs.'], ['Wo gilt die Aktion?', 'Neubaugürtel 38/5, 1070 Wien.'], ['Wie lange läuft sie?', 'Bis 31. Oktober 2026 laut Dealquelle.']], related: [['Gratis Essen in Wien', 'gratis-essen-wien.html'], ['1+1-Aktionen in Wien', 'eins-plus-eins-wien.html']],
   }),
   makeRecentDealGuide({
-    slug: 'ganesha-10-euro-gutschein-50-euro-wien', title: 'Ganesha Restaurant Wien: 10 Euro Rabatt ab 50 Euro', meta: 'Ganesha Restaurant Gutschein: 10 Euro Rabatt ab 50 Euro Konsumation in Wien. Gutscheinbedingungen und Enddatum 31. Dezember 2026 prüfen.', eyebrow: 'Restaurant-Gutschein Wien', headline: '10 Euro Rabatt im Ganesha Restaurant ab 50 Euro.', intro: 'Für das Ganesha Restaurant ist ein 10-Euro-Gutschein ab 50 Euro Konsumation gelistet. Der Deal ist aktuell bis 31. Dezember 2026 angegeben.', published: '2026-10-06', modified: '2026-10-06', expires: '2026-12-31T23:59:59+01:00', imageAlt: 'FreeFinder App mit Restaurant-Gutscheinen in Wien',
+    slug: 'ganesha-10-euro-gutschein-50-euro-wien', title: 'Ganesha Restaurant Wien: 10 Euro Rabatt ab 50 Euro', meta: 'Ganesha Restaurant Gutschein: 10 Euro Rabatt ab 50 Euro Konsumation in Wien. Gutscheinbedingungen und Enddatum 31. Dezember 2026 prüfen.', eyebrow: 'Restaurant-Gutschein Wien', headline: '10 Euro Rabatt im Ganesha Restaurant ab 50 Euro.', intro: 'Für das Ganesha Restaurant ist ein 10-Euro-Gutschein ab 50 Euro Konsumation gelistet. Der Deal ist aktuell bis 31. Dezember 2026 angegeben.', published: '2026-10-06', modified: '2026-10-06', expires: '2026-12-31T23:59:59+01:00', imageAlt: 'FreeFinder App mit Restaurant-Gutscheinen in Wien', reviewedAt: '2026-10-26',
     offer: `<p>Der Gutschein bietet <strong>10 Euro Rabatt ab 50 Euro Konsumation</strong>. Das entspricht rechnerisch 20 Prozent Ersparnis, wenn der Mindestbetrag genau erreicht wird.</p><p>Als Standort ist die Eschenbachgasse 4, 1010 Wien, gelistet.</p>`,
-    how: `<ol><li>Die <a href="https://www.gutschein.at/ganesha-restaurant/10-euro-gutschein" rel="noopener">Gutscheinseite für Ganesha</a> öffnen.</li><li>Bedingungen und Gutschein anzeigen lassen.</li><li>Im Restaurant ab 50 Euro konsumieren.</li><li>Gutschein vor dem Bezahlen vorzeigen und den Abzug auf dem Bon kontrollieren.</li></ol>`,
-    conditions: `<p>Der Gutschein ist bis <strong>31. Dezember 2026</strong> gelistet. Prüfe Ausschlüsse, Gültigkeit für Menüs oder Getränke, Kombinierbarkeit und die konkrete Annahme im Restaurant.</p>`,
-    source: `<p>Quelle ist die <a href="https://www.gutschein.at/ganesha-restaurant/10-euro-gutschein" rel="noopener">Ganesha-Gutscheinseite bei Gutscheine.at</a>.`,
+    how: `<p>Die Quelle widerspricht sich: Die Bedingungen nennen ausschließlich Konsumation im Restaurant, die Einlöseanleitung dagegen Lieferung und einen Code vom Lieferfahrer. Eine Lieferberechtigung oder ein eindeutig geklärter Ablauf im Lokal ist damit nicht bestätigt.</p><ol><li>Die <a href="https://www.gutschein.at/ganesha-restaurant/10-euro-gutschein" rel="noopener">Original-Gutscheinseite für Ganesha</a> am Smartphone öffnen.</li><li>Den widersprüchlichen Einlöseweg vor der Bestellung mit dem Restaurant klären.</li><li>Erst nach dieser Klärung die auf Gutschein.at verlangte Smartphone-Authentifizierung durchführen und den Original-Gutschein dem zuständigen Personal vorzeigen.</li><li>Erst beim Personal auf der Original-Gutscheinseite auf „Einlösen“ oder auf das Gutscheinbild tippen.</li><li>Den vom Personal genannten Einlösecode auf der Original-Gutscheinseite eingeben.</li><li>Die dort angezeigte grüne Bestätigung dem Personal vorzeigen und den Abzug auf dem Bon kontrollieren.</li></ol><p>Der Code vom Personal ist kein öffentlicher Rabattcode. Dieser Artikel und FreeFinder ersetzen den authentifizierten Original-Gutschein nicht.</p>`,
+    conditions: `<p>Der Gutschein ist bis <strong>31. Dezember 2026</strong> für die Konsumation im Restaurant gelistet. Es gilt höchstens <strong>ein Gutschein je Person und Bestellung</strong>; keine Barauszahlung. Wegen der abweichenden Lieferanleitung muss der konkrete Einlöseweg vor einer Bestellung mit dem Lokal geklärt werden.</p>`,
+    source: `<p>Quelle ist die <a href="https://www.gutschein.at/ganesha-restaurant/10-euro-gutschein" rel="noopener">Ganesha-Gutscheinseite bei Gutschein.at</a>. Bedingungen und widersprüchliche Einlöseanleitung am 26. Oktober 2026 abgeglichen. Keine Einlösung durchgeführt; der Widerspruch bleibt offen.</p>`,
     faqs: [['Wie viel Rabatt gibt es bei Ganesha?', '10 Euro ab 50 Euro Konsumation.'], ['Wo ist das Restaurant?', 'Eschenbachgasse 4, 1010 Wien.'], ['Wie lange gilt der Gutschein?', 'Bis 31. Dezember 2026 laut aktuellem Eintrag.']], related: [['Restaurant-Gutscheine in Wien', 'restaurant-gutscheine-wien.html'], ['Gutscheine in Wien', 'gutscheine-wien.html']],
   }),
 ];
 
 function quickDeal(guide) {
   const reviewed = dealGuides.find(item => item.slug === guide.slug);
-  if (!reviewed) return '';
+  if (!reviewed?.what) return '';
   return `<section class="article-note" data-guide-reviewed="${escapeHtml(reviewed.reviewedAt)}" aria-label="Deal auf einen Blick">
     <h2>Dein Deal auf einen Blick</h2>
     <dl>${[['Was', reviewed.what], ['Wo', reviewed.where], ['Wann', reviewed.when], ['So geht es', reviewed.how]].map(([key, value]) => `<dt><strong>${key}</strong></dt><dd>${escapeHtml(value)}</dd>`).join('')}</dl>
@@ -880,7 +880,7 @@ ${isDealPage ? '  <script defer src="deal-status.js"></script>\n' : ''}  <script
   <main${isDealPage ? ` data-deal-page data-deal-expires="${escapeHtml(guide.expires || '')}"` : ''}>
     <header class="article-hero"><div class="hero-inner"><p class="eyebrow">${expired ? 'Aktion beendet' : escapeHtml(guide.eyebrow)}</p><h1>${escapeHtml(guide.headline)}</h1><p class="hero-copy">${escapeHtml(guide.intro)}</p><div class="article-meta"><span>Aktualisiert am ${guide.modifiedLabel || publishedLabel}</span><span>${readingMinutes} Minuten Lesezeit</span></div><div class="article-byline"><span>Von <a href="/about.html">FreeFinder Redaktion</a></span><span>Verantwortlich: Stefan Ataalla</span></div>${statusBanner}</div></header>
     <div class="article-layout">
-      <article class="article-body">
+      <article class="article-body"${guide.reviewedAt ? ` data-guide-reviewed="${escapeHtml(guide.reviewedAt)}"` : ''}>
 ${quickDealBlock ? `        ${quickDealBlock}\n` : ''}        <picture>${guide.imageAvif ? `<source type="image/avif" srcset="${guide.imageAvif}" sizes="(max-width: 860px) 100vw, 710px">` : ''}<img class="article-image" src="${guide.image}" alt="${escapeHtml(guide.imageAlt)}" width="${guide.imageWidth}" height="${guide.imageHeight}"${guide.imagePosition ? ` style="object-position:${escapeHtml(guide.imagePosition)}"` : ''} loading="eager" decoding="async"></picture>
         ${sections}
         <h2 id="faq">Häufige Fragen</h2>

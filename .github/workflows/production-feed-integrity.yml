@@ -31,6 +31,9 @@ on:
       - "scraper/public-deal-text.js"
       - "scripts/test-public-deal-text.mjs"
       - "scripts/deals-feed-contract.mjs"
+      - "scripts/deal-redemptions.mjs"
+      - "scripts/test-deal-redemptions.mjs"
+      - "reviews/deal-redemptions.json"
       - "scripts/live-deal-edits-lib.mjs"
       - "scripts/test-source-backed-content.mjs"
       - "scripts/apply-reviewed-content.mjs"
@@ -63,6 +66,9 @@ jobs:
 
       - name: Validate live feed contract
         run: npm run test:feed-contract
+
+      - name: Validate reviewed in-app redemption details
+        run: node scripts/test-deal-redemptions.mjs
 
       - name: Protect source-backed content and manual review
         env:

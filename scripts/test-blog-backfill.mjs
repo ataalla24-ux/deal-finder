@@ -56,6 +56,51 @@ assert.match(read('docs/blog/nordsee-wrap-1plus1-wien.html'), /Thunfisch/);
 assert.doesNotMatch(load(read('docs/blog/nordsee-wrap-1plus1-wien.html'))('title').text(), /Archiv|Garnelen/);
 assert.match(read('docs/blog/therme-wien-drei-plus-mittwoch.html'), /25 Prozent Ersparnis zusammen/);
 
+const reviewedSlugs = [
+  'ganesha-10-euro-gutschein-50-euro-wien',
+  'hitomi-francis-10-euro-gutschein-wien',
+  'alleewirt-schnitzel-1plus1-wien',
+  'wiener-riesenrad-1plus1-gutschein',
+  'burger-king-crispy-chicken-1plus1-wien',
+];
+const markedSlugs = fs.readdirSync(path.join(root, 'docs/blog')).filter(name => name.endsWith('.html'))
+  .filter(name => load(read(`docs/blog/${name}`))('[data-guide-reviewed="2026-10-26"]').length)
+  .map(name => name.slice(0, -5));
+assert.deepEqual(markedSlugs.sort(), [...reviewedSlugs].sort(), 'Only the five reviewed guides gain this marker');
+for (const slug of reviewedSlugs) {
+  const $ = load(read(`docs/blog/${slug}.html`));
+  assert.equal($('.article-body[data-guide-reviewed="2026-10-26"]').length, 1);
+  const steps = $('#einloesen').nextUntil('h2').filter('ol').children('li')
+    .map((_, node) => $(node).text()).get();
+  const authenticated = steps.findIndex(step => /Authentifizierung/.test(step));
+  const presented = steps.findIndex(step => /zeigen/.test(step) && !/Best\u00e4tigung/.test(step));
+  const activated = steps.findIndex(step => /Erst beim Personal.*Original-Gutscheinseite.*Einl\u00f6sen.*Gutscheinbild/.test(step));
+  const entered = steps.findIndex(step => /Original-Gutscheinseite eingeben/.test(step));
+  const confirmed = steps.findIndex(step => /gr\u00fcne Best\u00e4tigung.*Personal vorzeigen/.test(step));
+  assert.ok(authenticated >= 0 && presented >= 0, `${slug}: issuer authentication and staff presentation are required`);
+  assert.ok(activated > authenticated && activated > presented, `${slug}: activate the issuer voucher only with staff present`);
+  assert.equal(entered, activated + 1, `${slug}: enter the staff code on the issuer page after activation`);
+  assert.equal(confirmed, entered + 1, `${slug}: show the issuer confirmation after code entry`);
+}
+for (const guide of backfillGuides) {
+  assert.equal(guide.reviewedAt, reviewedSlugs.includes(guide.slug) ? '2026-10-26' : undefined);
+}
+const ganesha = load(read('docs/blog/ganesha-10-euro-gutschein-50-euro-wien.html'));
+const ganeshaText = ganesha('.article-body').text();
+assert.match(ganeshaText, /Bedingungen nennen ausschlie\u00dflich Konsumation im Restaurant.*Lieferung.*Lieferfahrer/);
+assert.match(ganeshaText, /nicht best\u00e4tigt/);
+assert.match(ganeshaText, /vor der Bestellung mit dem Restaurant kl\u00e4ren/);
+assert.match(ganeshaText, /ein Gutschein je Person und Bestellung/);
+assert.match(ganeshaText, /keine Barauszahlung/);
+assert.doesNotMatch(ganeshaText, /Gutscheine\.at/);
+const riesenrad = load(read('docs/blog/wiener-riesenrad-1plus1-gutschein.html'));
+assert.equal(riesenrad('a[href="https://www.gutschein.at/11-fahrt-gratis-16"]').length, 1);
+assert.equal(riesenrad('#quelle').next('p').find('a').attr('href'), 'https://www.gutschein.at/wiener-riesenrad/1-plus-1-fahrt-gratis');
+assert.doesNotMatch(riesenrad('.article-body').text(), /ist kein Zeitfensterticket/);
+assert.match(riesenrad('.article-body').text(), /Zeitfenster.*nicht belegt/);
+assert.match(load(read('docs/blog/alleewirt-schnitzel-1plus1-wien.html'))('.article-body').text(),
+  /Vor der Bestellung dem Service den Original-Gutschein zeigen/);
+
 // Exercise exact regeneration twice in a disposable fixture, without touching the feed.
 const tempRoot = path.join(root, 'tmp');
 fs.mkdirSync(tempRoot, { recursive: true });
@@ -68,7 +113,7 @@ try {
   }
   fs.symlinkSync(path.join(root, 'node_modules'), path.join(fixture, 'node_modules'), 'dir');
   fs.writeFileSync(path.join(fixture, 'docs/blog/unrelated.html'), 'preserve');
-  const args = [path.join(fixture, 'scripts/generate-topic-guides.mjs'), ...backfillGuides.map(g => g.slug)];
+  const args = [path.join(fixture, 'scripts/generate-topic-guides.mjs'), ...backfillGuides.map(g => g.slug), reviewedSlugs[0]];
   // Normalize both sides after the last curated expiry: regeneration remains an
   // exact content comparison independent of the wall clock or stored archive state.
   const comparisonTime = Math.max(...backfillGuides.flatMap(guide =>
@@ -79,6 +124,9 @@ try {
     execFileSync(process.execPath, args, { env });
     for (const guide of backfillGuides) assert.equal(fs.readFileSync(path.join(fixture, 'docs/blog', `${guide.slug}.html`), 'utf8'),
       polishHtml(read(`docs/blog/${guide.slug}.html`), `blog/${guide.slug}.html`, comparisonTime));
+    const ganeshaFile = `blog/${reviewedSlugs[0]}.html`;
+    assert.equal(fs.readFileSync(path.join(fixture, 'docs', ganeshaFile), 'utf8'),
+      polishHtml(read(`docs/${ganeshaFile}`), ganeshaFile, comparisonTime));
     assert.equal(fs.readFileSync(path.join(fixture, 'docs/blog/index.html'), 'utf8'),
       polishHtml(read('docs/blog/index.html'), 'blog/index.html', comparisonTime));
     assert.equal(fs.readFileSync(path.join(fixture, 'docs/sitemap.xml'), 'utf8'), read('docs/sitemap.xml'));

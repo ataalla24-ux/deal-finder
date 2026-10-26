@@ -7,12 +7,14 @@ export function applyGuides(deals, guides, available, now = Date.now()) {
     const next = { ...deal };
     delete next.guideUrl;
     delete next.guideReviewUntil;
+    delete next.supplementaryGuideUrl;
+    delete next.supplementaryGuideReviewUntil;
     const guide = guides.find(g => g.id === deal.id && g.title === deal.title
       && g.sourceUrl === deal.url && Date.parse(g.reviewUntil) > now
       && /^[a-z0-9-]+$/.test(g.slug) && available.has(g.slug));
     if (guide && deal.approvedAt) {
-      next.guideUrl = `https://freefinder.at/blog/${guide.slug}.html`;
-      next.guideReviewUntil = guide.reviewUntil;
+      next.supplementaryGuideUrl = `https://freefinder.at/blog/${guide.slug}.html`;
+      next.supplementaryGuideReviewUntil = guide.reviewUntil;
     }
     return next;
   });
@@ -31,17 +33,17 @@ async function main() {
       const html = await response.text();
       if (response.ok && html.includes(`data-guide-reviewed="${g.reviewedAt}"`)
         && html.includes(g.sourceUrl)) available.add(g.slug);
-    } catch { /* An unreachable guide must never replace the original destination. */ }
+    } catch { /* An unreachable guide must never produce a supplementary link. */ }
   }
   const feedPath = path.join(root, 'docs/deals.json');
   const feed = JSON.parse(fs.readFileSync(feedPath));
   feed.deals = applyGuides(feed.deals, guides, available);
   fs.writeFileSync(feedPath, JSON.stringify(feed, null, 2) + '\n');
-  const candidates = feed.deals.filter(d => d.approvedAt && !d.guideUrl
+  const candidates = feed.deals.filter(d => d.approvedAt && !d.supplementaryGuideUrl
     && /omv|ikea/i.test(d.brand || '')).map(d => ({ id: d.id, title: d.title,
       sourceUrl: d.url, status: 'needs-source-review', reason: 'No current approved matching guide' }));
   fs.writeFileSync(path.join(root, 'reviews/deal-guide-candidates.json'), JSON.stringify({ candidates }, null, 2) + '\n');
-  console.log(`Verified deal guides: ${feed.deals.filter(d => d.guideUrl).length}; review candidates: ${candidates.length}`);
+  console.log(`Verified supplementary deal guides: ${feed.deals.filter(d => d.supplementaryGuideUrl).length}; review candidates: ${candidates.length}`);
 }
 
 if (process.argv[1] === fileURLToPath(import.meta.url)) await main();

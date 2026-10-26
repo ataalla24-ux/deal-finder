@@ -14,7 +14,7 @@ try {
   fs.mkdirSync(path.join(temp, 'docs'));
   write('package.json', { type: 'module' });
   for (const name of [
-    'scripts/validate-production-feed.mjs', 'scripts/deals-feed-contract.mjs',
+    'scripts/validate-production-feed.mjs', 'scripts/deals-feed-contract.mjs', 'scripts/deal-redemptions.mjs',
     'scripts/add-deal-moderation-entry.mjs', 'scripts/apply-deal-moderation.mjs',
     'scripts/sync-deal-map-references.mjs', 'scripts/sync-featured-deal-references.mjs',
     'scripts/stamp-deals-feed.mjs', 'scraper/public-deal-text.js',

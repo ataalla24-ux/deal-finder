@@ -2,6 +2,7 @@ import crypto from 'node:crypto';
 import fs from 'node:fs';
 import path from 'node:path';
 import { sanitizePublicDealText } from '../scraper/public-deal-text.js';
+import { applyDealRedemptions, loadDealRedemptions } from './deal-redemptions.mjs';
 
 export const DEALS_FEED_SCHEMA_VERSION = 1;
 
@@ -24,7 +25,9 @@ export function stampDealsFeedBundle(bundle, options = {}) {
   }
 
   const nowIso = options.nowIso || new Date().toISOString();
-  const deals = bundle.deals.map(sanitizePublicDealText);
+  const redemptionManifest = Object.hasOwn(options, 'redemptionManifest')
+    ? options.redemptionManifest : loadDealRedemptions(options.redemptionManifestPath);
+  const deals = applyDealRedemptions(bundle.deals.map(sanitizePublicDealText), redemptionManifest, Date.parse(nowIso));
   return {
     ...bundle,
     deals,
