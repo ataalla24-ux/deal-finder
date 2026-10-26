@@ -1,11 +1,11 @@
 {
-  "generatedAt": "2026-10-26T06:15:33.962Z",
+  "generatedAt": "2026-10-26T06:55:27.105Z",
   "summary": {
     "maxAgeDays": 7,
     "total": 306,
-    "allowed": 0,
-    "blocked": 306,
-    "warnings": 0,
+    "allowed": 1,
+    "blocked": 305,
+    "warnings": 1,
     "reasonCounts": {
       "kein konkretes Angebot erkennbar": 223,
       "älter als 7 Tage (2020-04-25)": 1,
@@ -16,7 +16,7 @@
       "älter als 7 Tage (2026-10-14)": 1,
       "URL ungültig (HTTP 404)": 9,
       "redaktioneller Mehrfach-Roundup statt eindeutigem Einzelangebot": 3,
-      "Gewinnspiel/Verlosung statt direkt nutzbarem Deal": 6,
+      "Gewinnspiel/Verlosung statt direkt nutzbarem Deal": 5,
       "älter als 7 Tage (2025-11-09)": 1,
       "abgelaufen (2026-10-24)": 2,
       "URL ungültig (Inhalt nicht mehr verfügbar)": 4,
@@ -50,7 +50,6 @@
       "ausgeschlossene Quelle (TheFork)": 3,
       "abgelaufen (2026-08-30)": 4,
       "Engagement-Aktion ohne garantierte Gegenleistung": 1,
-      "Offizielle Aktion nicht erneut bestätigt (source-unavailable)": 1,
       "kein verlässliches Quell-/Post-Datum gefunden": 115,
       "Ortswiderspruch: Originalangebot nennt einen Standort ausserhalb Wiens": 1,
       "allgemeine Empfehlung/Gratis-Event statt konkreter Aktion": 1
@@ -59,8 +58,8 @@
       "kein konkreter Deal": 226,
       "älter als 7 Tage": 139,
       "ungültige URL": 18,
-      "sonstiges": 10,
-      "Gewinnspiel": 6,
+      "sonstiges": 9,
+      "Gewinnspiel": 5,
       "abgelaufen": 12,
       "selbst syndiziert": 3,
       "nicht Wien": 13,
@@ -79,10 +78,10 @@
         }
       },
       "Firecrawl Gastro #2": {
-        "total": 15,
-        "allowed": 0,
+        "total": 16,
+        "allowed": 1,
         "blocked": 15,
-        "warnings": 0,
+        "warnings": 1,
         "reasonCategoryCounts": {
           "selbst syndiziert": 1,
           "ungültige URL": 4,
@@ -195,14 +194,13 @@
         }
       },
       "Meta Instagram Business Discovery": {
-        "total": 13,
+        "total": 12,
         "allowed": 0,
-        "blocked": 13,
+        "blocked": 12,
         "warnings": 0,
         "reasonCategoryCounts": {
           "selbst syndiziert": 2,
-          "kein konkreter Deal": 10,
-          "Gewinnspiel": 1
+          "kein konkreter Deal": 10
         }
       },
       "Meta Instagram Hashtag API": {
@@ -221,7 +219,6 @@
         "blocked": 1,
         "warnings": 0,
         "reasonCategoryCounts": {
-          "sonstiges": 1,
           "nicht Wien": 1
         }
       },
@@ -236,7 +233,25 @@
       }
     }
   },
-  "allowed": [],
+  "allowed": [
+    {
+      "id": "g2-enmeml",
+      "title": "1+1 Schnitzel: zwei Portionen zum Preis von einer",
+      "brand": "Alleewirt",
+      "source": "Firecrawl Gastro #2",
+      "url": "https://www.gutschein.at/11-schnitzel-gratis-1",
+      "reasons": [],
+      "warnings": [
+        "kein Quell-/Post-Datum gefunden"
+      ],
+      "sourceDate": "",
+      "sourceDateSource": "",
+      "sourceAgeDays": null,
+      "expiryDate": "2026-12-31",
+      "expirySource": "url.dateHints",
+      "urlStatus": "HTTP 200"
+    }
+  ],
   "blocked": [
     {
       "id": "jesuszentrum-events-20261019",
@@ -3829,25 +3844,6 @@
       "urlStatus": "HTTP 200"
     },
     {
-      "id": "meta-ig-18107580212213548",
-      "title": "Deshalb verlosen wir zum Semesterstart ein gratis Lunch für zwei bei uns.",
-      "brand": "LiuLiu Asian Cuisine",
-      "source": "Meta Instagram Business Discovery",
-      "url": "https://www.instagram.com/reel/DeqmbxCOVjF/",
-      "reasons": [
-        "Gewinnspiel/Verlosung statt direkt nutzbarem Deal"
-      ],
-      "warnings": [
-        "Inhalt prüfen: Caption-Reste oder Emoji-Codes im sichtbaren Text"
-      ],
-      "sourceDate": "2026-10-19T06:20:27.000Z",
-      "sourceDateSource": "url.instagramShortcode",
-      "sourceAgeDays": 7,
-      "expiryDate": "2026-10-28",
-      "expirySource": "url.contentHints.title",
-      "urlStatus": "HTTP 200"
-    },
-    {
       "id": "meta-ig-18127659742803970",
       "title": "With the crew ticket, four of you come to the gala for € 150.",
       "brand": "Ikazerestaurantvienna",
@@ -3894,18 +3890,15 @@
       "source": "power-official-food",
       "url": "https://www.back-werk.at/de/news/es-ist-snackbox-zeit-2618?lang=de",
       "reasons": [
-        "Offizielle Aktion nicht erneut bestätigt (source-unavailable)",
         "nicht eindeutig in Wien"
       ],
-      "warnings": [
-        "URL nicht eindeutig prüfbar (temporärer Fehler)"
-      ],
+      "warnings": [],
       "sourceDate": "2026-10-25T17:08:20.939Z",
       "sourceDateSource": "deal.discoveredAt",
       "sourceAgeDays": 1,
       "expiryDate": "",
       "expirySource": "deal.expires",
-      "urlStatus": "unklar: temporärer URL-Fehler"
+      "urlStatus": "HTTP 200"
     },
     {
       "id": "vpr-1371lsp",
