@@ -1,7 +1,7 @@
 {
-  "runId": "40238476502",
+  "runId": "40340937905",
   "mode": "scan",
-  "createdAt": "2026-10-25T22:04:57.696Z",
+  "createdAt": "2026-10-26T14:35:16.368Z",
   "usage": {
     "scrapingbee": {
       "provider": "scrapingbee",
@@ -43,101 +43,8 @@
       "planFields": []
     }
   },
-  "tasks": [
-    {
-      "source": "IKEA Food",
-      "url": "https://www.ikea.com/at/de/food/salesareas/restaurant/",
-      "provider": "scrapingbee",
-      "cap": 5
-    },
-    {
-      "source": "IKEA Food",
-      "url": "https://www.ikea.com/at/de/food/salesareas/swedish-food-market/",
-      "provider": "zyte",
-      "cap": 0.02
-    },
-    {
-      "source": "IKEA Food",
-      "url": "https://www.ikea.com/at/de/food/salesareas/bistro/",
-      "provider": "scraperapi",
-      "cap": 10
-    },
-    {
-      "source": "IKEA Food",
-      "url": "https://www.ikea.com/at/de/food/salesareas/swedish-cafe/",
-      "provider": "scrapingbee",
-      "cap": 5
-    }
-  ],
+  "tasks": [],
   "skipped": [],
-  "eligiblePages": 4,
-  "finishedAt": "2026-10-25T22:05:03.722Z",
-  "status": "partial",
-  "results": [
-    {
-      "provider": "scrapingbee",
-      "source": "IKEA Food",
-      "url": "https://www.ikea.com/at/de/food/salesareas/restaurant/",
-      "reserved": 5,
-      "directCandidates": 0,
-      "directRejected": [],
-      "directVisibleTextCharacters": 443,
-      "status": "direct-no-offer",
-      "reason": "readable-page-without-extractable-offer",
-      "note": "No browser credit spent; image/PDF-only offers are not established by this HTML check."
-    },
-    {
-      "provider": "zyte",
-      "source": "IKEA Food",
-      "url": "https://www.ikea.com/at/de/food/salesareas/swedish-food-market/",
-      "reserved": 0.02,
-      "directCandidates": 0,
-      "directRejected": [],
-      "directVisibleTextCharacters": 422,
-      "status": "direct-no-offer",
-      "reason": "readable-page-without-extractable-offer",
-      "note": "No browser credit spent; image/PDF-only offers are not established by this HTML check."
-    },
-    {
-      "provider": "scraperapi",
-      "source": "IKEA Food",
-      "url": "https://www.ikea.com/at/de/food/salesareas/bistro/",
-      "reserved": 10,
-      "directCandidates": 0,
-      "directRejected": [],
-      "directVisibleTextCharacters": 378,
-      "status": "failed",
-      "reason": "provider-cost-limit",
-      "httpStatus": 403,
-      "retryAt": "2026-10-28T22:05:00.159Z"
-    },
-    {
-      "provider": "scrapingbee",
-      "source": "IKEA Food",
-      "url": "https://www.ikea.com/at/de/food/salesareas/swedish-cafe/",
-      "reserved": 5,
-      "status": "source-paused"
-    }
-  ],
-  "funnel": {
-    "pagesBySource": {
-      "IKEA Food": 4
-    },
-    "statuses": {
-      "direct-no-offer": 2,
-      "failed": 1,
-      "source-paused": 1
-    },
-    "rejectionReasons": {},
-    "verificationReasons": {},
-    "directCandidates": 0,
-    "renderedCandidates": 0,
-    "verifiedCandidates": 0
-  },
-  "uniqueVerifiedCandidates": 0,
-  "alreadyKnown": 0,
-  "newPendingCandidates": 0,
-  "pendingCandidates": 0,
-  "slackMessagesSent": 0,
-  "note": "New pending candidates still require central Slack validation and human approval."
+  "eligiblePages": 0,
+  "status": "skipped"
 }
