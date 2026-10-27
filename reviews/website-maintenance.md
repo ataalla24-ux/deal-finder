@@ -13,21 +13,29 @@ After adding or updating an article:
    naturally; do not create duplicate district pages with interchangeable text.
 3. Add the article to `docs/blog/index.html` and its canonical URL to the sitemap.
    Add `data-deal-expires` when the provider specifies a reliable end date.
-   Use a subject-specific cover, never the shared pizza/Foodora app mockup.
-   Editorial cover assignments live in `scripts/blog-visuals.mjs`; provider logos
-   are explicit and source-documented in `docs/assets/blog/covers/logos/sources.json`.
-   A restaurant article must not inherit the logo of its delivery platform.
-   Keep cover text independent of temporary prices and availability. Genuine
-   article-specific photos may be retained; identify generic photos as symbols.
-   To render new code-authored covers, run `node scripts/build-blog-covers.mjs`
-   with Sharp installed, or set `SHARP_MODULE` to an existing Sharp module path.
-   Commit both the 1200 x 630 JPEG and its lightweight 480px WebP thumbnail.
+   Use a subject-specific photograph, never a text poster or shared app mockup.
+   Explicit article-to-photo assignments live in `scripts/blog-photo-catalog.mjs`;
+   `scripts/blog-visuals.mjs` keeps listings, articles and sharing metadata aligned.
+   Match the actual benefit: Pizza Rando is a kebab offer, Loving Hut is vegan,
+   and the current NORDSEE wrap is tuna, not shrimp. A delivery coupon must not
+   imply that an unrelated meal is included. Keep genuine article-specific photos;
+   identify generated/editorial illustrations as symbols, not merchant originals.
+   Reuse a matching committed photo where possible. For new exports, run
+   `node scripts/build-blog-photos.mjs [subject-or-article-slug]` with Sharp
+   available (`SHARP_MODULE` may point to an existing installation). Source assets
+   require `NATIVE_ASSETS_ROOT` and/or `BLOG_PHOTO_SOURCE_DIR` as appropriate.
+   The old `build-blog-covers.mjs` entry point now exports photos, not text covers.
+   Commit the 1200 x 630 JPEG, 1200px WebP, 480px WebP and updated photo provenance.
+   Current cover sources must be at least 600 x 400; do not enlarge tiny app tiles.
+   Do not delete old cover URLs that may remain in external caches or links.
    No image dependency is needed to serve or normalize the published website.
 4. Run `node scripts/polish-website.mjs` to refresh archive metadata, blog ordering,
    keyboard navigation and FAQ markup. Topic/feed generators call the same helper.
    It also aligns card, article, Open Graph, Twitter and Article-schema images,
    replaces stale picture sources and provides a neutral fallback for new articles
-   that still reference an old shared mockup. Check that future covers match the title.
+   that still reference an old shared mockup or text cover. For photo-only edits,
+   use `--visuals-only` (and `--visuals-only --check`) to preserve archive dates,
+   article order, content and availability. Check that future photos match the title.
 5. Run `node scripts/audit-website.mjs --summary`,
    `node scripts/test-website-quality.mjs`, `node scripts/test-pro-website.mjs`
    and `node scripts/test-seo-deals-page.mjs`. Check small and desktop viewports.

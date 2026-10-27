@@ -2,7 +2,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { load } from 'cheerio';
-import { blogVisual, visualPicture, polishBlogVisuals } from './blog-visuals.mjs';
+import { blogVisual, visualPicture, polishBlogVisuals, polishBlogCardVisuals } from './blog-visuals.mjs';
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const compact = value => String(value).replace(/\s+/g, ' ').trim();
@@ -74,6 +74,7 @@ export function polishHtml(source, filename, now = Date.now()) {
   if (!publicPage) return polishSharingMetadata(html);
   html = html.replace(/https:\/\/freefinder\.at\/og-preview-stores\.png/g, 'https://freefinder.at/og-home-20261007.jpg');
   html = polishBlogVisuals(html, filename);
+  if (filename === 'index.html') html = polishBlogCardVisuals(html, filename);
   if (filename === 'blog/index.html') {
     const cards = [...html.matchAll(/<article\b[^>]*class="[^\"]*\bpost-card\b[^\"]*"[\s\S]*?<\/article>/g)];
     const updated = cards.map(match => {
@@ -192,7 +193,8 @@ if (process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.me
   for (const file of fs.readdirSync(docs, { recursive: true }).filter(file => file.endsWith('.html'))) {
     const location = path.join(docs, file);
     const source = fs.readFileSync(location, 'utf8');
-    const result = process.argv.includes('--icons-only') ? polishSiteIcons(source)
+    const result = process.argv.includes('--visuals-only') ? polishBlogCardVisuals(polishBlogVisuals(source, file), file)
+      : process.argv.includes('--icons-only') ? polishSiteIcons(source)
       : process.argv.includes('--sharing-only') ? polishSharingMetadata(source) : polishHtml(source, file);
     if (result === source) continue;
     changed++;

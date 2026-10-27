@@ -1,8 +1,8 @@
 import { load } from 'cheerio';
 import { backfillCovers } from './blog-backfill-20261018.mjs';
+import { photoVisual } from './blog-photo-catalog.mjs';
 
-// Editorial covers name the subject, never assert a price or current availability.
-// Merchant identities are explicit: a delivery platform must not select a restaurant logo.
+// Editorial subject metadata is retained for generators; images are photographs.
 export const covers = {
   ...backfillCovers,
   'wien-guides': { lines: ['Deals & Gutscheine', 'in Wien.'], topic: 'FreeFinder Blog', tone: 'green' },
@@ -50,20 +50,35 @@ export const covers = {
 };
 
 const escape = value => String(value).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
-const legacy = /(?:current-ios\/|og-preview|og-home-)/;
+const legacy = /(?:current-ios\/|og-preview|og-home-|\/blog\/covers\/)/;
 export function blogVisual(slug, currentImage = '') {
   const key = Object.hasOwn(covers, slug) ? slug : legacy.test(currentImage) ? 'wien-guides' : null;
   if (!key) return null;
-  return { src: `/assets/blog/covers/${key}.jpg`, thumbnail: `/assets/blog/covers/${key}-480.webp`,
-    alt: `${covers[key].lines.join(' ')} – ${covers[key].topic}`, width: 1200, height: 630 };
+  return photoVisual(key, covers[key]);
+}
+
+export function polishBlogCardVisuals(html, filename) {
+  if (!['index.html', 'blog/index.html'].includes(filename)) return html;
+  return html.replace(/<article\b[^>]*class="[^"]*\b(?:post-card|blog-card)\b[^"]*"[\s\S]*?<\/article>/g, fragment => {
+    const $ = load(fragment);
+    const href = $('a[href]').first().attr('href');
+    const image = $('img').first();
+    if (!href || !image.length) return fragment;
+    const visual = blogVisual(href.split('/').pop().replace(/\.html$/, ''), image.attr('src'));
+    if (!visual) return fragment;
+    const element = image.parent().is('picture') ? image.parent() : image;
+    return fragment.replace($.html(element), visualPicture(visual, { eager: image.attr('loading') === 'eager' }));
+  });
 }
 
 export function visualPicture(visual, { article = false, eager = false } = {}) {
-  return `<picture><source type="image/webp" srcset="${visual.thumbnail} 480w" media="(max-width: 520px)"><img${article ? ' class="article-image"' : ''} src="${visual.src}" alt="${escape(visual.alt)}" width="1200" height="630" loading="${eager ? 'eager' : 'lazy'}" decoding="async"></picture>`;
+  const sizes = article ? '(max-width: 760px) calc(100vw - 40px), 760px' : '(max-width: 620px) calc(100vw - 40px), 530px';
+  return `<picture><source type="image/webp" srcset="${visual.thumbnail} 480w, ${visual.webp} 1200w" sizes="${sizes}"><img${article ? ' class="article-image"' : ''} src="${visual.src}" alt="${escape(visual.alt)}" width="1200" height="630" loading="${eager ? 'eager' : 'lazy'}" decoding="async"></picture>`;
 }
 
 export function polishBlogVisuals(html, filename) {
   if (!/^blog\/[^/]+\.html$/.test(filename)) return html;
+  html = html.replace(/(<link\b[^>]*href="(?:\/blog\/)?blog\.css)(?:\?[^"]*)?"/g, '$1?v=20261027-photos"');
   const $ = load(html);
   const slug = filename.slice(5, -5);
   const hero = $('.article-image, .article-cover img').first();

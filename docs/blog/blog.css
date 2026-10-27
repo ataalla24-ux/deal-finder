@@ -342,10 +342,13 @@ h1 {
   object-fit: cover;
 }
 
-/* Editorial covers keep the complete subject and provider logo visible. */
+/* Preserve each full photographic composition, including in narrow previews. */
 .post-card img[src*="/blog/covers/"],
 .article-image[src*="/blog/covers/"],
-.article-cover img[src*="/blog/covers/"] {
+.article-cover img[src*="/blog/covers/"],
+.post-card img[src*="/blog/photos/"],
+.article-image[src*="/blog/photos/"],
+.article-cover img[src*="/blog/photos/"] {
   aspect-ratio: 1200 / 630;
   object-fit: contain;
 }

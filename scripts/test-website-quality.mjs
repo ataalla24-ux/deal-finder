@@ -6,6 +6,7 @@ import { fileURLToPath } from 'node:url';
 import { load } from 'cheerio';
 import { polishHtml, polishSiteIcons, polishSharingMetadata } from './polish-website.mjs';
 import { blogVisual, covers } from './blog-visuals.mjs';
+import { articlePhotos, photoRecipes } from './blog-photo-catalog.mjs';
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const read = file => fs.readFileSync(path.join(root, file), 'utf8');
@@ -72,7 +73,8 @@ for (const card of index('.post-card').toArray()) {
     assert.equal(article(node).attr('src'), visual.src, `${slug}: visible article cover`);
     assert.equal(article(node).attr('alt'), visual.alt);
     const sources = article(node).parent('picture').find('source');
-    assert.equal(sources.attr('srcset'), `${visual.thumbnail} 480w`, `${slug}: no stale AVIF source`);
+    assert.equal(sources.attr('srcset'), `${visual.thumbnail} 480w, ${visual.webp} 1200w`, `${slug}: responsive photos without stale AVIF sources`);
+    assert.ok(sources.attr('sizes'), `${slug}: responsive selection includes high-density displays`);
   }
   assert.doesNotMatch(article('script[type="application/ld+json"]').text(), /current-ios|og-preview|og-home/, `${slug}: schema has no unrelated screenshot`);
 }
@@ -80,11 +82,27 @@ for (const slug of Object.keys(covers)) {
   const visual = blogVisual(slug);
   const jpeg = fs.readFileSync(path.join(root, 'docs', visual.src));
   assert.equal(jpeg.readUInt16BE(0), 0xffd8);
-  assert.ok(jpeg.length < 100000, `${slug}: compact editorial cover`);
+  assert.match(visual.src, /^\/assets\/blog\/photos\/[a-z-]+\.jpg$/);
+  assert.match(visual.alt, /^Symbolfoto: /);
+  assert.ok(jpeg.length < 160000, `${slug}: compact photographic cover`);
+  const webp = fs.readFileSync(path.join(root, 'docs', visual.webp));
+  assert.equal(webp.toString('ascii', 8, 12), 'WEBP');
+  assert.ok(webp.length < 160000, `${slug}: compact full-width WebP`);
   const thumbnail = fs.readFileSync(path.join(root, 'docs', visual.thumbnail));
   assert.equal(thumbnail.toString('ascii', 8, 12), 'WEBP');
-  assert.ok(thumbnail.length < 30000);
+  assert.ok(thumbnail.length < 35000);
 }
+assert.deepEqual(Object.keys(articlePhotos).sort(), Object.keys(covers).sort(), 'Every existing editorial subject has an explicit photo assignment');
+assert.equal(articlePhotos['pizza-rando-3-doener-zum-preis-von-2-wien'], 'kebab');
+assert.equal(articlePhotos['nordsee-wrap-1plus1-wien'], 'tuna-wrap');
+assert.equal(articlePhotos['loving-hut-dog-1plus1-wien'], 'vegan-hotdog');
+assert.equal(articlePhotos['bipa-therme-wien-wohlfuehlpaket'], 'thermal');
+const photoSources = JSON.parse(read('docs/assets/blog/photos/sources.json')).photos;
+for (const subject of Object.values(articlePhotos)) {
+  assert.ok(Object.hasOwn(photoRecipes, subject));
+  assert.ok(photoSources[subject].inputWidth >= 600 && photoSources[subject].inputHeight >= 400, `${subject}: no tiny app tile enlarged into a blog cover`);
+}
+assert.equal(blogVisual('new-old-cover', '/assets/blog/covers/new-old-cover.jpg').src, blogVisual('wien-guides').src);
 // New articles can keep genuine subject photos, but cannot resurrect shared mockups.
 assert.equal(blogVisual('new-cafe', '/assets/blog/new-cafe.jpg'), null);
 assert.equal(blogVisual('new-cafe', '/assets/current-ios/deals-home.jpg').src, blogVisual('wien-guides').src);

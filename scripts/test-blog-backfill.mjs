@@ -6,6 +6,7 @@ import { execFileSync, spawnSync } from 'node:child_process';
 import { load } from 'cheerio';
 import { backfillGuides } from './blog-backfill-20261018.mjs';
 import { polishHtml } from './polish-website.mjs';
+import { blogVisual } from './blog-visuals.mjs';
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const read = name => fs.readFileSync(path.join(root, name), 'utf8');
@@ -33,7 +34,7 @@ for (const guide of backfillGuides) {
   assert.equal(index(`.post-card h2 a[href="${guide.slug}.html"]`).length, 1);
   assert.equal(index(`.post-card h2 a[href="${guide.slug}.html"]`).closest('article').attr('data-topic'), guide.topic);
   assert.equal(sitemap('url').filter((_, node) => sitemap(node).find('loc').text() === canonical).length, 1);
-  assert.equal($('img.article-image').attr('src'), `/assets/blog/covers/${guide.slug}.jpg`);
+  assert.equal($('img.article-image').attr('src'), blogVisual(guide.slug).src);
   assert.ok($('#quelle').next('p').find('a[data-track="deal_outbound"]').length === 1);
   assert.doesNotMatch(html, /current-ios|og-preview|PLACEHOLDER|TODO/);
   const graph = JSON.parse($('script[type="application/ld+json"]').text())['@graph'];
@@ -106,7 +107,7 @@ const tempRoot = path.join(root, 'tmp');
 fs.mkdirSync(tempRoot, { recursive: true });
 const fixture = fs.mkdtempSync(path.join(tempRoot, 'blog-backfill-test-'));
 try {
-  for (const name of ['scripts/generate-topic-guides.mjs', 'scripts/polish-website.mjs', 'scripts/blog-visuals.mjs', 'scripts/blog-backfill-20261018.mjs', 'reviews/deal-guides.json', 'docs/sitemap.xml', 'docs/blog/index.html']) {
+  for (const name of ['scripts/generate-topic-guides.mjs', 'scripts/polish-website.mjs', 'scripts/blog-visuals.mjs', 'scripts/blog-photo-catalog.mjs', 'scripts/deal-photos.mjs', 'scripts/blog-backfill-20261018.mjs', 'reviews/deal-guides.json', 'docs/sitemap.xml', 'docs/blog/index.html']) {
     const destination = path.join(fixture, name);
     fs.mkdirSync(path.dirname(destination), { recursive: true });
     fs.copyFileSync(path.join(root, name), destination);

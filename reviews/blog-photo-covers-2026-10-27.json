@@ -1,0 +1,157 @@
+{
+  "date": "2026-10-27",
+  "request": "Replace blog text covers with matching photographic imagery.",
+  "scope": {
+    "mappedArticles": 63,
+    "retainedExistingPhotoArticles": 4,
+    "photoSubjects": 44,
+    "generatedSourcePhotos": 25,
+    "htmlPages": 69,
+    "surfaces": [
+      "blog listing",
+      "article covers",
+      "homepage blog teasers",
+      "Open Graph",
+      "Twitter",
+      "Article JSON-LD"
+    ]
+  },
+  "method": "Built-in image_gen; no API-key CLI or new external image provider.",
+  "originality": "Generated/editorial symbolic imagery, not documentation of the exact merchant product or named venue.",
+  "generatedOriginals": "output/blog-photo-covers-2026-10-27/generated/",
+  "publishedDerivatives": "docs/assets/blog/photos/",
+  "sourceManifest": "docs/assets/blog/photos/sources.json",
+  "invariants": [
+    "Article copy, prices, conditions, expiry dates, title, description and canonical URLs preserved.",
+    "Printed QR, native assets, Store listings, checkout, consent, shared feed and automations unchanged.",
+    "Old cover URLs retained for external links/caches.",
+    "Full-width and 480px WebP sources; JPEG sharing fallback; lazy loading retained."
+  ],
+  "prompts": [
+    {
+      "key": "birthday",
+      "original": "exec-e282d9ef-1a35-4774-bc3b-82e3077e9fac.png",
+      "prompt": "Use case: photorealistic-natural. Create ONE wide editorial photograph for the birthday-benefits guide of a Vienna deals website. A small, beautiful birthday cake with a few simple lit candles on a bright contemporary cafe table, white ceramic plate, a second empty place setting and a couple of small colorful wrapped gifts. Natural daylight, realistic appetizing textures, balanced fresh colors, understated surroundings. Wide landscape composition, full cake and candles visible with generous crop-safe space for a 1200 by 630 cover. The photo is a generic symbolic birthday scene, not a real merchant offer. No people, no lettering, no numbers, no labels, no logos, no price tags, no watermark, no typography or graphic overlays. Do not make a collage, poster, interface or image grid."
+    },
+    {
+      "key": "vegan-hotdog",
+      "original": "exec-75a92381-ebe8-4c34-b897-cd904f767e71.png",
+      "prompt": "Use case: photorealistic-natural. Create ONE wide landscape editorial food photograph, 1200:630 composition, for an article about a vegan hotdog deal. One appetizing plant-based hotdog in a golden bread roll with a clearly vegan vegetable sausage, a little mustard, ketchup, fresh cucumber relish and crisp fried onions on a plain white ceramic plate in a clean modern casual vegan cafe. Main hotdog fully visible, centered with comfortable space around it for wide and square crops. Fresh natural daylight, realistic rich food texture, neutral light surroundings with small green accents. This is an unbranded generic symbolic food scene, NOT the actual product of any restaurant. No meat, no meat patty, no dairy cheese, no people, no words, no logos, no lettering, no price tags, no text overlays, no watermark, no collage or image grid."
+    },
+    {
+      "key": "tuna-wrap",
+      "original": "exec-ddf41e40-49dd-4116-a32c-7a56b635bdfc.png",
+      "prompt": "Use case: photorealistic-natural. Create ONE wide landscape editorial food photograph, 1200:630 composition, of a TUNA SALAD TORTILLA WRAP. Two halves of a soft wheat tortilla wrap placed on plain white deli paper, one central cut face clearly shows flaked cooked tuna mixed with a small amount of creamy dressing, crisp green lettuce and a little sweetcorn. A clean casual cafe counter in natural daylight. Main wrap fully visible, centered with plenty of crop-safe space. Sharp appetizing realistic texture, fresh balanced colors. Generic symbolic food photograph only, not a specific restaurant product. Absolutely no shrimp, prawns, salmon, chicken, meat strips or burger bun. No people, hands, logos, branding, text, lettering, labels, price graphics, watermark, collage or image grid."
+    },
+    {
+      "key": "cinema",
+      "original": "exec-7e53f275-e4e2-4d68-9ad2-a4005e5ee12b.png",
+      "prompt": "Use case: photorealistic-natural. Create ONE clean wide landscape editorial photograph for a cinema-ticket savings article. A modern cinema auditorium with rows of comfortable rich red seats, one plain small tub of popcorn in the foreground, the distant screen blank and not glowing white. Natural-looking cinema lighting with enough brightness to inspect seat fabric and popcorn, realistic detailed photography, balanced red and neutral tones. Crop-safe 1200:630 composition with complete popcorn tub visible and rows of seats extending across frame. This is a generic symbolic cinema scene, not a named cinema interior. No people, text, numbers, ticket lettering, logos, brands, watermark, collage, posters, interface or graphic overlays."
+    },
+    {
+      "key": "coffee",
+      "original": "exec-97175702-7b39-43ea-bfba-73e36619833c.png",
+      "prompt": "Use case: photorealistic-natural. Create ONE wide landscape editorial photograph of a single freshly brewed coffee in a white porcelain cup and saucer on a bright contemporary Viennese-style cafe table. A little visible crema, soft natural window light, realistic ceramic and coffee texture, clean inviting surroundings with subtle greenery. Entire cup and saucer clearly visible and centered, enough room for 1200:630 and square crops. The cup is the only food or drink: no pastries, cake, croissant or free extra items. Generic symbolic coffee scene, not any named cafe or branded product. No people, text, numbers, logos, packaging, menus, price tags, watermark, collage, poster, image grid or graphic overlays."
+    },
+    {
+      "key": "vegetable-kebab",
+      "original": "exec-f70d9071-41c7-4e77-93d1-598efa71cbc0.png",
+      "prompt": "Use case: photorealistic-natural. Create ONE appetizing wide landscape editorial food photograph of a vegetable kebab in toasted flatbread: abundant grilled eggplant, zucchini and peppers with crisp lettuce, tomato, red onion and a light herb sauce. No meat. A bright casual cafe counter, plain white deli paper, unbranded setting, natural daylight, realistic textures and fresh rich vegetable colors. Full kebab clearly visible and centered, generous crop-safe space for a 1200:630 blog cover. Generic symbolic vegetable-kebab illustration only, not an actual branded restaurant product. No people, text, logos, labels, price graphics, watermark, collage, image grid or graphic overlays."
+    },
+    {
+      "key": "breakfast",
+      "original": "exec-00697f98-b0e4-4980-bc03-7e5d6dde2776.png",
+      "prompt": "Use case: photorealistic-natural. Create ONE high-resolution wide landscape editorial photograph of a simple breakfast on a white plate: a bread roll, butter, a boiled egg and a small glass of orange juice. This is a generic symbolic image for a deals blog, not a specific merchant product or real venue report. Clear detailed main subject, fresh natural light, balanced rich colors, contemporary understated surroundings, complete subject visible and centered with breathing space for a 1200:630 cover crop. No people, no readable text, no letters, no numbers, no brands, no logos, no promotional graphics, no price tags, no watermark, no collage or image grid. Make only one photographic scene."
+    },
+    {
+      "key": "fish",
+      "original": "exec-47da1e65-78ef-49de-9c24-7ac4fb51dcf7.png",
+      "prompt": "Use case: photorealistic-natural. Create ONE high-resolution wide landscape editorial photograph of a plate of golden battered fish fillets with crisp chips, a lemon wedge and a small dish of tartare sauce. This is a generic symbolic image for a deals blog, not a specific merchant product or real venue report. Clear detailed main subject, fresh natural light, balanced rich colors, contemporary understated surroundings, complete subject visible and centered with breathing space for a 1200:630 cover crop. No people, no readable text, no letters, no numbers, no brands, no logos, no promotional graphics, no price tags, no watermark, no collage or image grid. Make only one photographic scene."
+    },
+    {
+      "key": "schnitzel",
+      "original": "exec-379e9458-a7b8-49f9-bf32-4ccb7154df32.png",
+      "prompt": "Use case: photorealistic-natural. Create ONE high-resolution wide landscape editorial photograph of one golden Viennese-style breaded schnitzel with a lemon wedge on a white plate. This is a generic symbolic image for a deals blog, not a specific merchant product or real venue report. Clear detailed main subject, fresh natural light, balanced rich colors, contemporary understated surroundings, complete subject visible and centered with breathing space for a 1200:630 cover crop. No people, no readable text, no letters, no numbers, no brands, no logos, no promotional graphics, no price tags, no watermark, no collage or image grid. Make only one photographic scene."
+    },
+    {
+      "key": "crispy-chicken",
+      "original": "exec-f5c16e06-903b-4ba0-8ff3-f90267548f46.png",
+      "prompt": "Use case: photorealistic-natural. Create ONE high-resolution wide landscape editorial photograph of one crispy breaded chicken burger with lettuce, tomato and sauce in a plain sesame bun. This is a generic symbolic image for a deals blog, not a specific merchant product or real venue report. Clear detailed main subject, fresh natural light, balanced rich colors, contemporary understated surroundings, complete subject visible and centered with breathing space for a 1200:630 cover crop. No people, no readable text, no letters, no numbers, no brands, no logos, no promotional graphics, no price tags, no watermark, no collage or image grid. Make only one photographic scene."
+    },
+    {
+      "key": "bowl",
+      "original": "exec-615edd26-f7da-4b79-9adf-0f1b272ef3a7.png",
+      "prompt": "Use case: photorealistic-natural. Create ONE high-resolution wide landscape editorial photograph of a colorful vegetable rice bowl with cucumber, avocado, carrot, edamame and fresh greens. This is a generic symbolic image for a deals blog, not a specific merchant product or real venue report. Clear detailed main subject, fresh natural light, balanced rich colors, contemporary understated surroundings, complete subject visible and centered with breathing space for a 1200:630 cover crop. No people, no readable text, no letters, no numbers, no brands, no logos, no promotional graphics, no price tags, no watermark, no collage or image grid. Make only one photographic scene."
+    },
+    {
+      "key": "groceries",
+      "original": "exec-747f3822-36b0-472e-95ef-2264ad73b833.png",
+      "prompt": "Use case: photorealistic-natural. Create ONE high-resolution wide landscape editorial photograph of a market basket of fresh vegetables, fruit and a loaf of bread, without packaged brands. This is a generic symbolic image for a deals blog, not a specific merchant product or real venue report. Clear detailed main subject, fresh natural light, balanced rich colors, contemporary understated surroundings, complete subject visible and centered with breathing space for a 1200:630 cover crop. No people, no readable text, no letters, no numbers, no brands, no logos, no promotional graphics, no price tags, no watermark, no collage or image grid. Make only one photographic scene."
+    },
+    {
+      "key": "gift",
+      "original": "exec-e2416463-86ba-4373-b19f-fc935c35b15d.png",
+      "prompt": "Use case: photorealistic-natural. Create ONE high-resolution wide landscape editorial photograph of one small elegant orange gift box with a ribbon on a clean light tabletop. This is a generic symbolic image for a deals blog, not a specific merchant product or real venue report. Clear detailed main subject, fresh natural light, balanced rich colors, contemporary understated surroundings, complete subject visible and centered with breathing space for a 1200:630 cover crop. No people, no readable text, no letters, no numbers, no brands, no logos, no promotional graphics, no price tags, no watermark, no collage or image grid. Make only one photographic scene."
+    },
+    {
+      "key": "fashion",
+      "original": "exec-6f4447fa-53c3-4394-973d-655bcad0abe7.png",
+      "prompt": "Use case: photorealistic-natural. Create ONE high-resolution wide landscape editorial photograph of folded casual clothes, a simple pair of plain sneakers and an unprinted shopping bag in a bright contemporary shop setting. This is a generic symbolic image for a deals blog, not a specific merchant product or real venue report. Clear detailed main subject, fresh natural light, balanced rich colors, contemporary understated surroundings, complete subject visible and centered with breathing space for a 1200:630 cover crop. No people, no readable text, no letters, no numbers, no brands, no logos, no promotional graphics, no price tags, no watermark, no collage or image grid. Make only one photographic scene."
+    },
+    {
+      "key": "mattress",
+      "original": "exec-2938f75f-c6a5-4257-9475-76610a6da098.png",
+      "prompt": "Use case: photorealistic-natural. Create ONE high-resolution wide landscape editorial photograph of a comfortable clean bed and visible mattress edge in a bright modern bedroom. This is a generic symbolic image for a deals blog, not a specific merchant product or real venue report. Clear detailed main subject, fresh natural light, balanced rich colors, contemporary understated surroundings, complete subject visible and centered with breathing space for a 1200:630 cover crop. No people, no readable text, no letters, no numbers, no brands, no logos, no promotional graphics, no price tags, no watermark, no collage or image grid. Make only one photographic scene."
+    },
+    {
+      "key": "furniture",
+      "original": "exec-9d2d34b7-ae76-4742-beb7-75b75e8fc40d.png",
+      "prompt": "Use case: photorealistic-natural. Create ONE high-resolution wide landscape editorial photograph of a textured woven rug prominently visible across a bright living-room floor, with only part of a neutral chair and green plant at the edges. This is a generic symbolic image for a deals blog, not a specific merchant product or real venue report. Clear detailed main subject, fresh natural light, balanced rich colors, contemporary understated surroundings, complete subject visible and centered with breathing space for a 1200:630 cover crop. No people, no readable text, no letters, no numbers, no brands, no logos, no promotional graphics, no price tags, no watermark, no collage or image grid. Make only one photographic scene."
+    },
+    {
+      "key": "thermal",
+      "original": "exec-26c727e0-4387-444f-9058-acf2f7cbbe41.png",
+      "prompt": "Use case: photorealistic-natural. Create ONE high-resolution wide landscape editorial photograph of a bright serene indoor thermal swimming pool with clear turquoise water and comfortable neutral architecture, no visitors. This is a generic symbolic image for a deals blog, not a specific merchant product or real venue report. Clear detailed main subject, fresh natural light, balanced rich colors, contemporary understated surroundings, complete subject visible and centered with breathing space for a 1200:630 cover crop. No people, no readable text, no letters, no numbers, no brands, no logos, no promotional graphics, no price tags, no watermark, no collage or image grid. Make only one photographic scene."
+    },
+    {
+      "key": "museum",
+      "original": "exec-fb0ee088-199f-48a7-aa9f-cea9db03c7e7.png",
+      "prompt": "Use case: photorealistic-natural. Create ONE high-resolution wide landscape editorial photograph of a bright modern art museum gallery displaying only framed landscape and flower paintings on white walls; empty gallery, no sculptures or human figures. This is a generic symbolic image for a deals blog, not a specific merchant product or real venue report. Clear detailed main subject, fresh natural light, balanced rich colors, contemporary understated surroundings, complete subject visible and centered with breathing space for a 1200:630 cover crop. No people, no readable text, no letters, no numbers, no brands, no logos, no promotional graphics, no price tags, no watermark, no collage or image grid. Make only one photographic scene."
+    },
+    {
+      "key": "carwash",
+      "original": "exec-2b3b33ca-20c6-4f7d-95ee-89b683e5d637.png",
+      "prompt": "Use case: photorealistic-natural. Create ONE high-resolution wide landscape editorial photograph of an unbranded car being washed with white soap foam in a clean modern car wash. This is a generic symbolic image for a deals blog, not a specific merchant product or real venue report. Clear detailed main subject, fresh natural light, balanced rich colors, contemporary understated surroundings, complete subject visible and centered with breathing space for a 1200:630 cover crop. No people, no readable text, no letters, no numbers, no brands, no logos, no promotional graphics, no price tags, no watermark, no collage or image grid. Make only one photographic scene."
+    },
+    {
+      "key": "auto-parts",
+      "original": "exec-8f9d77eb-a0e2-4281-a63f-41fb5f86c8a3.png",
+      "prompt": "Use case: photorealistic-natural. Create ONE high-resolution wide landscape editorial photograph of clean unbranded automotive spare parts, including a brake disc and filter, arranged on a light work surface. This is a generic symbolic image for a deals blog, not a specific merchant product or real venue report. Clear detailed main subject, fresh natural light, balanced rich colors, contemporary understated surroundings, complete subject visible and centered with breathing space for a 1200:630 cover crop. No people, no readable text, no letters, no numbers, no brands, no logos, no promotional graphics, no price tags, no watermark, no collage or image grid. Make only one photographic scene."
+    },
+    {
+      "key": "smartphone",
+      "original": "exec-6e187f8f-37c0-4046-bfe0-6f36de9cedb6.png",
+      "prompt": "Use case: photorealistic-natural. Create ONE high-resolution wide landscape editorial photograph of an unbranded smartphone with an entirely blank dark screen beside a notebook and pen on a bright cafe desk. This is a generic symbolic image for a deals blog, not a specific merchant product or real venue report. Clear detailed main subject, fresh natural light, balanced rich colors, contemporary understated surroundings, complete subject visible and centered with breathing space for a 1200:630 cover crop. No people, no readable text, no letters, no numbers, no brands, no logos, no promotional graphics, no price tags, no watermark, no collage or image grid. Make only one photographic scene."
+    },
+    {
+      "key": "riesenrad",
+      "original": "exec-1e2479c4-cb2e-48b6-ad27-ec32ce7b5c86.png",
+      "prompt": "Use case: photorealistic-natural. Create ONE high-resolution wide landscape editorial photograph of a large classic Ferris wheel with red enclosed cabins among green trees under a clear blue sky; generic travel illustration, not documentation of a named attraction. This is a generic symbolic image for a deals blog, not a specific merchant product or real venue report. Clear detailed main subject, fresh natural light, balanced rich colors, contemporary understated surroundings, complete subject visible and centered with breathing space for a 1200:630 cover crop. No people, no readable text, no letters, no numbers, no brands, no logos, no promotional graphics, no price tags, no watermark, no collage or image grid. Make only one photographic scene."
+    },
+    {
+      "key": "flight",
+      "original": "exec-dd56c08b-14bc-4f91-bccf-3e10de32660a.png",
+      "prompt": "Use case: photorealistic-natural. Create ONE high-resolution wide landscape editorial photograph of an unbranded passenger aircraft parked at a bright airport apron, no airline logos, no visible registration numbers. This is a generic symbolic image for a deals blog, not a specific merchant product or real venue report. Clear detailed main subject, fresh natural light, balanced rich colors, contemporary understated surroundings, complete subject visible and centered with breathing space for a 1200:630 cover crop. No people, no readable text, no letters, no numbers, no brands, no logos, no promotional graphics, no price tags, no watermark, no collage or image grid. Make only one photographic scene."
+    },
+    {
+      "key": "delivery",
+      "original": "exec-79193999-1994-4e66-82eb-a78712c868d4.png",
+      "prompt": "Use case: photorealistic-natural. Create ONE high-resolution wide landscape editorial photograph of an unbranded reusable food-delivery bag beside closed kraft takeaway boxes and a plain paper bag on a bright table; no exposed food or labels. This is a generic symbolic image for a deals blog, not a specific merchant product or real venue report. Clear detailed main subject, fresh natural light, balanced rich colors, contemporary understated surroundings, complete subject visible and centered with breathing space for a 1200:630 cover crop. No people, no readable text, no letters, no numbers, no brands, no logos, no promotional graphics, no price tags, no watermark, no collage or image grid. Make only one photographic scene."
+    },
+    {
+      "key": "restaurant",
+      "original": "exec-152b686d-7afc-404c-8753-d4122c918248.png",
+      "prompt": "Use case: photorealistic-natural. Create ONE high-resolution wide landscape editorial photograph of a beautifully set contemporary restaurant table with empty white plates, cutlery, folded linen napkins and a little greenery; no specific food, drinks, menu or venue identity. This is a generic symbolic image for a deals blog, not a specific merchant product or real venue report. Clear detailed main subject, fresh natural light, balanced rich colors, contemporary understated surroundings, complete subject visible and centered with breathing space for a 1200:630 cover crop. No people, no readable text, no letters, no numbers, no brands, no logos, no promotional graphics, no price tags, no watermark, no collage or image grid. Make only one photographic scene."
+    }
+  ]
+}
