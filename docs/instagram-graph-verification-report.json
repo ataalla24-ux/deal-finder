@@ -1,7 +1,7 @@
 {
-  "generatedAt": "2026-10-27T18:29:16.127Z",
+  "generatedAt": "2026-10-27T19:26:10.671Z",
   "source": "instagram-graph-cross-source-verification",
-  "status": "ok",
+  "status": "degraded",
   "configured": true,
   "scannedFiles": [
     "deals-pending-church-events.json",
@@ -169,7 +169,7 @@
   },
   "candidatePosts": 34,
   "candidateAccounts": 26,
-  "skippedAccountCooldowns": 2,
+  "skippedAccountCooldowns": 1,
   "selectedAccounts": [
     {
       "username": "afrivision.austria",
@@ -192,14 +192,19 @@
       "candidates": 2
     },
     {
-      "username": "only.pizza.vienna",
+      "username": "iris.thegoodguides",
       "candidates": 1
     }
   ],
-  "fetchedPosts": 123,
-  "exactMatches": 7,
+  "fetchedPosts": 108,
+  "exactMatches": 6,
   "retainedEvidencePosts": 2000,
-  "errors": [],
+  "errors": [
+    {
+      "username": "iris.thegoodguides",
+      "message": "Meta API 400: Invalid user id for https://graph.facebook.com/v26.0/17841438552673858?fields=business_discovery.username%28iris.thegoodguides%29%7Busername%2Cname%2Cmedia.limit%2825%29%7Bid%2Ccaption%2Cmedia_type%2Cpermalink%2Ctimestamp%2Clike_count%2Ccomments_count%2Cmedia_product_type%2Cmedia_url%2Cthumbnail_url%2Cchildren%7Bmedia_type%2Cmedia_url%2Cthumbnail_url%7D%7D%7D&access_token=[redacted]"
+    }
+  ],
   "accountFailures": {
     "tantisaluti.wien": {
       "count": 2,
@@ -227,9 +232,9 @@
       "cooldownUntil": "2026-10-21T13:16:29.188Z"
     },
     "iris.thegoodguides": {
-      "count": 2,
-      "lastAt": "2026-10-26T19:11:40.761Z",
-      "cooldownUntil": "2026-10-27T19:11:40.761Z"
+      "count": 3,
+      "lastAt": "2026-10-27T19:26:10.671Z",
+      "cooldownUntil": "2026-10-28T19:26:10.671Z"
     },
     "foodupwien": {
       "count": 1,
@@ -244,7 +249,7 @@
     "reserved": 10,
     "stopped": false,
     "reason": "",
-    "highestUsagePercent": 71,
+    "highestUsagePercent": 47,
     "waitedMs": 0,
     "pacingMs": 0,
     "retryAt": "",
@@ -252,7 +257,7 @@
     "adaptiveIncreases": 0,
     "storageFailure": null
   },
-  "blockedEvidencePosts": 78,
-  "unmatchedCandidatePosts": 27,
-  "message": "7/34 fresh cross-source Instagram candidates matched exactly via Graph API."
+  "blockedEvidencePosts": 77,
+  "unmatchedCandidatePosts": 28,
+  "message": "6/34 fresh cross-source Instagram candidates matched exactly via Graph API."
 }
