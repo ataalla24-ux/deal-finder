@@ -1,12 +1,18 @@
 {
-  "generatedAt": "2026-10-27T10:35:08.499Z",
+  "generatedAt": "2026-10-27T10:42:22.331Z",
   "summary": {
     "filesConsidered": 32,
-    "totalCandidates": 843,
-    "uniqueCandidates": 735,
-    "distinctCandidates": 783,
+    "totalCandidates": 836,
+    "uniqueCandidates": 729,
+    "distinctCandidates": 777,
     "duplicateClusters": 48,
     "topHealthySources": [
+      {
+        "sourceKey": "member-benefits",
+        "sourceLabel": "Member Benefits",
+        "healthScore": 79,
+        "totalDeals": 102
+      },
       {
         "sourceKey": "wien-combined",
         "sourceLabel": "Wien Deals Combined Graph",
@@ -18,12 +24,6 @@
         "sourceLabel": "Apify 2 Vienna Food Discovery",
         "healthScore": 78,
         "totalDeals": 2
-      },
-      {
-        "sourceKey": "member-benefits",
-        "sourceLabel": "Member Benefits",
-        "healthScore": 76,
-        "totalDeals": 109
       },
       {
         "sourceKey": "joe",
@@ -66,17 +66,24 @@
       {
         "sourceKey": "member-benefits",
         "sourceLabel": "Member Benefits",
-        "missionFitScore": 68,
-        "totalDeals": 109
+        "missionFitScore": 70,
+        "totalDeals": 102
       }
     ],
     "topCoverageSources": [
       {
         "sourceKey": "member-benefits",
         "sourceLabel": "Member Benefits",
-        "coverageScore": 89,
-        "totalDeals": 109,
-        "fresh1dCount": 29
+        "coverageScore": 82,
+        "totalDeals": 102,
+        "fresh1dCount": 22
+      },
+      {
+        "sourceKey": "meta-instagram",
+        "sourceLabel": "Meta Instagram Graph",
+        "coverageScore": 71,
+        "totalDeals": 111,
+        "fresh1dCount": 15
       },
       {
         "sourceKey": "gastro2",
@@ -84,13 +91,6 @@
         "coverageScore": 70,
         "totalDeals": 116,
         "fresh1dCount": 0
-      },
-      {
-        "sourceKey": "meta-instagram",
-        "sourceLabel": "Meta Instagram Graph",
-        "coverageScore": 70,
-        "totalDeals": 111,
-        "fresh1dCount": 14
       },
       {
         "sourceKey": "vienna-promo-radar",
@@ -123,8 +123,8 @@
       {
         "sourceKey": "member-benefits",
         "sourceLabel": "Member Benefits",
-        "precisionScore": 74,
-        "totalDeals": 109
+        "precisionScore": 78,
+        "totalDeals": 102
       },
       {
         "sourceKey": "tiktok",
@@ -141,16 +141,16 @@
     ],
     "topWeightedSources": [
       {
+        "sourceKey": "member-benefits",
+        "sourceLabel": "Member Benefits",
+        "sourceWeightScore": 77,
+        "totalDeals": 102
+      },
+      {
         "sourceKey": "instagram-apify2",
         "sourceLabel": "Apify 2 Vienna Food Discovery",
         "sourceWeightScore": 77,
         "totalDeals": 2
-      },
-      {
-        "sourceKey": "member-benefits",
-        "sourceLabel": "Member Benefits",
-        "sourceWeightScore": 76,
-        "totalDeals": 109
       },
       {
         "sourceKey": "wien-combined",
@@ -167,7 +167,7 @@
       {
         "sourceKey": "meta-instagram",
         "sourceLabel": "Meta Instagram Graph",
-        "sourceWeightScore": 61,
+        "sourceWeightScore": 62,
         "totalDeals": 111
       }
     ],
@@ -238,6 +238,74 @@
     }
   },
   "sources": [
+    {
+      "sourceKey": "member-benefits",
+      "file": "deals-pending-member-benefits.json",
+      "sourceLabel": "Member Benefits",
+      "totalDeals": 102,
+      "uniqueDeals": 102,
+      "duplicateDeals": 0,
+      "duplicateAcrossSources": 0,
+      "fresh1dCount": 22,
+      "fresh7dCount": 22,
+      "viennaCount": 80,
+      "foodDrinkCount": 83,
+      "promoCount": 89,
+      "missingUrlCount": 0,
+      "sampleTitles": [
+        "1+1 Kinoticket gratis bei KinoDonnerstag",
+        "1+1 Wrap gratis bei Nordsee",
+        "1+1 Ticket gratis bei Madame Tussauds Wien"
+      ],
+      "lastRun": null,
+      "uniqueRate": 1,
+      "duplicateRate": 0,
+      "fresh1dRate": 0.2,
+      "fresh7dRate": 0.2,
+      "viennaRate": 0.8,
+      "foodDrinkRate": 0.8,
+      "promoRate": 0.9,
+      "missingUrlRate": 0,
+      "averageQualityScore": 65.6,
+      "topCategories": [
+        {
+          "value": "essen",
+          "count": 83
+        },
+        {
+          "value": "kultur",
+          "count": 11
+        },
+        {
+          "value": "technik",
+          "count": 6
+        },
+        {
+          "value": "shopping",
+          "count": 2
+        }
+      ],
+      "topTypes": [
+        {
+          "value": "rabatt",
+          "count": 84
+        },
+        {
+          "value": "bogo",
+          "count": 10
+        },
+        {
+          "value": "gratis",
+          "count": 8
+        }
+      ],
+      "issues": [],
+      "healthScore": 79,
+      "missionFitScore": 70,
+      "coverageScore": 82,
+      "precisionScore": 78,
+      "sourceWeightScore": 77
+    },
     {
       "sourceKey": "wien-combined",
       "file": "deals-pending-wien-combined.json",
@@ -393,80 +461,6 @@
       "coverageScore": 17,
       "precisionScore": 100,
       "sourceWeightScore": 77
-    },
-    {
-      "sourceKey": "member-benefits",
-      "file": "deals-pending-member-benefits.json",
-      "sourceLabel": "Member Benefits",
-      "totalDeals": 109,
-      "uniqueDeals": 109,
-      "duplicateDeals": 0,
-      "duplicateAcrossSources": 0,
-      "fresh1dCount": 29,
-      "fresh7dCount": 29,
-      "viennaCount": 80,
-      "foodDrinkCount": 83,
-      "promoCount": 89,
-      "missingUrlCount": 0,
-      "sampleTitles": [
-        "1+1 Kinoticket gratis bei KinoDonnerstag",
-        "1+1 Wrap gratis bei Nordsee",
-        "1+1 Ticket gratis bei Madame Tussauds Wien"
-      ],
-      "lastRun": null,
-      "uniqueRate": 1,
-      "duplicateRate": 0,
-      "fresh1dRate": 0.3,
-      "fresh7dRate": 0.3,
-      "viennaRate": 0.7,
-      "foodDrinkRate": 0.8,
-      "promoRate": 0.8,
-      "missingUrlRate": 0,
-      "averageQualityScore": 62.9,
-      "topCategories": [
-        {
-          "value": "essen",
-          "count": 83
-        },
-        {
-          "value": "kultur",
-          "count": 12
-        },
-        {
-          "value": "shopping",
-          "count": 6
-        },
-        {
-          "value": "technik",
-          "count": 6
-        },
-        {
-          "value": "reisen",
-          "count": 2
-        }
-      ],
-      "topTypes": [
-        {
-          "value": "rabatt",
-          "count": 91
-        },
-        {
-          "value": "bogo",
-          "count": 10
-        },
-        {
-          "value": "gratis",
-          "count": 8
-        }
-      ],
-      "issues": [
-        "Wien-Signal ist zu schwach"
-      ],
-      "healthScore": 76,
-      "missionFitScore": 68,
-      "coverageScore": 89,
-      "precisionScore": 74,
-      "sourceWeightScore": 76
     },
     {
       "sourceKey": "joe",
@@ -840,19 +834,19 @@
       "file": "deals-pending-meta-instagram.json",
       "sourceLabel": "Meta Instagram Graph",
       "totalDeals": 111,
-      "uniqueDeals": 68,
-      "duplicateDeals": 43,
+      "uniqueDeals": 69,
+      "duplicateDeals": 42,
       "duplicateAcrossSources": 28,
-      "fresh1dCount": 14,
-      "fresh7dCount": 107,
+      "fresh1dCount": 15,
+      "fresh7dCount": 108,
       "viennaCount": 111,
       "foodDrinkCount": 72,
-      "promoCount": 58,
+      "promoCount": 59,
       "missingUrlCount": 0,
       "sampleTitles": [
+        "Wien (noch zu bestätigen) 📱 Mitbringen: Dein aufgeladenes Smartphone (Ladekabel nicht vergessen!) 💜 Das erwartet dich: ✨ Kostenlos & fre",
         "💥 VERSCHIEDENE MODELLE, EIN PREIS: NUR 29,99 €!",
-        "VIP ticket with dinner, meet & greet, afterparty, welcome drink, seat in row 1 or 2 for €70",
-        "Pommes und Getränk für 10 Euro ab 20:00 Uhr an Halloween"
+        "VIP ticket with dinner, meet & greet, afterparty, welcome drink, seat in row 1 or 2 for €70"
       ],
       "lastRun": null,
       "uniqueRate": 0.6,
@@ -863,7 +857,7 @@
       "foodDrinkRate": 0.6,
       "promoRate": 0.5,
       "missingUrlRate": 0,
-      "averageQualityScore": 87,
+      "averageQualityScore": 87.1,
       "topCategories": [
         {
           "value": "essen",
@@ -871,7 +865,7 @@
         },
         {
           "value": "shopping",
-          "count": 24
+          "count": 23
         },
         {
           "value": "kaffee",
@@ -893,11 +887,11 @@
       "topTypes": [
         {
           "value": "rabatt",
-          "count": 66
+          "count": 65
         },
         {
           "value": "gratis",
-          "count": 34
+          "count": 35
         },
         {
           "value": "bogo",
@@ -917,9 +911,9 @@
       ],
       "healthScore": 63,
       "missionFitScore": 52,
-      "coverageScore": 70,
+      "coverageScore": 71,
       "precisionScore": 66,
-      "sourceWeightScore": 61
+      "sourceWeightScore": 62
     },
     {
       "sourceKey": "instagram-apify",
