@@ -247,8 +247,8 @@ export const backfillGuides = [
   }),
   guide({
     ids: ['fc4g-eg5ndc', 'g2-1ffpc0f'], slug: 'nordsee-coupons-wien', topic: 'essen',
-    title: 'NORDSEE Coupons in Wien: Angebote richtig vergleichen',
-    meta: 'NORDSEE-Gutscheine für Wien: Offizielle Österreich-Coupons öffnen, Filialen und Fristen prüfen. Kein pauschales 50-Prozent-Versprechen für jedes Menü.',
+    title: 'NORDSEE Coupons Wien: Österreich-Gutscheine herunterladen',
+    meta: 'NORDSEE Coupons für Wien: Zum offiziellen Österreich-Download, Originalgutschein auswählen und Filiale sowie Frist prüfen. Preise und Bedingungen je Coupon.',
     eyebrow: 'Fisch & Menüs · Wien',
     intro: 'Im App-Feed stehen zwei NORDSEE-Couponhinweise. Hier sind sie zusammengefasst, damit du direkt zur österreichischen Originalübersicht kommst, statt dieselbe Gutscheinsuche zweimal zu lesen.',
     cover: { lines: ['NORDSEE', 'Coupons in Wien.'], topic: 'Menüs & Gutscheinbedingungen', brand: 'nordsee', tone: 'blue' },
