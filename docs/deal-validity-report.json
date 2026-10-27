@@ -1,13 +1,13 @@
 {
-  "generatedAt": "2026-10-27T20:46:05.973Z",
+  "generatedAt": "2026-10-27T21:38:41.658Z",
   "summary": {
     "maxAgeDays": 7,
-    "total": 321,
-    "allowed": 0,
-    "blocked": 321,
-    "warnings": 0,
+    "total": 326,
+    "allowed": 4,
+    "blocked": 322,
+    "warnings": 4,
     "reasonCounts": {
-      "kein konkretes Angebot erkennbar": 236,
+      "kein konkretes Angebot erkennbar": 237,
       "Gottesdienste nur im Wochenlauf": 36,
       "älter als 7 Tage (2020-04-25)": 1,
       "älter als 7 Tage (2026-02-22)": 81,
@@ -57,7 +57,7 @@
       "Ortswiderspruch: Originalangebot nennt einen Standort ausserhalb Wiens": 1
     },
     "reasonCategoryCounts": {
-      "kein konkreter Deal": 240,
+      "kein konkreter Deal": 241,
       "Gottesdienste außerhalb Wochenlauf": 36,
       "älter als 7 Tage": 137,
       "ungültige URL": 18,
@@ -73,13 +73,14 @@
     },
     "sourceCounts": {
       "Apify 2 Vienna Food Discovery": {
-        "total": 1,
+        "total": 2,
         "allowed": 0,
-        "blocked": 1,
+        "blocked": 2,
         "warnings": 0,
         "reasonCategoryCounts": {
           "Meta-Graph-Widerspruch": 1,
-          "Gewinnspiel": 1
+          "Gewinnspiel": 1,
+          "kein konkreter Deal": 1
         }
       },
       "Apify Instagram Vienna Food Offers": {
@@ -221,24 +222,24 @@
         }
       },
       "Meta Instagram Business Discovery": {
-        "total": 15,
+        "total": 14,
         "allowed": 0,
-        "blocked": 15,
+        "blocked": 14,
         "warnings": 0,
         "reasonCategoryCounts": {
           "ausgeschlossene Quelle": 2,
-          "kein konkreter Deal": 12,
+          "kein konkreter Deal": 11,
           "abgelaufen": 1,
           "selbst syndiziert": 2
         }
       },
       "Meta Instagram Hashtag API": {
-        "total": 4,
-        "allowed": 0,
-        "blocked": 4,
-        "warnings": 0,
+        "total": 7,
+        "allowed": 2,
+        "blocked": 5,
+        "warnings": 2,
         "reasonCategoryCounts": {
-          "kein konkreter Deal": 2,
+          "kein konkreter Deal": 3,
           "sonstiges": 1,
           "ausgeschlossene Quelle": 1
         }
@@ -253,17 +254,89 @@
         }
       },
       "tiktok-deals-scanner": {
-        "total": 1,
-        "allowed": 0,
+        "total": 3,
+        "allowed": 2,
         "blocked": 1,
-        "warnings": 0,
+        "warnings": 2,
         "reasonCategoryCounts": {
           "kein konkreter Deal": 1
         }
       }
     }
   },
-  "allowed": [],
+  "allowed": [
+    {
+      "id": "meta-ig-18171215689462768",
+      "title": "50 % Rabatt auf ausgewählten Edelsteinschmuck",
+      "brand": "Weihnachtsgeschenk",
+      "source": "Meta Instagram Hashtag API",
+      "url": "https://www.instagram.com/p/DfAxa_hm_Cj/",
+      "reasons": [],
+      "warnings": [
+        "Inhalt prüfen: Caption-Reste oder Emoji-Codes im sichtbaren Text; Gültigkeitszeitraum nicht belegt; nicht als unbegrenzt gültig behandeln",
+        "kein Ablaufdatum gefunden"
+      ],
+      "sourceDate": "2026-10-27T20:59:46.000Z",
+      "sourceDateSource": "url.instagramShortcode",
+      "sourceAgeDays": 0,
+      "expiryDate": "",
+      "expirySource": "",
+      "urlStatus": "HTTP 200"
+    },
+    {
+      "id": "meta-ig-18115574093137001",
+      "title": "Bezirk 🎬 Auf Russisch mit deutschen Untertiteln 🎟 Eintritt frei.",
+      "brand": "Allin",
+      "source": "Meta Instagram Hashtag API",
+      "url": "https://www.instagram.com/reel/DfAdjy0MP2b/",
+      "reasons": [],
+      "warnings": [
+        "Inhalt prüfen: Caption-Reste oder Emoji-Codes im sichtbaren Text",
+        "startet am 2026-11-11T00:00:00.000Z"
+      ],
+      "sourceDate": "2026-10-27T18:06:12.000Z",
+      "sourceDateSource": "url.instagramShortcode",
+      "sourceAgeDays": 0,
+      "expiryDate": "2026-11-11T23:59:59.999Z",
+      "expirySource": "deal.structured",
+      "urlStatus": "HTTP 200"
+    },
+    {
+      "id": "tiktok-j10toa",
+      "title": "Gratis Döner bei Rotenturmstraße 19",
+      "brand": "Rotenturmstraße 19",
+      "source": "tiktok-deals-scanner",
+      "url": "https://www.tiktok.com/@eatinvienna/video/7701300982130461974",
+      "reasons": [],
+      "warnings": [
+        "Inhalt prüfen: Caption-Reste oder Emoji-Codes im sichtbaren Text",
+        "startet am 2026-10-31"
+      ],
+      "sourceDate": "2026-10-27T11:01:04.000Z",
+      "sourceDateSource": "url.tiktokVideoId",
+      "sourceAgeDays": 0,
+      "expiryDate": "2026-10-31",
+      "expirySource": "deal.expires",
+      "urlStatus": "HTTP 200"
+    },
+    {
+      "id": "tiktok-gof8m0",
+      "title": "Westfield Club Angebot",
+      "brand": "Westfield Club",
+      "source": "tiktok-deals-scanner",
+      "url": "https://www.tiktok.com/@aloneinwien/video/7701048818862755094",
+      "reasons": [],
+      "warnings": [
+        "Inhalt prüfen: Caption-Reste oder Emoji-Codes im sichtbaren Text; Nur Stadt/Region angegeben; Filiale oder teilnehmende Standorte prüfen"
+      ],
+      "sourceDate": "2026-10-26T18:42:33.000Z",
+      "sourceDateSource": "url.tiktokVideoId",
+      "sourceAgeDays": 1,
+      "expiryDate": "",
+      "expirySource": "deal.expires",
+      "urlStatus": "HTTP 200"
+    }
+  ],
   "blocked": [
     {
       "id": "jesuszentrum-events-20261026",
@@ -908,7 +981,7 @@
       "warnings": [
         "kein Ablaufdatum gefunden"
       ],
-      "sourceDate": "2026-10-27T20:44:39.269Z",
+      "sourceDate": "2026-10-27T21:37:42.495Z",
       "sourceDateSource": "url.publicationDate",
       "sourceAgeDays": 0,
       "expiryDate": "",
@@ -3518,6 +3591,23 @@
       "urlStatus": "HTTP 200"
     },
     {
+      "id": "igap-5mdz38",
+      "title": "Dress to kill. Drink on us. This Halloween, everyone in costume gets a complimentary Blood Orange Margarita. O",
+      "brand": "Santos Mexican Grill & Bar",
+      "source": "Apify 2 Vienna Food Discovery",
+      "url": "https://www.instagram.com/p/De_rgX5tIoU/",
+      "reasons": [
+        "kein konkretes Angebot erkennbar"
+      ],
+      "warnings": [],
+      "sourceDate": "2026-10-27T10:48:49.000Z",
+      "sourceDateSource": "url.instagramShortcode",
+      "sourceAgeDays": 0,
+      "expiryDate": "2026-10-30T10:51:13.000Z",
+      "expirySource": "deal.structured",
+      "urlStatus": "HTTP 200"
+    },
+    {
       "id": "joe-omv-viva-free-taste-19nkk2p",
       "title": "Gratis Coconut Strawberry Sunset testen",
       "brand": "OMV VIVA",
@@ -3686,8 +3776,8 @@
     {
       "id": "meta-ig-17951465712057908",
       "title": "VIP-Dinner mit Sitzplatz in Reihe 1 oder 2, Welcome Drink, Meet & Greet mit 15 Finalistinnen, Afterparty für 70 €",
-      "brand": "AfriVision Austria",
-      "source": "Meta Instagram Business Discovery",
+      "brand": "Afri Vision",
+      "source": "Meta Instagram Hashtag API",
       "url": "https://www.instagram.com/p/DfASj2nifSj/",
       "reasons": [
         "kein konkretes Angebot erkennbar"
