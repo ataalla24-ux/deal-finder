@@ -1,11 +1,11 @@
 {
-  "generatedAt": "2026-10-27T15:39:53.683Z",
+  "generatedAt": "2026-10-27T15:47:09.301Z",
   "summary": {
     "filesConsidered": 32,
-    "totalCandidates": 820,
-    "uniqueCandidates": 723,
+    "totalCandidates": 821,
+    "uniqueCandidates": 722,
     "distinctCandidates": 768,
-    "duplicateClusters": 45,
+    "duplicateClusters": 46,
     "topHealthySources": [
       {
         "sourceKey": "instagram-apify2",
@@ -32,10 +32,10 @@
         "totalDeals": 13
       },
       {
-        "sourceKey": "wien-combined",
-        "sourceLabel": "Wien Deals Combined Graph",
-        "healthScore": 72,
-        "totalDeals": 2
+        "sourceKey": "instagram-ai",
+        "sourceLabel": "Instagram AI Agent",
+        "healthScore": 65,
+        "totalDeals": 50
       }
     ],
     "topMissionSources": [
@@ -86,18 +86,18 @@
         "fresh1dCount": 0
       },
       {
+        "sourceKey": "meta-instagram",
+        "sourceLabel": "Meta Instagram Graph",
+        "coverageScore": 65,
+        "totalDeals": 105,
+        "fresh1dCount": 11
+      },
+      {
         "sourceKey": "gastro2",
         "sourceLabel": "Firecrawl Key 1 - Gastro",
         "coverageScore": 62,
         "totalDeals": 111,
         "fresh1dCount": 0
-      },
-      {
-        "sourceKey": "meta-instagram",
-        "sourceLabel": "Meta Instagram Graph",
-        "coverageScore": 62,
-        "totalDeals": 104,
-        "fresh1dCount": 8
       },
       {
         "sourceKey": "firecrawl4",
@@ -159,16 +159,16 @@
         "totalDeals": 10
       },
       {
-        "sourceKey": "meta-instagram",
-        "sourceLabel": "Meta Instagram Graph",
-        "sourceWeightScore": 61,
-        "totalDeals": 104
-      },
-      {
         "sourceKey": "instagram-ai",
         "sourceLabel": "Instagram AI Agent",
         "sourceWeightScore": 61,
         "totalDeals": 50
+      },
+      {
+        "sourceKey": "meta-instagram",
+        "sourceLabel": "Meta Instagram Graph",
+        "sourceWeightScore": 61,
+        "totalDeals": 105
       }
     ],
     "topSourcesToFix": [
@@ -509,169 +509,6 @@
       "sourceWeightScore": 57
     },
     {
-      "sourceKey": "wien-combined",
-      "file": "deals-pending-wien-combined.json",
-      "sourceLabel": "Wien Deals Combined Graph",
-      "totalDeals": 2,
-      "uniqueDeals": 2,
-      "duplicateDeals": 0,
-      "duplicateAcrossSources": 0,
-      "fresh1dCount": 2,
-      "fresh7dCount": 2,
-      "viennaCount": 2,
-      "foodDrinkCount": 0,
-      "promoCount": 1,
-      "missingUrlCount": 0,
-      "sampleTitles": [
-        "💚❄️ 2 € Rabatt auf unsere 1-Liter- und 1,5-Liter-Eisboxen!",
-        "Für nur 1 € drehst du am Automaten und lässt dich überraschen, welches Motiv du bekommst!"
-      ],
-      "lastRun": {
-        "status": "completed-with-errors",
-        "startedAt": "2026-10-27T12:37:09.149Z",
-        "finishedAt": "2026-10-27T12:38:33.628Z",
-        "durationMs": 84479,
-        "counts": {
-          "rawCandidates": 45,
-          "normalizedCandidates": 2,
-          "verifiedCandidates": 2,
-          "previousDeals": 0,
-          "acceptedDeals": 2,
-          "rejectedDeals": 41
-        },
-        "rejectedByReason": {
-          "no-concrete-offer": 29,
-          "missing-vienna-evidence": 1,
-          "general-recommendation": 7,
-          "alcohol-offer": 3,
-          "excluded-promotion-type": 1
-        },
-        "errors": [
-          "#wien: Instagram scan paused: request-budget"
-        ],
-        "reportFile": "deal-pipeline-last-run-wien-combined.json"
-      },
-      "uniqueRate": 1,
-      "duplicateRate": 0,
-      "fresh1dRate": 1,
-      "fresh7dRate": 1,
-      "viennaRate": 1,
-      "foodDrinkRate": 0,
-      "promoRate": 0.5,
-      "missingUrlRate": 0,
-      "averageQualityScore": 83,
-      "topCategories": [
-        {
-          "value": "shopping",
-          "count": 2
-        }
-      ],
-      "topTypes": [
-        {
-          "value": "gratis",
-          "count": 1
-        },
-        {
-          "value": "rabatt",
-          "count": 1
-        }
-      ],
-      "issues": [
-        "geringe Food-/Drink-Relevanz"
-      ],
-      "healthScore": 72,
-      "missionFitScore": 51,
-      "coverageScore": 10,
-      "precisionScore": 65,
-      "sourceWeightScore": 51
-    },
-    {
-      "sourceKey": "meta-instagram",
-      "file": "deals-pending-meta-instagram.json",
-      "sourceLabel": "Meta Instagram Graph",
-      "totalDeals": 104,
-      "uniqueDeals": 68,
-      "duplicateDeals": 36,
-      "duplicateAcrossSources": 24,
-      "fresh1dCount": 8,
-      "fresh7dCount": 99,
-      "viennaCount": 104,
-      "foodDrinkCount": 67,
-      "promoCount": 55,
-      "missingUrlCount": 0,
-      "sampleTitles": [
-        "15% Rabatt für die Regenbogen Family",
-        "Wien (noch zu bestätigen) 📱 Mitbringen: Dein aufgeladenes Smartphone (Ladekabel nicht vergessen!) 💜 Das erwartet dich: ✨ Kostenlos & fre",
-        "💥 VERSCHIEDENE MODELLE, EIN PREIS: NUR 29,99 €!"
-      ],
-      "lastRun": null,
-      "uniqueRate": 0.7,
-      "duplicateRate": 0.2,
-      "fresh1dRate": 0.1,
-      "fresh7dRate": 1,
-      "viennaRate": 1,
-      "foodDrinkRate": 0.6,
-      "promoRate": 0.5,
-      "missingUrlRate": 0,
-      "averageQualityScore": 87.1,
-      "topCategories": [
-        {
-          "value": "essen",
-          "count": 55
-        },
-        {
-          "value": "shopping",
-          "count": 21
-        },
-        {
-          "value": "kaffee",
-          "count": 6
-        },
-        {
-          "value": "kultur",
-          "count": 5
-        },
-        {
-          "value": "reisen",
-          "count": 5
-        },
-        {
-          "value": "supermarkt",
-          "count": 5
-        }
-      ],
-      "topTypes": [
-        {
-          "value": "rabatt",
-          "count": 62
-        },
-        {
-          "value": "gratis",
-          "count": 33
-        },
-        {
-          "value": "bogo",
-          "count": 5
-        },
-        {
-          "value": "freebie",
-          "count": 2
-        },
-        {
-          "value": "gewinnspiel",
-          "count": 2
-        }
-      ],
-      "issues": [
-        "wenige Deals sind frischer als 1 Tag"
-      ],
-      "healthScore": 65,
-      "missionFitScore": 52,
-      "coverageScore": 62,
-      "precisionScore": 67,
-      "sourceWeightScore": 61
-    },
-    {
       "sourceKey": "instagram-ai",
       "file": "deals-pending-instagram-ai.json",
       "sourceLabel": "Instagram AI Agent",
@@ -814,6 +651,92 @@
       "sourceWeightScore": 59
     },
     {
+      "sourceKey": "meta-instagram",
+      "file": "deals-pending-meta-instagram.json",
+      "sourceLabel": "Meta Instagram Graph",
+      "totalDeals": 105,
+      "uniqueDeals": 68,
+      "duplicateDeals": 37,
+      "duplicateAcrossSources": 25,
+      "fresh1dCount": 11,
+      "fresh7dCount": 101,
+      "viennaCount": 105,
+      "foodDrinkCount": 67,
+      "promoCount": 56,
+      "missingUrlCount": 0,
+      "sampleTitles": [
+        "Wir haben wieder täglich zwei wechselnde Mittagsmenüs für euch vorbereitet.",
+        "🧡 Wussten Sie, wie vielfältig das Angebot von 1450 Wien ist?",
+        "Für nur 1 € drehst du am Automaten und lässt dich überraschen, welches Motiv du bekommst!"
+      ],
+      "lastRun": null,
+      "uniqueRate": 0.6,
+      "duplicateRate": 0.2,
+      "fresh1dRate": 0.1,
+      "fresh7dRate": 1,
+      "viennaRate": 1,
+      "foodDrinkRate": 0.6,
+      "promoRate": 0.5,
+      "missingUrlRate": 0,
+      "averageQualityScore": 87,
+      "topCategories": [
+        {
+          "value": "essen",
+          "count": 55
+        },
+        {
+          "value": "shopping",
+          "count": 22
+        },
+        {
+          "value": "kaffee",
+          "count": 6
+        },
+        {
+          "value": "kultur",
+          "count": 5
+        },
+        {
+          "value": "reisen",
+          "count": 5
+        },
+        {
+          "value": "supermarkt",
+          "count": 5
+        }
+      ],
+      "topTypes": [
+        {
+          "value": "rabatt",
+          "count": 62
+        },
+        {
+          "value": "gratis",
+          "count": 34
+        },
+        {
+          "value": "bogo",
+          "count": 5
+        },
+        {
+          "value": "freebie",
+          "count": 2
+        },
+        {
+          "value": "gewinnspiel",
+          "count": 2
+        }
+      ],
+      "issues": [
+        "wenige Deals sind frischer als 1 Tag"
+      ],
+      "healthScore": 63,
+      "missionFitScore": 52,
+      "coverageScore": 65,
+      "precisionScore": 67,
+      "sourceWeightScore": 61
+    },
+    {
       "sourceKey": "instagram-verified",
       "file": "deals-pending-instagram-verified.json",
       "sourceLabel": "Instagram",
@@ -875,6 +798,84 @@
       "coverageScore": 11,
       "precisionScore": 56,
       "sourceWeightScore": 45
+    },
+    {
+      "sourceKey": "wien-combined",
+      "file": "deals-pending-wien-combined.json",
+      "sourceLabel": "Wien Deals Combined Graph",
+      "totalDeals": 2,
+      "uniqueDeals": 1,
+      "duplicateDeals": 1,
+      "duplicateAcrossSources": 1,
+      "fresh1dCount": 2,
+      "fresh7dCount": 2,
+      "viennaCount": 2,
+      "foodDrinkCount": 0,
+      "promoCount": 1,
+      "missingUrlCount": 0,
+      "sampleTitles": [
+        "💚❄️ 2 € Rabatt auf unsere 1-Liter- und 1,5-Liter-Eisboxen!",
+        "Für nur 1 € drehst du am Automaten und lässt dich überraschen, welches Motiv du bekommst!"
+      ],
+      "lastRun": {
+        "status": "completed-with-errors",
+        "startedAt": "2026-10-27T12:37:09.149Z",
+        "finishedAt": "2026-10-27T12:38:33.628Z",
+        "durationMs": 84479,
+        "counts": {
+          "rawCandidates": 45,
+          "normalizedCandidates": 2,
+          "verifiedCandidates": 2,
+          "previousDeals": 0,
+          "acceptedDeals": 2,
+          "rejectedDeals": 41
+        },
+        "rejectedByReason": {
+          "no-concrete-offer": 29,
+          "missing-vienna-evidence": 1,
+          "general-recommendation": 7,
+          "alcohol-offer": 3,
+          "excluded-promotion-type": 1
+        },
+        "errors": [
+          "#wien: Instagram scan paused: request-budget"
+        ],
+        "reportFile": "deal-pipeline-last-run-wien-combined.json"
+      },
+      "uniqueRate": 0.5,
+      "duplicateRate": 0.5,
+      "fresh1dRate": 1,
+      "fresh7dRate": 1,
+      "viennaRate": 1,
+      "foodDrinkRate": 0,
+      "promoRate": 0.5,
+      "missingUrlRate": 0,
+      "averageQualityScore": 83,
+      "topCategories": [
+        {
+          "value": "shopping",
+          "count": 2
+        }
+      ],
+      "topTypes": [
+        {
+          "value": "gratis",
+          "count": 1
+        },
+        {
+          "value": "rabatt",
+          "count": 1
+        }
+      ],
+      "issues": [
+        "geringe Food-/Drink-Relevanz",
+        "hohe Überschneidung mit anderen Quellen"
+      ],
+      "healthScore": 61,
+      "missionFitScore": 51,
+      "coverageScore": 10,
+      "precisionScore": 61,
+      "sourceWeightScore": 48
     },
     {
       "sourceKey": "firecrawl4",
