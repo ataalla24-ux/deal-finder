@@ -1,12 +1,12 @@
 name: "Featured Deal Picks"
-# Runs repeatedly after the digest window, so later Slack replies are picked up too.
+# Start before the morning push and retain later Slack picks: 34 instead of 44 runs/day.
 # Reply to the Slack digest thread with:
 # - "deal 3" or "3" for Deal des Tages
 # - "woche 3" / "Wochendeal 3" / "week 3" for Deal der Woche
 
 on:
   schedule:
-    - cron: '*/15 11-21 * * *'
+    - cron: '7,37 5-21 * * *'
   workflow_dispatch:
 
 concurrency:

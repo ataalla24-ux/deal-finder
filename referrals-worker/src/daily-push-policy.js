@@ -1,4 +1,5 @@
 import { selectNativeDailyDeal } from '../../scraper/native-weekly-utils.js';
+import { discoveryRejection, foodDiscoveryPriority } from '../../scraper/deal-discovery-policy.js';
 
 export const PUSH_APP_ID = 'com.stefanataalla.freefinderwien';
 const formatter = new Intl.DateTimeFormat('en-CA', {
@@ -16,8 +17,28 @@ const isoDay = value => {
   return Number.isFinite(date.getTime()) && date.toISOString().slice(0, 10) === value ? value : '';
 };
 
-export function eligiblePushDeals(feed, state, now = Date.now()) {
+export function pushDealExclusionReason(deal, now = Date.now()) {
   const { day } = viennaClock(now);
+  if (deal.hidden || deal.status === 'expired' || ['expired', 'invalid'].includes(deal.validity?.status)) return 'removed_or_expired';
+  if (deal.pipelineLifecycle?.manualDecision !== 'approved') return 'not_approved';
+  if (deal.dateConfidence !== 'high') return 'unverified_dates';
+  if (!/^[\w-]{1,160}$/.test(deal.id || '') || !deal.title?.trim() || deal.title.length > 110 ||
+      internal.test([deal.title, deal.brand, deal.description, deal.distance].join(' '))) return 'unsafe_copy';
+  const rejection = discoveryRejection(deal);
+  if (rejection) return rejection;
+  if (!foodDiscoveryPriority(deal)) return 'not_food_or_drink';
+  const start = isoDay(deal.validFrom || deal.validOn);
+  const end = isoDay(deal.validUntil || deal.validOn || deal.expires);
+  if ((deal.validFrom || deal.validOn) && !start) return 'unverified_dates';
+  if (!end || !['range', 'end', 'date', 'fixed', 'single', 'single_date'].includes(deal.expiryKind)) return 'unverified_dates';
+  if (end < day) return 'expired';
+  if (start && (start > day || start > end)) return 'not_started';
+  const timing = [deal.expiryDisplayText, deal.description, deal.title].join(' ');
+  if (/\b\d{1,2}[:.]\d{2}\s*(?:uhr|[-–]|bis)|\b(?:montag|dienstag|mittwoch|donnerstag|freitag|samstag|sonntag|happy hour)\b/i.test(timing)) return 'restricted_hours';
+  return '';
+}
+
+export function eligiblePushDeals(feed, state, now = Date.now()) {
   const updated = Date.parse(feed?.lastUpdated);
   if (!Number.isFinite(updated) || now - updated > 36 * 3600000 || updated > now + 300000 ||
       state?.ok !== true || !Array.isArray(state.overrides) || !Array.isArray(feed?.deals)) return [];
@@ -25,18 +46,7 @@ export function eligiblePushDeals(feed, state, now = Date.now()) {
   return feed.deals.flatMap(original => {
     const override = overrides.get(original.id);
     const deal = { ...original, ...Object.fromEntries(Object.entries(override || {}).filter(([, v]) => v !== '')) };
-    if (deal.hidden || deal.status === 'expired' || ['expired', 'invalid'].includes(deal.validity?.status)) return [];
-    if (deal.pipelineLifecycle?.manualDecision !== 'approved' || deal.dateConfidence !== 'high') return [];
-    if (!/^[\w-]{1,160}$/.test(deal.id || '') || !deal.title?.trim() || deal.title.length > 110 ||
-        internal.test([deal.title, deal.brand, deal.description, deal.distance].join(' '))) return [];
-    const start = isoDay(deal.validFrom || deal.validOn);
-    const end = isoDay(deal.validUntil || deal.validOn || deal.expires);
-    // Only explicit, source-grounded calendar dates. Unknown/recurring/time-limited offers need review.
-    if ((deal.validFrom || deal.validOn) && !start) return [];
-    if (!end || end < day || (start && (start > day || start > end)) || !['range', 'end', 'date', 'fixed', 'single', 'single_date'].includes(deal.expiryKind)) return [];
-    const timing = [deal.expiryDisplayText, deal.description, deal.title].join(' ');
-    if (/\b\d{1,2}[:.]\d{2}\s*(?:uhr|[-–]|bis)|\b(?:montag|dienstag|mittwoch|donnerstag|freitag|samstag|sonntag|happy hour)\b/i.test(timing)) return [];
-    return [deal];
+    return pushDealExclusionReason(deal, now) ? [] : [deal];
   });
 }
 
@@ -45,6 +55,16 @@ export function pickDailyPush(feed, state, recentIds, now = Date.now(), featured
   // Match the app's published daily selection. Never rename another deal as the daily deal.
   return featured?.date === viennaClock(now).day
     ? candidates.find(d => d.id === featured.dealId) || null : null;
+}
+
+export function dailyPushDecision(feed, state, recentIds, now = Date.now(), featured = state?.dailyDeal) {
+  const selected = pickDailyPush(feed, state, recentIds, now, featured);
+  if (selected) return { eligible: true, reason: 'ready' };
+  if (featured?.date !== viennaClock(now).day) return { eligible: false, reason: 'missing_current_selection' };
+  if (eligiblePushDeals(feed, state, now).some(d => d.id === featured.dealId) && recentIds.includes(featured.dealId)) {
+    return { eligible: false, reason: 'repeat_suppressed' };
+  }
+  return { eligible: false, reason: 'no_current_deal' };
 }
 
 export function pickMarketingPush(feed, state, recentIds, now = Date.now()) {
@@ -70,10 +90,11 @@ export function pushSlot(now = Date.now()) {
 export function pickDigestDeals(feed, state, recentIds, now = Date.now(), type = digestType(now)) {
   if (!digestTypes.includes(type)) return [];
   const published = d => Date.parse(d.pipelineLifecycle?.publishedAt || d.approvedAt || '');
-  // The recap covers the last seven days, not expired historical offers or scraped post dates.
+  // New-deal tips remain seven-day-only; the recap may include older, still-valid offers.
   const candidates = eligiblePushDeals(feed, state, now).filter(d => {
     const at = published(d);
-    return !recentIds.includes(d.id) && Number.isFinite(at) && at <= now && at > now - 7 * 86400000;
+    const horizon = type === 'weekly_digest' ? 30 : 7;
+    return !recentIds.includes(d.id) && Number.isFinite(at) && at <= now && at > now - horizon * 86400000;
   });
   const score = d => Number.isFinite(Number(d.votes)) ? Math.max(0, Number(d.votes)) : 0;
   candidates.sort((a, b) => (type === 'weekly_digest' ? score(b) - score(a) : 0) ||

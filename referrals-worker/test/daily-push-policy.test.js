@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { dailyMessage, eligiblePushDeals, normalizePushRegistration, pickDailyPush, pickMarketingPush, pushAudience, marketingDay, viennaClock, PUSH_APP_ID } from '../src/daily-push-policy.js';
+import { dailyMessage, dailyPushDecision, eligiblePushDeals, normalizePushRegistration, pickDailyPush, pickMarketingPush, pushAudience, marketingDay, viennaClock, PUSH_APP_ID } from '../src/daily-push-policy.js';
 
 const now = Date.parse('2026-10-08T07:00:00Z');
 const deal = { id: 'verified-pizza', title: '1+1 Pizza gratis', brand: 'Testrestaurant', category: 'essen',
@@ -81,6 +81,19 @@ test('moderation removal and edits apply even before CDN feed updates', () => {
 });
 test('no repeating deal even when daily selection pins it', () => {
   assert.equal(pickDailyPush(feed, { ...state, dailyDeal: { dealId: deal.id, date: '2026-10-08' } }, [deal.id], now), null);
+  assert.equal(dailyPushDecision(feed, state, [deal.id], now).reason, 'repeat_suppressed');
+  assert.equal(dailyPushDecision(feed, state, [], now).reason, 'ready');
+  assert.equal(dailyPushDecision(feed, state, [], now, null).reason, 'missing_current_selection');
+});
+
+test('notifications stay food-focused and reject alcohol without blocking explicit alcohol-free products', () => {
+  for (const edits of [{ title: '50 % Rabatt auf Schuhe', category: 'essen' },
+    { title: '1+1 Bier gratis' }, { title: 'Gratis Wein zur Pizza' }, { title: 'Gratis Kinoticket', category: 'kultur' }]) {
+    const offers = { ...feed, deals: [{ ...deal, ...edits }] };
+    assert.deepEqual(eligiblePushDeals(offers, state, now), []);
+    assert.equal(pickMarketingPush(offers, state, [], now), null);
+  }
+  assert.equal(eligiblePushDeals({ ...feed, deals: [{ ...deal, title: '1+1 alkoholfreies Bier gratis' }] }, state, now).length, 1);
 });
 test('registration requires exact app, permission, plan, metadata and valid clock', () => {
   const body = { bundleId: PUSH_APP_ID, token: 'ab'.repeat(32), appDeviceId: 'test-installation-0001',

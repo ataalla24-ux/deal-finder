@@ -77,13 +77,21 @@ test('recap sorts current recently published deals by votes, then publication ti
 test('no expired, old, unknown-date, future, unapproved or internally contaminated recap', () => {
   for (const edits of [{ validUntil: '2026-10-10' }, { dateConfidence: 'low' }, { title: 'Manuell prüfen' },
     { validFrom: '2026-10-12' }, { pipelineLifecycle: { manualDecision: 'pending', publishedAt: '2026-10-08' } },
-    { pipelineLifecycle: { manualDecision: 'approved', publishedAt: '2026-10-04T16:05:00Z' } },
+    { pipelineLifecycle: { manualDecision: 'approved', publishedAt: '2026-09-01T16:05:00Z' } },
     { pipelineLifecycle: { manualDecision: 'approved', publishedAt: '2026-10-12' } },
     { pipelineLifecycle: { manualDecision: 'approved' }, pubDate: '2026-10-08' }]) {
     assert.deepEqual(pickDigestDeals(feed([deal('bad', edits)]), state, [], now), [], JSON.stringify(edits));
   }
   assert.deepEqual(pickDigestDeals(feed([deal('hidden')]), { ok: true, overrides: [{ dealId: 'hidden', hidden: true }] }, [], now), []);
   assert.deepEqual(pickDigestDeals({ ...feed([deal('old')]), lastUpdated: '2026-10-01' }, state, [], now), []);
+});
+
+test('weekly recap includes ongoing offers, without calling them new or repeating a recent offer', () => {
+  const ongoing = deal('ongoing', { pipelineLifecycle: { manualDecision: 'approved', publishedAt: '2026-09-25T10:00:00Z' } });
+  assert.equal(pickDigestDeals(feed([ongoing]), state, [], now, 'weekly_digest')[0]?.id, 'ongoing');
+  assert.deepEqual(pickDigestDeals(feed([ongoing]), state, [], now, 'discovery_digest'), []);
+  assert.deepEqual(pickDigestDeals(feed([ongoing]), state, ['ongoing'], now, 'weekly_digest'), []);
+  assert.match(campaignMessage({ type: 'weekly_digest', deal: ongoing, deals: [ongoing] }).body, /^Noch nutzbar:/);
 });
 
 test('digest text is grounded in complete offer titles and available in both languages', () => {

@@ -11,6 +11,9 @@ import { fileURLToPath } from 'url';
 import { cleanText, extractDealsFromThreadMessages, extractSlackMessageText } from './slack-digest-utils.js';
 import { normalizeDealRecord } from './deal-normalization-utils.js';
 import { inspectDealUrlHealth } from './expiry-utils.js';
+import { discoveryRejection, foodDiscoveryPriority } from './deal-discovery-policy.js';
+import { featuredSelectionHistory, recentFeaturedDealIds } from './featured-selection-history.js';
+import { pushDealExclusionReason } from '../referrals-worker/src/daily-push-policy.js';
 import { cachedSourceReview, loadSourceReviewCache, rememberSourceReview, reviewClockContext,
     reviewFingerprint, saveSourceReviewCache } from './source-review-cache.js';
 
@@ -810,25 +813,23 @@ async function selectAutomaticFeaturedDeal(approvedDeals, options = {}) {
     const kind = options.kind || 'daily';
     const now = options.now instanceof Date ? options.now : new Date();
     const excludedIds = options.excludedIds instanceof Set ? options.excludedIds : new Set();
+    const recentIds = options.recentDealIds instanceof Set ? options.recentDealIds : new Set();
     const liveDeals = approvedDeals
         .filter((deal) => isFeaturedDealStillLive(deal, now))
         .filter(isAutomaticFeaturedPresentationReady)
-        .filter((deal) => !excludedIds.has(cleanText(deal.id || '')));
+        .filter((deal) => !excludedIds.has(cleanText(deal.id || '')))
+        .filter((deal) => kind !== 'daily' || !recentIds.has(cleanText(deal.id || '')));
 
     if (liveDeals.length === 0) return null;
 
-    const preferred = kind === 'weekly'
-        ? liveDeals.filter((deal) => isFoodDrinkDeal(deal))
-        : liveDeals.filter((deal) => {
-            const category = cleanText(deal.category || '').toLowerCase();
-            return !['kirche', 'gottesdienste', 'gemeinde'].includes(category);
-        });
-    const candidates = kind === 'weekly'
-        ? preferred
-        : (preferred.length > 0 ? preferred : liveDeals);
+    const candidates = liveDeals.filter((deal) => isFoodDrinkDeal(deal) && foodDiscoveryPriority(deal) && !discoveryRejection(deal));
     if (candidates.length === 0) return null;
 
     const sortedCandidates = [...candidates].sort((a, b) => {
+        if (kind === 'daily') {
+            const pushReadyDelta = Number(!pushDealExclusionReason(b, now.getTime())) - Number(!pushDealExclusionReason(a, now.getTime()));
+            if (pushReadyDelta !== 0) return pushReadyDelta;
+        }
         const scoreDelta = scoreAutomaticFeaturedDeal(b, kind, now) - scoreAutomaticFeaturedDeal(a, kind, now);
         if (scoreDelta !== 0) return scoreDelta;
         return parseTime(b.pubDate || b.approvedAt || '') - parseTime(a.pubDate || a.approvedAt || '');
@@ -871,6 +872,8 @@ function saveDealOfTheDay(deal, options = {}) {
         selectionReason: manualPick ? 'slack-pick' : 'automatic-approved-fallback',
         pickedAt: new Date().toISOString()
   };
+
+  output.selectionHistory = featuredSelectionHistory(loadExistingFeaturedDeal('daily'), output, today);
 
   fs.writeFileSync(outputPath, JSON.stringify(output, null, 2));
     console.log('Saved deal-of-the-day.json:', deal.brand, '-', deal.title);
@@ -1012,6 +1015,7 @@ async function main() {
     const fallbackDaily = await selectAutomaticFeaturedDeal(approvedDeals, {
       kind: 'daily',
       excludedIds: automaticExcludedIds,
+      recentDealIds: recentFeaturedDealIds(loadExistingFeaturedDeal('daily'), getViennaDayKey()),
     });
     if (fallbackDaily) {
       console.log(`Automatic daily fallback: ${fallbackDaily.deal.brand} - ${fallbackDaily.deal.title}`);

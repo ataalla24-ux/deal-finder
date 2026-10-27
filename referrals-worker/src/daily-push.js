@@ -1,4 +1,4 @@
-import { campaignMessage, dailyMessage, digestTypes, eligiblePushDeals, normalizePushRegistration, pickDailyPush, pickDigestDeals, pickMarketingPush, pushAudience, pushSlot, viennaClock } from './daily-push-policy.js';
+import { campaignMessage, dailyMessage, dailyPushDecision, digestTypes, eligiblePushDeals, normalizePushRegistration, pickDailyPush, pickDigestDeals, pickMarketingPush, pushAudience, pushSlot, viennaClock } from './daily-push-policy.js';
 import { sendFcmPush } from './fcm-push.js';
 
 const DAY = 86400000;
@@ -110,10 +110,17 @@ export class DailyPushService {
         marketingDays: ['Monday', 'Wednesday', 'Friday'], timeZone: 'Europe/Vienna', hour: 9,
         apnsReady: this.ready('apns'), fcmReady: this.ready('fcm'),
         devices: this.rows('SELECT provider, enabled, COUNT(*) AS count FROM devices GROUP BY provider, enabled'),
+        audiences: this.rows(`SELECT provider, enabled,
+          CASE WHEN json_extract(record, '$.plan') IN ('free', 'pro', 'plus') THEN json_extract(record, '$.plan') ELSE 'unknown' END AS plan,
+          CASE WHEN json_extract(record, '$.environment') IN ('production', 'sandbox', 'development') THEN json_extract(record, '$.environment') ELSE 'unknown' END AS environment,
+          CASE WHEN json_extract(record, '$.policyVersion') IN (1, 2, 3) THEN json_extract(record, '$.policyVersion') ELSE 0 END AS policyVersion,
+          COUNT(*) AS count FROM devices GROUP BY provider, enabled, plan, environment, policyVersion`),
         deliveries: this.rows('SELECT day, state, status, COUNT(*) AS count FROM deliveries GROUP BY day, state, status ORDER BY day DESC LIMIT 40') });
     }
     if (path === '/preview') {
       const source = await this.loadSource();
+      const recentDaily = this.rows('SELECT record FROM campaigns WHERE created > ?', this.now() - 7 * DAY)
+        .map(x => JSON.parse(x.record)).filter(x => (x.type || 'daily_deal') === 'daily_deal').map(x => x.deal.id);
       const deal = pickDailyPush(source.feed, source.state, [], this.now(), source.featured);
       const marketing = pickMarketingPush(source.feed, source.state, [], this.now());
       const digests = Object.fromEntries(digestTypes.map(type => {
@@ -122,6 +129,7 @@ export class DailyPushService {
       }));
       return json({ ok: true, eligible: eligiblePushDeals(source.feed, source.state, this.now()).length,
         dealId: deal?.id || null, message: deal ? dailyMessage(deal) : null,
+        dailyDecision: dailyPushDecision(source.feed, source.state, recentDaily, this.now(), source.featured),
         marketingDealId: marketing?.id || null, digests, sends: 0 });
     }
     if (path === '/tick') {
@@ -171,6 +179,12 @@ export class DailyPushService {
         this.sql.exec('INSERT OR IGNORE INTO deliveries VALUES (?, ?, ?, ?)', deliveryKey, row.id, 'not_scheduled', 0);
         continue;
       }
+      // A test installation or unavailable transport must not consume a real campaign's repeat window.
+      if (device.environment !== 'production' || !this.ready(device.provider)) {
+        this.sql.exec('INSERT OR IGNORE INTO deliveries VALUES (?, ?, ?, ?)', deliveryKey, row.id,
+          device.environment !== 'production' ? 'test_environment' : 'transport_not_ready', 0);
+        continue;
+      }
       const campaignKey = `${day}:${type}`;
       let campaign = this.rows('SELECT record FROM campaigns WHERE day = ?', campaignKey)[0];
       campaign = campaign ? JSON.parse(campaign.record) : null;
@@ -183,7 +197,8 @@ export class DailyPushService {
         const deals = digest ? pickDigestDeals(feed, state, recent, now, type) : [];
         const deal = digest ? deals[0] : type === 'daily_deal' ? pickDailyPush(feed, state, recent, now, featured) : pickMarketingPush(feed, state, recent, now);
         if (!deal) {
-          this.sql.exec('INSERT OR IGNORE INTO deliveries VALUES (?, ?, ?, ?)', deliveryKey, row.id, 'no_current_deal', 0);
+          const reason = type === 'daily_deal' ? dailyPushDecision(feed, state, recent, now, featured).reason : 'no_current_deal';
+          this.sql.exec('INSERT OR IGNORE INTO deliveries VALUES (?, ?, ?, ?)', deliveryKey, row.id, reason, 0);
           continue;
         }
         const expires = now + (60 - new Date(now).getUTCMinutes()) * 60000 - new Date(now).getUTCSeconds() * 1000;
@@ -201,10 +216,6 @@ export class DailyPushService {
       }
       campaign.deal = current;
       if (campaign.deals) campaign.deals = currentDeals;
-      if (!this.ready(device.provider) || device.environment !== 'production') {
-        this.sql.exec('INSERT OR IGNORE INTO deliveries VALUES (?, ?, ?, ?)', deliveryKey, row.id, 'not_ready', 0);
-        continue;
-      }
       // Claim before network I/O. Unknown outcomes are deliberately not retried: providers offer no exactly-once guarantee.
       const claim = this.rows('INSERT OR IGNORE INTO deliveries VALUES (?, ?, ?, ?) RETURNING device', deliveryKey, row.id, 'attempting', 0);
       if (!claim.length) continue;

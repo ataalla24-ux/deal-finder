@@ -56,6 +56,9 @@ for (const text of [
 assert.equal(foodDiscoveryPriority({ title: '1+1 Pizza gratis', category: 'shopping' }), 1);
 assert.equal(foodDiscoveryPriority({ title: 'Gratis Eintritt zum Konzert', category: 'essen' }), 0);
 assert.equal(foodDiscoveryPriority({ title: 'Cocktails 50% guenstiger', category: 'essen' }), 0);
+for (const title of ['Alkoholfreies Bier gratis', 'Non-alcoholic cocktails 50% off', 'Bier 0,0% gratis']) {
+  assert.equal(foodDiscoveryPriority({ title }), 1, 'explicit alcohol-free drinks remain food candidates');
+}
 const sorted = [
   { title: 'Gratis Museumseintritt', qualityScore: 99 },
   { title: 'Gratis Kaffee', qualityScore: 80 },

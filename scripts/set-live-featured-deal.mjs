@@ -2,6 +2,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { getFeaturedDealEligibility, getViennaDayKey, getViennaWeekKey, normalizeFeaturedDeal } from '../scraper/set-daily-deal.js';
+import { featuredSelectionHistory } from '../scraper/featured-selection-history.js';
 
 export async function buildLiveFeaturedPick(deals, dealId, kind, now = new Date()) {
   if (!['daily', 'weekly'].includes(kind)) throw new Error('Invalid featured kind');
@@ -26,6 +27,11 @@ if (process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.me
   const { dealId, kind } = JSON.parse(process.env.FEATURED_PICK_PAYLOAD || '{}');
   const feed = JSON.parse(fs.readFileSync('docs/deals.json', 'utf8'));
   const pick = await buildLiveFeaturedPick(feed.deals, dealId, kind);
+  if (kind === 'daily') {
+    const file = 'docs/deal-of-the-day.json';
+    const previous = fs.existsSync(file) ? JSON.parse(fs.readFileSync(file, 'utf8')) : {};
+    pick.selectionHistory = featuredSelectionHistory(previous, pick, pick.date);
+  }
   fs.writeFileSync(`docs/deal-of-the-${kind === 'daily' ? 'day' : 'week'}.json`, `${JSON.stringify(pick, null, 2)}\n`);
   console.log(`Selected ${kind}: ${dealId}`);
 }

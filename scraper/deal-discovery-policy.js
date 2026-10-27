@@ -45,9 +45,10 @@ export function foodDiscoveryPriority(value) {
   if (discoveryRejection(value)) return 0;
   const title = normalize(value?.title);
   // Do not trust inferred "essen" categories: ticket/software ads had them too.
-  if (FOOD.test(title)) return 1;
+  if (FOOD.test(title) || withoutAlcoholFreeProducts(title).includes('nonalcoholicproduct')) return 1;
   if (/\b(?:eintritt|tickets?|software|workshop|konzert)\b/.test(title)) return 0;
-  return FOOD.test(offerText(value)) ? 1 : 0;
+  const text = offerText(value);
+  return FOOD.test(text) || withoutAlcoholFreeProducts(text).includes('nonalcoholicproduct') ? 1 : 0;
 }
 
 export function filterDiscoveryDeals(deals) {

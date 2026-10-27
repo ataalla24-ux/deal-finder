@@ -20,7 +20,7 @@ async function runtime(t, flags = { DAILY_PUSH_ENABLED: '1', MARKETING_PUSH_ENAB
     export class TestDailyPush extends DailyPushService {
       async alarm() {} // Batches are explicitly driven by tests, never by wall-clock alarms.
       now() { return this.fixture?.now || ${now}; }
-      ready() { return true; }
+      ready() { return this.fixture?.transportReady !== false; }
       async loadSource() { if (this.fixture?.sourceFails) throw Error('test failure'); return this.fixture.source; }
       async send(device, campaign) {
         this.sql.exec('CREATE TABLE IF NOT EXISTS sent (id TEXT, day TEXT)');
@@ -51,7 +51,8 @@ async function runtime(t, flags = { DAILY_PUSH_ENABLED: '1', MARKETING_PUSH_ENAB
     } };
   ` }];
   for (const path of ['referrals-worker/src/index.js', 'referrals-worker/src/public-deal-state-cache.js',
-    'referrals-worker/src/daily-push.js', 'referrals-worker/src/daily-push-policy.js', 'referrals-worker/src/fcm-push.js', 'scraper/native-weekly-utils.js']) {
+    'referrals-worker/src/daily-push.js', 'referrals-worker/src/daily-push-policy.js', 'referrals-worker/src/fcm-push.js',
+    'scraper/deal-discovery-policy.js', 'scraper/native-weekly-utils.js']) {
     modules.push({ type: 'ESModule', path, contents: await readFile(new URL(`../../${path}`, import.meta.url), 'utf8') });
   }
   const mf = new Miniflare(convertV4MiniflareOptions({ compatibilityDate: '2026-03-09', modules,
@@ -91,6 +92,16 @@ test('atomic daily claims survive concurrent batches and repeated invocations', 
   await call('/fixture', { now, source });
   await call('/batch');
   assert.equal((await call('/sent')).length, 1, 'persistent claim, not in-memory dedupe');
+});
+
+test('audience diagnostics expose only fixed enums and aggregate counts, never arbitrary registration values', async t => {
+  const call = await runtime(t);
+  await call('/register', { ...device(1), body: { ...device(1).body,
+    subscriptionPlan: 'private-value@example.test', pushEnvironment: 'private-environment', policyVersion: 0 } });
+  const status = await call('/status');
+  assert.deepEqual(status.audiences, [{ provider: 'apns', enabled: 0, plan: 'unknown', environment: 'unknown', policyVersion: 0, count: 1 }]);
+  assert.ok(!JSON.stringify(status).includes('private-value'));
+  assert.ok(!JSON.stringify(status).includes(device(1).body.token));
 });
 test('token rotation, out-of-order requests and opt-out do not re-enable delivery', async t => {
   const call = await runtime(t);
@@ -155,6 +166,28 @@ test('same deal is not selected again the next day', async t => {
   await call('/fixture', { now: tomorrow, source: { ...source, featured: { ...source.featured, date: '2026-10-09' }, feed: { ...source.feed, lastUpdated: new Date(tomorrow).toISOString() } } });
   await call('/batch');
   assert.equal((await call('/sent')).length, 1);
+  assert.equal((await call('/status')).deliveries.find(d => d.day === '2026-10-09').state, 'repeat_suppressed');
+  assert.equal((await call('/preview')).dailyDecision.reason, 'repeat_suppressed');
+});
+
+test('test devices and unavailable transports cannot consume a real campaign repeat window', async t => {
+  for (const mode of ['sandbox', 'transport']) {
+    const call = await runtime(t);
+    await call('/register', { ...device(1), body: { ...device(1).body,
+      pushEnvironment: mode === 'sandbox' ? 'sandbox' : 'production' } });
+    await call('/fixture', { now, source, transportReady: mode !== 'transport' });
+    await call('/batch');
+    const status = await call('/status');
+    assert.equal(status.deliveries[0].state, mode === 'sandbox' ? 'test_environment' : 'transport_not_ready');
+    assert.equal(status.audiences[0].environment, mode === 'sandbox' ? 'sandbox' : 'production');
+    assert.equal((await call('/preview')).dailyDecision.reason, 'ready');
+    const tomorrow = now + 86400000;
+    await call('/fixture', { now: tomorrow, source: { ...source, featured: { ...source.featured, date: '2026-10-09' },
+      feed: { ...source.feed, lastUpdated: new Date(tomorrow).toISOString() } } });
+    await call('/register', { ...device(2), body: { ...device(2).body, revision: tomorrow } });
+    await call('/batch');
+    assert.ok((await call('/sent')).some(d => d.id === device(2).body.appDeviceId));
+  }
 });
 
 test('Free marketing requires consent and a delivery day; upgrading cannot double-send', async t => {

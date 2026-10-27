@@ -1,0 +1,32 @@
+{
+  "date": "2026-10-27",
+  "request": "Improve useful notifications for Free and Pro after the owner reported no daily Pro message and an unchanged daily offer.",
+  "findings": [
+    "The same IKEA offer was selected on October 25, 26 and 27. Selection ranking did not account for the seven-day push repeat guard.",
+    "A non-production device or unavailable transport could create a real campaign record before being excluded from delivery.",
+    "The old featured workflow started after the morning push window. The new schedule has 34 instead of 44 daily slots, starting before morning.",
+    "The exact reason on the owner's handset is unconfirmed: individual current delivery history was not accessible."
+  ],
+  "changes": [
+    "Bounded in-snapshot featured selection history retains seven complete prior Vienna calendar days and same-day manual picks; current manual choices remain authoritative.",
+    "Automatic selection avoids recent exact deal IDs, prioritizes push-eligible offers and restricts automatic features to supported food and non-alcoholic drinks.",
+    "Test devices and unavailable transports are excluded before creating campaigns; existing claims and campaign records are never reset.",
+    "The weekly recap may include still-valid approved offers published within 30 days. New-deal messages remain limited to the last seven days.",
+    "Private diagnostics distinguish repeat suppression, missing current selection, test environments and unavailable transports; audience data is aggregate-only."
+  ],
+  "unchanged": [
+    "Free/Pro consent, opt-outs, OS permission and all marketing flags",
+    "Pro morning window and existing twice-weekly policy-v3 digest schedule",
+    "Human publication approval, source-grounded dates, freshness and moderation exclusions",
+    "Provider exactly-once claims, unknown-outcome no-retry policy and production-only automatic delivery",
+    "Email sending, existing invitation notifications and optional trial reminders",
+    "All native source files, app versions, Store artifacts, scraping and AI budgets; paid card editor remains disabled"
+  ],
+  "verification": {
+    "localMerchantAndReferralTests": { "passed": 388, "failed": 0, "method": "387-test full run plus 16-test runtime rerun including the additional privacy regression" },
+    "focusedHistoryAndFeaturedTests": "passed",
+    "workerDryRun": "passed",
+    "actualHandsetDelivery": "not tested; no customer or test notification forced",
+    "deploymentEvidence": "See workspace output/notification-improvements-2026-10-27/STATUS.json for final source, deployment and CI evidence."
+  }
+}
