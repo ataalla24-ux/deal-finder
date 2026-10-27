@@ -1,12 +1,18 @@
 {
-  "generatedAt": "2026-10-27T05:08:17.222Z",
+  "generatedAt": "2026-10-27T05:33:21.856Z",
   "summary": {
     "filesConsidered": 32,
-    "totalCandidates": 866,
-    "uniqueCandidates": 759,
-    "distinctCandidates": 805,
-    "duplicateClusters": 46,
+    "totalCandidates": 865,
+    "uniqueCandidates": 763,
+    "distinctCandidates": 807,
+    "duplicateClusters": 44,
     "topHealthySources": [
+      {
+        "sourceKey": "wien-combined",
+        "sourceLabel": "Wien Deals Combined Graph",
+        "healthScore": 79,
+        "totalDeals": 4
+      },
       {
         "sourceKey": "instagram-apify2",
         "sourceLabel": "Apify 2 Vienna Food Discovery",
@@ -30,12 +36,6 @@
         "sourceLabel": "TikTok Scanner",
         "healthScore": 73,
         "totalDeals": 17
-      },
-      {
-        "sourceKey": "wien-combined",
-        "sourceLabel": "Wien Deals Combined Graph",
-        "healthScore": 68,
-        "totalDeals": 5
       }
     ],
     "topMissionSources": [
@@ -48,8 +48,8 @@
       {
         "sourceKey": "wien-combined",
         "sourceLabel": "Wien Deals Combined Graph",
-        "missionFitScore": 82,
-        "totalDeals": 5
+        "missionFitScore": 83,
+        "totalDeals": 4
       },
       {
         "sourceKey": "joe",
@@ -117,8 +117,8 @@
       {
         "sourceKey": "wien-combined",
         "sourceLabel": "Wien Deals Combined Graph",
-        "precisionScore": 78,
-        "totalDeals": 5
+        "precisionScore": 84,
+        "totalDeals": 4
       },
       {
         "sourceKey": "member-benefits",
@@ -153,16 +153,16 @@
         "totalDeals": 109
       },
       {
+        "sourceKey": "wien-combined",
+        "sourceLabel": "Wien Deals Combined Graph",
+        "sourceWeightScore": 69,
+        "totalDeals": 4
+      },
+      {
         "sourceKey": "joe",
         "sourceLabel": "jö Bonus Club",
         "sourceWeightScore": 64,
         "totalDeals": 10
-      },
-      {
-        "sourceKey": "wien-combined",
-        "sourceLabel": "Wien Deals Combined Graph",
-        "sourceWeightScore": 64,
-        "totalDeals": 5
       },
       {
         "sourceKey": "meta-instagram",
@@ -238,6 +238,91 @@
     }
   },
   "sources": [
+    {
+      "sourceKey": "wien-combined",
+      "file": "deals-pending-wien-combined.json",
+      "sourceLabel": "Wien Deals Combined Graph",
+      "totalDeals": 4,
+      "uniqueDeals": 2,
+      "duplicateDeals": 2,
+      "duplicateAcrossSources": 2,
+      "fresh1dCount": 4,
+      "fresh7dCount": 4,
+      "viennaCount": 4,
+      "foodDrinkCount": 2,
+      "promoCount": 4,
+      "missingUrlCount": 0,
+      "sampleTitles": [
+        "Jeden Donnerstag gibt es bei Papa Duck bis Ende 2026 eine „1+1“-Pizza-Aktion 🍕 📍Barnabitengasse 1, 1060 Wien 🕚 Opening hours: 11:00-22:00",
+        "🇬🇧 Every woman deserves to be seen, free and safe.",
+        "1+1 Asian Pizza Donnerstag bis Ende des Jahres!"
+      ],
+      "lastRun": {
+        "status": "completed-with-errors",
+        "startedAt": "2026-10-27T05:30:46.244Z",
+        "finishedAt": "2026-10-27T05:32:28.415Z",
+        "durationMs": 102171,
+        "counts": {
+          "rawCandidates": 65,
+          "normalizedCandidates": 4,
+          "verifiedCandidates": 4,
+          "previousDeals": 0,
+          "acceptedDeals": 4,
+          "rejectedDeals": 57
+        },
+        "rejectedByReason": {
+          "no-concrete-offer": 48,
+          "general-recommendation": 6,
+          "missing-vienna-evidence": 1,
+          "missing-text": 2
+        },
+        "errors": [
+          "#vienna: Instagram scan paused: request-budget"
+        ],
+        "reportFile": "deal-pipeline-last-run-wien-combined.json"
+      },
+      "uniqueRate": 0.5,
+      "duplicateRate": 0.5,
+      "fresh1dRate": 1,
+      "fresh7dRate": 1,
+      "viennaRate": 1,
+      "foodDrinkRate": 0.5,
+      "promoRate": 1,
+      "missingUrlRate": 0,
+      "averageQualityScore": 82.8,
+      "topCategories": [
+        {
+          "value": "essen",
+          "count": 2
+        },
+        {
+          "value": "kultur",
+          "count": 1
+        },
+        {
+          "value": "reisen",
+          "count": 1
+        }
+      ],
+      "topTypes": [
+        {
+          "value": "bogo",
+          "count": 2
+        },
+        {
+          "value": "gratis",
+          "count": 2
+        }
+      ],
+      "issues": [
+        "hohe Überschneidung mit anderen Quellen"
+      ],
+      "healthScore": 79,
+      "missionFitScore": 83,
+      "coverageScore": 16,
+      "precisionScore": 84,
+      "sourceWeightScore": 69
+    },
     {
       "sourceKey": "instagram-apify2",
       "file": "deals-pending-instagram-apify2.json",
@@ -517,92 +602,6 @@
       "sourceWeightScore": 58
     },
     {
-      "sourceKey": "wien-combined",
-      "file": "deals-pending-wien-combined.json",
-      "sourceLabel": "Wien Deals Combined Graph",
-      "totalDeals": 5,
-      "uniqueDeals": 0,
-      "duplicateDeals": 5,
-      "duplicateAcrossSources": 5,
-      "fresh1dCount": 5,
-      "fresh7dCount": 5,
-      "viennaCount": 5,
-      "foodDrinkCount": 4,
-      "promoCount": 3,
-      "missingUrlCount": 0,
-      "sampleTitles": [
-        "Jeden Donnerstag gibt es bei Papa Duck bis Ende 2026 eine „1+1“-Pizza-Aktion 🍕 📍Barnabitengasse 1, 1060 Wien 🕚 Opening hours: 11:00-22:00",
-        "▸ Mo 15:00 Melodic Monday Rooftop Dayparty · Der Dachboden (melodicmonday) ▸ Mi 19:00 Pub Quiz Halloween Special · Club-U (clubu.karlundotto",
-        "Mit dem Crew-Ticket kommt ihr zu viert für 150 € statt 180 €, jede Person mit Welcome Drink und Snacks."
-      ],
-      "lastRun": {
-        "status": "completed-with-errors",
-        "startedAt": "2026-10-26T23:18:33.836Z",
-        "finishedAt": "2026-10-26T23:20:18.387Z",
-        "durationMs": 104551,
-        "counts": {
-          "rawCandidates": 64,
-          "normalizedCandidates": 5,
-          "verifiedCandidates": 5,
-          "previousDeals": 0,
-          "acceptedDeals": 5,
-          "rejectedDeals": 55
-        },
-        "rejectedByReason": {
-          "general-recommendation": 5,
-          "no-concrete-offer": 45,
-          "excluded-promotion-type": 1,
-          "alcohol-offer": 3,
-          "missing-vienna-evidence": 1
-        },
-        "errors": [
-          "#sommerinwien: Instagram scan paused: request-budget"
-        ],
-        "reportFile": "deal-pipeline-last-run-wien-combined.json"
-      },
-      "uniqueRate": 0,
-      "duplicateRate": 1,
-      "fresh1dRate": 1,
-      "fresh7dRate": 1,
-      "viennaRate": 1,
-      "foodDrinkRate": 0.8,
-      "promoRate": 0.6,
-      "missingUrlRate": 0,
-      "averageQualityScore": 87.8,
-      "topCategories": [
-        {
-          "value": "essen",
-          "count": 4
-        },
-        {
-          "value": "technik",
-          "count": 1
-        }
-      ],
-      "topTypes": [
-        {
-          "value": "bogo",
-          "count": 2
-        },
-        {
-          "value": "rabatt",
-          "count": 2
-        },
-        {
-          "value": "gratis",
-          "count": 1
-        }
-      ],
-      "issues": [
-        "hohe Überschneidung mit anderen Quellen"
-      ],
-      "healthScore": 68,
-      "missionFitScore": 82,
-      "coverageScore": 16,
-      "precisionScore": 78,
-      "sourceWeightScore": 64
-    },
-    {
       "sourceKey": "instagram-apify",
       "file": "deals-pending-instagram-apify.json",
       "sourceLabel": "Apify Instagram",
@@ -670,9 +669,9 @@
       "file": "deals-pending-meta-instagram.json",
       "sourceLabel": "Meta Instagram Graph",
       "totalDeals": 113,
-      "uniqueDeals": 69,
-      "duplicateDeals": 44,
-      "duplicateAcrossSources": 33,
+      "uniqueDeals": 71,
+      "duplicateDeals": 42,
+      "duplicateAcrossSources": 28,
       "fresh1dCount": 19,
       "fresh7dCount": 110,
       "viennaCount": 113,
@@ -686,7 +685,7 @@
       ],
       "lastRun": null,
       "uniqueRate": 0.6,
-      "duplicateRate": 0.3,
+      "duplicateRate": 0.2,
       "fresh1dRate": 0.2,
       "fresh7dRate": 1,
       "viennaRate": 1,
@@ -746,7 +745,7 @@
       "healthScore": 64,
       "missionFitScore": 54,
       "coverageScore": 68,
-      "precisionScore": 67,
+      "precisionScore": 68,
       "sourceWeightScore": 62
     },
     {
