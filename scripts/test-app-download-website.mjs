@@ -15,8 +15,23 @@ assert.equal($('link[rel="canonical"]').attr('href'), 'https://freefinder.at/app
 assert.match($('meta[name="robots"]').attr('content'), /noindex/);
 assert.equal($('meta[property="og:url"]').attr('content'), 'https://freefinder.at/app/');
 assert.equal($('meta[property="og:title"]').attr('content'), $('title').text());
-assert.equal($('meta[property="og:image"]').attr('content'), 'https://freefinder.at/icon-512.png');
+assert.equal($('meta[property="og:image"]').attr('content'), 'https://freefinder.at/assets/campaigns/invitation-20261020.jpg');
+assert.equal($('meta[property="og:image"]').length, 1, 'One unambiguous food preview');
+assert.equal($('meta[property="og:image:secure_url"]').attr('content'), $('meta[property="og:image"]').attr('content'));
+assert.equal($('meta[property="og:image:type"]').attr('content'), 'image/jpeg');
+assert.equal($('meta[property="og:image:width"]').attr('content'), '1734');
+assert.equal($('meta[property="og:image:height"]').attr('content'), '907');
+assert.match($('meta[property="og:image:alt"]').attr('content'), /FreeFinder.*Pizza.*Kaffee/);
+assert.equal($('meta[name="twitter:card"]').attr('content'), 'summary_large_image');
 assert.equal($('meta[name="twitter:image"]').attr('content'), $('meta[property="og:image"]').attr('content'));
+assert.equal($('meta[name="application-name"]').attr('content'), 'FreeFinder');
+assert.equal($('meta[property="og:site_name"]').attr('content'), 'FreeFinder');
+for (const [rel, href] of [['icon', '/favicon.ico'], ['apple-touch-icon', '/apple-touch-icon.png']]) {
+  assert.equal($(`link[rel="${rel}"][href="${href}"]`).length, 1, 'Keep the real brand icons separate from the food preview');
+}
+const preview = fs.readFileSync(new URL('../docs/assets/campaigns/invitation-20261020.jpg', import.meta.url));
+assert.equal(preview.readUInt16BE(0), 0xffd8, 'Food preview must be an actual JPEG, not HTML or an icon');
+assert.ok(preview.length < 600000);
 assert.equal($('#primary-store').attr('href'), apple, 'iPhone download works without JavaScript');
 assert.equal($('#alternative-store').attr('href'), google, 'Android download works without JavaScript');
 assert.equal($('script').length, 1, 'Only the existing, first-party routing script');
