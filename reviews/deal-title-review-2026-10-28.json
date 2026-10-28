@@ -1,0 +1,336 @@
+{
+  "reviewedAt": "2026-10-28",
+  "baseline": "reviews/deal-title-review-2026-10-27-result.json",
+  "sourceSha": "eecbe98e99470f963ad81390c8b97cb8175ff2a2",
+  "reviewedCount": 62,
+  "deltaReviewedCount": 17,
+  "copyRelevantDelta": 12,
+  "scope": "Review eight newly approved records and nine changed records against the last publicly verified snapshot. Only title and necessary description corrections; no publication, removal, selection, date, price, vote, consent or API-policy changes.",
+  "changes": [
+    {
+      "id": "g2-3dn8v3",
+      "before": "7 € Rabatt auf Bestellungen über 16 €",
+      "sourceUrl": "https://wolt.com/de-at/aut/vienna/restaurant/schnitzel-stube-by-monte",
+      "reason": "Name the required Wolt ordering channel, retain the strict over-16-EUR threshold, and restore missing offer context without claiming the currently unconfirmed promotion was independently verified.",
+      "evidenceText": "7 € Rabatt auf Bestellungen über 16 €",
+      "evidenceBasis": "Current approved record and same-ID retained gastro2 submission. Direct official Wolt page HTTP 200 confirms merchant/address, but does not visibly confirm this promotion. No extra eligibility, end date or code inferred.",
+      "fields": {
+        "title": "7 € Wolt-Rabatt auf Bestellungen über 16 €",
+        "description": "Laut freigegebenem Angebotsbeleg: 7 € Rabatt auf Bestellungen über 16 € bei Schnitzel Stube by Monte über Wolt, Quellenstraße 115, 1100 Wien. Ein Enddatum ist im Quellbeleg nicht angegeben. Der Rabatt war beim aktuellen öffentlichen Seitenabruf nicht eindeutig sichtbar. Verfügbarkeit und Bedingungen vor der Bestellung in Wolt prüfen."
+      }
+    },
+    {
+      "id": "g2-1jitb0x",
+      "before": "7 € Rabatt auf Bestellungen über 16 €",
+      "sourceUrl": "https://wolt.com/de-at/aut/vienna/restaurant/cigkftem-jgerstrasse",
+      "reason": "Clarify the Wolt-only channel and missing description while preserving the approved amount and strict threshold. Current public promotion visibility remains explicitly uncertain.",
+      "evidenceText": "7 € Rabatt auf Bestellungen über 16 €",
+      "evidenceBasis": "Current approved record and same-ID retained gastro2 submission. Direct official Wolt page HTTP 200 confirms merchant/address, not the 7-EUR promotion. No assumed new-customer eligibility or invented end date.",
+      "fields": {
+        "title": "7 € Wolt-Rabatt auf Bestellungen über 16 €",
+        "description": "Laut freigegebenem Angebotsbeleg: 7 € Rabatt auf Bestellungen über 16 € bei Çiğköftem Jägerstrasse über Wolt, Jägerstrasse 39, 1200 Wien. Ein Enddatum ist im Quellbeleg nicht angegeben. Der Rabatt war beim aktuellen öffentlichen Seitenabruf nicht eindeutig sichtbar. Verfügbarkeit und Bedingungen vor der Bestellung in Wolt prüfen."
+      }
+    },
+    {
+      "id": "gs-567635",
+      "before": "Wechselnde Angebote auf die beliebtesten Fashion Marken mit bis zu 70% Rabatt",
+      "sourceUrl": "https://www.gutscheine.at/about-you-outlet",
+      "reason": "Replace an overlong promotional heading with the concrete category, merchant and maximum discount. Keep the changing-offer limitation and original content in the previously empty description.",
+      "evidenceText": "Wechselnde Angebote auf die beliebtesten Fashion Marken mit bis zu 70% Rabatt",
+      "evidenceBasis": "Same original heading and 01.11.2026 end date visible on a fresh HTTP-200 response from the source publisher. Not an independent merchant redemption test.",
+      "fields": {
+        "title": "Bis zu 70 % Rabatt auf Mode bei ABOUT YOU Outlet",
+        "description": "Wechselnde Angebote auf Fashion-Marken mit bis zu 70 % Rabatt bei ABOUT YOU Outlet. Der verlinkte Eintrag auf Gutscheine.at nennt den 01.11.2026 als Enddatum. Die einzelnen Angebote und verfügbaren Artikel können wechseln; die Bedingungen des jeweiligen Angebots prüfen."
+      }
+    },
+    {
+      "id": "g2-mpwntm",
+      "before": "30 % Rabatt auf Super Deals, z. B. Hähnchenbrust mit Grillgemüse für 7,77 € statt 11,10 € und Gourmet-Wurst für 8,68 € statt 12,40 €",
+      "sourceUrl": "https://www.lieferando.at/speisekarte/marden-1120-wien",
+      "reason": "Move the overlong price list into the missing description, retain the concrete chicken example and required Lieferando channel in the title. Preserve all original example prices and availability conditions.",
+      "evidenceText": "30 % Rabatt auf Super Deals, z. B. Hähnchenbrust mit Grillgemüse für 7,77 € statt 11,10 € und Gourmet-Wurst für 8,68 € statt 12,40 €",
+      "evidenceBasis": "Existing human-approved title, source URL and same-ID retained gastro2 description/availability text. Fresh official-source response is HTTP 403; not bypassed and not claimed as current price verification.",
+      "fields": {
+        "title": "30 % auf Hähnchenbrust & weitere Lieferando-Super-Deals",
+        "description": "Laut freigegebenem Angebotsbeleg bietet Marden in 1120 Wien über Lieferando 30 % Rabatt auf Super Deals, z. B. Hähnchenbrust mit Grillgemüse für 7,77 € statt 11,10 € und Gourmet-Wurst für 8,68 € statt 12,40 €. Nur bei Online-Bestellung während der angezeigten Verfügbarkeit; ein Enddatum ist nicht angegeben. Aktuelle Preise und Bedingungen vor der Bestellung auf Lieferando prüfen."
+      }
+    },
+    {
+      "id": "g2-1ys8kis",
+      "before": "6er Chicken McNuggets 1+1 gratis über die MyMcDonald's-App",
+      "sourceUrl": "https://www.mcdonalds.at/",
+      "reason": "Keep the already clear title. Add the missing explanation that this is an app coupon which must actually be available to the user, not an unconditional in-store free offer or a guaranteed coupon for every account.",
+      "evidenceText": "6er Chicken McNuggets 1+1 gratis über die MyMcDonald's-App",
+      "evidenceBasis": "Direct merchant homepage HTTP 200: 'Gutscheine wie 6er Chicken McNuggets 1+1 gratis' in the MyMcDonald's paragraph. No specific end date published for this example.",
+      "fields": {
+        "title": "6er Chicken McNuggets 1+1 gratis über die MyMcDonald's-App",
+        "description": "Die McDonald's-Website nennt einen 1+1-Gutschein für 6er Chicken McNuggets in der MyMcDonald's-App. Für die Einlösung muss dir dieser Gutschein dort zur Verfügung stehen. Teilnehmende Restaurants und genaue Bedingungen in der App prüfen. Die Website nennt für diesen Gutschein kein Enddatum."
+      }
+    }
+  ],
+  "kept": [
+    {
+      "id": "gs-567555",
+      "reason": "Keep approved copy after current inventory and delta review; no cosmetic rewriting or guessed facts."
+    },
+    {
+      "id": "meta-ig-18113401520589405",
+      "reason": "Keep approved copy after current inventory and delta review; no cosmetic rewriting or guessed facts."
+    },
+    {
+      "id": "meta-ig-18144789436596678",
+      "reason": "Keep approved copy after current inventory and delta review; no cosmetic rewriting or guessed facts."
+    },
+    {
+      "id": "gs-565332",
+      "reason": "Keep approved copy after current inventory and delta review; no cosmetic rewriting or guessed facts."
+    },
+    {
+      "id": "g2-4dgo1u",
+      "reason": "Keep approved copy after current inventory and delta review; no cosmetic rewriting or guessed facts."
+    },
+    {
+      "id": "meta-ig-18117531122064201",
+      "reason": "Keep approved copy after current inventory and delta review; no cosmetic rewriting or guessed facts."
+    },
+    {
+      "id": "power-food-9e109bce4885",
+      "reason": "Keep approved copy after current inventory and delta review; no cosmetic rewriting or guessed facts."
+    },
+    {
+      "id": "tiktok-hog7yq",
+      "reason": "Keep approved copy after current inventory and delta review; no cosmetic rewriting or guessed facts."
+    },
+    {
+      "id": "power-food-eca409ce31f3",
+      "reason": "Keep approved copy after current inventory and delta review; no cosmetic rewriting or guessed facts."
+    },
+    {
+      "id": "power-food-fea2efd7d1c2",
+      "reason": "Keep approved copy after current inventory and delta review; no cosmetic rewriting or guessed facts."
+    },
+    {
+      "id": "meta-ig-18024731315875558",
+      "reason": "Keep approved copy after current inventory and delta review; no cosmetic rewriting or guessed facts."
+    },
+    {
+      "id": "gs-558120",
+      "reason": "Keep approved copy after current inventory and delta review; no cosmetic rewriting or guessed facts."
+    },
+    {
+      "id": "fc4g-17quqdp",
+      "reason": "Keep approved copy after current inventory and delta review; no cosmetic rewriting or guessed facts."
+    },
+    {
+      "id": "meta-ad-1631954261718261",
+      "reason": "Keep approved copy after current inventory and delta review; no cosmetic rewriting or guessed facts."
+    },
+    {
+      "id": "tiktok-weaoq0",
+      "reason": "Keep approved copy after current inventory and delta review; no cosmetic rewriting or guessed facts."
+    },
+    {
+      "id": "instagram-ai-96ad08438159",
+      "reason": "Keep approved copy after current inventory and delta review; no cosmetic rewriting or guessed facts."
+    },
+    {
+      "id": "meta-ig-18097277306440116",
+      "reason": "Keep approved copy after current inventory and delta review; no cosmetic rewriting or guessed facts."
+    },
+    {
+      "id": "tiktok-1nxa19w",
+      "reason": "Keep approved copy after current inventory and delta review; no cosmetic rewriting or guessed facts."
+    },
+    {
+      "id": "fc4g-eg5ndc",
+      "reason": "Keep approved copy after current inventory and delta review; no cosmetic rewriting or guessed facts."
+    },
+    {
+      "id": "food3-dmej16",
+      "reason": "Keep approved copy after current inventory and delta review; no cosmetic rewriting or guessed facts."
+    },
+    {
+      "id": "g2-1enscad",
+      "reason": "Keep approved copy after current inventory and delta review; no cosmetic rewriting or guessed facts."
+    },
+    {
+      "id": "tiktok-1v5ykqd",
+      "reason": "Keep approved copy after current inventory and delta review; no cosmetic rewriting or guessed facts."
+    },
+    {
+      "id": "power-food-59969e313103",
+      "reason": "Keep approved copy after current inventory and delta review; no cosmetic rewriting or guessed facts."
+    },
+    {
+      "id": "tiktok-du6aut",
+      "reason": "Keep approved copy after current inventory and delta review; no cosmetic rewriting or guessed facts."
+    },
+    {
+      "id": "g2-a1l0vd",
+      "reason": "Keep approved copy after current inventory and delta review; no cosmetic rewriting or guessed facts."
+    },
+    {
+      "id": "flight-10yozoj",
+      "reason": "Keep approved copy after current inventory and delta review; no cosmetic rewriting or guessed facts."
+    },
+    {
+      "id": "flight-5i0ef4",
+      "reason": "Keep approved copy after current inventory and delta review; no cosmetic rewriting or guessed facts."
+    },
+    {
+      "id": "flight-1aicckv",
+      "reason": "Keep approved copy after current inventory and delta review; no cosmetic rewriting or guessed facts."
+    },
+    {
+      "id": "flight-rj2ol1",
+      "reason": "Keep approved copy after current inventory and delta review; no cosmetic rewriting or guessed facts."
+    },
+    {
+      "id": "flight-1b0v2p3",
+      "reason": "Keep approved copy after current inventory and delta review; no cosmetic rewriting or guessed facts."
+    },
+    {
+      "id": "g2-3cen4",
+      "reason": "Keep approved copy after current inventory and delta review; no cosmetic rewriting or guessed facts."
+    },
+    {
+      "id": "g2-1lfynn6",
+      "reason": "Keep approved copy after current inventory and delta review; no cosmetic rewriting or guessed facts."
+    },
+    {
+      "id": "g2-sfff19",
+      "reason": "Keep approved copy after current inventory and delta review; no cosmetic rewriting or guessed facts."
+    },
+    {
+      "id": "fc3-1cr332j",
+      "reason": "Keep approved copy after current inventory and delta review; no cosmetic rewriting or guessed facts."
+    },
+    {
+      "id": "g2-171hxsm",
+      "reason": "Keep approved copy after current inventory and delta review; no cosmetic rewriting or guessed facts."
+    },
+    {
+      "id": "gs-17514",
+      "reason": "Keep approved copy after current inventory and delta review; no cosmetic rewriting or guessed facts."
+    },
+    {
+      "id": "benefit-magenta-moments-oz9vs",
+      "reason": "Keep approved copy after current inventory and delta review; no cosmetic rewriting or guessed facts."
+    },
+    {
+      "id": "gs-91769",
+      "reason": "Keep approved copy after current inventory and delta review; no cosmetic rewriting or guessed facts."
+    },
+    {
+      "id": "g2-31pd49",
+      "reason": "Keep approved copy after current inventory and delta review; no cosmetic rewriting or guessed facts."
+    },
+    {
+      "id": "g2-1gbztrr",
+      "reason": "Keep approved copy after current inventory and delta review; no cosmetic rewriting or guessed facts."
+    },
+    {
+      "id": "benefit-drei-plus-7pk3o5",
+      "reason": "Keep approved copy after current inventory and delta review; no cosmetic rewriting or guessed facts."
+    },
+    {
+      "id": "benefit-drei-plus-1m300u0",
+      "reason": "Keep approved copy after current inventory and delta review; no cosmetic rewriting or guessed facts."
+    },
+    {
+      "id": "benefit-drei-plus-1g2bha9",
+      "reason": "Keep approved copy after current inventory and delta review; no cosmetic rewriting or guessed facts."
+    },
+    {
+      "id": "benefit-drei-plus-aekytk",
+      "reason": "Keep approved copy after current inventory and delta review; no cosmetic rewriting or guessed facts."
+    },
+    {
+      "id": "benefit-drei-plus-1ivo36q",
+      "reason": "Keep approved copy after current inventory and delta review; no cosmetic rewriting or guessed facts."
+    },
+    {
+      "id": "g2-ezkkws",
+      "reason": "Keep approved copy after current inventory and delta review; no cosmetic rewriting or guessed facts."
+    },
+    {
+      "id": "benefit-drei-plus-1fwwa4y",
+      "reason": "Keep approved copy after current inventory and delta review; no cosmetic rewriting or guessed facts."
+    },
+    {
+      "id": "g2-1ffpc0f",
+      "reason": "Keep approved copy after current inventory and delta review; no cosmetic rewriting or guessed facts."
+    },
+    {
+      "id": "manual-foodora-genuss-20260923",
+      "reason": "Keep approved copy after current inventory and delta review; no cosmetic rewriting or guessed facts."
+    },
+    {
+      "id": "b1-s5vhj5",
+      "reason": "Keep approved copy after current inventory and delta review; no cosmetic rewriting or guessed facts."
+    },
+    {
+      "id": "top-6",
+      "reason": "Keep approved copy after current inventory and delta review; no cosmetic rewriting or guessed facts."
+    },
+    {
+      "id": "gs-12012fb",
+      "reason": "Keep approved copy after current inventory and delta review; no cosmetic rewriting or guessed facts."
+    },
+    {
+      "id": "joe-omv-xlrh16",
+      "reason": "Keep approved copy after current inventory and delta review; no cosmetic rewriting or guessed facts."
+    },
+    {
+      "id": "hillsong-vienna-kirche",
+      "reason": "Keep approved copy after current inventory and delta review; no cosmetic rewriting or guessed facts."
+    },
+    {
+      "id": "cig-wien-kirche",
+      "reason": "Keep approved copy after current inventory and delta review; no cosmetic rewriting or guessed facts."
+    },
+    {
+      "id": "icf-wien-kirche",
+      "reason": "Keep approved copy after current inventory and delta review; no cosmetic rewriting or guessed facts."
+    },
+    {
+      "id": "jesuszentrum-events",
+      "reason": "Keep approved copy after current inventory and delta review; no cosmetic rewriting or guessed facts."
+    }
+  ],
+  "followUps": [
+    {
+      "ids": [
+        "g2-3dn8v3",
+        "g2-1jitb0x"
+      ],
+      "status": "open",
+      "reason": "Public Wolt menus return 200 but do not visibly substantiate the 7-EUR discount or precise eligibility. Preserved approved amounts and dates; uncertainty now explicit in descriptions. Source observation date has been normalized into a same-day expiry upstream; not altered by this copy-only review."
+    },
+    {
+      "id": "g2-1ys8kis",
+      "status": "open",
+      "reason": "Merchant confirms coupon as an app example, not its availability to every account or the existing 30-November expiry field. Specific date field preserved under copy-only scope; no invented validity claim in description."
+    },
+    {
+      "id": "g2-mpwntm",
+      "status": "open",
+      "reason": "Fresh Lieferando GET is 403. Original approved amounts/conditions retained, no access-block bypass and no claim of fresh menu/price verification."
+    },
+    {
+      "id": "manual-foodora-genuss-20260923",
+      "status": "unchanged-open",
+      "reason": "Existing owner-selected weekly offer has unconfirmed current GENUSS validity. No new evidence, forced reselection or guessed public code."
+    },
+    {
+      "id": "g2-1enscad",
+      "status": "unchanged-open",
+      "reason": "Current KAFFEE5 campaign remains independently unconfirmed; existing warning and reviewed copy preserved."
+    },
+    {
+      "id": "fc4g-17quqdp",
+      "status": "unchanged-open",
+      "reason": "Exact meter-food product, merchant and redemption remain unidentified; no guessed details."
+    }
+  ]
+}
