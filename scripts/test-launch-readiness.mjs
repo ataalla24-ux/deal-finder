@@ -29,6 +29,22 @@ test('zero new candidates alone is healthy, not a transport failure or delivery 
   assert.equal(report.sources[0].zeroNewCandidates, true);
   assert.match(renderSummary(report), /not live balances, Slack delivery proof/);
 }));
+test('Apify succeeded is healthy, but source errors, holds and stale evidence still warn', () => fixture(({ reports, write, build }) => {
+  const file = 'apify-discovery-report.json';
+  const succeeded = { ...reports[file], status: 'succeeded', fetchedRecords: 24, freshAcceptedDeals: 1 };
+  write(file, succeeded);
+  assert.equal(build().sources[0].status, 'ok');
+  assert.equal(build().sources[0].state, 'succeeded');
+  write(file, { ...succeeded, providerErrors: 1 });
+  assert(build().sources[0].issues.includes('source-or-batch-errors'));
+  assert.equal(build().sources[0].status, 'warning');
+  write(file, { ...succeeded, budget: { allowed: false, reason: 'low-credit' } });
+  assert.equal(build().sources[0].status, 'warning');
+  write(file, { ...succeeded, generatedAt: '2026-10-20T00:00:00Z' });
+  assert.equal(build().sources[0].status, 'warning');
+  write(file, { ...succeeded, status: 'unknown-provider-state' });
+  assert(build().sources[0].issues.includes('unknown-run-state'));
+}));
 test('budget stops and partial source failures remain distinct and visible', () => fixture(({ reports, write, build }) => {
   write('apify-discovery-report.json', { ...reports['apify-discovery-report.json'], status: 'partial', providerErrors: 8,
     budget: { allowed: false, reason: 'low-credit', accountUsageUsd: 4.8, runCapUsd: .075 } });

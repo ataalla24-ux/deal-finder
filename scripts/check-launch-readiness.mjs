@@ -110,7 +110,7 @@ function summarize(name, raw) {
   }
   if (['failed', 'error', 'partial', 'degraded'].includes(row.state)) row.issues.push('degraded-or-failed-run');
   if (['skipped', 'deferred', 'quota-deferred', 'budget-stopped'].includes(row.state)) row.holds.push(row.state);
-  if (!['ok', 'completed', 'legitimate-zero', 'healthy-no-verified-deals', 'failed', 'error', 'partial',
+  if (!['ok', 'completed', ...(name === 'Apify 2' ? ['succeeded'] : []), 'legitimate-zero', 'healthy-no-verified-deals', 'failed', 'error', 'partial',
     'degraded', 'skipped', 'deferred', 'quota-deferred', 'budget-stopped'].includes(row.state)) row.issues.push('unknown-run-state');
   row.state = code(row.state);
   row.holds = codes(row.holds);

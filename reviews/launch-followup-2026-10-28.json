@@ -1,0 +1,50 @@
+{
+  "reviewedAt": "2026-10-28",
+  "scope": "Owner-authorized launch follow-up: correct three existing approved records using their retained merchant caption or fresh official Drei terms. No new publication, removal, votes, order, membership or offer-price changes.",
+  "changes": [
+    {
+      "id": "meta-ig-18003254489808380",
+      "beforeTitle": "1+1 bei Only Noodle",
+      "sourceUrl": "https://www.instagram.com/reel/DfCedAZM2un/",
+      "evidenceBasis": "The current, already human-approved merchant caption explicitly names the Biang Biang Noodle 1+1 promotion, end of October, Only Noodle Hietzing and Hietzinger Hauptstrasse22/EKZ Hietzing. No new Instagram or AI extraction requested.",
+      "reason": "Name the concrete dish, replace promotional caption clutter with the actual offer and add the explicitly provided branch address.",
+      "fields": {
+        "title": "1+1 Biang-Biang-Nudeln gratis bei Only Noodle",
+        "description": "1+1-Aktion für Biang-Biang-Nudeln bei Only Noodle Hietzing im EKZ Hietzing, Hietzinger Hauptstraße 22, Wien. Beim Kauf einer Portion gibt es eine zweite dazu. Laut Händlerbeitrag läuft die Aktion bis Ende Oktober 2026. Ein Gutscheincode wird im Beitrag nicht genannt.",
+        "address": "Hietzinger Hauptstraße 22, Wien",
+        "location": "Only Noodle Hietzing, EKZ Hietzing"
+      }
+    },
+    {
+      "id": "benefit-drei-plus-aekytk",
+      "beforeTitle": "Drei-Kunden: 1+1 Thunfisch-Wrap gratis",
+      "sourceUrl": "https://www.drei.at/de/dreiplus/ersparnisse/nordsee/",
+      "evidenceBasis": "Fresh official Drei page must still explicitly name Thunfisch and03.01.2027. Existing description and expires already match that date, but validUntil/display incorrectly retain30.09.2026.",
+      "reason": "Resolve contradictory structured expiry so native clients do not hide a source-confirmed current benefit.",
+      "fields": {
+        "validUntil": "2027-01-03",
+        "expiryDisplayText": "Bis 03.01.2027"
+      }
+    },
+    {
+      "id": "benefit-drei-plus-j3z6si",
+      "beforeTitle": "10 gratis Nachilfestunden & Lern-KI bei Schülerhilfe",
+      "sourceUrl": "https://www.drei.at/de/dreiplus/ersparnisse/schuelerhilfe/",
+      "evidenceBasis": "Fresh official terms must still confirm at least six months, two90-minute group sessions per week, new Schuelerhilfe customers and availability until revocation. The currently stored2025end is not an offer end in that source. Archive the complete before-record, including the superseded parsed expiresOriginal, before replacing active expiry metadata.",
+      "reason": "Disclose the paid-contract prerequisite rather than suggesting unconditional free tutoring. Correct the stale parsed end date without inventing a new end date or claiming ongoing availability is guaranteed.",
+      "fields": {
+        "title": "10 gratis Nachhilfestunden zum 6-Monats-Vertrag (Drei)",
+        "description": "Drei-Vorteil für Neukunden der Schülerhilfe: Beim Abschluss eines Nachhilfevertrags mit mindestens sechs Monaten Laufzeit und mindestens zweimal 90 Minuten Einzelunterricht in einer kleinen Gruppe pro Woche gibt es zehn zusätzliche Einheiten zu je 45 Minuten kostenlos. Eingelöst werden sie als fünf zusätzliche Termine zu je 90 Minuten, nach Vereinbarung und bei freien Plätzen. Kira, die KI-Lernhilfe, ist während der Vertragslaufzeit enthalten. Für den persönlichen Vorteilscode eine kostenlose SMS mit LERNEN an 5353 senden und den erhaltenen Code am teilnehmenden Schülerhilfe-Standort in Österreich vorzeigen. Keine Barauszahlung oder Kombination mit anderen Aktionen. Laut Drei bis auf Widerruf; kein festes Enddatum angegeben.",
+        "expiresOriginal": "Bis auf Widerruf",
+        "expiryKind": "unknown",
+        "expiryDisplayText": "Bis auf Widerruf; Vertragsbedingungen beachten"
+      },
+      "clearFields": ["expires", "validUntil"]
+    }
+  ],
+  "unresolved": [
+    "The weloveholidays100EUR listing lacks conditions in the approved record; do not invent a minimum booking amount or public code.",
+    "GENUSS/KAFFEE5 current merchant validity remains unconfirmed; no new guarantee or redemption test.",
+    "Nordsee coupon-page entries are different offers, not duplicate records merely because they share the coupon URL."
+  ]
+}
