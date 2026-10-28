@@ -1,7 +1,7 @@
 {
-  "generatedAt": "2026-10-28T23:25:02.435Z",
+  "generatedAt": "2026-10-28T23:33:02.610Z",
   "source": "instagram-graph-cross-source-verification",
-  "status": "ok",
+  "status": "failed-preserved",
   "configured": true,
   "scannedFiles": [
     "deals-pending-church-events.json",
@@ -108,7 +108,7 @@
     },
     "deals-pending-instagram-ai.json": {
       "deals": 49,
-      "candidates": 17
+      "candidates": 11
     },
     "deals-pending-instagram-apify.json": {
       "deals": 14,
@@ -192,14 +192,19 @@
       "candidates": 2
     },
     {
-      "username": "roppvienna",
+      "username": "derputtler",
       "candidates": 1
     }
   ],
-  "fetchedPosts": 134,
-  "exactMatches": 8,
+  "fetchedPosts": 0,
+  "exactMatches": 0,
   "retainedEvidencePosts": 2000,
-  "errors": [],
+  "errors": [
+    {
+      "username": "afrivision.austria",
+      "message": "Instagram shared quota paused: shared cooldown"
+    }
+  ],
   "accountFailures": {
     "tantisaluti.wien": {
       "count": 2,
@@ -238,21 +243,27 @@
     }
   },
   "sharedQuota": {
-    "limitPerHour": 237,
+    "limitPerHour": 190,
     "usageThreshold": 95,
-    "requests": 6,
-    "reserved": 10,
-    "stopped": false,
-    "reason": "",
-    "highestUsagePercent": 19,
+    "requests": 0,
+    "reserved": 0,
+    "stopped": true,
+    "reason": "Instagram shared quota paused: shared cooldown",
+    "highestUsagePercent": 0,
     "waitedMs": 0,
     "pacingMs": 0,
-    "retryAt": "",
+    "retryAt": "2026-10-28T23:42:33.557Z",
     "adaptiveSafetyCeiling": 190,
     "adaptiveIncreases": 0,
     "storageFailure": null
   },
+  "globalError": {
+    "username": "afrivision.austria",
+    "status": 0,
+    "code": "SCAN_BUDGET",
+    "message": "Instagram shared quota paused: shared cooldown"
+  },
   "blockedEvidencePosts": 88,
-  "unmatchedCandidatePosts": 29,
-  "message": "8/37 fresh cross-source Instagram candidates matched exactly via Graph API."
+  "unmatchedCandidatePosts": 37,
+  "message": "0/37 fresh cross-source Instagram candidates matched exactly via Graph API."
 }
