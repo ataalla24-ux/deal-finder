@@ -1,7 +1,7 @@
 {
-  "generatedAt": "2026-10-28T21:41:04.110Z",
+  "generatedAt": "2026-10-28T21:48:46.145Z",
   "source": "instagram-graph-cross-source-verification",
-  "status": "ok",
+  "status": "degraded",
   "configured": true,
   "scannedFiles": [
     "deals-pending-church-events.json",
@@ -151,7 +151,7 @@
       "candidates": 0
     },
     "deals-pending-tiktok.json": {
-      "deals": 13,
+      "deals": 11,
       "candidates": 0
     },
     "deals-pending-twitter.json": {
@@ -196,10 +196,15 @@
       "candidates": 1
     }
   ],
-  "fetchedPosts": 134,
-  "exactMatches": 8,
+  "fetchedPosts": 50,
+  "exactMatches": 1,
   "retainedEvidencePosts": 2000,
-  "errors": [],
+  "errors": [
+    {
+      "username": "tuchlauben.eis",
+      "message": "Instagram shared quota paused: rolling-hour budget exhausted"
+    }
+  ],
   "accountFailures": {
     "tantisaluti.wien": {
       "count": 2,
@@ -240,19 +245,25 @@
   "sharedQuota": {
     "limitPerHour": 237,
     "usageThreshold": 95,
-    "requests": 6,
-    "reserved": 10,
-    "stopped": false,
-    "reason": "",
+    "requests": 2,
+    "reserved": 2,
+    "stopped": true,
+    "reason": "Instagram shared quota paused: rolling-hour budget exhausted",
     "highestUsagePercent": 58,
     "waitedMs": 0,
     "pacingMs": 0,
-    "retryAt": "",
+    "retryAt": "2026-10-28T21:56:56.500Z",
     "adaptiveSafetyCeiling": 190,
     "adaptiveIncreases": 0,
     "storageFailure": null
   },
+  "globalError": {
+    "username": "tuchlauben.eis",
+    "status": 0,
+    "code": "SCAN_BUDGET",
+    "message": "Instagram shared quota paused: rolling-hour budget exhausted"
+  },
   "blockedEvidencePosts": 89,
-  "unmatchedCandidatePosts": 29,
-  "message": "8/37 fresh cross-source Instagram candidates matched exactly via Graph API."
+  "unmatchedCandidatePosts": 36,
+  "message": "1/37 fresh cross-source Instagram candidates matched exactly via Graph API."
 }
