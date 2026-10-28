@@ -1,11 +1,11 @@
 {
-  "generatedAt": "2026-10-28T05:55:15.457Z",
+  "generatedAt": "2026-10-28T06:15:36.981Z",
   "summary": {
     "filesConsidered": 32,
-    "totalCandidates": 850,
-    "uniqueCandidates": 746,
+    "totalCandidates": 849,
+    "uniqueCandidates": 745,
     "distinctCandidates": 793,
-    "duplicateClusters": 47,
+    "duplicateClusters": 48,
     "topHealthySources": [
       {
         "sourceKey": "instagram-apify2",
@@ -52,6 +52,12 @@
         "totalDeals": 2
       },
       {
+        "sourceKey": "wien-combined",
+        "sourceLabel": "Wien Deals Combined Graph",
+        "missionFitScore": 72,
+        "totalDeals": 1
+      },
+      {
         "sourceKey": "member-benefits",
         "sourceLabel": "Member Benefits",
         "missionFitScore": 70,
@@ -62,12 +68,6 @@
         "sourceLabel": "Apify Instagram",
         "missionFitScore": 68,
         "totalDeals": 14
-      },
-      {
-        "sourceKey": "firecrawl5",
-        "sourceLabel": "Firecrawl Key 5 - Instagram Gastro",
-        "missionFitScore": 64,
-        "totalDeals": 2
       }
     ],
     "topCoverageSources": [
@@ -133,10 +133,10 @@
         "totalDeals": 118
       },
       {
-        "sourceKey": "firecrawl5",
-        "sourceLabel": "Firecrawl Key 5 - Instagram Gastro",
-        "precisionScore": 69,
-        "totalDeals": 2
+        "sourceKey": "wien-combined",
+        "sourceLabel": "Wien Deals Combined Graph",
+        "precisionScore": 70,
+        "totalDeals": 1
       }
     ],
     "topWeightedSources": [
@@ -229,12 +229,11 @@
     ],
     "pipelineRuns": {
       "reportedSources": 8,
-      "failedSources": [
-        "wien-combined"
-      ],
+      "failedSources": [],
       "completedWithErrors": [
         "instagram-apify2",
-        "power"
+        "power",
+        "wien-combined"
       ]
     }
   },
@@ -519,9 +518,9 @@
       "file": "deals-pending-meta-instagram.json",
       "sourceLabel": "Meta Instagram Graph",
       "totalDeals": 118,
-      "uniqueDeals": 79,
-      "duplicateDeals": 39,
-      "duplicateAcrossSources": 27,
+      "uniqueDeals": 78,
+      "duplicateDeals": 40,
+      "duplicateAcrossSources": 28,
       "fresh1dCount": 25,
       "fresh7dCount": 115,
       "viennaCount": 118,
@@ -664,6 +663,80 @@
       "coverageScore": 19,
       "precisionScore": 68,
       "sourceWeightScore": 58
+    },
+    {
+      "sourceKey": "wien-combined",
+      "file": "deals-pending-wien-combined.json",
+      "sourceLabel": "Wien Deals Combined Graph",
+      "totalDeals": 1,
+      "uniqueDeals": 0,
+      "duplicateDeals": 1,
+      "duplicateAcrossSources": 1,
+      "fresh1dCount": 1,
+      "fresh7dCount": 1,
+      "viennaCount": 1,
+      "foodDrinkCount": 1,
+      "promoCount": 0,
+      "missingUrlCount": 0,
+      "sampleTitles": [
+        "📍 rhuloofficial ❗️1 € Wrap Angebot in der Filiale rhulo1020 🥗 Cigköfte & mehr 🔥 Vegan und richtig lecker 🎥 wienerfoodkaiser *AD - Angebo"
+      ],
+      "lastRun": {
+        "status": "completed-with-errors",
+        "startedAt": "2026-10-28T06:12:52.047Z",
+        "finishedAt": "2026-10-28T06:14:15.845Z",
+        "durationMs": 83798,
+        "counts": {
+          "rawCandidates": 63,
+          "normalizedCandidates": 1,
+          "verifiedCandidates": 1,
+          "previousDeals": 0,
+          "acceptedDeals": 1,
+          "rejectedDeals": 58
+        },
+        "rejectedByReason": {
+          "no-concrete-offer": 42,
+          "alcohol-offer": 2,
+          "general-recommendation": 5,
+          "missing-vienna-evidence": 1,
+          "excluded-promotion-type": 2,
+          "missing-text": 6
+        },
+        "errors": [
+          "#vienna: Instagram scan paused: request-budget"
+        ],
+        "reportFile": "deal-pipeline-last-run-wien-combined.json"
+      },
+      "uniqueRate": 0,
+      "duplicateRate": 1,
+      "fresh1dRate": 1,
+      "fresh7dRate": 1,
+      "viennaRate": 1,
+      "foodDrinkRate": 1,
+      "promoRate": 0,
+      "missingUrlRate": 0,
+      "averageQualityScore": 88,
+      "topCategories": [
+        {
+          "value": "essen",
+          "count": 1
+        }
+      ],
+      "topTypes": [
+        {
+          "value": "rabatt",
+          "count": 1
+        }
+      ],
+      "issues": [
+        "wenige klare Gratis-/Promo-Signale",
+        "hohe Überschneidung mit anderen Quellen"
+      ],
+      "healthScore": 62,
+      "missionFitScore": 72,
+      "coverageScore": 11,
+      "precisionScore": 70,
+      "sourceWeightScore": 57
     },
     {
       "sourceKey": "instagram-verified",
@@ -1455,79 +1528,6 @@
       "coverageScore": 6,
       "precisionScore": 42,
       "sourceWeightScore": 28
-    },
-    {
-      "sourceKey": "wien-combined",
-      "file": "deals-pending-wien-combined.json",
-      "sourceLabel": "Wien Deals Combined Graph",
-      "totalDeals": 2,
-      "uniqueDeals": 0,
-      "duplicateDeals": 2,
-      "duplicateAcrossSources": 2,
-      "fresh1dCount": 2,
-      "fresh7dCount": 2,
-      "viennaCount": 2,
-      "foodDrinkCount": 0,
-      "promoCount": 1,
-      "missingUrlCount": 0,
-      "sampleTitles": [
-        "💚❄️ 2 € Rabatt auf unsere 1-Liter- und 1,5-Liter-Eisboxen!",
-        "Für nur 1 € drehst du am Automaten und lässt dich überraschen, welches Motiv du bekommst!"
-      ],
-      "lastRun": {
-        "status": "failed",
-        "startedAt": "2026-10-27T22:34:12.969Z",
-        "finishedAt": "2026-10-27T22:34:14.039Z",
-        "durationMs": 1070,
-        "counts": {
-          "rawCandidates": 0,
-          "normalizedCandidates": 0,
-          "verifiedCandidates": 0,
-          "previousDeals": 0,
-          "acceptedDeals": 0,
-          "rejectedDeals": 0
-        },
-        "rejectedByReason": {},
-        "errors": [
-          "No Graph hashtag source completed successfully; last-good output was preserved. #viennaeats: Instagram shared quota paused: shared cooldown"
-        ],
-        "reportFile": "deal-pipeline-last-run-wien-combined.json"
-      },
-      "uniqueRate": 0,
-      "duplicateRate": 1,
-      "fresh1dRate": 1,
-      "fresh7dRate": 1,
-      "viennaRate": 1,
-      "foodDrinkRate": 0,
-      "promoRate": 0.5,
-      "missingUrlRate": 0,
-      "averageQualityScore": 83,
-      "topCategories": [
-        {
-          "value": "shopping",
-          "count": 2
-        }
-      ],
-      "topTypes": [
-        {
-          "value": "gratis",
-          "count": 1
-        },
-        {
-          "value": "rabatt",
-          "count": 1
-        }
-      ],
-      "issues": [
-        "letzter Pipeline-Lauf ist fehlgeschlagen",
-        "geringe Food-/Drink-Relevanz",
-        "hohe Überschneidung mit anderen Quellen"
-      ],
-      "healthScore": 50,
-      "missionFitScore": 51,
-      "coverageScore": 10,
-      "precisionScore": 57,
-      "sourceWeightScore": 44
     },
     {
       "sourceKey": "church-events",
