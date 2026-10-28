@@ -1946,6 +1946,16 @@ async function notifySlackCampaign(env, campaign) {
     `Quelle: ${campaign.paymentProvider || campaign.platform || "unknown"}`,
   ].filter(Boolean);
 
+  const sections = [];
+  for (const line of lines.map((value) => `* ${slackValue(value)}`)) {
+    const previous = sections.at(-1);
+    if (previous && previous.length + line.length + 1 <= 2800) {
+      sections[sections.length - 1] += `\n${line}`;
+    } else {
+      sections.push(line);
+    }
+  }
+
   const heading = campaign.paymentProvider === 'promo' ? 'Neue Business-Anzeige: Promo-Code eingelöst' : 'Neue Business-Anzeige bezahlt';
   const payload = {
     text: `${heading}: ${slackValue(campaign.restaurantName)} - ${slackValue(campaign.dealTitle)}`,
@@ -1956,10 +1966,10 @@ async function notifySlackCampaign(env, campaign) {
         type: "header",
         text: { type: "plain_text", text: heading },
       },
-      {
+      ...sections.map((text) => ({
         type: "section",
-        text: { type: "mrkdwn", text: lines.map((line) => `* ${slackValue(line)}`).join("\n") },
-      },
+        text: { type: "mrkdwn", text },
+      })),
     ],
   };
 

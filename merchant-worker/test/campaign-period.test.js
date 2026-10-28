@@ -18,7 +18,8 @@ test('paid campaign preserves offer period through storage, Slack, public feed a
   };
   t.mock.method(globalThis, 'fetch', async (url, options) => {
     if (String(url).startsWith('https://api.stripe.com/v1/checkout/sessions/')) {
-      return Response.json({ id: 'cs_test_period', payment_intent: 'pi_test_period',
+      const isLong = new URL(url).pathname.endsWith('/cs_long_fields');
+      return Response.json({ id: isLong ? 'cs_long_fields' : 'cs_test_period', payment_intent: isLong ? 'pi_long_fields' : 'pi_test_period',
         metadata: { merchant_package_id: 'starter', source: 'freefinder-web' },
         payment_status: 'paid', status: 'complete', currency: 'eur', amount_total: 2599 });
     }
@@ -65,4 +66,20 @@ test('paid campaign preserves offer period through storage, Slack, public feed a
   assert.equal(retry.status, 200);
   assert.deepEqual((await retry.json()).campaign, campaign);
   assert.equal(slack.length, 1);
+
+  const expandedPayload = { ...payload, transactionId: 'pi_long_fields', stripeSessionId: 'cs_long_fields',
+    restaurantName: 'Test & '.repeat(12), dealTitle: 'Pizza um 5 EUR ' + '&'.repeat(90),
+    description: 'Pizza vor Ort. ' + '&'.repeat(340), address: 'Testgasse 1, Wien ' + '&'.repeat(110),
+    ctaURL: 'https://example.com/menu?a=' + '&'.repeat(200),
+  };
+  const expanded = await call(expandedPayload);
+  assert.equal(expanded.status, 201);
+  const expandedCampaign = (await expanded.json()).campaign;
+  assert.equal(slack.length, 2);
+  const sections = slack[1].blocks.filter(block => block.type === 'section');
+  assert.ok(sections.every(block => block.text.text.length <= 2800), 'escaped Slack sections must stay below the service limit');
+  const combined = sections.map(block => block.text.text).join('\n');
+  const escape = value => value.replaceAll('&', '&amp;').replaceAll('<', '&lt;').replaceAll('>', '&gt;');
+  assert.ok(combined.includes(escape(expandedCampaign.description)));
+  assert.ok(combined.includes(escape(expandedCampaign.ctaURL)));
 });

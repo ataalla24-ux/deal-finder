@@ -1,0 +1,8 @@
+{
+  "scope": "Keep the new full business-ad details within Slack section limits after escaping",
+  "evidence": "Actual paid-campaign handler with isolated storage and mocked Stripe/Slack: valid maximum-size ampersand-heavy payload previously produced a section exceeding 2800 characters",
+  "change": "Pack complete escaped field lines into bounded sections, preserving text and order; existing per-field input limits bound every individual line",
+  "regression": "merchant-worker/test/campaign-period.test.js asserts all sections <=2800 and preserves the full normalized description and URL",
+  "unchanged": ["campaign data", "promo ledger", "charges", "approvals", "consents", "budgets", "schedules"],
+  "additionalRealSlackTests": 0
+}
