@@ -1,0 +1,42 @@
+{
+  "scope": "Complete Business promo Slack fields and verify submissions without creating public test ads",
+  "sourceBase": "19616c5b8",
+  "changes": [
+    "Include original description/conditions, normal price and offer price in Business Slack notifications",
+    "Escape Slack markup control characters and suppress link previews",
+    "Add isolated SPOTLIGHTGRATIS integration and optional owner-only live Slack diagnostic"
+  ],
+  "offlineEvidence": {
+    "merchantWorkerTestsPassed": 357,
+    "communityIntakeTestsPassed": 3,
+    "communityEnrichmentTestsPassed": 11,
+    "focusedChecksPassed": 16,
+    "workflowPermissions": "50 workflows / 52 jobs, explicit read-only diagnostic",
+    "paidProviderCalls": 0
+  },
+  "liveAvailability": {
+    "checkedAt": "2026-10-28T22:50:16.009Z",
+    "code": "SPOTLIGHTGRATIS",
+    "httpStatus": 200,
+    "amount": 0,
+    "currency": "EUR",
+    "durationDays": 3,
+    "productionRedemptionAttempted": false
+  },
+  "guards": {
+    "publicTestCampaigns": 0,
+    "productionPromoClaimsConsumedByDiagnostic": 0,
+    "storePurchases": 0,
+    "customerPushOrEmailTests": 0,
+    "newSchedules": 0,
+    "nativeReleaseFilesChanged": false,
+    "approvalAndConsentPoliciesChanged": false,
+    "paidCardEditorEnabled": false
+  },
+  "limits": [
+    "Offline transport assertions are not proof of real Slack delivery",
+    "The optional dispatch sends at most one clearly marked owner-channel card using an in-memory ledger",
+    "No automatic retry after a potentially delivered diagnostic",
+    "Native UI and external account recovery are separate checks"
+  ]
+}

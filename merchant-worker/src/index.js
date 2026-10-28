@@ -1930,11 +1930,16 @@ async function notifySlackCampaign(env, campaign) {
   const channel = cleanText(env.SLACK_CHANNEL_ID, 120);
   if (!webhookURL && (!botToken || !channel)) return;
 
+  const slackValue = (value) => String(value ?? "")
+    .replaceAll("&", "&amp;").replaceAll("<", "&lt;").replaceAll(">", "&gt;");
   const lines = [
     `Paket: ${campaign.packageName || campaign.packageId}`,
     `Anbieter: ${campaign.restaurantName}`,
     `Deal: ${campaign.dealTitle}`,
+    campaign.description ? `Details und Bedingungen: ${campaign.description}` : "",
     campaign.address ? `Ort: ${campaign.address}` : "",
+    campaign.oldPrice ? `Normalpreis: ${campaign.oldPrice}` : "",
+    campaign.dealPrice ? `Angebotspreis: ${campaign.dealPrice}` : "",
     campaign.offerValidityText ? `Angebotszeitraum: ${campaign.offerValidityText}` : "",
     campaign.ctaURL ? `Link: ${campaign.ctaURL}` : "",
     campaign.endsAt ? `Sichtbar bis: ${new Date(campaign.endsAt).toISOString()}` : "",
@@ -1943,7 +1948,9 @@ async function notifySlackCampaign(env, campaign) {
 
   const heading = campaign.paymentProvider === 'promo' ? 'Neue Business-Anzeige: Promo-Code eingelöst' : 'Neue Business-Anzeige bezahlt';
   const payload = {
-    text: `${heading}: ${campaign.restaurantName} - ${campaign.dealTitle}`,
+    text: `${heading}: ${slackValue(campaign.restaurantName)} - ${slackValue(campaign.dealTitle)}`,
+    unfurl_links: false,
+    unfurl_media: false,
     blocks: [
       {
         type: "header",
@@ -1951,7 +1958,7 @@ async function notifySlackCampaign(env, campaign) {
       },
       {
         type: "section",
-        text: { type: "mrkdwn", text: lines.map((line) => `* ${line}`).join("\n") },
+        text: { type: "mrkdwn", text: lines.map((line) => `* ${slackValue(line)}`).join("\n") },
       },
     ],
   };

@@ -1,5 +1,11 @@
 name: Merchant promo tests
 on:
+  workflow_dispatch:
+    inputs:
+      slack_delivery_test:
+        description: 'Send one clearly marked diagnostic to the owner Slack channel using isolated storage only'
+        type: boolean
+        default: false
   push:
     paths: ['merchant-worker/**', 'referrals-worker/**', 'scraper/native-weekly-utils.js', 'scraper/deal-discovery-policy.js', 'scraper/featured-selection-history.js', 'scraper/set-daily-deal.js', 'scripts/set-live-featured-deal.mjs', 'scripts/test-featured-selection-history.mjs', '.github/workflows/merchant-promos-test.yml']
   pull_request:
@@ -30,3 +36,28 @@ jobs:
       - run: node ../scripts/test-featured-deal-reference-sync.mjs
       - run: npx wrangler deploy --dry-run
       - run: npx wrangler deploy --dry-run --config ../referrals-worker/wrangler.toml
+  isolated-slack-delivery:
+    if: github.event_name == 'workflow_dispatch' && inputs.slack_delivery_test
+    needs: tests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+          cache-dependency-path: merchant-worker/package-lock.json
+      - run: npm ci
+        working-directory: merchant-worker
+      - run: npm ci
+      - name: Isolated promo submission to Slack, never a public ad
+        run: node merchant-worker/scripts/check-isolated-slack-submission.mjs --send-slack-test
+        env:
+          SENTRY_DISABLED: '1'
+          ISOLATED_SLACK_TEST: owner-authorized
+          SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
+          SLACK_CHANNEL_ID: ${{ secrets.SLACK_CHANNEL_ID }}
+      - uses: actions/upload-artifact@v4
+        with:
+          name: isolated-slack-submission
+          path: output/isolated-slack-submission.json

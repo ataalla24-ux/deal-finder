@@ -29,7 +29,9 @@ test('paid campaign preserves offer period through storage, Slack, public feed a
   const payload = {
     platform: 'web', paymentProvider: 'stripe', packageId: 'starter', transactionId: 'pi_test_period',
     stripeSessionId: 'cs_test_period', restaurantName: 'Testlokal', dealTitle: 'Lunch um 5 Euro',
-    description: 'Nur vor Ort.', address: 'Testgasse 1, 1010 Wien', ctaURL: 'https://example.com',
+    description: 'Nur vor Ort. Ab 2 Personen; solange der Vorrat reicht. <!channel>',
+    address: 'Testgasse 1, 1010 Wien', ctaURL: 'https://example.com',
+    oldPrice: '9 EUR', dealPrice: '5 EUR',
     offerValidityText: '14.–18.10.2026, 12–15 Uhr',
   };
   const call = body => worker.fetch(new Request('https://worker.test/api/merchant/campaigns', {
@@ -50,6 +52,13 @@ test('paid campaign preserves offer period through storage, Slack, public feed a
   assert.equal(campaign.endsAt - campaign.startsAt, 86400000);
   assert.equal(slack.length, 1);
   assert.ok(JSON.stringify(slack[0]).includes(payload.offerValidityText));
+  const slackText = slack[0].blocks[1].text.text;
+  assert.ok(slackText.includes('Details und Bedingungen: Nur vor Ort. Ab 2 Personen; solange der Vorrat reicht. &lt;!channel&gt;'));
+  assert.ok(slackText.includes('Normalpreis: 9 EUR'));
+  assert.ok(slackText.includes('Angebotspreis: 5 EUR'));
+  assert.ok(!slackText.includes('<!channel>'));
+  assert.equal(slack[0].unfurl_links, false);
+  assert.equal(slack[0].unfurl_media, false);
   const listing = await worker.fetch(new Request('https://worker.test/api/merchant/campaigns'), env);
   assert.deepEqual((await listing.json()).campaigns, [campaign]);
   const retry = await call(payload);
