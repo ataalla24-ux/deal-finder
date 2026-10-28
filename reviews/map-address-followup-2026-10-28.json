@@ -1,0 +1,38 @@
+{
+  "checkedAt": "2026-10-28T22:56:00Z",
+  "scope": "Missing evidenced restaurant locations, no offer or approval changes",
+  "before": { "mappedDeals": 28, "locations": 52 },
+  "after": { "mappedDeals": 30, "locations": 54, "onlineDeals": 21, "unresolvedDeals": 12 },
+  "changes": [
+    {
+      "dealId": "meta-ig-18024731315875558",
+      "locationId": "food-up-hainburger-52",
+      "evidenceUrl": "https://www.instagram.com/p/Dey5dxesY6p/",
+      "evidence": "Retained merchant caption explicitly names Hainburger Strasse 52, 1030 Wien; collection-only condition unchanged",
+      "coordinateFeature": "ADRESSENOGD.602378301"
+    },
+    {
+      "dealId": "tiktok-hog7yq",
+      "locationId": "dim-sum-babe-bahnhofcity-west",
+      "evidenceUrl": "https://www.dimsumbabe.at/impressum",
+      "corroboratingUrl": "https://bahnhofcitywienwest.oebb.at/de/gastronomie/dim-sum-babe",
+      "evidence": "Merchant and OeBB identify BahnhofCity Wien West, Europaplatz 2, upper floor; use the explicitly named BahnhofCity address point, not an arbitrary station entrance",
+      "coordinateFeature": "ADRESSENOGD.602459157",
+      "precision": "Official venue address point, not an independently measured shop entrance"
+    }
+  ],
+  "preservation": {
+    "all52ExistingLocationsDeepEqual": true,
+    "all63PublicDealRecordsByteIdentical": true,
+    "noAdditionalAutomaticLookupsDuringProjection": true,
+    "noHumanApprovalOrValidityChanges": true,
+    "noNativeOrStoreChanges": true
+  },
+  "research": { "directFreeCityAddressRequests": 3, "paidGeocodingRequests": 0 },
+  "checks": ["map location validator", "coverage validator", "103 pipeline tests", "enrichment regression suite", "exact preservation assertions"],
+  "remaining": [
+    "Only Noodle at Hietzinger Hauptstrasse 22 has two official address points more than 100 metres apart; exact entrance unresolved, no guessed marker",
+    "Broad chain offers remain unbound without proof of participating branches",
+    "Dim Sum Babe action end date remains unstated; venue verification is not verification of ongoing redemption"
+  ]
+}
