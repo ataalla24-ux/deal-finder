@@ -1,21 +1,22 @@
 {
-  "generatedAt": "2026-10-28T08:48:09.180Z",
+  "generatedAt": "2026-10-28T09:18:58.516Z",
   "summary": {
     "maxAgeDays": 7,
-    "total": 326,
-    "allowed": 0,
+    "total": 327,
+    "allowed": 1,
     "blocked": 326,
-    "warnings": 0,
+    "warnings": 1,
     "reasonCounts": {
       "kein konkretes Angebot erkennbar": 239,
       "Gottesdienste nur im Wochenlauf": 36,
       "älter als 7 Tage (2020-04-25)": 1,
-      "älter als 7 Tage (2026-02-22)": 81,
+      "älter als 7 Tage (2026-02-22)": 80,
       "URL ungültig (fehlende Ziel-URL)": 2,
       "älter als 7 Tage (2017-04-20)": 1,
       "älter als 7 Tage (2026-10-06)": 1,
       "älter als 7 Tage (2026-10-14)": 1,
-      "URL ungültig (HTTP 404)": 8,
+      "älter als 7 Tage (2025-07-30)": 1,
+      "URL ungültig (HTTP 404)": 10,
       "selbst syndizierter FreeFinder-Post": 5,
       "nicht eindeutig in Wien": 16,
       "älter als 45 Tage trotz ausdrücklich noch aktive Gültigkeit (2026-08-04)": 3,
@@ -60,7 +61,7 @@
       "kein konkreter Deal": 243,
       "Gottesdienste außerhalb Wochenlauf": 36,
       "älter als 7 Tage": 137,
-      "ungültige URL": 16,
+      "ungültige URL": 18,
       "selbst syndiziert": 5,
       "nicht Wien": 16,
       "sonstiges": 9,
@@ -136,6 +137,13 @@
           "sonstiges": 1
         }
       },
+      "Firecrawl Key 3 - Consumables": {
+        "total": 1,
+        "allowed": 1,
+        "blocked": 0,
+        "warnings": 1,
+        "reasonCategoryCounts": {}
+      },
       "Freikirchen Wien": {
         "total": 35,
         "allowed": 0,
@@ -145,7 +153,7 @@
           "kein konkreter Deal": 33,
           "Gottesdienste außerhalb Wochenlauf": 35,
           "älter als 7 Tage": 32,
-          "ungültige URL": 1,
+          "ungültige URL": 2,
           "Post-Datum in Zukunft": 1,
           "sonstiges": 1
         }
@@ -204,7 +212,7 @@
         "reasonCategoryCounts": {
           "kein konkreter Deal": 92,
           "älter als 7 Tage": 94,
-          "ungültige URL": 6,
+          "ungültige URL": 7,
           "Gottesdienste außerhalb Wochenlauf": 1,
           "sonstiges": 2,
           "Post-Datum in Zukunft": 2,
@@ -264,7 +272,26 @@
       }
     }
   },
-  "allowed": [],
+  "allowed": [
+    {
+      "id": "fc3-10950hu",
+      "title": "lidl_oesterreich: Lidl-Plus-Punkte gegen Rabatt-Coupons oder Gratis-Artikel",
+      "brand": "lidl_oesterreich",
+      "source": "Firecrawl Key 3 - Consumables",
+      "url": "https://www.instagram.com/p/De1uNlUAX5j/",
+      "reasons": [],
+      "warnings": [
+        "Inhalt prüfen: Caption-Reste oder Emoji-Codes im sichtbaren Text",
+        "kein Ablaufdatum gefunden"
+      ],
+      "sourceDate": "2026-10-23T14:00:04.000Z",
+      "sourceDateSource": "url.instagramShortcode",
+      "sourceAgeDays": 5,
+      "expiryDate": "",
+      "expirySource": "",
+      "urlStatus": "HTTP 200"
+    }
+  ],
   "blocked": [
     {
       "id": "jesuszentrum-events-20261026",
@@ -297,6 +324,7 @@
         "Gottesdienste nur im Wochenlauf"
       ],
       "warnings": [
+        "URL nicht eindeutig prüfbar (temporärer Fehler)",
         "kein Ablaufdatum gefunden"
       ],
       "sourceDate": "2026-10-26T13:45:53.481Z",
@@ -304,7 +332,7 @@
       "sourceAgeDays": 2,
       "expiryDate": "",
       "expirySource": "",
-      "urlStatus": "HTTP 200"
+      "urlStatus": "unklar: temporärer URL-Fehler"
     },
     {
       "id": "cig-wien-kirche-20261026",
@@ -716,18 +744,17 @@
       "reasons": [
         "kein konkretes Angebot erkennbar",
         "Gottesdienste nur im Wochenlauf",
-        "älter als 7 Tage (2026-02-22)"
+        "älter als 7 Tage (2025-07-30)"
       ],
       "warnings": [
-        "URL nicht eindeutig prüfbar (HTTP 500)",
         "kein Ablaufdatum gefunden"
       ],
-      "sourceDate": "2026-02-22T21:13:07.698Z",
-      "sourceDateSource": "deal.pubDate",
-      "sourceAgeDays": 248,
+      "sourceDate": "2025-07-30T05:18:47.000Z",
+      "sourceDateSource": "url.publicationDate",
+      "sourceAgeDays": 455,
       "expiryDate": "",
       "expirySource": "",
-      "urlStatus": "unklar: HTTP 500"
+      "urlStatus": "HTTP 200"
     },
     {
       "id": "extra-21-20260222",
@@ -909,7 +936,7 @@
       "warnings": [
         "kein Ablaufdatum gefunden"
       ],
-      "sourceDate": "2026-10-28T08:46:48.540Z",
+      "sourceDate": "2026-10-28T09:16:56.557Z",
       "sourceDateSource": "url.publicationDate",
       "sourceAgeDays": 0,
       "expiryDate": "",
@@ -1313,19 +1340,18 @@
       "source": "Freikirchen Wien",
       "url": "https://www.baptisten.at/wien",
       "reasons": [
+        "URL ungültig (HTTP 404)",
         "kein konkretes Angebot erkennbar",
         "Gottesdienste nur im Wochenlauf",
         "älter als 7 Tage (2026-04-19)"
       ],
-      "warnings": [
-        "URL nicht eindeutig prüfbar (temporärer Fehler)"
-      ],
+      "warnings": [],
       "sourceDate": "2026-04-19T08:59:47.145Z",
       "sourceDateSource": "deal.pubDate",
       "sourceAgeDays": 192,
       "expiryDate": "",
       "expirySource": "deal.expires",
-      "urlStatus": "unklar: temporärer URL-Fehler"
+      "urlStatus": "ungültig: HTTP 404"
     },
     {
       "id": "freikirche-7-20260419",
@@ -3036,18 +3062,17 @@
       "source": "Kirchen Verzeichnis",
       "url": "https://www.baptisten.at/wien",
       "reasons": [
+        "URL ungültig (HTTP 404)",
         "kein konkretes Angebot erkennbar",
         "älter als 7 Tage (2026-02-22)"
       ],
-      "warnings": [
-        "URL nicht eindeutig prüfbar (temporärer Fehler)"
-      ],
+      "warnings": [],
       "sourceDate": "2026-02-22T21:12:35.964Z",
       "sourceDateSource": "deal.pubDate",
       "sourceAgeDays": 248,
       "expiryDate": "",
       "expirySource": "deal.expires",
-      "urlStatus": "unklar: temporärer URL-Fehler"
+      "urlStatus": "ungültig: HTTP 404"
     },
     {
       "id": "gottesdienste-17-20260222",
