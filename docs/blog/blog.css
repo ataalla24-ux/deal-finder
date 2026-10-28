@@ -925,3 +925,20 @@ h1 {
 @media (prefers-reduced-motion: reduce) {
   html { scroll-behavior: auto; }
 }
+
+/* Optional birthday date planner; the comparison table remains usable without JS. */
+.birthday-planner-controls { padding: 20px; margin: 20px 0; border: 1px solid var(--line); border-radius: 16px; background: var(--surface, #fff); }
+.birthday-planner-controls label { display: block; font-weight: 700; }
+.birthday-planner-controls input { display: block; box-sizing: border-box; width: 100%; max-width: 320px; min-width: 0; margin: 10px 0; padding: 12px; border: 1px solid #637267; border-radius: 8px; color: #14251b; background: #fff; font: inherit; }
+.birthday-planner-controls button { min-height: 48px; max-width: 100%; padding: 12px 18px; border: 0; border-radius: 10px; background: #163f2b; color: #fff; font: inherit; font-weight: 700; cursor: pointer; }
+.birthday-planner-controls button:focus-visible, .birthday-planner-controls input:focus-visible { outline: 3px solid #487b58; outline-offset: 3px; }
+.birthday-planner-controls [role="status"] { margin-bottom: 0; }
+.birthday-planner [hidden] { display: none; }
+
+.article-body .birthday-planner table { min-width: 0; table-layout: fixed; }
+.birthday-planner th:first-child { width: 34%; }
+.birthday-window { display: block; margin-top: 8px; font-weight: 400; }
+@media (max-width: 620px) {
+  .birthday-planner th:first-child { width: 42%; }
+  .article-body .birthday-planner th, .article-body .birthday-planner td { padding: 10px; font-size: 14px; overflow-wrap: anywhere; }
+}
