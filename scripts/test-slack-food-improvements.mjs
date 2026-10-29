@@ -27,6 +27,11 @@ assert(locationConflictReason({ ...foreignOffer, description: 'Gratis Matcha in 
 assert.equal(locationConflictReason({ title: 'Gratis Matcha', description: 'Dubai-Style Matcha gratis in unserer Filiale, 1010 Wien.' }), '');
 assert.equal(locationConflictReason({ title: 'Gratis Kaffee', description: 'In Dubai und auch in Wien bei unserer Filiale.' }), '');
 assert.equal(locationConflictReason({ title: 'Flug nach Dubai', flight: { origin: 'VIE' }, description: 'Reise nach Dubai' }), '');
+for (const description of ['20% Rabatt in Graz und Wien', 'Gratis Kaffee in Wien, Graz und Linz', '20% Rabatt in Berlin & Vienna']) {
+  assert.equal(locationConflictReason({ title: description, description }), '', 'explicit Vienna branches stay eligible');
+}
+assert(locationConflictReason({ description: '20% Rabatt in Graz. Liebe Gruesse aus Wien! #vienna' }), 'unrelated Vienna mentions are not a participating branch');
+assert(locationConflictReason({ description: 'Gratis Drink in Dubai, Kaiser’s Vienna im Market Island.' }), 'Vienna inside the foreign brand is not a city list');
 const priceMap = 'A free map of real prices in Vienna, added by guests. Coffee, Schnitzel: 230+ places, from cheap to pricey. HOW MUCH ist eine kostenlose Karte mit echten Preisen in Wien.';
 assert(getNonOfferContentReason(priceMap), 'a free price directory is not a merchant benefit');
 assert.equal(discoveryRejection({ title: priceMap, socialFoodReview: true }), 'non-offer-content', 'social review uses the same non-offer guard');

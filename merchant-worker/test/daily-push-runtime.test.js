@@ -52,7 +52,7 @@ async function runtime(t, flags = { DAILY_PUSH_ENABLED: '1', MARKETING_PUSH_ENAB
   ` }];
   for (const path of ['referrals-worker/src/index.js', 'referrals-worker/src/public-deal-state-cache.js',
     'referrals-worker/src/daily-push.js', 'referrals-worker/src/daily-push-policy.js', 'referrals-worker/src/fcm-push.js',
-    'scraper/deal-discovery-policy.js', 'scraper/native-weekly-utils.js']) {
+    'scraper/deal-discovery-policy.js', 'scraper/promotion-quality-utils.js', 'scraper/native-weekly-utils.js']) {
     modules.push({ type: 'ESModule', path, contents: await readFile(new URL(`../../${path}`, import.meta.url), 'utf8') });
   }
   const mf = new Miniflare(convertV4MiniflareOptions({ compatibilityDate: '2026-03-09', modules,

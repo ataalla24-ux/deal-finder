@@ -12,9 +12,12 @@ export function locationConflictReason(deal = {}) {
   const nationwide = /\b(?:österreichweit|austria[- ]wide|bundesweit|im\s+online[- ]?shop|online\s+bestellen)\b/i.test(caption);
   if (nationwide && !/\bnur\s+(?:in|bei)\b/i.test(caption) && !explicitElsewhere.test(text(deal.title))) return '';
   // A Vienna display default or Wienerstrasse cannot override the actual venue.
-  const viennaBranch = /\b1(?:0[1-9]|1\d|2[0-3])0\s+(?:Wien|Vienna)\b/i.test(caption)
+  const city = `(?:${outside}|Wien|Vienna)`;
+  const cityLists = caption.match(new RegExp(`\\b(?:in|bei)\\s+${city}(?:\\s*(?:,|/|und|&)\\s*${city}){1,5}\\b`, 'gi')) || [];
+  const viennaBranch = cityLists.some(list => /\b(?:Wien|Vienna)\b/i.test(list))
+    || /\b1(?:0[1-9]|1\d|2[0-3])0\s+(?:Wien|Vienna)\b/i.test(caption)
     || /\b(?:in allen|alle teilnehmenden|auch in|auch bei)\b[^.!?]{0,65}\b(?:Wien|Wiener|österreichweit)\b/i.test(caption);
-  return explicitElsewhere.test(text(deal.title)) || (!viennaBranch && (explicitElsewhere.test(caption) || venueElsewhere.test(caption) || outsideHandle.test(caption)))
+  return !viennaBranch && (explicitElsewhere.test(text(deal.title)) || explicitElsewhere.test(caption) || venueElsewhere.test(caption) || outsideHandle.test(caption))
     ? 'Ortswiderspruch: Originalangebot nennt einen Standort ausserhalb Wiens' : '';
 }
 
