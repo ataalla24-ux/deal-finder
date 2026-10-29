@@ -1,11 +1,11 @@
 {
-  "generatedAt": "2026-10-29T13:33:29.828Z",
+  "generatedAt": "2026-10-29T13:44:46.531Z",
   "summary": {
     "filesConsidered": 32,
-    "totalCandidates": 826,
-    "uniqueCandidates": 734,
+    "totalCandidates": 827,
+    "uniqueCandidates": 733,
     "distinctCandidates": 776,
-    "duplicateClusters": 42,
+    "duplicateClusters": 43,
     "topHealthySources": [
       {
         "sourceKey": "member-benefits",
@@ -229,11 +229,12 @@
     ],
     "pipelineRuns": {
       "reportedSources": 8,
-      "failedSources": [],
+      "failedSources": [
+        "wien-combined"
+      ],
       "completedWithErrors": [
         "firecrawl2",
-        "power",
-        "wien-combined"
+        "power"
       ]
     }
   },
@@ -611,9 +612,9 @@
       "file": "deals-pending-instagram-ai.json",
       "sourceLabel": "Instagram AI Agent",
       "totalDeals": 49,
-      "uniqueDeals": 23,
-      "duplicateDeals": 26,
-      "duplicateAcrossSources": 21,
+      "uniqueDeals": 22,
+      "duplicateDeals": 27,
+      "duplicateAcrossSources": 22,
       "fresh1dCount": 8,
       "fresh7dCount": 49,
       "viennaCount": 49,
@@ -626,7 +627,7 @@
         "1+1 Asian Pizza Aktion jeden Donnerstag bis Ende Dezember 2026"
       ],
       "lastRun": null,
-      "uniqueRate": 0.5,
+      "uniqueRate": 0.4,
       "duplicateRate": 0.4,
       "fresh1dRate": 0.2,
       "fresh7dRate": 1,
@@ -682,7 +683,7 @@
       "issues": [
         "hohe Überschneidung mit anderen Quellen"
       ],
-      "healthScore": 69,
+      "healthScore": 67,
       "missionFitScore": 67,
       "coverageScore": 37,
       "precisionScore": 76,
@@ -692,15 +693,15 @@
       "sourceKey": "instagram-apify",
       "file": "deals-pending-instagram-apify.json",
       "sourceLabel": "Apify Instagram",
-      "totalDeals": 13,
+      "totalDeals": 14,
       "uniqueDeals": 10,
-      "duplicateDeals": 3,
-      "duplicateAcrossSources": 3,
+      "duplicateDeals": 4,
+      "duplicateAcrossSources": 4,
       "fresh1dCount": 0,
-      "fresh7dCount": 13,
-      "viennaCount": 4,
-      "foodDrinkCount": 13,
-      "promoCount": 11,
+      "fresh7dCount": 14,
+      "viennaCount": 5,
+      "foodDrinkCount": 14,
+      "promoCount": 12,
       "missingUrlCount": 0,
       "sampleTitles": [
         "Gratis Döner in Wien ❤️‍🔥✨🥙 Den gibt es am Samstag, dem 31.10. zur Feier der neuen Cio’s Filiale im Ersten!",
@@ -708,19 +709,19 @@
         "🎃👻 Halloween at MARiN Kaffee! ☕🧡 Join us on 30 October, 15:00–17:00 at Naschmarkt for spooky fun, surprises"
       ],
       "lastRun": null,
-      "uniqueRate": 0.8,
-      "duplicateRate": 0.2,
+      "uniqueRate": 0.7,
+      "duplicateRate": 0.3,
       "fresh1dRate": 0,
       "fresh7dRate": 1,
-      "viennaRate": 0.3,
+      "viennaRate": 0.4,
       "foodDrinkRate": 1,
-      "promoRate": 0.8,
+      "promoRate": 0.9,
       "missingUrlRate": 0,
-      "averageQualityScore": 92.2,
+      "averageQualityScore": 92.4,
       "topCategories": [
         {
           "value": "essen",
-          "count": 9
+          "count": 10
         },
         {
           "value": "kaffee",
@@ -734,7 +735,7 @@
       "topTypes": [
         {
           "value": "gratis",
-          "count": 9
+          "count": 10
         },
         {
           "value": "rabatt",
@@ -749,11 +750,11 @@
         "wenige Deals sind frischer als 1 Tag",
         "Wien-Signal ist zu schwach"
       ],
-      "healthScore": 63,
-      "missionFitScore": 62,
-      "coverageScore": 16,
-      "precisionScore": 62,
-      "sourceWeightScore": 53
+      "healthScore": 65,
+      "missionFitScore": 66,
+      "coverageScore": 17,
+      "precisionScore": 67,
+      "sourceWeightScore": 56
     },
     {
       "sourceKey": "wien-combined",
@@ -774,26 +775,21 @@
         "Bezirk: Schnitzel vom Kalb, Schweinsbraten im Mittagsmenü um 12,90 €, Kaiserschmarrn ohne Rosinen und Palatschinken wie von der Oma."
       ],
       "lastRun": {
-        "status": "completed-with-errors",
-        "startedAt": "2026-10-29T06:22:53.980Z",
-        "finishedAt": "2026-10-29T06:24:22.791Z",
-        "durationMs": 88811,
+        "status": "failed",
+        "startedAt": "2026-10-29T13:38:45.355Z",
+        "finishedAt": "2026-10-29T13:38:46.367Z",
+        "durationMs": 1012,
         "counts": {
-          "rawCandidates": 42,
-          "normalizedCandidates": 2,
-          "verifiedCandidates": 2,
+          "rawCandidates": 0,
+          "normalizedCandidates": 0,
+          "verifiedCandidates": 0,
           "previousDeals": 0,
-          "acceptedDeals": 2,
-          "rejectedDeals": 38
+          "acceptedDeals": 0,
+          "rejectedDeals": 0
         },
-        "rejectedByReason": {
-          "no-concrete-offer": 30,
-          "general-recommendation": 6,
-          "non-vienna-location": 1,
-          "missing-vienna-evidence": 1
-        },
+        "rejectedByReason": {},
         "errors": [
-          "#vienna: Instagram scan paused: request-budget"
+          "No Graph hashtag source completed successfully; last-good output was preserved. #viennaeats: Instagram shared quota paused: shared cooldown"
         ],
         "reportFile": "deal-pipeline-last-run-wien-combined.json"
       },
@@ -819,6 +815,7 @@
         }
       ],
       "issues": [
+        "letzter Pipeline-Lauf ist fehlgeschlagen",
         "wenige klare Gratis-/Promo-Signale",
         "hohe Überschneidung mit anderen Quellen"
       ],
