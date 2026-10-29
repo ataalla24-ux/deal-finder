@@ -2,9 +2,52 @@
   "schemaVersion": 1,
   "sourceKey": "power",
   "sourceLabel": "Power Scraper",
-  "updatedAt": "2026-10-28T18:58:24.375Z",
+  "updatedAt": "2026-10-29T11:39:40.493Z",
   "runCount": 90,
   "runs": [
+    {
+      "schemaVersion": 1,
+      "runId": "power-2026-10-29T11:39:40.493Z",
+      "sourceKey": "power",
+      "sourceLabel": "Power Scraper",
+      "status": "completed-with-errors",
+      "startedAt": "2026-10-29T11:39:12.722Z",
+      "finishedAt": "2026-10-29T11:39:40.493Z",
+      "durationMs": 27771,
+      "outputFile": "docs/deals-pending-power.json",
+      "counts": {
+        "rawCandidates": 39,
+        "normalizedCandidates": 39,
+        "verifiedCandidates": 0,
+        "previousDeals": 0,
+        "acceptedDeals": 39,
+        "rejectedDeals": 0
+      },
+      "rejectedByReason": {},
+      "rejectedSamples": [],
+      "diagnostics": {
+        "healthySources": 46,
+        "failedSources": 12,
+        "sourceCount": 58,
+        "concurrency": 4,
+        "timeoutMs": 8000
+      },
+      "constraints": {},
+      "errors": [
+        "Too Good To Go: deferred until 2026-11-04T11:28:53.892Z",
+        "BackWerk: deferred until 2026-10-31T11:29:02.705Z",
+        "MediaMarkt: HTTP 404",
+        "Saturn: deferred until 2026-10-30T09:40:24.536Z",
+        "Spar: deferred until 2026-10-30T09:40:25.390Z",
+        "Conrad: HTTP 403",
+        "Decathlon: HTTP 403",
+        "XXXLutz: HTTP 403",
+        "Möbelix: HTTP 403",
+        "Lego Store: HTTP 403",
+        "Thalia: HTTP 403",
+        "Libro: deferred until 2026-11-02T19:28:01.216Z"
+      ]
+    },
     {
       "schemaVersion": 1,
       "runId": "power-2026-10-28T18:58:24.375Z",
@@ -3611,39 +3654,6 @@
       "constraints": {},
       "errors": [
         "Too Good To Go: Browser HTTP 429"
-      ]
-    },
-    {
-      "schemaVersion": 1,
-      "runId": "power-2026-09-06T09:37:26.080Z",
-      "sourceKey": "power",
-      "sourceLabel": "Power Scraper",
-      "status": "completed-with-errors",
-      "startedAt": "2026-09-06T09:37:13.611Z",
-      "finishedAt": "2026-09-06T09:37:26.080Z",
-      "durationMs": 12469,
-      "outputFile": "docs/deals-pending-power.json",
-      "counts": {
-        "rawCandidates": 47,
-        "normalizedCandidates": 43,
-        "verifiedCandidates": 0,
-        "previousDeals": 0,
-        "acceptedDeals": 43,
-        "rejectedDeals": 0
-      },
-      "rejectedByReason": {},
-      "rejectedSamples": [],
-      "diagnostics": {
-        "healthySources": 37,
-        "failedSources": 2,
-        "sourceCount": 39,
-        "concurrency": 8,
-        "timeoutMs": 8000
-      },
-      "constraints": {},
-      "errors": [
-        "Too Good To Go: Browser HTTP 429",
-        "Coupons.at: page.goto: Timeout 8000ms exceeded. Call log: - navigating to \"https://www.coupons.at/\", waiting until \"domcontentloaded\""
       ]
     }
   ]
