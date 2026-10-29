@@ -2,9 +2,106 @@
   "schemaVersion": 1,
   "sourceKey": "food3",
   "sourceLabel": "Firecrawl Key 2 - Food",
-  "updatedAt": "2026-10-28T08:05:30.182Z",
+  "updatedAt": "2026-10-29T08:15:34.628Z",
   "runCount": 90,
   "runs": [
+    {
+      "schemaVersion": 1,
+      "runId": "food3-2026-10-29T08:15:34.628Z",
+      "sourceKey": "food3",
+      "sourceLabel": "Firecrawl Key 2 - Food",
+      "status": "completed",
+      "startedAt": "2026-10-29T08:14:09.713Z",
+      "finishedAt": "2026-10-29T08:15:34.628Z",
+      "durationMs": 84915,
+      "outputFile": "docs/deals-pending-food3.json",
+      "counts": {
+        "rawCandidates": 2,
+        "normalizedCandidates": 2,
+        "verifiedCandidates": 4,
+        "previousDeals": 4,
+        "acceptedDeals": 4,
+        "rejectedDeals": 2
+      },
+      "rejectedByReason": {
+        "post-verification-rejected": 2
+      },
+      "rejectedSamples": [
+        {
+          "reason": "post-verification-rejected",
+          "deal": {
+            "id": "food3-aawrz0",
+            "title": "Instagram: Benedict / béné — Wilmersdorf. Happy hour daily 4–6 PM ...",
+            "brand": "Instagram",
+            "url": "https://www.instagram.com/p/De8MY8sD7QG/",
+            "source": "Firecrawl Food #2",
+            "pubDate": "",
+            "expires": "",
+            "postVerificationStatus": ""
+          }
+        },
+        {
+          "reason": "post-verification-rejected",
+          "deal": {
+            "id": "food3-1d70bac",
+            "title": "Instagram: Was war das?? Unser erstes popup ist vorbei und es hätte ...",
+            "brand": "Instagram",
+            "url": "https://www.instagram.com/p/DfAWLcajGty/",
+            "source": "Firecrawl Food #2",
+            "pubDate": "",
+            "expires": "",
+            "postVerificationStatus": ""
+          }
+        }
+      ],
+      "diagnostics": {
+        "agentStatus": "completed",
+        "creditsUsed": 0,
+        "configuredSources": 6,
+        "attemptedSources": 3,
+        "completedSources": 3,
+        "targetsPerRun": 3,
+        "agentTimeoutSeconds": 120,
+        "maxCreditsPerTarget": 300,
+        "sourceStats": [
+          {
+            "url": "https://www.instagram.com/explore/tags/happyhourwien/",
+            "status": "completed-search",
+            "rawCandidates": 1,
+            "searchCandidates": 1,
+            "creditsUsed": 0
+          },
+          {
+            "url": "https://www.instagram.com/explore/tags/lunchdealwien/",
+            "status": "completed",
+            "rawCandidates": 0,
+            "searchCandidates": 0,
+            "creditsUsed": 0
+          },
+          {
+            "url": "https://www.instagram.com/explore/tags/neueröffnungwien/",
+            "status": "completed-search",
+            "rawCandidates": 1,
+            "searchCandidates": 1,
+            "creditsUsed": 0
+          }
+        ],
+        "retainedPreviousDeals": 4,
+        "prunedPreviousDeals": 0,
+        "duplicateCandidatesMerged": 0,
+        "verifier": {
+          "statusCounts": {
+            "verified-meta-graph": 4
+          },
+          "verifiedOriginalPosts": 0,
+          "timestampOnlyPosts": 0,
+          "unavailableOriginalPosts": 0,
+          "registryViennaEvidence": 0
+        }
+      },
+      "constraints": {},
+      "errors": []
+    },
     {
       "schemaVersion": 1,
       "runId": "food3-2026-10-28T08:05:30.182Z",
@@ -13121,72 +13218,6 @@
             "timestamp-derived": 17
           },
           "verifiedOriginalPosts": 3,
-          "timestampOnlyPosts": 0,
-          "unavailableOriginalPosts": 0,
-          "registryViennaEvidence": 0
-        }
-      },
-      "constraints": {},
-      "errors": []
-    },
-    {
-      "schemaVersion": 1,
-      "runId": "food3-2026-07-30T05:19:27.208Z",
-      "sourceKey": "food3",
-      "sourceLabel": "Firecrawl Key 2 - Food",
-      "status": "completed",
-      "startedAt": "2026-07-30T05:12:38.472Z",
-      "finishedAt": "2026-07-30T05:19:27.208Z",
-      "durationMs": 408736,
-      "outputFile": "docs/deals-pending-food3.json",
-      "counts": {
-        "rawCandidates": 46,
-        "normalizedCandidates": 44,
-        "verifiedCandidates": 44,
-        "previousDeals": 0,
-        "acceptedDeals": 44,
-        "rejectedDeals": 2
-      },
-      "rejectedByReason": {
-        "invalid-original-post-url": 2
-      },
-      "rejectedSamples": [
-        {
-          "reason": "invalid-original-post-url",
-          "deal": {
-            "id": "",
-            "title": "20% off bottles of Champagne",
-            "brand": "Vienna Cafe & Bistro",
-            "url": "https://www.instagram.com/viennacafeandbistro/",
-            "source": "",
-            "pubDate": "",
-            "expires": "",
-            "postVerificationStatus": ""
-          }
-        },
-        {
-          "reason": "invalid-original-post-url",
-          "deal": {
-            "id": "",
-            "title": "Street food from all over",
-            "brand": "European Street Food Festival",
-            "url": "https://www.wien.info/en/now-on/events/european-street-food-festival-1-1131006",
-            "source": "",
-            "pubDate": "",
-            "expires": "",
-            "postVerificationStatus": ""
-          }
-        }
-      ],
-      "diagnostics": {
-        "agentStatus": "completed",
-        "creditsUsed": 0,
-        "verifier": {
-          "statusCounts": {
-            "timestamp-derived": 32,
-            "verified-original-post": 12
-          },
-          "verifiedOriginalPosts": 12,
           "timestampOnlyPosts": 0,
           "unavailableOriginalPosts": 0,
           "registryViennaEvidence": 0
