@@ -1,7 +1,7 @@
 {
-  "generatedAt": "2026-10-29T00:24:29.705Z",
+  "generatedAt": "2026-10-29T00:52:06.701Z",
   "source": "instagram-graph-cross-source-verification",
-  "status": "ok",
+  "status": "failed-preserved",
   "configured": true,
   "scannedFiles": [
     "deals-pending-church-events.json",
@@ -108,7 +108,7 @@
     },
     "deals-pending-instagram-ai.json": {
       "deals": 49,
-      "candidates": 11
+      "candidates": 10
     },
     "deals-pending-instagram-apify.json": {
       "deals": 14,
@@ -139,8 +139,8 @@
       "candidates": 0
     },
     "deals-pending-meta-instagram.json": {
-      "deals": 126,
-      "candidates": 28
+      "deals": 125,
+      "candidates": 27
     },
     "deals-pending-power.json": {
       "deals": 39,
@@ -167,8 +167,8 @@
       "candidates": 0
     }
   },
-  "candidatePosts": 40,
-  "candidateAccounts": 32,
+  "candidatePosts": 38,
+  "candidateAccounts": 30,
   "skippedAccountCooldowns": 0,
   "selectedAccounts": [
     {
@@ -192,14 +192,19 @@
       "candidates": 2
     },
     {
-      "username": "derputtler",
+      "username": "wirwo.wien",
       "candidates": 1
     }
   ],
-  "fetchedPosts": 134,
-  "exactMatches": 8,
+  "fetchedPosts": 0,
+  "exactMatches": 0,
   "retainedEvidencePosts": 2000,
-  "errors": [],
+  "errors": [
+    {
+      "username": "afrivision.austria",
+      "message": "Instagram shared quota paused: rolling-hour budget exhausted"
+    }
+  ],
   "accountFailures": {
     "tantisaluti.wien": {
       "count": 2,
@@ -240,19 +245,25 @@
   "sharedQuota": {
     "limitPerHour": 190,
     "usageThreshold": 95,
-    "requests": 6,
-    "reserved": 10,
-    "stopped": false,
-    "reason": "",
-    "highestUsagePercent": 79,
+    "requests": 0,
+    "reserved": 0,
+    "stopped": true,
+    "reason": "Instagram shared quota paused: rolling-hour budget exhausted",
+    "highestUsagePercent": 0,
     "waitedMs": 0,
     "pacingMs": 0,
-    "retryAt": "",
+    "retryAt": "2026-10-29T01:29:30.265Z",
     "adaptiveSafetyCeiling": 190,
     "adaptiveIncreases": 0,
     "storageFailure": null
   },
-  "blockedEvidencePosts": 89,
-  "unmatchedCandidatePosts": 32,
-  "message": "8/40 fresh cross-source Instagram candidates matched exactly via Graph API."
+  "globalError": {
+    "username": "afrivision.austria",
+    "status": 0,
+    "code": "SCAN_BUDGET",
+    "message": "Instagram shared quota paused: rolling-hour budget exhausted"
+  },
+  "blockedEvidencePosts": 91,
+  "unmatchedCandidatePosts": 38,
+  "message": "0/38 fresh cross-source Instagram candidates matched exactly via Graph API."
 }
