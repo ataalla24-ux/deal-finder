@@ -1,11 +1,11 @@
 {
-  "generatedAt": "2026-10-29T10:09:47.898Z",
+  "generatedAt": "2026-10-29T10:46:49.911Z",
   "summary": {
     "filesConsidered": 32,
-    "totalCandidates": 858,
-    "uniqueCandidates": 772,
-    "distinctCandidates": 811,
-    "duplicateClusters": 39,
+    "totalCandidates": 861,
+    "uniqueCandidates": 773,
+    "distinctCandidates": 813,
+    "duplicateClusters": 40,
     "topHealthySources": [
       {
         "sourceKey": "instagram-apify2",
@@ -52,6 +52,12 @@
         "totalDeals": 1
       },
       {
+        "sourceKey": "firecrawl5",
+        "sourceLabel": "Firecrawl Key 5 - Instagram Gastro",
+        "missionFitScore": 72,
+        "totalDeals": 5
+      },
+      {
         "sourceKey": "wien-combined",
         "sourceLabel": "Wien Deals Combined Graph",
         "missionFitScore": 72,
@@ -62,12 +68,6 @@
         "sourceLabel": "Member Benefits",
         "missionFitScore": 68,
         "totalDeals": 109
-      },
-      {
-        "sourceKey": "instagram-ai",
-        "sourceLabel": "Instagram AI Agent",
-        "missionFitScore": 67,
-        "totalDeals": 49
       }
     ],
     "topCoverageSources": [
@@ -81,9 +81,9 @@
       {
         "sourceKey": "meta-instagram",
         "sourceLabel": "Meta Instagram Graph",
-        "coverageScore": 84,
+        "coverageScore": 83,
         "totalDeals": 127,
-        "fresh1dCount": 25
+        "fresh1dCount": 24
       },
       {
         "sourceKey": "gastro2",
@@ -115,6 +115,12 @@
         "totalDeals": 1
       },
       {
+        "sourceKey": "firecrawl5",
+        "sourceLabel": "Firecrawl Key 5 - Instagram Gastro",
+        "precisionScore": 79,
+        "totalDeals": 5
+      },
+      {
         "sourceKey": "instagram-ai",
         "sourceLabel": "Instagram AI Agent",
         "precisionScore": 76,
@@ -131,12 +137,6 @@
         "sourceLabel": "Member Benefits",
         "precisionScore": 74,
         "totalDeals": 109
-      },
-      {
-        "sourceKey": "meta-instagram",
-        "sourceLabel": "Meta Instagram Graph",
-        "precisionScore": 73,
-        "totalDeals": 127
       }
     ],
     "topWeightedSources": [
@@ -147,16 +147,16 @@
         "totalDeals": 109
       },
       {
-        "sourceKey": "meta-instagram",
-        "sourceLabel": "Meta Instagram Graph",
-        "sourceWeightScore": 71,
-        "totalDeals": 127
-      },
-      {
         "sourceKey": "instagram-apify2",
         "sourceLabel": "Apify 2 Vienna Food Discovery",
         "sourceWeightScore": 70,
         "totalDeals": 1
+      },
+      {
+        "sourceKey": "meta-instagram",
+        "sourceLabel": "Meta Instagram Graph",
+        "sourceWeightScore": 70,
+        "totalDeals": 127
       },
       {
         "sourceKey": "joe",
@@ -522,8 +522,8 @@
       "uniqueDeals": 92,
       "duplicateDeals": 35,
       "duplicateAcrossSources": 20,
-      "fresh1dCount": 25,
-      "fresh7dCount": 124,
+      "fresh1dCount": 24,
+      "fresh7dCount": 123,
       "viennaCount": 127,
       "foodDrinkCount": 85,
       "promoCount": 79,
@@ -594,19 +594,101 @@
       "issues": [],
       "healthScore": 70,
       "missionFitScore": 61,
-      "coverageScore": 84,
+      "coverageScore": 83,
       "precisionScore": 73,
-      "sourceWeightScore": 71
+      "sourceWeightScore": 70
+    },
+    {
+      "sourceKey": "firecrawl5",
+      "file": "deals-pending-firecrawl5.json",
+      "sourceLabel": "Firecrawl Key 5 - Instagram Gastro",
+      "totalDeals": 5,
+      "uniqueDeals": 2,
+      "duplicateDeals": 3,
+      "duplicateAcrossSources": 3,
+      "fresh1dCount": 0,
+      "fresh7dCount": 5,
+      "viennaCount": 5,
+      "foodDrinkCount": 5,
+      "promoCount": 4,
+      "missingUrlCount": 0,
+      "sampleTitles": [
+        "Rotenturmstraße 19: ciosgrill 📍Rotenturmstraße 19, 1010 Wien 31.10.26 12-17 ...",
+        "Rotenturmstraße 19: Gratis Döner zu Halloween in Wien 🎃🌯 Am 31. Oktober ...",
+        "Rotenturmstraße 19: 🎃🥙 GRATIS DÖNER IN WIEN! 😍🔥 Am 31.10. bekommt ihr ..."
+      ],
+      "lastRun": {
+        "status": "completed",
+        "startedAt": "2026-10-29T10:43:36.031Z",
+        "finishedAt": "2026-10-29T10:45:46.491Z",
+        "durationMs": 130460,
+        "counts": {
+          "rawCandidates": 12,
+          "normalizedCandidates": 10,
+          "verifiedCandidates": 5,
+          "previousDeals": 2,
+          "acceptedDeals": 5,
+          "rejectedDeals": 9
+        },
+        "rejectedByReason": {
+          "excluded-giveaway": 2,
+          "post-verification-rejected": 7
+        },
+        "errors": [],
+        "reportFile": "deal-pipeline-last-run-firecrawl5.json"
+      },
+      "uniqueRate": 0.4,
+      "duplicateRate": 0.6,
+      "fresh1dRate": 0,
+      "fresh7dRate": 1,
+      "viennaRate": 1,
+      "foodDrinkRate": 1,
+      "promoRate": 0.8,
+      "missingUrlRate": 0,
+      "averageQualityScore": 80,
+      "topCategories": [
+        {
+          "value": "essen",
+          "count": 4
+        },
+        {
+          "value": "technik",
+          "count": 1
+        }
+      ],
+      "topTypes": [
+        {
+          "value": "gratis",
+          "count": 3
+        },
+        {
+          "value": "bogo",
+          "count": 1
+        },
+        {
+          "value": "rabatt",
+          "count": 1
+        }
+      ],
+      "issues": [
+        "wenige Deals sind frischer als 1 Tag",
+        "hohe Überschneidung mit anderen Quellen"
+      ],
+      "healthScore": 70,
+      "missionFitScore": 72,
+      "coverageScore": 16,
+      "precisionScore": 79,
+      "sourceWeightScore": 62
     },
     {
       "sourceKey": "instagram-ai",
       "file": "deals-pending-instagram-ai.json",
       "sourceLabel": "Instagram AI Agent",
       "totalDeals": 49,
-      "uniqueDeals": 24,
-      "duplicateDeals": 25,
-      "duplicateAcrossSources": 20,
-      "fresh1dCount": 11,
+      "uniqueDeals": 23,
+      "duplicateDeals": 26,
+      "duplicateAcrossSources": 21,
+      "fresh1dCount": 10,
       "fresh7dCount": 49,
       "viennaCount": 49,
       "foodDrinkCount": 41,
@@ -676,7 +758,7 @@
       ],
       "healthScore": 69,
       "missionFitScore": 67,
-      "coverageScore": 39,
+      "coverageScore": 38,
       "precisionScore": 76,
       "sourceWeightScore": 64
     },
@@ -1244,82 +1326,6 @@
       "coverageScore": 9,
       "precisionScore": 52,
       "sourceWeightScore": 42
-    },
-    {
-      "sourceKey": "firecrawl5",
-      "file": "deals-pending-firecrawl5.json",
-      "sourceLabel": "Firecrawl Key 5 - Instagram Gastro",
-      "totalDeals": 2,
-      "uniqueDeals": 0,
-      "duplicateDeals": 2,
-      "duplicateAcrossSources": 2,
-      "fresh1dCount": 0,
-      "fresh7dCount": 2,
-      "viennaCount": 2,
-      "foodDrinkCount": 2,
-      "promoCount": 1,
-      "missingUrlCount": 0,
-      "sampleTitles": [
-        "zushimarket: Zushi Market on Instagram: \"4 FÜR 3 HERBSTFERIEN SPECIAL! Zu viert ...",
-        "milyn Fusionhouse Zieglergasse 42: ️ Achtung, Hunger vorprogrammiert! Swipe dich durch ... - Instagram"
-      ],
-      "lastRun": {
-        "status": "completed",
-        "startedAt": "2026-10-28T10:22:42.774Z",
-        "finishedAt": "2026-10-28T10:24:51.556Z",
-        "durationMs": 128782,
-        "counts": {
-          "rawCandidates": 12,
-          "normalizedCandidates": 12,
-          "verifiedCandidates": 2,
-          "previousDeals": 2,
-          "acceptedDeals": 2,
-          "rejectedDeals": 10
-        },
-        "rejectedByReason": {
-          "post-verification-rejected": 10
-        },
-        "errors": [],
-        "reportFile": "deal-pipeline-last-run-firecrawl5.json"
-      },
-      "uniqueRate": 0,
-      "duplicateRate": 1,
-      "fresh1dRate": 0,
-      "fresh7dRate": 1,
-      "viennaRate": 1,
-      "foodDrinkRate": 1,
-      "promoRate": 0.5,
-      "missingUrlRate": 0,
-      "averageQualityScore": 80,
-      "topCategories": [
-        {
-          "value": "essen",
-          "count": 1
-        },
-        {
-          "value": "technik",
-          "count": 1
-        }
-      ],
-      "topTypes": [
-        {
-          "value": "bogo",
-          "count": 1
-        },
-        {
-          "value": "rabatt",
-          "count": 1
-        }
-      ],
-      "issues": [
-        "wenige Deals sind frischer als 1 Tag",
-        "hohe Überschneidung mit anderen Quellen"
-      ],
-      "healthScore": 56,
-      "missionFitScore": 64,
-      "coverageScore": 13,
-      "precisionScore": 69,
-      "sourceWeightScore": 53
     },
     {
       "sourceKey": "gastro2",
