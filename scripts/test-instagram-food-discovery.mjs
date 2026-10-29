@@ -89,7 +89,7 @@ assert.doesNotMatch(JSON.stringify(normalizeAdLibraryItem(ad, config, now)), /ac
 assert.ok(normalizeAdLibraryItem({ ...ad, publisher_platforms: ['FACEBOOK'] }, config, now).deal);
 assert.equal(normalizeAdLibraryItem({ ...ad, publisher_platforms: ['AUDIENCE_NETWORK'] }, config, now).rejection, 'unsupported-ad-platform');
 assert.equal(normalizeAdLibraryItem({ ...ad, ad_creative_bodies: ['Wien Beauty 20% Rabatt'] }, config, now).rejection, 'non-food-ad');
-assert.equal(normalizeAdLibraryItem({ ...ad, ad_creative_bodies: ['Free coffee in Berlin'], target_locations: [{ name: 'Wien' }] }, config, now).rejection, 'missing-vienna-redemption-evidence');
+assert.equal(normalizeAdLibraryItem({ ...ad, ad_creative_bodies: ['Free coffee in Berlin'], target_locations: [{ name: 'Wien' }] }, config, now).rejection, 'missing-vienna-evidence', 'the explicit foreign venue is rejected before generated targeting can imply Vienna');
 assert.ok(normalizeAdLibraryItem({ ...ad, ad_creative_bodies: ['Gratis Getr\u00e4nke in Wien am 21.09.2026'] }, config, now).deal);
 
 for (const text of [

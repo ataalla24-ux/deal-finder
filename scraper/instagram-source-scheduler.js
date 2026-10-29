@@ -57,7 +57,9 @@ export function selectCoverageAccounts(accounts, config, state = {}, now = new D
   const due = accounts.filter((account) => !last(account) || +now - last(account) >= accountRescanHours(account, stats(account), now) * HOUR);
   const first = (account) => !last(account);
   const food = due.filter(isFoodDrinkSource);
-  const foodTarget = Math.min(food.length, Math.ceil(limit * Number(config.foodAccountShare ?? 0.9)));
+  const foodReservation = Math.ceil(limit * Math.max(0, Math.min(1, Number(config.foodAccountShare ?? 0.9))));
+  const foodTarget = Math.min(food.length, foodReservation);
+  const otherLimit = Math.max(0, Math.min(limit - foodReservation, config.maxNonFoodAccounts ?? limit));
   const isScout = (account) => ['creator', 'discovery', 'platform'].includes(inferInstagramAccountRole(account));
   const compareQuality = (a, b) => quality(b, stats(b)) - quality(a, stats(a)) || last(a) - last(b) || a.username.localeCompare(b.username);
   const oldest = (a, b) => last(a) - last(b) || compareQuality(a, b);
@@ -85,7 +87,13 @@ export function selectCoverageAccounts(accounts, config, state = {}, now = new D
     if (selected.length >= foodTarget) break;
     add(account, first(account) ? 'first-check' : 'food-rotation');
   }
-  for (const account of due.filter((item) => !seen.has(item.username)).sort(oldest)) add(account, isFoodDrinkSource(account) ? 'food-rotation' : 'other-rotation');
+  // Leave unavailable food slots unused instead of spending them on unrelated
+  // sources. Source cooldowns and shared API limits remain authoritative.
+  let otherCount = 0;
+  for (const account of due.filter((item) => !seen.has(item.username)).sort(oldest)) {
+    if (isFoodDrinkSource(account)) add(account, 'food-rotation');
+    else if (otherCount < otherLimit) { add(account, 'other-rotation'); otherCount += 1; }
+  }
   return selected;
 }
 

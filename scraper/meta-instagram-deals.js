@@ -13,6 +13,8 @@ import { fileURLToPath } from 'url';
 import { normalizeCategoryForScraper } from './category-utils.js';
 import { extractLowFoodPrice, getAdFoodBenefitRejection, getMetaNonOfferRejection, isFoodDrinkSource, weakFoodPromotionReason } from './food-discovery-utils.js';
 import { discoveryRejection } from './deal-discovery-policy.js';
+import { locationConflictReason } from './deal-factual-guards.js';
+import { polishOfferTitle } from './offer-title-utils.js';
 import { inferPreferredBrand } from './deal-normalization-utils.js';
 import {
   canonicalInstagramPostKey,
@@ -198,7 +200,7 @@ const VIENNA_PATTERNS = [
 const CATEGORY_HINTS = [
   { category: 'reisen', pattern: /\b(?:flug|flüge|fluege|flight|reise|reisepaket|travel\s+package|umrah|hotel\s*[•·+]\s*(?:transfer|flug))\b/i },
   { category: 'kaffee', pattern: /\b(?:kaffee|coffee|cafe|espresso|latte|matcha|boba|bubble tea)\b/i },
-  { category: 'essen', pattern: /\b(?:essen|food|restaurant|pizza|burger|kebab|kebap|döner|doener|sushi|ramen|brunch|eis|gelato|bakery|bäckerei)\b/i },
+  { category: 'essen', pattern: /\b(?:essen|food|restaurant|speisen|speisenplatte|pizza|burger|kebab|kebap|döner|doener|sushi|ramen|brunch|eis|gelato|bakery|bäckerei)\b/i },
   { category: 'fitness', pattern: /\b(?:fitness|gym|yoga|pilates|training|workout|probetraining)\b/i },
   { category: 'beauty', pattern: /\b(?:beauty|kosmetik|friseur|salon|wellness|massage)\b/i },
   { category: 'shopping', pattern: /\b(?:shopping|store|shop|mode|fashion|sale|gutschein|klavier|piano|fl[üu]gel|musikinstrument(?:e)?|haushalt|reinigung|küche|kueche|trinkgl[aä]ser|auflaufform|geschirr)\b/i },
@@ -755,6 +757,8 @@ export function findViennaEvidence(candidate, account = null, config = {}) {
     candidate?.text,
   ].filter(Boolean);
   const text = textParts.join(' ');
+  const locationConflict = locationConflictReason({ description: text });
+  if (locationConflict) return { verified: false, source: 'location-conflict', detail: locationConflict };
   if (hasViennaText(text)) {
     return { verified: true, source: 'content', detail: cleanText(text.match(/.{0,40}(?:wien|vienna|1\d{3}).{0,60}/i)?.[0] || 'Wien-Signal im Inhalt', 140) };
   }
@@ -1205,8 +1209,11 @@ export function normalizeGraphMediaItem(raw, context, config, now = new Date()) 
     ? captionProse
     : promotionText;
   const displayText = [...new Set([caption, trustedAiOffer, trustedAiLocation, trustedAiValidity].filter(Boolean))].join('\n');
-  const category = inferCategory(displayText);
-  const title = inferTitle(titleText, brand, promotion);
+  const categoryEvidence = [displayText, trustedAiOffer ? ocrText : ''].filter(Boolean).join(' ');
+  const category = inferCategory(categoryEvidence);
+  const translatedOffer = trustedAiOffer ? polishOfferTitle(trustedAiOffer) : '';
+  const title = translatedOffer && translatedOffer !== trustedAiOffer
+    ? translatedOffer : polishOfferTitle(inferTitle(titleText, brand, promotion), displayText);
   const deal = buildDealBase({
     id: `meta-ig-${cleanText(raw?.id, 120) || stableHash(url)}`,
     brand,
@@ -1675,7 +1682,8 @@ async function collectInstagramGraph(config, accountCatalog, state, now, fetchIm
   );
   const reserveAccounts = selectAccountShard(
     availableAccounts,
-    { ...config, maxAccountsPerRun: maxAccountAttempts },
+    { ...config, maxAccountsPerRun: maxAccountAttempts,
+      maxNonFoodAccounts: accountTarget - Math.ceil(accountTarget * Math.max(0, Math.min(1, Number(config.foodAccountShare ?? 0.9)))) },
     state,
     now,
   ).filter((account) => !initialAccounts.some((selected) => selected.username === account.username));

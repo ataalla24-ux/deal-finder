@@ -203,7 +203,9 @@ try {
   assert.deepEqual(loadAccountCatalog(config, migrationPaths, { discoveredAccounts }).map((row) => row.username).sort(),
     ['cafe.vienna', 'owner.ac.at', 'tagged.co.at'], 'legacy website-only discovery is excluded without blocking proven owners/tags');
   write('state.json', { discoveredAccounts, mediaLlmUsage: [{ at: start.toISOString(), calls: 4 }] });
-  const migrated = await runMetaInstagramCollector({ config: { ...testConfig, maxAccountsPerRun: 3, hashtags: [] }, env: {}, now: start, paths: migrationPaths, write: false,
+  // This case checks catalog migration, including uncategorized owners, not the
+  // separate food reservation policy exercised by the scheduler regressions.
+  const migrated = await runMetaInstagramCollector({ config: { ...testConfig, maxAccountsPerRun: 3, foodAccountShare: 0, hashtags: [] }, env: {}, now: start, paths: migrationPaths, write: false,
     fetchImpl: async (url) => {
       assert(!String(url).includes('wien.orf.at'));
       return Response.json({ business_discovery: { media: { data: [] } } });

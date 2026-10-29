@@ -12,6 +12,7 @@ on:
       - 'scripts/test-apify*'
       - '.github/workflows/apify-discovery.yml'
       - 'scripts/test-slack-food-improvements.mjs'
+      - 'scripts/test-review-clarity.mjs'
       - 'scripts/test-instagram-media-budget.mjs'
       - 'scripts/test-instagram-max-coverage.mjs'
       - 'scripts/test-meta-instagram-deals.mjs'
@@ -28,6 +29,7 @@ on:
       - '.github/workflows/daily-digest.yml'
   pull_request:
     paths:
+      - 'scripts/test-review-clarity.mjs'
       - 'scraper/**'
       - 'scripts/review-live-deals-llm.mjs'
       - 'scripts/test-source-review-cache.mjs'
@@ -80,6 +82,7 @@ jobs:
           node --test scripts/test-source-review-cache.mjs
           SENTRY_DISABLED=1 node --test scripts/test-community-card-enrichment.mjs
           node scripts/test-slack-food-improvements.mjs
+          node scripts/test-review-clarity.mjs
           node scripts/test-deal-evidence.mjs
           node scripts/test-slack-deal-quality.mjs
           node scripts/test-deal-review-feedback.mjs

@@ -1,0 +1,26 @@
+{
+  "date": "2026-10-29",
+  "scope": "Owner-approved quality improvements for future candidates; no live offer edits or manual Slack sends",
+  "changes": [
+    "Explicit foreign venues override generated Vienna defaults; reject non-offer price maps and event roundups",
+    "Complete source-backed product/price patterns receive understandable German headings; human edits and approvals stay protected",
+    "Cached trusted food evidence can classify a restaurant promotion despite incidental holiday wording",
+    "Slack retains up to 6000 description characters, prefers explicit addresses and distinguishes source dates from internal review TTLs",
+    "Narrow duplicate key for official Austrian IKEA family campaigns requires matching dates, minimum purchase, membership, age and quantity",
+    "Unavailable food source reservations remain unused; non-food backfill cannot expand the original allowance"
+  ],
+  "verification": {
+    "offline_suites": 22,
+    "result": "passed",
+    "new_regression": "scripts/test-review-clarity.mjs",
+    "live_regular_run_observed": false,
+    "new_slack_deliveries_claimed": false
+  },
+  "preserved": [
+    "All existing public deals including owner-held Wolt g2-3dn8v3",
+    "Manual Slack approval and existing message identities",
+    "Source cooldowns, shared quotas, existing paid-call and cost limits",
+    "DEAL_CARD_EDITOR_ENABLED remains disabled",
+    "No extra Actor, scraper, OCR, model, notification or customer-message run"
+  ]
+}

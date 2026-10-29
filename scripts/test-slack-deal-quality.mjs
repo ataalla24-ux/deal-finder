@@ -2098,7 +2098,7 @@ const slackDisplay = buildSlackMessage({
     warnings: ['kein Quell-/Post-Datum gefunden'],
   },
 }, 1);
-assert.match(slackDisplay, /Angebotsdatum: k\.A\./);
+assert.match(slackDisplay, /Quellendatum: k\.A\./);
 assert.match(slackDisplay, /Gültig bis: 31\.8\.2026/);
 assert.doesNotMatch(slackDisplay, /Gültig bis: 1\.7\.2026/);
 

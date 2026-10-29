@@ -2,16 +2,19 @@ const text = (value) => String(value || '').replace(/\s+/g, ' ').trim();
 
 export function locationConflictReason(deal = {}) {
   if (deal.flight || /flights-vienna/i.test(deal.originSource || '')) return '';
-  const caption = text([deal.description, deal.evidence?.textSample, deal.metaGraphCaption].filter(Boolean).join(' '));
-  const outside = '(?:Graz|Salzburg|Linz|Innsbruck|Klagenfurt|Villach|Berlin|München)';
-  const explicitElsewhere = new RegExp(`\\b(?:in|bei|nahe)\\s+${outside}\\b`, 'i');
+  // Generated descriptions may contain a default Vienna address. Prefer the
+  // original post when deciding where the actual promotion takes place.
+  const caption = text(deal.metaGraphCaption || deal.evidence?.textSample || deal.description);
+  const outside = '(?:Graz|Salzburg|Linz|Innsbruck|Klagenfurt|Villach|Berlin|München|Dubai|Abu Dhabi)';
+  const explicitElsewhere = new RegExp(`\\b(?:in|bei|nahe|at)\\s+${outside}\\b`, 'i');
+  const venueElsewhere = new RegExp(`(?:📍|\\b(?:Standort|Location|Adresse|Address)\\s*:)\\s*[^.!?]{0,180}\\b${outside}\\b`, 'i');
   const outsideHandle = /\b(?:@?[a-z0-9_.]*(?:grill|food|kebab|kebap|pizza|cafe)[a-z0-9_.]*graz)\b/i;
   const nationwide = /\b(?:österreichweit|austria[- ]wide|bundesweit|im\s+online[- ]?shop|online\s+bestellen)\b/i.test(caption);
   if (nationwide && !/\bnur\s+(?:in|bei)\b/i.test(caption) && !explicitElsewhere.test(text(deal.title))) return '';
   // A Vienna display default or Wienerstrasse cannot override the actual venue.
   const viennaBranch = /\b1(?:0[1-9]|1\d|2[0-3])0\s+(?:Wien|Vienna)\b/i.test(caption)
     || /\b(?:in allen|alle teilnehmenden|auch in|auch bei)\b[^.!?]{0,65}\b(?:Wien|Wiener|österreichweit)\b/i.test(caption);
-  return explicitElsewhere.test(text(deal.title)) || (!viennaBranch && (explicitElsewhere.test(caption) || outsideHandle.test(caption)))
+  return explicitElsewhere.test(text(deal.title)) || (!viennaBranch && (explicitElsewhere.test(caption) || venueElsewhere.test(caption) || outsideHandle.test(caption)))
     ? 'Ortswiderspruch: Originalangebot nennt einen Standort ausserhalb Wiens' : '';
 }
 

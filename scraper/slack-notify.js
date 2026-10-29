@@ -1,4 +1,6 @@
 import { officialFoodOfferKey } from './power-food-sources.js';
+import { polishOfferTitle } from './offer-title-utils.js';
+import { officialFamilyMealCampaignKey } from './deal-evidence-utils.js';
 import { filterDiscoveryDeals, foodDiscoveryPriority } from './deal-discovery-policy.js';
 import { normalizeDealFacts, locationConflictReason, materialOfferConditions } from './deal-factual-guards.js';
 import { isCommunitySubmission } from './community-review-utils.js';
@@ -380,7 +382,10 @@ function normalizeDeal(rawDeal, sourceKey) {
   const inferredTitle = inferTitle(deal, inferredBrand);
   const identity = repairKnownDealIdentity(deal, rawUrl, inferredBrand, inferredTitle);
   const brand = identity.brand;
-  const title = identity.title;
+  const protectedTitle = deal.slackTs || deal.editedInSlack || deal.slackEditedAt || deal.slackEditedFields?.length
+    || deal.slackFormEditTs || deal.liveEditedAt || deal.liveEditedFields?.length || deal.cardEditorial
+    || deal.approvedAt || deal.pipelineLifecycle?.publishedAt || deal.pipelineLifecycle?.manualDecision;
+  const title = protectedTitle ? identity.title : polishOfferTitle(identity.title, deal.description || '');
   const rawDistance = inferDistance(deal);
   const rawExpires = cleanText(deal.expires || deal.validUntil || deal.validOn || deal.end_date || deal.validity_date || '');
   const normalizedExpires = inferExpires(deal);
@@ -878,8 +883,10 @@ function buildSlackMessage(deal, index, mapContext = loadDealMapReviewContext())
   const displayedOfferDate = validity.status ? validity.sourceDate : deal.pubDate;
   const displayedStart = deal.validFrom || (deal.expiryKind === 'single' ? deal.validOn : '');
   const displayedExpiry = validity.expiryDate || deal.validUntil || deal.validOn || deal.expires;
+  const internalExpiry = /ttl|fallback/i.test([deal.expiryKind, deal.expirySource, deal.expiresSource].join(' '));
   const link = deal.url ? `<${deal.url}|Zum Angebot>` : isCommunitySubmission(deal) ? 'Kein Link angegeben (optional)' : '⚠️ FEHLT';
-  const desc = deal.description ? `\n📝 ${slackTextPrefix(deal.description, isCommunitySubmission(deal) ? 6000 : 180)}` : '';
+  const description = String(deal.description || '');
+  const desc = description ? `\n📝 ${slackTextPrefix(description, 6000)}${Array.from(description).length > 6000 ? '\n⚠️ Text gekürzt: vollständige Bedingungen in der Quelle prüfen.' : ''}` : '';
   const missingNote = Array.isArray(deal.missingFields) && deal.missingFields.length > 0
     ? `\n⚠️ FEHLT: ${deal.missingFields.join(', ')}`
     : '';
@@ -896,14 +903,15 @@ function buildSlackMessage(deal, index, mapContext = loadDealMapReviewContext())
     `*${index}. ${deal.title}*`,
     ...(materialOfferConditions(deal) ? [`*Wichtige Bedingungen:* ${slackTextPrefix(materialOfferConditions(deal), 900)}`] : []),
     `🏷️ Marke/Restaurant: ${deal.brand || 'k.A.'}`,
-    `📍 Ort: ${deal.distance || 'k.A.'}`,
+    `📍 Ort: ${deal.address || deal.distance || 'k.A.'}`,
     isCommunitySubmission(deal)
       ? `📨 Eingereicht: ${formatDate(deal.submittedAt || deal.pubDate)} (kein Aktionsdatum)`
-      : `📅 Angebotsdatum: ${formatDate(displayedOfferDate)}`,
+      : `📅 Quellendatum: ${formatDate(displayedOfferDate)}`,
     ...(isCommunitySubmission(deal) && deal.expiresOriginal
       ? [`🗓️ Gültigkeit laut Text: ${deal.expiresOriginal}`] : []),
     ...(displayedStart ? [`🚀 Startet am: ${formatDate(displayedStart)}`] : []),
-    `⏳ Gültig bis: ${displayedExpiry ? formatDate(displayedExpiry) : 'k.A.'}`,
+    `⏳ Gültig bis: ${!internalExpiry && displayedExpiry ? formatDate(displayedExpiry) : 'k.A.'}`,
+    ...(internalExpiry ? [`⚠️ Interne Prüffrist: ${formatDate(displayedExpiry)} (kein Angebotsende)`] : []),
     `🧭 Kategorie: ${deal.category} | Typ: ${displayedType}`,
     `🧩 Ursprung intern: ${deal.originSource || deal.source || 'k.A.'}`,
     `🔗 Direktlink: ${link}`,
@@ -1318,6 +1326,8 @@ function buildDealDuplicateKeys(deal) {
   }
   const semanticOfferKey = semanticCrossPlatformOfferKey(deal);
   if (semanticOfferKey) keys.push(semanticOfferKey);
+  const familyMealKey = officialFamilyMealCampaignKey(deal);
+  if (familyMealKey) keys.push(familyMealKey);
   if (postKey && titleKey) {
     keys.push(`url-title:${postKey}|${titleKey}`);
   }

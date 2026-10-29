@@ -165,6 +165,41 @@ export function semanticCrossPlatformOfferKey(deal = {}) {
   return semanticPromotionOfferKey(deal);
 }
 
+// These two official Austrian listing pages repeat the same family campaign.
+// Require its complete identity; never merge on the merchant or "gratis" alone.
+export function officialFamilyMealCampaignKey(deal = {}) {
+  if (semanticBrandKey(deal) !== 'ikea') return '';
+  let url;
+  try { url = new URL(deal.url); } catch { return ''; }
+  if (url.protocol !== 'https:' || !['ikea.com', 'www.ikea.com'].includes(url.hostname)
+      || !['/at/de/food/', '/at/de/stores/neu-im-einrichtungshaus/'].includes(url.pathname)) return '';
+  const raw = [deal.title, deal.description, deal.expiresOriginal, deal.expires].filter(Boolean).join(' ');
+  const text = normalizeFingerprintText(raw);
+  if (!/\bkindermenus?\b/.test(text) || !/\bgratis\b/.test(text) || !/\bikea family\b/.test(text)
+      || !/\bwarmes?\w* hauptgericht\w*\b/.test(text)
+      || /\b(?:nur|ausschliesslich|exklusiv)\s+(?:in|im|bei)\s+(?:(?:der|dem)\s+)?(?:filiale|einrichtungshaus|ikea|wien)\b/.test(text)) return '';
+  const maxima = uniqueMatches(text, /\b(?:maximal|bis zu)\s+(\d+|zwei)\s+(?:gratis-)?(?:kindermenus?|kinder)\b/g,
+    m => m[1] === 'zwei' ? '2' : m[1]);
+  const ages = uniqueMatches(text, /\bbis\s+(\d+)\s+jahre\b/g, m => m[1]);
+  const amounts = uniqueMatches(raw, /\bab\s+(\d+(?:[,.]\d+)?)\s*(?:€|eur\b|euro\b)/gi, m => Number(m[1].replace(',', '.')));
+  if (maxima.length !== 1 || ages.length !== 1 || amounts.length !== 1) return '';
+  const ranges = [...raw.matchAll(/\b(\d{1,2})\.(\d{1,2})\.(20\d{2})?\s*(?:bis|[–—-])\s*(\d{1,2})\.(\d{1,2})\.(20\d{2})\b/gu)];
+  const day = (y, m, d) => {
+    const date = new Date(Date.UTC(Number(y), Number(m) - 1, Number(d)));
+    return date.getUTCFullYear() === Number(y) && date.getUTCMonth() + 1 === Number(m)
+      && date.getUTCDate() === Number(d) ? date.toISOString().slice(0, 10) : '';
+  };
+  const periods = [...new Set(ranges.map(m => {
+    const start = day(m[3] || m[6], m[2], m[1]), end = day(m[6], m[5], m[4]);
+    return start && end && start <= end ? `${start}/${end}` : '';
+  }))];
+  if (periods.length !== 1 || !periods[0]) return '';
+  const [start, end] = periods[0].split('/');
+  if ((deal.validFrom && String(deal.validFrom).slice(0, 10) !== start)
+      || (deal.validUntil && String(deal.validUntil).slice(0, 10) !== end)) return '';
+  return `official-family:ikea-at|${periods[0]}|max-${maxima[0]}|age-${ages[0]}|minimum-${amounts[0]}|family`;
+}
+
 function toIsoTimestamp(value) {
   if (value === null || value === undefined || value === '') return '';
   let candidate = value;

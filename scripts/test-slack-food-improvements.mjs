@@ -5,17 +5,45 @@ import path from 'node:path';
 import { locationConflictReason, normalizeDealFacts, materialOfferConditions } from '../scraper/deal-factual-guards.js';
 import { inferPreferredBrand } from '../scraper/deal-normalization-utils.js';
 import { semanticCrossPlatformOfferKey, getViennaEvidence } from '../scraper/deal-evidence-utils.js';
-import { getNonOfferContentReason } from '../scraper/promotion-quality-utils.js';
+import { getNonOfferContentReason, getEditorialRoundupPromotionReason } from '../scraper/promotion-quality-utils.js';
 import { normalizeDeal, filterDuplicateDealsInRun, buildSlackMessage } from '../scraper/slack-notify.js';
 import { validateDealsForSlack } from '../scraper/deal-validity-agent.js';
 import { scanAdLibraryCoverage } from '../scraper/meta-ad-library-coverage.js';
-import { buildConfig, collectAdLibrary } from '../scraper/meta-instagram-deals.js';
+import { buildConfig, collectAdLibrary, classifyPromotion, findViennaEvidence } from '../scraper/meta-instagram-deals.js';
+import { discoveryRejection } from '../scraper/deal-discovery-policy.js';
 import { runWienDealsCombined } from '../scraper/wien-deals-combined.js';
 import { enrichInstagramGraphMedia } from '../scraper/instagram-media-evidence.js';
 import { recentFeedbackMetrics } from '../scraper/social-food-audit.js';
 import { buildShardedActorInput, collectDirectPostSeedUrls } from '../scraper/import-apify-instagram-deals.js';
 
 const now = new Date('2026-10-16T08:00:00Z');
+// Actual October 29 Slack false positives, with positive controls for real offers.
+const dubaiCaption = 'Spend AED 70 or more at Kaiser’s Vienna and enjoy a FREE matcha from Rhea Matcha. 📍 Kaiser’s Vienna, Market Island, Dubai Festival City Mall.';
+const foreignOffer = { title: 'SPECIAL OFFER AT MARKET ISLAND!', description: dubaiCaption,
+  metaGraphCaption: dubaiCaption, city: 'Wien', viennaVerified: true };
+assert(locationConflictReason(foreignOffer), 'Vienna in a foreign merchant name is not a Vienna branch');
+assert.equal(findViennaEvidence({ caption: dubaiCaption }, { verifiedVienna: true }).verified, false, 'reject before registry/default Vienna evidence');
+assert(locationConflictReason({ ...foreignOffer, description: 'Gratis Matcha in 1010 Wien' }), 'inferred display location cannot override the original venue');
+assert.equal(locationConflictReason({ title: 'Gratis Matcha', description: 'Dubai-Style Matcha gratis in unserer Filiale, 1010 Wien.' }), '');
+assert.equal(locationConflictReason({ title: 'Gratis Kaffee', description: 'In Dubai und auch in Wien bei unserer Filiale.' }), '');
+assert.equal(locationConflictReason({ title: 'Flug nach Dubai', flight: { origin: 'VIE' }, description: 'Reise nach Dubai' }), '');
+const priceMap = 'A free map of real prices in Vienna, added by guests. Coffee, Schnitzel: 230+ places, from cheap to pricey. HOW MUCH ist eine kostenlose Karte mit echten Preisen in Wien.';
+assert(getNonOfferContentReason(priceMap), 'a free price directory is not a merchant benefit');
+assert.equal(discoveryRejection({ title: priceMap, socialFoodReview: true }), 'non-offer-content', 'social review uses the same non-offer guard');
+assert.equal(classifyPromotion(priceMap).accepted, false, 'reject before retaining a Meta candidate');
+assert.equal(getNonOfferContentReason(`${priceMap} Heute gibt es bei Cafe Test einen gratis Kaffee.`), '', 'keep independently promised consumer benefits');
+const roundup = '10 things happening in Vienna this Halloween weekend and 4 are free to enter. Friday: harvest fest, free entry; food costs extra. Saturday: Halloween at the cemetery.';
+assert(getEditorialRoundupPromotionReason(roundup));
+assert.equal(classifyPromotion(roundup).accepted, false);
+assert.equal(getEditorialRoundupPromotionReason('10 Burger zum halben Preis in Wien am Freitag, nur solange der Vorrat reicht.'), '');
+assert.equal(getEditorialRoundupPromotionReason('Halloween in Wien: Gratis Kaffee am 31.10. in 1070 Wien.'), '');
+for (const candidate of [foreignOffer, { title: 'Gratis Preisvergleichskarte', description: priceMap }, { title: 'Gratis-Eintritt zum Event', description: roundup }]) {
+  const checked = await validateDealsForSlack([{ ...candidate, id: 'regression', url: 'https://example.com/offer',
+    city: 'Wien', viennaVerified: true, type: 'gratis', pubDate: now.toISOString(), validUntil: '2026-10-30' }],
+  { now, inspectDealUrlHealth: async () => ({ status: 200, contentHints: {}, dateHints: {} }) });
+  assert.equal(checked.allowedDeals.length, 0, 'central validation must also reject retained false positives');
+  assert(checked.results[0].decision.reasons.some(r => /Ortswiderspruch|Preisverzeichnis|Mehrfach-Roundup/.test(r)));
+}
 const grazing = { title: 'Gratis Döner mit Ayran', brand: 'Best Food Grill', city: 'Wien', viennaVerified: true,
   description: 'Am 17.10.2026 von 12:00-15:00 bei bestfoodgrillgraz in der Wienerstraße.',
   url: 'https://www.instagram.com/reel/DeR5j2sM8S0/', type: 'gratis', pubDate: '2026-10-15T10:00:00Z', pubDateSource: 'instagram-graph-timestamp' };

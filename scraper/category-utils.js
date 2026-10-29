@@ -65,7 +65,7 @@ const CATEGORY_HINTS = {
     'matcha', 'tee', 'tea', 'chai', 'starbucks', 'tchibo', 'nespresso', 'mccafe'
   ],
   essen: [
-    'restaurant', 'essen', 'food', 'pizza', 'burger', 'kebab', 'kebap', 'döner',
+    'restaurant', 'essen', 'food', 'speisen', 'speisenplatte', 'pizza', 'burger', 'kebab', 'kebap', 'döner',
     'doener', 'doner', 'falafel', 'wrap', 'brunch', 'buffet', 'snack', 'cocktail',
     'drink', 'drinks', 'getränk', 'getraenk', 'cola', 'saft', 'smoothie', 'tonic',
     'boba', 'bubble tea', 'sandwich', 'schnitzel', 'ramen', 'donburi', 'nudeln',

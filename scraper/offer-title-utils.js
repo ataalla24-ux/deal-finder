@@ -18,6 +18,17 @@ export function polishOfferTitle(value = '', description = '') {
   const text = stripSlackEmojiCodes(original)
     .replace(/^[🎉🔥📣\s\uFE0F]+/u, '')
     .replace(/\s+/g, ' ').trim();
+  const comparison = text.replace(/\p{Extended_Pictographic}|\uFE0F/gu, '').trim()
+    .match(/^(?:nur\s+)?(\d+(?:[,.]\d{1,2})?)\s*€\s+statt\s+(\d+(?:[,.]\d{1,2})?)\s*€[!.]*$/iu);
+  if (comparison && !/\b(?:ab\s+\d|mindest\w*|neukunden?|bei\s+(?:kauf|bestellung|einem\s+einkauf)|mit\s+(?:code|coupon|gutschein))\b/iu.test(description)) {
+    const products = [...description.matchAll(/\bUnsere?\s+([\p{L}\p{N}][\p{L}\p{N} '-]{1,45}?)(?:\s*[–—-]\s*[^.!?()]{1,70})?\s*\((\d+\s*(?:g|kg|ml|l))\)\s+gibt(?:[’']s|\s+es)/giu)];
+    const prices = [...description.matchAll(/(\d+(?:[,.]\d{1,2})?)\s*€\s+statt\s+(\d+(?:[,.]\d{1,2})?)\s*€/giu)];
+    if (products.length === 1 && prices.length === 1 && prices[0][1] === comparison[1] && prices[0][2] === comparison[2]) {
+      return `${products[0][2]} ${products[0][1].trim()}: ${comparison[1]} € statt ${comparison[2]} €`;
+    }
+  }
+  const translated = text.match(/^([^:!\n]{2,60}):\s*\d{1,2}% off, now (\d+(?:[,.]\d{1,2})?) € instead of (\d+(?:[,.]\d{1,2})?) €, for (\d+) persons(?: \([\d,.]+ € per person\))?$/u);
+  if (translated) return `${translated[1]}: ${translated[2]} € statt ${translated[3]} € für ${translated[4]} Personen`;
   if (isSocialInstructionTitle(text)
       && /\b(?:die\s+)?zweite Pizza übernehmen wir[.!]/iu.test(description)
       && /\b(?:die\s+)?günstigere Pizza ist gratis[.!]/iu.test(description)

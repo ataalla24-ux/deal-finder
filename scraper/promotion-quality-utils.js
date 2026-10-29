@@ -101,13 +101,18 @@ export function getEditorialRoundupPromotionReason(value) {
     .slice(1)
     .map((entry) => entry.trim())
     .filter((entry) => entry.length >= 20 && EDITORIAL_BULLET_DATE_PATTERN.test(entry));
-  if (!EDITORIAL_ROUNDUP_PATTERN.test(text) && datedBulletEntries.length < 2) return '';
+  const numberedEventRoundup = /\b\d{1,2}\s+things\s+happening\s+in\s+(?:wien|vienna)\b/i.test(text);
+  if (!EDITORIAL_ROUNDUP_PATTERN.test(text) && !numberedEventRoundup && datedBulletEntries.length < 2) return '';
   return 'redaktioneller Mehrfach-Roundup statt eindeutigem Einzelangebot';
 }
 
 export function getNonOfferContentReason(value) {
   const text = cleanPromotionText(value);
   if (!text) return '';
+  const freePriceDirectory = /\b(?:free|kostenlose?)\s+(?:map|karte|app)\b.{0,60}\b(?:real\s+prices|echten?\s+Preisen|Preisvergleich)\b/i.test(text);
+  if (freePriceDirectory && !INDEPENDENT_PROMOTION_PATTERN.test(text)) {
+    return 'kostenloses Preisverzeichnis statt konkretem Einzelangebot';
+  }
   const withoutIncidentalFree = text.replace(/\bfree\s+(?:trade|time|speech|spirit|cancellation|wifi|wi-fi)\b/gi, '');
   if (/\bfree\s+trade\b/i.test(text) && !INDEPENDENT_PROMOTION_PATTERN.test(withoutIncidentalFree)) return 'Freihandel ist kein Gratisangebot';
   if (/\b(?:itinerary|24\s*hours?\s+in|reiseplan)\b/i.test(text)

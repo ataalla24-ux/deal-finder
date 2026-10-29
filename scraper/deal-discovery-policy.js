@@ -1,3 +1,5 @@
+import { getNonOfferContentReason } from './promotion-quality-utils.js';
+
 function normalize(value) {
   return String(value || '').toLowerCase().replace(/ä/g, 'ae').replace(/ö/g, 'oe')
     .replace(/ü/g, 'ue').replace(/ß/g, 'ss').normalize('NFKD').replace(/[\u0300-\u036f]/g, '')
@@ -30,6 +32,8 @@ export function discoveryRejection(value) {
   const text = offerText(value);
   const alcoholText = withoutAlcoholFreeProducts(text);
   if (ALCOHOL_PATTERN.test(alcoholText)) return 'alcohol-offer';
+  // The social-food review lane must not bypass the ordinary offer guards.
+  if (getNonOfferContentReason(text)) return 'non-offer-content';
   // A free sales contact or business tool is not a consumer saving. Keep an
   // independently promised food benefit even if booking/contact is mentioned.
   if (PROFESSIONAL.test(text) && BENEFIT.test(text)
