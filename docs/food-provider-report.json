@@ -1,7 +1,7 @@
 {
-  "runId": "40764572361",
+  "runId": "40893823368",
   "mode": "scan",
-  "createdAt": "2026-10-28T20:35:30.103Z",
+  "createdAt": "2026-10-29T14:40:40.293Z",
   "usage": {
     "scrapingbee": {
       "provider": "scrapingbee",
@@ -43,8 +43,131 @@
       "planFields": []
     }
   },
-  "tasks": [],
-  "skipped": [],
-  "eligiblePages": 0,
-  "status": "skipped"
+  "tasks": [
+    {
+      "source": "IKEA Food",
+      "url": "https://www.ikea.com/at/de/food/salesareas/bistro/",
+      "provider": "scrapingbee",
+      "cap": 5
+    },
+    {
+      "source": "IKEA Food",
+      "url": "https://www.ikea.com/at/de/food/salesareas/swedish-cafe/",
+      "provider": "zyte",
+      "cap": 0.02
+    },
+    {
+      "source": "IKEA Food",
+      "url": "https://www.ikea.com/at/de/food/salesareas/restaurant",
+      "provider": "scrapingbee",
+      "cap": 5
+    },
+    {
+      "source": "IKEA Food",
+      "url": "https://www.ikea.com/at/de/food/salesareas/restaurant/?categories=SC017",
+      "provider": "zyte",
+      "cap": 0.02
+    }
+  ],
+  "skipped": [
+    {
+      "provider": "scraperapi",
+      "reason": "scraperapi-trial-expired"
+    }
+  ],
+  "eligiblePages": 4,
+  "finishedAt": "2026-10-29T14:40:58.409Z",
+  "status": "completed",
+  "results": [
+    {
+      "provider": "scrapingbee",
+      "source": "IKEA Food",
+      "url": "https://www.ikea.com/at/de/food/salesareas/bistro/",
+      "reserved": 5,
+      "directCandidates": 0,
+      "directRejected": [],
+      "directVisibleTextCharacters": 378,
+      "status": "fetched",
+      "bytes": 1224630,
+      "visibleTextCharacters": 3686,
+      "reportedCredits": 5,
+      "extractedCandidates": 0,
+      "incrementalCandidates": 0,
+      "offerLinks": [
+        "https://www.ikea.com/at/de/food/"
+      ],
+      "rejected": [],
+      "verifiedCandidates": 0,
+      "verifiedIncrementalCandidates": 0,
+      "unverifiedCandidates": 0,
+      "candidates": []
+    },
+    {
+      "provider": "zyte",
+      "source": "IKEA Food",
+      "url": "https://www.ikea.com/at/de/food/salesareas/swedish-cafe/",
+      "reserved": 0.02,
+      "directCandidates": 0,
+      "directRejected": [],
+      "directVisibleTextCharacters": 389,
+      "status": "fetched",
+      "bytes": 1213071,
+      "visibleTextCharacters": 3722,
+      "reportedCredits": null,
+      "extractedCandidates": 0,
+      "incrementalCandidates": 0,
+      "offerLinks": [
+        "https://www.ikea.com/at/de/food/"
+      ],
+      "rejected": [],
+      "verifiedCandidates": 0,
+      "verifiedIncrementalCandidates": 0,
+      "unverifiedCandidates": 0,
+      "candidates": []
+    },
+    {
+      "provider": "scrapingbee",
+      "source": "IKEA Food",
+      "url": "https://www.ikea.com/at/de/food/salesareas/restaurant",
+      "reserved": 5,
+      "directCandidates": 0,
+      "directRejected": [],
+      "directVisibleTextCharacters": 443,
+      "status": "direct-no-offer",
+      "reason": "readable-page-without-extractable-offer",
+      "note": "No browser credit spent; image/PDF-only offers are not established by this HTML check."
+    },
+    {
+      "provider": "zyte",
+      "source": "IKEA Food",
+      "url": "https://www.ikea.com/at/de/food/salesareas/restaurant/?categories=SC017",
+      "reserved": 0.02,
+      "directCandidates": 0,
+      "directRejected": [],
+      "directVisibleTextCharacters": 443,
+      "status": "direct-no-offer",
+      "reason": "readable-page-without-extractable-offer",
+      "note": "No browser credit spent; image/PDF-only offers are not established by this HTML check."
+    }
+  ],
+  "funnel": {
+    "pagesBySource": {
+      "IKEA Food": 4
+    },
+    "statuses": {
+      "fetched": 2,
+      "direct-no-offer": 2
+    },
+    "rejectionReasons": {},
+    "verificationReasons": {},
+    "directCandidates": 0,
+    "renderedCandidates": 0,
+    "verifiedCandidates": 0
+  },
+  "uniqueVerifiedCandidates": 0,
+  "alreadyKnown": 0,
+  "newPendingCandidates": 0,
+  "pendingCandidates": 0,
+  "slackMessagesSent": 0,
+  "note": "New pending candidates still require central Slack validation and human approval."
 }
