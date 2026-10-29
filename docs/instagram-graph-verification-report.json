@@ -1,7 +1,7 @@
 {
-  "generatedAt": "2026-10-29T12:39:30.266Z",
+  "generatedAt": "2026-10-29T13:19:43.071Z",
   "source": "instagram-graph-cross-source-verification",
-  "status": "ok",
+  "status": "failed-preserved",
   "configured": true,
   "scannedFiles": [
     "deals-pending-church-events.json",
@@ -139,8 +139,8 @@
       "candidates": 0
     },
     "deals-pending-meta-instagram.json": {
-      "deals": 128,
-      "candidates": 25
+      "deals": 130,
+      "candidates": 26
     },
     "deals-pending-power.json": {
       "deals": 39,
@@ -167,8 +167,8 @@
       "candidates": 0
     }
   },
-  "candidatePosts": 37,
-  "candidateAccounts": 26,
+  "candidatePosts": 38,
+  "candidateAccounts": 27,
   "skippedAccountCooldowns": 0,
   "selectedAccounts": [
     {
@@ -196,10 +196,15 @@
       "candidates": 2
     }
   ],
-  "fetchedPosts": 125,
-  "exactMatches": 12,
+  "fetchedPosts": 0,
+  "exactMatches": 0,
   "retainedEvidencePosts": 2000,
-  "errors": [],
+  "errors": [
+    {
+      "username": "afrivision.austria",
+      "message": "Instagram shared quota paused: shared cooldown"
+    }
+  ],
   "accountFailures": {
     "tantisaluti.wien": {
       "count": 2,
@@ -240,19 +245,25 @@
   "sharedQuota": {
     "limitPerHour": 190,
     "usageThreshold": 95,
-    "requests": 6,
-    "reserved": 10,
-    "stopped": false,
-    "reason": "",
-    "highestUsagePercent": 84,
+    "requests": 0,
+    "reserved": 0,
+    "stopped": true,
+    "reason": "Instagram shared quota paused: shared cooldown",
+    "highestUsagePercent": 0,
     "waitedMs": 0,
     "pacingMs": 0,
-    "retryAt": "",
+    "retryAt": "2026-10-29T13:27:06.745Z",
     "adaptiveSafetyCeiling": 190,
     "adaptiveIncreases": 0,
     "storageFailure": null
   },
+  "globalError": {
+    "username": "afrivision.austria",
+    "status": 0,
+    "code": "SCAN_BUDGET",
+    "message": "Instagram shared quota paused: shared cooldown"
+  },
   "blockedEvidencePosts": 87,
-  "unmatchedCandidatePosts": 25,
-  "message": "12/37 fresh cross-source Instagram candidates matched exactly via Graph API."
+  "unmatchedCandidatePosts": 38,
+  "message": "0/38 fresh cross-source Instagram candidates matched exactly via Graph API."
 }
