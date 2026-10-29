@@ -1,7 +1,7 @@
 {
-  "generatedAt": "2026-10-29T22:24:30.440Z",
+  "generatedAt": "2026-10-29T22:53:21.757Z",
   "source": "instagram-graph-cross-source-verification",
-  "status": "ok",
+  "status": "failed-preserved",
   "configured": true,
   "scannedFiles": [
     "deals-pending-church-events.json",
@@ -139,7 +139,7 @@
       "candidates": 0
     },
     "deals-pending-meta-instagram.json": {
-      "deals": 132,
+      "deals": 133,
       "candidates": 23
     },
     "deals-pending-power.json": {
@@ -168,7 +168,7 @@
     }
   },
   "candidatePosts": 34,
-  "candidateAccounts": 25,
+  "candidateAccounts": 26,
   "skippedAccountCooldowns": 0,
   "selectedAccounts": [
     {
@@ -178,10 +178,6 @@
     {
       "username": "afrivision.austria",
       "candidates": 3
-    },
-    {
-      "username": "freefinder.at",
-      "candidates": 2
     },
     {
       "username": "tuchlauben.eis",
@@ -194,12 +190,21 @@
     {
       "username": "blumencafe.wien",
       "candidates": 2
+    },
+    {
+      "username": "gastro.news_",
+      "candidates": 2
     }
   ],
-  "fetchedPosts": 125,
-  "exactMatches": 11,
+  "fetchedPosts": 0,
+  "exactMatches": 0,
   "retainedEvidencePosts": 2000,
-  "errors": [],
+  "errors": [
+    {
+      "username": "only.pizza.vienna",
+      "message": "Instagram shared quota paused: shared cooldown"
+    }
+  ],
   "accountFailures": {
     "tantisaluti.wien": {
       "count": 2,
@@ -240,19 +245,25 @@
   "sharedQuota": {
     "limitPerHour": 190,
     "usageThreshold": 95,
-    "requests": 6,
-    "reserved": 10,
-    "stopped": false,
-    "reason": "",
-    "highestUsagePercent": 55,
+    "requests": 0,
+    "reserved": 0,
+    "stopped": true,
+    "reason": "Instagram shared quota paused: shared cooldown",
+    "highestUsagePercent": 0,
     "waitedMs": 0,
     "pacingMs": 0,
-    "retryAt": "",
+    "retryAt": "2026-10-29T23:00:58.033Z",
     "adaptiveSafetyCeiling": 190,
     "adaptiveIncreases": 0,
     "storageFailure": null
   },
-  "blockedEvidencePosts": 76,
-  "unmatchedCandidatePosts": 23,
-  "message": "11/34 fresh cross-source Instagram candidates matched exactly via Graph API."
+  "globalError": {
+    "username": "only.pizza.vienna",
+    "status": 0,
+    "code": "SCAN_BUDGET",
+    "message": "Instagram shared quota paused: shared cooldown"
+  },
+  "blockedEvidencePosts": 79,
+  "unmatchedCandidatePosts": 34,
+  "message": "0/34 fresh cross-source Instagram candidates matched exactly via Graph API."
 }
