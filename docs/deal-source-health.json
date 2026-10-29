@@ -1,12 +1,18 @@
 {
-  "generatedAt": "2026-10-29T21:30:11.928Z",
+  "generatedAt": "2026-10-29T22:24:45.306Z",
   "summary": {
     "filesConsidered": 32,
     "totalCandidates": 803,
-    "uniqueCandidates": 720,
-    "distinctCandidates": 759,
-    "duplicateClusters": 39,
+    "uniqueCandidates": 722,
+    "distinctCandidates": 760,
+    "duplicateClusters": 38,
     "topHealthySources": [
+      {
+        "sourceKey": "instagram-apify2",
+        "sourceLabel": "Apify 2 Vienna Food Discovery",
+        "healthScore": 78,
+        "totalDeals": 1
+      },
       {
         "sourceKey": "member-benefits",
         "sourceLabel": "Member Benefits",
@@ -30,15 +36,15 @@
         "sourceLabel": "Firecrawl Key 5 - Instagram Gastro",
         "healthScore": 71,
         "totalDeals": 3
-      },
-      {
-        "sourceKey": "meta-instagram",
-        "sourceLabel": "Meta Instagram Graph",
-        "healthScore": 70,
-        "totalDeals": 132
       }
     ],
     "topMissionSources": [
+      {
+        "sourceKey": "instagram-apify2",
+        "sourceLabel": "Apify 2 Vienna Food Discovery",
+        "missionFitScore": 85,
+        "totalDeals": 1
+      },
       {
         "sourceKey": "joe",
         "sourceLabel": "jö Bonus Club",
@@ -62,12 +68,6 @@
         "sourceLabel": "Instagram AI Agent",
         "missionFitScore": 66,
         "totalDeals": 49
-      },
-      {
-        "sourceKey": "instagram-apify",
-        "sourceLabel": "Apify Instagram",
-        "missionFitScore": 66,
-        "totalDeals": 14
       }
     ],
     "topCoverageSources": [
@@ -102,7 +102,7 @@
       {
         "sourceKey": "instagram-ai",
         "sourceLabel": "Instagram AI Agent",
-        "coverageScore": 33,
+        "coverageScore": 34,
         "totalDeals": 49,
         "fresh1dCount": 3
       }
@@ -153,6 +153,12 @@
         "totalDeals": 132
       },
       {
+        "sourceKey": "instagram-apify2",
+        "sourceLabel": "Apify 2 Vienna Food Discovery",
+        "sourceWeightScore": 66,
+        "totalDeals": 1
+      },
+      {
         "sourceKey": "joe",
         "sourceLabel": "jö Bonus Club",
         "sourceWeightScore": 64,
@@ -163,12 +169,6 @@
         "sourceLabel": "Firecrawl Key 5 - Instagram Gastro",
         "sourceWeightScore": 64,
         "totalDeals": 3
-      },
-      {
-        "sourceKey": "instagram-ai",
-        "sourceLabel": "Instagram AI Agent",
-        "sourceWeightScore": 62,
-        "totalDeals": 49
       }
     ],
     "topSourcesToFix": [
@@ -234,11 +234,81 @@
       ],
       "completedWithErrors": [
         "firecrawl2",
+        "instagram-apify2",
         "power"
       ]
     }
   },
   "sources": [
+    {
+      "sourceKey": "instagram-apify2",
+      "file": "deals-pending-instagram-apify2.json",
+      "sourceLabel": "Apify 2 Vienna Food Discovery",
+      "totalDeals": 1,
+      "uniqueDeals": 1,
+      "duplicateDeals": 0,
+      "duplicateAcrossSources": 0,
+      "fresh1dCount": 1,
+      "fresh7dCount": 1,
+      "viennaCount": 0,
+      "foodDrinkCount": 1,
+      "promoCount": 1,
+      "missingUrlCount": 0,
+      "sampleTitles": [
+        "Gratis Yaprak Döner im ersten Bezirk bei 📍Rotenturmstraße 19, 1010 Wien Einfach verkleidet herkommen genießen"
+      ],
+      "lastRun": {
+        "status": "completed-with-errors",
+        "startedAt": "2026-10-29T21:54:18.724Z",
+        "finishedAt": "2026-10-29T21:55:31.549Z",
+        "durationMs": 72825,
+        "counts": {
+          "rawCandidates": 26,
+          "normalizedCandidates": 11,
+          "verifiedCandidates": 0,
+          "previousDeals": 0,
+          "acceptedDeals": 1,
+          "rejectedDeals": 10
+        },
+        "rejectedByReason": {
+          "giveaway": 3,
+          "missing-vienna-evidence": 2,
+          "non-food-ad": 4,
+          "no-consumer-food-benefit": 1
+        },
+        "errors": [],
+        "reportFile": "deal-pipeline-last-run-instagram-apify2.json"
+      },
+      "uniqueRate": 1,
+      "duplicateRate": 0,
+      "fresh1dRate": 1,
+      "fresh7dRate": 1,
+      "viennaRate": 0,
+      "foodDrinkRate": 1,
+      "promoRate": 1,
+      "missingUrlRate": 0,
+      "averageQualityScore": 80,
+      "topCategories": [
+        {
+          "value": "essen",
+          "count": 1
+        }
+      ],
+      "topTypes": [
+        {
+          "value": "gratis",
+          "count": 1
+        }
+      ],
+      "issues": [
+        "Wien-Signal ist zu schwach"
+      ],
+      "healthScore": 78,
+      "missionFitScore": 85,
+      "coverageScore": 11,
+      "precisionScore": 72,
+      "sourceWeightScore": 66
+    },
     {
       "sourceKey": "member-benefits",
       "file": "deals-pending-member-benefits.json",
@@ -604,9 +674,9 @@
       "file": "deals-pending-instagram-ai.json",
       "sourceLabel": "Instagram AI Agent",
       "totalDeals": 49,
-      "uniqueDeals": 24,
-      "duplicateDeals": 25,
-      "duplicateAcrossSources": 21,
+      "uniqueDeals": 25,
+      "duplicateDeals": 24,
+      "duplicateAcrossSources": 20,
       "fresh1dCount": 3,
       "fresh7dCount": 49,
       "viennaCount": 49,
@@ -678,7 +748,7 @@
       ],
       "healthScore": 68,
       "missionFitScore": 66,
-      "coverageScore": 33,
+      "coverageScore": 34,
       "precisionScore": 75,
       "sourceWeightScore": 62
     },
@@ -1861,76 +1931,6 @@
       "coverageScore": 34,
       "precisionScore": 30,
       "sourceWeightScore": 31
-    },
-    {
-      "sourceKey": "instagram-apify2",
-      "file": "deals-pending-instagram-apify2.json",
-      "sourceLabel": "Apify 2 Vienna Food Discovery",
-      "totalDeals": 1,
-      "uniqueDeals": 0,
-      "duplicateDeals": 1,
-      "duplicateAcrossSources": 1,
-      "fresh1dCount": 1,
-      "fresh7dCount": 1,
-      "viennaCount": 0,
-      "foodDrinkCount": 1,
-      "promoCount": 0,
-      "missingUrlCount": 0,
-      "sampleTitles": [
-        "1 € Wrap in Wien - *Empfehlung 📍Heinestraße 32, 1020 Wien 🕞30.10.26 so lange der Vorrat reicht > > v = an . “"
-      ],
-      "lastRun": {
-        "status": "completed",
-        "startedAt": "2026-10-29T11:39:23.544Z",
-        "finishedAt": "2026-10-29T11:40:55.220Z",
-        "durationMs": 91676,
-        "counts": {
-          "rawCandidates": 24,
-          "normalizedCandidates": 9,
-          "verifiedCandidates": 0,
-          "previousDeals": 0,
-          "acceptedDeals": 1,
-          "rejectedDeals": 8
-        },
-        "rejectedByReason": {
-          "non-food-ad": 5,
-          "no-consumer-food-benefit": 2,
-          "non-offer-content": 1
-        },
-        "errors": [],
-        "reportFile": "deal-pipeline-last-run-instagram-apify2.json"
-      },
-      "uniqueRate": 0,
-      "duplicateRate": 1,
-      "fresh1dRate": 1,
-      "fresh7dRate": 1,
-      "viennaRate": 0,
-      "foodDrinkRate": 1,
-      "promoRate": 0,
-      "missingUrlRate": 0,
-      "averageQualityScore": 65,
-      "topCategories": [
-        {
-          "value": "essen",
-          "count": 1
-        }
-      ],
-      "topTypes": [
-        {
-          "value": "rabatt",
-          "count": 1
-        }
-      ],
-      "issues": [
-        "wenige klare Gratis-/Promo-Signale",
-        "Wien-Signal ist zu schwach",
-        "hohe Überschneidung mit anderen Quellen"
-      ],
-      "healthScore": 40,
-      "missionFitScore": 57,
-      "coverageScore": 6,
-      "precisionScore": 42,
-      "sourceWeightScore": 39
     },
     {
       "sourceKey": "flights",
