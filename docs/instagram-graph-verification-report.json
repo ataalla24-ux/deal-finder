@@ -1,7 +1,7 @@
 {
-  "generatedAt": "2026-10-29T16:26:39.049Z",
+  "generatedAt": "2026-10-29T16:48:59.445Z",
   "source": "instagram-graph-cross-source-verification",
-  "status": "ok",
+  "status": "failed-preserved",
   "configured": true,
   "scannedFiles": [
     "deals-pending-church-events.json",
@@ -88,7 +88,7 @@
     },
     "deals-pending-gastro2.json": {
       "deals": 133,
-      "candidates": 2
+      "candidates": 3
     },
     "deals-pending-gemeinde.json": {
       "deals": 33,
@@ -108,7 +108,7 @@
     },
     "deals-pending-instagram-ai.json": {
       "deals": 49,
-      "candidates": 11
+      "candidates": 12
     },
     "deals-pending-instagram-apify.json": {
       "deals": 14,
@@ -139,8 +139,8 @@
       "candidates": 0
     },
     "deals-pending-meta-instagram.json": {
-      "deals": 130,
-      "candidates": 20
+      "deals": 128,
+      "candidates": 22
     },
     "deals-pending-power.json": {
       "deals": 39,
@@ -167,13 +167,17 @@
       "candidates": 0
     }
   },
-  "candidatePosts": 30,
-  "candidateAccounts": 23,
+  "candidatePosts": 32,
+  "candidateAccounts": 24,
   "skippedAccountCooldowns": 0,
   "selectedAccounts": [
     {
       "username": "afrivision.austria",
       "candidates": 4
+    },
+    {
+      "username": "tuchlauben.eis",
+      "candidates": 2
     },
     {
       "username": "only.pizza.vienna",
@@ -190,16 +194,17 @@
     {
       "username": "gastro.news_",
       "candidates": 2
-    },
-    {
-      "username": "2ndstreetburger",
-      "candidates": 1
     }
   ],
-  "fetchedPosts": 141,
-  "exactMatches": 9,
+  "fetchedPosts": 0,
+  "exactMatches": 0,
   "retainedEvidencePosts": 2000,
-  "errors": [],
+  "errors": [
+    {
+      "username": "afrivision.austria",
+      "message": "Instagram shared quota paused: shared cooldown"
+    }
+  ],
   "accountFailures": {
     "tantisaluti.wien": {
       "count": 2,
@@ -238,21 +243,27 @@
     }
   },
   "sharedQuota": {
-    "limitPerHour": 296,
+    "limitPerHour": 190,
     "usageThreshold": 95,
-    "requests": 6,
-    "reserved": 10,
-    "stopped": false,
-    "reason": "",
-    "highestUsagePercent": 15,
+    "requests": 0,
+    "reserved": 0,
+    "stopped": true,
+    "reason": "Instagram shared quota paused: shared cooldown",
+    "highestUsagePercent": 0,
     "waitedMs": 0,
     "pacingMs": 0,
-    "retryAt": "",
+    "retryAt": "2026-10-29T16:56:10.584Z",
     "adaptiveSafetyCeiling": 190,
     "adaptiveIncreases": 0,
     "storageFailure": null
   },
-  "blockedEvidencePosts": 83,
-  "unmatchedCandidatePosts": 21,
-  "message": "9/30 fresh cross-source Instagram candidates matched exactly via Graph API."
+  "globalError": {
+    "username": "afrivision.austria",
+    "status": 0,
+    "code": "SCAN_BUDGET",
+    "message": "Instagram shared quota paused: shared cooldown"
+  },
+  "blockedEvidencePosts": 79,
+  "unmatchedCandidatePosts": 32,
+  "message": "0/32 fresh cross-source Instagram candidates matched exactly via Graph API."
 }
