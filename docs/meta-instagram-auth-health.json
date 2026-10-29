@@ -1,8 +1,8 @@
 {
-  "generatedAt": "2026-10-29T00:56:59.507Z",
+  "generatedAt": "2026-10-29T02:09:19.092Z",
   "source": "meta-instagram-auth-health",
   "graphVersion": "v26.0",
-  "status": "quota-deferred",
+  "status": "ok",
   "configured": {
     "instagramGraph": true,
     "instagramUserId": true,
@@ -10,30 +10,80 @@
   },
   "checks": [
     {
-      "name": "token-expiry",
+      "name": "token-basic",
       "status": "ok",
-      "detail": "Configured token expiry is 2026-12-14T22:55:36.000Z (46.9 days remaining)."
+      "detail": "Token resolved /me."
     },
     {
-      "name": "token-basic",
-      "status": "quota-deferred",
-      "detail": "Instagram shared quota paused: rolling-hour budget exhausted",
-      "code": "SCAN_BUDGET"
+      "name": "token-inspection",
+      "status": "ok",
+      "detail": "Meta confirmed a valid USER token for app 4332170530445850."
+    },
+    {
+      "name": "token-expiry",
+      "status": "ok",
+      "detail": "Provider-verified access expires at 2026-12-14T22:55:36.000Z (46.9 days remaining)."
+    },
+    {
+      "name": "token-permissions",
+      "status": "ok",
+      "detail": "5 granted permission(s): pages_show_list, instagram_basic, instagram_manage_insights, pages_read_engagement, public_profile."
+    },
+    {
+      "name": "instagram-user-id",
+      "status": "configured",
+      "detail": "Using INSTAGRAM_USER_ID=17841438552673858."
+    },
+    {
+      "name": "own-media",
+      "status": "ok",
+      "detail": "Read 3 recent media row(s); timestamp/permalink fields are available."
+    },
+    {
+      "name": "tagged-media",
+      "status": "skipped",
+      "detail": "Set META_INSTAGRAM_TAGGED_MEDIA_ENABLED=1 after the endpoint healthcheck succeeds."
+    },
+    {
+      "name": "business-discovery",
+      "status": "ok",
+      "detail": "Business Discovery works for @ciosgrill; 1 media row(s) returned."
+    },
+    {
+      "name": "hashtag-search",
+      "status": "skipped",
+      "detail": "Set META_INSTAGRAM_HEALTHCHECK_HASHTAG to test hashtag access; this counts toward Meta hashtag limits."
     }
   ],
-  "nextAction": "Wait for the existing shared Meta cooldown or rolling-hour allowance; collection will resume on a later scheduled run.",
+  "nextAction": "Meta Instagram Graph is ready for the deal collector.",
   "tokenExpiry": {
+    "source": "meta-debug-token",
     "expiresAt": "2026-12-14T22:55:36.000Z",
-    "source": "configured-metadata",
+    "accessTokenExpiresAt": "2026-12-14T22:55:36.000Z",
+    "dataAccessExpiresAt": "2027-01-13T23:01:23.000Z",
     "daysRemaining": 46.9,
-    "status": "ok"
+    "status": "ok",
+    "configuredExpiresAt": "2026-12-14T22:55:36.000Z"
   },
+  "tokenInspection": {
+    "source": "meta-debug-token",
+    "valid": true,
+    "appId": "4332170530445850",
+    "type": "USER"
+  },
+  "grantedPermissions": [
+    "pages_show_list",
+    "instagram_basic",
+    "instagram_manage_insights",
+    "pages_read_engagement",
+    "public_profile"
+  ],
   "sharedQuota": {
-    "requests": 0,
-    "reserved": 0,
-    "stopped": true,
-    "reason": "Instagram shared quota paused: rolling-hour budget exhausted",
-    "retryAt": "2026-10-29T01:29:30.265Z",
+    "requests": 5,
+    "reserved": 5,
+    "stopped": false,
+    "reason": "",
+    "retryAt": "",
     "storageFailure": null
   }
 }
