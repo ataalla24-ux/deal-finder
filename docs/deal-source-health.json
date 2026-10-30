@@ -1,11 +1,11 @@
 {
-  "generatedAt": "2026-10-30T12:41:11.568Z",
+  "generatedAt": "2026-10-30T13:30:24.647Z",
   "summary": {
     "filesConsidered": 32,
-    "totalCandidates": 831,
+    "totalCandidates": 833,
     "uniqueCandidates": 771,
-    "distinctCandidates": 799,
-    "duplicateClusters": 28,
+    "distinctCandidates": 800,
+    "duplicateClusters": 29,
     "topHealthySources": [
       {
         "sourceKey": "instagram-apify2",
@@ -26,16 +26,16 @@
         "totalDeals": 10
       },
       {
+        "sourceKey": "wien-combined",
+        "sourceLabel": "Wien Deals Combined Graph",
+        "healthScore": 74,
+        "totalDeals": 3
+      },
+      {
         "sourceKey": "meta-instagram",
         "sourceLabel": "Meta Instagram Graph",
         "healthScore": 72,
-        "totalDeals": 125
-      },
-      {
-        "sourceKey": "firecrawl5",
-        "sourceLabel": "Firecrawl Key 5 - Instagram Gastro",
-        "healthScore": 71,
-        "totalDeals": 3
+        "totalDeals": 127
       }
     ],
     "topMissionSources": [
@@ -81,9 +81,9 @@
       {
         "sourceKey": "meta-instagram",
         "sourceLabel": "Meta Instagram Graph",
-        "coverageScore": 81,
-        "totalDeals": 125,
-        "fresh1dCount": 21
+        "coverageScore": 80,
+        "totalDeals": 127,
+        "fresh1dCount": 20
       },
       {
         "sourceKey": "gastro2",
@@ -95,16 +95,16 @@
       {
         "sourceKey": "vienna-promo-radar",
         "sourceLabel": "Vienna Promo Radar",
-        "coverageScore": 57,
+        "coverageScore": 56,
         "totalDeals": 107,
-        "fresh1dCount": 4
+        "fresh1dCount": 3
       },
       {
         "sourceKey": "instagram-ai",
         "sourceLabel": "Instagram AI Agent",
-        "coverageScore": 37,
+        "coverageScore": 36,
         "totalDeals": 49,
-        "fresh1dCount": 8
+        "fresh1dCount": 6
       }
     ],
     "topPrecisionSources": [
@@ -123,20 +123,20 @@
       {
         "sourceKey": "wien-combined",
         "sourceLabel": "Wien Deals Combined Graph",
-        "precisionScore": 78,
+        "precisionScore": 81,
         "totalDeals": 3
-      },
-      {
-        "sourceKey": "instagram-ai",
-        "sourceLabel": "Instagram AI Agent",
-        "precisionScore": 75,
-        "totalDeals": 49
       },
       {
         "sourceKey": "member-benefits",
         "sourceLabel": "Member Benefits",
         "precisionScore": 74,
         "totalDeals": 110
+      },
+      {
+        "sourceKey": "instagram-ai",
+        "sourceLabel": "Instagram AI Agent",
+        "precisionScore": 74,
+        "totalDeals": 49
       }
     ],
     "topWeightedSources": [
@@ -155,20 +155,20 @@
       {
         "sourceKey": "meta-instagram",
         "sourceLabel": "Meta Instagram Graph",
-        "sourceWeightScore": 71,
-        "totalDeals": 125
+        "sourceWeightScore": 70,
+        "totalDeals": 127
+      },
+      {
+        "sourceKey": "wien-combined",
+        "sourceLabel": "Wien Deals Combined Graph",
+        "sourceWeightScore": 66,
+        "totalDeals": 3
       },
       {
         "sourceKey": "joe",
         "sourceLabel": "jö Bonus Club",
         "sourceWeightScore": 64,
         "totalDeals": 10
-      },
-      {
-        "sourceKey": "firecrawl5",
-        "sourceLabel": "Firecrawl Key 5 - Instagram Gastro",
-        "sourceWeightScore": 64,
-        "totalDeals": 3
       }
     ],
     "topSourcesToFix": [
@@ -455,23 +455,108 @@
       "sourceWeightScore": 64
     },
     {
+      "sourceKey": "wien-combined",
+      "file": "deals-pending-wien-combined.json",
+      "sourceLabel": "Wien Deals Combined Graph",
+      "totalDeals": 3,
+      "uniqueDeals": 1,
+      "duplicateDeals": 2,
+      "duplicateAcrossSources": 2,
+      "fresh1dCount": 3,
+      "fresh7dCount": 3,
+      "viennaCount": 3,
+      "foodDrinkCount": 2,
+      "promoCount": 2,
+      "missingUrlCount": 0,
+      "sampleTitles": [
+        "❤️ Deshalb gibt’s bei Papa Duck jeden Donnerstag bis Ende des Jahres 1+1 Pizza!",
+        "Cigköfte Roll um 1 € - das gibt’s heute am 30.10.",
+        "Come to BALLROOM in your Halloween costume on October 31st and get one FREE Sweet Dumpling on us!"
+      ],
+      "lastRun": {
+        "status": "completed-with-errors",
+        "startedAt": "2026-10-30T06:21:14.440Z",
+        "finishedAt": "2026-10-30T06:22:59.802Z",
+        "durationMs": 105362,
+        "counts": {
+          "rawCandidates": 40,
+          "normalizedCandidates": 3,
+          "verifiedCandidates": 3,
+          "previousDeals": 0,
+          "acceptedDeals": 3,
+          "rejectedDeals": 33
+        },
+        "rejectedByReason": {
+          "no-concrete-offer": 24,
+          "alcohol-offer": 3,
+          "general-recommendation": 5,
+          "missing-text": 1
+        },
+        "errors": [
+          "#wien: Instagram scan paused: request-budget"
+        ],
+        "reportFile": "deal-pipeline-last-run-wien-combined.json"
+      },
+      "uniqueRate": 0.3,
+      "duplicateRate": 0.7,
+      "fresh1dRate": 1,
+      "fresh7dRate": 1,
+      "viennaRate": 1,
+      "foodDrinkRate": 0.7,
+      "promoRate": 0.7,
+      "missingUrlRate": 0,
+      "averageQualityScore": 86.7,
+      "topCategories": [
+        {
+          "value": "essen",
+          "count": 2
+        },
+        {
+          "value": "shopping",
+          "count": 1
+        }
+      ],
+      "topTypes": [
+        {
+          "value": "bogo",
+          "count": 1
+        },
+        {
+          "value": "gratis",
+          "count": 1
+        },
+        {
+          "value": "rabatt",
+          "count": 1
+        }
+      ],
+      "issues": [
+        "hohe Überschneidung mit anderen Quellen"
+      ],
+      "healthScore": 74,
+      "missionFitScore": 81,
+      "coverageScore": 15,
+      "precisionScore": 81,
+      "sourceWeightScore": 66
+    },
+    {
       "sourceKey": "meta-instagram",
       "file": "deals-pending-meta-instagram.json",
       "sourceLabel": "Meta Instagram Graph",
-      "totalDeals": 125,
-      "uniqueDeals": 99,
-      "duplicateDeals": 26,
-      "duplicateAcrossSources": 13,
-      "fresh1dCount": 21,
-      "fresh7dCount": 122,
-      "viennaCount": 125,
+      "totalDeals": 127,
+      "uniqueDeals": 98,
+      "duplicateDeals": 29,
+      "duplicateAcrossSources": 12,
+      "fresh1dCount": 20,
+      "fresh7dCount": 125,
+      "viennaCount": 127,
       "foodDrinkCount": 85,
-      "promoCount": 79,
+      "promoCount": 81,
       "missingUrlCount": 0,
       "sampleTitles": [
-        "14, Vienna 🎟️ Free Entrance",
-        "20 % RABATT auf deinen gesamten Einkauf",
-        "Oktober 2026 🎃Ab 20 Uhr 📍Margaretenstraße 84, 1050 Wien 👻 Eintritt frei - mit oder ohne Kostüm ___ Wien Halloween Events"
+        "🍺 Und als besonderes Halloween-Zuckerl: Ein gratis 0,3-l frisch gezapftes Lieblingsbier!",
+        "Mit dem Crew-Ticket kommt ihr zu viert für 150 € statt 180 €, jede Person mit Welcome Drink und Snacks",
+        "Meine Haltung: Eine einzelne Zahl macht keinen guten Deal"
       ],
       "lastRun": null,
       "uniqueRate": 0.8,
@@ -482,19 +567,19 @@
       "foodDrinkRate": 0.7,
       "promoRate": 0.6,
       "missingUrlRate": 0,
-      "averageQualityScore": 87.7,
+      "averageQualityScore": 87.6,
       "topCategories": [
         {
           "value": "essen",
-          "count": 67
+          "count": 68
         },
         {
           "value": "shopping",
-          "count": 25
+          "count": 27
         },
         {
           "value": "kaffee",
-          "count": 14
+          "count": 13
         },
         {
           "value": "kultur",
@@ -512,11 +597,11 @@
       "topTypes": [
         {
           "value": "rabatt",
-          "count": 64
+          "count": 65
         },
         {
           "value": "gratis",
-          "count": 51
+          "count": 52
         },
         {
           "value": "freebie",
@@ -534,9 +619,9 @@
       "issues": [],
       "healthScore": 72,
       "missionFitScore": 61,
-      "coverageScore": 81,
+      "coverageScore": 80,
       "precisionScore": 74,
-      "sourceWeightScore": 71
+      "sourceWeightScore": 70
     },
     {
       "sourceKey": "firecrawl5",
@@ -606,90 +691,6 @@
       "coverageScore": 16,
       "precisionScore": 82,
       "sourceWeightScore": 64
-    },
-    {
-      "sourceKey": "instagram-ai",
-      "file": "deals-pending-instagram-ai.json",
-      "sourceLabel": "Instagram AI Agent",
-      "totalDeals": 49,
-      "uniqueDeals": 31,
-      "duplicateDeals": 18,
-      "duplicateAcrossSources": 10,
-      "fresh1dCount": 8,
-      "fresh7dCount": 47,
-      "viennaCount": 49,
-      "foodDrinkCount": 43,
-      "promoCount": 26,
-      "missingUrlCount": 0,
-      "sampleTitles": [
-        "Halloween 1+1 Baby Sushi Push Pop",
-        "Gratis Döner am Halloween-Grand-Opening",
-        "Gratis Döner am 31. Oktober 2026"
-      ],
-      "lastRun": null,
-      "uniqueRate": 0.6,
-      "duplicateRate": 0.2,
-      "fresh1dRate": 0.2,
-      "fresh7dRate": 1,
-      "viennaRate": 1,
-      "foodDrinkRate": 0.9,
-      "promoRate": 0.5,
-      "missingUrlRate": 0,
-      "averageQualityScore": 85.2,
-      "topCategories": [
-        {
-          "value": "essen",
-          "count": 34
-        },
-        {
-          "value": "kaffee",
-          "count": 5
-        },
-        {
-          "value": "supermarkt",
-          "count": 3
-        },
-        {
-          "value": "shopping",
-          "count": 2
-        },
-        {
-          "value": "technik",
-          "count": 2
-        },
-        {
-          "value": "beauty",
-          "count": 1
-        }
-      ],
-      "topTypes": [
-        {
-          "value": "rabatt",
-          "count": 26
-        },
-        {
-          "value": "gratis",
-          "count": 19
-        },
-        {
-          "value": "bogo",
-          "count": 2
-        },
-        {
-          "value": "freebie",
-          "count": 1
-        },
-        {
-          "value": "gewinnspiel",
-          "count": 1
-        }
-      ],
-      "issues": [],
-      "healthScore": 70,
-      "missionFitScore": 65,
-      "coverageScore": 37,
-      "precisionScore": 75,
-      "sourceWeightScore": 63
     },
     {
       "sourceKey": "instagram-apify",
@@ -827,89 +828,90 @@
       "sourceWeightScore": 56
     },
     {
-      "sourceKey": "wien-combined",
-      "file": "deals-pending-wien-combined.json",
-      "sourceLabel": "Wien Deals Combined Graph",
-      "totalDeals": 3,
-      "uniqueDeals": 0,
-      "duplicateDeals": 3,
-      "duplicateAcrossSources": 3,
-      "fresh1dCount": 3,
-      "fresh7dCount": 3,
-      "viennaCount": 3,
-      "foodDrinkCount": 2,
-      "promoCount": 2,
+      "sourceKey": "instagram-ai",
+      "file": "deals-pending-instagram-ai.json",
+      "sourceLabel": "Instagram AI Agent",
+      "totalDeals": 49,
+      "uniqueDeals": 31,
+      "duplicateDeals": 18,
+      "duplicateAcrossSources": 10,
+      "fresh1dCount": 6,
+      "fresh7dCount": 47,
+      "viennaCount": 49,
+      "foodDrinkCount": 43,
+      "promoCount": 26,
       "missingUrlCount": 0,
       "sampleTitles": [
-        "❤️ Deshalb gibt’s bei Papa Duck jeden Donnerstag bis Ende des Jahres 1+1 Pizza!",
-        "Cigköfte Roll um 1 € - das gibt’s heute am 30.10.",
-        "Come to BALLROOM in your Halloween costume on October 31st and get one FREE Sweet Dumpling on us!"
+        "Halloween 1+1 Baby Sushi Push Pop",
+        "Gratis Döner am Halloween-Grand-Opening",
+        "Gratis Döner am 31. Oktober 2026"
       ],
-      "lastRun": {
-        "status": "completed-with-errors",
-        "startedAt": "2026-10-30T06:21:14.440Z",
-        "finishedAt": "2026-10-30T06:22:59.802Z",
-        "durationMs": 105362,
-        "counts": {
-          "rawCandidates": 40,
-          "normalizedCandidates": 3,
-          "verifiedCandidates": 3,
-          "previousDeals": 0,
-          "acceptedDeals": 3,
-          "rejectedDeals": 33
-        },
-        "rejectedByReason": {
-          "no-concrete-offer": 24,
-          "alcohol-offer": 3,
-          "general-recommendation": 5,
-          "missing-text": 1
-        },
-        "errors": [
-          "#wien: Instagram scan paused: request-budget"
-        ],
-        "reportFile": "deal-pipeline-last-run-wien-combined.json"
-      },
-      "uniqueRate": 0,
-      "duplicateRate": 1,
-      "fresh1dRate": 1,
+      "lastRun": null,
+      "uniqueRate": 0.6,
+      "duplicateRate": 0.2,
+      "fresh1dRate": 0.1,
       "fresh7dRate": 1,
       "viennaRate": 1,
-      "foodDrinkRate": 0.7,
-      "promoRate": 0.7,
+      "foodDrinkRate": 0.9,
+      "promoRate": 0.5,
       "missingUrlRate": 0,
-      "averageQualityScore": 86.7,
+      "averageQualityScore": 85.2,
       "topCategories": [
         {
           "value": "essen",
-          "count": 2
+          "count": 34
+        },
+        {
+          "value": "kaffee",
+          "count": 5
+        },
+        {
+          "value": "supermarkt",
+          "count": 3
         },
         {
           "value": "shopping",
+          "count": 2
+        },
+        {
+          "value": "technik",
+          "count": 2
+        },
+        {
+          "value": "beauty",
           "count": 1
         }
       ],
       "topTypes": [
         {
-          "value": "bogo",
-          "count": 1
+          "value": "rabatt",
+          "count": 26
         },
         {
           "value": "gratis",
+          "count": 19
+        },
+        {
+          "value": "bogo",
+          "count": 2
+        },
+        {
+          "value": "freebie",
           "count": 1
         },
         {
-          "value": "rabatt",
+          "value": "gewinnspiel",
           "count": 1
         }
       ],
       "issues": [
-        "hohe Überschneidung mit anderen Quellen"
+        "wenige Deals sind frischer als 1 Tag"
       ],
-      "healthScore": 67,
-      "missionFitScore": 81,
-      "coverageScore": 15,
-      "precisionScore": 78,
-      "sourceWeightScore": 63
+      "healthScore": 69,
+      "missionFitScore": 63,
+      "coverageScore": 36,
+      "precisionScore": 74,
+      "sourceWeightScore": 61
     },
     {
       "sourceKey": "instagram-verified",
@@ -1536,7 +1538,7 @@
       "uniqueDeals": 107,
       "duplicateDeals": 0,
       "duplicateAcrossSources": 0,
-      "fresh1dCount": 4,
+      "fresh1dCount": 3,
       "fresh7dCount": 10,
       "viennaCount": 0,
       "foodDrinkCount": 70,
@@ -1604,9 +1606,9 @@
       ],
       "healthScore": 45,
       "missionFitScore": 30,
-      "coverageScore": 57,
+      "coverageScore": 56,
       "precisionScore": 35,
-      "sourceWeightScore": 41
+      "sourceWeightScore": 40
     },
     {
       "sourceKey": "gemeinde",
