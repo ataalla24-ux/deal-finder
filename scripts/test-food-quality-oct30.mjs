@@ -12,6 +12,8 @@ import { normalizeSocialAuditCandidate, buildSocialFoodReviewDeal } from '../scr
 import { classifyDiscoveryPost } from '../scraper/apify-food-discovery-policy.js';
 import { runWienDealsCombined } from '../scraper/wien-deals-combined.js';
 import { concreteFoodOfferTitle } from '../scraper/offer-title-utils.js';
+import { normalizeDealExpiry } from '../scraper/expiry-utils.js';
+import { applyLiveDealEditsToBundle } from './live-deal-edits-lib.mjs';
 
 const now = new Date('2026-10-30T08:00:00Z');
 const ballroom = 'Come to BALLROOM in your Halloween costume on October 31st and get one FREE Sweet Dumpling on us! Think apple, caramel & hazelnut. 📍 BALLROOM – DAMN.GOOD.DUMPLINGS, Maria-Theresien-Straße 5, 1090 Vienna';
@@ -131,6 +133,20 @@ test('food expiring soon outranks an otherwise identical far-future offer', () =
   assert(entryMediaPriority(entry('Gratis Kaffee in Wien am 31.10.2026'), now)
     > entryMediaPriority(entry('Gratis Kaffee in Wien am 20.11.2026'), now));
   assert(entryMediaPriority(entry('Gratis Kaffee in Wien am 29.10.2026'), now) <= -1000);
+});
+
+test('reviewed coupon expiry survives re-normalization without reverting to old raw dates', async () => {
+  const old = { id: 'reviewed-wrap', title: '1+1 Thunfisch-Wrap', expires: '2026-09-30T23:59:59.999Z',
+    expiresOriginal: '2026-09-30T23:59:59.999Z', validUntil: '2027-01-03' };
+  const edits = { edits: [{ dealId: old.id, expires: '2027-01-03T23:59:59.999Z',
+    expiresOriginal: '03.01.2027', validUntil: '2027-01-03', expiryDisplayText: 'Bis 03.01.2027' }] };
+  const fixed = applyLiveDealEditsToBundle({ deals: [old] }, edits).bundle.deals[0];
+  await normalizeDealExpiry(fixed, { now, allowUrlLookup: false });
+  assert.equal(fixed.expires, '2027-01-03T23:59:59.999Z');
+  assert.equal(fixed.validUntil, '2027-01-03');
+  assert.equal(fixed.expiresOriginal, '03.01.2027');
+  assert.equal(fixed.id, old.id);
+  assert.equal(fixed.title, old.title);
 });
 
 test('preview uses existing exact-post evidence and stops network failure storms', async () => {

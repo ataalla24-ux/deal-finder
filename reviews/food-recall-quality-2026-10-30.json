@@ -1,6 +1,6 @@
 {
   "date": "2026-10-30",
-  "scope": "Vienna food/non-alcoholic drink discovery and Slack quality; source-only changes",
+  "scope": "Vienna food/non-alcoholic drink discovery and Slack quality; source changes and one narrowly source-confirmed NORDSEE expiry metadata repair",
   "base": "d5e1f4ef3",
   "evidence": {
     "slackCardsRead": 63,
@@ -24,7 +24,9 @@
   ],
   "verification": {
     "offlineSuitesPassed": 39,
-    "newRegressionGroups": 11,
+    "graphCiCommandsRerunPassed": 31,
+    "merchantTestsPassed": 360,
+    "newRegressionGroups": 12,
     "redBeforeGreenAfter": true,
     "gitDiffCheck": "pass",
     "ci": "Initial Power, Repository Safety, Slack Removal and Pages passed. Graph exposed an unnecessary rewrite of a complete community title; keep complete source sentences ahead of the condensed fallback. Merchant runtime needed the new category helper in its isolated module graph; corrected and 360 local Merchant tests pass. Follow-up CI pending.",
@@ -32,7 +34,16 @@
     "noManualProviderDispatch": true,
     "noManualSlackSend": true
   },
-  "preserved": ["paid and shared API limits", "AI daily/pacing limits", "cron schedules", "manual approval", "live feed and existing Slack cards", "human edits", "Wolt g2-3dn8v3", "native and Store artifacts", "paid card editor OFF"],
+  "nordseeExpiryRepair": {
+    "id": "benefit-drei-plus-aekytk",
+    "checkedAt": "2026-10-30T10:18:49.000Z",
+    "source": "https://www.drei.at/de/dreiplus/ersparnisse/nordsee/",
+    "evidence": "Fresh official page confirms 2-for-1 tuna wrap through 03.01.2027; Austria excluding motorway locations. Existing approved title, conditions and validUntil already match this date.",
+    "before": { "expires": "2026-09-30T23:59:59.999Z", "expiresOriginal": "2026-09-30T23:59:59.999Z", "validUntil": "2027-01-03" },
+    "after": { "expires": "2027-01-03T23:59:59.999Z", "expiresOriginal": "03.01.2027", "validUntil": "2027-01-03" },
+    "reason": "Old raw expiry won normalization and undid the previous verified expiry. Align both raw and normalized fields in feed and persistent existing edit; no new approval, removal, price or conditions."
+  },
+  "preserved": ["paid and shared API limits", "AI daily/pacing limits", "cron schedules", "manual approval", "all other live records and existing Slack cards", "human-edited offer copy", "Wolt g2-3dn8v3", "native and Store artifacts", "paid card editor OFF"],
   "remainingLimitations": [
     "No claim of finding every Instagram offer or of improved live yield before a regular post-deployment run.",
     "Provider 403/429, missing endpoints and existing cooldowns remain external constraints; no bypass or quota increase.",
