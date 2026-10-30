@@ -5,6 +5,7 @@ import { Miniflare, convertV4MiniflareOptions } from 'miniflare';
 import { bundledAuth } from './bundled-auth.js';
 import { bundledEmail } from './bundled-email.js';
 import { bundledAppleClaims } from './bundled-apple-claims.js';
+import { bundledCreatorNotifications } from './bundled-creator-notifications.js';
 
 const DAY = 86400000;
 const API = 'https://worker.test/api/merchant/promos';
@@ -34,10 +35,11 @@ test('promo ledger integration with real SQLite Durable Object', async t => {
             return super.fetch(request);
           }
         }` },
-      ...await Promise.all(['index.js', 'invitation-push.js', 'hot-data-storage.js', 'referral-months.js', 'ad-content-policy.js', 'merchant-promos.js', 'public-interaction-cache.js', 'storage-usage.js', 'subscription-trial.js', 'store-catalog.js', 'store-test-receipt.js'].map(async name => ({ type: 'ESModule', path: `src/${name}`, contents: await readFile(new URL(`../src/${name}`, import.meta.url), 'utf8') }))),
+      ...await Promise.all(['index.js', 'creator-program.js', 'invitation-push.js', 'hot-data-storage.js', 'referral-months.js', 'ad-content-policy.js', 'merchant-promos.js', 'public-interaction-cache.js', 'storage-usage.js', 'subscription-trial.js', 'store-catalog.js', 'store-test-receipt.js'].map(async name => ({ type: 'ESModule', path: `src/${name}`, contents: await readFile(new URL(`../src/${name}`, import.meta.url), 'utf8') }))),
       await bundledAuth(),
       await bundledEmail(),
       await bundledAppleClaims(),
+      await bundledCreatorNotifications(),
     ],
     durableObjects: { MERCHANT_PROMOS: { className: 'TestLedger', useSQLite: true } },
     kvNamespaces: ['MERCHANT_CAMPAIGNS'], bindings: { MERCHANT_PROMO_ADMIN_SECRET: 'test-only-admin-secret' },

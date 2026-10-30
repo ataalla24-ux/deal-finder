@@ -11,6 +11,9 @@ import { appleRewardClaims } from './apple-reward-claim.js';
 import { invitationPushLedger, handleInvitationPushAdmin } from './invitation-push.js';
 import { HotDataStorage } from './hot-data-storage.js';
 import { measureStorage, storageIdentity, StorageQuotaError } from './storage-usage.js';
+import { CreatorProgramLedger, creatorAppleEvidence, creatorPlayEvidence, creatorHash,
+  handleCreatorProgram, scheduledCreatorProgram } from './creator-program.js';
+import { verifyAppleCreatorNotification, verifyGoogleCreatorNotification } from './creator-store-notifications.js';
 export { MerchantPromoLedger } from './merchant-promos.js';
 
 export class HotDataLedger extends HotDataStorage {
@@ -59,6 +62,79 @@ export class ReferralMonths extends invitationPushLedger(accountEmailLedger(appl
       const expires = Date.parse(body.itemExpiryTimeDetails?.find(x => x.productId === purchase.product)?.expiryTime);
       return { ok: response.ok && expires >= expiry, expires, definitive: [400, 401, 403, 404, 409, 412].includes(response.status) };
     } catch { return { ok: false, definitive: false }; }
+  }
+}
+
+// Prices and offer identifiers below come only from authenticated Store APIs.
+// No caller-supplied signed payload or payment amount is accepted as proof.
+export class CreatorProgram extends CreatorProgramLedger {
+  playRequest(...args) { return ReferralMonths.prototype.playRequest.apply(this, args); }
+  verifyAppleNotification(body) { return verifyAppleCreatorNotification(body.signedPayload); }
+  verifyGoogleNotification(body) { return verifyGoogleCreatorNotification(body.transportAuthorization, body, this.env); }
+  async appleRead(kind, transactionId) {
+    if (!/^\d{5,30}$/.test(transactionId || '')) throw Error('Invalid transaction');
+    const credentials = appStoreCredentials(this.env);
+    if (!credentials.ok) throw Error('Store unavailable');
+    const path = kind === 'history' ? `v2/history/${transactionId}?sort=DESCENDING` :
+      kind === 'subscriptions' ? `v1/subscriptions/${transactionId}` : `v1/transactions/${transactionId}`;
+    const response = await fetch(`https://api.storekit.itunes.apple.com/inApps/${path}`, {
+      headers: { authorization: `Bearer ${await appStoreServerToken(credentials)}` },
+      signal: AbortSignal.timeout(9000), redirect: 'manual',
+    });
+    if (!response.ok) throw Error('Store unavailable');
+    return response.json();
+  }
+  async verify(body, partners, knownChain = null) {
+    const now = Date.now();
+    if (body.platform === 'ios') {
+      const decode = signed => {
+        if (typeof signed !== 'string' || signed.length > 30000 || signed.split('.').length !== 3) throw Error('Store response incomplete');
+        return JSON.parse(new TextDecoder().decode(Uint8Array.from(atob(signed.split('.')[1].replace(/-/g, '+').replace(/_/g, '/')), c => c.charCodeAt(0))));
+      };
+      if (knownChain) {
+        const history = await this.appleRead('history', body.transactionId);
+        if (history.environment !== 'Production' || history.bundleId !== 'com.stefanataalla.freefinderwien' ||
+            history.hasMore || !Array.isArray(history.signedTransactions) || !history.signedTransactions.length || history.signedTransactions.length > 100) throw Error('History requires review');
+        const transactions = history.signedTransactions.map(decode).filter(raw => raw.originalTransactionId === knownChain.key.slice(4));
+        if (!transactions.length) throw Error('Subscription history missing');
+        return transactions.map(raw => creatorAppleEvidence(raw, partners, now, knownChain));
+      }
+      const response = await this.appleRead('transactions', body.transactionId);
+      const raw = decode(response.signedTransactionInfo);
+      if (raw.transactionId !== body.transactionId) throw Error('Transaction mismatch');
+      const chain = await this.storage.get('chain:ios:' + raw.originalTransactionId);
+      let pending = null;
+      if (!chain && raw.price === 0 && raw.offerType === 1) {
+        const status = await this.appleRead('subscriptions', body.transactionId);
+        if (status.environment !== 'Production' || status.bundleId !== raw.bundleId) throw Error('Subscription mismatch');
+        const rows = (status.data || []).flatMap(group => group.lastTransactions || []);
+        const row = rows.find(row => row.originalTransactionId === raw.originalTransactionId);
+        if (row?.signedRenewalInfo) {
+          pending = decode(row.signedRenewalInfo);
+          if (pending.environment !== 'Production' || pending.originalTransactionId !== raw.originalTransactionId) throw Error('Renewal mismatch');
+        }
+      }
+      return creatorAppleEvidence(raw, partners, now, chain, pending);
+    }
+    if (body.platform !== 'android' || typeof body.purchaseToken !== 'string' ||
+        !/^[A-Za-z0-9._-]{10,4096}$/.test(body.purchaseToken)) throw Error('Invalid purchase token');
+    const hash = await creatorHash(body.purchaseToken);
+    const chain = knownChain || await this.storage.get('chain:android:' + hash);
+    const purchase = await ReferralMonths.prototype.playPurchase.call(this, body.purchaseToken);
+    const orderId = purchase.lineItems?.[0]?.latestSuccessfulOrderId || purchase.latestOrderId;
+    if (!/^GPA\.[A-Za-z0-9.-]{5,150}$/.test(orderId || '')) throw Error('Order missing');
+    const ids = new Set([orderId]);
+    if (knownChain) for (const key of knownChain.paymentKeys || []) {
+      ids.add(key.slice('payment:android:'.length));
+    }
+    if (ids.size > 15) throw Error('Order history requires review');
+    const evidence = [];
+    for (const orderId of ids) {
+      const order = await ReferralMonths.prototype.playOrder.call(this, orderId);
+      if (order.purchaseToken !== body.purchaseToken || order.orderId !== orderId) throw Error('Order mismatch');
+      evidence.push(creatorPlayEvidence(purchase, order, hash, partners, now, chain));
+    }
+    return knownChain ? evidence : evidence[0];
   }
 }
 
@@ -150,7 +226,10 @@ const DEFAULT_INSTAGRAM_HASHTAGS = [
 ];
 
 export default {
-  async scheduled(_controller, env) { await scheduledAccountEmail(env); },
+  async scheduled(_controller, env) {
+    await scheduledAccountEmail(env);
+    await scheduledCreatorProgram(env);
+  },
   async fetch(request, env, ctx) {
     const usage = measureStorage(request, env.MERCHANT_CAMPAIGNS);
     let response;
@@ -179,6 +258,7 @@ const merchantWorker = {
     const url = new URL(request.url);
 
     try {
+      if (url.pathname.startsWith('/api/creators/')) return handleCreatorProgram(request, env);
       if (url.pathname === '/api/invitations/admin/owner-test') return handleInvitationPushAdmin(request, env);
       if (url.pathname.startsWith('/api/email/')) return handleAccountEmail(request, env);
       if (url.pathname.startsWith('/api/account/')) return handleAccount(request, env);

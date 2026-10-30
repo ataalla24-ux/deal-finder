@@ -4,6 +4,9 @@ compatibility_date = "2025-12-01"
 compatibility_flags = ["nodejs_compat"]
 workers_dev = true
 
+[alias]
+"node-fetch" = "./src/creator-store-notifications.js"
+
 [triggers]
 crons = ["5,20,35,50 * * * *"]
 
@@ -22,6 +25,10 @@ ACCOUNT_EMAIL_QA_ENABLED = "0"
 INVITATION_PUSH_ENABLED = "1"
 INVITATION_PUSH_QA_ENABLED = "0"
 STORE_TEST_RECEIPTS_ENABLED = "0"
+CREATOR_PROGRAM_ENABLED = "0"
+CREATOR_RECONCILIATION_ENABLED = "0"
+CREATOR_APPLE_NOTIFICATIONS_ENABLED = "0"
+CREATOR_GOOGLE_NOTIFICATIONS_ENABLED = "0"
 FIREBASE_PROJECT_ID = "earnest-sandbox-487113-g8"
 APP_STORE_BUNDLE_ID = "com.stefanataalla.freefinderwien"
 REFERRAL_MONTHS_ENABLED = "1"
@@ -67,3 +74,11 @@ new_sqlite_classes = ["ReferralMonths"]
 [[migrations]]
 tag = "hot-app-data-v1"
 new_sqlite_classes = ["HotDataLedger"]
+
+[[durable_objects.bindings]]
+name = "CREATOR_PROGRAM"
+class_name = "CreatorProgram"
+
+[[migrations]]
+tag = "creator-program-v1"
+new_sqlite_classes = ["CreatorProgram"]

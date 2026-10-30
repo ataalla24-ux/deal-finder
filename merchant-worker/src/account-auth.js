@@ -59,14 +59,15 @@ export async function authenticateAccount(request, env, { keyResolver = keys, tr
     providers: (user.providerUserInfo || []).map(p => p.providerId).filter(p => ['apple.com', 'google.com', 'password'].includes(p)) };
 }
 
-export async function boundedJSON(request) {
+export async function boundedJSON(request, maxBytes = 16000) {
+  if (!Number.isInteger(maxBytes) || maxBytes < 1 || maxBytes > 65536) throw accountError('Ungültige Anfragegrenze.', 400);
   if (!request.headers.get('content-type')?.includes('application/json')) throw accountError('JSON erforderlich.', 415);
   const reader = request.body?.getReader(); let size = 0; const chunks = [];
   if (!reader) throw accountError('Anfrage fehlt.', 400);
   while (true) {
     const { done, value } = await reader.read(); if (done) break;
     size += value.byteLength;
-    if (size > 16000) { await reader.cancel(); throw accountError('Anfrage zu groß.', 413); }
+    if (size > maxBytes) { await reader.cancel(); throw accountError('Anfrage zu groß.', 413); }
     chunks.push(value);
   }
   let body;

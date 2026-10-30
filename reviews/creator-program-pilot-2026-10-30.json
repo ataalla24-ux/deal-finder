@@ -1,0 +1,61 @@
+{
+  "date": "2026-10-30",
+  "baseCommit": "67062fcf2bee360ed89187b347063fc0545362b6",
+  "scope": "Inactive five-partner creator affiliate pilot; native changes prepared separately",
+  "ownerChoices": {
+    "customerDiscountPercent": 20,
+    "customerDiscountPaidMonths": 12,
+    "commissionPercent": 30,
+    "commissionBasis": "actual_customer_paid_EUR_gross_after_discount_and_refunds",
+    "creatorVat": "included_in_commission_not_added_on_top",
+    "commissionPilotPaidPeriods": 12,
+    "longerCommissionRequiresExplicitTermsBeforeActivation": true,
+    "maximumPartners": 5,
+    "initialNamedDrafts": ["foodiewien", "tastyfood"],
+    "newMonthlySubscriptionsOnly": true,
+    "region": "AT",
+    "annualSubscriptionsUnchanged": true,
+    "bankPayments": "owner_approved_manual_transfer_only"
+  },
+  "implementation": [
+    "isolated_sqlite_creator_ledger",
+    "authenticated_owned_receipt_confirmation_only",
+    "apple_official_sdk_verified_server_notification_ingestion",
+    "google_oidc_verified_rtdn_refetch_trigger",
+    "actual_store_api_prices_not_client_claims",
+    "integer_cent_commissions_and_partial_refund_reconciliation",
+    "immutable_subscription_attribution_and_started_terms",
+    "monthly_financial_report_and_funds_received_approval",
+    "negative_refund_carry_and_manual_bank_reference_idempotence",
+    "fair_bounded_reconciliation_cursor_using_existing_cron",
+    "default_disabled_native_code_flows_for_ios_and_android"
+  ],
+  "inactiveFlags": [
+    "CREATOR_PROGRAM_ENABLED",
+    "CREATOR_RECONCILIATION_ENABLED",
+    "CREATOR_APPLE_NOTIFICATIONS_ENABLED",
+    "CREATOR_GOOGLE_NOTIFICATIONS_ENABLED"
+  ],
+  "notClaimed": [
+    "signed_creator_contracts",
+    "created_or_activated_store_discounts_or_custom_codes",
+    "configured_apple_server_notification_url_or_google_pubsub",
+    "genuine_end_to_end_store_redemption_renewal_and_refund_test",
+    "native_store_upload_or_public_release",
+    "automatic_bank_transfers",
+    "completed_legal_tax_or_privacy_clearance"
+  ],
+  "preserved": [
+    "existing_subscriptions_and_referral_months",
+    "business_promotion_codes",
+    "notification_and_email_consents_and_frequency",
+    "scraper_schedules_and_paid_model_editor_disabled_state",
+    "existing_cloudflare_bindings_and_cron_schedule",
+    "frozen_android_79_aab_and_ios_81_ipa",
+    "preexisting_untracked_wrangler_directory"
+  ],
+  "paidServiceOrBudgetChange": false,
+  "customerMessageOrCreatorOutreach": false,
+  "livePaymentTest": false,
+  "testEvidence": "Root output/creator-program-2026-10-30 contains actual serial test/build logs and verification.json; fixture success is not Store activation."
+}
