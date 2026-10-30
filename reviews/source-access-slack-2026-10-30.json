@@ -48,6 +48,17 @@
     }
   },
   "tests": { "graphAndPowerCommands": 48, "failed": 0, "focusedTests": 24, "focusedFailed": 0, "newAccessRegressionTests": 12, "actualRhuloQueueReplay": "pass", "diffCheck": "pass" },
+  "postReleaseFollowUp": {
+    "centralDispatchRun": 41045079118,
+    "status": "success",
+    "slackResult": "Zero new messages; independently checked channel after completion at11:11UTC. No increase in unique good deals demonstrated.",
+    "funnel": { "exactPostsAlreadySeen": 455, "alreadyLive": 40, "alreadyQueued": 3, "remainingBlocked": 269, "note": "Mixed retained corpus, not all fresh Instagram food candidates; rejection reasons overlap." },
+    "slack429Finding": "Retry-After10seconds was correctly honored. The delivery-only dedupe path nevertheless performed up to250 redundant reaction requests plus auth.test; reactions never changed its already-populated seen keys.",
+    "fix": "Remove only redundant auth/reaction reads from the delivery cache. Keep full message reads, existing retries, suppression window, cache lifetime, approval and moderation unchanged.",
+    "test": "Delivered cards with no reaction, approval, rejection and human replies all remain seen; cache replay issues no further reads. Zero auth/reaction/network calls in isolated fixture.",
+    "focusedTests": 25,
+    "note": "Fewer unnecessary reads, not a guarantee of zero future Slack429 responses or a measured post-fix runtime improvement."
+  },
   "preservation": {
     "publicFeedAndHistoricalQueue": "Deep-equal to worktree base before commit",
     "wolt": "g2-3dn8v3 unchanged including expiry",

@@ -1,8 +1,11 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
+import fs from 'node:fs';
+import os from 'node:os';
+import path from 'node:path';
 import { createInstagramWebAccess } from '../scraper/instagram-web-access-policy.js';
 import { discoverProfileCandidates, enrichPreviews, enrichRenderedPreviews, fetchRenderedInstagramPreview, extractViennaLocation } from '../scraper/instagram-ai-agent.js';
-import { filterAlreadyQueuedDeals, loadQueuedDealDuplicateKeys } from '../scraper/slack-notify.js';
+import { filterAlreadyQueuedDeals, loadQueuedDealDuplicateKeys, loadRecentlySeenPostKeys, buildSlackMessage } from '../scraper/slack-notify.js';
 import { runScheduledPowerSource } from '../scraper/power-source-scheduling.js';
 import { POWER_FOOD_SOURCES } from '../scraper/power-food-sources.js';
 import { extractFoodOffers, extractFoodExpiry, discoverFoodLinks } from '../scraper/power-food-extraction.js';
@@ -11,6 +14,29 @@ import { sourceHttpError } from '../scraper/source-http-policy.js';
 const now = new Date('2026-10-30T10:00:00Z');
 const clock = hours => new Date(+now + hours * 3600000);
 const candidates = Array.from({ length: 5 }, (_, i) => ({ url: `https://www.instagram.com/p/Test${i}/` }));
+
+test('delivery cache needs no auth or reaction lookups; human decisions and cache reuse are preserved', async () => {
+  const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'food-seen-read-'));
+  const originalFetch = globalThis.fetch;
+  let reads = 0;
+  globalThis.fetch = async () => { throw Error('unnecessary Slack API request'); };
+  try {
+    const options = { now, cachePath: path.join(dir, 'seen.json'), listThreads: async () => ['1', '2', '3'],
+      readThread: async ts => { reads++; return [{ ts, text: 'FreeFinder Wien' }, {
+        ts: `${ts}.1`, text: buildSlackMessage({ id: `test${ts}`, title: 'Gratis Kaffee in Wien', brand: 'Cafe Test', category: 'kaffee', type: 'gratis', description: 'Gratis Kaffee in Wien.', url: `https://www.instagram.com/p/Test${ts}/` }, 1),
+        reactions: ts === '1' ? [] : [{ name: ts === '2' ? 'white_check_mark' : 'x', users: ['human'] }],
+      }, { ts: `${ts}.2`, user: 'human', text: 'Bitte Bedingungen beachten.' }]; } };
+    const first = await loadRecentlySeenPostKeys(options);
+    assert.equal(first.size, 3, 'delivered, approved and rejected messages all remain seen');
+    assert.equal(reads, 3);
+    const second = await loadRecentlySeenPostKeys({ ...options, listThreads: async () => { throw Error('fresh cache reread'); } });
+    assert.deepEqual(second, first);
+    assert.equal(reads, 3);
+  } finally {
+    globalThis.fetch = originalFetch;
+    fs.rmSync(dir, { recursive: true, force: true });
+  }
+});
 function browser(status = 200, retryAfter = '') {
   const calls = { launch: 0, navigation: 0, evaluate: 0, closed: 0 };
   const page = { goto: async () => { calls.navigation++; return { status: () => status, headers: () => ({ 'retry-after': retryAfter }) }; },

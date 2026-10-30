@@ -90,7 +90,6 @@ const SLACK_BOT_TOKEN = process.env.SLACK_BOT_TOKEN || '';
 const SLACK_CHANNEL_ID = process.env.SLACK_CHANNEL_ID || '';
 const PENDING_FILE_NAMES = process.env.PENDING_FILE_NAMES || '';
 const SEEN_DEAL_SUPPRESSION_DAYS = Number(process.env.SLACK_SEEN_DEAL_SUPPRESSION_DAYS || 30);
-const MAX_SEEN_REACTION_CHECKS = Number(process.env.SLACK_SEEN_MAX_REACTION_CHECKS || 250);
 const QUEUE_REVALIDATION_INTERVAL_HOURS = Number(
   process.env.SLACK_QUEUE_REVALIDATION_INTERVAL_HOURS || 6,
 );
@@ -241,21 +240,6 @@ function canonicalPostKey(url) {
 
 function isDigestHeader(message) {
   return cleanText(message?.text).includes('FreeFinder Wien');
-}
-
-function isLikelyHumanMessage(message, botUserId) {
-  const user = cleanText(message?.user);
-  if (!user || (botUserId && user === botUserId)) return false;
-  if (message?.bot_id || message?.subtype === 'bot_message') return false;
-  return !isDigestHeader(message);
-}
-
-function hasHumanCheckReaction(reactions, botUserId) {
-  const checkNames = new Set(['white_check_mark', 'heavy_check_mark', 'check']);
-  return ensureArray(reactions).some((reaction) => {
-    if (!checkNames.has(cleanText(reaction?.name))) return false;
-    return ensureArray(reaction?.users).some((user) => user && user !== botUserId);
-  });
 }
 
 function toIsoDate(value) {
@@ -1047,12 +1031,6 @@ async function slackApi(url, attempt = 0) {
   return data;
 }
 
-async function getBotUserId() {
-  const data = await slackApi('https://slack.com/api/auth.test');
-  if (!data.ok) return '';
-  return cleanText(data.user_id);
-}
-
 async function findRecentDigestThreadTs(days = SEEN_DEAL_SUPPRESSION_DAYS) {
   if (!Number.isFinite(days) || days <= 0) return [];
   const oldest = Math.floor((Date.now() - days * 24 * 60 * 60 * 1000) / 1000);
@@ -1110,16 +1088,6 @@ async function getThreadMessages(threadTs) {
   }
 
   return messages;
-}
-
-async function getReactions(messageTs) {
-  const query = new URLSearchParams({
-    channel: SLACK_CHANNEL_ID,
-    timestamp: messageTs,
-  });
-  const data = await slackApi(`https://slack.com/api/reactions.get?${query.toString()}`);
-  if (!data.ok) return [];
-  return ensureArray(data.message?.reactions);
 }
 
 async function untouchedEditorialThread(deal) {
@@ -1224,7 +1192,7 @@ async function loadRecentlySeenPostKeys(options = {}) {
     return cache.keys;
   }
 
-  const threadTsList = await findRecentDigestThreadTs();
+  const threadTsList = await (options.listThreads || findRecentDigestThreadTs)();
   if (threadTsList.length === 0) {
     if (cache.usable && cache.keys.size > 0) {
       console.log(`⚠️ Slack-Historie leer; verwende ${cache.keys.size} Einträge aus dem letzten Seen-Cache`);
@@ -1234,66 +1202,19 @@ async function loadRecentlySeenPostKeys(options = {}) {
     return new Set();
   }
 
-  const botUserId = await getBotUserId();
   const seenKeys = new Set();
-  let reactionChecks = 0;
-  let checkedThreads = 0;
-  let repliedThreads = 0;
-  let checkedDeals = 0;
 
   for (const threadTs of threadTsList) {
-    const messages = await getThreadMessages(threadTs);
+    const messages = await (options.readThread || getThreadMessages)(threadTs);
     const deals = extractDealsFromThreadMessages(messages);
     // Delivery, not a human reaction, is what makes an offer already sent.
+    // Approval and moderation read reactions separately; this cache must not.
     addSeenDealsFromThread(seenKeys, deals);
-    const dealByTs = new Map(deals.map((deal) => [cleanText(deal.slackTs), deal]).filter(([ts]) => ts));
-    const headerMessage = messages.find((message) => cleanText(message?.ts) === cleanText(threadTs));
-    let headerReactions = ensureArray(headerMessage?.reactions);
-    if (headerReactions.length === 0 && reactionChecks < MAX_SEEN_REACTION_CHECKS) {
-      headerReactions = await getReactions(threadTs);
-      reactionChecks += 1;
-      await sleep(150);
-    }
-
-    if (hasHumanCheckReaction(headerReactions, botUserId)) {
-      const added = addSeenDealsFromThread(seenKeys, deals);
-      if (added > 0) checkedThreads += 1;
-      continue;
-    }
-
-    const humanReplyInThread = messages.some((message) => {
-      if (cleanText(message?.ts) === cleanText(threadTs)) return false;
-      if (dealByTs.has(cleanText(message?.ts))) return false;
-      return isLikelyHumanMessage(message, botUserId);
-    });
-
-    if (humanReplyInThread) {
-      const added = addSeenDealsFromThread(seenKeys, deals);
-      if (added > 0) repliedThreads += 1;
-      continue;
-    }
-
-    for (const deal of deals) {
-      const message = messages.find((item) => cleanText(item?.ts) === cleanText(deal.slackTs));
-      let reactions = ensureArray(message?.reactions);
-      if (reactions.length === 0 && deal.slackTs && reactionChecks < MAX_SEEN_REACTION_CHECKS) {
-        reactions = await getReactions(deal.slackTs);
-        reactionChecks += 1;
-        await sleep(150);
-      }
-      if (!hasHumanCheckReaction(reactions, botUserId)) continue;
-      const key = dealPostKey(deal);
-      if (key && !seenKeys.has(key)) {
-        seenKeys.add(key);
-        checkedDeals += 1;
-      }
-    }
   }
 
   console.log(
     `👀 Seen filter: ${seenKeys.size} exakte Post-URLs aus ${threadTsList.length} Slack-Digest(s) ` +
-    `der letzten ${SEEN_DEAL_SUPPRESSION_DAYS} Tage ` +
-    `(${checkedThreads} abgehakte Threads, ${repliedThreads} beantwortete Threads, ${checkedDeals} einzelne Deals)`
+    `der letzten ${SEEN_DEAL_SUPPRESSION_DAYS} Tage (zugestellte Nachrichten, keine Reaktionsabfragen)`
   );
   writeSeenPostCache(seenKeys, { ...options, now });
   return seenKeys;
@@ -2231,6 +2152,7 @@ export {
   filterDuplicateDealsInRun,
   loadLiveDealDuplicateKeys,
   loadQueuedDealDuplicateKeys,
+  loadRecentlySeenPostKeys,
   normalizeSeenPostCache,
   normalizeDeal,
   prepareKey4ReviewDeals,
