@@ -35,7 +35,7 @@
   <link rel="icon" href="/favicon-96x96.png" sizes="96x96" type="image/png">
   <link rel="apple-touch-icon" href="/apple-touch-icon.png" sizes="180x180">
 
-  <link rel="preload" as="image" href="assets/native-preview-20260923/for-you-720.webp" imagesrcset="assets/native-preview-20260923/for-you-360.webp 360w, assets/native-preview-20260923/for-you-720.webp 720w, assets/native-preview-20260923/for-you-960.webp 960w" imagesizes="280px" type="image/webp" fetchpriority="high" media="(min-width: 1081px)">
+  <link rel="preload" as="image" href="assets/klar-urban-20261030/01-deals-720.webp" imagesrcset="assets/klar-urban-20261030/01-deals-360.webp 360w, assets/klar-urban-20261030/01-deals-720.webp 720w" imagesizes="(max-width: 760px) 110px, 200px" type="image/webp" fetchpriority="high">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link rel="preload" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=optional" as="style">
@@ -2016,6 +2016,7 @@
     }
   </style>
   <meta name="apple-mobile-web-app-title" content="FreeFinder">
+  <link rel="stylesheet" href="/home-showcase.css?v=20261030">
   <link rel="stylesheet" href="/visual-refresh.css?v=20261030">
 </head>
 <body>
@@ -2118,17 +2119,14 @@
             </li>
           </ul>
         </div>
-        <div class="phone-stage" role="group" aria-label="FreeFinder Ansichten: Karte, Empfehlungen und Favoriten">
-          <div class="phone-frame phone-side">
-            <img src="assets/native-preview-20260923/map.webp" srcset="assets/native-preview-20260923/map-360.webp 360w, assets/native-preview-20260923/map-720.webp 720w" sizes="(max-width: 760px) 124px, 206px" width="1320" height="2868" alt="FreeFinder Karte mit IKEA Wien Westbahnhof" loading="lazy" decoding="async">
+        <figure class="hero-showcase" aria-describedby="heroPreviewNote">
+          <div class="hero-phones">
+            <img src="assets/klar-urban-20261030/05-favoriten-720.webp" srcset="assets/klar-urban-20261030/05-favoriten-360.webp 360w, assets/klar-urban-20261030/05-favoriten-720.webp 720w" sizes="(max-width: 760px) 100px, 180px" width="851" height="1848" alt="Designvorschau: Favoriten mit beispielhaften Kebap-, Pizza- und Burger-Angeboten" decoding="async">
+            <img class="showcase-main" src="assets/klar-urban-20261030/01-deals-720.webp" srcset="assets/klar-urban-20261030/01-deals-360.webp 360w, assets/klar-urban-20261030/01-deals-720.webp 720w" sizes="(max-width: 760px) 110px, 200px" width="851" height="1848" alt="Designvorschau: FreeFinder Deals mit Burger, Kebap und Pizza als Beispieldaten" decoding="async" fetchpriority="high">
+            <img src="assets/klar-urban-20261030/02-fuer-dich-720.webp" srcset="assets/klar-urban-20261030/02-fuer-dich-360.webp 360w, assets/klar-urban-20261030/02-fuer-dich-720.webp 720w" sizes="(max-width: 760px) 100px, 180px" width="851" height="1848" alt="Designvorschau: Für-dich-Empfehlungen mit Pizza und Kaffee als Beispieldaten" decoding="async">
           </div>
-          <div class="phone-frame phone-main">
-            <img src="assets/native-preview-20260923/for-you.webp" srcset="assets/native-preview-20260923/for-you-360.webp 360w, assets/native-preview-20260923/for-you-720.webp 720w, assets/native-preview-20260923/for-you-960.webp 960w" sizes="(max-width: 760px) 172px, 280px" width="1320" height="2868" alt="FreeFinder Empfehlungen mit dem IKEA-Family-Heißgetränkevorteil" decoding="async" fetchpriority="high">
-          </div>
-          <div class="phone-frame phone-side right">
-            <img src="assets/native-preview-20260923/favorites.webp" srcset="assets/native-preview-20260923/favorites-360.webp 360w, assets/native-preview-20260923/favorites.webp 1320w" sizes="(max-width: 760px) 124px, 206px" width="1320" height="2868" alt="Gespeicherte Angebote in FreeFinder" loading="lazy" decoding="async">
-          </div>
-        </div>
+          <figcaption id="heroPreviewNote">Designvorschau mit Beispieldaten.</figcaption>
+        </figure>
         <div class="next-strip" aria-hidden="true">
           <h2>Schnell zum besten Deal.</h2>
           <div class="quick-links">
@@ -2156,9 +2154,6 @@
       <section class="section app-section" id="app" aria-labelledby="appTitle">
         <div class="app-grid">
           <div class="screenshot-column">
-            <div class="phone-frame">
-              <img src="assets/native-preview-20260923/for-you.webp" srcset="assets/native-preview-20260923/for-you-360.webp 360w, assets/native-preview-20260923/for-you-720.webp 720w, assets/native-preview-20260923/for-you-960.webp 960w" sizes="280px" width="1320" height="2868" alt="IKEA-Family-Vorteil in den FreeFinder Empfehlungen" loading="lazy" decoding="async">
-            </div>
             <aside class="live-deals" aria-labelledby="liveDealsTitle">
               <div class="live-deals-head">
                 <strong id="liveDealsTitle">Wiener Angebote</strong>
@@ -2202,6 +2197,21 @@
               </div>
             </div>
           </div>
+        </div>
+      </section>
+
+      <section class="section app-design-section" aria-labelledby="appDesignTitle">
+        <div class="app-gallery-heading">
+          <h2 id="appDesignTitle">FreeFinder in Bildern.</h2>
+          <p id="appDesignNote">Designvorschauen mit Beispieldaten.</p>
+        </div>
+        <div class="app-gallery" role="region" aria-label="Sechs FreeFinder Designvorschauen" aria-describedby="appDesignNote" tabindex="0">
+          <figure><img src="assets/klar-urban-20261030/01-deals-720.webp" srcset="assets/klar-urban-20261030/01-deals-360.webp 360w, assets/klar-urban-20261030/01-deals-720.webp 720w" sizes="(max-width: 760px) 240px, 190px" width="851" height="1848" alt="Designvorschau: Deals mit beispielhaften Burger-, Kebap- und Pizza-Angeboten" loading="lazy" decoding="async"><figcaption>Deals</figcaption></figure>
+          <figure><img src="assets/klar-urban-20261030/02-fuer-dich-720.webp" srcset="assets/klar-urban-20261030/02-fuer-dich-360.webp 360w, assets/klar-urban-20261030/02-fuer-dich-720.webp 720w" sizes="(max-width: 760px) 240px, 190px" width="851" height="1848" alt="Designvorschau: Für dich mit Pizza und Kaffee als Beispieldaten" loading="lazy" decoding="async"><figcaption>Für dich</figcaption></figure>
+          <figure><img src="assets/klar-urban-20261030/03-karte-720.webp" srcset="assets/klar-urban-20261030/03-karte-360.webp 360w, assets/klar-urban-20261030/03-karte-720.webp 720w" sizes="(max-width: 760px) 240px, 190px" width="851" height="1848" alt="Designvorschau: Illustrierte Wien-Karte mit beispielhaften Food-Markierungen" loading="lazy" decoding="async"><figcaption>Karte</figcaption></figure>
+          <figure><img src="assets/klar-urban-20261030/04-statistik-720.webp" srcset="assets/klar-urban-20261030/04-statistik-360.webp 360w, assets/klar-urban-20261030/04-statistik-720.webp 720w" sizes="(max-width: 760px) 240px, 190px" width="851" height="1849" alt="Designvorschau: Sparstatistik mit Beispielwerten" loading="lazy" decoding="async"><figcaption>Statistiken</figcaption></figure>
+          <figure><img src="assets/klar-urban-20261030/05-favoriten-720.webp" srcset="assets/klar-urban-20261030/05-favoriten-360.webp 360w, assets/klar-urban-20261030/05-favoriten-720.webp 720w" sizes="(max-width: 760px) 240px, 190px" width="851" height="1848" alt="Designvorschau: Gespeicherte Beispielangebote für Kebap, Pizza, Burger und Bowl" loading="lazy" decoding="async"><figcaption>Favoriten</figcaption></figure>
+          <figure><img src="assets/klar-urban-20261030/06-pro-720.webp" srcset="assets/klar-urban-20261030/06-pro-360.webp 360w, assets/klar-urban-20261030/06-pro-720.webp 720w" sizes="(max-width: 760px) 240px, 190px" width="851" height="1848" alt="Designvorschau: FreeFinder Pro mit monatlichem und jährlichem Tarif" loading="lazy" decoding="async"><figcaption>FreeFinder Pro</figcaption></figure>
         </div>
       </section>
 

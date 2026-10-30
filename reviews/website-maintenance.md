@@ -4,6 +4,15 @@ The website lives in `docs/` and is served by GitHub Pages at
 https://freefinder.at/. Keep existing URLs and printed QR destinations stable.
 Never publish real customer, checkout, analytics or credential data in this tree.
 
+Owner selection, 2026-10-30: homepage app artwork uses the six approved Klar x
+Urban designs in `assets/klar-urban-20261030/`, not the older native feed images.
+Keep the visible design-preview/sample-data disclosures; these are illustrations,
+not current app captures or verified deals. Never use them as blog cover photos.
+`home-showcase.css` keeps the Pro band charcoal/orange on desktop and mobile;
+preserve existing billing, trial eligibility and renewal text. Responsive checks
+include 320x568, the horizontal keyboard-accessible gallery and the next-section
+hint in the first viewport. Original source image hashes are in `sources.json`.
+
 After adding or updating an article:
 
 1. Verify the original provider source, address, dates and redemption conditions.

@@ -8,6 +8,35 @@ import { dealPhoto } from './deal-photos.mjs';
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const read = file => fs.readFileSync(path.join(root, 'docs', file), 'utf8');
+const home = load(read('index.html'));
+assert.equal(home('link[href="/home-showcase.css?v=20261030"]').length, 1);
+assert.equal(home('.hero-showcase img').length, 3);
+assert.equal(home('.hero-showcase .phone-frame').length, 0, 'Artwork already includes a phone frame');
+assert.match(home('#heroPreviewNote').text(), /Designvorschau mit Beispieldaten/);
+assert.match(home('#appDesignNote').text(), /Designvorschauen mit Beispieldaten/);
+assert.equal(home('.app-gallery[tabindex="0"]').length, 1, 'Scrollable previews support keyboard focus');
+const previewSources = JSON.parse(read('assets/klar-urban-20261030/sources.json'));
+assert.equal(previewSources.actualNativeCaptures, false);
+assert.equal(previewSources.newlyGenerated, false);
+assert.equal(previewSources.images.length, 6);
+const previewNames = home('.app-gallery img').toArray().map(image => {
+  assert.match(home(image).attr('alt'), /^Designvorschau:/);
+  assert.equal(home(image).attr('loading'), 'lazy');
+  assert.ok(home(image).attr('srcset').includes('360w'));
+  return path.basename(home(image).attr('src')).replace('-720.webp', '');
+});
+assert.deepEqual(previewNames, previewSources.images.map(image => image.name));
+for (const image of previewSources.images) {
+  for (const variant of image.variants) {
+    const bytes = fs.readFileSync(path.join(root, 'docs/assets/klar-urban-20261030', variant.file));
+    assert.equal(bytes.subarray(0, 4).toString(), 'RIFF');
+    assert.equal(bytes.subarray(8, 12).toString(), 'WEBP');
+    assert.equal(bytes.length, variant.bytes);
+    assert.ok(bytes.length < 220000, 'Responsive design preview image budget');
+  }
+}
+assert.match(read('home-showcase.css'), /#pro\s*\{[^}]*background:\s*#1c1c20/);
+assert.match(read('home-showcase.css'), /#pro \.plan\.featured\s*\{[^}]*#ff964a/);
 for (const file of ['index.html', 'blog/index.html', 'angebote-wien-heute.html']) {
   const html = read(file), $ = load(html);
   assert.equal($('link[href="/visual-refresh.css?v=20261030"]').length, 1, `${file}: one presentation stylesheet`);
@@ -66,4 +95,4 @@ const privateFixture = '<html><head><meta name="robots" content="noindex"></head
 const privatePage = load(polishHtml(privateFixture, 'blog/private.html'));
 assert.equal(privatePage('main').text(), 'Private fixture');
 assert.equal(privatePage('.article-discovery, .visual-topics, link[href^="/visual-refresh.css"]').length, 0);
-console.log(`Visual website checks passed: six linked photo topics, ${articles} article discovery strips, eight precise deal motifs, image budgets, noindex isolation and idempotence.`);
+console.log(`Visual website checks passed: six approved design previews, branded Pro palette, six linked photo topics, ${articles} article discovery strips, eight precise deal motifs, image budgets, noindex isolation and idempotence.`);

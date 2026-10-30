@@ -1,0 +1,62 @@
+/* Reuse the approved artwork without adding another phone frame. */
+.hero-showcase { min-width: 0; margin: 0; align-self: center; }
+.hero-phones { height: 470px; display: grid; grid-template-columns: minmax(0, .9fr) minmax(0, 1.1fr) minmax(0, .9fr); align-items: center; gap: 10px; }
+.hero-phones img { display: block; width: 100%; height: auto; max-height: 390px; object-fit: contain; mix-blend-mode: multiply; border-radius: 8px; }
+.hero-phones .showcase-main { max-height: 470px; }
+.hero-showcase > figcaption { margin-top: 12px; text-align: center; color: #60616a; font-size: 12px; line-height: 1.5; }
+.app-design-section { padding-block: 0 60px; }
+.app-gallery-heading { display: flex; justify-content: space-between; align-items: baseline; gap: 20px; }
+.app-gallery-heading h2 { margin: 0; font-size: 26px; scroll-margin-top: 100px; }
+.app-gallery-heading p { margin: 0; color: #60616a; font-size: 13px; }
+.app-gallery { display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 18px; margin-top: 24px; }
+.app-gallery figure { min-width: 0; margin: 0; }
+.app-gallery img { display: block; width: 100%; height: auto; aspect-ratio: 851 / 1848; object-fit: contain; border-radius: 8px; mix-blend-mode: multiply; }
+.app-gallery figcaption { margin-top: 12px; text-align: center; font-size: 14px; font-weight: 800; }
+#pro { width: 100%; border-radius: 0; background: #1c1c20; box-shadow: none; }
+#pro .pro-grid { max-width: 1180px; margin-inline: auto; }
+#pro .section-copy, #pro .payment-note, #pro .pro-benefits p { color: #d1d0d6; }
+#pro .plan { border-color: #535158; border-radius: 8px; background: #27262b; }
+#pro .plan.featured { border-color: #ff964a; }
+#pro .plan h3, #pro .plan li svg, #pro .pro-benefits h3 { color: #ff964a; }
+#pro .plan li, #pro .pro-benefits li { color: #e1dfe5; }
+#pro .price span { color: #c9c6cf; }
+#pro .button-warm { background: #ff964a; color: #211b18; box-shadow: none; }
+#pro .button-ghost { color: #fff; border-color: #918c99; }
+#pro .pro-benefits { padding: 0 0 0 28px; border: 0; border-left: 2px solid #ff964a; border-radius: 0; background: transparent; }
+@media (min-width: 761px) and (max-height: 800px) {
+  body:has(.hero-showcase) .hero-proof { margin-top: 22px; padding-top: 18px; }
+  .hero-phones { height: 380px; }
+  .hero-phones img { max-height: 320px; }
+  .hero-phones .showcase-main { max-height: 380px; }
+}
+@media (min-width: 761px) and (max-width: 1100px) {
+  body:has(.hero-showcase) .hero { grid-template-columns: minmax(0, 1fr) 320px; gap: 24px; }
+  .hero-phones { height: 340px; gap: 6px; }
+}
+@media (max-width: 760px) {
+  .hero-phones { height: 225px; gap: 10px; }
+  .hero-phones img { max-height: 190px; }
+  .hero-phones .showcase-main { max-height: 225px; }
+  .hero-showcase > figcaption { margin: 8px 0 18px; font-size: 11px; }
+  .app-design-section { padding-bottom: 36px; }
+  .app-gallery-heading { display: block; }
+  .app-gallery-heading h2 { font-size: 24px; }
+  .app-gallery-heading p { margin-top: 10px; line-height: 1.5; }
+  .app-gallery { grid-template-columns: none; grid-auto-flow: column; grid-auto-columns: min(75%, 240px); gap: 18px; overflow-x: auto; overscroll-behavior-x: contain; scroll-snap-type: x mandatory; padding-bottom: 12px; }
+  .app-gallery figure { scroll-snap-align: start; }
+  .app-gallery:focus-visible { outline: 3px solid #c74a16; outline-offset: 4px; }
+  #pro .pro-benefits { padding: 24px 0 0; border-left: 0; border-top: 1px solid #6a646f; }
+}
+@media (max-width: 760px) and (max-height: 700px) {
+  body:has(.hero-showcase) main .hero { padding-top: 18px; gap: 12px; }
+  body:has(.hero-showcase) .hero-copy p { margin-top: 14px; }
+  body:has(.hero-showcase) .hero-actions { margin-top: 18px; gap: 8px; }
+  .hero-phones { height: 100px; }
+  .hero-phones img { max-height: 88px; }
+  .hero-phones .showcase-main { max-height: 100px; }
+  .hero-showcase > figcaption { margin-bottom: 8px; }
+}
+@media (max-width: 360px) and (max-height: 700px) {
+  body:has(.hero-showcase) .hero h1 { font-size: 30px; }
+  body:has(.hero-showcase) .hero-copy p { font-size: 15px; }
+}
