@@ -1,6 +1,7 @@
 import { load } from "cheerio";
 import crypto from "node:crypto";
 import { extractLowFoodPrice } from "./food-discovery-utils.js";
+import { parseExpiryDetails } from "./expiry-utils.js";
 import { discoveryRejection } from "./deal-discovery-policy.js";
 import {
   getNonGuaranteedPromotionReason,
@@ -91,6 +92,11 @@ export function extractFoodExpiry(text, now) {
   const compact = text.match(
     /(\d{1,2})\.\s*[-–]\s*(\d{1,2})\.\s*(\d{1,2})\.\s*(20\d{2})/,
   );
+  const namedEnd = text.match(/\bbis\s+(?:zum\s+)?(\d{1,2}\.?\s+[a-zäöü]+)(?:\s+(20\d{2}))?\b/i);
+  // An old yearless May offer must not be revived as next May's campaign.
+  const namedUntil = namedEnd
+    ? parseExpiryDetails(`${namedEnd[1]} ${namedEnd[2] || year}`, { now })?.date?.toISOString().slice(0, 10) || ""
+    : "";
   const start = text.match(
     /\b(?:ab|vom|von)\s+(\d{1,2})\.\s*(\d{1,2})\.\s*(20\d{2})?/i,
   );
@@ -98,7 +104,7 @@ export function extractFoodExpiry(text, now) {
     ? iso(+end[1], +end[2], +(end[3] || year))
     : compact
       ? iso(+compact[2], +compact[3], +compact[4])
-      : "";
+      : namedUntil;
   const validFrom = start
     ? iso(+start[1], +start[2], +(start[3] || end?.[3] || year))
     : compact
@@ -107,7 +113,7 @@ export function extractFoodExpiry(text, now) {
   return {
     validFrom,
     validUntil,
-    raw: end?.[0] || start?.[0] || compact?.[0] || "",
+    raw: end?.[0] || start?.[0] || compact?.[0] || (namedUntil ? namedEnd[0] : ""),
     recurring:
       /bis auf widerruf|bis auf wiederuf|jeden|täglich|wochentags|montag bis|freitag und samstag|(?:montag|dienstag|mittwoch|donnerstag|freitag|samstag|sonntag) ist \w+tag|\b(?:daily|everyday|every\s+(?:day|monday|tuesday|wednesday|thursday|friday|saturday|sunday))\b/i.test(
         text,

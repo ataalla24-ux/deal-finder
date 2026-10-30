@@ -204,6 +204,20 @@ export function semanticSocialOfferKey(deal = {}) {
   return semanticPromotionOfferKey(deal, { requireSocial: true });
 }
 
+// Only a less complete repost may be covered by an already delivered dated
+// venue offer. Two explicitly different time slots must remain independent.
+export function semanticVenueTimeGapKey(deal = {}, forReference = false) {
+  const key = semanticVenueCampaignKey(deal);
+  if (!key) return '';
+  const parts = key.split('|');
+  if (parts.length !== 6 || !/^20\d{2}-\d{2}-\d{2}$/.test(parts[3])) return '';
+  const conditions = parts[4].split('+').filter(Boolean);
+  const isClock = value => /^\d{1,2}:\d{2}$/.test(value);
+  if (!forReference && conditions.some(isClock)) return '';
+  parts[4] = conditions.filter(value => !isClock(value)).join('+');
+  return `time-unspecified:${parts.join('|')}`;
+}
+
 export function semanticCrossPlatformOfferKey(deal = {}) {
   return semanticPromotionOfferKey(deal);
 }

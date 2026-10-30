@@ -14,6 +14,7 @@ import {
 import { normalizeCategoryForScraper } from './category-utils.js';
 import { discoveryRejection } from './deal-discovery-policy.js';
 import { sourceHttpError } from './source-http-policy.js';
+import { createInstagramWebAccess } from './instagram-web-access-policy.js';
 import { runInstagramSearchQueries } from './instagram-search-discovery.js';
 import { canonicalInstagramPostKey } from './deal-evidence-utils.js';
 import { advanceDealLifecycle } from './deal-lifecycle.js';
@@ -98,6 +99,7 @@ const CONFIG = {
 const INSTAGRAM_COOKIE_HINTS = loadInstagramCookieHints();
 const INSTAGRAM_AUTH = instagramAuthSummary(INSTAGRAM_COOKIE_HINTS);
 const INSTAGRAM_AUTH_CIRCUIT = instagramAuthCircuitStatus(readJson(INSTAGRAM_AUTH_HEALTH_PATH, {}));
+const WEB_ACCESS = createInstagramWebAccess({ previousReport: readJson(REPORT_PATH, {}), healthReport: readJson(INSTAGRAM_AUTH_HEALTH_PATH, {}) });
 let instagramCookieAccessEnabled = INSTAGRAM_AUTH.authenticatedSession && INSTAGRAM_AUTH_CIRCUIT.allowed;
 let instagramRateLimitedDuringRun = false;
 let previewTransportBlocked = false;
@@ -815,9 +817,9 @@ function resolveCandidateEntities(candidate, signal = '') {
   });
 }
 
-function extractViennaLocation(signal = '') {
+export function extractViennaLocation(signal = '') {
   const text = cleanText(signal, 4000);
-  const postal = text.match(/(?:[A-ZÄÖÜ][^.!?\n]{0,55}\s+)?\b(1(?:0[1-9]0|1[0-9]0|2[0-3]0))\s+Wien\b/i)?.[0];
+  const postal = text.match(/\b(1(?:0[1-9]0|1[0-9]0|2[0-3]0))\s+Wien\b/i)?.[0];
   if (postal) return cleanText(postal, 120);
   const postalOnly = text.match(/\b(1(?:0[1-9]0|1[0-9]0|2[0-3]0))\b/)?.[1];
   if (postalOnly) return `${postalOnly} Wien`;
@@ -1038,7 +1040,8 @@ function addSeedCandidates(map) {
   return urls.length;
 }
 
-async function discoverProfileCandidates(accounts, map) {
+export async function discoverProfileCandidates(accounts, map, options = {}) {
+  const access = options.access || WEB_ACCESS;
   const stats = {
     accountsVisited: 0,
     discovered: 0,
@@ -1049,11 +1052,13 @@ async function discoverProfileCandidates(accounts, map) {
     stoppedReason: '',
     errors: [],
   };
-  if (!CONFIG.profileDiscoveryEnabled || accounts.length === 0) return stats;
+  if (!(options.enabled ?? CONFIG.profileDiscoveryEnabled) || accounts.length === 0) return stats;
+  const pause = access.pause('profiles');
+  if (pause) return { ...stats, stoppedEarly: true, stoppedReason: 'web-access-cooldown', nextRetryAt: pause.nextRetryAt };
 
   const selected = selectRotatingAccounts(accounts, CONFIG.maxProfileAccounts);
 
-  const browser = await chromium.launch({ headless: true });
+  const browser = await (options.browserType || chromium).launch({ headless: true });
   const context = await browser.newContext({
     viewport: { width: 1366, height: 900 },
     userAgent: USER_AGENT,
@@ -1061,12 +1066,10 @@ async function discoverProfileCandidates(accounts, map) {
     timezoneId: 'Europe/Vienna',
   });
   await applyInstagramCookies(context, activeInstagramCookies());
-  await context.addInitScript(() => {
-    Object.defineProperty(navigator, 'webdriver', { get: () => undefined });
-  });
 
   try {
     let consecutiveUnavailable = 0;
+    let consecutiveErrors = 0;
     for (const account of selected) {
       let stopProfileScan = false;
       const username = cleanText(account.username, 80);
@@ -1077,17 +1080,17 @@ async function discoverProfileCandidates(accounts, map) {
         let urls = [];
         const profileUrls = [
           `https://www.instagram.com/${username}/`,
-          `https://www.instagram.com/${username}/?hl=en`,
         ];
         for (const profileUrl of profileUrls) {
           const navigation = await page.goto(profileUrl, { waitUntil: 'domcontentloaded', timeout: 30000 });
-          if (navigation?.status() === 429) {
+          if ([401, 403, 429].includes(navigation?.status())) {
+            const status = navigation.status();
             stats.blocked += 1;
-            stats.rateLimited = true;
+            stats.rateLimited = status === 429;
             stats.stoppedEarly = true;
-            stats.stoppedReason = 'instagram-http-429';
-            openInstagramRuntimeCircuit('profile-http-429', { rateLimited: true });
-            await context.clearCookies();
+            stats.stoppedReason = `instagram-http-${status}`;
+            stats.nextRetryAt = access.failure('all', { status, retryAfter: navigation.headers()['retry-after'] }).nextRetryAt;
+            if (!options.access) openInstagramRuntimeCircuit(`profile-http-${status}`, { rateLimited: status === 429 });
             stopProfileScan = true;
             break;
           }
@@ -1110,6 +1113,7 @@ async function discoverProfileCandidates(accounts, map) {
           } else {
             stats.noPostLinks += 1;
             consecutiveUnavailable = 0;
+            access.success('profiles');
           }
         } else {
           consecutiveUnavailable = 0;
@@ -1133,15 +1137,21 @@ async function discoverProfileCandidates(accounts, map) {
         }
         stats.accountsVisited += 1;
         stats.discovered += urls.length;
+        consecutiveErrors = 0;
         if (!stopProfileScan && consecutiveUnavailable >= 3) {
           stats.stoppedEarly = true;
           stats.stoppedReason = 'three-consecutive-profile-blocks';
-          openInstagramRuntimeCircuit('three-consecutive-profile-blocks');
-          await context.clearCookies();
+          stats.nextRetryAt = access.failure('profiles', { reason: 'profile-unavailable' }).nextRetryAt;
           stopProfileScan = true;
         }
       } catch (error) {
         stats.errors.push({ account: username, error: error.message });
+        if (++consecutiveErrors >= 3) {
+          stats.stoppedEarly = true;
+          stats.stoppedReason = 'three-consecutive-profile-errors';
+          stats.nextRetryAt = access.failure('profiles', { reason: 'transport-failures' }).nextRetryAt;
+          stopProfileScan = true;
+        }
       } finally {
         await page.close();
       }
@@ -1252,7 +1262,8 @@ async function fetchInstagramPreview(url) {
       ...(cookieHeader ? { cookie: cookieHeader } : {}),
     },
   });
-  const html = await response.text();
+  const html = response.ok ? await response.text() : '';
+  if (!response.ok) await response.body?.cancel().catch(() => {});
   const finalUrl = response.url || url;
   const status = response.status;
   if (status === 429) openInstagramRuntimeCircuit('preview-http-429', { rateLimited: true });
@@ -1267,6 +1278,7 @@ async function fetchInstagramPreview(url) {
     jsonLdText: '',
     pubDate: '',
     rateLimited: status === 429,
+    retryAfter: response.headers.get('retry-after') || '',
   };
 
   if (response.ok && !loginWall) {
@@ -1299,8 +1311,11 @@ function extractRenderedPostDate(data = {}) {
   return null;
 }
 
-async function fetchRenderedInstagramPreview(page, url) {
-  await page.goto(url, { waitUntil: 'domcontentloaded', timeout: 30000 });
+export async function fetchRenderedInstagramPreview(page, url) {
+  const response = await page.goto(url, { waitUntil: 'domcontentloaded', timeout: 30000 });
+  const status = response?.status() || 0;
+  const retryAfter = response?.headers()['retry-after'] || '';
+  if (status >= 400 || !status) return { status, retryAfter, finalUrl: url, loginWall: false, description: '', pubDate: '' };
   await page.waitForTimeout(4500);
 
   const data = await page.evaluate(() => {
@@ -1321,7 +1336,8 @@ async function fetchRenderedInstagramPreview(page, url) {
 
   const postDate = extractRenderedPostDate(data);
   return {
-    status: 200,
+    status,
+    retryAfter,
     finalUrl: data.finalUrl,
     loginWall: /accounts\/login|anmelden|registrieren|log in to instagram/i.test(cleanText(data.bodyText, 500)),
     title: cleanText(data.ogTitle || data.title, 1200),
@@ -2423,9 +2439,15 @@ export function hasStructuredPostEvidence(candidate, now = new Date()) {
 }
 
 export async function enrichPreviews(candidates, options = {}) {
+  const access = options.access || (options.fetchPreview ? createInstagramWebAccess() : WEB_ACCESS);
   const errors = [];
   errors.stats = { attempted: 0, structuredEvidence: 0, deferred: 0, stoppedReason: '' };
   if (!(options.enabled ?? CONFIG.previewFetchEnabled)) return errors;
+  const pause = access.pause();
+  if (pause) {
+    errors.stats = { ...errors.stats, deferred: candidates.length, stoppedReason: 'web-access-cooldown', nextRetryAt: pause.nextRetryAt };
+    return errors;
+  }
   if (options.rateLimited ?? instagramRateLimitedDuringRun) {
     errors.stats.stoppedReason = 'http-429';
     errors.stats.deferred = candidates.length;
@@ -2434,7 +2456,7 @@ export async function enrichPreviews(candidates, options = {}) {
   }
 
   const fetchPreview = options.fetchPreview || fetchInstagramPreview;
-  const pause = options.sleep || sleep;
+  const wait = options.sleep || sleep;
   let failures = 0;
   for (const candidate of candidates) {
     if (hasStructuredPostEvidence(candidate, options.now || new Date())) { errors.stats.structuredEvidence++; continue; }
@@ -2445,18 +2467,24 @@ export async function enrichPreviews(candidates, options = {}) {
       const status = candidate.preview.status;
       if ([401, 403, 429].includes(status) || candidate.preview.loginWall) {
         errors.stats.stoppedReason = candidate.preview.loginWall ? 'login-wall' : `http-${status}`;
+        errors.stats.nextRetryAt = access.failure('all', { status, retryAfter: candidate.preview.retryAfter,
+          reason: candidate.preview.loginWall ? 'login-wall' : 'transport-failures' }).nextRetryAt;
         errors.push({ url: candidate.url, error: `Instagram ${errors.stats.stoppedReason}; remaining previews deferred` });
         break;
       }
       if (status >= 500 || !status) failures++;
-      else failures = 0;
+      else { failures = 0; access.success(); }
     } catch (error) {
       candidate.preview = { status: 0, finalUrl: candidate.url, loginWall: false, title: '', description: '', image: '', jsonLdText: '', pubDate: '' };
       failures++;
       errors.push({ url: candidate.url, error: `${error.message}${error.cause?.code ? ` (${error.cause.code})` : ''}` });
     }
-    if (failures >= 3) { errors.stats.stoppedReason = 'consecutive-preview-failures'; break; }
-    await pause(300);
+    if (failures >= 3) {
+      errors.stats.stoppedReason = 'consecutive-preview-failures';
+      errors.stats.nextRetryAt = access.failure('all', { reason: 'transport-failures' }).nextRetryAt;
+      break;
+    }
+    await wait(300);
   }
   if (errors.stats.stoppedReason) {
     errors.stats.deferred = candidates.length - errors.stats.attempted - errors.stats.structuredEvidence;
@@ -2465,15 +2493,18 @@ export async function enrichPreviews(candidates, options = {}) {
   return errors;
 }
 
-async function enrichRenderedPreviews(candidates) {
+export async function enrichRenderedPreviews(candidates, options = {}) {
   const errors = [];
-  if (!CONFIG.renderFetchEnabled) return errors;
+  const access = options.access || WEB_ACCESS;
+  if (!(options.enabled ?? CONFIG.renderFetchEnabled)) return errors;
+  const pause = access.pause();
+  if (pause) return [{ url: '', error: 'Rendered previews deferred by website cooldown', nextRetryAt: pause.nextRetryAt }];
   if (previewTransportBlocked) return [{ url: '', error: 'Rendered previews deferred after preview access/transport circuit' }];
   if (instagramRateLimitedDuringRun) {
     return [{ url: '', error: 'Instagram rendered previews skipped after HTTP 429' }];
   }
 
-  const browser = await chromium.launch({ headless: true });
+  const browser = await (options.browserType || chromium).launch({ headless: true });
   const context = await browser.newContext({
     viewport: { width: 1366, height: 900 },
     userAgent: USER_AGENT,
@@ -2481,29 +2512,41 @@ async function enrichRenderedPreviews(candidates) {
     timezoneId: 'Europe/Vienna',
   });
   await applyInstagramCookies(context, activeInstagramCookies());
-  await context.addInitScript(() => {
-    Object.defineProperty(navigator, 'webdriver', { get: () => undefined });
-  });
 
   let fetched = 0;
+  let failures = 0;
   try {
     for (const candidate of candidates) {
       if (fetched >= CONFIG.maxRenderFetches) break;
       if (hasStructuredPostEvidence(candidate)) continue;
       const page = await context.newPage();
+      fetched += 1;
       try {
         const rendered = await fetchRenderedInstagramPreview(page, candidate.url);
-        candidate.preview = {
-          ...(candidate.preview || {}),
-          ...rendered,
-          loginWall: rendered.loginWall && !rendered.description,
-        };
+        if ([401, 403, 429].includes(rendered.status) || rendered.loginWall) {
+          const blocked = access.failure('all', { status: rendered.status, retryAfter: rendered.retryAfter, reason: 'login-wall' });
+          errors.push({ url: candidate.url, error: rendered.loginWall ? 'Instagram login-wall' : `HTTP ${rendered.status}`, nextRetryAt: blocked.nextRetryAt });
+          break;
+        }
+        if (rendered.status >= 400 || !rendered.status) {
+          errors.push({ url: candidate.url, error: `HTTP ${rendered.status}` });
+          failures = rendered.status >= 500 || !rendered.status ? failures + 1 : 0;
+        } else {
+          failures = 0;
+          access.success();
+          candidate.preview = {
+            ...(candidate.preview || {}),
+            ...rendered,
+            loginWall: rendered.loginWall,
+          };
+        }
       } catch (error) {
+        failures++;
         errors.push({ url: candidate.url, error: error.message });
       } finally {
         await page.close();
       }
-      fetched += 1;
+      if (failures >= 3) { access.failure('all', { reason: 'transport-failures' }); break; }
       await sleep(250);
     }
   } finally {
@@ -2589,6 +2632,7 @@ async function main() {
     profileDiscovery: stats.profileDiscovery,
     previewErrors,
     previewFetch: previewErrors.stats,
+    webAccess: WEB_ACCESS.snapshot(),
     renderErrors,
     aiErrors: aiResult.errors,
     rejectionReasons: rejectionCounts(candidates),

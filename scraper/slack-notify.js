@@ -1,7 +1,7 @@
 import { officialFoodOfferKey } from './power-food-sources.js';
 import { polishOfferTitle } from './offer-title-utils.js';
 import { normalizeCategoryForScraper } from './category-utils.js';
-import { officialFamilyMealCampaignKey, semanticVenueCampaignKey } from './deal-evidence-utils.js';
+import { officialFamilyMealCampaignKey, semanticVenueCampaignKey, semanticVenueTimeGapKey } from './deal-evidence-utils.js';
 import { filterDiscoveryDeals, foodDiscoveryPriority } from './deal-discovery-policy.js';
 import { normalizeDealFacts, locationConflictReason, materialOfferConditions } from './deal-factual-guards.js';
 import { isCommunitySubmission } from './community-review-utils.js';
@@ -1330,6 +1330,8 @@ function buildDealDuplicateKeys(deal) {
   if (semanticOfferKey) keys.push(semanticOfferKey);
   const venueCampaign = semanticVenueCampaignKey(deal);
   if (venueCampaign) keys.push(venueCampaign);
+  const incompleteTimeKey = semanticVenueTimeGapKey(deal);
+  if (incompleteTimeKey) keys.push(incompleteTimeKey);
   const familyMealKey = officialFamilyMealCampaignKey(deal);
   if (familyMealKey) keys.push(familyMealKey);
   if (postKey && titleKey) {
@@ -1368,6 +1370,8 @@ function collectDealDuplicateKeys(deals, options = {}) {
   for (const deal of ensureArray(deals)) {
     if (requireSlackTs && !cleanText(deal.slackTs)) continue;
     for (const key of buildDealDuplicateKeys(deal)) keys.add(key);
+    const coveredTimeKey = semanticVenueTimeGapKey(deal, true);
+    if (coveredTimeKey) keys.add(coveredTimeKey);
   }
   return keys;
 }

@@ -177,12 +177,13 @@ export const POWER_FOOD_SOURCES = [
   },
   {
     name: "BackWerk",
-    url: "https://www.back-werk.at/de/home/",
+    url: "https://back-werk.at/de/aktuell",
     category: "essen",
     allowedHosts: ["www.back-werk.at", "back-werk.at"],
     // The archive also contains generic product news and non-Vienna openings.
-    linkPattern: /\/de\/news\/[^/?]*(?:aktion|angebot|rabatt|coupon|gutschein|snackbox|deal)/i,
-    providerPagePattern: /\/de\/news\/[^/?]*(?:aktion|angebot|rabatt|coupon|gutschein|snackbox|deal)/i,
+    linkPattern: /\/de\/aktuell\/[^/?]*(?:aktion|angebot|rabatt|coupon|gutschein|snackbox|deal)/i,
+    providerPagePattern: /\/de\/aktuell\/[^/?]*(?:aktion|angebot|rabatt|coupon|gutschein|snackbox|deal)/i,
+    singleOfferPattern: /\/de\/aktuell\/[^/?]*(?:aktion|angebot|rabatt|coupon|gutschein|snackbox|deal)/i,
   },
   {
     name: "Shibuya",

@@ -13,6 +13,7 @@ on:
       - '.github/workflows/apify-discovery.yml'
       - 'scripts/test-slack-food-improvements.mjs'
       - 'scripts/test-food-quality-oct30.mjs'
+      - 'scripts/test-source-access-oct30.mjs'
       - 'scripts/test-tiktok-deal-scanner.mjs'
       - 'scripts/test-review-clarity.mjs'
       - 'scripts/test-instagram-media-budget.mjs'
@@ -31,6 +32,7 @@ on:
       - '.github/workflows/daily-digest.yml'
   pull_request:
     paths:
+      - 'scripts/test-source-access-oct30.mjs'
       - 'scripts/test-food-quality-oct30.mjs'
       - 'scripts/test-tiktok-deal-scanner.mjs'
       - 'scripts/test-review-clarity.mjs'
@@ -87,6 +89,7 @@ jobs:
           SENTRY_DISABLED=1 node --test scripts/test-community-card-enrichment.mjs
           node scripts/test-slack-food-improvements.mjs
           node --test scripts/test-food-quality-oct30.mjs
+          node --test scripts/test-source-access-oct30.mjs
           node scripts/test-tiktok-deal-scanner.mjs
           node scripts/test-review-clarity.mjs
           node scripts/test-deal-evidence.mjs

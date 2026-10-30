@@ -1,0 +1,59 @@
+{
+  "reviewedAt": "2026-10-30T10:58:18Z",
+  "scope": "Website access failures, BackWerk migration and actual Slack food yield",
+  "changes": [
+    "Persist Instagram website cooldowns separately from official Graph access. Honor Retry-After across profile, HTTP preview and rendered preview transports.",
+    "Preserve actual renderer HTTP status. Stop on 401/403/429 and login walls; bound consecutive transport failures. Remove locale/anonymous profile retries and webdriver hiding.",
+    "Use the verified Austrian BackWerk /de/aktuell route without www and follow only offer-related detail URLs.",
+    "Recognize named-month food offer expiry with explicit years preserved and conservative current-year inference. Reject the old BackWerk May Snackbox rather than counting an accessible page as a good deal.",
+    "Suppress a less complete, time-unspecified repost when the same dated venue campaign already reached Slack. Keep differing explicit times, branches, prices, merchants and conditions separate.",
+    "Avoid copying an arbitrary promotional sentence prefix into the Instagram location field. Original address evidence remains in the description."
+  ],
+  "liveEvidence": {
+    "backwerk": {
+      "oldWwwRoot": 404,
+      "newListing": "https://back-werk.at/de/aktuell",
+      "newListingStatus": 200,
+      "detail": "https://back-werk.at/de/aktuell/es-ist-snackbox-zeit-id2618",
+      "detailStatus": 200,
+      "boundedCrawlerPages": 2,
+      "crawlerStatus": "ok",
+      "acceptedDeals": 0,
+      "rejection": "offer-expired",
+      "sourceEndText": "Bis zum 04. Mai",
+      "note": "Local direct crawl, not proof of GitHub transport or merchant redemption. No Austrian current Snackbox claim."
+    },
+    "spar": { "url": "https://www.spar.at/aktionen/", "httpStatus": 403, "pageTitle": "Just a moment...", "action": "Challenge not bypassed; existing source cooldown retained" },
+    "tooGoodToGo": { "existingRetryAt": "2026-11-04T11:28:53.892Z", "action": "No new request while existing 429 cooldown is active" },
+    "slack": {
+      "channel": "C0AF8TXN2KW",
+      "lastReadAt": "2026-10-30T10:52:57Z",
+      "latestParent": "1793356385.885639",
+      "latestReply": "1793356386.015899",
+      "candidate": "instagram-ai-392d3a5ff097",
+      "campaign": "Rhulo, Cigkofte wrap/roll for EUR1, 30 October 2026, Heinestrasse32,1020Wien",
+      "alreadyDelivered": ["social-food-review-1m7ch4y", "meta-ig-18144135919610477"],
+      "actualQueueOfflineReplay": "Duplicate suppressed; old cards unchanged",
+      "result": "One new card after the preceding release, but not a new campaign. No further channel messages on recheck. No demonstrated increase in unique good food deals or manual approvals."
+    },
+    "latestScheduledMeta": {
+      "runId": 41042279394,
+      "runConclusion": "success",
+      "reportAt": "2026-10-30T10:40:51.488Z",
+      "sourceStatus": "degraded",
+      "freshPostsFetched": 145,
+      "newDeals": 0,
+      "repeatedDeals": 127,
+      "note": "Repeated count includes retained corpus, not 127 new offers. One account-specific Invalid user id for rhea_mat; no global token outage evidenced. AI pacing window full, 24 of 144 daily slots remain. Limits not raised."
+    }
+  },
+  "tests": { "graphAndPowerCommands": 48, "failed": 0, "focusedTests": 24, "focusedFailed": 0, "newAccessRegressionTests": 12, "actualRhuloQueueReplay": "pass", "diffCheck": "pass" },
+  "preservation": {
+    "publicFeedAndHistoricalQueue": "Deep-equal to worktree base before commit",
+    "wolt": "g2-3dn8v3 unchanged including expiry",
+    "manualSlackOrCustomerSends": 0,
+    "manualPaidProviderOrModelRuns": 0,
+    "budgetsSchedulesConsentsNativeWorkerAndStores": "unchanged",
+    "caveat": "Existing scheduled jobs continue. Publishing instagram-ai-agent.js triggers its existing GitHub push workflow, which may use its existing model budget."
+  }
+}
