@@ -1,12 +1,18 @@
 {
-  "generatedAt": "2026-10-30T22:46:59.070Z",
+  "generatedAt": "2026-10-30T22:58:20.688Z",
   "summary": {
     "filesConsidered": 32,
     "totalCandidates": 837,
-    "uniqueCandidates": 779,
-    "distinctCandidates": 806,
-    "duplicateClusters": 27,
+    "uniqueCandidates": 786,
+    "distinctCandidates": 809,
+    "duplicateClusters": 23,
     "topHealthySources": [
+      {
+        "sourceKey": "instagram-ai",
+        "sourceLabel": "Instagram AI Agent",
+        "healthScore": 77,
+        "totalDeals": 49
+      },
       {
         "sourceKey": "member-benefits",
         "sourceLabel": "Member Benefits",
@@ -30,12 +36,6 @@
         "sourceLabel": "Firecrawl Key 5 - Instagram Gastro",
         "healthScore": 71,
         "totalDeals": 3
-      },
-      {
-        "sourceKey": "instagram-ai",
-        "sourceLabel": "Instagram AI Agent",
-        "healthScore": 70,
-        "totalDeals": 49
       }
     ],
     "topMissionSources": [
@@ -52,6 +52,12 @@
         "totalDeals": 3
       },
       {
+        "sourceKey": "instagram-ai",
+        "sourceLabel": "Instagram AI Agent",
+        "missionFitScore": 74,
+        "totalDeals": 49
+      },
+      {
         "sourceKey": "food3",
         "sourceLabel": "Firecrawl Key 2 - Food",
         "missionFitScore": 71,
@@ -62,12 +68,6 @@
         "sourceLabel": "Member Benefits",
         "missionFitScore": 68,
         "totalDeals": 110
-      },
-      {
-        "sourceKey": "instagram-ai",
-        "sourceLabel": "Instagram AI Agent",
-        "missionFitScore": 66,
-        "totalDeals": 49
       }
     ],
     "topCoverageSources": [
@@ -81,9 +81,9 @@
       {
         "sourceKey": "meta-instagram",
         "sourceLabel": "Meta Instagram Graph",
-        "coverageScore": 77,
+        "coverageScore": 76,
         "totalDeals": 129,
-        "fresh1dCount": 17
+        "fresh1dCount": 16
       },
       {
         "sourceKey": "gastro2",
@@ -100,11 +100,11 @@
         "fresh1dCount": 1
       },
       {
-        "sourceKey": "gutscheine",
-        "sourceLabel": "Gutscheine.at",
-        "coverageScore": 40,
-        "totalDeals": 36,
-        "fresh1dCount": 36
+        "sourceKey": "instagram-ai",
+        "sourceLabel": "Instagram AI Agent",
+        "coverageScore": 41,
+        "totalDeals": 49,
+        "fresh1dCount": 11
       }
     ],
     "topPrecisionSources": [
@@ -117,7 +117,7 @@
       {
         "sourceKey": "instagram-ai",
         "sourceLabel": "Instagram AI Agent",
-        "precisionScore": 76,
+        "precisionScore": 82,
         "totalDeals": 49
       },
       {
@@ -147,9 +147,15 @@
         "totalDeals": 110
       },
       {
+        "sourceKey": "instagram-ai",
+        "sourceLabel": "Instagram AI Agent",
+        "sourceWeightScore": 70,
+        "totalDeals": 49
+      },
+      {
         "sourceKey": "meta-instagram",
         "sourceLabel": "Meta Instagram Graph",
-        "sourceWeightScore": 69,
+        "sourceWeightScore": 68,
         "totalDeals": 129
       },
       {
@@ -163,12 +169,6 @@
         "sourceLabel": "Firecrawl Key 5 - Instagram Gastro",
         "sourceWeightScore": 64,
         "totalDeals": 3
-      },
-      {
-        "sourceKey": "instagram-ai",
-        "sourceLabel": "Instagram AI Agent",
-        "sourceWeightScore": 63,
-        "totalDeals": 49
       }
     ],
     "topSourcesToFix": [
@@ -238,6 +238,78 @@
     }
   },
   "sources": [
+    {
+      "sourceKey": "instagram-ai",
+      "file": "deals-pending-instagram-ai.json",
+      "sourceLabel": "Instagram AI Agent",
+      "totalDeals": 49,
+      "uniqueDeals": 36,
+      "duplicateDeals": 13,
+      "duplicateAcrossSources": 10,
+      "fresh1dCount": 11,
+      "fresh7dCount": 49,
+      "viennaCount": 48,
+      "foodDrinkCount": 47,
+      "promoCount": 32,
+      "missingUrlCount": 0,
+      "sampleTitles": [
+        "Gratis Döner am Halloween Grand Opening mit Instagram-Story",
+        "Halloween 1+1 Baby Sushi Push Pop",
+        "Gratis Döner am Halloween-Grand-Opening"
+      ],
+      "lastRun": null,
+      "uniqueRate": 0.7,
+      "duplicateRate": 0.2,
+      "fresh1dRate": 0.2,
+      "fresh7dRate": 1,
+      "viennaRate": 1,
+      "foodDrinkRate": 1,
+      "promoRate": 0.7,
+      "missingUrlRate": 0,
+      "averageQualityScore": 86.2,
+      "topCategories": [
+        {
+          "value": "essen",
+          "count": 36
+        },
+        {
+          "value": "kaffee",
+          "count": 9
+        },
+        {
+          "value": "supermarkt",
+          "count": 2
+        },
+        {
+          "value": "shopping",
+          "count": 1
+        },
+        {
+          "value": "technik",
+          "count": 1
+        }
+      ],
+      "topTypes": [
+        {
+          "value": "gratis",
+          "count": 25
+        },
+        {
+          "value": "rabatt",
+          "count": 22
+        },
+        {
+          "value": "bogo",
+          "count": 2
+        }
+      ],
+      "issues": [],
+      "healthScore": 77,
+      "missionFitScore": 74,
+      "coverageScore": 41,
+      "precisionScore": 82,
+      "sourceWeightScore": 70
+    },
     {
       "sourceKey": "member-benefits",
       "file": "deals-pending-member-benefits.json",
@@ -383,10 +455,10 @@
       "file": "deals-pending-meta-instagram.json",
       "sourceLabel": "Meta Instagram Graph",
       "totalDeals": 129,
-      "uniqueDeals": 99,
-      "duplicateDeals": 30,
+      "uniqueDeals": 101,
+      "duplicateDeals": 28,
       "duplicateAcrossSources": 12,
-      "fresh1dCount": 17,
+      "fresh1dCount": 16,
       "fresh7dCount": 127,
       "viennaCount": 129,
       "foodDrinkCount": 88,
@@ -460,9 +532,9 @@
       ],
       "healthScore": 71,
       "missionFitScore": 59,
-      "coverageScore": 77,
+      "coverageScore": 76,
       "precisionScore": 72,
-      "sourceWeightScore": 69
+      "sourceWeightScore": 68
     },
     {
       "sourceKey": "firecrawl5",
@@ -532,88 +604,6 @@
       "coverageScore": 16,
       "precisionScore": 82,
       "sourceWeightScore": 64
-    },
-    {
-      "sourceKey": "instagram-ai",
-      "file": "deals-pending-instagram-ai.json",
-      "sourceLabel": "Instagram AI Agent",
-      "totalDeals": 49,
-      "uniqueDeals": 31,
-      "duplicateDeals": 18,
-      "duplicateAcrossSources": 11,
-      "fresh1dCount": 6,
-      "fresh7dCount": 48,
-      "viennaCount": 48,
-      "foodDrinkCount": 45,
-      "promoCount": 30,
-      "missingUrlCount": 0,
-      "sampleTitles": [
-        "Gratis Döner am Halloween Grand Opening",
-        "Çiğköfte-Wrap für 1 € am 30. Oktober 2026",
-        "Halloween 1+1 Baby Sushi Push Pop"
-      ],
-      "lastRun": null,
-      "uniqueRate": 0.6,
-      "duplicateRate": 0.2,
-      "fresh1dRate": 0.1,
-      "fresh7dRate": 1,
-      "viennaRate": 1,
-      "foodDrinkRate": 0.9,
-      "promoRate": 0.6,
-      "missingUrlRate": 0,
-      "averageQualityScore": 88.1,
-      "topCategories": [
-        {
-          "value": "essen",
-          "count": 38
-        },
-        {
-          "value": "kaffee",
-          "count": 5
-        },
-        {
-          "value": "supermarkt",
-          "count": 2
-        },
-        {
-          "value": "beauty",
-          "count": 1
-        },
-        {
-          "value": "fitness",
-          "count": 1
-        },
-        {
-          "value": "shopping",
-          "count": 1
-        }
-      ],
-      "topTypes": [
-        {
-          "value": "gratis",
-          "count": 24
-        },
-        {
-          "value": "rabatt",
-          "count": 22
-        },
-        {
-          "value": "bogo",
-          "count": 2
-        },
-        {
-          "value": "gewinnspiel",
-          "count": 1
-        }
-      ],
-      "issues": [
-        "wenige Deals sind frischer als 1 Tag"
-      ],
-      "healthScore": 70,
-      "missionFitScore": 66,
-      "coverageScore": 36,
-      "precisionScore": 76,
-      "sourceWeightScore": 63
     },
     {
       "sourceKey": "instagram-apify",
