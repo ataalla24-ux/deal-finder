@@ -1,0 +1,56 @@
+{
+  "date": "2026-10-30",
+  "scope": "Optimize active Instagram Graph account and hashtag selection for Vienna food and non-alcoholic drinks",
+  "base": "b20823062",
+  "accountPolicy": {
+    "before": 1901,
+    "retained": 1485,
+    "heldFromActivePolling": 416,
+    "directoryBefore": 1389,
+    "directoryAfter": 1389,
+    "publishedFoodOwnersLost": 0,
+    "description": "Offline snapshot at base revision, not a count of working accounts or new deals. Require reviewed food identity, Vienna food directory evidence, food scout/platform identity, genuine consumer food evidence or an existing approved Vienna food source. An inherited food category alone is insufficient.",
+    "knownExcluded": {
+      "flugninja.at": "flight compensation",
+      "welovehandmade.at": "craft workshops",
+      "howmuch.live": "price-directory software",
+      "rhea_mat": "B2B coffee equipment",
+      "holzhandwerk.wien": "woodworking",
+      "klanglichtimpark.at": "non-food event",
+      "shop.klanglichtimpark.at": "non-food event ticket shop",
+      "apotheke.at": "pharmacy",
+      "juwel.wien": "jewellery",
+      "market.island_uae": "foreign venue, previously mistaken for Vienna"
+    },
+    "retainedExamples": ["rhulo1020", "onlynoodle_", "boca.vienna", "haikky.wien", "marin_kaffee", "dimsumbabe_at", "dieseeteufel", "wolt.oesterreich"],
+    "recovery": "Unproven sources remain in historical data and may qualify later through actual food evidence. Known irrelevant source exclusions override stale labels. New reports list excluded accounts and reasons."
+  },
+  "hashtags": {
+    "main": ["viennafood", "wienessen", "viennaeats", "viennarestaurants", "wienfood", "wienisst", "wienfoodie", "wienkaffee", "wiengastro", "wienergastro", "essenwien", "wienstreetfood", "gratiswien", "gratisinwien", "wiengratis", "neueröffnungwien", "wienangebot", "wien"],
+    "combined": ["wienfood", "viennafood", "wienisst", "viennarestaurants", "wienkaffee", "wienfoodie", "wienergastro", "essenwien", "viennaeats"],
+    "oldUnionCount": 31,
+    "newUnionCount": 18,
+    "newPreviouslyUnqueriedHashtags": 0,
+    "removed": ["wienaktion", "wienrabatt", "wiengutschein", "wienangebote", "viennadeals", "wienerdeals", "happyhourvienna", "vienna", "wienevents", "wientipps", "wienfamilie", "sommerinwien", "viennaevents"],
+    "rotation": "Up to six dedicated food tags plus at most two broader discovery tags per existing eight-tag run; unused discovery capacity can return to food tags. Existing due intervals, feedback and source cooldowns still apply. Combined uses only dedicated food tags."
+  },
+  "preserved": {
+    "wolt": "No edits to g2-3dn8v3 or its expiry; existing Wolt account retained",
+    "publicFeedHistoricalSlackAndApprovals": "unchanged",
+    "metaAndOpenAiBudgets": "unchanged",
+    "crons": "unchanged",
+    "accessAndRateCooldowns": "unchanged",
+    "qualityGates": "unchanged",
+    "firecrawlFilesNativeStoresWorkerAndNotifications": "unchanged",
+    "manualSlackOrCustomerMessages": 0,
+    "manualProviderOrModelRuns": 0
+  },
+  "tests": {
+    "offlineGraphAndPowerCommands": 49,
+    "failed": 0,
+    "newSourcePolicyTests": 7,
+    "newSourcePolicyFailures": 0,
+    "testsCover": ["shared evergreen pool and stale variable overrides", "Combined removes broad/seasonal tags before requests", "food slots resist misleading historical event yields", "unrelated sources with false food labels never reach Graph", "real merchants, scouts and groceries survive", "approved Vienna food sources preserved with live records unchanged", "full fake Graph collector checks requests and report exclusions"]
+  },
+  "deployment": "Update only META_INSTAGRAM_HASHTAGS and WIEN_COMBINED_GRAPH_HASHTAGS to the reviewed lists after main push, read back and verify source CI. New scheduled food yield and Slack delivery remain unproven until observed."
+}

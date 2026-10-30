@@ -9,6 +9,7 @@ import { fileURLToPath } from 'node:url';
 
 import { canonicalInstagramPostKey } from './deal-evidence-utils.js';
 import { isFoodDrinkSource } from './food-discovery-utils.js';
+import { COMBINED_FOOD_HASHTAGS, foodGraphHashtags, isDedicatedFoodHashtag } from './instagram-food-source-policy.js';
 import {
   buildConfig,
   normalizeGraphMediaItem,
@@ -52,18 +53,7 @@ const RESCUABLE_REJECTIONS = new Set([
   'no-concrete-offer',
   'missing-vienna-evidence',
 ]);
-const DEFAULT_HASHTAGS = [
-  'wien',
-  'wienfood',
-  'viennafood',
-  'wienisst',
-  'viennarestaurants',
-  'wienkaffee',
-  'wienfoodie',
-  'wienergastro',
-  'essenwien',
-  'viennaeats',
-];
+const DEFAULT_HASHTAGS = COMBINED_FOOD_HASHTAGS;
 
 function cleanText(value, maxLength = 1200) {
   return String(value || '').replace(/\s+/g, ' ').trim().slice(0, maxLength);
@@ -235,9 +225,12 @@ export async function runWienDealsCombined(options = {}) {
   const accessToken = cleanText(env.INSTAGRAM_ACCESS_TOKEN || env.INSTAGRAM_GRAPH_ACCESS_TOKEN, 1000);
   const userId = cleanText(env.INSTAGRAM_USER_ID || env.INSTAGRAM_GRAPH_USER_ID, 120);
   const graphVersion = cleanText(env.META_GRAPH_VERSION || 'v26.0', 20);
-  // This is intentionally a separate discovery surface from the high-intent
-  // hashtag pool used by the main Meta collector.
+  // Use a food-only subset of the main collector's reviewed hashtag pool.
   let hashtags = parseHashtags(env.WIEN_COMBINED_GRAPH_HASHTAGS);
+  if (env.META_INSTAGRAM_FOOD_SOURCES_ONLY === '1') {
+    hashtags = foodGraphHashtags(hashtags, COMBINED_FOOD_HASHTAGS).filter(isDedicatedFoodHashtag);
+    if (!hashtags.length) hashtags = [...COMBINED_FOOD_HASHTAGS];
+  }
   const maxMediaPerHashtag = Math.max(5, Math.min(50, Number(env.WIEN_COMBINED_MEDIA_PER_HASHTAG || 30)));
   const maxDeals = Math.max(1, Math.min(80, Number(env.WIEN_COMBINED_MAX_DEALS || 40)));
   const timeoutMs = Math.max(3000, Number(env.WIEN_COMBINED_GRAPH_TIMEOUT_MS || 12000));

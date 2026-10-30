@@ -1,5 +1,8 @@
 import { isFoodDrinkSource } from './food-discovery-utils.js';
 import { inferInstagramAccountRole } from './instagram-entity-resolution.js';
+import { isDedicatedFoodHashtag } from './instagram-food-source-policy.js';
+
+const isFoodAccount = account => account.foodDiscoveryEligible === true || isFoodDrinkSource(account);
 
 const HOUR = 3600000;
 const time = (value) => Number.isFinite(Date.parse(value)) ? Date.parse(value) : 0;
@@ -12,7 +15,7 @@ export function accountRescanHours(account, stats = {}, now = new Date()) {
   const scout = ['creator', 'discovery', 'platform'].includes(inferInstagramAccountRole(account));
   const feedback = manual(account, scout);
   const opening = time(account.nextOpeningAt);
-  if (isFoodDrinkSource(account) && opening >= +now - 24 * HOUR && opening <= +now + 7 * 24 * HOUR) return 1;
+  if (isFoodAccount(account) && opening >= +now - 24 * HOUR && opening <= +now + 7 * 24 * HOUR) return 1;
   if (feedback.rejected >= 3 && feedback.approved === 0) return 7 * 24;
   if (feedback.approved >= 3) return scout ? 6 : Number(stats.recentNewAccepted || 0) > 0.1 ? 2 : 4;
   if (feedback.approved > 0) return scout ? 12 : 6;
@@ -56,7 +59,7 @@ export function selectCoverageAccounts(accounts, config, state = {}, now = new D
   const last = (account) => time(stats(account).lastRunAt);
   const due = accounts.filter((account) => !last(account) || +now - last(account) >= accountRescanHours(account, stats(account), now) * HOUR);
   const first = (account) => !last(account);
-  const food = due.filter(isFoodDrinkSource);
+  const food = due.filter(isFoodAccount);
   const foodReservation = Math.ceil(limit * Math.max(0, Math.min(1, Number(config.foodAccountShare ?? 0.9))));
   const foodTarget = Math.min(food.length, foodReservation);
   const otherLimit = Math.max(0, Math.min(limit - foodReservation, config.maxNonFoodAccounts ?? limit));
@@ -91,7 +94,7 @@ export function selectCoverageAccounts(accounts, config, state = {}, now = new D
   // sources. Source cooldowns and shared API limits remain authoritative.
   let otherCount = 0;
   for (const account of due.filter((item) => !seen.has(item.username)).sort(oldest)) {
-    if (isFoodDrinkSource(account)) add(account, 'food-rotation');
+    if (isFoodAccount(account)) add(account, 'food-rotation');
     else if (otherCount < otherLimit) { add(account, 'other-rotation'); otherCount += 1; }
   }
   return selected;
@@ -116,7 +119,7 @@ export function selectCoverageHashtags(hashtags, config, state = {}, now = new D
     const yes = reviewed?.approved.size || 0, no = reviewed?.rejected.size || 0;
     const learned = ((yes + 2) / (yes + no + 4) - 0.5) * ((yes + no) / (yes + no + 5)) * 60;
     return learned + yieldRate * Math.min(1, sample / 25) * 100
-      + (isFoodDrinkSource(tag) ? 8 : 0) + (/gratis|aktion|rabatt|gutschein|angebot|deal|happyhour|er[o\u00f6]ffnung/i.test(tag) ? 5 : 0);
+      + (isDedicatedFoodHashtag(tag) || isFoodDrinkSource(tag) ? 8 : 0) + (/gratis|aktion|rabatt|gutschein|angebot|deal|happyhour|er[o\u00f6]ffnung/i.test(tag) ? 5 : 0);
   };
   const due = [...new Set(hashtags)].filter((tag) => {
     const stats = performance[tag] || {};
@@ -131,6 +134,14 @@ export function selectCoverageHashtags(hashtags, config, state = {}, now = new D
     if (broad.has(tag) && selected.some((item) => broad.has(item))) return;
     selected.push(tag);
   };
+  if (config.foodSourcesOnly) {
+    const foods = ranked.filter(isDedicatedFoodHashtag);
+    for (const tag of foods.slice(0, Math.min(6, limit))) add(tag);
+    // At most two discovery searches, even if old non-food hits score higher.
+    for (const tag of ranked.filter(tag => !isDedicatedFoodHashtag(tag)).slice(0, Math.min(2, Math.max(0, limit - selected.length)))) add(tag);
+    for (const tag of foods) if (!selected.includes(tag) && selected.length < limit) add(tag);
+    return selected;
+  }
   for (const tag of ranked) {
     if (selected.length >= Math.max(0, limit - 2)) break;
     add(tag);

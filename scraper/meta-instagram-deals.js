@@ -2,6 +2,7 @@ import { sharedInstagramFetch } from './instagram-shared-quota.js';
 import { scanAdLibraryCoverage, hasFreshActiveAdEvidence, isAdPayloadTooLarge, smallerAdPageSize } from './meta-ad-library-coverage.js';
 import { selectDiscoveryAccounts } from './vienna-merchant-discovery.js';
 import { selectCoverageAccounts, selectCoverageHashtags, accountCoverageSummary } from './instagram-source-scheduler.js';
+import { FOOD_GRAPH_HASHTAGS, foodGraphHashtags, hasConsumerFoodOffer, selectInstagramFoodAccounts } from './instagram-food-source-policy.js';
 import '../sentry/instrument.mjs';
 
 import { createGraphRequestBudget, createGraphScanStore, scanGraphSource, scanGraphPages, graphCursor } from './instagram-graph-scan.js';
@@ -19,6 +20,8 @@ import { inferPreferredBrand } from './deal-normalization-utils.js';
 import {
   canonicalInstagramPostKey,
   getPublicationEvidence,
+  getViennaEvidence,
+  extractStructuredOwnerUsername,
 } from './deal-evidence-utils.js';
 import { parseExpiryShape } from './expiry-utils.js';
 import {
@@ -104,36 +107,7 @@ const DEFAULT_AD_SEARCH_TERMS = [
   'gratis Döner', 'gratis Kebab', 'gratis Kebap', 'gratis Kaffee', 'gratis Essen',
   'Kebab 1 Euro', 'Döner 1 Euro', 'Pizza 1+1', 'Kaffee aufs Haus',
 ];
-const DEFAULT_HASHTAGS = [
-  'gratiswien',
-  'gratisinwien',
-  'wiengastro',
-  'wienessen',
-  'wienkaffee',
-  'wienstreetfood',
-  'wienaktion',
-  'wienrabatt',
-  'wiengutschein',
-  'neueröffnungwien',
-  'wienangebote',
-  'wienangebot',
-  'wiengratis',
-  'viennadeals',
-  'wienerdeals',
-  'happyhourvienna',
-  'wien',
-  'vienna',
-  'viennafood',
-  'wienevents',
-  'wientipps',
-  'wienfamilie',
-  'sommerinwien',
-  'wienergastro',
-  'essenwien',
-  'viennaeats',
-  'viennaevents',
-  'viennarestaurants',
-];
+const DEFAULT_HASHTAGS = FOOD_GRAPH_HASHTAGS;
 
 const CONCRETE_FREE_PATTERN = /(?<!gluten[- ])(?<!sugar[- ])(?<!lactose[- ])(?<!dairy[- ])(?<!alcohol[- ])(?<!caffeine[- ])(?<!cruelty[- ])(?<!plastic[- ])(?<!smoke[- ])(?<!tax[- ])(?<!risk[- ])(?<!fat[- ])(?<!nut[- ])(?<!gmo[- ])\bfree\b/i;
 const FREE_ENTRY_PATTERN = /\b(?:free\s+entry|entry\s+(?:is\s+)?free|gratis(?:er)?\s+eintritt|eintritt\s+(?:frei|gratis|kostenlos)|kostenlos(?:er)?\s+eintritt)\b/i;
@@ -300,7 +274,10 @@ export function buildConfig(env = process.env, now = new Date()) {
     instagramAccessToken: cleanText(env.INSTAGRAM_ACCESS_TOKEN || env.META_INSTAGRAM_ACCESS_TOKEN || '', 700),
     instagramUserId: cleanText(env.INSTAGRAM_USER_ID || env.IG_USER_ID || '', 100),
     adSearchTerms,
-    hashtags: parseList(env.META_INSTAGRAM_HASHTAGS, DEFAULT_HASHTAGS)
+    foodSourcesOnly: booleanEnv(env, 'META_INSTAGRAM_FOOD_SOURCES_ONLY', false),
+    hashtags: (booleanEnv(env, 'META_INSTAGRAM_FOOD_SOURCES_ONLY', false)
+      ? foodGraphHashtags(env.META_INSTAGRAM_HASHTAGS)
+      : parseList(env.META_INSTAGRAM_HASHTAGS, DEFAULT_HASHTAGS))
       .map((item) => item.replace(/^#/, '').toLowerCase())
       .filter((item) => /^[a-z0-9_.äöüß]+$/i.test(item))
       .slice(0, 30),
@@ -479,6 +456,9 @@ export function loadAccountCatalog(config, paths = {}, state = {}) {
       existing.merchants = merchantDetails(raw.merchants);
     }
     existing.priority = Math.max(existing.priority, Number(raw?.priority || raw?.priorityScore || 0));
+    existing.name ||= cleanText(raw?.name, 160);
+    existing.consumerFoodOfferEvidence = existing.consumerFoodOfferEvidence === true || raw?.consumerFoodOfferEvidence === true;
+    existing.foodOfferSamples = [...new Set([...(existing.foodOfferSamples || []), ...(raw?.sampleTitles || [])])].slice(0, 12);
     const sourceCategory = raw?.category || (origin === 'registry' ? raw?.topCategories?.[0]?.value : '') || '';
     if (sourceCategory) {
       const ownSource = origin === 'watchlist' || origin === 'registry' || origin === 'vienna-directory' || origin.startsWith('candidate:');
@@ -543,6 +523,7 @@ export function loadAccountCatalog(config, paths = {}, state = {}) {
       const publication = getPublicationEvidence(deal);
       if (username && hasInstagramCandidateEvidence(deal)) add({
         username,
+        name: deal.brand,
         priority: 104,
         category: deal?.category || '',
         accountType: deal?.sourceAccountType
@@ -550,6 +531,9 @@ export function loadAccountCatalog(config, paths = {}, state = {}) {
           || (normalizeInstagramUsername(deal?.merchantUsername) === username ? 'merchant' : ''),
         nextOpeningAt: /(?:eröffnung|eroeffnung|opening)/i.test(`${deal.title || ''} ${deal.description || ''}`) && ['content-date', 'text', 'deal.structured'].includes(deal.expirySource || deal.expiresSource) ? (deal.validFrom || deal.validOn || '') : '',
         sourcePublishedAt: publication.sourcePublishedAt,
+        consumerFoodOfferEvidence: (getViennaEvidence(deal).hasViennaEvidence || hasViennaText(textWithoutHashtags(deal.description || '')))
+          && !locationConflictReason(deal)
+          && hasConsumerFoodOffer([deal.title, deal.description].filter(Boolean).join(' ')),
       }, `candidate:${path.basename(candidatePath)}`);
 
       for (const mentionedUsername of extractMentionedUsernames(deal)) {
@@ -565,6 +549,18 @@ export function loadAccountCatalog(config, paths = {}, state = {}) {
     }
   }
   for (const username of config.explicitAccounts) add({ username, priority: 110 }, 'env');
+
+  const publishedPath = paths.publishedPath || (!paths.watchlistPath && !paths.registryPath ? path.join(DOCS_DIR, 'deals.json') : '');
+  const published = publishedPath ? readJson(publishedPath, {}) : {};
+  for (const deal of Array.isArray(published) ? published : (published.deals || [])) {
+    const owner = extractStructuredOwnerUsername(deal);
+    const existing = byUsername.get(owner);
+    if (existing && deal.approvedAt && ['essen', 'kaffee', 'trinken'].includes(deal.category)
+        && getViennaEvidence(deal).hasViennaEvidence && !discoveryRejection(deal)) {
+      existing.approvedFoodSource = true;
+      existing.name ||= cleanText(deal.brand, 160);
+    }
+  }
 
   return [...byUsername.values()].sort((a, b) => b.priority - a.priority || a.username.localeCompare(b.username));
 }
@@ -2153,10 +2149,12 @@ export async function runMetaInstagramCollector(options = {}) {
   const lastGoodPayload = previousPayload && Array.isArray(previousPayload.deals)
     ? previousPayload
     : null;
-  const accountCatalog = loadAccountCatalog(config, options.paths || {}, {
+  const loadedAccounts = loadAccountCatalog(config, options.paths || {}, {
     ...state,
     discoveredAccounts: previousDiscoveredAccounts,
   });
+  const sourceSelection = config.foodSourcesOnly ? selectInstagramFoodAccounts(loadedAccounts) : { accounts: loadedAccounts, excluded: [] };
+  const accountCatalog = sourceSelection.accounts;
   config.accountRoleIndex = buildInstagramRoleIndex(accountCatalog);
   const configured = {
     adLibrary: Boolean(config.adLibraryToken),
@@ -2169,6 +2167,8 @@ export async function runMetaInstagramCollector(options = {}) {
     status: 'running',
     configured,
     accountCatalogSize: accountCatalog.length,
+    accountSourceSelection: { foodOnly: config.foodSourcesOnly, catalogBeforeFilter: loadedAccounts.length,
+      retained: accountCatalog.length, excluded: sourceSelection.excluded },
     selectedAccounts: [],
     selectedHashtags: [],
     discoveryBudget: {
@@ -2308,7 +2308,7 @@ export async function runMetaInstagramCollector(options = {}) {
     report.selectedAccounts = result.selectedAccounts.map((account) => ({
       username: account.username,
       category: account.category,
-      foodFocused: isFoodDrinkSource(account),
+      foodFocused: account.foodDiscoveryEligible === true || isFoodDrinkSource(account),
       priority: account.priority,
       verifiedVienna: account.verifiedVienna,
       approvedDeals: Number(account.approvedDeals || 0),
