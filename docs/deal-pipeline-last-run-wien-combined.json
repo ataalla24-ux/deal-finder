@@ -1,26 +1,436 @@
 {
   "schemaVersion": 1,
-  "runId": "wien-combined-2026-10-29T22:56:46.744Z",
+  "runId": "wien-combined-2026-10-30T06:22:59.802Z",
   "sourceKey": "wien-combined",
   "sourceLabel": "Wien Deals Combined",
-  "status": "failed",
-  "startedAt": "2026-10-29T22:56:45.381Z",
-  "finishedAt": "2026-10-29T22:56:46.744Z",
-  "durationMs": 1363,
+  "status": "completed-with-errors",
+  "startedAt": "2026-10-30T06:21:14.440Z",
+  "finishedAt": "2026-10-30T06:22:59.802Z",
+  "durationMs": 105362,
   "outputFile": "docs/deals-pending-wien-combined.json",
   "counts": {
-    "rawCandidates": 0,
-    "normalizedCandidates": 0,
-    "verifiedCandidates": 0,
+    "rawCandidates": 40,
+    "normalizedCandidates": 3,
+    "verifiedCandidates": 3,
     "previousDeals": 0,
-    "acceptedDeals": 0,
-    "rejectedDeals": 0
+    "acceptedDeals": 3,
+    "rejectedDeals": 33
   },
-  "rejectedByReason": {},
-  "rejectedSamples": [],
-  "diagnostics": {},
-  "constraints": {},
+  "rejectedByReason": {
+    "no-concrete-offer": 24,
+    "alcohol-offer": 3,
+    "general-recommendation": 5,
+    "missing-text": 1
+  },
+  "rejectedSamples": [
+    {
+      "reason": "no-concrete-offer",
+      "deal": {
+        "id": "18128406895869277",
+        "title": "Cordon Bleu Menü in Wien mit Pommes & Getränk 🔥 € 16,50 · Lieferung € 17,50 📍 Hernalser Hauptstraße 149, 1170 Wien · 📞 01 489 06 95 website: wienerschnitzelplaza.at #CordonBleu",
+        "brand": "",
+        "url": "https://www.instagram.com/p/DfFdOb6ipzh/",
+        "source": "#essenwien",
+        "pubDate": "2026-10-29T16:39:31+0000",
+        "expires": "",
+        "postVerificationStatus": ""
+      }
+    },
+    {
+      "reason": "alcohol-offer",
+      "deal": {
+        "id": "18341090770258559",
+        "title": "Pljeskavica, frisch vom Grill. 🔥 Erst zischt sie am Grill, dann kommt sie auf eine Schicht Sauce. Obendrauf ein cremiger Klecks, frische Zwiebel und Kresse, und zum Schluss ein Sp",
+        "brand": "",
+        "url": "https://www.instagram.com/reel/DfFNvg6M8k1/",
+        "source": "#essenwien",
+        "pubDate": "2026-10-29T14:24:35+0000",
+        "expires": "",
+        "postVerificationStatus": ""
+      }
+    },
+    {
+      "reason": "no-concrete-offer",
+      "deal": {
+        "id": "18121954021822605",
+        "title": "€10 or a mystery meal… what would you choose? 👀🫘 Tell us below 👇 #wienfood #mysterymeal #streetinterview #viennaeats #lunchinvienna",
+        "brand": "",
+        "url": "https://www.instagram.com/reel/DfGE43jNru3/",
+        "source": "#viennaeats",
+        "pubDate": "2026-10-29T22:29:23+0000",
+        "expires": "",
+        "postVerificationStatus": ""
+      }
+    },
+    {
+      "reason": "no-concrete-offer",
+      "deal": {
+        "id": "18223922281356024",
+        "title": "Keeping it classy. And balanced. 🍷 See you at Markt.grätzL 📍Meidlinger Markt 15-20 | 1120 Wien #wien #vienna #wine #viennaeats #friday",
+        "brand": "",
+        "url": "https://www.instagram.com/reel/DfF3LOtR1Qu/",
+        "source": "#viennaeats",
+        "pubDate": "2026-10-29T20:28:36+0000",
+        "expires": "",
+        "postVerificationStatus": ""
+      }
+    },
+    {
+      "reason": "alcohol-offer",
+      "deal": {
+        "id": "17884551252528605",
+        "title": "Was macht einen Abend bei Biotto in Wien unvergesslich? 🇮🇹❤️ Natürlich gehört eine echte Pizza Napoletana dazu. Aber es sind die kleinen Dinge, die aus einem einfachen Restaurant",
+        "brand": "",
+        "url": "https://www.instagram.com/p/DfFmH7kjJWs/",
+        "source": "#viennaeats",
+        "pubDate": "2026-10-29T17:57:15+0000",
+        "expires": "",
+        "postVerificationStatus": ""
+      }
+    },
+    {
+      "reason": "general-recommendation",
+      "deal": {
+        "id": "18033334766889587",
+        "title": "Ein neuer Pizza-Spot in Wien, den ich euch empfehlen kann 🍕🤍 Speichert euch den Tipp für euren nächsten Pizza-Date-Abend! #viennafood #viennaeats #pizzaliebe #foodspotsvienna #wi",
+        "brand": "",
+        "url": "https://www.instagram.com/reel/DfFcv-3MOiO/",
+        "source": "#viennaeats",
+        "pubDate": "2026-10-29T16:35:51+0000",
+        "expires": "",
+        "postVerificationStatus": ""
+      }
+    },
+    {
+      "reason": "general-recommendation",
+      "deal": {
+        "id": "18110455994620545",
+        "title": "Ein neuer Pizza-Spot in Wien, den ich euch empfehlen kann 🍕🤍 Speichert euch den Tipp für euren nächsten Pizza-Date-Abend! #viennafood #viennaeats #pizzaliebe #foodspotsvienna #wi",
+        "brand": "",
+        "url": "https://www.instagram.com/reel/DfFcphJMoHG/",
+        "source": "#viennaeats",
+        "pubDate": "2026-10-29T16:34:56+0000",
+        "expires": "",
+        "postVerificationStatus": ""
+      }
+    },
+    {
+      "reason": "no-concrete-offer",
+      "deal": {
+        "id": "18318201073303677",
+        "title": "Einmal kurz bestellt – plötzlich ist der Tisch voll 🥢 Genau so mögen wir das. Wen würdest du zu deiner nächsten Ebi-Runde mitnehmen? 👀 #ebi #sushi #allyoucaneat #sushilover #vien",
+        "brand": "",
+        "url": "https://www.instagram.com/reel/DfFWp5OIG46/",
+        "source": "#viennaeats",
+        "pubDate": "2026-10-29T15:42:32+0000",
+        "expires": "",
+        "postVerificationStatus": ""
+      }
+    },
+    {
+      "reason": "no-concrete-offer",
+      "deal": {
+        "id": "18340631221277973",
+        "title": "be honest, who’s the first person that came to mind? 😂❤️ Tag them and come grab some gulab jamun at Chit Chaat Cafe! #viennava #chitchaatcafeva #indianfood #gulabjamun #viennaeats",
+        "brand": "",
+        "url": "https://www.instagram.com/reel/DfFVNQiz_xh/",
+        "source": "#viennaeats",
+        "pubDate": "2026-10-29T15:31:32+0000",
+        "expires": "",
+        "postVerificationStatus": ""
+      }
+    },
+    {
+      "reason": "no-concrete-offer",
+      "deal": {
+        "id": "18289124374293379",
+        "title": "I tried Vienna’s viral Chickz so you know whether it’s ACTUALLY worth the hype. 🍗 The Nashville OG burger set the tone. Add Korean tenders, truffle fries, buffalo wings and Cajun",
+        "brand": "",
+        "url": "https://www.instagram.com/reel/DfFUjTSM6h6/",
+        "source": "#viennaeats",
+        "pubDate": "2026-10-29T15:27:09+0000",
+        "expires": "",
+        "postVerificationStatus": ""
+      }
+    },
+    {
+      "reason": "no-concrete-offer",
+      "deal": {
+        "id": "18030299987858446",
+        "title": "Vienna’s most viral pastry spot! 🍓🥐💚 These desserts are almost TOO pretty to eat! 📍 KASHTAN | Multiple locations in Vienna Would you try these? 👀🍰 #ViennaFood #ViennaEats #Vi",
+        "brand": "",
+        "url": "https://www.instagram.com/reel/DfFRwbXORko/",
+        "source": "#viennaeats",
+        "pubDate": "2026-10-29T15:01:41+0000",
+        "expires": "",
+        "postVerificationStatus": ""
+      }
+    },
+    {
+      "reason": "no-concrete-offer",
+      "deal": {
+        "id": "18141350239625395",
+        "title": "Precision in every single cut. 🥩🔪 Der Donnerstagabend im 1. Bezirk läutet das bevorstehende Wochenende ein. Perfekt gereiftes Fleisch, auf den Punkt zubereitet mit unserer hausge",
+        "brand": "",
+        "url": "https://www.instagram.com/p/DfFR2D1FFEv/",
+        "source": "#viennaeats",
+        "pubDate": "2026-10-29T15:00:18+0000",
+        "expires": "",
+        "postVerificationStatus": ""
+      }
+    },
+    {
+      "reason": "no-concrete-offer",
+      "deal": {
+        "id": "18381484402300694",
+        "title": "Premium Pasta in Wien sofareofficial 🍝 #wien #viennaeats #ayce #pasta #amore",
+        "brand": "",
+        "url": "https://www.instagram.com/reel/DfFGyeWg0IM/",
+        "source": "#viennaeats",
+        "pubDate": "2026-10-29T13:26:34+0000",
+        "expires": "",
+        "postVerificationStatus": ""
+      }
+    },
+    {
+      "reason": "no-concrete-offer",
+      "deal": {
+        "id": "17903045430378982",
+        "title": "A symphony of sights and flavors. Postcard & food inspiration from Vienna ❣️✨ #viennafoodies #vienna_austria #wienisst #viennafood #viennaeats",
+        "brand": "",
+        "url": "https://www.instagram.com/reel/DfEj3SARpVT/",
+        "source": "#viennaeats",
+        "pubDate": "2026-10-29T08:23:27+0000",
+        "expires": "",
+        "postVerificationStatus": ""
+      }
+    },
+    {
+      "reason": "no-concrete-offer",
+      "deal": {
+        "id": "18432911197147978",
+        "title": "📍 Momoya19, 1190 #asianfood #sushi #wien #vienna #viennafood",
+        "brand": "",
+        "url": "https://www.instagram.com/reel/DfGLBMToZel/",
+        "source": "#viennafood",
+        "pubDate": "2026-10-29T23:19:57+0000",
+        "expires": "",
+        "postVerificationStatus": ""
+      }
+    },
+    {
+      "reason": "no-concrete-offer",
+      "deal": {
+        "id": "18117809045005649",
+        "title": "Bitzinger 🔥🔥🔥🔥 . Kasekrainer . Nice cheese sausage! Crisp skin with juicy and nice cheese inside matched with given ketchup and mustard. . #vienna #viennafood #bitzinger #kasek",
+        "brand": "",
+        "url": "https://www.instagram.com/p/DfF6t83jgEg/",
+        "source": "#viennafood",
+        "pubDate": "2026-10-29T20:57:12+0000",
+        "expires": "",
+        "postVerificationStatus": ""
+      }
+    },
+    {
+      "reason": "no-concrete-offer",
+      "deal": {
+        "id": "18027601787940542",
+        "title": "Gerstner K. u. K. Hofzuckerbäcker | Palais Todesco | Café Bar Restaurant Shop ♨️♨️♨️♨️♨️ . Apflestrudle, Kardinalschnitte, Barbara Getsner Kaffee, Sisi Veilchen Geschenksdose . A v",
+        "brand": "",
+        "url": "https://www.instagram.com/p/DfF5JtODoEY/",
+        "source": "#viennafood",
+        "pubDate": "2026-10-29T20:43:31+0000",
+        "expires": "",
+        "postVerificationStatus": ""
+      }
+    },
+    {
+      "reason": "general-recommendation",
+      "deal": {
+        "id": "18214846519317431",
+        "title": "no but I was really inspired by this place. I instantly wanted to draw everything about the aesthetic and interior. Save it! And of course, the food was just as lovely. They also s",
+        "brand": "",
+        "url": "https://www.instagram.com/reel/DfF0AwdxPxP/",
+        "source": "#viennafood",
+        "pubDate": "2026-10-29T20:01:40+0000",
+        "expires": "",
+        "postVerificationStatus": ""
+      }
+    },
+    {
+      "reason": "no-concrete-offer",
+      "deal": {
+        "id": "18078442364732700",
+        "title": "📍 weisserrauchfangkehrer Nakon 20 godina učenja njemačkog, naziv ovog restorana i dalje ne znam izgovoriti…. Mjesto u koje idem od djetinjstva i jedna od adresa za pravu, tradicio",
+        "brand": "",
+        "url": "https://www.instagram.com/p/DfFuJ6FjrH2/",
+        "source": "#viennafood",
+        "pubDate": "2026-10-29T19:07:25+0000",
+        "expires": "",
+        "postVerificationStatus": ""
+      }
+    },
+    {
+      "reason": "no-concrete-offer",
+      "deal": {
+        "id": "18113732726612231",
+        "title": "🇮🇹✨ Ein Stück Neapel. Mitten in Wien. ❤️ Manche Restaurants servieren einfach Essen… Wir servieren Leidenschaft, Tradition und ein Stück italienische Seele. 🍷🍕 Willkommen bei I",
+        "brand": "",
+        "url": "https://www.instagram.com/reel/DfFtpUHoslg/",
+        "source": "#viennafood",
+        "pubDate": "2026-10-29T19:03:24+0000",
+        "expires": "",
+        "postVerificationStatus": ""
+      }
+    },
+    {
+      "reason": "alcohol-offer",
+      "deal": {
+        "id": "18446455549126903",
+        "title": "The previous videos with some of my favorite spots in Vienna got so popular so I decided to create another part of it 🤍 Here we go: cafeansari wonderful restaurant with georgian c",
+        "brand": "",
+        "url": "https://www.instagram.com/reel/DfFqqc0i2Mw/",
+        "source": "#viennafood",
+        "pubDate": "2026-10-29T18:46:28+0000",
+        "expires": "",
+        "postVerificationStatus": ""
+      }
+    },
+    {
+      "reason": "general-recommendation",
+      "deal": {
+        "id": "18148648057603771",
+        "title": "Dein neues Lieblingslokal🥳 #merakvienna #viennafood #mariahilfer #cevapcici #barbecue",
+        "brand": "",
+        "url": "https://www.instagram.com/reel/DfFnTVEAe-4/",
+        "source": "#viennafood",
+        "pubDate": "2026-10-29T18:08:25+0000",
+        "expires": "",
+        "postVerificationStatus": ""
+      }
+    },
+    {
+      "reason": "no-concrete-offer",
+      "deal": {
+        "id": "17911303767578532",
+        "title": "First Class Burger Spot in Vienna Austria 🔥🍔📍🇦🇹 #vienna #fyp #food #viral #viennafood",
+        "brand": "",
+        "url": "https://www.instagram.com/reel/DfFjUr_MwRK/",
+        "source": "#viennafood",
+        "pubDate": "2026-10-29T17:33:39+0000",
+        "expires": "",
+        "postVerificationStatus": ""
+      }
+    },
+    {
+      "reason": "no-concrete-offer",
+      "deal": {
+        "id": "18345840532251551",
+        "title": "Knusprig aus dem Holzofen, mit ganz Wien zu Ihren Füßen – Martinigansl Am Himmel. 🦢🍂 Unser Bio-Freilandgansl vom Biohof Reisenbauer, gefüllt mit Dörrzwetschken, Datteln, Äpfeln u",
+        "brand": "",
+        "url": "https://www.instagram.com/p/DfFjNPFMvRW/",
+        "source": "#viennafood",
+        "pubDate": "2026-10-29T17:31:49+0000",
+        "expires": "",
+        "postVerificationStatus": ""
+      }
+    },
+    {
+      "reason": "general-recommendation",
+      "deal": {
+        "id": "17908087344666733",
+        "title": "🥐🤤 BUREK LOVERS, YOU NEED TO TRY THIS SPOT IN VIENNA! 🇦🇹❤️ We tried SO MANY delicious burek flavours at Pitara Oroz and every bite was worth it! 😍 From savoury to sweet, they",
+        "brand": "",
+        "url": "https://www.instagram.com/reel/DfFhomTxDPQ/",
+        "source": "#viennafood",
+        "pubDate": "2026-10-29T17:20:26+0000",
+        "expires": "",
+        "postVerificationStatus": ""
+      }
+    },
+    {
+      "reason": "no-concrete-offer",
+      "deal": {
+        "id": "18120384308055653",
+        "title": "Wir finden immer eine Lösung 🫶🏻 #wien #gustolab #vienna #döner #viennafood",
+        "brand": "",
+        "url": "https://www.instagram.com/reel/DfFhKS8RZzk/",
+        "source": "#viennafood",
+        "pubDate": "2026-10-29T17:14:59+0000",
+        "expires": "",
+        "postVerificationStatus": ""
+      }
+    },
+    {
+      "reason": "missing-text",
+      "deal": {
+        "id": "17932666944422924",
+        "title": "#TheGuesthouseVienna #BrasserieVienna #NewMenu #NewMenuAlert #NeueSpeisekarte #FoodPhotography #FoodStyling #ChefLife #ChefFlorian #FlorianOswald #ViennaFood #ViennaFoodies #FoodCo",
+        "brand": "",
+        "url": "https://www.instagram.com/p/DfFfzo7jLUG/",
+        "source": "#viennafood",
+        "pubDate": "2026-10-29T17:02:03+0000",
+        "expires": "",
+        "postVerificationStatus": ""
+      }
+    },
+    {
+      "reason": "no-concrete-offer",
+      "deal": {
+        "id": "18116462621045206",
+        "title": "goldenerpapagei has such an easy feel to it and is exactly the kind of place i’d keep in mind for a slow morning or a casual stop in 1020. self-paid / no collaboration #ceschlist #",
+        "brand": "",
+        "url": "https://www.instagram.com/p/DfFfllLmy4q/",
+        "source": "#viennafood",
+        "pubDate": "2026-10-29T17:00:08+0000",
+        "expires": "",
+        "postVerificationStatus": ""
+      }
+    },
+    {
+      "reason": "no-concrete-offer",
+      "deal": {
+        "id": "18398616187204933",
+        "title": "Good food, beautiful surrounding & the taste of Asia. 🥢🥟🇨🇳 #viennarestaurant #viennafood #ugccreators #visitvienna",
+        "brand": "",
+        "url": "https://www.instagram.com/p/DfFeV6NDWwr/",
+        "source": "#viennafood",
+        "pubDate": "2026-10-29T16:49:15+0000",
+        "expires": "",
+        "postVerificationStatus": ""
+      }
+    },
+    {
+      "reason": "no-concrete-offer",
+      "deal": {
+        "id": "18098493119225431",
+        "title": "Rotes Curry mit knuspriger Ente 🦆🌶️ Hausgemachte rote Currypaste, cremige Kokosmilch und zarte Entenbrust mit goldbrauner Haut – serviert mit duftendem Thai-Jasminreis. Ein Klass",
+        "brand": "",
+        "url": "https://www.instagram.com/reel/DfFci9IjKyD/",
+        "source": "#viennafood",
+        "pubDate": "2026-10-29T16:33:55+0000",
+        "expires": "",
+        "postVerificationStatus": ""
+      }
+    }
+  ],
+  "diagnostics": {
+    "hashtags": 10,
+    "successfulSources": 6,
+    "failedSources": 0,
+    "uniquePosts": 36,
+    "rescueEligible": 0,
+    "rescuedDeals": 0,
+    "mediaAnalyzed": 0,
+    "mediaAiCalls": 0,
+    "mediaVisionCalls": 0,
+    "mediaTokens": 0,
+    "graphVersion": "v26.0"
+  },
+  "constraints": {
+    "maxSocialPostAgeDays": 7
+  },
   "errors": [
-    "No Graph hashtag source completed successfully; last-good output was preserved. #wienergastro: Instagram shared quota paused: shared cooldown"
+    "#wien: Instagram scan paused: request-budget"
   ]
 }
