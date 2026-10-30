@@ -73,9 +73,72 @@ export function polishBlogCardVisuals(html, filename) {
   });
 }
 
-export function visualPicture(visual, { article = false, eager = false } = {}) {
-  const sizes = article ? '(max-width: 760px) calc(100vw - 40px), 760px' : '(max-width: 620px) calc(100vw - 40px), 530px';
+export function visualPicture(visual, { article = false, eager = false, sizes: customSizes } = {}) {
+  const sizes = customSizes || (article ? '(max-width: 760px) calc(100vw - 40px), 760px' : '(max-width: 620px) calc(100vw - 40px), (max-width: 950px) calc((100vw - 60px) / 2), 354px');
   return `<picture><source type="image/webp" srcset="${visual.thumbnail} 480w, ${visual.webp} 1200w" sizes="${sizes}"><img${article ? ' class="article-image"' : ''} src="${visual.src}" alt="${escape(visual.alt)}" width="1200" height="630" loading="${eager ? 'eager' : 'lazy'}" decoding="async"></picture>`;
+}
+
+const discoveryTopics = [
+  ['guenstig-essen-wien', 'Essen in Wien', 'only-noodle-biang-biang-1plus1-wien'],
+  ['gratis-kaffee-wien', 'Kaffee', 'gratis-kaffee-wien'],
+  ['eins-plus-eins-wien', '1+1-Aktionen', 'papa-duck-pizza-donnerstag-1plus1-wien'],
+  ['geburtstag-gratis-wien', 'Geburtstag', 'geburtstag-gratis-wien'],
+  ['kinodonnerstag-wien-drei', 'Kino in Wien', 'kinodonnerstag-wien-drei'],
+  [null, 'Alle Angebote', 'wiener-riesenrad-1plus1-gutschein'],
+];
+const discoveryGuides = {
+  'guenstig-essen-wien': 'Günstig essen nach Bezirk',
+  'geburtstag-gratis-wien': 'Geburtstag: Essen & Eintritt',
+  'kinodonnerstag-wien-drei': 'KinoDonnerstag in Wien',
+  'gratis-kaffee-wien': 'Gratis Kaffee in Wien',
+  'eins-plus-eins-wien': '1+1-Angebote vergleichen',
+  'restaurant-gutscheine-wien': 'Restaurant-Gutscheine',
+  'gutscheine-wien': 'Gutscheine in Wien',
+  'rabatte-wien': 'Rabatte richtig vergleichen',
+  'kostenlose-freizeitangebote-wien': 'Freizeit in Wien',
+  'studentenrabatte-wien': 'Vorteile für Studierende',
+};
+
+function photoTopics(relative = false) {
+  return `<nav class="topic-nav visual-topics" aria-label="Wiener Ratgeber">${discoveryTopics.map(([slug, label, image]) => `<a href="${slug ? `${relative ? '' : '/blog/'}${slug}.html` : '/angebote-wien-heute.html'}">${visualPicture(blogVisual(image), { sizes: '(max-width: 620px) 120px, 180px' })}<span>${escape(label)}</span></a>`).join('')}</nav>`;
+}
+
+// Keep the same presentation after future targeted article/feed regeneration.
+export function polishVisualDiscovery(html, filename) {
+  const home = filename === 'index.html';
+  const blog = /^blog\/[^/]+\.html$/.test(filename);
+  if (!home && !blog && filename !== 'angebote-wien-heute.html') return html;
+  html = html.replace(/\s*<link\b[^>]*href="\/visual-refresh\.css(?:\?[^"]*)?"[^>]*>/g, '');
+  html = html.replace('</head>', '  <link rel="stylesheet" href="/visual-refresh.css?v=20261030">\n</head>');
+  if (home) {
+    const band = `<section class="discovery-band" aria-labelledby="discoveryTitle"><div class="discovery-inner"><div class="discovery-heading"><h2 id="discoveryTitle">Dein Wien. Deine Entdeckungen.</h2><a href="/blog/">Alle Guides</a></div>${photoTopics()}</div></section>`;
+    const existing = /<section class="discovery-band"[\s\S]*?<\/section>/;
+    if (existing.test(html)) html = html.replace(existing, band);
+    else html = html.replace(/<section class="section app-section"/, `${band}\n      <section class="section app-section"`);
+    html = html.replace(/<a\b[^>]*class="deal-card has-photo"[\s\S]*?<\/a>/g, fragment => {
+      const $ = load(fragment);
+      const href = $('a').attr('href') || '';
+      const slug = href.includes('ganesha') ? 'ganesha-10-euro-gutschein-50-euro-wien'
+        : href.includes('#1080') ? 'cafe-hummel-kaffee-250-wien'
+        : href.includes('geburtstag') ? 'haikky-eroeffnung-gratis-essen-wien-1-november' : '';
+      const picture = $('picture.deal-thumb');
+      if (!slug || !picture.length) return fragment;
+      return fragment.replace($.html(picture), visualPicture(blogVisual(slug), { sizes: '(max-width: 620px) 110px, 130px' }).replace('<picture>', '<picture class="deal-thumb">'));
+    });
+  } else if (filename === 'blog/index.html') {
+    html = html.replace(/<nav class="topic-nav(?: visual-topics)?" aria-label="Wiener Ratgeber">[\s\S]*?<\/nav>/, photoTopics(true));
+  } else if (blog) {
+    const $ = load(html);
+    if (!$('.article-body').length || !$('.article-layout').length) return html;
+    const own = filename.slice(5, -5);
+    const linked = $('.related-links a[href]').toArray().map(a => ($(a).attr('href') || '').split('/').pop().replace(/\.html$/, ''));
+    const slugs = [...new Set([...linked, 'guenstig-essen-wien', 'geburtstag-gratis-wien', 'kinodonnerstag-wien-drei', 'gratis-kaffee-wien'])]
+      .filter(slug => slug !== own && Object.hasOwn(discoveryGuides, slug)).slice(0, 3);
+    const section = `<section class="article-discovery" aria-labelledby="moreViennaTitle"><h2 id="moreViennaTitle">Mehr für deinen Wien-Tag.</h2><div class="discovery-guides">${slugs.map(slug => `<a class="discovery-guide" href="/blog/${slug}.html">${visualPicture(blogVisual(slug))}<span>${escape(discoveryGuides[slug])}</span></a>`).join('')}</div></section>`;
+    const existing = /<section class="article-discovery"[\s\S]*?<\/section>/;
+    html = existing.test(html) ? html.replace(existing, section) : html.replace('</main>', `${section}\n  </main>`);
+  }
+  return html;
 }
 
 export function polishBlogVisuals(html, filename) {

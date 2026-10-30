@@ -44,6 +44,9 @@ const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const directory = path.join(ROOT, 'docs/assets/deal-photos');
 const catalogPath = path.join(directory, 'sources.json');
 const catalog = fs.existsSync(catalogPath) ? JSON.parse(fs.readFileSync(catalogPath, 'utf8')).photos : {};
+const editorialDirectory = path.join(ROOT, 'docs/assets/blog/photos');
+const editorialPath = path.join(editorialDirectory, 'sources.json');
+const editorial = fs.existsSync(editorialPath) ? JSON.parse(fs.readFileSync(editorialPath, 'utf8')).photos : {};
 const normalize = value => String(value || '').normalize('NFD').replace(/\p{M}/gu, '').toLowerCase().replace(/ß/g, 'ss');
 
 export function photoKey(deal) {
@@ -87,6 +90,23 @@ export function photoKey(deal) {
 
 export function dealPhoto(deal) {
   const key = photoKey(deal);
+  const text = normalize(`${deal.title || ''} ${deal.brand || ''}`);
+  const specific = [
+    [/biang|only noodle/, 'biang-noodles'], [/cigkofte/, 'cigkofte-wrap'],
+    [/krapfen/, 'krapfen'], [/mcnuggets|chicken nuggets/, 'nuggets'],
+    [/bubble[ -]?tea/, 'bubble-tea'], [/tiramisu/, 'tiramisu'],
+    [/thunfisch.*wrap|tuna.*wrap/, 'tuna-wrap'],
+    [/kindermenu/, 'family-lunch'], [/ganesha/, 'indian-meal'],
+    [/haikky|watertuin/, 'restaurant-buffet'], [/xxxl grill/, 'balkan-brunch'],
+    [/(?:hot.?dog|hut-dog).*loving.?hut|loving.?hut.*(?:hot.?dog|hut-dog)/, 'vegan-hotdog'],
+  ].find(([pattern]) => pattern.test(text))?.[1] || key;
+  const photo = editorial[specific];
+  if (photo && photo.inputWidth >= 600 && photo.inputHeight >= 400
+    && [`${specific}.webp`, `${specific}-480.webp`].every(file => fs.existsSync(path.join(editorialDirectory, file)))) {
+    return { key: specific, src: `/assets/blog/photos/${specific}.webp`,
+      srcset: `/assets/blog/photos/${specific}-480.webp 480w, /assets/blog/photos/${specific}.webp 1200w`,
+      width: photo.width, height: photo.height, alt: `Symbolfoto: ${photo.subject}` };
+  }
   const metadata = catalog?.[key];
   if (!metadata || ![metadata.width, metadata.height, metadata.thumbWidth].every(value => Number.isInteger(value) && value > 0)) return null;
   if (![`${key}.webp`, `${key}-160.webp`].every(file => fs.existsSync(path.join(directory, file)))) return null;

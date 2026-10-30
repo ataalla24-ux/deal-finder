@@ -42,6 +42,13 @@ After adding or updating an article:
 6. Publish only scoped website changes and verify the deployed files over HTTPS.
 
 The Website Quality workflow is read-only and checks future website edits.
+The shared photo-led presentation is in `docs/visual-refresh.css` and the
+idempotent `polishVisualDiscovery` helper in `scripts/blog-visuals.mjs`.
+Keep its category links and related-guide photos when regenerating pages.
+Deal cards prefer matching high-resolution editorial photos, with the existing
+native artwork and logo fallback retained if those local assets are unavailable.
+Photos are generic illustrations, never verification of a merchant or menu.
+Run `node scripts/test-website-visuals.mjs` after presentation or motif changes.
 Before selecting the next daily article, run `node scripts/audit-blog-coverage.mjs`.
 The dated coverage ledger distinguishes existing articles, held evidence and
 informational directory records. New IDs and changed offer content require a new

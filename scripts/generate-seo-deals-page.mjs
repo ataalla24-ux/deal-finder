@@ -229,7 +229,7 @@ function renderDealCard(deal, index) {
   return `
         <article class="live-deal-card" id="${escapeHtml(id)}" data-type="${type}" data-districts="${districtCodes(deal).join(' ')}" data-order="${index}" data-expiry="${deal.expiryDate.getTime()}">
           <div class="deal-card-top${photo ? ' has-photo' : ''}">
-            ${photo ? `<picture class="deal-photo"><img src="${photo.src}" srcset="${photo.srcset}" sizes="(max-width: 360px) 80px, 104px" alt="${escapeHtml(photo.alt)}" width="${photo.width}" height="${photo.height}" loading="lazy" decoding="async"></picture>` : `<span class="deal-brand-image" aria-hidden="true">${logo ? `<img src="${escapeHtml(logo)}" alt="" width="52" height="52" loading="lazy">` : `<span>${escapeHtml(initials)}</span>`}</span>`}
+            ${photo ? `<picture class="deal-photo"><img src="${photo.src}" srcset="${photo.srcset}" sizes="(max-width: 680px) calc(100vw - 40px), (max-width: 950px) calc((100vw - 66px) / 2), 360px" alt="${escapeHtml(photo.alt)}" width="${photo.width}" height="${photo.height}" loading="lazy" decoding="async"></picture>` : `<span class="deal-brand-image" aria-hidden="true">${logo ? `<img src="${escapeHtml(logo)}" alt="" width="52" height="52" loading="lazy">` : `<span>${escapeHtml(initials)}</span>`}</span>`}
             <div class="deal-card-heading">
               <div class="deal-card-badges"><span class="deal-type">${escapeHtml(typeLabel(deal.type))}</span>${photo && logo ? `<img class="deal-merchant-logo" src="${escapeHtml(logo)}" alt="" width="28" height="28" loading="lazy">` : ''}</div>
               <p class="live-deal-brand">${escapeHtml(deal.brand || 'Anbieter')}</p>

@@ -2,7 +2,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { load } from 'cheerio';
-import { blogVisual, visualPicture, polishBlogVisuals, polishBlogCardVisuals } from './blog-visuals.mjs';
+import { blogVisual, visualPicture, polishBlogVisuals, polishBlogCardVisuals, polishVisualDiscovery } from './blog-visuals.mjs';
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const compact = value => String(value).replace(/\s+/g, ' ').trim();
@@ -184,7 +184,7 @@ export function polishHtml(source, filename, now = Date.now()) {
     const additions = Object.entries(metadata).filter(([name, value]) => value && !$(`meta[property="${name}"]`).length).map(([name, value]) => `  <meta property="${name}" content="${escape(value)}">`);
     if (additions.length) html = html.replace('</head>', additions.join('\n') + '\n</head>');
   }
-  return polishSharingMetadata(html).replace(/^[ \t]+$/gm, '');
+  return polishVisualDiscovery(polishSharingMetadata(html).replace(/^[ \t]+$/gm, ''), filename);
 }
 
 if (process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.meta.url)) {

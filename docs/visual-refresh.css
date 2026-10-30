@@ -1,0 +1,130 @@
+/* Shared photo-led presentation; offer facts and redemption remain unchanged. */
+.discovery-band { background: #f3f7f5; border-block: 1px solid #e0e8e3; }
+.discovery-inner { width: min(1180px, calc(100% - 40px)); margin-inline: auto; padding: 30px 0 32px; }
+.discovery-heading { display: flex; align-items: center; justify-content: space-between; gap: 18px; margin-bottom: 20px; }
+.discovery-heading h2 { margin: 0; font-family: 'Bricolage Grotesque', sans-serif; font-size: 28px; line-height: 1.2; letter-spacing: 0; }
+.discovery-heading > a { color: #176147; font-size: 14px; font-weight: 800; text-underline-offset: 4px; }
+.topic-nav.visual-topics { display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 14px; padding: 0; margin: 0; border: 0; }
+.visual-topics a { min-width: 0; display: flex; flex-direction: column; gap: 10px; padding: 0; border: 0; background: transparent; color: #182c23; text-decoration: none; font-size: 14px; font-weight: 800; line-height: 1.35; }
+.visual-topics picture { display: block; width: 100%; overflow: hidden; border-radius: 8px; aspect-ratio: 3 / 2; background: #e4ece6; }
+.visual-topics img { display: block; width: 100%; height: 100%; object-fit: cover; transition: transform .2s; }
+.visual-topics a:hover img { transform: scale(1.035); }
+.visual-topics a:hover span { text-decoration: underline; text-underline-offset: 4px; }
+.visual-topics a:focus-visible, .discovery-guide:focus-visible { outline: 3px solid #087f5b; outline-offset: 5px; }
+.blog-hero, .article-hero { background: #fff; }
+.blog-hero .hero-inner { padding: 38px 0 30px; }
+.blog-hero h1 { max-width: 880px; font-size: 46px; line-height: 1.08; }
+.blog-hero .hero-copy { max-width: 800px; font-size: 16px; margin-top: 16px; }
+.blog-hero .visual-topics { margin-top: 26px; }
+.blog-main { padding-top: 26px; }
+.post-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 22px; }
+.post-card { display: flex; flex-direction: column; border-color: #e0e6e2; box-shadow: 0 2px 5px #19312505; }
+.post-card-body { display: flex; flex: 1; flex-direction: column; padding: 20px; }
+.post-card h2 { font-size: 24px; line-height: 1.2; }
+.post-card-body > p { font-size: 14px; line-height: 1.65; }
+.post-card-body > a:last-child { margin-top: auto; padding-top: 14px; }
+.article-hero .hero-inner { padding: 38px 0 34px; }
+.article-hero h1 { max-width: 940px; font-size: 46px; line-height: 1.12; }
+.article-hero .hero-copy { max-width: 840px; font-size: 17px; }
+.article-layout { padding-top: 36px; }
+.article-image { border-radius: 8px; }
+.article-discovery { width: min(1060px, calc(100% - 40px)); margin: 0 auto; padding: 32px 0 48px; border-top: 1px solid #e0e7e2; }
+.article-discovery > h2 { margin: 0 0 24px; font-size: 30px; }
+.discovery-guides { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 20px; }
+.discovery-guide { display: flex; flex-direction: column; border: 1px solid #e0e7e2; border-radius: 8px; overflow: hidden; color: #172b21; text-decoration: none; }
+.discovery-guide picture { display: block; aspect-ratio: 1.9; background: #eef3ef; overflow: hidden; }
+.discovery-guide img { width: 100%; height: 100%; object-fit: cover; }
+.discovery-guide span { padding: 16px; font-size: 17px; line-height: 1.35; font-weight: 800; }
+.discovery-guide:hover span { text-decoration: underline; text-underline-offset: 4px; }
+.deals-page .live-deal-card { overflow: hidden; padding: 20px; box-shadow: 0 3px 10px #18322506; }
+.deals-page .deal-card-top.has-photo { display: flex; flex-direction: column; align-items: stretch; gap: 18px; min-height: 0; }
+.deals-page .deal-photo { min-height: 0; aspect-ratio: 1.85; margin: -20px -20px 0; border-radius: 0; }
+.deals-page .deal-photo img { position: static; width: 100%; height: 100%; object-fit: cover; }
+.deals-page .deal-card-heading h3 { font-size: 23px; line-height: 1.2; }
+.deals-page .deal-card-heading .live-deal-brand { margin-block: 10px 6px; }
+.deals-page .live-deal-source { color: #126148; }
+body:has(.discovery-band) .hero { min-height: 0; padding-top: 36px; padding-bottom: 36px; }
+body:has(.discovery-band) .hero::after { display: none; }
+body:has(.discovery-band) .phone-stage { min-height: 0; height: 500px; overflow: hidden; }
+body:has(.discovery-band) .phone-stage .phone-main { width: 220px; padding: 8px; border-radius: 34px; }
+body:has(.discovery-band) .phone-stage .phone-frame img { border-radius: 26px; }
+body:has(.discovery-band) .phone-stage .phone-side { width: 170px; padding: 7px; border-radius: 30px; transform: rotate(-7deg) translate(-126px, 22px); }
+body:has(.discovery-band) .phone-stage .phone-side.right { transform: rotate(7deg) translate(126px, 32px); }
+body:has(.discovery-band) .next-strip { display: none; }
+body:has(.discovery-band) .app-section { padding-top: 60px; }
+body:has(.discovery-band) .screenshot-column { display: block; min-height: 0; }
+body:has(.discovery-band) .screenshot-column > .phone-frame { display: none; }
+body:has(.discovery-band) .live-deals { position: static; width: 100%; padding: 0; border: 0; border-radius: 0; background: transparent; box-shadow: none; backdrop-filter: none; }
+body:has(.discovery-band) .deal-card.has-photo { grid-template-columns: 130px minmax(0, 1fr); }
+body:has(.discovery-band) .deal-thumb { min-height: 116px; }
+body:has(.discovery-band) .section-title { font-size: 44px; line-height: 1.12; }
+body:has(.discovery-band) .section-copy { font-size: 18px; }
+body:has(.discovery-band) .feature-row { border-radius: 8px; box-shadow: none; }
+body:has(.discovery-band) .feature-row svg { border-radius: 8px; }
+body:has(.discovery-band) .hero-copy p { font-size: 19px; }
+body:has(.discovery-band) .blog-card { border-radius: 8px; box-shadow: 0 3px 12px #18322506; }
+@media (max-width: 950px) {
+  .post-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .visual-topics { gap: 10px; }
+  body:has(.discovery-band) .phone-stage { height: 380px; }
+  body:has(.discovery-band) .phone-stage .phone-main { width: 170px; padding: 6px; border-radius: 28px; }
+  body:has(.discovery-band) .phone-stage .phone-side { width: 124px; padding: 6px; border-radius: 26px; transform: translate(-100px, 28px) rotate(-7deg); }
+  body:has(.discovery-band) .phone-stage .phone-side.right { transform: translate(100px, 28px) rotate(7deg); }
+}
+@media (min-width: 761px) and (max-width: 1100px) {
+  body:has(.discovery-band) .hero { grid-template-columns: minmax(0, 1fr) 250px; gap: 28px; }
+  body:has(.discovery-band) .hero h1 { font-size: 42px; }
+  body:has(.discovery-band) .hero-proof { gap: 12px; }
+}
+@media (max-width: 760px) {
+  body:has(.discovery-band) .hero { padding-top: 26px; padding-bottom: 0; gap: 20px; }
+  body:has(.discovery-band) .hero-copy p { font-size: 16px; }
+  body:has(.discovery-band) .phone-stage { height: 210px; }
+}
+@media (max-width: 620px) {
+  .discovery-inner { padding: 24px 0; }
+  .discovery-heading { align-items: baseline; gap: 10px; }
+  .discovery-heading h2 { max-width: 240px; font-size: 23px; }
+  .discovery-heading > a { flex-shrink: 0; font-size: 12px; }
+  .topic-nav.visual-topics { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px 12px; }
+  .visual-topics a { gap: 8px; font-size: 13px; }
+  .blog-hero .hero-inner { padding: 26px 0 24px; }
+  .blog-hero h1 { font-size: 34px; line-height: 1.12; }
+  .blog-hero .hero-copy { font-size: 15px; }
+  .blog-hero .visual-topics { margin-top: 24px; }
+  .blog-main { padding-top: 8px; }
+  .post-grid { grid-template-columns: minmax(0, 1fr); gap: 22px; }
+  .post-card h2 { font-size: 25px; }
+  .post-card-body { padding: 20px; }
+  .article-hero .hero-inner { padding: 28px 0; }
+  .article-hero h1 { font-size: 34px; line-height: 1.14; }
+  .article-hero .hero-copy { font-size: 16px; }
+  .article-layout { padding-top: 22px; }
+  .article-discovery { padding: 26px 0 36px; }
+  .article-discovery > h2 { font-size: 27px; }
+  .discovery-guides { grid-template-columns: minmax(0, 1fr); gap: 14px; }
+  .discovery-guide { display: grid; grid-template-columns: 120px minmax(0, 1fr); align-items: stretch; }
+  .discovery-guide picture { height: 100%; min-height: 92px; aspect-ratio: auto; }
+  .discovery-guide span { align-self: center; padding: 14px; font-size: 16px; }
+  body:has(.discovery-band) .hero { padding-top: 26px; padding-bottom: 0; gap: 20px; }
+  body:has(.discovery-band) .hero-copy p { font-size: 16px; }
+  body:has(.discovery-band) .phone-stage { height: 210px; }
+  body:has(.discovery-band) .phone-stage .phone-main { width: 170px; padding: 6px; border-radius: 28px; }
+  body:has(.discovery-band) .phone-stage .phone-frame img { border-radius: 22px; }
+  body:has(.discovery-band) .phone-stage .phone-side { width: 124px; padding: 6px; border-radius: 26px; transform: translate(-100px, 32px) rotate(-7deg); }
+  body:has(.discovery-band) .phone-stage .phone-side.right { transform: translate(100px, 32px) rotate(7deg); }
+  body:has(.discovery-band) .app-section { padding-top: 36px; }
+  body:has(.discovery-band) .section-title { font-size: 31px; }
+  body:has(.discovery-band) .section-copy { font-size: 16px; }
+  body:has(.discovery-band) .deal-card.has-photo { grid-template-columns: 110px minmax(0, 1fr); }
+}
+@media (max-width: 360px) {
+  .visual-topics a { font-size: 12px; }
+  .discovery-heading h2 { font-size: 21px; }
+  .article-hero h1, .blog-hero h1 { font-size: 30px; }
+  .discovery-guide { grid-template-columns: 100px minmax(0, 1fr); }
+}
+@media (max-width: 760px) and (max-height: 700px) {
+  body:has(.discovery-band) .phone-stage { height: 120px; }
+}
+@media (prefers-reduced-motion: reduce) { .visual-topics img { transition: none; } }

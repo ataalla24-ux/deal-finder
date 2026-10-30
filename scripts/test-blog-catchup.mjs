@@ -31,7 +31,7 @@ for (const guide of catchupGuides) {
   assert.equal(sitemap('loc').filter((_, e) => sitemap(e).text() === `https://freefinder.at/${file}`).length, 1);
   assert.equal($('img.article-image').attr('src'), blogVisual(guide.slug).src);
   assert.match($('img.article-image').attr('alt'), /^Symbolfoto:/);
-  assert.equal($('picture source[type="image/webp"]').length, 1);
+  assert.equal($('.article-body > picture source[type="image/webp"]').length, 1);
   assert.equal($('main').attr('data-deal-expires'), guide.expires || '');
   assert.ok($('#quelle').next('p').find('a[data-track="deal_outbound"]').length === 1);
   const graph = JSON.parse($('script[type="application/ld+json"]').text())['@graph'];
