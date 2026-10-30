@@ -1,10 +1,10 @@
 {
-  "generatedAt": "2026-10-30T22:24:46.559Z",
+  "generatedAt": "2026-10-30T22:39:43.972Z",
   "summary": {
     "filesConsidered": 32,
-    "totalCandidates": 843,
-    "uniqueCandidates": 783,
-    "distinctCandidates": 810,
+    "totalCandidates": 840,
+    "uniqueCandidates": 782,
+    "distinctCandidates": 809,
     "duplicateClusters": 27,
     "topHealthySources": [
       {
@@ -58,16 +58,16 @@
         "totalDeals": 2
       },
       {
-        "sourceKey": "wien-combined",
-        "sourceLabel": "Wien Deals Combined Graph",
-        "missionFitScore": 69,
-        "totalDeals": 3
-      },
-      {
         "sourceKey": "member-benefits",
         "sourceLabel": "Member Benefits",
         "missionFitScore": 68,
         "totalDeals": 110
+      },
+      {
+        "sourceKey": "instagram-ai",
+        "sourceLabel": "Instagram AI Agent",
+        "missionFitScore": 66,
+        "totalDeals": 49
       }
     ],
     "topCoverageSources": [
@@ -121,12 +121,6 @@
         "totalDeals": 49
       },
       {
-        "sourceKey": "wien-combined",
-        "sourceLabel": "Wien Deals Combined Graph",
-        "precisionScore": 74,
-        "totalDeals": 3
-      },
-      {
         "sourceKey": "member-benefits",
         "sourceLabel": "Member Benefits",
         "precisionScore": 74,
@@ -137,6 +131,12 @@
         "sourceLabel": "Meta Instagram Graph",
         "precisionScore": 72,
         "totalDeals": 129
+      },
+      {
+        "sourceKey": "food3",
+        "sourceLabel": "Firecrawl Key 2 - Food",
+        "precisionScore": 70,
+        "totalDeals": 2
       }
     ],
     "topWeightedSources": [
@@ -677,97 +677,6 @@
       "coverageScore": 17,
       "precisionScore": 66,
       "sourceWeightScore": 57
-    },
-    {
-      "sourceKey": "wien-combined",
-      "file": "deals-pending-wien-combined.json",
-      "sourceLabel": "Wien Deals Combined Graph",
-      "totalDeals": 3,
-      "uniqueDeals": 1,
-      "duplicateDeals": 2,
-      "duplicateAcrossSources": 2,
-      "fresh1dCount": 2,
-      "fresh7dCount": 3,
-      "viennaCount": 3,
-      "foodDrinkCount": 1,
-      "promoCount": 3,
-      "missingUrlCount": 0,
-      "sampleTitles": [
-        "❤️ Deshalb gibt’s bei Papa Duck jeden Donnerstag bis Ende des Jahres 1+1 Pizza!",
-        "mit Freunden & Familie: gruselig, gemütlich und oft gratis 👻 → Halloween im Wurstelprater · bis Sa, 14–17 Uhr, gratis pratervienna → Hallow",
-        "Meine Haltung: Eine einzelne Zahl macht keinen guten Deal"
-      ],
-      "lastRun": {
-        "status": "completed-with-errors",
-        "startedAt": "2026-10-30T13:27:10.675Z",
-        "finishedAt": "2026-10-30T13:28:59.230Z",
-        "durationMs": 108555,
-        "counts": {
-          "rawCandidates": 51,
-          "normalizedCandidates": 3,
-          "verifiedCandidates": 3,
-          "previousDeals": 0,
-          "acceptedDeals": 3,
-          "rejectedDeals": 48
-        },
-        "rejectedByReason": {
-          "no-concrete-offer": 40,
-          "alcohol-offer": 5,
-          "general-recommendation": 2,
-          "business-lead-generation": 1
-        },
-        "errors": [
-          "#wienisst: Meta Graph 18: This API call could not be completed due to resource limits",
-          "#wien: Instagram scan paused: request-budget"
-        ],
-        "reportFile": "deal-pipeline-last-run-wien-combined.json"
-      },
-      "uniqueRate": 0.3,
-      "duplicateRate": 0.7,
-      "fresh1dRate": 0.7,
-      "fresh7dRate": 1,
-      "viennaRate": 1,
-      "foodDrinkRate": 0.3,
-      "promoRate": 1,
-      "missingUrlRate": 0,
-      "averageQualityScore": 83.3,
-      "topCategories": [
-        {
-          "value": "essen",
-          "count": 1
-        },
-        {
-          "value": "kultur",
-          "count": 1
-        },
-        {
-          "value": "shopping",
-          "count": 1
-        }
-      ],
-      "topTypes": [
-        {
-          "value": "bogo",
-          "count": 1
-        },
-        {
-          "value": "gratis",
-          "count": 1
-        },
-        {
-          "value": "rabatt",
-          "count": 1
-        }
-      ],
-      "issues": [
-        "geringe Food-/Drink-Relevanz",
-        "hohe Überschneidung mit anderen Quellen"
-      ],
-      "healthScore": 66,
-      "missionFitScore": 69,
-      "coverageScore": 14,
-      "precisionScore": 74,
-      "sourceWeightScore": 58
     },
     {
       "sourceKey": "food3",
@@ -2178,6 +2087,65 @@
       "topCategories": [],
       "topTypes": [],
       "issues": [
+        "liefert aktuell 0 Deals"
+      ],
+      "healthScore": 0,
+      "missionFitScore": 0,
+      "coverageScore": 0,
+      "precisionScore": 0,
+      "sourceWeightScore": 0
+    },
+    {
+      "sourceKey": "wien-combined",
+      "file": "deals-pending-wien-combined.json",
+      "sourceLabel": "Wien Deals Combined Graph",
+      "totalDeals": 0,
+      "uniqueDeals": 0,
+      "duplicateDeals": 0,
+      "duplicateAcrossSources": 0,
+      "fresh1dCount": 0,
+      "fresh7dCount": 0,
+      "viennaCount": 0,
+      "foodDrinkCount": 0,
+      "promoCount": 0,
+      "missingUrlCount": 0,
+      "sampleTitles": [],
+      "lastRun": {
+        "status": "completed-with-errors",
+        "startedAt": "2026-10-30T22:36:50.624Z",
+        "finishedAt": "2026-10-30T22:38:14.338Z",
+        "durationMs": 83714,
+        "counts": {
+          "rawCandidates": 16,
+          "normalizedCandidates": 0,
+          "verifiedCandidates": 0,
+          "previousDeals": 0,
+          "acceptedDeals": 0,
+          "rejectedDeals": 16
+        },
+        "rejectedByReason": {
+          "no-concrete-offer": 15,
+          "missing-text": 1
+        },
+        "errors": [
+          "#wienisst: Meta Graph 18: This API call could not be completed due to resource limits",
+          "#viennafood: Instagram shared quota paused: request or quota unavailable"
+        ],
+        "reportFile": "deal-pipeline-last-run-wien-combined.json"
+      },
+      "uniqueRate": 0,
+      "duplicateRate": 0,
+      "fresh1dRate": 0,
+      "fresh7dRate": 0,
+      "viennaRate": 0,
+      "foodDrinkRate": 0,
+      "promoRate": 0,
+      "missingUrlRate": 0,
+      "averageQualityScore": 0,
+      "topCategories": [],
+      "topTypes": [],
+      "issues": [
+        "letzter Lauf fand Kandidaten, aber akzeptierte keinen Deal",
         "liefert aktuell 0 Deals"
       ],
       "healthScore": 0,
