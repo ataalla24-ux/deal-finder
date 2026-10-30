@@ -76,11 +76,6 @@ export function polishOfferTitle(value = '', description = '') {
 
 export function concreteFoodOfferTitle(value = '') {
   const text = stripSlackEmojiCodes(value).replace(/\p{Extended_Pictographic}|\p{Emoji_Modifier}|\uFE0F/gu, ' ');
-  if (!/\b(?:nicht|kein\w*|statt|früher|abgelaufen)\b/iu.test(text)) {
-    const prices = [...text.matchAll(/(?:^|[^\p{L}])((?:(?:[cç]i[gğ]k[öo]fte)[- ]+)?(?:wrap|döner|kebap|kebab|kaffee|cappuccino|pizza))\s+(?:für|fuer|um|for)\s+(?:nur\s+)?(\d+(?:[,.]\d{1,2})?)\s*€/giu)];
-    const unique = [...new Set(prices.map(m => `${m[1]} um ${m[2]} €`))];
-    if (unique.length === 1) return unique[0];
-  }
   const sentences = text.split(/[!?;\n]|(?<!\d)\.(?=\s|$)/u);
   for (const raw of sentences) {
     const sentence = raw.trim().replace(/\b(?:unglaubliche|unschlagbare)\s+(?=\d)/gi, '').replace(/(\d)\s*€/g, '$1 €').replace(/\s+/g, ' ');
@@ -89,6 +84,11 @@ export function concreteFoodOfferTitle(value = '') {
     if (!/\d+(?:[,.]\d{1,2})?\s*(?:€|euro\b)|\b(?:gratis|kostenlos)\b|\b[12]\s*\+\s*1\b/i.test(sentence)) continue;
     if (/\b(?:nicht|kein|keine|vorbei|abgelaufen|statt|früher)\b/i.test(sentence) || /[=,:-]$/.test(sentence)) continue;
     return sentence;
+  }
+  if (!/\b(?:nicht|kein\w*|statt|früher|abgelaufen)\b/iu.test(text)) {
+    const prices = [...text.matchAll(/(?:^|[^\p{L}])((?:(?:[cç]i[gğ]k[öo]fte)[- ]+)?(?:wrap|döner|kebap|kebab|kaffee|cappuccino|pizza))\s+(?:für|fuer|um|for)\s+(?:nur\s+)?(\d+(?:[,.]\d{1,2})?)\s*€/giu)];
+    const unique = [...new Set(prices.map(m => `${m[1]} um ${m[2]} €`))];
+    if (unique.length === 1) return unique[0];
   }
   return '';
 }

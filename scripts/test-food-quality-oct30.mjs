@@ -11,6 +11,7 @@ import { entryMediaPriority } from '../scraper/instagram-media-evidence.js';
 import { normalizeSocialAuditCandidate, buildSocialFoodReviewDeal } from '../scraper/social-food-audit-utils.js';
 import { classifyDiscoveryPost } from '../scraper/apify-food-discovery-policy.js';
 import { runWienDealsCombined } from '../scraper/wien-deals-combined.js';
+import { concreteFoodOfferTitle } from '../scraper/offer-title-utils.js';
 
 const now = new Date('2026-10-30T08:00:00Z');
 const ballroom = 'Come to BALLROOM in your Halloween costume on October 31st and get one FREE Sweet Dumpling on us! Think apple, caramel & hazelnut. 📍 BALLROOM – DAMN.GOOD.DUMPLINGS, Maria-Theresien-Straße 5, 1090 Vienna';
@@ -19,6 +20,7 @@ const sushi = 'Trick or Sushi? 🎃 Dieses Halloween gibt’s bei uns Sushi stat
 test('actual food does not become Apple technology or kitchen equipment food', () => {
   assert.equal(inferPreferredBrand({ brand: '@ballroom', description: ballroom, url: 'https://www.instagram.com/p/food/' }).startsWith('BALLROOM'), true);
   assert.equal(normalizeCategoryForScraper('technik', [ballroom]), 'essen');
+  assert.equal(foodDiscoveryPriority({ title: ballroom }), 1);
   const grill = 'ROLAND MULTIGRILL MIT 2000 WATT – NUR 89,90 €! Knusprige Toasts, Sandwiches, Pizza, Fleisch und warme Gerichte mit nur einem Gerät.';
   assert.equal(normalizeCategoryForScraper('essen', [grill]), 'shopping');
   assert.equal(foodDiscoveryPriority({ title: grill }), 0);
@@ -42,7 +44,8 @@ test('alcohol and free business/literary content do not pass as food deals', () 
     assert.equal(classifyPromotion(text).accepted, false, text);
     assert(discoveryRejection({ title: text, socialFoodReview: true }), 'same gate before Slack');
   }
-  for (const text of ['Gratis Ingwer-Shot in Wien', 'Alkoholfreier Martini gratis in Wien', 'Gratis Kaffee zur Beratung in 1070 Wien']) {
+  for (const text of ['Gratis Ingwer-Shot in Wien', 'Alkoholfreier Martini gratis in Wien', 'Gratis Kaffee zur Beratung in 1070 Wien',
+    'Free espresso shot in Vienna', 'Some shots of our pizza. Heute 20% Rabatt in Wien.']) {
     assert.equal(discoveryRejection(text), '', text);
   }
 });
@@ -91,7 +94,9 @@ test('OCR is retained as evidence, not duplicated unreadable Slack prose', () =>
   const row = normalizeSocialAuditCandidate({ caption, text: caption, description: caption, status: 'rejected', reason: 'no-concrete-offer',
     url: 'https://www.instagram.com/p/wrap/', pubDate: now.toISOString(), mediaEvidence: { ocrText: 'a ~~ XY % z q | 33' } }, {}, now);
   const deal = buildSocialFoodReviewDeal({ ...row, reviewEligible: true }, now);
-  assert.equal(deal.title, 'Cigköfte Wrap um 1 €');
+  assert.match(deal.title, /Cigköfte Wrap für 1 €/);
+  assert(deal.title.length <= 110);
+  assert.equal(concreteFoodOfferTitle('Am 30. Oktober gibt es eine tolle Aktion für euch nämlich Cigköfte Wrap für 1€ Wo: Heinestraße 32 ab 13:00 Uhr gilt die tolle Aktion und nur solange der Vorrat reicht.'), 'Cigköfte Wrap um 1 €');
   assert.equal(deal.description.split('Am 30. Oktober').length - 1, 1);
   assert.doesNotMatch(deal.description, /XY/);
   assert.match(deal.description, /Vorrat reicht/);
@@ -145,6 +150,11 @@ test('preview uses existing exact-post evidence and stops network failure storms
   const denied = await enrichPreviews(missing, { enabled: true, sleep: async () => {}, fetchPreview: async () => { calls++; return { status: 403 }; } });
   assert.equal(calls, 1);
   assert.equal(denied.stats.stoppedReason, 'http-403');
+  const rateLimited = await enrichPreviews(missing, { enabled: true, rateLimited: true,
+    fetchPreview: async () => { throw Error('rate-limited run must not fetch'); } });
+  assert.equal(rateLimited.stats.attempted, 0);
+  assert.equal(rateLimited.stats.deferred, missing.length);
+  assert.equal(rateLimited.stats.stoppedReason, 'http-429');
 });
 
 test('Combined replays a fresh scan with zero Graph calls', async () => {

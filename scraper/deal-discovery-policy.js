@@ -23,6 +23,8 @@ const PROFESSIONAL = /\b(?:coaching|teamcoaching|erstgespraech|beratung|besichti
 function withoutAlcoholFreeProducts(text) {
   return text
     .replace(/\b(?:ingwer|ginger|vitamin|immunity|kurkuma|turmeric|wheatgrass)[- ]shots?\b/gi, ' nonalcoholicproduct ')
+    .replace(/\b(?:espresso|coffee|kaffee)[- ]shots?\b/gi, ' coffee ')
+    .replace(/\b(?:camera|photo|food)[- ]shots?\b|\bshots?\s+of\b/gi, '')
     .replace(/\b(?:komm(?:t|en)?|schau(?:t|en)?)\s+(?:(?:gerne?|doch|mal|heute)\s+){0,3}rum\b/gi, '')
     .replace(new RegExp(`\\b(?:ausgenommen|ohne|except|excluding)\\s+${ALCOHOL}(?:\\s*(?:,|und|oder|and|or|/|&)\\s*${ALCOHOL})*\\b`, 'gi'), '')
     .replace(new RegExp(`\\b${NON_ALCOHOLIC}\\s+${ALCOHOL}\\b`, 'gi'), ' nonalcoholicproduct ')
@@ -54,10 +56,10 @@ export function foodDiscoveryPriority(value) {
   if (isKitchenApplianceOffer(typeof value === 'object' ? [value.title, value.description].join(' ') : value)) return 0;
   const title = normalize(value?.title);
   // Do not trust inferred "essen" categories: ticket/software ads had them too.
-  if (FOOD.test(title) || withoutAlcoholFreeProducts(title).includes('nonalcoholicproduct')) return 1;
+  if (FOOD.test(title) || /\b(?:dumplings?|gyoza|bao)\b/.test(title) || withoutAlcoholFreeProducts(title).includes('nonalcoholicproduct')) return 1;
   if (/\b(?:eintritt|tickets?|software|workshop|konzert)\b/.test(title)) return 0;
   const text = offerText(value);
-  return FOOD.test(text) || withoutAlcoholFreeProducts(text).includes('nonalcoholicproduct') ? 1 : 0;
+  return FOOD.test(text) || /\b(?:dumplings?|gyoza|bao)\b/.test(text) || withoutAlcoholFreeProducts(text).includes('nonalcoholicproduct') ? 1 : 0;
 }
 
 export function filterDiscoveryDeals(deals) {

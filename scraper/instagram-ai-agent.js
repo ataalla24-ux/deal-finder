@@ -2426,8 +2426,11 @@ export async function enrichPreviews(candidates, options = {}) {
   const errors = [];
   errors.stats = { attempted: 0, structuredEvidence: 0, deferred: 0, stoppedReason: '' };
   if (!(options.enabled ?? CONFIG.previewFetchEnabled)) return errors;
-  if (instagramRateLimitedDuringRun) {
-    return [{ url: '', error: 'Instagram preview fetch skipped after HTTP 429' }];
+  if (options.rateLimited ?? instagramRateLimitedDuringRun) {
+    errors.stats.stoppedReason = 'http-429';
+    errors.stats.deferred = candidates.length;
+    errors.push({ url: '', error: 'Instagram preview fetch skipped after HTTP 429' });
+    return errors;
   }
 
   const fetchPreview = options.fetchPreview || fetchInstagramPreview;
