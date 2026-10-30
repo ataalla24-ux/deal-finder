@@ -1,7 +1,7 @@
 {
-  "generatedAt": "2026-10-30T07:16:34.966Z",
+  "generatedAt": "2026-10-30T07:19:11.885Z",
   "source": "instagram-graph-cross-source-verification",
-  "status": "ok",
+  "status": "degraded",
   "configured": true,
   "scannedFiles": [
     "deals-pending-church-events.json",
@@ -196,10 +196,15 @@
       "candidates": 2
     }
   ],
-  "fetchedPosts": 125,
-  "exactMatches": 11,
+  "fetchedPosts": 75,
+  "exactMatches": 8,
   "retainedEvidencePosts": 2000,
-  "errors": [],
+  "errors": [
+    {
+      "username": "ikazerestaurant",
+      "message": "Instagram shared quota paused: rolling-hour budget exhausted"
+    }
+  ],
   "accountFailures": {
     "tantisaluti.wien": {
       "count": 2,
@@ -240,19 +245,25 @@
   "sharedQuota": {
     "limitPerHour": 296,
     "usageThreshold": 95,
-    "requests": 6,
-    "reserved": 10,
-    "stopped": false,
-    "reason": "",
+    "requests": 4,
+    "reserved": 4,
+    "stopped": true,
+    "reason": "Instagram shared quota paused: rolling-hour budget exhausted",
     "highestUsagePercent": 81,
     "waitedMs": 0,
     "pacingMs": 0,
-    "retryAt": "",
+    "retryAt": "2026-10-30T07:26:15.605Z",
     "adaptiveSafetyCeiling": 190,
     "adaptiveIncreases": 0,
     "storageFailure": null
   },
+  "globalError": {
+    "username": "ikazerestaurant",
+    "status": 0,
+    "code": "SCAN_BUDGET",
+    "message": "Instagram shared quota paused: rolling-hour budget exhausted"
+  },
   "blockedEvidencePosts": 84,
-  "unmatchedCandidatePosts": 28,
-  "message": "11/39 fresh cross-source Instagram candidates matched exactly via Graph API."
+  "unmatchedCandidatePosts": 31,
+  "message": "8/39 fresh cross-source Instagram candidates matched exactly via Graph API."
 }
