@@ -1,11 +1,11 @@
 {
-  "generatedAt": "2026-10-30T06:04:55.601Z",
+  "generatedAt": "2026-10-30T06:24:09.810Z",
   "summary": {
     "filesConsidered": 32,
-    "totalCandidates": 806,
-    "uniqueCandidates": 732,
-    "distinctCandidates": 767,
-    "duplicateClusters": 35,
+    "totalCandidates": 807,
+    "uniqueCandidates": 734,
+    "distinctCandidates": 768,
+    "duplicateClusters": 34,
     "topHealthySources": [
       {
         "sourceKey": "member-benefits",
@@ -26,16 +26,16 @@
         "totalDeals": 11
       },
       {
+        "sourceKey": "meta-instagram",
+        "sourceLabel": "Meta Instagram Graph",
+        "healthScore": 72,
+        "totalDeals": 135
+      },
+      {
         "sourceKey": "instagram-ai",
         "sourceLabel": "Instagram AI Agent",
         "healthScore": 72,
         "totalDeals": 49
-      },
-      {
-        "sourceKey": "firecrawl5",
-        "sourceLabel": "Firecrawl Key 5 - Instagram Gastro",
-        "healthScore": 71,
-        "totalDeals": 3
       }
     ],
     "topMissionSources": [
@@ -229,13 +229,12 @@
     ],
     "pipelineRuns": {
       "reportedSources": 8,
-      "failedSources": [
-        "wien-combined"
-      ],
+      "failedSources": [],
       "completedWithErrors": [
         "firecrawl2",
         "instagram-apify2",
-        "power"
+        "power",
+        "wien-combined"
       ]
     }
   },
@@ -447,6 +446,90 @@
       "sourceWeightScore": 59
     },
     {
+      "sourceKey": "meta-instagram",
+      "file": "deals-pending-meta-instagram.json",
+      "sourceLabel": "Meta Instagram Graph",
+      "totalDeals": 135,
+      "uniqueDeals": 102,
+      "duplicateDeals": 33,
+      "duplicateAcrossSources": 17,
+      "fresh1dCount": 26,
+      "fresh7dCount": 132,
+      "viennaCount": 135,
+      "foodDrinkCount": 90,
+      "promoCount": 83,
+      "missingUrlCount": 0,
+      "sampleTitles": [
+        "November 2026, 17 bis 18:30 Uhr 📍 Gelber Salon, Amerlingstraße 11, 1060 Wien 🎟️ Eintritt frei 🗣️ Persönliche Beratung: jeden Montag, 15 b",
+        "👉 Schreiben Sie PLANET in die Kommentare – wir schauen uns Ihre Website kostenlos an.",
+        "Gratis Yaprak Döner im ersten Bezirk bei ciosgrill 📍Rotenturmstraße 19, 1010 Wien Einfach verkleidet herkommen genießen und unter den top 3"
+      ],
+      "lastRun": null,
+      "uniqueRate": 0.8,
+      "duplicateRate": 0.1,
+      "fresh1dRate": 0.2,
+      "fresh7dRate": 1,
+      "viennaRate": 1,
+      "foodDrinkRate": 0.7,
+      "promoRate": 0.6,
+      "missingUrlRate": 0,
+      "averageQualityScore": 87.4,
+      "topCategories": [
+        {
+          "value": "essen",
+          "count": 71
+        },
+        {
+          "value": "shopping",
+          "count": 26
+        },
+        {
+          "value": "kaffee",
+          "count": 17
+        },
+        {
+          "value": "kultur",
+          "count": 6
+        },
+        {
+          "value": "reisen",
+          "count": 5
+        },
+        {
+          "value": "beauty",
+          "count": 4
+        }
+      ],
+      "topTypes": [
+        {
+          "value": "rabatt",
+          "count": 69
+        },
+        {
+          "value": "gratis",
+          "count": 55
+        },
+        {
+          "value": "bogo",
+          "count": 5
+        },
+        {
+          "value": "freebie",
+          "count": 4
+        },
+        {
+          "value": "gewinnspiel",
+          "count": 2
+        }
+      ],
+      "issues": [],
+      "healthScore": 72,
+      "missionFitScore": 61,
+      "coverageScore": 89,
+      "precisionScore": 74,
+      "sourceWeightScore": 72
+    },
+    {
       "sourceKey": "instagram-ai",
       "file": "deals-pending-instagram-ai.json",
       "sourceLabel": "Instagram AI Agent",
@@ -597,88 +680,94 @@
       "sourceWeightScore": 64
     },
     {
-      "sourceKey": "meta-instagram",
-      "file": "deals-pending-meta-instagram.json",
-      "sourceLabel": "Meta Instagram Graph",
-      "totalDeals": 135,
-      "uniqueDeals": 101,
-      "duplicateDeals": 34,
-      "duplicateAcrossSources": 18,
-      "fresh1dCount": 26,
-      "fresh7dCount": 132,
-      "viennaCount": 135,
-      "foodDrinkCount": 90,
-      "promoCount": 83,
+      "sourceKey": "wien-combined",
+      "file": "deals-pending-wien-combined.json",
+      "sourceLabel": "Wien Deals Combined Graph",
+      "totalDeals": 3,
+      "uniqueDeals": 1,
+      "duplicateDeals": 2,
+      "duplicateAcrossSources": 2,
+      "fresh1dCount": 3,
+      "fresh7dCount": 3,
+      "viennaCount": 3,
+      "foodDrinkCount": 1,
+      "promoCount": 2,
       "missingUrlCount": 0,
       "sampleTitles": [
-        "November 2026, 17 bis 18:30 Uhr 📍 Gelber Salon, Amerlingstraße 11, 1060 Wien 🎟️ Eintritt frei 🗣️ Persönliche Beratung: jeden Montag, 15 b",
-        "👉 Schreiben Sie PLANET in die Kommentare – wir schauen uns Ihre Website kostenlos an.",
-        "Gratis Yaprak Döner im ersten Bezirk bei ciosgrill 📍Rotenturmstraße 19, 1010 Wien Einfach verkleidet herkommen genießen und unter den top 3"
+        "❤️ Deshalb gibt’s bei Papa Duck jeden Donnerstag bis Ende des Jahres 1+1 Pizza!",
+        "Cigköfte Roll um 1 € - das gibt’s heute am 30.10.",
+        "Come to BALLROOM in your Halloween costume on October 31st and get one FREE Sweet Dumpling on us!"
       ],
-      "lastRun": null,
-      "uniqueRate": 0.7,
-      "duplicateRate": 0.1,
-      "fresh1dRate": 0.2,
+      "lastRun": {
+        "status": "completed-with-errors",
+        "startedAt": "2026-10-30T06:21:14.440Z",
+        "finishedAt": "2026-10-30T06:22:59.802Z",
+        "durationMs": 105362,
+        "counts": {
+          "rawCandidates": 40,
+          "normalizedCandidates": 3,
+          "verifiedCandidates": 3,
+          "previousDeals": 0,
+          "acceptedDeals": 3,
+          "rejectedDeals": 33
+        },
+        "rejectedByReason": {
+          "no-concrete-offer": 24,
+          "alcohol-offer": 3,
+          "general-recommendation": 5,
+          "missing-text": 1
+        },
+        "errors": [
+          "#wien: Instagram scan paused: request-budget"
+        ],
+        "reportFile": "deal-pipeline-last-run-wien-combined.json"
+      },
+      "uniqueRate": 0.3,
+      "duplicateRate": 0.7,
+      "fresh1dRate": 1,
       "fresh7dRate": 1,
       "viennaRate": 1,
-      "foodDrinkRate": 0.7,
-      "promoRate": 0.6,
+      "foodDrinkRate": 0.3,
+      "promoRate": 0.7,
       "missingUrlRate": 0,
-      "averageQualityScore": 87.4,
+      "averageQualityScore": 86.7,
       "topCategories": [
         {
           "value": "essen",
-          "count": 71
+          "count": 1
         },
         {
           "value": "shopping",
-          "count": 26
+          "count": 1
         },
         {
-          "value": "kaffee",
-          "count": 17
-        },
-        {
-          "value": "kultur",
-          "count": 6
-        },
-        {
-          "value": "reisen",
-          "count": 5
-        },
-        {
-          "value": "beauty",
-          "count": 4
+          "value": "technik",
+          "count": 1
         }
       ],
       "topTypes": [
         {
-          "value": "rabatt",
-          "count": 69
+          "value": "bogo",
+          "count": 1
         },
         {
           "value": "gratis",
-          "count": 55
+          "count": 1
         },
         {
-          "value": "bogo",
-          "count": 5
-        },
-        {
-          "value": "freebie",
-          "count": 4
-        },
-        {
-          "value": "gewinnspiel",
-          "count": 2
+          "value": "rabatt",
+          "count": 1
         }
       ],
-      "issues": [],
-      "healthScore": 70,
-      "missionFitScore": 61,
-      "coverageScore": 89,
-      "precisionScore": 74,
-      "sourceWeightScore": 72
+      "issues": [
+        "geringe Food-/Drink-Relevanz",
+        "hohe Überschneidung mit anderen Quellen"
+      ],
+      "healthScore": 66,
+      "missionFitScore": 67,
+      "coverageScore": 13,
+      "precisionScore": 71,
+      "sourceWeightScore": 57
     },
     {
       "sourceKey": "instagram-apify",
@@ -1434,76 +1523,6 @@
       "coverageScore": 5,
       "precisionScore": 42,
       "sourceWeightScore": 28
-    },
-    {
-      "sourceKey": "wien-combined",
-      "file": "deals-pending-wien-combined.json",
-      "sourceLabel": "Wien Deals Combined Graph",
-      "totalDeals": 2,
-      "uniqueDeals": 0,
-      "duplicateDeals": 2,
-      "duplicateAcrossSources": 2,
-      "fresh1dCount": 0,
-      "fresh7dCount": 2,
-      "viennaCount": 2,
-      "foodDrinkCount": 2,
-      "promoCount": 0,
-      "missingUrlCount": 0,
-      "sampleTitles": [
-        "Preis-Tipp: Wrap um 1 € bei RHULO Heinestraße 32",
-        "Bezirk: Schnitzel vom Kalb, Schweinsbraten im Mittagsmenü um 12,90 €, Kaiserschmarrn ohne Rosinen und Palatschinken wie von der Oma."
-      ],
-      "lastRun": {
-        "status": "failed",
-        "startedAt": "2026-10-29T22:56:45.381Z",
-        "finishedAt": "2026-10-29T22:56:46.744Z",
-        "durationMs": 1363,
-        "counts": {
-          "rawCandidates": 0,
-          "normalizedCandidates": 0,
-          "verifiedCandidates": 0,
-          "previousDeals": 0,
-          "acceptedDeals": 0,
-          "rejectedDeals": 0
-        },
-        "rejectedByReason": {},
-        "errors": [
-          "No Graph hashtag source completed successfully; last-good output was preserved. #wienergastro: Instagram shared quota paused: shared cooldown"
-        ],
-        "reportFile": "deal-pipeline-last-run-wien-combined.json"
-      },
-      "uniqueRate": 0,
-      "duplicateRate": 1,
-      "fresh1dRate": 0,
-      "fresh7dRate": 1,
-      "viennaRate": 1,
-      "foodDrinkRate": 1,
-      "promoRate": 0,
-      "missingUrlRate": 0,
-      "averageQualityScore": 83,
-      "topCategories": [
-        {
-          "value": "essen",
-          "count": 2
-        }
-      ],
-      "topTypes": [
-        {
-          "value": "rabatt",
-          "count": 2
-        }
-      ],
-      "issues": [
-        "letzter Pipeline-Lauf ist fehlgeschlagen",
-        "wenige Deals sind frischer als 1 Tag",
-        "wenige klare Gratis-/Promo-Signale",
-        "hohe Überschneidung mit anderen Quellen"
-      ],
-      "healthScore": 48,
-      "missionFitScore": 50,
-      "coverageScore": 11,
-      "precisionScore": 58,
-      "sourceWeightScore": 43
     },
     {
       "sourceKey": "food3",
