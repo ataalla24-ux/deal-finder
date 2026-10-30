@@ -42,6 +42,13 @@ After adding or updating an article:
 6. Publish only scoped website changes and verify the deployed files over HTTPS.
 
 The Website Quality workflow is read-only and checks future website edits.
+Before selecting the next daily article, run `node scripts/audit-blog-coverage.mjs`.
+The dated coverage ledger distinguishes existing articles, held evidence and
+informational directory records. New IDs and changed offer content require a new
+editorial decision; votes and routine feed timestamps do not create a new topic.
+Do not mark an offer covered merely because another article mentions its merchant.
+Do not regenerate the historical ledger to suppress a warning without research.
+Run `node scripts/test-blog-catchup.mjs` after modifying the October 30 collection.
 Provider link checks are optional (`--external`); some providers restrict bots.
 The QR promotion `/plus-gratis.html` intentionally remains unlisted. Preserve
 its destination and eligibility. Noindex admin/test pages must not enter the sitemap.

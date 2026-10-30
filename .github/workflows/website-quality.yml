@@ -20,6 +20,7 @@ jobs:
       - run: node scripts/audit-website.mjs --summary
       - run: node scripts/test-website-quality.mjs
       - run: node scripts/test-blog-backfill.mjs
+      - run: node scripts/test-blog-catchup.mjs
       - run: node scripts/test-pro-website.mjs
       - run: node scripts/test-flyer-website.mjs
       - run: node scripts/test-app-download-website.mjs

@@ -71,7 +71,7 @@ for (const [key, recipe] of Object.entries(photoRecipes).filter(([key]) => !sele
 }
 await fs.writeFile(path.join(destination, 'sources.json'), JSON.stringify({
   description: 'Photographic editorial illustrations only; no merchant-product documentation or added text/logo/price overlays.',
-  generatedPhotoMethod: 'Built-in image_gen for 25 supplemental source photos; existing native/editorial imagery reused for other subjects. No API-key CLI.',
+  generatedPhotoMethod: 'Built-in image_gen for supplemental source photos; existing native/editorial imagery reused for other subjects. No API-key CLI.',
   photos: sources,
 }, null, 2) + '\n');
 console.log(`Prepared ${Object.keys(sources).length} photographic subjects with 1200px JPEG and 480px WebP assets.`);

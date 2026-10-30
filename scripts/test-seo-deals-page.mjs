@@ -17,6 +17,7 @@ fs.copyFileSync(path.join(ROOT, 'scripts/polish-website.mjs'), path.join(fixture
 fs.copyFileSync(path.join(ROOT, 'scripts/blog-visuals.mjs'), path.join(fixtureRoot, 'scripts/blog-visuals.mjs'));
 fs.copyFileSync(path.join(ROOT, 'scripts/blog-photo-catalog.mjs'), path.join(fixtureRoot, 'scripts/blog-photo-catalog.mjs'));
 fs.copyFileSync(path.join(ROOT, 'scripts/blog-backfill-20261018.mjs'), path.join(fixtureRoot, 'scripts/blog-backfill-20261018.mjs'));
+fs.copyFileSync(path.join(ROOT, 'scripts/blog-backfill-20261030.mjs'), path.join(fixtureRoot, 'scripts/blog-backfill-20261030.mjs'));
 fs.copyFileSync(path.join(ROOT, 'scripts/deal-photos.mjs'), path.join(fixtureRoot, 'scripts/deal-photos.mjs'));
 fs.cpSync(path.join(ROOT, 'docs/assets/deal-photos'), path.join(fixtureRoot, 'docs/assets/deal-photos'), { recursive: true });
 fs.symlinkSync(path.join(ROOT, 'node_modules'), path.join(fixtureRoot, 'node_modules'), 'dir');

@@ -5,6 +5,9 @@ import { fileURLToPath } from 'url';
 import { load } from 'cheerio';
 import { polishHtml } from './polish-website.mjs';
 import { backfillGuides } from './blog-backfill-20261018.mjs';
+import { catchupGuides } from './blog-backfill-20261030.mjs';
+
+const editorialGuides = [...backfillGuides, ...catchupGuides];
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const BLOG_DIR = path.join(ROOT, 'docs', 'blog');
@@ -168,19 +171,22 @@ function quickDeal(guide) {
 const PUBLISHED = '2026-08-17';
 const PUBLISHED_LABEL = '17. August 2026';
 
-const guides = [...backfillGuides, ...timelyGuides, ...recentDealGuides, ...[
+const guides = [...editorialGuides, ...timelyGuides, ...recentDealGuides, ...[
   {
     slug: 'guenstig-essen-wien',
-    title: 'Günstig essen Wien: Angebote in 1010, 1080 & 1110',
-    meta: 'Günstig essen in Wien: Angebote in 1010, 1080 und 1110. Ganesha-Gutschein ab 50 Euro, früher Hummel-Kaffee und Geburtstagsbuffet mit Begleitkosten vergleichen.',
+    title: 'Günstig essen in Wien: Angebote und Adressen nach Bezirk',
+    meta: 'Günstig essen in Wien nach Bezirk: Pizza zur Abholung in 1030, 1+1 bei Papa Duck in 1060, Bubble Tea am Westbahnhof und Restaurant-Gutscheine vergleichen.',
     eyebrow: 'Essen & Trinken in Wien',
-    headline: 'Günstig essen in Wien: 1010, 1080 und 1110 im Vergleich.',
-    intro: 'Ein Restaurant-Gutschein in der Inneren Stadt, günstiger Kaffee in der Josefstadt oder ein Geburtstagsbuffet in Simmering: Hier findest du konkrete Wiener Adressen, die Voraussetzungen zur Einlösung und mögliche Zusatzkosten.',
-    published: '2026-10-07', publishedLabel: '7. Oktober 2026', modified: '2026-10-07', modifiedLabel: '7. Oktober 2026',
+    headline: 'Günstig essen in Wien: Angebote nach Bezirk vergleichen.',
+    intro: 'Pizza zur Abholung, ein bedingter Gratis-Bubble-Tea oder ein Restaurant-Gutschein: Hier findest du konkrete Wiener Standorte, Fristen, Kaufvoraussetzungen und mögliche Zusatzkosten statt austauschbarer Restaurantlisten.',
+    published: '2026-10-07', publishedLabel: '7. Oktober 2026', modified: '2026-10-30', modifiedLabel: '30. Oktober 2026',
     image: '/assets/current-ios/deals-home.jpg', imageAvif: '/assets/current-ios/deals-home-400.avif 400w, /assets/current-ios/deals-home-736.avif 736w', imageWidth: 736, imageHeight: 414,
     imageAlt: 'Wiener Food-Angebote in der FreeFinder App',
     sections: [
-      ['bezirke', 'Wiener Angebote nach Bezirk vergleichen', `<p>Die folgenden drei Angebote wurden am <strong>7. Oktober 2026</strong> auf der jeweiligen Anbieter- oder Gutscheinseite nachgelesen. Sie sind keine Liste aller günstigen Restaurants in Wien. Entscheidend sind dein Anlass, der Gesamtpreis und die Bedingungen vor Ort.</p><nav class="topic-nav" aria-label="Bezirke in diesem Guide"><a href="#1010">1010 Innere Stadt</a><a href="#1080">1080 Josefstadt</a><a href="#1110">1110 Simmering</a></nav><p>Suchst du stattdessen eine spontane Aktion für heute? Die <a href="/angebote-wien-heute.html">Angebote in Wien heute</a> enthalten Deals mit bekanntem, noch gültigem Enddatum. Für Aktionen ohne festes Enddatum bleibt die Originalquelle vor deinem Besuch wichtig.</p>`],
+      ['bezirke', 'Wiener Angebote nach Bezirk vergleichen', `<p>Dieser Guide ist keine vollständige Liste günstiger Restaurants in Wien. Die ursprünglichen drei Beispiele wurden am 7. Oktober auf Anbieter- oder Gutscheinseiten nachgelesen. Am <strong>30. Oktober 2026</strong> ergänzte lokale App-Ankündigungen sind jeweils als solche gekennzeichnet; sie sind kein neuer Einlösungstest.</p><nav class="topic-nav" aria-label="Bezirke in diesem Guide"><a href="#1010">1010 Innere Stadt</a><a href="#1030">1030 Landstraße</a><a href="#1060">1060 Mariahilf</a><a href="#1080">1080 Josefstadt</a><a href="#1110">1110 Simmering</a><a href="#1150">1150 Westbahnhof</a></nav><p>Die <a href="/angebote-wien-heute.html">Angebote in Wien heute</a> zeigen eine Auswahl mit bekanntem Enddatum. Bei Ankündigungen ohne feste Frist bestätige die Fortführung vor deinem Besuch.</p>`],
+      ['1030', '1030 Wien: Pizza bei FOOD UP zur Abholung', `<p>In der <strong>Hainburger Straße 52</strong> kündigt FOOD UP Pizza nach Wahl für <strong>7,90 Euro zur Abholung</strong> an. Ein festes Ende des Eröffnungsangebots ist nicht belegt. Die bei anderen Gerichten beworbenen Pommes und Pepsi sind bei der Pizza nicht als inklusive bestätigt.</p><p>Im <a href="food-up-pizza-790-wien-1030.html">FOOD-UP-Guide für 1030 Wien</a> stehen die getrennten Angebote und die gesicherte Händlerankündigung. Bestätige Auswahl, Aufpreise und Fortführung direkt beim Lokal.</p>`],
+      ['1060', '1060 Wien: Papa Duck mit Pizza 1+1 am Donnerstag', `<p>Papa Duck in der <strong>Barnabitengasse 1</strong> bewirbt donnerstags Pizza 1+1 bis Ende 2026. Das ist keine tägliche Aktion. Welche Pizzen teilnehmen und welche Regeln bei unterschiedlichen Preisen gelten, muss das Lokal bestätigen.</p><p>Der <a href="papa-duck-pizza-donnerstag-1plus1-wien.html">Papa-Duck-Pizza-Guide</a> trennt diesen Vorteil von der früheren Bowl-Aktion. Deren Follow-Voraussetzung wird nicht ungeprüft auf Pizza übertragen.</p>`],
+      ['1150', '1150 Wien: Bubble Tea als Zugabe am Westbahnhof', `<p>DimsumBabe kündigt am <strong>Wiener Westbahnhof</strong> einen Bubble Tea zum Kauf einer Portion Gyoza oder Xiao Long Bao an. Kostenlos ist die Getränkezulage, nicht die vollständige Mahlzeit. Eine feste Frist ist nicht angegeben.</p><p>Prüfe vor der Bestellung die laufende Aktion, teilnehmende Sorten und Größen. Der <a href="dimsumbabe-bubble-tea-gratis-westbahnhof-wien.html">DimsumBabe-Guide</a> dokumentiert die gesicherte TikTok-Ankündigung mit ihren offenen Punkten.</p>`],
       ['1010', '1010 Wien: 10 Euro Restaurant-Gutschein bei Ganesha', `<p>Für indisches Essen in der <strong>Inneren Stadt</strong> führt Gutschein.at einen Ganesha-Gutschein: <strong>10 Euro Rabatt ab 50 Euro Konsumation</strong>. Das Restaurant liegt in der <strong>Eschenbachgasse 4, 1010 Wien</strong>. Bei genau 50 Euro sind das 20 Prozent Ersparnis; bei einem höheren Rechnungsbetrag bleiben es 10 Euro, nicht pauschal 20 Prozent.</p><p>Die <a href="https://www.gutschein.at/ganesha-restaurant/10-euro-gutschein" rel="noopener" data-track="deal_outbound">Gutscheinseite mit Bedingungen</a> nennt den <strong>31. Dezember 2026</strong> als Enddatum, Konsumation im Restaurant und höchstens einen Gutschein pro Bestellung und Person. Keine Barablöse. Kündige den Gutschein vor der Bestellung an und lass dir den mobilen Einlösevorgang vom Personal erklären: Die allgemeine Anleitung der Plattform erwähnt auch Lieferung, während die konkrete Bedingung das Restaurant nennt.</p><p>Mehr zur Einlösung findest du im <a href="ganesha-10-euro-gutschein-50-euro-wien.html">Ganesha-Gutschein-Guide</a>.</p>`],
       ['1080', '1080 Wien: Kaffee um 2,50 Euro im Café Hummel', `<p>Für einen günstigen Kaffee in der <strong>Josefstadt</strong> nennt das Café Hummel seine Early-Hummel-Aktion: <strong>Montag bis Freitag von 08:00 bis 09:00 Uhr kostet jeder Kaffee 2,50 Euro</strong>. Die Adresse lautet <strong>Josefstädter Straße 66, 1080 Wien</strong>.</p><p>Die <a href="https://cafehummel.at/" rel="noopener" data-track="deal_outbound">offizielle Café-Hummel-Seite</a> nennt kein festes Ende. Der Preis ist an das enge Zeitfenster gebunden; er gilt nicht als ganztägiger Kaffeepreis und ist kein kostenloses Frühstück. Prüfe die Aktion vor der Anfahrt erneut, besonders an Feiertagen.</p><p>Andere Aktionen, bei denen das Getränk tatsächlich kostenlos sein kann, findest du unter <a href="gratis-kaffee-wien.html">Gratis Kaffee in Wien</a>.</p>`],
       ['1110', '1110 Wien: Geburtstagsbuffet bei Watertuin', `<p>Wer am Geburtstag in <strong>Simmering</strong> essen gehen möchte, findet bei Watertuin einen bedingten Gratisvorteil. Das Lokal ist laut <a href="https://www.watertuin.at/kontakt" rel="noopener">offizieller Kontaktseite</a> in der <strong>Etrichstraße 23, 1110 Wien</strong>.</p><p>Die <a href="https://www.watertuin.at/aktionen" rel="noopener" data-track="deal_outbound">Geburtstagsaktion bei Watertuin</a> umfasst Essen und Trinken für das Geburtstagskind. Mindestens eine erwachsene Begleitperson muss den normalen Vollpreis zahlen; eine Reservierung ist verpflichtend. Fällt der Geburtstag auf einen Dienstag, nennt Watertuin als Ausnahme den folgenden Mittwoch oder Donnerstag. Die Aktion gilt bis auf Widerruf.</p><p>Für die Gruppe ist der Besuch deshalb nicht komplett kostenlos. Vergleiche den aktuellen Preis der Begleitung vor der Reservierung. Weitere Möglichkeiten für deinen Tag stehen unter <a href="geburtstag-gratis-wien.html">Geburtstag gratis in Wien: Essen und Eintritt</a>.</p>`],
@@ -825,7 +831,7 @@ function renderGuide(guide) {
   const isDealPage = Boolean(guide.expires || guide.dealPage);
   const statusBanner = isDealPage ? `<div class="deal-status-banner" data-deal-status-banner${expired ? '' : ' hidden'}><strong>Aktion beendet.</strong>Der angekündigte Aktionszeitraum ist vorbei. Dieser Artikel bleibt als Archiv online. Aktuelle Treffer findest du unter <a href="/angebote-wien-heute.html">Angebote in Wien heute</a>.</div>` : '';
   const wordCount = guide.sections.map((section) => section[2].replace(/<[^>]+>/g, ' ').split(/\s+/).length).reduce((a, b) => a + b, 0);
-  const readingMinutes = backfillGuides.includes(guide) ? Math.max(1, Math.ceil(wordCount / 170)) : Math.max(5, Math.round(wordCount / 170));
+  const readingMinutes = editorialGuides.includes(guide) ? Math.max(1, Math.ceil(wordCount / 170)) : Math.max(5, Math.round(wordCount / 170));
   const structuredData = {
     '@context': 'https://schema.org',
     '@graph': [
@@ -920,7 +926,7 @@ for (const guide of selectedGuides.filter((guide) => guide.modified)) {
   const entryPattern = new RegExp(`(<loc>${url}</loc>\\s*<lastmod>)[^<]+(</lastmod>)`);
   if (entryPattern.test(sitemap)) {
     sitemap = sitemap.replace(entryPattern, `$1${guide.modified}$2`);
-  } else if (backfillGuides.includes(guide)) {
+  } else if (editorialGuides.includes(guide)) {
     const xml = load(sitemap, { xml: true });
     if (xml('loc').toArray().some(node => xml(node).text() === url)) throw new Error(`Unexpected sitemap format: ${url}`);
     if (xml('urlset').length !== 1) throw new Error('Invalid sitemap root');
@@ -931,7 +937,7 @@ for (const guide of selectedGuides.filter((guide) => guide.modified)) {
 }
 fs.writeFileSync(sitemapPath, sitemap);
 
-const selectedBackfill = selectedGuides.filter(guide => backfillGuides.includes(guide));
+const selectedBackfill = selectedGuides.filter(guide => editorialGuides.includes(guide));
 if (selectedBackfill.length) {
   const indexPath = path.join(BLOG_DIR, 'index.html');
   let index = fs.readFileSync(indexPath, 'utf8');

@@ -40,7 +40,7 @@ for (const guide of backfillGuides) {
   const graph = JSON.parse($('script[type="application/ld+json"]').text())['@graph'];
   const article = graph.find(item => item['@type'] === 'Article');
   assert.equal(article.datePublished, guide.published);
-  assert.equal(article.dateModified, '2026-10-18');
+  assert.equal(article.dateModified, guide.modified);
   for (const question of graph.find(item => item['@type'] === 'FAQPage').mainEntity) {
     assert.ok($('.article-body').text().includes(question.name));
     assert.ok($('.article-body').text().includes(question.acceptedAnswer.text));
@@ -107,7 +107,7 @@ const tempRoot = path.join(root, 'tmp');
 fs.mkdirSync(tempRoot, { recursive: true });
 const fixture = fs.mkdtempSync(path.join(tempRoot, 'blog-backfill-test-'));
 try {
-  for (const name of ['scripts/generate-topic-guides.mjs', 'scripts/polish-website.mjs', 'scripts/blog-visuals.mjs', 'scripts/blog-photo-catalog.mjs', 'scripts/deal-photos.mjs', 'scripts/blog-backfill-20261018.mjs', 'reviews/deal-guides.json', 'docs/sitemap.xml', 'docs/blog/index.html']) {
+  for (const name of ['scripts/generate-topic-guides.mjs', 'scripts/polish-website.mjs', 'scripts/blog-visuals.mjs', 'scripts/blog-photo-catalog.mjs', 'scripts/deal-photos.mjs', 'scripts/blog-backfill-20261018.mjs', 'scripts/blog-backfill-20261030.mjs', 'reviews/deal-guides.json', 'docs/sitemap.xml', 'docs/blog/index.html']) {
     const destination = path.join(fixture, name);
     fs.mkdirSync(path.dirname(destination), { recursive: true });
     fs.copyFileSync(path.join(root, name), destination);

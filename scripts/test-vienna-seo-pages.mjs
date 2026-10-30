@@ -21,7 +21,7 @@ for (const slug of slugs) {
   assert.equal($('meta[property="og:url"]').attr('content'), canonical);
   const entry = sitemap('url').filter((_, element) => sitemap(element).find('loc').text() === canonical);
   assert.equal(entry.length, 1, `${slug}: one sitemap entry`);
-  const modified = slug === 'geburtstag-gratis-wien' ? '2026-10-28' : slug === 'guenstig-essen-wien' ? '2026-10-07' : '2026-10-08';
+  const modified = slug === 'geburtstag-gratis-wien' ? '2026-10-28' : '2026-10-30';
   assert.equal(entry.find('lastmod').text(), modified);
   const graph = JSON.parse($('script[type="application/ld+json"]').text())['@graph'];
   const article = graph.find(item => item['@type'] === 'Article');
@@ -71,7 +71,7 @@ for (const href of ['lugner-city-50-prozent-gastronomie-5-oktober-2026.html', 'i
 fs.mkdirSync(path.join(root, 'tmp'), { recursive: true });
 const fixture = fs.mkdtempSync(path.join(root, 'tmp', 'freefinder-vienna-seo-test-'));
 try {
-  for (const filename of ['scripts/generate-topic-guides.mjs', 'scripts/polish-website.mjs', 'scripts/blog-visuals.mjs', 'scripts/blog-photo-catalog.mjs', 'scripts/deal-photos.mjs', 'scripts/blog-backfill-20261018.mjs', 'reviews/deal-guides.json', 'docs/sitemap.xml']) {
+  for (const filename of ['scripts/generate-topic-guides.mjs', 'scripts/polish-website.mjs', 'scripts/blog-visuals.mjs', 'scripts/blog-photo-catalog.mjs', 'scripts/deal-photos.mjs', 'scripts/blog-backfill-20261018.mjs', 'scripts/blog-backfill-20261030.mjs', 'reviews/deal-guides.json', 'docs/sitemap.xml']) {
     const destination = path.join(fixture, filename);
     fs.mkdirSync(path.dirname(destination), { recursive: true });
     fs.copyFileSync(path.join(root, filename), destination);

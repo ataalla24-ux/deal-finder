@@ -37,10 +37,28 @@ export const photoRecipes = {
   'indian-restaurant': { generated: 'restaurant.png', subject: 'Gedeckter Restauranttisch' },
   'asian-restaurant': { generated: 'restaurant.png', subject: 'Gedeckter Restauranttisch' },
   'pizza-alternative': { nativeIndex: 1, subject: 'Pizza mit Tomaten und Käse' },
+  'biang-noodles': { generated: 'biang-noodles.png', subject: 'Breite Biang-Biang-Nudeln in einer Schale' },
+  'cigkofte-wrap': { generated: 'cigkofte-wrap.png', subject: 'Wrap mit Ciğköfte-Füllung und Gemüse' },
+  krapfen: { generated: 'krapfen.png', subject: 'Krapfen mit Staubzucker auf einem Teller' },
+  nuggets: { generated: 'nuggets.png', subject: 'Panierte Chicken Nuggets auf einem Teller' },
+  'bubble-tea': { generated: 'bubble-tea.png', subject: 'Bubble Tea mit Tapiokaperlen' },
+  tiramisu: { generated: 'tiramisu.png', subject: 'Tiramisu auf einem Dessertteller' },
 };
 
 // Match the benefit, not a merchant word in the URL (Pizza Rando offers döner).
 export const articlePhotos = {
+  'only-noodle-biang-biang-1plus1-wien': 'biang-noodles',
+  'rhulo-cigkoefte-wrap-1-euro-wien-30-oktober': 'cigkofte-wrap',
+  'papa-duck-pizza-donnerstag-1plus1-wien': 'pizza',
+  'tuchlauben-krapfen-10-fuer-13-euro-wien': 'krapfen',
+  'mcdonalds-chicken-mcnuggets-1plus1-oesterreich': 'nuggets',
+  'ikea-kindermenue-gratis-family-wien': 'restaurant',
+  'dimsumbabe-bubble-tea-gratis-westbahnhof-wien': 'bubble-tea',
+  'food-up-pizza-790-wien-1030': 'pizza-alternative',
+  'tadima-tiramisu-gratis-doener-wien': 'tiramisu',
+  'haikky-eroeffnung-gratis-essen-wien-1-november': 'restaurant',
+  'peek-cloppenburg-sale-oesterreich': 'fashion',
+  'about-you-outlet-rabatt-oesterreich': 'clothes-alternative',
   'wien-guides': 'city',
   'guenstig-essen-wien': 'cafe-breakfast',
   'geburtstag-gratis-wien': 'birthday',

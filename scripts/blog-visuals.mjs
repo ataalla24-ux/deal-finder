@@ -1,10 +1,12 @@
 import { load } from 'cheerio';
 import { backfillCovers } from './blog-backfill-20261018.mjs';
+import { catchupCovers } from './blog-backfill-20261030.mjs';
 import { photoVisual } from './blog-photo-catalog.mjs';
 
 // Editorial subject metadata is retained for generators; images are photographs.
 export const covers = {
   ...backfillCovers,
+  ...catchupCovers,
   'wien-guides': { lines: ['Deals & Gutscheine', 'in Wien.'], topic: 'FreeFinder Blog', tone: 'green' },
   'guenstig-essen-wien': { lines: ['Günstig essen', 'in Wien.'], topic: 'Essen nach Bezirk', tone: 'green' },
   'geburtstag-gratis-wien': { lines: ['Geburtstag', 'in Wien.'], topic: 'Essen, Eintritt & Erlebnisse', tone: 'rose' },
