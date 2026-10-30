@@ -449,11 +449,17 @@ function hasSignalTerm(signal, pattern) {
 function isLikelyGenericLocation(value) {
   const text = cleanUiNoiseText(value);
   if (!text) return true;
+  if (isStreetAddressBrand(text)) return true;
   if (/^(wien|vienna|online|österreich|osterreich|ganz wien|restaurant \(wien\)|gemeinde|kirche)$/i.test(text)) return true;
   if (/^(?:online|wien|vienna|österreich|osterreich)(?:\s*[\/|,&-]\s*(?:online|wien|vienna|österreich|osterreich))+$/i.test(text)) return true;
   if (/^\d{4}\s+wien/i.test(text)) return false;
   if (/,/.test(text) || /\b(straße|strasse|gasse|platz|weg|ring|allee|bezirk)\b/i.test(text)) return false;
   return text.length <= 4;
+}
+
+function isStreetAddressBrand(value) {
+  return /\b[\p{L}.-]*(?:straße|strasse|gasse|platz|weg|ring|allee)\s+\d+[a-z]?(?:\b|\/)/iu.test(value)
+    || /^\d{4}\s+(?:Wien|Vienna)\b/i.test(value);
 }
 
 function isSourceLikeBrand(value) {
@@ -464,6 +470,7 @@ function isSourceLikeBrand(value) {
 }
 
 function isPlausibleCaptionBrand(value) {
+  if (isStreetAddressBrand(value)) return false;
   const text = cleanUiNoiseText(value).replace(/^[^\p{L}]+|[^\p{L}]+$/gu, '');
   if (!text || text.length < 3 || text.length > 60) return false;
   if (text.split(/\s+/).length > 7 || /\d/.test(text)) return false;
@@ -474,6 +481,10 @@ function isPlausibleCaptionBrand(value) {
 
 function extractPinnedCaptionBrand(value) {
   const text = cleanUiNoiseText(value);
+  for (const match of text.matchAll(/📍\s*([^|#\n]{2,80}?)(?=\s*[,•|–—]|\s+\d{4}\b)/gu)) {
+    const candidate = cleanUiNoiseText(match[1]);
+    if (isPlausibleCaptionBrand(candidate)) return candidate;
+  }
   for (const match of text.matchAll(/📍\s*([^|#]{2,90}?)(?=\s*\||\s+\d{4}\b)/gu)) {
     const candidate = cleanUiNoiseText(match[1]).replace(/[,:;|\s]+$/g, '');
     if (isPlausibleCaptionBrand(candidate)) return candidate;
@@ -606,6 +617,10 @@ function inferPreferredBrand(deal = {}) {
   const knownInTitle = findBrandRule(titleSignal);
   const knownInDescription = findBrandRule(descriptionSignal);
   const knownInURL = findBrandRule([deal.url, deal.post_url].filter(Boolean).join(' '));
+  const captionBrand = extractCaptionBrand(descriptionSignal);
+  const pinnedBrand = extractPinnedCaptionBrand(descriptionSignal);
+  if (pinnedBrand && (!explicitBrand || explicitLooksLikePublisher || isSourceLikeBrand(explicitBrand)
+      || isLikelyGenericLocation(explicitBrand))) return pinnedBrand;
   const merchantUsername = cleanUiNoiseText(deal.merchantUsername || '');
   const knownMerchant = merchantUsername && findBrandRule(merchantUsername);
   if (deal.metaGraphVerified === true && deal.sourceAccountType === 'merchant'
@@ -642,7 +657,6 @@ function inferPreferredBrand(deal = {}) {
     return knownInDescription.name;
   }
 
-  const captionBrand = extractCaptionBrand(descriptionSignal);
   if (
     captionBrand
     && (!explicitBrand || explicitLooksLikePublisher || isSourceLikeBrand(explicitBrand) || isLikelyGenericLocation(explicitBrand))
@@ -667,6 +681,7 @@ function inferPreferredBrand(deal = {}) {
   const distanceBrand = extractFromDistance(deal.distance);
   if (distanceBrand) return distanceBrand;
 
+  if (isStreetAddressBrand(explicitBrand)) return ownerUsername ? `@${ownerUsername.replace(/^@/, '')}` : 'Instagram';
   return explicitBrand || '';
 }
 

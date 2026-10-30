@@ -75,7 +75,7 @@ const CATEGORY_HINTS = {
     'frühstück', 'fruehstueck', 'eis', 'eissalon', 'gelato', 'ice cream',
     'dessert', 'schoko', 'schokolade', 'erdbeer', 'erdbeere', 'erdbeeren',
     'chocoberry', 'waffel', 'pancake', 'kuchen', 'torte', 'bäckerei', 'backerei',
-    'bakery', 'krapfen'
+    'bakery', 'krapfen', 'dumpling', 'dumplings', 'gyoza', 'sushi', 'early dinner'
   ],
   supermarkt: [
     'supermarkt', 'lebensmittel', 'einkauf', 'gutscheinheft', 'jö', 'joe',
@@ -154,6 +154,9 @@ function isChristianEvent(text) {
 function inferCategoryFromText(parts = []) {
   const text = buildSignalText(parts);
   if (!text) return null;
+  if (isKitchenApplianceOffer(text)) return 'shopping';
+  if (/\bsupermarkt\b/i.test(text) && !hasAnyTerm(text, CATEGORY_HINTS.kaffee)) return 'supermarkt';
+  if (/\bcentimeter\b/i.test(text) && /\b(?:lokale?|speisenplatte|\d+\s*meter\s+österreich)\b/i.test(text)) return 'essen';
 
   if (isChristianText(text)) {
     if (hasServiceContext(text)) return 'kirche';
@@ -181,10 +184,14 @@ function normalizeCategoryForScraper(rawCategory, parts = []) {
   const category = CATEGORY_ALIASES[original] || original;
   const inferred = inferCategoryFromText(parts);
   const text = buildSignalText([category, ...parts]);
+  if (isKitchenApplianceOffer(buildSignalText(parts))) return 'shopping';
+  if (category === 'technik' && ['essen', 'kaffee'].includes(inferred)
+      && !/\b(?:iphone|ipad|macbook|airpods|samsung|playstation|xbox|smartphone|tablet|laptop)\b/i.test(text)) return inferred;
 
   if (category === 'events') return isChristianText(text) ? 'events' : (inferred || 'kultur');
   if (isChristianText(text) && hasServiceContext(text)) return 'kirche';
   if (category === 'kirche') return 'kirche';
+  if (category === 'kaffee' && inferred === 'supermarkt') return inferred;
 
   if (['essen', 'kaffee'].includes(category) && ['fitness', 'freizeit', 'kultur', 'reisen', 'beauty'].includes(inferred)) {
     return inferred;
@@ -195,6 +202,14 @@ function normalizeCategoryForScraper(rawCategory, parts = []) {
   if (category === 'shopping' && inferred && inferred !== 'shopping') return inferred;
 
   return category || inferred || 'wien';
+}
+
+// Product specifications distinguish a kitchen device from meals made with it.
+export function isKitchenApplianceOffer(value) {
+  const text = cleanText(value);
+  return /\b(?:multigrill|kontaktgrill|airfryer|heißluftfritteuse|heissluftfritteuse|sandwichmaker|kaffeemaschine)\b/i.test(text)
+    && /\b(?:watt|gerät|geraet|maschine|leistung)\b|\b\d{3,4}\s*w\b/i.test(text)
+    && /\d\s*(?:€|eur\b|euro\b|%)|€\s*\d/i.test(text);
 }
 
 export {

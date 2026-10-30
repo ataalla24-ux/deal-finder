@@ -4,8 +4,9 @@ import { discoveryRejection } from './deal-discovery-policy.js';
 import { getAdFoodBenefitRejection, isFoodDrinkSource } from './food-discovery-utils.js';
 import { canonicalInstagramPostKey } from './deal-evidence-utils.js';
 import { evaluateInstagramOfferTiming } from './instagram-ai-validity-utils.js';
+import { parseExpiryShape } from './expiry-utils.js';
 import { relativeCaptionValidity } from '../apify/instagram-vienna-food-offers/src/validity-utils.js';
-import { concreteFoodOfferTitle } from './offer-title-utils.js';
+import { concreteFoodOfferTitle, socialOfferDisplayText } from './offer-title-utils.js';
 
 export const DAY = 86_400_000;
 export const TAGS = ['wienfood', 'viennafood', 'esseninwien', 'wienisst', 'gratiswien', 'wienkaffee', 'neueroeffnungwien', 'wienpizza'];
@@ -129,10 +130,10 @@ export function classifyDiscoveryPost(raw, { now = new Date(), registry = {}, oc
   const published = realPostTimestamp(raw).iso;
   const timing = evaluateInstagramOfferTiming({ signal, pubDate: published, now, maxAgeDays: 7 });
   const relative = relativeCaptionValidity(signal, now, published);
-  const until = viennaBoundary(relative?.validUntil || timing.offerWindow?.endDate, true);
-  const from = viennaBoundary(relative?.validFrom || timing.offerWindow?.startDate, false);
+  const captionDate = parseExpiryShape(plain(raw.caption), { now, referenceDate: new Date(published) });
+  const until = viennaBoundary(relative?.validUntil || timing.offerWindow?.endDate || captionDate.validUntil || captionDate.validOn, true);
+  const from = viennaBoundary(relative?.validFrom || timing.offerWindow?.startDate || captionDate.validFrom || captionDate.validOn, false);
   if (timing.yesterdayOnly || (until && Date.parse(until) < +now)) return { deal: null, rejectReason: 'expired-offer' };
-  if (from && Date.parse(from) > +now) return { deal: null, rejectReason: 'offer-not-started' };
   const bogo = /\b(?:1\s*[+&]\s*1|2\s*(?:für|fuer|for)\s*1|bogo)\b/i.test(signal);
   const benefitText = signal
     .replace(/\b(?:gluten|sugar|lactose|dairy|alcohol|caffeine|cruelty|plastic|smoke|fat|nut|gmo)[- ]free\b/gi, '')
@@ -152,6 +153,10 @@ export function classifyDiscoveryPost(raw, { now = new Date(), registry = {}, oc
   if (Date.parse(expires) <= +now) return { deal: null, rejectReason: 'review-window-ended' };
   return { rejectReason: '', deal: {
     ...result.deal, title, expires, validUntil: expires, qualityScore, votes: 0,
+    validFrom: from,
+    expirySource: until ? 'social-post-content-date' : 'post-age-review-ttl',
+    expiryEstimated: !until,
+    description: socialOfferDisplayText(plain(raw.caption), ocrText),
     hot: false, reviewRequired: true, reviewTier: 'review',
     originSource: 'Apify 2 Vienna Food Discovery', discoveredBy: 'apify2-profile-hashtag',
     originalCaption: String(raw.caption || '').slice(0, 12_000), ocrText: String(ocrText || '').slice(0, 4000),

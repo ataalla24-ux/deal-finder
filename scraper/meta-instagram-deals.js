@@ -822,7 +822,8 @@ export function classifyPromotion(text) {
   }
 
   const bogoMatch = normalized.match(/\b(?:1\s*\+\s*1|2\s*(?:f(?:ü|u|ue)r|for)\s*1|bogo)\b/i)
-    || normalized.match(SECOND_ITEM_FREE_PATTERN);
+    || normalized.match(SECOND_ITEM_FREE_PATTERN)
+    || normalized.match(/\b(?:kauf|kaufe|buy)\b[^.!?]{0,120}\b(?:den\s+zweiten|die\s+zweite|das\s+zweite|the\s+second)\s+(?:gratis|kostenlos|free)\b/i);
   let type = 'rabatt';
   if (COMPLIMENTARY_FOOD_PATTERN.test(normalized) || (strongMatch && (
     /\bgratis\b|\bkostenlos(?:e|er|es|en)?\b/i.test(strongMatch[0])
@@ -844,6 +845,7 @@ export function classifyPromotion(text) {
 }
 
 function inferCategory(text) {
+  if (/\b(?:early\s+dinner|\d+[- ]gänge(?:[- ]menü)?)\b[^.!?]{0,55}\b\d+(?:[,.]\d+)?\s*€/i.test(text)) return 'essen';
   if (FREE_ENTRY_PATTERN.test(text)
       && /\b(?:event|party|open[- ]?air|festival|concert|konzert|music|musik|show|club)\b/i.test(text)) {
     return 'kultur';
@@ -902,7 +904,7 @@ function inferTitle(text, brand, promotion) {
     return `${restaurantWeekMenu[1]} um ${restaurantWeekMenu[2].replace('.', ',')} € zur Restaurantwoche`;
   }
   const segments = String(text || '')
-    .split(/(?:\r?\n+|\|+|(?<=[.!?])\s+)/)
+    .split(/(?:\r?\n+|\|+|(?<=[!?])\s+|(?<!\d)\.\s+)/)
     .map((segment) => cleanText(segment, 180))
     .filter(Boolean);
   const signalPatterns = [...PROMO_PATTERNS, ...SOFT_PROMO_PATTERNS];

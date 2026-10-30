@@ -100,6 +100,7 @@ const INSTAGRAM_AUTH = instagramAuthSummary(INSTAGRAM_COOKIE_HINTS);
 const INSTAGRAM_AUTH_CIRCUIT = instagramAuthCircuitStatus(readJson(INSTAGRAM_AUTH_HEALTH_PATH, {}));
 let instagramCookieAccessEnabled = INSTAGRAM_AUTH.authenticatedSession && INSTAGRAM_AUTH_CIRCUIT.allowed;
 let instagramRateLimitedDuringRun = false;
+let previewTransportBlocked = false;
 let instagramRuntimeCircuitReason = INSTAGRAM_AUTH_CIRCUIT.reason;
 
 function activeInstagramCookies() {
@@ -1242,6 +1243,7 @@ function extractDateFromHtml(html) {
 async function fetchInstagramPreview(url) {
   const cookieHeader = activeInstagramCookieHeader();
   const response = await fetch(url, {
+    signal: AbortSignal.timeout(12000),
     redirect: 'follow',
     headers: {
       'user-agent': USER_AGENT,
@@ -2412,28 +2414,50 @@ async function discoverCandidates(accounts) {
   return { candidates: rankCandidatesForScan([...map.values()]).slice(0, CONFIG.maxCandidates), stats };
 }
 
-async function enrichPreviews(candidates) {
+export function hasStructuredPostEvidence(candidate, now = new Date()) {
+  const deal = candidate.sourceDeal || {};
+  if (!canonicalInstagramPostKey(deal.url) || canonicalInstagramPostKey(deal.url) !== canonicalInstagramPostKey(candidate.url)) return false;
+  const published = trustedSourceDealPostDate(deal);
+  if (!published || +published.date > +now || +now - +published.date > 7 * 86400000) return false;
+  return postSignal({ ...candidate, preview: null }).length >= 80;
+}
+
+export async function enrichPreviews(candidates, options = {}) {
   const errors = [];
-  if (!CONFIG.previewFetchEnabled) return errors;
+  errors.stats = { attempted: 0, structuredEvidence: 0, deferred: 0, stoppedReason: '' };
+  if (!(options.enabled ?? CONFIG.previewFetchEnabled)) return errors;
   if (instagramRateLimitedDuringRun) {
     return [{ url: '', error: 'Instagram preview fetch skipped after HTTP 429' }];
   }
 
-  let fetched = 0;
+  const fetchPreview = options.fetchPreview || fetchInstagramPreview;
+  const pause = options.sleep || sleep;
+  let failures = 0;
   for (const candidate of candidates) {
-    if (fetched >= CONFIG.maxPreviewFetches) break;
+    if (hasStructuredPostEvidence(candidate, options.now || new Date())) { errors.stats.structuredEvidence++; continue; }
+    if (errors.stats.attempted >= (options.maxFetches ?? CONFIG.maxPreviewFetches)) { errors.stats.deferred++; continue; }
+    errors.stats.attempted++;
     try {
-      candidate.preview = await fetchInstagramPreview(candidate.url);
-      if (candidate.preview.rateLimited) {
-        errors.push({ url: candidate.url, error: 'Instagram HTTP 429; remaining preview requests skipped' });
+      candidate.preview = await fetchPreview(candidate.url);
+      const status = candidate.preview.status;
+      if ([401, 403, 429].includes(status) || candidate.preview.loginWall) {
+        errors.stats.stoppedReason = candidate.preview.loginWall ? 'login-wall' : `http-${status}`;
+        errors.push({ url: candidate.url, error: `Instagram ${errors.stats.stoppedReason}; remaining previews deferred` });
         break;
       }
+      if (status >= 500 || !status) failures++;
+      else failures = 0;
     } catch (error) {
       candidate.preview = { status: 0, finalUrl: candidate.url, loginWall: false, title: '', description: '', image: '', jsonLdText: '', pubDate: '' };
-      errors.push({ url: candidate.url, error: error.message });
+      failures++;
+      errors.push({ url: candidate.url, error: `${error.message}${error.cause?.code ? ` (${error.cause.code})` : ''}` });
     }
-    fetched += 1;
-    await sleep(300);
+    if (failures >= 3) { errors.stats.stoppedReason = 'consecutive-preview-failures'; break; }
+    await pause(300);
+  }
+  if (errors.stats.stoppedReason) {
+    errors.stats.deferred = candidates.length - errors.stats.attempted - errors.stats.structuredEvidence;
+    if (!options.fetchPreview) previewTransportBlocked = true;
   }
   return errors;
 }
@@ -2441,6 +2465,7 @@ async function enrichPreviews(candidates) {
 async function enrichRenderedPreviews(candidates) {
   const errors = [];
   if (!CONFIG.renderFetchEnabled) return errors;
+  if (previewTransportBlocked) return [{ url: '', error: 'Rendered previews deferred after preview access/transport circuit' }];
   if (instagramRateLimitedDuringRun) {
     return [{ url: '', error: 'Instagram rendered previews skipped after HTTP 429' }];
   }
@@ -2461,6 +2486,7 @@ async function enrichRenderedPreviews(candidates) {
   try {
     for (const candidate of candidates) {
       if (fetched >= CONFIG.maxRenderFetches) break;
+      if (hasStructuredPostEvidence(candidate)) continue;
       const page = await context.newPage();
       try {
         const rendered = await fetchRenderedInstagramPreview(page, candidate.url);
@@ -2559,6 +2585,7 @@ async function main() {
     seedUrls: stats.seedUrls,
     profileDiscovery: stats.profileDiscovery,
     previewErrors,
+    previewFetch: previewErrors.stats,
     renderErrors,
     aiErrors: aiResult.errors,
     rejectionReasons: rejectionCounts(candidates),

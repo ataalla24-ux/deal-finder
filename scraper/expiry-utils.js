@@ -596,7 +596,8 @@ export function parseExpiryShape(value, options = {}) {
 
   if (/\bjeden\s+(montag|dienstag|mittwoch|donnerstag|freitag|samstag|sonntag)\b/.test(text) ||
       /\bwöchentlich\b|\bwoechentlich\b|\bmonatlich\b|\bregelmäßig\b|\bregelm[aä](?:ß|ss)ig\b/.test(text) ||
-      /\bsolange vorrat reicht\b|\bsolange der vorrat reicht\b|\btba\b|\bvariiert\b/.test(text)) {
+      /\btba\b|\bvariiert\b/.test(text) ||
+      (uniqueExplicitDates.size === 0 && /\bsolange (?:der )?vorrat reicht\b/.test(text))) {
     return { kind: 'recurring', raw, confidence: 'low' };
   }
 

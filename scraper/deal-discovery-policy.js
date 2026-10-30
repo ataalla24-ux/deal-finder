@@ -1,4 +1,5 @@
 import { getNonOfferContentReason } from './promotion-quality-utils.js';
+import { isKitchenApplianceOffer } from './category-utils.js';
 
 function normalize(value) {
   return String(value || '').toLowerCase().replace(/ä/g, 'ae').replace(/ö/g, 'oe')
@@ -12,15 +13,16 @@ function offerText(value) {
   return normalize([value.title, value.description, value.promotionEvidence].filter(v => typeof v === 'string').join('\n'));
 }
 
-const ALCOHOL = '(?:biere?n?|beers?|spritzer|spritz(?:getraenke?)?|aperol|campari|wein(?:e|verkostung)?|rotwein|weisswein|wines?|prosecco|sekt|champagner|champagne|cocktails?|longdrinks?|vodka|wodka|gin|rum|whisk[ey]+|tequila|likoer|schnaps|spirituosen|radler|gluehwein)';
+const ALCOHOL = '(?:biere?n?|beers?|spritzer|spritz(?:getraenke?)?|aperol|campari|wein(?:e|verkostung)?|rotwein|weisswein|wines?|prosecco|rosecco|sekt|champagner|champagne|cocktails?|martinis?|shots?|longdrinks?|vodka|wodka|gin|rum|whisk[ey]+|tequila|likoer|schnaps|spirituosen|radler|gluehwein)';
 const ALCOHOL_PATTERN = new RegExp(`\\b${ALCOHOL}\\b`, 'i');
 const NON_ALCOHOLIC = '(?:alkoholfrei(?:e[rmns]?)?|alcohol[- ]free|non[- ]alcoholic|0[.,]0\\s*%)';
 const FOOD = /\b(?:essen|speisen?|gerichte?|food|mahlzeiten?|mittagessen|restaurants?|getraenke?|pizza|burger|kebap|kebab|doener|dueruem|falafel|schnitzel|pasta|nudeln|noodles|ramen|sushi|bowls?|sandwich|wraps?|pommes|menue|mittagsmenue|lunch|brunch|fruehstueck|buffet|croissant|brot|semmel|gebaeck|backwaren|krapfen|topfen|kuchen|torte|desserts?|tiramisu|baklava|eis|gelato|kaffee|coffee|espresso|cappuccino|melange|kakao|latte|matcha|tee|tea|boba|ayran|limonade|softdrinks?|mocktails?|saefte|saft|smoothies?)\b/i;
 const BENEFIT = /\b(?:gratis|kostenlos\w*|kostenfrei|free|rabatt|discount|guenstiger|billiger|geschenkt|coupon|gutschein)\b|\b1\s*\+\s*1\b|\d+\s*%/i;
-const PROFESSIONAL = /\b(?:coaching|teamcoaching|erstgespraech|beratung|besichtigung\w*|entruempelung\w*|raeumung\w*|musterwohnungsraeumung|wohnungen?|wohnmesse|immobilien|buwog|webseiten?[- ]check|seo[- ]check|reservierungssoftware|buchungssoftware|reservierungssystem|b2b)\b/i;
+const PROFESSIONAL = /\b(?:coaching|teamcoaching|erstgespraech|beratung|besichtigung\w*|entruempelung\w*|raeumung\w*|musterwohnungsraeumung|wohnungen?|wohnmesse|immobilien|buwog|webdesign|webseiten?[- ]check|seo[- ]check|reservierungssoftware|buchungssoftware|reservierungssystem|b2b)\b/i;
 
 function withoutAlcoholFreeProducts(text) {
   return text
+    .replace(/\b(?:ingwer|ginger|vitamin|immunity|kurkuma|turmeric|wheatgrass)[- ]shots?\b/gi, ' nonalcoholicproduct ')
     .replace(/\b(?:komm(?:t|en)?|schau(?:t|en)?)\s+(?:(?:gerne?|doch|mal|heute)\s+){0,3}rum\b/gi, '')
     .replace(new RegExp(`\\b(?:ausgenommen|ohne|except|excluding)\\s+${ALCOHOL}(?:\\s*(?:,|und|oder|and|or|/|&)\\s*${ALCOHOL})*\\b`, 'gi'), '')
     .replace(new RegExp(`\\b${NON_ALCOHOLIC}\\s+${ALCOHOL}\\b`, 'gi'), ' nonalcoholicproduct ')
@@ -34,6 +36,8 @@ export function discoveryRejection(value) {
   if (ALCOHOL_PATTERN.test(alcoholText)) return 'alcohol-offer';
   // The social-food review lane must not bypass the ordinary offer guards.
   if (getNonOfferContentReason(text)) return 'non-offer-content';
+  if (/\b(?:free to read|read (?:it|the story) for free)\b/.test(text)
+      && !/\b(?:free|gratis)\s+(?:coffee|kaffee|food|essen)\b/.test(text)) return 'non-offer-content';
   // A free sales contact or business tool is not a consumer saving. Keep an
   // independently promised food benefit even if booking/contact is mentioned.
   if (PROFESSIONAL.test(text) && BENEFIT.test(text)
@@ -47,6 +51,7 @@ export function discoveryRejection(value) {
 
 export function foodDiscoveryPriority(value) {
   if (discoveryRejection(value)) return 0;
+  if (isKitchenApplianceOffer(typeof value === 'object' ? [value.title, value.description].join(' ') : value)) return 0;
   const title = normalize(value?.title);
   // Do not trust inferred "essen" categories: ticket/software ads had them too.
   if (FOOD.test(title) || withoutAlcoholFreeProducts(title).includes('nonalcoholicproduct')) return 1;

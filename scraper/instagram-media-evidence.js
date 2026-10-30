@@ -5,6 +5,8 @@ import path from 'node:path';
 import { promisify } from 'node:util';
 import { extractLowFoodPrice, isFoodDrinkSource } from './food-discovery-utils.js';
 import { mergeMediaBacklog, saveMediaBacklog } from './instagram-media-backlog.js';
+import { extractActiveOfferWindow } from './instagram-ai-validity-utils.js';
+import { discoveryRejection, foodDiscoveryPriority } from './deal-discovery-policy.js';
 
 const execFileAsync = promisify(execFile);
 const DAY_MS = 24 * 60 * 60 * 1000;
@@ -629,6 +631,7 @@ export function entryMediaPriority(entry, now) {
   const item = entry?.item || {};
   const ageHours = Math.max(0, (now.getTime() - finiteDateMs(item.timestamp)) / (60 * 60 * 1000));
   const caption = cleanText(item.caption, 4000);
+  if (discoveryRejection(caption)) return -1000;
   let score = Math.max(0, 72 - ageHours);
   if (foodDrinkText(`${caption} ${entry?.context?.account?.category || ''}`)) score += 55;
   if (obviousDealText(caption)) score += 150;
@@ -637,6 +640,14 @@ export function entryMediaPriority(entry, now) {
   if (entry?.context?.account?.accountType === 'merchant') score += 20;
   if (/\b(?:wien|vienna|1\d{3})\b/i.test(caption)) score += 20;
   if (cleanText(item.media_type, 40).toUpperCase() === 'CAROUSEL_ALBUM') score += 12;
+  if (foodDiscoveryPriority({ title: caption })) {
+    if (/\b(?:gratis|kostenlos|free|1\s*\+\s*1)\b|(?:\b1\s*€|€\s*1\b)/i.test(caption)) score += 30;
+    const publication = new Date(item.timestamp);
+    const window = Number.isFinite(+publication) ? extractActiveOfferWindow(caption, { now, pubDate: publication }) : null;
+    const end = window?.endDate?.getTime();
+    if (Number.isFinite(end) && end < +now) return -1000;
+    if (Number.isFinite(end) && end - +now <= 48 * 3600000) score += 100;
+  }
   const sourceBoost = Number(entry?.context?.mediaPriorityBoost || 0);
   if (Number.isFinite(sourceBoost)) score += Math.max(-500, Math.min(500, sourceBoost));
   return score;
@@ -766,6 +777,7 @@ export async function enrichInstagramGraphMedia(entries, config, now = new Date(
     const publishedAt = finiteDateMs(entry?.item?.timestamp);
     if (!id || !publishedAt || now.getTime() - publishedAt > maxAgeMs) continue;
     if (options.shouldAnalyzeEntry?.(entry) === false) { report.skippedResolved += 1; continue; }
+    if (entryMediaPriority(entry, now) <= -1000) { report.skippedResolved += 1; continue; }
     if (!extractInstagramMediaAssets(entry.item).length) continue;
     report.eligible += 1;
     uncached.push(entry);

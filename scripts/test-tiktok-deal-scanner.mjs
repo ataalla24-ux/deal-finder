@@ -237,7 +237,7 @@ const genericTravelGuide = build(
   ),
 );
 assert.equal(genericTravelGuide.deal, null);
-assert.match(genericTravelGuide.reason, /Reiseguide/);
+assert.equal(genericTravelGuide.reason, 'non-offer-content');
 
 const genericPayWhatYouWishWeekend = build(
   'https://www.tiktok.com/@elena.mov/video/7678002441849425184',
@@ -432,7 +432,7 @@ const tourismGuide = build(
   ),
 );
 assert.equal(tourismGuide.deal, null);
-assert.match(tourismGuide.reason, /Sehenswürdigkeits|Freizeitempfehlung/);
+assert.equal(tourismGuide.reason, 'non-offer-content');
 
 const datedBulletRoundup = build(
   'https://www.tiktok.com/@austriannaa/video/7679384436122586390',

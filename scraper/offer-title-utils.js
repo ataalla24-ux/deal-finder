@@ -8,6 +8,21 @@ export function stripSlackEmojiCodes(value = '') {
   return String(value).replace(/:[a-z][a-z0-9_+-]*:/gi, ' ').replace(/\s+/g, ' ').trim();
 }
 
+export function socialOfferDisplayText(caption = '', ocrText = '') {
+  const source = stripSlackEmojiCodes(caption);
+  const readable = [...new Set(String(ocrText).split(/\n+/).map(line => stripSlackEmojiCodes(line)).filter(line => {
+    if (!line || source.toLowerCase().includes(line.toLowerCase())) return false;
+    const words = line.match(/[\p{L}\p{N}]+/gu) || [];
+    const letters = (line.match(/[\p{L}\p{N}]/gu) || []).length;
+    // Keep readable conditions/quantities, but not OCR's single-letter soup.
+    return words.length >= 3 && letters / line.length >= 0.55
+      && words.filter(word => /^\p{L}{1,2}$/u.test(word)).length / words.length < 0.55;
+  }))];
+  if (!ocrText) return source;
+  return [source, readable.length ? `Bildtext (automatisch erkannt, Original prüfen): ${readable.join(' ')}`
+    : 'Zusätzlicher Bildtext erkannt; Bedingungen am verlinkten Originalpost prüfen.'].filter(Boolean).join(' ');
+}
+
 export function isSocialInstructionTitle(value = '') {
   return /^(?:kommentier(?:e|t)?|folg(?:e|t)|markier(?:e|t)?|schreib(?:e|t)?|teil(?:e|t)?)\b|\b(?:per DM|direktnachricht)\b/iu.test(String(value).trim());
 }
@@ -18,6 +33,10 @@ export function polishOfferTitle(value = '', description = '') {
   const text = stripSlackEmojiCodes(original)
     .replace(/^[🎉🔥📣\s\uFE0F]+/u, '')
     .replace(/\s+/g, ' ').trim();
+  if (text.length > 110 || isPromotionalIntro(text)) {
+    const concise = concreteFoodOfferTitle(description);
+    if (concise) return concise;
+  }
   const comparison = text.replace(/\p{Extended_Pictographic}|\uFE0F/gu, '').trim()
     .match(/^(?:nur\s+)?(\d+(?:[,.]\d{1,2})?)\s*€\s+statt\s+(\d+(?:[,.]\d{1,2})?)\s*€[!.]*$/iu);
   if (comparison && !/\b(?:ab\s+\d|mindest\w*|neukunden?|bei\s+(?:kauf|bestellung|einem\s+einkauf)|mit\s+(?:code|coupon|gutschein))\b/iu.test(description)) {
@@ -57,6 +76,11 @@ export function polishOfferTitle(value = '', description = '') {
 
 export function concreteFoodOfferTitle(value = '') {
   const text = stripSlackEmojiCodes(value).replace(/\p{Extended_Pictographic}|\p{Emoji_Modifier}|\uFE0F/gu, ' ');
+  if (!/\b(?:nicht|kein\w*|statt|früher|abgelaufen)\b/iu.test(text)) {
+    const prices = [...text.matchAll(/(?:^|[^\p{L}])((?:(?:[cç]i[gğ]k[öo]fte)[- ]+)?(?:wrap|döner|kebap|kebab|kaffee|cappuccino|pizza))\s+(?:für|fuer|um|for)\s+(?:nur\s+)?(\d+(?:[,.]\d{1,2})?)\s*€/giu)];
+    const unique = [...new Set(prices.map(m => `${m[1]} um ${m[2]} €`))];
+    if (unique.length === 1) return unique[0];
+  }
   const sentences = text.split(/[!?;\n]|(?<!\d)\.(?=\s|$)/u);
   for (const raw of sentences) {
     const sentence = raw.trim().replace(/\b(?:unglaubliche|unschlagbare)\s+(?=\d)/gi, '').replace(/(\d)\s*€/g, '$1 €').replace(/\s+/g, ' ');

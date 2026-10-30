@@ -1,4 +1,5 @@
 import { canonicalSocialPostKey } from './deal-evidence-utils.js';
+import { concreteFoodOfferTitle, socialOfferDisplayText } from './offer-title-utils.js';
 import { advanceDealLifecycle, lifecycleState } from './deal-lifecycle.js';
 import { extractActiveOfferWindow } from './instagram-ai-validity-utils.js';
 import {
@@ -248,6 +249,10 @@ export function normalizeSocialAuditCandidate(input = {}, defaults = {}, now = n
   const sourceLabel = cleanText(input.sourceLabel || defaults.sourceLabel || source, 160);
   const url = cleanText(input.url || input.permalink || input.postUrl, 1200);
   const text = candidateText(input);
+  const displayParts = [input.caption, input.description, input.text, input.textSample]
+    .map(value => cleanText(value, 4000)).filter(Boolean);
+  const displayText = displayParts.filter((value, index) => !displayParts.some((other, j) =>
+    j !== index && other.includes(value) && (other.length > value.length || j < index))).join(' ');
   const status = cleanText(input.status || defaults.status || (input.rejectionReason || input.reason ? 'rejected' : 'collector-accepted'), 40);
   const rejectionReason = cleanText(input.rejectionReason || input.reason, 240);
   const pubDate = isoDate(input.pubDate || input.sourcePublishedAt || input.timestamp);
@@ -301,6 +306,8 @@ export function normalizeSocialAuditCandidate(input = {}, defaults = {}, now = n
     url,
     title: cleanText(input.title || input.brand || (ownerUsername ? `@${ownerUsername}` : ''), 180),
     textSample: cleanText(text, 700),
+    displayText,
+    originalOcrText: cleanText(input.mediaEvidence?.ocrText, 4000),
     ownerUsername,
     ownerRole: cleanText(input.ownerRole || input.accountType, 40),
     merchantUsername,
@@ -452,6 +459,8 @@ function inferredReviewIdentity(row) {
 }
 
 function inferredReviewTitle(row, brand) {
+  const concrete = concreteFoodOfferTitle(row.displayText || row.textSample);
+  if (concrete) return concrete;
   const percent = row.textSample.match(/\b(\d{1,2}\s*%\s*Rabatt\s+auf\s+[^.!?📍#⏰]{2,80})/i)?.[1];
   if (percent) {
     const offer = cleanText(percent, 100)
@@ -507,7 +516,7 @@ export function buildSocialFoodReviewDeal(row, now = new Date()) {
     id: `social-food-review-${stableHash(row.key)}`,
     title,
     brand: identity.brand,
-    description: cleanText(row.textSample, 900),
+    description: cleanText(socialOfferDisplayText(row.displayText ?? row.textSample, row.originalOcrText), 4000),
     type: inferredReviewType(row),
     category: inferredReviewCategory(row),
     source: row.platform === 'tiktok' ? 'TikTok Review' : 'Instagram Review',
@@ -539,6 +548,7 @@ export function buildSocialFoodReviewDeal(row, now = new Date()) {
     scoutUsername: row.ownerRole === 'creator' || row.ownerRole === 'discovery' ? identity.ownerUsername : '',
     merchantUsername: identity.merchantUsername,
     evidence: {
+      originalOcrText: row.originalOcrText || '',
       socialFoodAudit: {
         source: row.source,
         lossCategory: row.lossCategory,

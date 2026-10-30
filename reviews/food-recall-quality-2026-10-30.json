@@ -1,0 +1,42 @@
+{
+  "date": "2026-10-30",
+  "scope": "Vienna food/non-alcoholic drink discovery and Slack quality; source-only changes",
+  "base": "d5e1f4ef3",
+  "evidence": {
+    "slackCardsRead": 63,
+    "slackThreadsRead": 35,
+    "note": "Includes a community test; not 63 unique approved offers.",
+    "failedTikTokRuns": [40960822428, 40865793746],
+    "actualRegressions": ["BALLROOM / Apple", "Sushi date split", "Rhulo cross-posts", "THELL dinner", "Bintat grocery", "Centimeter / travel", "Multigrill / food", "Rosecco and free shots", "free fiction / webdesign leads"]
+  },
+  "changes": [
+    "Repair both stale TikTok test contracts without weakening the non-offer rejection; execute scanner tests in push CI.",
+    "Prefer a pinned merchant over incidental brand keywords; reject street addresses as merchant names.",
+    "Correct food/grocery/appliance categories; preserve already-sent and human-edited card identities.",
+    "Reject alcohol and free business/literary content; preserve explicit non-alcoholic drinks and independent free food.",
+    "Preserve ordinal dates in titles; classify buy-one/second-free correctly; extract concise evidenced food prices.",
+    "Keep readable OCR conditions visibly marked as machine-read, retain raw evidence separately, eliminate repeated caption fields.",
+    "Deduplicate dated merchant aliases by venue, benefit and conditions; preserve distinct branches, prices, dates, times, customer restrictions and quantities.",
+    "Prioritize soon-expiring free/cheap food in the existing media budget; do not spend media slots on policy-rejected or explicitly expired offers.",
+    "Skip public HTML/render fetches with fresh exact-post structured evidence; bound fetch time and stop after access denial or three consecutive transport failures.",
+    "Use food-focused Combined defaults and resolve hashtag IDs lazily so fresh shared scan snapshots use zero Graph requests.",
+    "Retain future Apify offers; recognize explicit caption dates; keep two-digit historical years and prevent stock conditions from overriding a dated expiry."
+  ],
+  "verification": {
+    "offlineSuitesPassed": 39,
+    "newRegressionGroups": 11,
+    "redBeforeGreenAfter": true,
+    "gitDiffCheck": "pass",
+    "ci": "verify after push",
+    "noNewProviderRun": true,
+    "noManualSlackSend": true
+  },
+  "preserved": ["paid and shared API limits", "AI daily/pacing limits", "cron schedules", "manual approval", "live feed and existing Slack cards", "human edits", "Wolt g2-3dn8v3", "native and Store artifacts", "paid card editor OFF"],
+  "remainingLimitations": [
+    "No claim of finding every Instagram offer or of improved live yield before a regular post-deployment run.",
+    "Provider 403/429, missing endpoints and existing cooldowns remain external constraints; no bypass or quota increase.",
+    "BackWerk official /de/news/ was researched as a replacement but direct verification also returned HTTP 404; source/cooldown left unchanged rather than presenting a working replacement.",
+    "Ambiguous creator identity, missing campaign dates or conflicting terms remain review candidates rather than aggressive semantic merges.",
+    "Existing Production Feed Integrity failure for owner-retained Wolt expiry must not be hidden."
+  ]
+}

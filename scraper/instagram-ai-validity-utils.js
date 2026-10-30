@@ -74,6 +74,9 @@ function normalizeSignal(value = '') {
     .replace(/[\u0300-\u036f]/g, '')
     .replace(/\u00df/g, 'ss')
     .replace(/[\u2010-\u2015\u2212]/g, '-')
+    // Do not silently read 31.10.25 as a yearless date in the current year.
+    .replace(/\b([0-3]?\d)([./])(0?[1-9]|1[0-2])\2(\d{2})(?!\d)\b/g,
+      (_, day, separator, month, year) => `${day}${separator}${month}${separator}20${year}`)
     .replace(/\s+/g, ' ')
     .trim()
     .toLowerCase();
@@ -409,9 +412,18 @@ export function extractActiveOfferWindow(signal, options = {}) {
     || parseEventSingleDate(text, referenceDate)
     || parseStandaloneDatedEvent(text, referenceDate)
     || parseExplicitSingleDate(text, referenceDate)
+    || parseDatedFoodBenefit(text, referenceDate)
     || parseRelativeWeekday(text, referenceDate)
     || parseOfferMonth(text, referenceDate)
   );
+}
+
+function parseDatedFoodBenefit(text, referenceDate) {
+  const food = '(?:kaffee|coffee|pizza|burger|kebab|kebap|doener|döner|wrap|sushi|dumpling|getraenk|getränk)';
+  const benefit = new RegExp(`\\b(?:gratis|kostenlos|free)\\s+${food}\\b|\\b${food}\\b[^.!?]{0,30}(?:\\bgratis\\b|\\bfree\\b|\\d+\\s*€)`, 'i');
+  if (!benefit.test(text) || (text.match(/\bam\s+\d/gi) || []).length !== 1) return null;
+  const window = parseExplicitSingleDate(text.replace(/\bam\s+(?=\d)/i, 'angebot am '), referenceDate);
+  return window ? { ...window, evidence: window.evidence.replace(/^angebot am /i, 'am ') } : null;
 }
 
 export function hasRecurringWeekdaySchedule(signal) {

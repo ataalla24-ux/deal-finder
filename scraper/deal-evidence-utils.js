@@ -30,6 +30,9 @@ const OFFER_PRODUCT_PATTERNS = [
   ['bowl', /\bbowl\b/],
   ['sushi', /\b(?:sushi|maki)\b/],
   ['ramen', /\bramen\b/],
+  ['wrap', /\b(?:wraps?|cigkofte|cigkoefte)\b/],
+  ['dumpling', /\b(?:dumplings?|gyoza)\b/],
+  ['dinner', /\b(?:early dinner|[3-9][ -]gange|[3-9][ -]gaenge)\b/],
   ['food', /\b(?:essen|eat|speise|gericht|menue|menu|food)\b/],
   ['ticket', /\b(?:ticket|eintritt|admission)\b/],
   ['hair-styling', /\b(?:haarstyling|hair\s+(?:styled|styling)|styling\s+tour|haare?\b[^.!?]{0,40}\bstylen)\b/],
@@ -51,7 +54,7 @@ function normalizeFingerprintText(value) {
     .replace(/[\u0300-\u036f]/g, '')
     .replace(/ß/g, 'ss')
     .toLowerCase()
-    .replace(/[^a-z0-9%€+./-]+/g, ' ')
+    .replace(/[^a-z0-9%€+:./-]+/g, ' ')
     .replace(/\s+/g, ' ')
     .trim();
 }
@@ -103,6 +106,20 @@ function uniqueMatches(text, pattern, mapper = (match) => match[0]) {
   return [...new Set([...text.matchAll(pattern)].map(mapper).filter(Boolean))];
 }
 
+function offerBranchKey(deal) {
+  const text = normalizeFingerprintText([deal.address, deal.location, deal.distance, deal.description].filter(v => typeof v === 'string').join(' '));
+  const branches = uniqueMatches(text, /\b([a-z.-]*(?:strasse|str\.?|gasse|platz|weg|ring|allee))\s*(\d+[a-z]?(?:\/\d+)?)\b/g,
+    m => `${m[1].replace(/str(?:asse|\.)?$/, 'str')}${m[2]}`);
+  return branches.length === 1 ? branches[0] : branches.length > 1 ? branches.sort().join('+') : '';
+}
+
+function offerDay(value) {
+  if (!value) return '';
+  const date = new Date(value);
+  if (!Number.isFinite(+date)) return '';
+  return new Intl.DateTimeFormat('en-CA', { timeZone: 'Europe/Vienna', year: 'numeric', month: '2-digit', day: '2-digit' }).format(date);
+}
+
 /**
  * Conservative cross-post fingerprint for one social promotion. It deliberately
  * requires a merchant plus concrete offer evidence so unrelated posts from the
@@ -130,7 +147,8 @@ function semanticPromotionOfferKey(deal = {}, options = {}) {
   // Rich captions often contain unrelated prices or study percentages. Prefer
   // the normalized offer fields and only inspect the caption as a fallback.
   const markers = extractMarkers(signal);
-  if (markers.length === 0) markers.push(...extractMarkers(context));
+  const explicitFreeSignal = /\b(?:gratis|kostenlos)\b|\bfree\s+(?:food|coffee|pizza|burger|kebab|dumpling|drink)\b/.test(signal);
+  if (markers.length === 0 && !explicitFreeSignal) markers.push(...extractMarkers(context));
 
   const productKeys = (text) => OFFER_PRODUCT_PATTERNS
     .filter(([, pattern]) => pattern.test(text))
@@ -139,6 +157,8 @@ function semanticPromotionOfferKey(deal = {}, options = {}) {
   if (products.length === 0) products = productKeys(context);
   if (products.includes('hair-styling')) products = ['hair-styling'];
   if (products.length > 1) products = products.filter((product) => product !== 'food');
+  if (/\b(?:vegan|veggie|vegetarisch)\b/.test(signal)) products.push('vegetarian');
+  if (/\b(?:chicken|hahnchen|huhn)\b/.test(signal)) products.push('chicken');
   products = products.slice(0, 4);
   const concreteMarker = markers.length > 0;
   const freeMarker = /\b(?:gratis|kostenlos|free)\b/.test(context);
@@ -147,14 +167,37 @@ function semanticPromotionOfferKey(deal = {}, options = {}) {
 
   if (!concreteMarker && !(freeMarker && products.length > 0 && dateMarkers.length > 0)) return '';
   if (products.length === 0) return '';
-  const campaignDate = !concreteMarker ? dateMarkers.slice(0, 2).sort().join('+')
-    : [deal.validOn, deal.validFrom, deal.expiryEstimated === true || /ttl|fallback|unknown/i.test(deal.expirySource || '') ? '' : deal.validUntil].filter(Boolean).join('+');
+  const structuredDays = [...new Set([deal.validOn, deal.validFrom,
+    deal.expiryEstimated === true || /ttl|fallback|unknown/i.test(deal.expirySource || '') ? '' : deal.validUntil].map(offerDay).filter(Boolean))].sort();
+  const campaignDate = structuredDays.join('+') || dateMarkers.slice(0, 2).sort().join('+');
   const conditions = [
     /\b(?:neukunden?|erstbestellung|new customers?)\b/.test(context) ? 'new-customer' : '',
     /\b(?:nachsten einkauf|next purchase)\b/.test(context) ? 'next-purchase' : '',
+    /\b(?:kostum|kostume|verkleidet|verkleidung|costume)\b/.test(context) ? 'costume' : '',
+    /\b(?:reservier\w*|reservation|booking)\b/.test(context) ? 'reservation' : '',
+    /\b(?:nur|only)\s+(?:mitglieder|members)\b/.test(context) ? 'membership' : '',
+    /\b(?:bei kauf|beim kauf|with purchase)\b/.test(context) ? 'purchase' : '',
+    ...uniqueMatches(context, /\b(?:ersten|first)\s+(\d+)\b/g, m => `first-${m[1]}`),
+    ...uniqueMatches(context, /\b(?:montag|dienstag|mittwoch|donnerstag|freitag|samstag|sonntag)\b/g),
+    ...uniqueMatches(normalizeFingerprintText([deal.title, deal.description, deal.promotionEvidence].filter(Boolean).join(' ')), /\b(?:[01]?\d|2[0-3]):[0-5]\d\b/g),
     ...uniqueMatches(context, /\b(?:ab|uber|mindestbestellwert|minimum spend)\s*(?:€\s*)?(\d+(?:[.,]\d+)?)\s*(?:€|eur\b|euro\b)/g, m => `minimum-${m[1]}`),
   ].filter(Boolean).sort().join('+');
-  return `offer:${brand}|${markers.join('+') || 'free'}|${products.sort().join('+')}|${campaignDate}|${conditions}`;
+  return `offer:${brand}|${markers.join('+') || 'free'}|${products.sort().join('+')}|${campaignDate}|${conditions}|${offerBranchKey(deal)}`;
+}
+
+// Merchant aliases still need the same venue and dated promotion. An unresolved
+// creator is not permission to merge two businesses inside the same food hall.
+export function semanticVenueCampaignKey(deal = {}) {
+  const branch = offerBranchKey(deal);
+  if (['creator', 'discovery'].includes(deal.sourceAccountType) && !deal.merchantUsername) return '';
+  const merchant = compactMerchantFingerprint(deal.merchantUsername || deal.brand)
+    .replace(/official$/, '').replace(/(?:10[1-9]0|11\d0|12[0-3]0)$/, '');
+  if (!branch || branch.includes('+') || deal.expiryEstimated === true
+      || merchant.length < 3 || GENERIC_MERCHANT_KEYS.has(merchant)
+      || /ttl|fallback|unknown/i.test(deal.expirySource || '')
+      || !offerDay(deal.validOn || deal.validUntil)) return '';
+  const key = semanticPromotionOfferKey({ ...deal, brand: `venue-${branch}-${merchant}` });
+  return key ? `venue-campaign:${key}` : '';
 }
 
 export function semanticSocialOfferKey(deal = {}) {

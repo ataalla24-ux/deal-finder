@@ -54,12 +54,12 @@ const RESCUABLE_REJECTIONS = new Set([
 ]);
 const DEFAULT_HASHTAGS = [
   'wien',
-  'vienna',
+  'wienfood',
   'viennafood',
-  'wienevents',
-  'wientipps',
-  'wienfamilie',
-  'sommerinwien',
+  'wienisst',
+  'viennarestaurants',
+  'wienkaffee',
+  'wienfoodie',
   'wienergastro',
   'essenwien',
   'viennaeats',
@@ -283,17 +283,19 @@ export async function runWienDealsCombined(options = {}) {
       break;
     }
     try {
-      const search = await graphRequest('ig_hashtag_search', { user_id: userId, q: hashtag }, requestOptions);
-      const hashtagId = cleanText(search?.data?.[0]?.id, 120);
-      if (!hashtagId) {
-        sourceResults.push({ hashtag, status: 'not-found', fetched: 0, accepted: 0 });
-        continue;
-      }
+      let hashtagId = '';
       const scan = await scanGraphSource({
         key: `hashtag:${hashtag}`, store: scanStore, now,
         cacheMinutes: collectorConfig.scanCacheMinutes, maxPages: collectorConfig.maxPagesPerSource,
         refreshHours: collectorConfig.scanRefreshHours,
         fetchPage: async (after) => {
+          // Resolve only when paging is needed. A fresh peer snapshot costs no
+          // search request and leaves the shared quota for unvisited sources.
+          if (!hashtagId) {
+            const search = await graphRequest('ig_hashtag_search', { user_id: userId, q: hashtag }, requestOptions);
+            hashtagId = cleanText(search?.data?.[0]?.id, 120);
+            if (!hashtagId) throw Object.assign(new Error('Hashtag not found'), { code: 24 });
+          }
           const response = await graphHashtagMediaRequestWithAdaptiveLimit(`${hashtagId}/recent_media`, {
             user_id: userId, limit: maxMediaPerHashtag, ...(after ? { after } : {}),
           }, requestOptions);
