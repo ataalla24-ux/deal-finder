@@ -1,19 +1,21 @@
 {
-  "generatedAt": "2026-10-30T21:34:51.902Z",
+  "generatedAt": "2026-10-30T21:59:30.631Z",
   "summary": {
     "maxAgeDays": 7,
-    "total": 312,
-    "allowed": 0,
+    "total": 313,
+    "allowed": 1,
     "blocked": 312,
-    "warnings": 0,
+    "warnings": 1,
     "reasonCounts": {
-      "kein konkretes Angebot erkennbar": 235,
+      "kein konkretes Angebot erkennbar": 232,
       "Gottesdienste nur im Wochenlauf": 36,
       "älter als 7 Tage (2020-04-25)": 1,
-      "älter als 7 Tage (2026-02-22)": 82,
+      "älter als 7 Tage (2026-02-22)": 80,
       "URL ungültig (fehlende Ziel-URL)": 2,
+      "älter als 7 Tage (2017-04-20)": 1,
       "älter als 7 Tage (2026-10-20)": 1,
       "älter als 7 Tage (2026-10-14)": 1,
+      "älter als 7 Tage (2025-07-30)": 1,
       "URL ungültig (HTTP 404)": 19,
       "nicht eindeutig in Wien": 7,
       "älter als 45 Tage trotz ausdrücklich noch aktive Gültigkeit (2026-08-04)": 4,
@@ -38,11 +40,11 @@
       "älter als 7 Tage (2009-05-01)": 1,
       "älter als 7 Tage (2014-06-07)": 1,
       "älter als 7 Tage (2025-12-30)": 1,
-      "Meta-Graph-Widerspruch (excluded-promotion-type)": 2,
-      "Gewinnspiel/Verlosung statt direkt nutzbarem Deal": 5,
+      "Meta-Graph-Widerspruch (excluded-promotion-type)": 1,
+      "Gewinnspiel/Verlosung statt direkt nutzbarem Deal": 4,
       "abgelaufen (2026-08-30)": 4,
       "kostenlose Mitgliedschaft/Registrierung statt Deal": 1,
-      "selbst syndizierter FreeFinder-Post": 4,
+      "selbst syndizierter FreeFinder-Post": 5,
       "allgemeine Empfehlung/Gratis-Event statt konkreter Aktion": 2,
       "relative Kurz-Aktion abgelaufen (2026-10-26)": 1,
       "Engagement-Aktion ohne garantierte Gegenleistung": 1,
@@ -51,30 +53,20 @@
       "Ortswiderspruch: Originalangebot nennt einen Standort ausserhalb Wiens": 1
     },
     "reasonCategoryCounts": {
-      "kein konkreter Deal": 237,
+      "kein konkreter Deal": 234,
       "Gottesdienste außerhalb Wochenlauf": 36,
       "älter als 7 Tage": 136,
       "ungültige URL": 26,
       "nicht Wien": 7,
       "sonstiges": 14,
       "abgelaufen": 10,
-      "Meta-Graph-Widerspruch": 2,
-      "Gewinnspiel": 5,
-      "selbst syndiziert": 4,
+      "Meta-Graph-Widerspruch": 1,
+      "Gewinnspiel": 4,
+      "selbst syndiziert": 5,
       "kein echtes Post-Datum": 106,
       "ausgeschlossene Quelle": 47
     },
     "sourceCounts": {
-      "Apify 2 Vienna Food Discovery": {
-        "total": 1,
-        "allowed": 0,
-        "blocked": 1,
-        "warnings": 0,
-        "reasonCategoryCounts": {
-          "Meta-Graph-Widerspruch": 1,
-          "Gewinnspiel": 1
-        }
-      },
       "Apify Instagram Vienna Food Offers": {
         "total": 1,
         "allowed": 0,
@@ -122,7 +114,7 @@
         "blocked": 35,
         "warnings": 0,
         "reasonCategoryCounts": {
-          "kein konkreter Deal": 34,
+          "kein konkreter Deal": 33,
           "Gottesdienste außerhalb Wochenlauf": 35,
           "älter als 7 Tage": 32,
           "ungültige URL": 2,
@@ -179,7 +171,7 @@
         "blocked": 97,
         "warnings": 0,
         "reasonCategoryCounts": {
-          "kein konkreter Deal": 94,
+          "kein konkreter Deal": 92,
           "älter als 7 Tage": 94,
           "ungültige URL": 7,
           "Gottesdienste außerhalb Wochenlauf": 1,
@@ -199,14 +191,14 @@
         }
       },
       "Meta Instagram Business Discovery": {
-        "total": 21,
-        "allowed": 0,
-        "blocked": 21,
-        "warnings": 0,
+        "total": 23,
+        "allowed": 1,
+        "blocked": 22,
+        "warnings": 1,
         "reasonCategoryCounts": {
+          "selbst syndiziert": 5,
           "sonstiges": 2,
           "kein konkreter Deal": 15,
-          "selbst syndiziert": 4,
           "abgelaufen": 1
         }
       },
@@ -222,7 +214,25 @@
       }
     }
   },
-  "allowed": [],
+  "allowed": [
+    {
+      "id": "meta-ig-18113483138165497",
+      "title": "20 % Rabatt auf deinen gesamten Einkauf bei OMNOM",
+      "brand": "Burger Wien | Vienna",
+      "source": "Meta Instagram Business Discovery",
+      "url": "https://www.instagram.com/p/DfIe4WRkcw_/",
+      "reasons": [],
+      "warnings": [
+        "Inhalt prüfen: Caption-Reste oder Emoji-Codes im sichtbaren Text"
+      ],
+      "sourceDate": "2026-10-30T20:51:40.000Z",
+      "sourceDateSource": "url.instagramShortcode",
+      "sourceAgeDays": 0,
+      "expiryDate": "2026-10-31",
+      "expirySource": "url.contentHints.title",
+      "urlStatus": "HTTP 200"
+    }
+  ],
   "blocked": [
     {
       "id": "jesuszentrum-events-20261026",
@@ -432,15 +442,13 @@
         "kein konkretes Angebot erkennbar",
         "älter als 7 Tage (2026-02-22)"
       ],
-      "warnings": [
-        "URL nicht eindeutig prüfbar (temporärer Fehler)"
-      ],
+      "warnings": [],
       "sourceDate": "2026-02-22T21:12:35.964Z",
       "sourceDateSource": "deal.pubDate",
       "sourceAgeDays": 250,
       "expiryDate": "",
       "expirySource": "deal.expires",
-      "urlStatus": "unklar: temporärer URL-Fehler"
+      "urlStatus": "HTTP 200"
     },
     {
       "id": "events-8-20260222",
@@ -583,17 +591,15 @@
       "url": "https://www.malteser.at",
       "reasons": [
         "kein konkretes Angebot erkennbar",
-        "älter als 7 Tage (2026-02-22)"
+        "älter als 7 Tage (2017-04-20)"
       ],
-      "warnings": [
-        "URL nicht eindeutig prüfbar (temporärer Fehler)"
-      ],
-      "sourceDate": "2026-02-22T21:12:35.964Z",
-      "sourceDateSource": "deal.pubDate",
-      "sourceAgeDays": 250,
+      "warnings": [],
+      "sourceDate": "2017-04-20T11:03:34.000Z",
+      "sourceDateSource": "url.publicationDate",
+      "sourceAgeDays": 3480,
       "expiryDate": "",
       "expirySource": "deal.expires",
-      "urlStatus": "unklar: temporärer URL-Fehler"
+      "urlStatus": "HTTP 200"
     },
     {
       "id": "events-16-20260222",
@@ -678,18 +684,17 @@
       "reasons": [
         "kein konkretes Angebot erkennbar",
         "Gottesdienste nur im Wochenlauf",
-        "älter als 7 Tage (2026-02-22)"
+        "älter als 7 Tage (2025-07-30)"
       ],
       "warnings": [
-        "URL nicht eindeutig prüfbar (HTTP 500)",
         "kein Ablaufdatum gefunden"
       ],
-      "sourceDate": "2026-02-22T21:13:07.698Z",
-      "sourceDateSource": "deal.pubDate",
-      "sourceAgeDays": 250,
+      "sourceDate": "2025-07-30T05:18:47.000Z",
+      "sourceDateSource": "url.publicationDate",
+      "sourceAgeDays": 457,
       "expiryDate": "",
       "expirySource": "",
-      "urlStatus": "unklar: HTTP 500"
+      "urlStatus": "HTTP 200"
     },
     {
       "id": "extra-21-20260222",
@@ -871,7 +876,7 @@
       "warnings": [
         "kein Ablaufdatum gefunden"
       ],
-      "sourceDate": "2026-10-30T21:33:23.092Z",
+      "sourceDate": "2026-10-30T21:57:23.318Z",
       "sourceDateSource": "url.publicationDate",
       "sourceAgeDays": 0,
       "expiryDate": "",
@@ -1085,19 +1090,16 @@
       "source": "Freikirchen Wien",
       "url": "https://www.fcgwien.at",
       "reasons": [
-        "kein konkretes Angebot erkennbar",
         "Gottesdienste nur im Wochenlauf",
         "älter als 7 Tage (2026-04-19)"
       ],
-      "warnings": [
-        "URL nicht eindeutig prüfbar (HTTP 403)"
-      ],
+      "warnings": [],
       "sourceDate": "2026-04-19T08:59:47.145Z",
       "sourceDateSource": "deal.pubDate",
       "sourceAgeDays": 194,
       "expiryDate": "",
       "expirySource": "deal.expires",
-      "urlStatus": "unklar: HTTP 403"
+      "urlStatus": "HTTP 200"
     },
     {
       "id": "freikirche-4-20260419",
@@ -2166,18 +2168,15 @@
       "source": "Kirchen Verzeichnis",
       "url": "https://www.fcgwien.at",
       "reasons": [
-        "kein konkretes Angebot erkennbar",
         "älter als 7 Tage (2026-02-22)"
       ],
-      "warnings": [
-        "URL nicht eindeutig prüfbar (HTTP 403)"
-      ],
+      "warnings": [],
       "sourceDate": "2026-02-22T21:12:35.964Z",
       "sourceDateSource": "deal.pubDate",
       "sourceAgeDays": 250,
       "expiryDate": "",
       "expirySource": "deal.expires",
-      "urlStatus": "unklar: HTTP 403"
+      "urlStatus": "HTTP 200"
     },
     {
       "id": "gemeinde-10-20260222",
@@ -2966,18 +2965,15 @@
       "source": "Kirchen Verzeichnis",
       "url": "https://www.fcgwien.at",
       "reasons": [
-        "kein konkretes Angebot erkennbar",
         "älter als 7 Tage (2026-02-22)"
       ],
-      "warnings": [
-        "URL nicht eindeutig prüfbar (HTTP 403)"
-      ],
+      "warnings": [],
       "sourceDate": "2026-02-22T21:12:35.964Z",
       "sourceDateSource": "deal.pubDate",
       "sourceAgeDays": 250,
       "expiryDate": "",
       "expirySource": "deal.expires",
-      "urlStatus": "unklar: HTTP 403"
+      "urlStatus": "HTTP 200"
     },
     {
       "id": "gottesdienste-18-20260222",
@@ -3569,26 +3565,6 @@
       "urlStatus": "HTTP 200"
     },
     {
-      "id": "igap-k5q7ry",
-      "title": "Samstag, 31. Oktober 2026 12:00–17:00 Uhr GRATIS DÖNER",
-      "brand": "CIO‘S",
-      "source": "Apify 2 Vienna Food Discovery",
-      "url": "https://www.instagram.com/p/DfHZ5jORqUM/",
-      "reasons": [
-        "Meta-Graph-Widerspruch (excluded-promotion-type)",
-        "Gewinnspiel/Verlosung statt direkt nutzbarem Deal"
-      ],
-      "warnings": [
-        "Inhalt prüfen: Nur Stadt/Region angegeben; Filiale oder teilnehmende Standorte prüfen"
-      ],
-      "sourceDate": "2026-10-30T10:48:54.000Z",
-      "sourceDateSource": "url.instagramShortcode",
-      "sourceAgeDays": 0,
-      "expiryDate": "2026-10-31T22:59:59.999Z",
-      "expirySource": "deal.structured",
-      "urlStatus": "HTTP 200"
-    },
-    {
       "id": "joe-omv-viva-free-taste-19nkk2p",
       "title": "Gratis Coconut Strawberry Sunset testen",
       "brand": "OMV VIVA",
@@ -3732,6 +3708,25 @@
       "sourceAgeDays": null,
       "expiryDate": "",
       "expirySource": "deal.expires",
+      "urlStatus": "HTTP 200"
+    },
+    {
+      "id": "meta-ig-18028840571698252",
+      "title": "🐟 1+1 GRATIS MIT NORDSEE-COUPON!",
+      "brand": "NORDSEE",
+      "source": "Meta Instagram Business Discovery",
+      "url": "https://www.instagram.com/reel/DfISNaREqS_/",
+      "reasons": [
+        "selbst syndizierter FreeFinder-Post"
+      ],
+      "warnings": [
+        "Inhalt prüfen: Caption-Reste oder Emoji-Codes im sichtbaren Text"
+      ],
+      "sourceDate": "2026-10-30T19:00:57.000Z",
+      "sourceDateSource": "url.instagramShortcode",
+      "sourceAgeDays": 0,
+      "expiryDate": "2026-11-30",
+      "expirySource": "url.contentHints.title",
       "urlStatus": "HTTP 200"
     },
     {
@@ -3905,7 +3900,7 @@
       "sourceDate": "2026-10-28T19:00:38.000Z",
       "sourceDateSource": "url.instagramShortcode",
       "sourceAgeDays": 2,
-      "expiryDate": "2026-11-02T16:25:02.323Z",
+      "expiryDate": "2026-11-02T21:39:52.018Z",
       "expirySource": "deal.structured",
       "urlStatus": "HTTP 200"
     },
