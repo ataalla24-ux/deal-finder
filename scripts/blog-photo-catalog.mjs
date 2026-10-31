@@ -51,6 +51,7 @@ export const photoRecipes = {
 
 // Match the benefit, not a merchant word in the URL (Pizza Rando offers döner).
 export const articlePhotos = {
+  'blumencafe-kaffee-kuchen-6-euro-wien': 'coffee',
   'only-noodle-biang-biang-1plus1-wien': 'biang-noodles',
   'rhulo-cigkoefte-wrap-1-euro-wien-30-oktober': 'cigkofte-wrap',
   'papa-duck-pizza-donnerstag-1plus1-wien': 'pizza',

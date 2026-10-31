@@ -7,6 +7,7 @@ import { photoVisual } from './blog-photo-catalog.mjs';
 export const covers = {
   ...backfillCovers,
   ...catchupCovers,
+  'blumencafe-kaffee-kuchen-6-euro-wien': { lines: ['Blumencafé', 'Kaffee & Kuchen.'], topic: 'Kaffeepause in Währing', tone: 'green' },
   'wien-guides': { lines: ['Deals & Gutscheine', 'in Wien.'], topic: 'FreeFinder Blog', tone: 'green' },
   'guenstig-essen-wien': { lines: ['Günstig essen', 'in Wien.'], topic: 'Essen nach Bezirk', tone: 'green' },
   'geburtstag-gratis-wien': { lines: ['Geburtstag', 'in Wien.'], topic: 'Essen, Eintritt & Erlebnisse', tone: 'rose' },
