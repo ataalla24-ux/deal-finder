@@ -1,20 +1,20 @@
 {
-  "generatedAt": "2026-10-30T22:36:50.625Z",
+  "generatedAt": "2026-10-31T06:12:19.038Z",
   "status": "degraded",
   "message": "0 fresh, evidence-checked Graph hashtag deal(s) found; 0 recovered from media.",
   "hashtags": [
-    "essenwien",
-    "wienfood",
-    "wienisst",
-    "wienfoodie",
-    "viennafood",
     "viennarestaurants",
     "wienkaffee",
+    "wienisst",
     "wienergastro",
+    "essenwien",
+    "wienfood",
+    "viennafood",
+    "wienfoodie",
     "viennaeats"
   ],
-  "fetchedPosts": 16,
-  "uniquePosts": 16,
+  "fetchedPosts": 31,
+  "uniquePosts": 30,
   "totalDeals": 0,
   "rescueEligible": 0,
   "rescuedDeals": 0,
@@ -36,21 +36,21 @@
     "warnings": []
   },
   "requestBudget": {
-    "requests": 20,
+    "requests": 30,
     "maxRequests": 30,
-    "highestUsagePercent": 23,
-    "stopped": false,
-    "reason": ""
+    "highestUsagePercent": 28,
+    "stopped": true,
+    "reason": "request-budget"
   },
   "budgetDeferred": true,
   "sharedQuota": {
     "limitPerHour": 237,
     "usageThreshold": 95,
-    "requests": 20,
-    "reserved": 20,
+    "requests": 30,
+    "reserved": 30,
     "stopped": false,
     "reason": "",
-    "highestUsagePercent": 23,
+    "highestUsagePercent": 28,
     "waitedMs": 0,
     "pacingMs": 0,
     "retryAt": "",
@@ -59,6 +59,70 @@
     "storageFailure": null
   },
   "sources": [
+    {
+      "hashtag": "viennarestaurants",
+      "status": "ok",
+      "coverage": {
+        "pages": 3,
+        "uniquePosts": 8,
+        "newPosts": 2,
+        "stopReason": "exhausted",
+        "incomplete": false,
+        "resumed": false
+      },
+      "fetched": 8,
+      "accepted": 0,
+      "mediaFieldMode": "full-media-with-owner",
+      "mediaLimit": 25
+    },
+    {
+      "hashtag": "wienkaffee",
+      "status": "ok",
+      "coverage": {
+        "pages": 1,
+        "uniquePosts": 0,
+        "newPosts": 0,
+        "stopReason": "exhausted",
+        "incomplete": false,
+        "resumed": false
+      },
+      "fetched": 0,
+      "accepted": 0,
+      "mediaFieldMode": "full-media-with-owner",
+      "mediaLimit": 25
+    },
+    {
+      "hashtag": "wienisst",
+      "status": "ok",
+      "coverage": {
+        "pages": 3,
+        "uniquePosts": 7,
+        "newPosts": 7,
+        "stopReason": "page-limit",
+        "incomplete": true,
+        "resumed": false
+      },
+      "fetched": 7,
+      "accepted": 0,
+      "mediaFieldMode": "full-media-with-owner",
+      "mediaLimit": 25
+    },
+    {
+      "hashtag": "wienergastro",
+      "status": "ok",
+      "coverage": {
+        "pages": 1,
+        "uniquePosts": 1,
+        "newPosts": 0,
+        "stopReason": "exhausted",
+        "incomplete": false,
+        "resumed": false
+      },
+      "fetched": 1,
+      "accepted": 0,
+      "mediaFieldMode": "basic",
+      "mediaLimit": 25
+    },
     {
       "hashtag": "essenwien",
       "status": "ok",
@@ -81,7 +145,7 @@
       "coverage": {
         "pages": 3,
         "uniquePosts": 15,
-        "newPosts": 7,
+        "newPosts": 0,
         "stopReason": "page-limit",
         "incomplete": true,
         "resumed": false
@@ -92,41 +156,77 @@
       "mediaLimit": 25
     },
     {
-      "hashtag": "wienisst",
-      "status": "error",
-      "fetched": 0,
-      "accepted": 0,
-      "error": "Meta Graph 18: This API call could not be completed due to resource limits"
-    },
-    {
-      "hashtag": "wienfoodie",
-      "status": "ok",
-      "coverage": {
-        "pages": 1,
-        "uniquePosts": 1,
-        "newPosts": 0,
-        "stopReason": "exhausted",
-        "incomplete": false,
-        "resumed": false
-      },
-      "fetched": 1,
-      "accepted": 0,
-      "mediaFieldMode": "basic",
-      "mediaLimit": 25
-    },
-    {
       "hashtag": "viennafood",
       "status": "deferred",
       "fetched": 0,
       "accepted": 0,
-      "error": "Instagram shared quota paused: request or quota unavailable"
+      "error": "Instagram scan paused: request-budget"
     }
   ],
   "rejectionReasons": {
-    "no-concrete-offer": 15,
+    "no-concrete-offer": 25,
+    "alcohol-offer": 2,
+    "general-recommendation": 1,
+    "business-lead-generation": 1,
     "missing-text": 1
   },
   "candidateAudit": [
+    {
+      "id": "18119265112820795",
+      "status": "rejected",
+      "url": "https://www.instagram.com/p/DfJLbgLF1GF/",
+      "title": "Looking for a relaxed restaurant for your next date? MOZAIK brings together generous portions, warm hospitality, and something for every taste—from grilled specialties and pizza to",
+      "text": "Looking for a relaxed restaurant for your next date? MOZAIK brings together generous portions, warm hospitality, and something for every taste—from grilled specialties and pizza to pasta, salads, desserts, and coffee. Whether you’re planning a quiet dinner or an easygoing evening near Prater, settle in and enjoy good food together. #ViennaDining #DateNightVienna #Leopoldstadt #RestaurantForCouples #ViennaRestaurants #SharedMeals #MOZAIK",
+      "ownerUsername": "",
+      "ownerRole": "",
+      "scoutUsername": "",
+      "merchantUsername": "",
+      "pubDate": "2026-10-31T03:21:02+0000",
+      "rejectionReason": "no-concrete-offer",
+      "qualityScore": 0,
+      "viennaVerified": false,
+      "mediaEvidence": {
+        "analyzedAt": "",
+        "ocrText": "",
+        "assetCount": 0,
+        "imageCount": 0,
+        "videoFrameCount": 0,
+        "downloadRetries": 0,
+        "errors": [],
+        "ai": null
+      },
+      "hashtags": [
+        "viennarestaurants"
+      ]
+    },
+    {
+      "id": "17915896686471698",
+      "status": "rejected",
+      "url": "https://www.instagram.com/p/DfInHZxM83g/",
+      "title": "Our pick: Burrata Creamy burrata, avocado cream, marinated cherry tomatoes, fresh basil & a hint of lemon. #finefinevienna #ViennaRestaurants #WhereToEatVienna #ViennaFoodGuide #It",
+      "text": "Our pick: Burrata Creamy burrata, avocado cream, marinated cherry tomatoes, fresh basil & a hint of lemon. #finefinevienna #ViennaRestaurants #WhereToEatVienna #ViennaFoodGuide #ItalianRestaurantVienna",
+      "ownerUsername": "",
+      "ownerRole": "",
+      "scoutUsername": "",
+      "merchantUsername": "",
+      "pubDate": "2026-10-30T22:05:04+0000",
+      "rejectionReason": "no-concrete-offer",
+      "qualityScore": 0,
+      "viennaVerified": false,
+      "mediaEvidence": {
+        "analyzedAt": "",
+        "ocrText": "",
+        "assetCount": 0,
+        "imageCount": 0,
+        "videoFrameCount": 0,
+        "downloadRetries": 0,
+        "errors": [],
+        "ai": null
+      },
+      "hashtags": [
+        "viennarestaurants"
+      ]
+    },
     {
       "id": "18143019004715281",
       "status": "rejected",
@@ -181,6 +281,62 @@
       },
       "hashtags": [
         "wienfood"
+      ]
+    },
+    {
+      "id": "18094598108674804",
+      "status": "rejected",
+      "url": "https://www.instagram.com/reel/DfIZacwsEwT/",
+      "title": "Trixie or Treat? 🖤 📍 1070 Urban-Loritz-Platz 1 ... #bbq #wien #trixiekiddos #barbecue #wienisst",
+      "text": "Trixie or Treat? 🖤 📍 1070 Urban-Loritz-Platz 1 ... #bbq #wien #trixiekiddos #barbecue #wienisst",
+      "ownerUsername": "",
+      "ownerRole": "",
+      "scoutUsername": "",
+      "merchantUsername": "",
+      "pubDate": "2026-10-30T20:05:25+0000",
+      "rejectionReason": "no-concrete-offer",
+      "qualityScore": 0,
+      "viennaVerified": false,
+      "mediaEvidence": {
+        "analyzedAt": "",
+        "ocrText": "",
+        "assetCount": 0,
+        "imageCount": 0,
+        "videoFrameCount": 0,
+        "downloadRetries": 0,
+        "errors": [],
+        "ai": null
+      },
+      "hashtags": [
+        "wienisst"
+      ]
+    },
+    {
+      "id": "18148466536574445",
+      "status": "rejected",
+      "url": "https://www.instagram.com/p/DfIY_x-Ctf5/",
+      "title": "Good news: a new menu is coming. 🧡 Bad news: the current one won't be around forever. 🍝 Come taste your favorites while you still can. 🥂 #BistrotBertarelliVienna #NewMenu #Vienn",
+      "text": "Good news: a new menu is coming. 🧡 Bad news: the current one won't be around forever. 🍝 Come taste your favorites while you still can. 🥂 #BistrotBertarelliVienna #NewMenu #ViennaFoodie #ViennaRestaurants #WienGenuss",
+      "ownerUsername": "",
+      "ownerRole": "",
+      "scoutUsername": "",
+      "merchantUsername": "",
+      "pubDate": "2026-10-30T20:00:16+0000",
+      "rejectionReason": "no-concrete-offer",
+      "qualityScore": 0,
+      "viennaVerified": false,
+      "mediaEvidence": {
+        "analyzedAt": "",
+        "ocrText": "",
+        "assetCount": 0,
+        "imageCount": 0,
+        "videoFrameCount": 0,
+        "downloadRetries": 0,
+        "errors": [],
+        "ai": null
+      },
+      "hashtags": [
+        "viennarestaurants"
       ]
     },
     {
@@ -296,6 +452,34 @@
       ]
     },
     {
+      "id": "18400608871201380",
+      "status": "rejected",
+      "url": "https://www.instagram.com/p/DfIEZe2jcVO/",
+      "title": "Ein Lokal. Vier Hebel. 👉 Wischen Bar, Live-Musik und Live-Sport – mit Küche wie im Top-Restaurant: munchy.theurbankitchen am Schottenring ist Wiens neuer Lieblingsort. Wir machen ",
+      "text": "Ein Lokal. Vier Hebel. 👉 Wischen Bar, Live-Musik und Live-Sport – mit Küche wie im Top-Restaurant: munchy.theurbankitchen am Schottenring ist Wiens neuer Lieblingsort. Wir machen dort Website, Instagram, Werbung und laufende Pflege – alles aus einer Hand. So sieht 2026 bisher aus: 🌐 Website: +250 % Besucher aus der Google-Suche, +509 % Sichtbarkeit 📱 Instagram: +435 % neue Follower, +79 % Reichweite 🎯 Werbung: 5,6 Mio. Aufrufe auf Instagram & Facebook (+60 %), +113 % Klicks auf die Website 🎾 Event-Seite zum Tennisturnier: +652 % Sichtbarkeit bei Google in einer Woche Kein Zufall, sondern das Zusammenspiel: Events auf der Website, passende Reels und Werbung genau dann, wenn Gäste ihren Abend planen. Sie haben ein Lokal und wollen wissen, wo Sie heute stehen? Schreiben Sie uns oder buchen Sie ein kostenloses Erstgespräch – Link in Bio. (Vergleichszeiträume: Google Search Console Sep.–Okt. 2026 ggü. Jän.–Feb. 2026, Ø pro Tag; Instagram 1.1.–30.10.2026 ggü. gleich langem Zeitraum davor.) #gastromarketing #restaurantmarketing #socialmediamarketing #webdesignwien #werbeagenturwien #wienergastro #barmarketing #googleads #instagrammarketing #euramedia",
+      "ownerUsername": "",
+      "ownerRole": "",
+      "scoutUsername": "",
+      "merchantUsername": "",
+      "pubDate": "2026-10-30T17:00:16+0000",
+      "rejectionReason": "business-lead-generation",
+      "qualityScore": 0,
+      "viennaVerified": false,
+      "mediaEvidence": {
+        "analyzedAt": "",
+        "ocrText": "",
+        "assetCount": 0,
+        "imageCount": 0,
+        "videoFrameCount": 0,
+        "downloadRetries": 0,
+        "errors": [],
+        "ai": null
+      },
+      "hashtags": [
+        "wienergastro"
+      ]
+    },
+    {
       "id": "18136610956682539",
       "status": "rejected",
       "url": "https://www.instagram.com/p/De4gvkCiPWQ/",
@@ -321,6 +505,62 @@
       },
       "hashtags": [
         "wienfood"
+      ]
+    },
+    {
+      "id": "18317980669303466",
+      "status": "rejected",
+      "url": "https://www.instagram.com/reel/DfIDTyQRlND/",
+      "title": "Von und mit der Community ❤️ derwienergastgeber - zeigt mir seine Nummer 1 Carbonara! Kann die was? Schick mir deinen Lieblings Spot oder einen den du probieren möchtest und wenn d",
+      "text": "Von und mit der Community ❤️ derwienergastgeber - zeigt mir seine Nummer 1 Carbonara! Kann die was? Schick mir deinen Lieblings Spot oder einen den du probieren möchtest und wenn du willst, gehen wir gemeinsam hin! 📍 vivalavita.pizzeria 🍝 Originale carbonara & mehr 🔥 Authentischer OG Italiener mit top Service 🎥 wienerfoodkaiser #wien #spaghetticarbonara #viennafood #viennafoodguide #wienisst",
+      "ownerUsername": "",
+      "ownerRole": "",
+      "scoutUsername": "",
+      "merchantUsername": "",
+      "pubDate": "2026-10-30T16:51:30+0000",
+      "rejectionReason": "no-concrete-offer",
+      "qualityScore": 0,
+      "viennaVerified": false,
+      "mediaEvidence": {
+        "analyzedAt": "",
+        "ocrText": "",
+        "assetCount": 0,
+        "imageCount": 0,
+        "videoFrameCount": 0,
+        "downloadRetries": 0,
+        "errors": [],
+        "ai": null
+      },
+      "hashtags": [
+        "wienisst"
+      ]
+    },
+    {
+      "id": "18112596014219803",
+      "status": "rejected",
+      "url": "https://www.instagram.com/reel/DfIB2AXqj8P/",
+      "title": "A little Greek getaway without leaving Vienna 🇬🇷✨ If you’re always looking for new restaurants in Vienna, here’s one to add to your list! IRODION is bringing Mediterranean vibes ",
+      "text": "A little Greek getaway without leaving Vienna 🇬🇷✨ If you’re always looking for new restaurants in Vienna, here’s one to add to your list! IRODION is bringing Mediterranean vibes to the city with delicious Greek specialties, fresh seafood, traditional flavors and beautiful dishes. Think long dinners, good food, cocktails and that feeling of being somewhere on a little Greek holiday ☀️ Perfect for a dinner with friends or your next date night! 📍 IRODION Greek Restaurant | irodiongreek Bräunerstraße 8, 1010 Wien Save this spot for your next dinner & follow miracles_alice for more places worth discovering in Vienna! 🤍 #ViennaFood #ViennaRestaurants #viennafoodguide #GreekFood #ViennaTips",
+      "ownerUsername": "",
+      "ownerRole": "",
+      "scoutUsername": "",
+      "merchantUsername": "",
+      "pubDate": "2026-10-30T16:38:39+0000",
+      "rejectionReason": "alcohol-offer",
+      "qualityScore": 0,
+      "viennaVerified": false,
+      "mediaEvidence": {
+        "analyzedAt": "",
+        "ocrText": "",
+        "assetCount": 0,
+        "imageCount": 0,
+        "videoFrameCount": 0,
+        "downloadRetries": 0,
+        "errors": [],
+        "ai": null
+      },
+      "hashtags": [
+        "viennarestaurants"
       ]
     },
     {
@@ -408,16 +648,16 @@
       ]
     },
     {
-      "id": "18114690245135315",
+      "id": "18352125196249866",
       "status": "rejected",
-      "url": "https://www.instagram.com/p/DfHphhUslhM/",
-      "title": "Der Herbst ist die Zeit der Ernte, und kaum etwas fängt seine Fülle so schön ein wie unser Früchtebrot. Feigen, Datteln, Zwetschken, Walnüsse und Haselnüsse werden mit unserem gere",
-      "text": "Der Herbst ist die Zeit der Ernte, und kaum etwas fängt seine Fülle so schön ein wie unser Früchtebrot. Feigen, Datteln, Zwetschken, Walnüsse und Haselnüsse werden mit unserem gereiften Honiglebkuchenteig gebacken und in mundgerechte Stücke geschnitten. Saftig, vollmundig und der perfekte Begleiter zum Kaffee, während draußen die Blätter fallen. - Autumn is the season of harvest, and nothing captures its abundance quite like our Früchtebrot. Figs, dates, plums, walnuts and hazelnuts are baked together with our matured honey Lebkuchen dough, then cut into elegant bite-sized pieces. Rich, wholesome and deeply flavourful, it is the perfect companion to a cup of coffee as the leaves fall outside. https://metzgersoehne.com/products/fruechtebrot-lebkuchen 📍 Herrengasse 6-8, Wien | Marktplatz 18, Perchtoldsdorf #Früchtebrot #Lebkuchen #Herbstgenuss #wienfoodie #igersvienna Handwerkskunst | Craftsmanship | AustrianTradition | Heritage | Handgemacht | Metzgerlebkuchen1685 | Früchtebrot | Erntezeit | Vienna travel | Vienna travel hotspots | Vienna hidden gems | Vienna | Austria | Lebkuchen",
+      "url": "https://www.instagram.com/p/DfHo7vYAMcC/",
+      "title": "Friday rule: order more, share everything. 😏🥢 Bring your friends, order your way across the menu, add a few drinks and let the weekend begin. ✨ #HongKongCafe #ViennaFood #WienEss",
+      "text": "Friday rule: order more, share everything. 😏🥢 Bring your friends, order your way across the menu, add a few drinks and let the weekend begin. ✨ #HongKongCafe #ViennaFood #WienEssen #HongKongFood #ViennaRestaurants",
       "ownerUsername": "",
       "ownerRole": "",
       "scoutUsername": "",
       "merchantUsername": "",
-      "pubDate": "2026-10-30T13:05:57+0000",
+      "pubDate": "2026-10-30T13:00:17+0000",
       "rejectionReason": "no-concrete-offer",
       "qualityScore": 0,
       "viennaVerified": false,
@@ -432,7 +672,7 @@
         "ai": null
       },
       "hashtags": [
-        "wienfoodie"
+        "viennarestaurants"
       ]
     },
     {
@@ -461,6 +701,90 @@
       },
       "hashtags": [
         "wienfood"
+      ]
+    },
+    {
+      "id": "18211106671367464",
+      "status": "rejected",
+      "url": "https://www.instagram.com/reel/DfHo_3PhD5A/",
+      "title": "October dump…. #viennarestaurants #viennarestaurant #leopoldstadt #praterstrasse #1020",
+      "text": "October dump…. #viennarestaurants #viennarestaurant #leopoldstadt #praterstrasse #1020",
+      "ownerUsername": "",
+      "ownerRole": "",
+      "scoutUsername": "",
+      "merchantUsername": "",
+      "pubDate": "2026-10-30T13:00:05+0000",
+      "rejectionReason": "no-concrete-offer",
+      "qualityScore": 0,
+      "viennaVerified": false,
+      "mediaEvidence": {
+        "analyzedAt": "",
+        "ocrText": "",
+        "assetCount": 0,
+        "imageCount": 0,
+        "videoFrameCount": 0,
+        "downloadRetries": 0,
+        "errors": [],
+        "ai": null
+      },
+      "hashtags": [
+        "viennarestaurants"
+      ]
+    },
+    {
+      "id": "18057647423798031",
+      "status": "rejected",
+      "url": "https://www.instagram.com/reel/DfHbOYkO750/",
+      "title": "The one spot that checks every box. 👀🍸 Great food, even better cocktails, and Friday nights with a DJ. Whether it’s a lunch date, dinner with friends or drinks to kick off the we",
+      "text": "The one spot that checks every box. 👀🍸 Great food, even better cocktails, and Friday nights with a DJ. Whether it’s a lunch date, dinner with friends or drinks to kick off the weekend – Spelunke has you covered. 📍 Spelunke, Taborstraße 1, 1020 Vienna Save this spot for your next plans. 🖤 #spelunke #viennafoodguide #viennarestaurants #viennanightlife #wienliebe",
+      "ownerUsername": "",
+      "ownerRole": "",
+      "scoutUsername": "",
+      "merchantUsername": "",
+      "pubDate": "2026-10-30T11:00:44+0000",
+      "rejectionReason": "alcohol-offer",
+      "qualityScore": 0,
+      "viennaVerified": false,
+      "mediaEvidence": {
+        "analyzedAt": "",
+        "ocrText": "",
+        "assetCount": 0,
+        "imageCount": 0,
+        "videoFrameCount": 0,
+        "downloadRetries": 0,
+        "errors": [],
+        "ai": null
+      },
+      "hashtags": [
+        "viennarestaurants"
+      ]
+    },
+    {
+      "id": "17970193346965897",
+      "status": "rejected",
+      "url": "https://www.instagram.com/reel/DfHady-OrA0/",
+      "title": "Amore della Mutti amore_della_mutti 📍 Franz-Josefs-Kai 29, 1010 Wien Dove c’è amore, c’è gusto. ❤️🇮🇹 Ein Abend bei Amore della Mutti aus Gästesicht: Burrata auf den Tisch, zwei ",
+      "text": "Amore della Mutti amore_della_mutti 📍 Franz-Josefs-Kai 29, 1010 Wien Dove c’è amore, c’è gusto. ❤️🇮🇹 Ein Abend bei Amore della Mutti aus Gästesicht: Burrata auf den Tisch, zwei Pizzen aus dem Ofen und dazu italienische Aranciata – viel mehr braucht es manchmal gar nicht. Auf unseren Tellern: Burrata Amore, Pizza Parma mit Prosciutto, Rucola und Cherrytomaten und Pizza Tartufo mit ordentlich Trüffel. Dahinter stecken Zutaten, bei denen das Restaurant unter anderem auf Produkte von Buratti Gusto Italiano setzt. 🤌🏻 Von der Burrata bis zur Trüffelcreme: italienische Produkte für einen ziemlich kurzen kulinarischen Weg von Wien nach Italien. #buratti #amoredellamutti #gustoitaliano #pizza #wienisst italianfood",
+      "ownerUsername": "",
+      "ownerRole": "",
+      "scoutUsername": "",
+      "merchantUsername": "",
+      "pubDate": "2026-10-30T10:54:54+0000",
+      "rejectionReason": "no-concrete-offer",
+      "qualityScore": 0,
+      "viennaVerified": false,
+      "mediaEvidence": {
+        "analyzedAt": "",
+        "ocrText": "",
+        "assetCount": 0,
+        "imageCount": 0,
+        "videoFrameCount": 0,
+        "downloadRetries": 0,
+        "errors": [],
+        "ai": null
+      },
+      "hashtags": [
+        "wienisst"
       ]
     },
     {
@@ -573,6 +897,119 @@
       },
       "hashtags": [
         "wienfood"
+      ]
+    },
+    {
+      "id": "17921256957242935",
+      "status": "rejected",
+      "url": "https://www.instagram.com/p/DfHOfiriPqE/",
+      "title": "Ein kleiner Rückblick auf die letzten Wochen aus unserer Küche. Viele gute Teller, saisonale Zutaten und immer wieder neue Kombinationen. Ein paar unserer aktuellen Gerichte könnt ",
+      "text": "Ein kleiner Rückblick auf die letzten Wochen aus unserer Küche. Viele gute Teller, saisonale Zutaten und immer wieder neue Kombinationen. Ein paar unserer aktuellen Gerichte könnt ihr noch genießen, bevor bald wieder Neues auf die Karte kommt. Kommt vorbei, probiert euch durch und lasst euch ein gutes Glas dazu einschenken. #frigowien #wienisst #wiengehtessen",
+      "ownerUsername": "",
+      "ownerRole": "",
+      "scoutUsername": "",
+      "merchantUsername": "",
+      "pubDate": "2026-10-30T09:09:14+0000",
+      "rejectionReason": "no-concrete-offer",
+      "qualityScore": 0,
+      "viennaVerified": false,
+      "mediaEvidence": {
+        "analyzedAt": "",
+        "ocrText": "",
+        "assetCount": 0,
+        "imageCount": 0,
+        "videoFrameCount": 0,
+        "downloadRetries": 0,
+        "errors": [],
+        "ai": null
+      },
+      "hashtags": [
+        "wienisst"
+      ]
+    },
+    {
+      "id": "17950809846367498",
+      "status": "rejected",
+      "url": "https://www.instagram.com/p/DfHMqe9ikcO/",
+      "title": "IHR HABT GEFRAGT. WIR HABEN GELIEFERT. ❤️🍔 Ab sofort ist UMAMI LAB HALAL! 🔥 Wir möchten, dass noch mehr von euch unsere Burger genießen können. Deshalb setzen wir ab jetzt auf Ha",
+      "text": "IHR HABT GEFRAGT. WIR HABEN GELIEFERT. ❤️🍔 Ab sofort ist UMAMI LAB HALAL! 🔥 Wir möchten, dass noch mehr von euch unsere Burger genießen können. Deshalb setzen wir ab jetzt auf Halal-Fleisch – ohne Kompromisse bei Geschmack und Qualität. Ob Smash Burger, Fries oder euer Lieblingsmenü: Der Geschmack bleibt, die Community wächst! ❤️ 📍 Hernalser Gürtel 47, 1170 Wien #umamilab #halalburger #wienisst #smashburger #halalfood",
+      "ownerUsername": "",
+      "ownerRole": "",
+      "scoutUsername": "",
+      "merchantUsername": "",
+      "pubDate": "2026-10-30T08:53:17+0000",
+      "rejectionReason": "no-concrete-offer",
+      "qualityScore": 0,
+      "viennaVerified": false,
+      "mediaEvidence": {
+        "analyzedAt": "",
+        "ocrText": "",
+        "assetCount": 0,
+        "imageCount": 0,
+        "videoFrameCount": 0,
+        "downloadRetries": 0,
+        "errors": [],
+        "ai": null
+      },
+      "hashtags": [
+        "wienisst"
+      ]
+    },
+    {
+      "id": "18126778732844083",
+      "status": "rejected",
+      "url": "https://www.instagram.com/p/DfHItjwkfMA/",
+      "title": "Empfehlungen) Wer auf der Suche nach richtig gutem chinesischen Essen in Wien ist: Das hier ist der Spot! 🔥 Die 2 Falstaff-Gabeln sind mehr als verdient – Geschmack, Service und A",
+      "text": "Empfehlungen) Wer auf der Suche nach richtig gutem chinesischen Essen in Wien ist: Das hier ist der Spot! 🔥 Die 2 Falstaff-Gabeln sind mehr als verdient – Geschmack, Service und Ambiente stimmen einfach auf ganzer Linie. Unbedingt abspeichern! 👇 #ViennaFoodies #ViennaLife #ViennaRestaurants #Falstaff2026 #WienIsst WienGenuss RestaurantTippWien",
+      "ownerUsername": "",
+      "ownerRole": "",
+      "scoutUsername": "",
+      "merchantUsername": "",
+      "pubDate": "2026-10-30T08:18:43+0000",
+      "rejectionReason": "general-recommendation",
+      "qualityScore": 0,
+      "viennaVerified": false,
+      "mediaEvidence": {
+        "analyzedAt": "",
+        "ocrText": "",
+        "assetCount": 0,
+        "imageCount": 0,
+        "videoFrameCount": 0,
+        "downloadRetries": 0,
+        "errors": [],
+        "ai": null
+      },
+      "hashtags": [
+        "viennarestaurants",
+        "wienisst"
+      ]
+    },
+    {
+      "id": "18124056172906786",
+      "status": "rejected",
+      "url": "https://www.instagram.com/reel/DfHGgOhOB2_/",
+      "title": "Welche Beilage ist euer Favorit? 🤤🔥 Schreibt’s in die Kommentare! 🌽 🍟🍗 #viennafood #foodlover #chicken #wienisst #chickenlove",
+      "text": "Welche Beilage ist euer Favorit? 🤤🔥 Schreibt’s in die Kommentare! 🌽 🍟🍗 #viennafood #foodlover #chicken #wienisst #chickenlove",
+      "ownerUsername": "",
+      "ownerRole": "",
+      "scoutUsername": "",
+      "merchantUsername": "",
+      "pubDate": "2026-10-30T08:00:47+0000",
+      "rejectionReason": "no-concrete-offer",
+      "qualityScore": 0,
+      "viennaVerified": false,
+      "mediaEvidence": {
+        "analyzedAt": "",
+        "ocrText": "",
+        "assetCount": 0,
+        "imageCount": 0,
+        "videoFrameCount": 0,
+        "downloadRetries": 0,
+        "errors": [],
+        "ai": null
+      },
+      "hashtags": [
+        "wienisst"
       ]
     }
   ]
