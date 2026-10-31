@@ -8,6 +8,9 @@ import { dealPhoto } from './deal-photos.mjs';
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const read = file => fs.readFileSync(path.join(root, 'docs', file), 'utf8');
+// Presentation idempotence must not change when a retained deal expires later.
+// Expiry transitions are covered separately by the blog catch-up/status checks.
+const presentationNow = Date.parse('2026-10-07T12:00:00+02:00');
 const home = load(read('index.html'));
 assert.equal(home('link[href="/home-showcase.css?v=20261030"]').length, 1);
 assert.equal(home('.hero-showcase img').length, 3);
@@ -40,7 +43,7 @@ assert.match(read('home-showcase.css'), /#pro \.plan\.featured\s*\{[^}]*#ff964a/
 for (const file of ['index.html', 'blog/index.html', 'angebote-wien-heute.html']) {
   const html = read(file), $ = load(html);
   assert.equal($('link[href="/visual-refresh.css?v=20261030"]').length, 1, `${file}: one presentation stylesheet`);
-  assert.equal(polishHtml(html, file), html, `${file}: presentation is idempotent`);
+  assert.equal(polishHtml(html, file, presentationNow), html, `${file}: presentation is idempotent`);
   if (file !== 'angebote-wien-heute.html') {
     assert.equal($('.visual-topics a').length, 6);
     assert.equal($('.visual-topics picture').length, 6);
@@ -66,7 +69,7 @@ for (const file of fs.readdirSync(path.join(root, 'docs/blog')).filter(f => f.en
   assert.equal($('.discovery-guide').length, 3);
   assert.equal($('.discovery-guide img[loading="lazy"]').length, 3);
   assert.equal($('.article-body .article-discovery').length, 0, 'No nested article/card layout');
-  assert.equal(polishHtml(html, `blog/${file}`), html);
+  assert.equal(polishHtml(html, `blog/${file}`, presentationNow), html);
 }
 assert.ok(articles >= 70);
 for (const [title, brand, key] of [
@@ -92,7 +95,7 @@ for (const key of ['indian-meal', 'restaurant-buffet', 'family-lunch', 'balkan-b
   for (const suffix of ['.jpg', '.webp', '-480.webp']) assert.ok(fs.existsSync(path.join(root, 'docs/assets/blog/photos', key + suffix)));
 }
 const privateFixture = '<html><head><meta name="robots" content="noindex"></head><body><main><p>Private fixture</p></main></body></html>';
-const privatePage = load(polishHtml(privateFixture, 'blog/private.html'));
+const privatePage = load(polishHtml(privateFixture, 'blog/private.html', presentationNow));
 assert.equal(privatePage('main').text(), 'Private fixture');
 assert.equal(privatePage('.article-discovery, .visual-topics, link[href^="/visual-refresh.css"]').length, 0);
 console.log(`Visual website checks passed: six approved design previews, branded Pro palette, six linked photo topics, ${articles} article discovery strips, eight precise deal motifs, image budgets, noindex isolation and idempotence.`);

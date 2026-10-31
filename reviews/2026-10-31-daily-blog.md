@@ -143,3 +143,27 @@ Commit und GitHub-Pages-Live-Nachweis werden vom Hauptlauf ergänzt.
   13 held, vier informational, null missing/changed.
 - `git diff --check` bestanden. Push und Live-Verifikation werden nach tatsächlichem
   Abschluss in der Automationsmemory mit endgültigem Commit dokumentiert.
+
+## Live-Erfolg und enger CI-Nachlauf
+
+Inhaltscommit `3e6a8d68fde800fa34a581132bd1a554a450bb5f` nach Fetch/Rebase
+normal auf main gepusht; konkurrierende Bot-Zustände erhalten. GitHub Pages
+41183019874 SUCCESS, Pages-API built für exakt diesen Commit. Am
+2026-10-31T08:04:13.989Z vier relevante HTML-Seiten, Sitemap und drei lokale
+Kaffeebild-Varianten HTTP200 und SHA256 byte-identisch zum Checkout.
+Titel, Canonical, Bild und neues Sitemap-Ziel stimmen. Erst danach manuell
+vier URLs an IndexNow gemeldet: HTTP200.
+
+WebsiteQuality 41183019859 fand anschließend eine vorbestehende zeitabhängige
+Präsentations-Testannahme: `test-website-visuals.mjs` verwendete die Wandzeit,
+wodurch das am 30. Oktober beendete Rhulo-Angebot beim reinen
+Idempotenzvergleich zusätzlich archiviert wurde. Der Nachlauf übergibt denselben
+festen Präsentationszeitpunkt wie `test-website-quality.mjs` an die drei
+Normalisierungsaufrufe. Die vorhandenen expliziten Ablauf-Grenztests in
+`test-blog-catchup.mjs` bleiben unverändert; keine Produktlogik abgeschwächt
+und keine zweite inhaltliche Tagesveröffentlichung.
+
+Alle Website-CI-Prüfungen danach lokal bestanden, einschließlich Visuals,
+Catchup, Quality, Backfill, SEO, Pro, Flyer, App-Download, Business-App-Guide und
+sechs Invitation-Link-Tests. Separater ProductionFeed-Status wird unabhängig
+berichtet; die bekannte owner-retained Wolt-Expiry wird nicht verändert.
