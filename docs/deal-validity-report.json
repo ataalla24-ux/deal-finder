@@ -1,13 +1,13 @@
 {
-  "generatedAt": "2026-10-31T00:47:33.613Z",
+  "generatedAt": "2026-10-31T01:10:23.804Z",
   "summary": {
     "maxAgeDays": 7,
-    "total": 313,
-    "allowed": 0,
-    "blocked": 313,
-    "warnings": 0,
+    "total": 310,
+    "allowed": 2,
+    "blocked": 308,
+    "warnings": 2,
     "reasonCounts": {
-      "kein konkretes Angebot erkennbar": 232,
+      "kein konkretes Angebot erkennbar": 229,
       "Gottesdienste nur im Wochenlauf": 36,
       "älter als 7 Tage (2020-04-25)": 1,
       "älter als 7 Tage (2026-02-22)": 81,
@@ -18,7 +18,7 @@
       "URL ungültig (HTTP 404)": 19,
       "nicht eindeutig in Wien": 8,
       "älter als 45 Tage trotz ausdrücklich noch aktive Gültigkeit (2026-08-04)": 4,
-      "redaktioneller Mehrfach-Roundup statt eindeutigem Einzelangebot": 8,
+      "redaktioneller Mehrfach-Roundup statt eindeutigem Einzelangebot": 7,
       "älter als 7 Tage (2026-04-19)": 28,
       "älter als 7 Tage (2016-10-30)": 3,
       "älter als 7 Tage (2023-09-21)": 3,
@@ -40,13 +40,12 @@
       "älter als 7 Tage (2009-05-01)": 1,
       "älter als 7 Tage (2014-06-07)": 1,
       "älter als 7 Tage (2025-12-30)": 1,
-      "abgelaufen (2026-10-30)": 4,
+      "abgelaufen (2026-10-30)": 2,
       "Meta-Graph-Widerspruch (excluded-promotion-type)": 2,
       "Gewinnspiel/Verlosung statt direkt nutzbarem Deal": 5,
       "abgelaufen (2026-08-30)": 4,
       "kostenlose Mitgliedschaft/Registrierung statt Deal": 1,
-      "selbst syndizierter FreeFinder-Post": 5,
-      "abgelaufen (2026-10-30T23:59:59.999Z)": 3,
+      "selbst syndizierter FreeFinder-Post": 4,
       "allgemeine Empfehlung/Gratis-Event statt konkreter Aktion": 2,
       "relative Kurz-Aktion abgelaufen (2026-10-26)": 1,
       "Engagement-Aktion ohne garantierte Gegenleistung": 1,
@@ -55,17 +54,17 @@
       "Ortswiderspruch: Originalangebot nennt einen Standort ausserhalb Wiens": 1
     },
     "reasonCategoryCounts": {
-      "kein konkreter Deal": 234,
+      "kein konkreter Deal": 231,
       "Gottesdienste außerhalb Wochenlauf": 36,
       "älter als 7 Tage": 136,
       "ungültige URL": 26,
       "nicht Wien": 8,
-      "sonstiges": 14,
+      "sonstiges": 13,
       "Post-Datum in Zukunft": 3,
-      "abgelaufen": 17,
+      "abgelaufen": 12,
       "Meta-Graph-Widerspruch": 2,
       "Gewinnspiel": 5,
-      "selbst syndiziert": 5,
+      "selbst syndiziert": 4,
       "kein echtes Post-Datum": 106,
       "ausgeschlossene Quelle": 47
     },
@@ -198,16 +197,23 @@
           "sonstiges": 1
         }
       },
+      "Meta Ad Library API": {
+        "total": 1,
+        "allowed": 1,
+        "blocked": 0,
+        "warnings": 1,
+        "reasonCategoryCounts": {}
+      },
       "Meta Instagram Business Discovery": {
-        "total": 22,
-        "allowed": 0,
-        "blocked": 22,
-        "warnings": 0,
+        "total": 18,
+        "allowed": 1,
+        "blocked": 17,
+        "warnings": 1,
         "reasonCategoryCounts": {
-          "selbst syndiziert": 5,
-          "sonstiges": 2,
-          "abgelaufen": 6,
-          "kein konkreter Deal": 15
+          "selbst syndiziert": 4,
+          "kein konkreter Deal": 12,
+          "sonstiges": 1,
+          "abgelaufen": 1
         }
       },
       "Meta Instagram Hashtag API": {
@@ -222,7 +228,44 @@
       }
     }
   },
-  "allowed": [],
+  "allowed": [
+    {
+      "id": "meta-ad-1777887363292858",
+      "title": "Gratis-Eintritt zum Event bei 7777eaf",
+      "brand": "7777eaf",
+      "source": "Meta Ad Library API",
+      "url": "https://www.facebook.com/ads/library/?id=1777887363292858",
+      "reasons": [],
+      "warnings": [
+        "Aktive Meta-Anzeige frisch durch Meta bestätigt; Kampagnenstart bleibt unverändert, Ablauf und relative Aktionsdaten werden separat geprüft",
+        "URL nicht eindeutig prüfbar (HTTP 403)",
+        "kein Ablaufdatum gefunden"
+      ],
+      "sourceDate": "2026-10-30T00:00:00.000Z",
+      "sourceDateSource": "deal.meta-ad-delivery-start",
+      "sourceAgeDays": 1,
+      "expiryDate": "",
+      "expirySource": "",
+      "urlStatus": "unklar: HTTP 403"
+    },
+    {
+      "id": "meta-ig-18101307323648065",
+      "title": "Dein Rhulo Wrap-Deal 1 €",
+      "brand": "Praterstern",
+      "source": "Meta Instagram Business Discovery",
+      "url": "https://www.instagram.com/reel/DfITP6mNqgN/",
+      "reasons": [],
+      "warnings": [
+        "Inhalt prüfen: Caption-Reste oder Emoji-Codes im sichtbaren Text"
+      ],
+      "sourceDate": "2026-10-30T19:10:02.000Z",
+      "sourceDateSource": "url.instagramShortcode",
+      "sourceAgeDays": 1,
+      "expiryDate": "2026-11-03T00:55:25.184Z",
+      "expirySource": "deal.structured",
+      "urlStatus": "HTTP 200"
+    }
+  ],
   "blocked": [
     {
       "id": "jesuszentrum-events-20261026",
@@ -867,7 +910,7 @@
       "warnings": [
         "kein Ablaufdatum gefunden"
       ],
-      "sourceDate": "2026-10-31T00:45:19.875Z",
+      "sourceDate": "2026-10-31T01:09:07.949Z",
       "sourceDateSource": "url.publicationDate",
       "sourceAgeDays": 0,
       "expiryDate": "",
@@ -3761,26 +3804,6 @@
       "urlStatus": "HTTP 200"
     },
     {
-      "id": "meta-ig-18112634627176046",
-      "title": "2-Gang-Menü Suppe oder Dessert + Hauptspeise für €17,50; 3-Gang-Menü Suppe + Hauptspeise + Dessert für €19,50",
-      "brand": "Hebenstreit | Restaurant Wien",
-      "source": "Meta Instagram Business Discovery",
-      "url": "https://www.instagram.com/p/De7ZQUtNj8K/",
-      "reasons": [
-        "redaktioneller Mehrfach-Roundup statt eindeutigem Einzelangebot",
-        "abgelaufen (2026-10-30)"
-      ],
-      "warnings": [
-        "Inhalt prüfen: Caption-Reste oder Emoji-Codes im sichtbaren Text"
-      ],
-      "sourceDate": "2026-10-25T18:52:23.000Z",
-      "sourceDateSource": "url.instagramShortcode",
-      "sourceAgeDays": 6,
-      "expiryDate": "2026-10-30",
-      "expirySource": "url.contentHints.title",
-      "urlStatus": "HTTP 200"
-    },
-    {
       "id": "meta-ig-18141811594615694",
       "title": "Pumpkin Experience menu with five dishes for 39 € per person on Friday, November 20th, two seatings: 18:00-20:00 or 20:15-22:15",
       "brand": "Hollandstrasse 10/4-6",
@@ -3818,26 +3841,6 @@
       "sourceAgeDays": 2,
       "expiryDate": "2026-11-07T23:59:59.999Z",
       "expirySource": "deal.structured",
-      "urlStatus": "HTTP 200"
-    },
-    {
-      "id": "meta-ig-17895097455615800",
-      "title": "🌯 MORGEN: CIĞKÖFTE-WRAP FÜR NUR 1 €!",
-      "brand": "Rhulo",
-      "source": "Meta Instagram Business Discovery",
-      "url": "https://www.instagram.com/reel/DfFtZiSnS_H/",
-      "reasons": [
-        "selbst syndizierter FreeFinder-Post",
-        "abgelaufen (2026-10-30)"
-      ],
-      "warnings": [
-        "Inhalt prüfen: Caption-Reste oder Emoji-Codes im sichtbaren Text"
-      ],
-      "sourceDate": "2026-10-29T19:00:49.000Z",
-      "sourceDateSource": "url.instagramShortcode",
-      "sourceAgeDays": 2,
-      "expiryDate": "2026-10-30",
-      "expirySource": "url.dateHints",
       "urlStatus": "HTTP 200"
     },
     {
@@ -3938,24 +3941,6 @@
       "urlStatus": "HTTP 200"
     },
     {
-      "id": "meta-ig-17991618815865376",
-      "title": "Tagesmenü mit Suppe für €14.90 oder Hauptspeise für €13.90, täglich von 11:30-14:00 Uhr, inkl",
-      "brand": "Strandcafé an der Alten Donau",
-      "source": "Meta Instagram Business Discovery",
-      "url": "https://www.instagram.com/p/De_yDZuIVpS/",
-      "reasons": [
-        "kein konkretes Angebot erkennbar",
-        "abgelaufen (2026-10-30T23:59:59.999Z)"
-      ],
-      "warnings": [],
-      "sourceDate": "2026-10-27T11:46:02.000Z",
-      "sourceDateSource": "url.instagramShortcode",
-      "sourceAgeDays": 4,
-      "expiryDate": "2026-10-30T23:59:59.999Z",
-      "expirySource": "deal.structured",
-      "urlStatus": "HTTP 200"
-    },
-    {
       "id": "meta-ig-18074631431583679",
       "title": "With the crew ticket, four of you get in for € 150 instead of € 180, each with a welcome drink and snacks",
       "brand": "Ikazerestaurantvienna",
@@ -4010,26 +3995,6 @@
       "sourceDateSource": "url.instagramShortcode",
       "sourceAgeDays": 4,
       "expiryDate": "2026-11-11T23:59:59.999Z",
-      "expirySource": "deal.structured",
-      "urlStatus": "HTTP 200"
-    },
-    {
-      "id": "meta-ig-18128692780847741",
-      "title": "Mittagsmenü mit Tagessuppe und Gericht mit oder ohne Fleisch für € 9,90",
-      "brand": "Lercherl von Hernals",
-      "source": "Meta Instagram Business Discovery",
-      "url": "https://www.instagram.com/p/De8tPzbxa_x/",
-      "reasons": [
-        "kein konkretes Angebot erkennbar",
-        "abgelaufen (2026-10-30T23:59:59.999Z)"
-      ],
-      "warnings": [
-        "Inhalt prüfen: Caption-Reste oder Emoji-Codes im sichtbaren Text"
-      ],
-      "sourceDate": "2026-10-26T07:06:19.000Z",
-      "sourceDateSource": "url.instagramShortcode",
-      "sourceAgeDays": 5,
-      "expiryDate": "2026-10-30T23:59:59.999Z",
       "expirySource": "deal.structured",
       "urlStatus": "HTTP 200"
     },
@@ -4090,24 +4055,6 @@
       "sourceDateSource": "url.instagramShortcode",
       "sourceAgeDays": 4,
       "expiryDate": "2026-11-07T23:59:59.999Z",
-      "expirySource": "deal.structured",
-      "urlStatus": "HTTP 200"
-    },
-    {
-      "id": "meta-ig-18194036155403855",
-      "title": "Wir haben wieder täglich zwei wechselnde Mittagsmenüs für euch vorbereitet",
-      "brand": "Dönerista - Premium Döner",
-      "source": "Meta Instagram Business Discovery",
-      "url": "https://www.instagram.com/p/De_N5JGlHxR/",
-      "reasons": [
-        "kein konkretes Angebot erkennbar",
-        "abgelaufen (2026-10-30T23:59:59.999Z)"
-      ],
-      "warnings": [],
-      "sourceDate": "2026-10-27T06:30:04.000Z",
-      "sourceDateSource": "url.instagramShortcode",
-      "sourceAgeDays": 4,
-      "expiryDate": "2026-10-30T23:59:59.999Z",
       "expirySource": "deal.structured",
       "urlStatus": "HTTP 200"
     },
