@@ -1,11 +1,11 @@
 {
-  "generatedAt": "2026-10-31T21:46:05.631Z",
+  "generatedAt": "2026-10-31T21:53:51.699Z",
   "summary": {
     "filesConsidered": 32,
-    "totalCandidates": 807,
-    "uniqueCandidates": 739,
-    "distinctCandidates": 772,
-    "duplicateClusters": 33,
+    "totalCandidates": 804,
+    "uniqueCandidates": 738,
+    "distinctCandidates": 770,
+    "duplicateClusters": 32,
     "topHealthySources": [
       {
         "sourceKey": "member-benefits",
@@ -26,16 +26,16 @@
         "totalDeals": 2
       },
       {
+        "sourceKey": "instagram-apify",
+        "sourceLabel": "Apify Instagram",
+        "healthScore": 69,
+        "totalDeals": 12
+      },
+      {
         "sourceKey": "meta-instagram",
         "sourceLabel": "Meta Instagram Graph",
         "healthScore": 68,
         "totalDeals": 105
-      },
-      {
-        "sourceKey": "instagram-apify",
-        "sourceLabel": "Apify Instagram",
-        "healthScore": 67,
-        "totalDeals": 15
       }
     ],
     "topMissionSources": [
@@ -67,7 +67,7 @@
         "sourceKey": "instagram-apify",
         "sourceLabel": "Apify Instagram",
         "missionFitScore": 65,
-        "totalDeals": 15
+        "totalDeals": 12
       }
     ],
     "topCoverageSources": [
@@ -102,7 +102,7 @@
       {
         "sourceKey": "instagram-ai",
         "sourceLabel": "Instagram AI Agent",
-        "coverageScore": 30,
+        "coverageScore": 31,
         "totalDeals": 49,
         "fresh1dCount": 1
       }
@@ -127,16 +127,16 @@
         "totalDeals": 109
       },
       {
+        "sourceKey": "instagram-ai",
+        "sourceLabel": "Instagram AI Agent",
+        "precisionScore": 71,
+        "totalDeals": 49
+      },
+      {
         "sourceKey": "meta-instagram",
         "sourceLabel": "Meta Instagram Graph",
         "precisionScore": 71,
         "totalDeals": 105
-      },
-      {
-        "sourceKey": "instagram-ai",
-        "sourceLabel": "Instagram AI Agent",
-        "precisionScore": 70,
-        "totalDeals": 49
       }
     ],
     "topWeightedSources": [
@@ -231,12 +231,13 @@
     ],
     "pipelineRuns": {
       "reportedSources": 8,
-      "failedSources": [],
+      "failedSources": [
+        "wien-combined"
+      ],
       "completedWithErrors": [
         "firecrawl2",
         "firecrawl5",
-        "power",
-        "wien-combined"
+        "power"
       ]
     }
   },
@@ -450,6 +451,65 @@
       "sourceWeightScore": 66
     },
     {
+      "sourceKey": "instagram-apify",
+      "file": "deals-pending-instagram-apify.json",
+      "sourceLabel": "Apify Instagram",
+      "totalDeals": 12,
+      "uniqueDeals": 12,
+      "duplicateDeals": 0,
+      "duplicateAcrossSources": 0,
+      "fresh1dCount": 0,
+      "fresh7dCount": 12,
+      "viennaCount": 4,
+      "foodDrinkCount": 12,
+      "promoCount": 11,
+      "missingUrlCount": 0,
+      "sampleTitles": [
+        "OUR TEAM BEHIND THE SCENE - feier bei Omnom Halloween! 👻🧛‍♂️🍔 Wir haben unserem Team hier ein kleines Makeo",
+        "🎃 CIO’S HALLOWEEN GRAND OPENING! 🎃 📅 Samstag, 31. Oktober 2026 ⏰ 12:00–17:00 Uhr 🌯 GRATIS DÖNER? So geht’s",
+        "Gratis Yaprak Döner im ersten Bezirk bei 📍Rotenturmstraße 19, 1010 Wien Einfach verkleidet herkommen genießen"
+      ],
+      "lastRun": null,
+      "uniqueRate": 1,
+      "duplicateRate": 0,
+      "fresh1dRate": 0,
+      "fresh7dRate": 1,
+      "viennaRate": 0.3,
+      "foodDrinkRate": 1,
+      "promoRate": 0.9,
+      "missingUrlRate": 0,
+      "averageQualityScore": 94,
+      "topCategories": [
+        {
+          "value": "essen",
+          "count": 10
+        },
+        {
+          "value": "kaffee",
+          "count": 2
+        }
+      ],
+      "topTypes": [
+        {
+          "value": "gratis",
+          "count": 10
+        },
+        {
+          "value": "rabatt",
+          "count": 2
+        }
+      ],
+      "issues": [
+        "wenige Deals sind frischer als 1 Tag",
+        "Wien-Signal ist zu schwach"
+      ],
+      "healthScore": 69,
+      "missionFitScore": 65,
+      "coverageScore": 16,
+      "precisionScore": 66,
+      "sourceWeightScore": 57
+    },
+    {
       "sourceKey": "meta-instagram",
       "file": "deals-pending-meta-instagram.json",
       "sourceLabel": "Meta Instagram Graph",
@@ -536,72 +596,13 @@
       "sourceWeightScore": 64
     },
     {
-      "sourceKey": "instagram-apify",
-      "file": "deals-pending-instagram-apify.json",
-      "sourceLabel": "Apify Instagram",
-      "totalDeals": 15,
-      "uniqueDeals": 14,
-      "duplicateDeals": 1,
-      "duplicateAcrossSources": 1,
-      "fresh1dCount": 0,
-      "fresh7dCount": 13,
-      "viennaCount": 4,
-      "foodDrinkCount": 15,
-      "promoCount": 13,
-      "missingUrlCount": 0,
-      "sampleTitles": [
-        "OUR TEAM BEHIND THE SCENE - feier bei Omnom Halloween! 👻🧛‍♂️🍔 Wir haben unserem Team hier ein kleines Makeo",
-        "🎃 CIO’S HALLOWEEN GRAND OPENING! 🎃 📅 Samstag, 31. Oktober 2026 ⏰ 12:00–17:00 Uhr 🌯 GRATIS DÖNER? So geht’s",
-        "Gratis Yaprak Döner im ersten Bezirk bei 📍Rotenturmstraße 19, 1010 Wien Einfach verkleidet herkommen genießen"
-      ],
-      "lastRun": null,
-      "uniqueRate": 0.9,
-      "duplicateRate": 0.1,
-      "fresh1dRate": 0,
-      "fresh7dRate": 0.9,
-      "viennaRate": 0.3,
-      "foodDrinkRate": 1,
-      "promoRate": 0.9,
-      "missingUrlRate": 0,
-      "averageQualityScore": 93.4,
-      "topCategories": [
-        {
-          "value": "essen",
-          "count": 13
-        },
-        {
-          "value": "kaffee",
-          "count": 2
-        }
-      ],
-      "topTypes": [
-        {
-          "value": "gratis",
-          "count": 12
-        },
-        {
-          "value": "rabatt",
-          "count": 3
-        }
-      ],
-      "issues": [
-        "wenige Deals sind frischer als 1 Tag",
-        "Wien-Signal ist zu schwach"
-      ],
-      "healthScore": 67,
-      "missionFitScore": 65,
-      "coverageScore": 18,
-      "precisionScore": 65,
-      "sourceWeightScore": 56
-    },
-    {
       "sourceKey": "instagram-ai",
       "file": "deals-pending-instagram-ai.json",
       "sourceLabel": "Instagram AI Agent",
       "totalDeals": 49,
-      "uniqueDeals": 24,
-      "duplicateDeals": 25,
-      "duplicateAcrossSources": 23,
+      "uniqueDeals": 25,
+      "duplicateDeals": 24,
+      "duplicateAcrossSources": 22,
       "fresh1dCount": 1,
       "fresh7dCount": 47,
       "viennaCount": 49,
@@ -615,7 +616,7 @@
       ],
       "lastRun": null,
       "uniqueRate": 0.5,
-      "duplicateRate": 0.5,
+      "duplicateRate": 0.4,
       "fresh1dRate": 0,
       "fresh7dRate": 1,
       "viennaRate": 1,
@@ -673,8 +674,8 @@
       ],
       "healthScore": 64,
       "missionFitScore": 59,
-      "coverageScore": 30,
-      "precisionScore": 70,
+      "coverageScore": 31,
+      "precisionScore": 71,
       "sourceWeightScore": 57
     },
     {
@@ -2115,24 +2116,21 @@
       "missingUrlCount": 0,
       "sampleTitles": [],
       "lastRun": {
-        "status": "completed-with-errors",
-        "startedAt": "2026-10-31T12:59:32.017Z",
-        "finishedAt": "2026-10-31T13:00:43.566Z",
-        "durationMs": 71549,
+        "status": "failed",
+        "startedAt": "2026-10-31T21:50:46.144Z",
+        "finishedAt": "2026-10-31T21:50:49.445Z",
+        "durationMs": 3301,
         "counts": {
-          "rawCandidates": 5,
+          "rawCandidates": 0,
           "normalizedCandidates": 0,
           "verifiedCandidates": 0,
           "previousDeals": 0,
           "acceptedDeals": 0,
-          "rejectedDeals": 5
+          "rejectedDeals": 0
         },
-        "rejectedByReason": {
-          "no-concrete-offer": 5
-        },
+        "rejectedByReason": {},
         "errors": [
-          "#wienfood: Meta hashtag returned no media collection",
-          "#viennafood: Instagram shared quota paused: request or quota unavailable"
+          "No Graph hashtag source completed successfully; last-good output was preserved. #viennarestaurants: Instagram scan paused: api-usage"
         ],
         "reportFile": "deal-pipeline-last-run-wien-combined.json"
       },
@@ -2148,7 +2146,7 @@
       "topCategories": [],
       "topTypes": [],
       "issues": [
-        "letzter Lauf fand Kandidaten, aber akzeptierte keinen Deal",
+        "letzter Pipeline-Lauf ist fehlgeschlagen",
         "liefert aktuell 0 Deals"
       ],
       "healthScore": 0,
