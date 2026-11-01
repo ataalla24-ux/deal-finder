@@ -1,7 +1,7 @@
 {
-  "generatedAt": "2026-11-01T19:26:04.697Z",
+  "generatedAt": "2026-11-01T19:46:04.632Z",
   "source": "instagram-graph-cross-source-verification",
-  "status": "ok",
+  "status": "failed-preserved",
   "configured": true,
   "scannedFiles": [
     "deals-pending-church-events.json",
@@ -139,8 +139,8 @@
       "candidates": 0
     },
     "deals-pending-meta-instagram.json": {
-      "deals": 84,
-      "candidates": 20
+      "deals": 80,
+      "candidates": 19
     },
     "deals-pending-power.json": {
       "deals": 37,
@@ -167,16 +167,16 @@
       "candidates": 0
     }
   },
-  "candidatePosts": 25,
+  "candidatePosts": 24,
   "candidateAccounts": 18,
   "skippedAccountCooldowns": 0,
   "selectedAccounts": [
     {
-      "username": "afrivision.austria",
-      "candidates": 4
+      "username": "ikazerestaurant",
+      "candidates": 3
     },
     {
-      "username": "ikazerestaurant",
+      "username": "afrivision.austria",
       "candidates": 3
     },
     {
@@ -196,10 +196,15 @@
       "candidates": 1
     }
   ],
-  "fetchedPosts": 117,
-  "exactMatches": 8,
+  "fetchedPosts": 0,
+  "exactMatches": 0,
   "retainedEvidencePosts": 2000,
-  "errors": [],
+  "errors": [
+    {
+      "username": "ikazerestaurant",
+      "message": "Instagram shared quota paused: shared cooldown"
+    }
+  ],
   "accountFailures": {
     "tantisaluti.wien": {
       "count": 2,
@@ -233,21 +238,27 @@
     }
   },
   "sharedQuota": {
-    "limitPerHour": 296,
+    "limitPerHour": 190,
     "usageThreshold": 95,
-    "requests": 6,
-    "reserved": 10,
-    "stopped": false,
-    "reason": "",
-    "highestUsagePercent": 85,
+    "requests": 0,
+    "reserved": 0,
+    "stopped": true,
+    "reason": "Instagram shared quota paused: shared cooldown",
+    "highestUsagePercent": 0,
     "waitedMs": 0,
     "pacingMs": 0,
-    "retryAt": "",
+    "retryAt": "2026-11-01T19:53:16.138Z",
     "adaptiveSafetyCeiling": 190,
     "adaptiveIncreases": 0,
     "storageFailure": null
   },
+  "globalError": {
+    "username": "ikazerestaurant",
+    "status": 0,
+    "code": "SCAN_BUDGET",
+    "message": "Instagram shared quota paused: shared cooldown"
+  },
   "blockedEvidencePosts": 100,
-  "unmatchedCandidatePosts": 17,
-  "message": "8/25 fresh cross-source Instagram candidates matched exactly via Graph API."
+  "unmatchedCandidatePosts": 24,
+  "message": "0/24 fresh cross-source Instagram candidates matched exactly via Graph API."
 }
