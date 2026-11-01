@@ -1,7 +1,7 @@
 {
-  "generatedAt": "2026-11-01T12:12:01.936Z",
+  "generatedAt": "2026-11-01T12:18:13.464Z",
   "source": "instagram-graph-cross-source-verification",
-  "status": "ok",
+  "status": "failed-preserved",
   "configured": true,
   "scannedFiles": [
     "deals-pending-church-events.json",
@@ -140,7 +140,7 @@
     },
     "deals-pending-meta-instagram.json": {
       "deals": 78,
-      "candidates": 16
+      "candidates": 17
     },
     "deals-pending-power.json": {
       "deals": 37,
@@ -167,13 +167,17 @@
       "candidates": 0
     }
   },
-  "candidatePosts": 23,
+  "candidatePosts": 24,
   "candidateAccounts": 17,
   "skippedAccountCooldowns": 0,
   "selectedAccounts": [
     {
       "username": "afrivision.austria",
       "candidates": 3
+    },
+    {
+      "username": "vorteilsclub.wien",
+      "candidates": 2
     },
     {
       "username": "ikazerestaurant",
@@ -190,16 +194,17 @@
     {
       "username": "tuchlauben.eis",
       "candidates": 2
-    },
-    {
-      "username": "eiskarussell",
-      "candidates": 1
     }
   ],
-  "fetchedPosts": 134,
-  "exactMatches": 8,
+  "fetchedPosts": 0,
+  "exactMatches": 0,
   "retainedEvidencePosts": 2000,
-  "errors": [],
+  "errors": [
+    {
+      "username": "afrivision.austria",
+      "message": "Instagram shared quota paused: shared cooldown"
+    }
+  ],
   "accountFailures": {
     "tantisaluti.wien": {
       "count": 2,
@@ -235,19 +240,25 @@
   "sharedQuota": {
     "limitPerHour": 190,
     "usageThreshold": 95,
-    "requests": 6,
-    "reserved": 10,
-    "stopped": false,
-    "reason": "",
-    "highestUsagePercent": 60,
+    "requests": 0,
+    "reserved": 0,
+    "stopped": true,
+    "reason": "Instagram shared quota paused: shared cooldown",
+    "highestUsagePercent": 0,
     "waitedMs": 0,
     "pacingMs": 0,
-    "retryAt": "",
+    "retryAt": "2026-11-01T12:26:02.495Z",
     "adaptiveSafetyCeiling": 190,
     "adaptiveIncreases": 0,
     "storageFailure": null
   },
+  "globalError": {
+    "username": "afrivision.austria",
+    "status": 0,
+    "code": "SCAN_BUDGET",
+    "message": "Instagram shared quota paused: shared cooldown"
+  },
   "blockedEvidencePosts": 102,
-  "unmatchedCandidatePosts": 15,
-  "message": "8/23 fresh cross-source Instagram candidates matched exactly via Graph API."
+  "unmatchedCandidatePosts": 24,
+  "message": "0/24 fresh cross-source Instagram candidates matched exactly via Graph API."
 }
