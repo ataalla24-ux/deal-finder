@@ -1,10 +1,10 @@
 {
-  "generatedAt": "2026-11-01T08:48:18.520Z",
+  "generatedAt": "2026-11-01T08:57:24.315Z",
   "summary": {
     "filesConsidered": 32,
-    "totalCandidates": 772,
-    "uniqueCandidates": 726,
-    "distinctCandidates": 748,
+    "totalCandidates": 773,
+    "uniqueCandidates": 727,
+    "distinctCandidates": 749,
     "duplicateClusters": 22,
     "topHealthySources": [
       {
@@ -52,16 +52,16 @@
         "totalDeals": 2
       },
       {
-        "sourceKey": "food3",
-        "sourceLabel": "Firecrawl Key 2 - Food",
-        "missionFitScore": 78,
-        "totalDeals": 1
-      },
-      {
         "sourceKey": "instagram-apify",
         "sourceLabel": "Apify Instagram",
         "missionFitScore": 71,
         "totalDeals": 11
+      },
+      {
+        "sourceKey": "food3",
+        "sourceLabel": "Firecrawl Key 2 - Food",
+        "missionFitScore": 71,
+        "totalDeals": 2
       },
       {
         "sourceKey": "member-benefits",
@@ -115,12 +115,6 @@
         "totalDeals": 2
       },
       {
-        "sourceKey": "food3",
-        "sourceLabel": "Firecrawl Key 2 - Food",
-        "precisionScore": 80,
-        "totalDeals": 1
-      },
-      {
         "sourceKey": "instagram-ai",
         "sourceLabel": "Instagram AI Agent",
         "precisionScore": 75,
@@ -137,6 +131,12 @@
         "sourceLabel": "Apify Instagram",
         "precisionScore": 72,
         "totalDeals": 11
+      },
+      {
+        "sourceKey": "meta-instagram",
+        "sourceLabel": "Meta Instagram Graph",
+        "precisionScore": 71,
+        "totalDeals": 77
       }
     ],
     "topWeightedSources": [
@@ -165,10 +165,10 @@
         "totalDeals": 49
       },
       {
-        "sourceKey": "food3",
-        "sourceLabel": "Firecrawl Key 2 - Food",
-        "sourceWeightScore": 62,
-        "totalDeals": 1
+        "sourceKey": "instagram-apify",
+        "sourceLabel": "Apify Instagram",
+        "sourceWeightScore": 61,
+        "totalDeals": 11
       }
     ],
     "topSourcesToFix": [
@@ -237,6 +237,7 @@
       "completedWithErrors": [
         "firecrawl2",
         "firecrawl5",
+        "food3",
         "power"
       ]
     }
@@ -677,43 +678,46 @@
       "sourceKey": "food3",
       "file": "deals-pending-food3.json",
       "sourceLabel": "Firecrawl Key 2 - Food",
-      "totalDeals": 1,
-      "uniqueDeals": 0,
+      "totalDeals": 2,
+      "uniqueDeals": 1,
       "duplicateDeals": 1,
       "duplicateAcrossSources": 1,
       "fresh1dCount": 0,
-      "fresh7dCount": 1,
+      "fresh7dCount": 2,
       "viennaCount": 1,
-      "foodDrinkCount": 1,
-      "promoCount": 1,
+      "foodDrinkCount": 2,
+      "promoCount": 2,
       "missingUrlCount": 0,
       "sampleTitles": [
+        "Burger: Lust auf Burger? 2für1 Burger Deals nur mit der NeoTaste App Bundry ...",
         "Papa Duck: THE ONLY +2 I'LL ACCEPT! Pizza schmeckt zu zweit ... - Instagram"
       ],
       "lastRun": {
-        "status": "completed",
-        "startedAt": "2026-10-31T08:11:18.355Z",
-        "finishedAt": "2026-10-31T08:11:53.218Z",
-        "durationMs": 34863,
+        "status": "completed-with-errors",
+        "startedAt": "2026-11-01T08:55:44.312Z",
+        "finishedAt": "2026-11-01T08:56:10.776Z",
+        "durationMs": 26464,
         "counts": {
-          "rawCandidates": 2,
-          "normalizedCandidates": 2,
+          "rawCandidates": 21,
+          "normalizedCandidates": 21,
           "verifiedCandidates": 2,
-          "previousDeals": 2,
+          "previousDeals": 1,
           "acceptedDeals": 2,
-          "rejectedDeals": 2
+          "rejectedDeals": 20
         },
         "rejectedByReason": {
-          "post-verification-rejected": 2
+          "post-verification-rejected": 20
         },
-        "errors": [],
+        "errors": [
+          "https://www.instagram.com/explore/tags/fooddealsvienna/: Refusal: Die angegebene Instagram-Hashtag-Seite konnte in diesem Durchlauf nicht abgerufen werden (Quellseite wird vom verfügbaren Webzugriff nicht unterstützt). Da ausschließlich diese Quelle erlaubt ist und keine verlässlichen Originalposts, Veröffentlichungsdaten oder Direktlinks verifiziert werden konnten, kann ich keine Angebote regelkonform extrahieren."
+        ],
         "reportFile": "deal-pipeline-last-run-food3.json"
       },
-      "uniqueRate": 0,
-      "duplicateRate": 1,
+      "uniqueRate": 0.5,
+      "duplicateRate": 0.5,
       "fresh1dRate": 0,
       "fresh7dRate": 1,
-      "viennaRate": 1,
+      "viennaRate": 0.5,
       "foodDrinkRate": 1,
       "promoRate": 1,
       "missingUrlRate": 0,
@@ -721,24 +725,25 @@
       "topCategories": [
         {
           "value": "essen",
-          "count": 1
+          "count": 2
         }
       ],
       "topTypes": [
         {
           "value": "bogo",
-          "count": 1
+          "count": 2
         }
       ],
       "issues": [
         "wenige Deals sind frischer als 1 Tag",
+        "Wien-Signal ist zu schwach",
         "hohe Überschneidung mit anderen Quellen"
       ],
       "healthScore": 64,
-      "missionFitScore": 78,
-      "coverageScore": 15,
-      "precisionScore": 80,
-      "sourceWeightScore": 62
+      "missionFitScore": 71,
+      "coverageScore": 13,
+      "precisionScore": 70,
+      "sourceWeightScore": 57
     },
     {
       "sourceKey": "firecrawl4",
