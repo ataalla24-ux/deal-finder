@@ -1,7 +1,7 @@
 {
-  "generatedAt": "2026-11-01T18:14:47.056Z",
+  "generatedAt": "2026-11-01T18:27:17.664Z",
   "source": "instagram-graph-cross-source-verification",
-  "status": "ok",
+  "status": "degraded",
   "configured": true,
   "scannedFiles": [
     "deals-pending-church-events.json",
@@ -107,8 +107,8 @@
       "candidates": 0
     },
     "deals-pending-instagram-ai.json": {
-      "deals": 49,
-      "candidates": 7
+      "deals": 41,
+      "candidates": 4
     },
     "deals-pending-instagram-apify.json": {
       "deals": 10,
@@ -167,8 +167,8 @@
       "candidates": 0
     }
   },
-  "candidatePosts": 27,
-  "candidateAccounts": 18,
+  "candidatePosts": 25,
+  "candidateAccounts": 17,
   "skippedAccountCooldowns": 0,
   "selectedAccounts": [
     {
@@ -188,18 +188,23 @@
       "candidates": 2
     },
     {
-      "username": "ciosgrill",
+      "username": "tuchlauben.eis",
       "candidates": 2
     },
     {
-      "username": "tuchlauben.eis",
-      "candidates": 2
+      "username": "bintat.at",
+      "candidates": 1
     }
   ],
-  "fetchedPosts": 135,
-  "exactMatches": 10,
+  "fetchedPosts": 110,
+  "exactMatches": 8,
   "retainedEvidencePosts": 2000,
-  "errors": [],
+  "errors": [
+    {
+      "username": "bintat.at",
+      "message": "Instagram shared quota paused: request or quota unavailable"
+    }
+  ],
   "accountFailures": {
     "tantisaluti.wien": {
       "count": 2,
@@ -239,7 +244,7 @@
     "reserved": 10,
     "stopped": false,
     "reason": "",
-    "highestUsagePercent": 59,
+    "highestUsagePercent": 26,
     "waitedMs": 0,
     "pacingMs": 0,
     "retryAt": "",
@@ -247,7 +252,13 @@
     "adaptiveIncreases": 0,
     "storageFailure": null
   },
+  "globalError": {
+    "username": "bintat.at",
+    "status": 0,
+    "code": "SCAN_BUDGET",
+    "message": "Instagram shared quota paused: request or quota unavailable"
+  },
   "blockedEvidencePosts": 99,
   "unmatchedCandidatePosts": 17,
-  "message": "10/27 fresh cross-source Instagram candidates matched exactly via Graph API."
+  "message": "8/25 fresh cross-source Instagram candidates matched exactly via Graph API."
 }
