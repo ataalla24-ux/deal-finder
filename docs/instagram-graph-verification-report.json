@@ -1,7 +1,7 @@
 {
-  "generatedAt": "2026-11-01T22:22:05.093Z",
+  "generatedAt": "2026-11-01T22:29:25.631Z",
   "source": "instagram-graph-cross-source-verification",
-  "status": "ok",
+  "status": "degraded",
   "configured": true,
   "scannedFiles": [
     "deals-pending-church-events.json",
@@ -111,7 +111,7 @@
       "candidates": 4
     },
     "deals-pending-instagram-apify.json": {
-      "deals": 10,
+      "deals": 11,
       "candidates": 0
     },
     "deals-pending-instagram-apify2.json": {
@@ -139,7 +139,7 @@
       "candidates": 0
     },
     "deals-pending-meta-instagram.json": {
-      "deals": 80,
+      "deals": 81,
       "candidates": 19
     },
     "deals-pending-power.json": {
@@ -196,10 +196,15 @@
       "candidates": 1
     }
   ],
-  "fetchedPosts": 117,
-  "exactMatches": 8,
+  "fetchedPosts": 50,
+  "exactMatches": 3,
   "retainedEvidencePosts": 2000,
-  "errors": [],
+  "errors": [
+    {
+      "username": "boca.vienna",
+      "message": "Instagram shared quota paused: rolling-hour budget exhausted"
+    }
+  ],
   "accountFailures": {
     "tantisaluti.wien": {
       "count": 2,
@@ -235,19 +240,25 @@
   "sharedQuota": {
     "limitPerHour": 237,
     "usageThreshold": 95,
-    "requests": 6,
-    "reserved": 10,
-    "stopped": false,
-    "reason": "",
-    "highestUsagePercent": 65,
+    "requests": 2,
+    "reserved": 2,
+    "stopped": true,
+    "reason": "Instagram shared quota paused: rolling-hour budget exhausted",
+    "highestUsagePercent": 61,
     "waitedMs": 0,
     "pacingMs": 0,
-    "retryAt": "",
+    "retryAt": "2026-11-01T22:59:28.718Z",
     "adaptiveSafetyCeiling": 190,
     "adaptiveIncreases": 0,
     "storageFailure": null
   },
-  "blockedEvidencePosts": 101,
-  "unmatchedCandidatePosts": 16,
-  "message": "8/24 fresh cross-source Instagram candidates matched exactly via Graph API."
+  "globalError": {
+    "username": "boca.vienna",
+    "status": 0,
+    "code": "SCAN_BUDGET",
+    "message": "Instagram shared quota paused: rolling-hour budget exhausted"
+  },
+  "blockedEvidencePosts": 99,
+  "unmatchedCandidatePosts": 21,
+  "message": "3/24 fresh cross-source Instagram candidates matched exactly via Graph API."
 }
