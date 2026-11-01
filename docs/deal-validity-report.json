@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-11-01T01:29:29.125Z",
+  "generatedAt": "2026-11-01T01:30:54.018Z",
   "summary": {
     "maxAgeDays": 7,
     "total": 304,
@@ -7,7 +7,7 @@
     "blocked": 304,
     "warnings": 0,
     "reasonCounts": {
-      "kein konkretes Angebot erkennbar": 232,
+      "kein konkretes Angebot erkennbar": 235,
       "Gottesdienste nur im Wochenlauf": 36,
       "älter als 7 Tage (2020-04-25)": 1,
       "älter als 7 Tage (2026-02-22)": 80,
@@ -16,7 +16,7 @@
       "älter als 7 Tage (2026-10-20)": 1,
       "älter als 7 Tage (2026-10-14)": 1,
       "älter als 7 Tage (2025-07-30)": 1,
-      "URL ungültig (HTTP 404)": 10,
+      "URL ungültig (HTTP 404)": 13,
       "Gewinnspiel/Verlosung statt direkt nutzbarem Deal": 7,
       "abgelaufen (2026-10-31)": 8,
       "nicht eindeutig in Wien": 9,
@@ -56,10 +56,10 @@
       "Ortswiderspruch: Originalangebot nennt einen Standort ausserhalb Wiens": 1
     },
     "reasonCategoryCounts": {
-      "kein konkreter Deal": 234,
+      "kein konkreter Deal": 237,
       "Gottesdienste außerhalb Wochenlauf": 36,
       "älter als 7 Tage": 137,
-      "ungültige URL": 17,
+      "ungültige URL": 20,
       "Gewinnspiel": 7,
       "abgelaufen": 18,
       "nicht Wien": 9,
@@ -122,10 +122,10 @@
         "blocked": 35,
         "warnings": 0,
         "reasonCategoryCounts": {
-          "kein konkreter Deal": 33,
+          "kein konkreter Deal": 34,
           "Gottesdienste außerhalb Wochenlauf": 35,
           "älter als 7 Tage": 32,
-          "ungültige URL": 1,
+          "ungültige URL": 2,
           "Post-Datum in Zukunft": 1,
           "sonstiges": 1
         }
@@ -182,9 +182,9 @@
         "blocked": 97,
         "warnings": 0,
         "reasonCategoryCounts": {
-          "kein konkreter Deal": 92,
+          "kein konkreter Deal": 94,
           "älter als 7 Tage": 94,
-          "ungültige URL": 5,
+          "ungültige URL": 7,
           "Gottesdienste außerhalb Wochenlauf": 1,
           "sonstiges": 2,
           "Post-Datum in Zukunft": 2,
@@ -869,7 +869,7 @@
       "warnings": [
         "kein Ablaufdatum gefunden"
       ],
-      "sourceDate": "2026-11-01T01:27:56.061Z",
+      "sourceDate": "2026-11-01T01:29:47.979Z",
       "sourceDateSource": "url.publicationDate",
       "sourceAgeDays": 0,
       "expiryDate": "",
@@ -1101,16 +1101,19 @@
       "source": "Freikirchen Wien",
       "url": "https://www.fcgwien.at",
       "reasons": [
+        "kein konkretes Angebot erkennbar",
         "Gottesdienste nur im Wochenlauf",
         "älter als 7 Tage (2026-04-19)"
       ],
-      "warnings": [],
+      "warnings": [
+        "URL nicht eindeutig prüfbar (HTTP 403)"
+      ],
       "sourceDate": "2026-04-19T08:59:47.145Z",
       "sourceDateSource": "deal.pubDate",
       "sourceAgeDays": 196,
       "expiryDate": "",
       "expirySource": "deal.expires",
-      "urlStatus": "HTTP 200"
+      "urlStatus": "unklar: HTTP 403"
     },
     {
       "id": "freikirche-4-20260419",
@@ -1159,19 +1162,18 @@
       "source": "Freikirchen Wien",
       "url": "https://www.baptisten.at/wien",
       "reasons": [
+        "URL ungültig (HTTP 404)",
         "kein konkretes Angebot erkennbar",
         "Gottesdienste nur im Wochenlauf",
         "älter als 7 Tage (2026-04-19)"
       ],
-      "warnings": [
-        "URL nicht eindeutig prüfbar (temporärer Fehler)"
-      ],
+      "warnings": [],
       "sourceDate": "2026-04-19T08:59:47.145Z",
       "sourceDateSource": "deal.pubDate",
       "sourceAgeDays": 196,
       "expiryDate": "",
       "expirySource": "deal.expires",
-      "urlStatus": "unklar: temporärer URL-Fehler"
+      "urlStatus": "ungültig: HTTP 404"
     },
     {
       "id": "freikirche-7-20260419",
@@ -2183,26 +2185,8 @@
       "source": "Kirchen Verzeichnis",
       "url": "https://www.baptisten.at/wien",
       "reasons": [
+        "URL ungültig (HTTP 404)",
         "kein konkretes Angebot erkennbar",
-        "älter als 7 Tage (2026-02-22)"
-      ],
-      "warnings": [
-        "URL nicht eindeutig prüfbar (temporärer Fehler)"
-      ],
-      "sourceDate": "2026-02-22T21:12:35.964Z",
-      "sourceDateSource": "deal.pubDate",
-      "sourceAgeDays": 252,
-      "expiryDate": "",
-      "expirySource": "deal.expires",
-      "urlStatus": "unklar: temporärer URL-Fehler"
-    },
-    {
-      "id": "gemeinde-9-20260222",
-      "title": "⭐ Gemeinde",
-      "brand": "Freie Christliche Gemeinde Wie",
-      "source": "Kirchen Verzeichnis",
-      "url": "https://www.fcgwien.at",
-      "reasons": [
         "älter als 7 Tage (2026-02-22)"
       ],
       "warnings": [],
@@ -2211,7 +2195,27 @@
       "sourceAgeDays": 252,
       "expiryDate": "",
       "expirySource": "deal.expires",
-      "urlStatus": "HTTP 200"
+      "urlStatus": "ungültig: HTTP 404"
+    },
+    {
+      "id": "gemeinde-9-20260222",
+      "title": "⭐ Gemeinde",
+      "brand": "Freie Christliche Gemeinde Wie",
+      "source": "Kirchen Verzeichnis",
+      "url": "https://www.fcgwien.at",
+      "reasons": [
+        "kein konkretes Angebot erkennbar",
+        "älter als 7 Tage (2026-02-22)"
+      ],
+      "warnings": [
+        "URL nicht eindeutig prüfbar (HTTP 403)"
+      ],
+      "sourceDate": "2026-02-22T21:12:35.964Z",
+      "sourceDateSource": "deal.pubDate",
+      "sourceAgeDays": 252,
+      "expiryDate": "",
+      "expirySource": "deal.expires",
+      "urlStatus": "unklar: HTTP 403"
     },
     {
       "id": "gemeinde-10-20260222",
@@ -2982,26 +2986,8 @@
       "source": "Kirchen Verzeichnis",
       "url": "https://www.baptisten.at/wien",
       "reasons": [
+        "URL ungültig (HTTP 404)",
         "kein konkretes Angebot erkennbar",
-        "älter als 7 Tage (2026-02-22)"
-      ],
-      "warnings": [
-        "URL nicht eindeutig prüfbar (temporärer Fehler)"
-      ],
-      "sourceDate": "2026-02-22T21:12:35.964Z",
-      "sourceDateSource": "deal.pubDate",
-      "sourceAgeDays": 252,
-      "expiryDate": "",
-      "expirySource": "deal.expires",
-      "urlStatus": "unklar: temporärer URL-Fehler"
-    },
-    {
-      "id": "gottesdienste-17-20260222",
-      "title": "⏰ So 10:00 & 18:00 Uhr",
-      "brand": "Freie Christliche Gemeinde Wie",
-      "source": "Kirchen Verzeichnis",
-      "url": "https://www.fcgwien.at",
-      "reasons": [
         "älter als 7 Tage (2026-02-22)"
       ],
       "warnings": [],
@@ -3010,7 +2996,27 @@
       "sourceAgeDays": 252,
       "expiryDate": "",
       "expirySource": "deal.expires",
-      "urlStatus": "HTTP 200"
+      "urlStatus": "ungültig: HTTP 404"
+    },
+    {
+      "id": "gottesdienste-17-20260222",
+      "title": "⏰ So 10:00 & 18:00 Uhr",
+      "brand": "Freie Christliche Gemeinde Wie",
+      "source": "Kirchen Verzeichnis",
+      "url": "https://www.fcgwien.at",
+      "reasons": [
+        "kein konkretes Angebot erkennbar",
+        "älter als 7 Tage (2026-02-22)"
+      ],
+      "warnings": [
+        "URL nicht eindeutig prüfbar (HTTP 403)"
+      ],
+      "sourceDate": "2026-02-22T21:12:35.964Z",
+      "sourceDateSource": "deal.pubDate",
+      "sourceAgeDays": 252,
+      "expiryDate": "",
+      "expirySource": "deal.expires",
+      "urlStatus": "unklar: HTTP 403"
     },
     {
       "id": "gottesdienste-18-20260222",
