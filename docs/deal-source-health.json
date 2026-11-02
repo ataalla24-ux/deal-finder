@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-11-02T21:51:53.855Z",
+  "generatedAt": "2026-11-02T21:59:02.541Z",
   "summary": {
     "filesConsidered": 32,
     "totalCandidates": 761,
@@ -66,7 +66,7 @@
       {
         "sourceKey": "instagram-apify",
         "sourceLabel": "Apify Instagram",
-        "missionFitScore": 68,
+        "missionFitScore": 65,
         "totalDeals": 8
       }
     ],
@@ -230,13 +230,12 @@
     ],
     "pipelineRuns": {
       "reportedSources": 8,
-      "failedSources": [
-        "wien-combined"
-      ],
+      "failedSources": [],
       "completedWithErrors": [
         "firecrawl2",
         "instagram-apify2",
-        "power"
+        "power",
+        "wien-combined"
       ]
     }
   },
@@ -611,8 +610,8 @@
       "duplicateDeals": 0,
       "duplicateAcrossSources": 0,
       "fresh1dCount": 0,
-      "fresh7dCount": 6,
-      "viennaCount": 2,
+      "fresh7dCount": 8,
+      "viennaCount": 1,
       "foodDrinkCount": 8,
       "promoCount": 8,
       "missingUrlCount": 0,
@@ -625,8 +624,8 @@
       "uniqueRate": 1,
       "duplicateRate": 0,
       "fresh1dRate": 0,
-      "fresh7dRate": 0.8,
-      "viennaRate": 0.3,
+      "fresh7dRate": 1,
+      "viennaRate": 0.1,
       "foodDrinkRate": 1,
       "promoRate": 1,
       "missingUrlRate": 0,
@@ -634,11 +633,7 @@
       "topCategories": [
         {
           "value": "essen",
-          "count": 7
-        },
-        {
-          "value": "kaffee",
-          "count": 1
+          "count": 8
         }
       ],
       "topTypes": [
@@ -659,11 +654,11 @@
         "wenige Deals sind frischer als 1 Tag",
         "Wien-Signal ist zu schwach"
       ],
-      "healthScore": 71,
-      "missionFitScore": 68,
-      "coverageScore": 15,
-      "precisionScore": 68,
-      "sourceWeightScore": 58
+      "healthScore": 66,
+      "missionFitScore": 65,
+      "coverageScore": 14,
+      "precisionScore": 63,
+      "sourceWeightScore": 55
     },
     {
       "sourceKey": "church-events",
@@ -2143,21 +2138,26 @@
       "missingUrlCount": 0,
       "sampleTitles": [],
       "lastRun": {
-        "status": "failed",
-        "startedAt": "2026-11-02T06:43:52.432Z",
-        "finishedAt": "2026-11-02T06:43:53.567Z",
-        "durationMs": 1135,
+        "status": "completed-with-errors",
+        "startedAt": "2026-11-02T21:53:46.846Z",
+        "finishedAt": "2026-11-02T21:54:08.039Z",
+        "durationMs": 21193,
         "counts": {
-          "rawCandidates": 0,
+          "rawCandidates": 6,
           "normalizedCandidates": 0,
           "verifiedCandidates": 0,
           "previousDeals": 0,
           "acceptedDeals": 0,
-          "rejectedDeals": 0
+          "rejectedDeals": 6
         },
-        "rejectedByReason": {},
+        "rejectedByReason": {
+          "no-concrete-offer": 3,
+          "general-recommendation": 2,
+          "alcohol-offer": 1
+        },
         "errors": [
-          "No Graph hashtag source completed successfully; last-good output was preserved. #viennarestaurants: Instagram shared quota paused: rolling-hour budget exhausted"
+          "#viennarestaurants: Instagram shared quota paused: rolling-hour budget exhausted",
+          "#wienkaffee: Instagram shared quota paused: rolling-hour budget exhausted"
         ],
         "reportFile": "deal-pipeline-last-run-wien-combined.json"
       },
@@ -2173,7 +2173,7 @@
       "topCategories": [],
       "topTypes": [],
       "issues": [
-        "letzter Pipeline-Lauf ist fehlgeschlagen",
+        "letzter Lauf fand Kandidaten, aber akzeptierte keinen Deal",
         "liefert aktuell 0 Deals"
       ],
       "healthScore": 0,
