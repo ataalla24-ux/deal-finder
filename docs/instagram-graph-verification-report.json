@@ -1,7 +1,7 @@
 {
-  "generatedAt": "2026-11-02T06:49:52.372Z",
+  "generatedAt": "2026-11-02T07:21:54.810Z",
   "source": "instagram-graph-cross-source-verification",
-  "status": "ok",
+  "status": "degraded",
   "configured": true,
   "scannedFiles": [
     "deals-pending-church-events.json",
@@ -196,10 +196,15 @@
       "candidates": 1
     }
   ],
-  "fetchedPosts": 135,
-  "exactMatches": 9,
+  "fetchedPosts": 110,
+  "exactMatches": 8,
   "retainedEvidencePosts": 2000,
-  "errors": [],
+  "errors": [
+    {
+      "username": "fonds.soziales.wien",
+      "message": "Instagram shared quota paused: rolling-hour budget exhausted"
+    }
+  ],
   "accountFailures": {
     "lati.na.watson50": {
       "count": 1,
@@ -225,19 +230,25 @@
   "sharedQuota": {
     "limitPerHour": 190,
     "usageThreshold": 95,
-    "requests": 6,
-    "reserved": 10,
-    "stopped": false,
-    "reason": "",
-    "highestUsagePercent": 24,
+    "requests": 5,
+    "reserved": 5,
+    "stopped": true,
+    "reason": "Instagram shared quota paused: rolling-hour budget exhausted",
+    "highestUsagePercent": 38,
     "waitedMs": 0,
     "pacingMs": 0,
-    "retryAt": "",
+    "retryAt": "2026-11-02T07:45:27.131Z",
     "adaptiveSafetyCeiling": 190,
     "adaptiveIncreases": 0,
     "storageFailure": null
   },
+  "globalError": {
+    "username": "fonds.soziales.wien",
+    "status": 0,
+    "code": "SCAN_BUDGET",
+    "message": "Instagram shared quota paused: rolling-hour budget exhausted"
+  },
   "blockedEvidencePosts": 95,
-  "unmatchedCandidatePosts": 17,
-  "message": "9/26 fresh cross-source Instagram candidates matched exactly via Graph API."
+  "unmatchedCandidatePosts": 18,
+  "message": "8/26 fresh cross-source Instagram candidates matched exactly via Graph API."
 }
