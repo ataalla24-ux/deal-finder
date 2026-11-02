@@ -1,7 +1,7 @@
 {
-  "generatedAt": "2026-11-02T02:47:26.489Z",
+  "generatedAt": "2026-11-02T03:21:39.649Z",
   "source": "instagram-graph-cross-source-verification",
-  "status": "ok",
+  "status": "degraded",
   "configured": true,
   "scannedFiles": [
     "deals-pending-church-events.json",
@@ -108,7 +108,7 @@
     },
     "deals-pending-instagram-ai.json": {
       "deals": 26,
-      "candidates": 2
+      "candidates": 3
     },
     "deals-pending-instagram-apify.json": {
       "deals": 11,
@@ -167,8 +167,8 @@
       "candidates": 0
     }
   },
-  "candidatePosts": 24,
-  "candidateAccounts": 18,
+  "candidatePosts": 25,
+  "candidateAccounts": 19,
   "skippedAccountCooldowns": 0,
   "selectedAccounts": [
     {
@@ -188,18 +188,23 @@
       "candidates": 2
     },
     {
-      "username": "fonds.soziales.wien",
+      "username": "eylulbaeckerei",
       "candidates": 1
     },
     {
-      "username": "paskongpinoyaustria",
+      "username": "fonds.soziales.wien",
       "candidates": 1
     }
   ],
-  "fetchedPosts": 117,
-  "exactMatches": 8,
+  "fetchedPosts": 110,
+  "exactMatches": 7,
   "retainedEvidencePosts": 2000,
-  "errors": [],
+  "errors": [
+    {
+      "username": "fonds.soziales.wien",
+      "message": "Instagram shared quota paused: rolling-hour budget exhausted"
+    }
+  ],
   "accountFailures": {
     "lati.na.watson50": {
       "count": 1,
@@ -225,19 +230,25 @@
   "sharedQuota": {
     "limitPerHour": 190,
     "usageThreshold": 95,
-    "requests": 6,
-    "reserved": 10,
-    "stopped": false,
-    "reason": "",
-    "highestUsagePercent": 93,
+    "requests": 5,
+    "reserved": 5,
+    "stopped": true,
+    "reason": "Instagram shared quota paused: rolling-hour budget exhausted",
+    "highestUsagePercent": 55,
     "waitedMs": 0,
     "pacingMs": 0,
-    "retryAt": "",
+    "retryAt": "2026-11-02T03:22:18.642Z",
     "adaptiveSafetyCeiling": 190,
     "adaptiveIncreases": 0,
     "storageFailure": null
   },
-  "blockedEvidencePosts": 95,
-  "unmatchedCandidatePosts": 16,
-  "message": "8/24 fresh cross-source Instagram candidates matched exactly via Graph API."
+  "globalError": {
+    "username": "fonds.soziales.wien",
+    "status": 0,
+    "code": "SCAN_BUDGET",
+    "message": "Instagram shared quota paused: rolling-hour budget exhausted"
+  },
+  "blockedEvidencePosts": 96,
+  "unmatchedCandidatePosts": 18,
+  "message": "7/25 fresh cross-source Instagram candidates matched exactly via Graph API."
 }
