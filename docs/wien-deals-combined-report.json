@@ -1,44 +1,262 @@
 {
-  "generatedAt": "2026-11-02T06:43:52.432Z",
-  "status": "deferred",
-  "message": "No Graph hashtag source completed successfully; last-good output was preserved.",
+  "generatedAt": "2026-11-02T21:53:46.847Z",
+  "status": "degraded",
+  "message": "0 fresh, evidence-checked Graph hashtag deal(s) found; 0 recovered from media.",
   "hashtags": [
     "viennarestaurants",
     "wienkaffee",
     "wienisst",
     "wienergastro",
-    "wienfood",
     "essenwien",
-    "viennafood",
     "wienfoodie",
+    "wienfood",
+    "viennafood",
     "viennaeats"
   ],
-  "fetchedPosts": 0,
+  "fetchedPosts": 6,
+  "uniquePosts": 6,
   "totalDeals": 0,
+  "rescueEligible": 0,
+  "rescuedDeals": 0,
+  "mediaEvidence": {
+    "status": "not-needed",
+    "eligible": 0,
+    "selected": 0,
+    "cached": 0,
+    "analyzed": 0,
+    "withOcrText": 0,
+    "withVisionImages": 0,
+    "aiCalls": 0,
+    "visionCalls": 0,
+    "aiAccepted": 0,
+    "inputTokens": 0,
+    "outputTokens": 0,
+    "totalTokens": 0,
+    "errors": [],
+    "warnings": []
+  },
+  "requestBudget": {
+    "requests": 7,
+    "maxRequests": 30,
+    "highestUsagePercent": 33,
+    "stopped": false,
+    "reason": ""
+  },
+  "budgetDeferred": true,
+  "sharedQuota": {
+    "limitPerHour": 190,
+    "usageThreshold": 95,
+    "requests": 5,
+    "reserved": 5,
+    "stopped": true,
+    "reason": "Instagram shared quota paused: rolling-hour budget exhausted",
+    "highestUsagePercent": 33,
+    "waitedMs": 0,
+    "pacingMs": 0,
+    "retryAt": "2026-11-02T22:14:32.881Z",
+    "adaptiveSafetyCeiling": 190,
+    "adaptiveIncreases": 0,
+    "storageFailure": null
+  },
   "sources": [
     {
       "hashtag": "viennarestaurants",
+      "status": "partial",
+      "coverage": {
+        "pages": 1,
+        "uniquePosts": 6,
+        "newPosts": 2,
+        "stopReason": "request-budget",
+        "incomplete": true,
+        "resumed": false
+      },
+      "error": "Instagram shared quota paused: rolling-hour budget exhausted",
+      "fetched": 6,
+      "accepted": 0,
+      "mediaFieldMode": "basic",
+      "mediaLimit": 25
+    },
+    {
+      "hashtag": "wienkaffee",
       "status": "deferred",
       "fetched": 0,
       "accepted": 0,
       "error": "Instagram shared quota paused: rolling-hour budget exhausted"
     }
   ],
-  "rejectionReasons": {},
-  "budgetDeferred": true,
-  "sharedQuota": {
-    "limitPerHour": 190,
-    "usageThreshold": 95,
-    "requests": 0,
-    "reserved": 0,
-    "stopped": true,
-    "reason": "Instagram shared quota paused: rolling-hour budget exhausted",
-    "highestUsagePercent": 0,
-    "waitedMs": 0,
-    "pacingMs": 0,
-    "retryAt": "2026-11-02T06:44:21.693Z",
-    "adaptiveSafetyCeiling": 190,
-    "adaptiveIncreases": 0,
-    "storageFailure": null
-  }
+  "rejectionReasons": {
+    "no-concrete-offer": 3,
+    "general-recommendation": 2,
+    "alcohol-offer": 1
+  },
+  "candidateAudit": [
+    {
+      "id": "18140594587723345",
+      "status": "rejected",
+      "url": "https://www.instagram.com/reel/DfPolSjseYs/",
+      "title": "READY FOR LUNCH AT LE:TO? Come by and let us brighten your day! With loads of delicious foood and smiles! 🤗#viennarestaurants #fyp #vienna_austria #thingstodoinvienna #foodvienna",
+      "text": "READY FOR LUNCH AT LE:TO? Come by and let us brighten your day! With loads of delicious foood and smiles! 🤗#viennarestaurants #fyp #vienna_austria #thingstodoinvienna #foodvienna",
+      "ownerUsername": "",
+      "ownerRole": "",
+      "scoutUsername": "",
+      "merchantUsername": "",
+      "pubDate": "2026-11-02T15:34:13+0000",
+      "rejectionReason": "no-concrete-offer",
+      "qualityScore": 0,
+      "viennaVerified": false,
+      "mediaEvidence": {
+        "analyzedAt": "",
+        "ocrText": "",
+        "assetCount": 0,
+        "imageCount": 0,
+        "videoFrameCount": 0,
+        "downloadRetries": 0,
+        "errors": [],
+        "ai": null
+      },
+      "hashtags": [
+        "viennarestaurants"
+      ]
+    },
+    {
+      "id": "17910677886576832",
+      "status": "rejected",
+      "url": "https://www.instagram.com/reel/DfPShhFtMCS/",
+      "title": "taste of Thailand in the heart of Vienna! 🇹🇭 Authentic Thai flavors meet modern elegance at dara.thaicuisine.vienna 🍽️🍸 A unique Thai dining experience you don’t want to miss! ",
+      "text": "taste of Thailand in the heart of Vienna! 🇹🇭 Authentic Thai flavors meet modern elegance at dara.thaicuisine.vienna 🍽️🍸 A unique Thai dining experience you don’t want to miss! 🤍 📍 dara.thaicuisine.vienna 🗓️ Limited Pop-Up: October 22 – December 13, 2026 Save this spot for your next dinner date! #ViennaFood #ViennaRestaurants #ThaiCuisine #ViennaEats #ViennaFoodGuide ViennaHidden",
+      "ownerUsername": "",
+      "ownerRole": "",
+      "scoutUsername": "",
+      "merchantUsername": "",
+      "pubDate": "2026-11-02T12:20:12+0000",
+      "rejectionReason": "general-recommendation",
+      "qualityScore": 0,
+      "viennaVerified": false,
+      "mediaEvidence": {
+        "analyzedAt": "",
+        "ocrText": "",
+        "assetCount": 0,
+        "imageCount": 0,
+        "videoFrameCount": 0,
+        "downloadRetries": 0,
+        "errors": [],
+        "ai": null
+      },
+      "hashtags": [
+        "viennarestaurants"
+      ]
+    },
+    {
+      "id": "17907048918352683",
+      "status": "rejected",
+      "url": "https://www.instagram.com/reel/DfO7S31mt46/",
+      "title": "Zwei besondere Erlebnisse, die ihr euch im Altia nicht entgehen lassen solltet! ✨🥂 🥂 WIENS HÖCHSTGELEGENER BRUNCH Sonntagsbrunch auf 220 Metern Höhe! Freut euch auf ein vielfälti",
+      "text": "Zwei besondere Erlebnisse, die ihr euch im Altia nicht entgehen lassen solltet! ✨🥂 🥂 WIENS HÖCHSTGELEGENER BRUNCH Sonntagsbrunch auf 220 Metern Höhe! Freut euch auf ein vielfältiges Frühstücksbuffet, mediterrane Tapas, Live-Cooking-Stationen und einen einzigartigen Panoramablick über Wien. Sekt, Kaffee, Tee und alkoholfreie Getränke sind inklusive. 📅 Die nächsten Brunch-Termine: 15. & 29. November 2026 6., 13. & 20. Dezember 2026 🕛 12:00–16:00 Uhr 💶 € 79 pro Person 🍷 CHEF’S TABLE – EIN DINNER, DAS GESCHICHTEN ERZÄHLT Ein exklusives kulinarisches Erlebnis. Genießt ein saisonales Degustationsmenü, bei dem unser Küchenchef die einzelnen Gänge persönlich vorstellt und spannende Einblicke in die Traditionen, Zutaten und Geschichten der mediterran-baskischen Küche gibt. Begleitet wird der Abend von einer sorgfältig abgestimmten Weinbegleitung, die von einem ausgewählten Weinpartner persönlich vorgestellt wird. 📅 Die nächsten Chef’s Table-Termine: 6. November 2026 27. November 2026 🕖 19:00 Uhr 💶 € 159 pro Person ✨ Limitiert 📍 Altia Restaurant | 57. Stock, Meliá Vienna 🔗 Alle Termine und Reservierungen findet ihr über den Buchungslink in unserer Bio! #altiarestaurant #altiaskybar #viennafood #brunchvienna #chefstabledinner #viennarestaurants",
+      "ownerUsername": "",
+      "ownerRole": "",
+      "scoutUsername": "",
+      "merchantUsername": "",
+      "pubDate": "2026-11-02T09:00:49+0000",
+      "rejectionReason": "alcohol-offer",
+      "qualityScore": 0,
+      "viennaVerified": false,
+      "mediaEvidence": {
+        "analyzedAt": "",
+        "ocrText": "",
+        "assetCount": 0,
+        "imageCount": 0,
+        "videoFrameCount": 0,
+        "downloadRetries": 0,
+        "errors": [],
+        "ai": null
+      },
+      "hashtags": [
+        "viennarestaurants"
+      ]
+    },
+    {
+      "id": "18096258575671533",
+      "status": "rejected",
+      "url": "https://www.instagram.com/reel/DfO7u3au5uz/",
+      "title": "A little taste of France in Vienna. 🇫🇷🍮 Good food, a little city adventure, and a restaurant where I can actually order in English without playing charades. 😂 📍 Le Bol, Vienna",
+      "text": "A little taste of France in Vienna. 🇫🇷🍮 Good food, a little city adventure, and a restaurant where I can actually order in English without playing charades. 😂 📍 Le Bol, Vienna Goat cheese salad? Yes. Crème brûlée? Obviously. English-speaking staff? Now we’re talking. 👀 Living in Austria without fluent German means finding places where everyday life feels a little easier. And when I find them, I share them with you. ❤️ 🇦🇹 Follow storyofaneastgurl for English-friendly finds, real-life Austria tips, and the things Google won’t tell you. 💬 What’s YOUR favourite restaurant in Vienna? I’m always looking for new places to try! #ViennaRestaurants #ViennaExpats #LivingInAustria #ViennaFood #EnglishFriendlyVienna",
+      "ownerUsername": "",
+      "ownerRole": "",
+      "scoutUsername": "",
+      "merchantUsername": "",
+      "pubDate": "2026-11-02T08:59:56+0000",
+      "rejectionReason": "general-recommendation",
+      "qualityScore": 0,
+      "viennaVerified": false,
+      "mediaEvidence": {
+        "analyzedAt": "",
+        "ocrText": "",
+        "assetCount": 0,
+        "imageCount": 0,
+        "videoFrameCount": 0,
+        "downloadRetries": 0,
+        "errors": [],
+        "ai": null
+      },
+      "hashtags": [
+        "viennarestaurants"
+      ]
+    },
+    {
+      "id": "18109630745262817",
+      "status": "rejected",
+      "url": "https://www.instagram.com/reel/DfO5YEjujSR/",
+      "title": "Crispy, glossy, sweet and tangy. Watching Guo Bao Rou come together is almost as satisfying as eating it. 📍Red Bowl · Vienna #ViennaFood #WienEssen #GuoBaoRou #ChineseFoodVienna #",
+      "text": "Crispy, glossy, sweet and tangy. Watching Guo Bao Rou come together is almost as satisfying as eating it. 📍Red Bowl · Vienna #ViennaFood #WienEssen #GuoBaoRou #ChineseFoodVienna #ViennaRestaurants",
+      "ownerUsername": "",
+      "ownerRole": "",
+      "scoutUsername": "",
+      "merchantUsername": "",
+      "pubDate": "2026-11-02T08:39:04+0000",
+      "rejectionReason": "no-concrete-offer",
+      "qualityScore": 0,
+      "viennaVerified": false,
+      "mediaEvidence": {
+        "analyzedAt": "",
+        "ocrText": "",
+        "assetCount": 0,
+        "imageCount": 0,
+        "videoFrameCount": 0,
+        "downloadRetries": 0,
+        "errors": [],
+        "ai": null
+      },
+      "hashtags": [
+        "viennarestaurants"
+      ]
+    },
+    {
+      "id": "18146944981598952",
+      "status": "rejected",
+      "url": "https://www.instagram.com/p/DfOWIsnl5pt/",
+      "title": "Whether you’re craving juicy grilled meats, comforting pasta, crisp salads, classic European dishes, or a sweet finish, there’s a plate for every appetite near Prater. MOZAIK bring",
+      "text": "Whether you’re craving juicy grilled meats, comforting pasta, crisp salads, classic European dishes, or a sweet finish, there’s a plate for every appetite near Prater. MOZAIK brings generous portions, familiar flavors, and warm hospitality to every meal—perfect for families, friends, couples, and relaxed gatherings. In the heart of Leopoldstadt, good food is always better when shared. #MozaikVienna #PraterVienna #ViennaFood #Leopoldstadt #FamilyDining #ViennaRestaurants #GoodFoodGoodCompany",
+      "ownerUsername": "",
+      "ownerRole": "",
+      "scoutUsername": "",
+      "merchantUsername": "",
+      "pubDate": "2026-11-02T03:30:48+0000",
+      "rejectionReason": "no-concrete-offer",
+      "qualityScore": 0,
+      "viennaVerified": false,
+      "mediaEvidence": {
+        "analyzedAt": "",
+        "ocrText": "",
+        "assetCount": 0,
+        "imageCount": 0,
+        "videoFrameCount": 0,
+        "downloadRetries": 0,
+        "errors": [],
+        "ai": null
+      },
+      "hashtags": [
+        "viennarestaurants"
+      ]
+    }
+  ]
 }
