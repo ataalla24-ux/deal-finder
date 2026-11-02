@@ -457,7 +457,7 @@ function normalizeDeal(rawDeal, sourceKey) {
     qualityScore: Number(deal.qualityScore) || 0,
     hot: Boolean(deal.hot),
     isNew: true,
-    votes: Number(deal.votes) || 1,
+    votes: Number(deal.votes) || (deal.carrierProvider ? 0 : 1),
     priority: Number(deal.priority) || 3,
     ownerUsername: extractStructuredOwnerUsername(deal),
     viennaVerified: deal.viennaVerified === true || viennaEvidence.hasViennaEvidence,

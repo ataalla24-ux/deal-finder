@@ -1,5 +1,6 @@
 import { verifyOfficialFoodDeal } from './power-food-verification.js';
 import { verifyViennaFoodBenefit } from './vienna-food-benefits.js';
+import { verifyCarrierBenefit } from './carrier-benefits.js';
 import { hasFreshActiveAdEvidence } from './meta-ad-library-coverage.js';
 import fs from 'fs';
 import path from 'path';
@@ -1048,12 +1049,13 @@ async function validateDeal(deal, context) {
   const reviewedWithoutLink = reviewedCommunity && !String(deal.url || '').trim()
     && [deal.brand, deal.title, deal.distance || deal.address].every(value => String(value || '').trim());
   const viennaFood = await verifyViennaFoodBenefit(deal, { now, cache: context.officialFoodCache, fetchPage: context.fetchViennaBenefitPage });
+  const verifiedBenefit = viennaFood || await verifyCarrierBenefit(deal, { now, cache: context.officialFoodCache, fetchPage: context.fetchCarrierBenefitPage });
   // This source already has a strict, paced fetcher with a persistent pause.
   // Do not issue an unpaced generic probe ahead of its own source guard.
-  const health = viennaFood ? { finalUrl:url,dateHints:{},contentHints:{},...(viennaFood.ok ? {ok:true,status:200} : {}) } : reviewedWithoutLink
+  const health = verifiedBenefit ? { finalUrl:url,dateHints:{},contentHints:{},...(verifiedBenefit.ok ? {ok:true,status:200} : {}) } : reviewedWithoutLink
     ? { reason: 'Community-Angebot ohne Link manuell freigegeben', dateHints: {}, contentHints: {} }
     : await inspectUrlWithCache(url, context.urlCache, context.urlOptions);
-  const officialFood = viennaFood || await verifyOfficialFoodDeal(deal, { now, cache: context.officialFoodCache, fetchPage: context.fetchOfficialFoodPage });
+  const officialFood = verifiedBenefit || await verifyOfficialFoodDeal(deal, { now, cache: context.officialFoodCache, fetchPage: context.fetchOfficialFoodPage });
   if (officialFood?.ok) {
     // Restore extracted facts before checking and forwarding the candidate.
     // Caller-supplied location or dates cannot survive an evidence refresh.
@@ -1352,6 +1354,7 @@ async function validateDealsForSlack(deals, options = {}) {
     officialFoodCache: new Map(),
     fetchOfficialFoodPage: options.fetchOfficialFoodPage,
     fetchViennaBenefitPage: options.fetchViennaBenefitPage,
+    fetchCarrierBenefitPage: options.fetchCarrierBenefitPage,
     urlOptions: {
       now,
       timeoutMs,

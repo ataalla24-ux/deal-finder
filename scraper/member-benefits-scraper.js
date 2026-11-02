@@ -2,7 +2,9 @@ import '../sentry/instrument.mjs';
 
 import fs from 'fs';
 import path from 'path';
+import { pathToFileURL } from 'node:url';
 import { collectViennaFoodBenefits } from './vienna-food-benefits.js';
+import { CARRIER_SOURCES, collectCarrierBenefits, readCarrierPauses, recordCarrierPauses } from './carrier-benefits.js';
 
 const ROOT = process.cwd();
 const OUTPUT_PATH = path.join(ROOT, 'docs', 'deals-pending-member-benefits.json');
@@ -10,27 +12,7 @@ const MAX_DEALS_PER_SOURCE = Number(process.env.MEMBER_BENEFITS_MAX_PER_SOURCE |
 const MIN_QUALITY_SCORE = Number(process.env.MEMBER_BENEFITS_MIN_SCORE || 18);
 
 const SOURCES = [
-  {
-    key: 'drei-plus',
-    source: 'Drei Plus',
-    membership: 'Drei Kund:innen',
-    url: 'https://www.drei.at/de/dreiplus/',
-    distance: 'Österreich',
-  },
-  {
-    key: 'magenta-moments',
-    source: 'Magenta Moments',
-    membership: 'Magenta Kund:innen',
-    url: 'https://www.magenta.at/magenta-moments',
-    distance: 'Österreich',
-  },
-  {
-    key: 'a1-smile',
-    source: 'A1 Smile',
-    membership: 'A1 Kund:innen',
-    url: 'https://www.a1.net/treue',
-    distance: 'Österreich',
-  },
+  ...CARRIER_SOURCES,
   {
     key: 'wienmobil-vorteilswelt',
     source: 'WienMobil Vorteilswelt',
@@ -426,13 +408,34 @@ async function scrapeSource(source) {
   return deals;
 }
 
+function readJson(file, fallback) {
+  try { return JSON.parse(fs.readFileSync(file, 'utf8')); }
+  catch (error) { if (error.code === 'ENOENT') return fallback; throw error; }
+}
+
+export function mergeCarrierPending(previous, carrierDeals) {
+  const names = new Set([...CARRIER_SOURCES.map(source => source.source), 'A1 Smile']);
+  return [...(previous.deals || []).filter(deal => !names.has(deal.source) && !deal.carrierProvider), ...carrierDeals];
+}
+
 async function main() {
   console.log('🎟️ MEMBER BENEFITS SCRAPER');
   console.log('========================================');
 
-  const allDeals = [];
-  const errors = [];
-  for (const source of SOURCES) {
+  const previous = readJson(OUTPUT_PATH, { deals: [] });
+  const live = readJson(path.join(ROOT, 'docs', 'deals.json'), { deals: [] });
+  const carriers = await collectCarrierBenefits({
+    previous: previous.deals || [], live: Array.isArray(live) ? live : live.deals || [],
+    state: readCarrierPauses(), maxDeals: MAX_DEALS_PER_SOURCE,
+  });
+  recordCarrierPauses(carriers.state);
+  fs.writeFileSync(path.join(ROOT, 'docs', 'carrier-benefit-coverage.json'), JSON.stringify(carriers.report, null, 2) + '\n');
+  const carrierOnly = process.env.MEMBER_BENEFITS_SCOPE === 'carriers';
+  const allDeals = carrierOnly ? mergeCarrierPending(previous, carriers.deals) : [...carriers.deals];
+  const errors = carriers.report.providers.flatMap(provider => provider.errors.map(error => ({ source:provider.source,...error })));
+  if (carrierOnly) errors.push(...(previous.errors || []).filter(error => !CARRIER_SOURCES.some(source => source.url === error.url)));
+  for (const source of SOURCES.filter(source => !CARRIER_SOURCES.some(carrier => carrier.key === source.key))) {
+    if (carrierOnly) continue;
     try {
       allDeals.push(...await scrapeSource(source));
     } catch (error) {
@@ -449,14 +452,15 @@ async function main() {
     errors,
     sources: SOURCES.map(({ key, source, url, membership }) => ({ key, source, url, membership })),
     deals,
-    viennaFoodReport: SOURCES.find(source => source.key === 'vorteilsclub-wien').foodReport,
+    carrierReport: carriers.report,
+    viennaFoodReport: carrierOnly ? previous.viennaFoodReport : SOURCES.find(source => source.key === 'vorteilsclub-wien').foodReport,
   };
 
   fs.writeFileSync(OUTPUT_PATH, JSON.stringify(payload, null, 2));
   console.log(`💾 ${deals.length} Deals → ${OUTPUT_PATH}`);
 }
 
-main().catch((error) => {
+if (process.argv[1] && import.meta.url === pathToFileURL(path.resolve(process.argv[1])).href) main().catch((error) => {
   console.error('❌ member benefits scraper failed:', error);
   process.exit(1);
 });

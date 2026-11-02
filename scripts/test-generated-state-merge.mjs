@@ -33,6 +33,10 @@ function writeQueue(directory, deals, updatedAt) {
   }, null, 2)}\n`);
 }
 
+function writeCarrierPauses(directory, state) {
+  fs.writeFileSync(path.join(directory, 'docs/carrier-benefit-pause.json'), JSON.stringify(state) + '\n');
+}
+
 const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), 'generated-state-merge-'));
 const seedDir = path.join(tempDir, 'seed');
 const remoteDir = path.join(tempDir, 'remote.git');
@@ -46,7 +50,8 @@ try {
   run('git', ['init', '--initial-branch=main'], seedDir);
   writeQueue(seedDir, [{ id: 'approved-old', slackTs: '100.1', title: 'Old queue row' }], '2026-08-22T09:00:00.000Z');
   fs.writeFileSync(path.join(seedDir, 'docs/vienna-food-benefit-pause.json'), '{"retryAt":""}\n');
-  run('git', ['add', 'docs/deals-pending-all.json', 'docs/vienna-food-benefit-pause.json'], seedDir);
+  writeCarrierPauses(seedDir, {});
+  run('git', ['add', 'docs'], seedDir);
   run('git', ['commit', '-m', 'seed queue'], seedDir);
   fs.mkdirSync(remoteDir, { recursive: true });
   run('git', ['init', '--bare'], remoteDir);
@@ -59,7 +64,8 @@ try {
   // A concurrent approval removes the old row and another source adds a row.
   writeQueue(concurrentDir, [{ id: 'remote-new', slackTs: '200.1', title: 'Remote deal' }], '2026-08-22T10:00:00.000Z');
   fs.writeFileSync(path.join(concurrentDir, 'docs/vienna-food-benefit-pause.json'), '{"retryAt":"2026-11-10T00:00:00Z"}\n');
-  run('git', ['add', 'docs/deals-pending-all.json', 'docs/vienna-food-benefit-pause.json'], concurrentDir);
+  writeCarrierPauses(concurrentDir, {'https://www.a1.net':{retryAt:'2026-11-10T00:00:00Z'}});
+  run('git', ['add', 'docs'], concurrentDir);
   run('git', ['commit', '-m', 'approve old and add remote'], concurrentDir);
   run('git', ['push', 'origin', 'main'], concurrentDir);
 
@@ -70,6 +76,7 @@ try {
     { id: 'local-new', slackTs: '300.1', title: 'Local deal' },
   ], '2026-08-22T11:00:00.000Z');
   fs.writeFileSync(path.join(localDir, 'docs/vienna-food-benefit-pause.json'), '{"retryAt":"2026-10-24T00:00:00Z"}\n');
+  writeCarrierPauses(localDir, {'https://www.drei.at':{retryAt:'2026-11-11T00:00:00Z'}});
   run(process.execPath, [
     SCRIPT_PATH,
     '--skip-conflicts',
@@ -82,6 +89,7 @@ try {
     '--files',
     'docs/deals-pending-all.json',
     'docs/vienna-food-benefit-pause.json',
+    'docs/carrier-benefit-pause.json',
   ], localDir);
 
   run('git', ['clone', '--branch', 'main', remoteDir, verifyDir], tempDir);
@@ -89,17 +97,22 @@ try {
   assert.deepEqual(payload.deals.map((deal) => deal.id).sort(), ['local-new', 'remote-new']);
   assert.equal(payload.totalDeals, 2);
   assert.equal(JSON.parse(fs.readFileSync(path.join(verifyDir, 'docs/vienna-food-benefit-pause.json'))).retryAt, '2026-11-10T00:00:00Z');
+  assert.deepEqual(JSON.parse(fs.readFileSync(path.join(verifyDir, 'docs/carrier-benefit-pause.json'))), {
+    'https://www.a1.net':{retryAt:'2026-11-10T00:00:00Z'}, 'https://www.drei.at':{retryAt:'2026-11-11T00:00:00Z'},
+  });
 
   // A source-owned collector may intentionally replace its own generated file
   // even if a verifier enriched the previous version while the collector ran.
   writeQueue(verifyDir, [{ id: 'remote-verification', title: 'Concurrent verifier output' }], '2026-08-22T12:00:00.000Z');
   fs.writeFileSync(path.join(verifyDir, 'docs/vienna-food-benefit-pause.json'), '{"retryAt":"2026-11-12T00:00:00Z"}\n');
-  run('git', ['add', 'docs/deals-pending-all.json', 'docs/vienna-food-benefit-pause.json'], verifyDir);
+  writeCarrierPauses(verifyDir, {'https://www.a1.net':{retryAt:'2026-11-12T00:00:00Z'},'https://www.drei.at':{retryAt:'2026-11-11T00:00:00Z'}});
+  run('git', ['add', 'docs'], verifyDir);
   run('git', ['commit', '-m', 'concurrent verifier output'], verifyDir);
   run('git', ['push', 'origin', 'main'], verifyDir);
 
   writeQueue(localDir, [{ id: 'source-owned', title: 'Fresh collector output' }], '2026-08-22T13:00:00.000Z');
   fs.writeFileSync(path.join(localDir, 'docs/vienna-food-benefit-pause.json'), '{"retryAt":"2026-11-11T00:00:00Z"}\n');
+  writeCarrierPauses(localDir, {'https://www.a1.net':{retryAt:'2026-11-11T00:00:00Z'},'https://www.hot.at':{retryAt:'2026-11-13T00:00:00Z'}});
   run(process.execPath, [
     SCRIPT_PATH,
     '--replace-conflicts',
@@ -112,6 +125,7 @@ try {
     '--files',
     'docs/deals-pending-all.json',
     'docs/vienna-food-benefit-pause.json',
+    'docs/carrier-benefit-pause.json',
   ], localDir);
 
   run('git', ['clone', '--branch', 'main', remoteDir, replaceVerifyDir], tempDir);
@@ -119,6 +133,10 @@ try {
   assert.deepEqual(replacedPayload.deals.map((deal) => deal.id), ['source-owned']);
   assert.equal(replacedPayload.totalDeals, 1);
   assert.equal(JSON.parse(fs.readFileSync(path.join(replaceVerifyDir, 'docs/vienna-food-benefit-pause.json'))).retryAt, '2026-11-12T00:00:00Z', 'replace mode must not shorten a source pause');
+  const carrierPauses=JSON.parse(fs.readFileSync(path.join(replaceVerifyDir, 'docs/carrier-benefit-pause.json')));
+  assert.equal(carrierPauses['https://www.a1.net'].retryAt,'2026-11-12T00:00:00Z');
+  assert.equal(carrierPauses['https://www.drei.at'].retryAt,'2026-11-11T00:00:00Z');
+  assert.equal(carrierPauses['https://www.hot.at'].retryAt,'2026-11-13T00:00:00Z');
 } finally {
   fs.rmSync(tempDir, { recursive: true, force: true });
 }

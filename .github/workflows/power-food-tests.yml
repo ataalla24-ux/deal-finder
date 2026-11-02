@@ -5,6 +5,10 @@ on:
       - "scraper/vienna-food-benefits.js"
       - "scraper/member-benefits-scraper.js"
       - "scripts/test-vienna-food-benefits.mjs"
+      - "scraper/carrier-benefits.js"
+      - "scripts/test-carrier-benefits.mjs"
+      - "scripts/commit-generated.mjs"
+      - "scripts/test-generated-state-merge.mjs"
       - "scraper/official-coupon-media.js"
       - "scripts/test-official-coupon-media.mjs"
       - ".github/actions/coupon-tools/**"
@@ -38,6 +42,10 @@ on:
       - "scraper/vienna-food-benefits.js"
       - "scraper/member-benefits-scraper.js"
       - "scripts/test-vienna-food-benefits.mjs"
+      - "scraper/carrier-benefits.js"
+      - "scripts/test-carrier-benefits.mjs"
+      - "scripts/commit-generated.mjs"
+      - "scripts/test-generated-state-merge.mjs"
       - "scraper/official-coupon-media.js"
       - "scripts/test-official-coupon-media.mjs"
       - ".github/actions/coupon-tools/**"
@@ -81,6 +89,8 @@ jobs:
       - run: npm ci
       - run: |
           node --test scripts/test-vienna-food-benefits.mjs
+          node --test scripts/test-carrier-benefits.mjs
+          node scripts/test-generated-state-merge.mjs
           node --test scripts/test-food-provider-discovery.mjs
           node scripts/test-food-discovery-policy.mjs
           node scripts/test-instagram-food-discovery.mjs

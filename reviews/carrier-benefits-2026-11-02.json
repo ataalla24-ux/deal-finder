@@ -1,0 +1,49 @@
+{
+  "date": "2026-11-02",
+  "purpose": "Expand official Austrian mobile-provider customer benefits without paid extraction or bypassing Slack approval",
+  "baseline": "14e8fc4e4",
+  "completeProviderCoverage": false,
+  "scope": "Public customer-benefit pages, not a comprehensive mobile-tariff comparison",
+  "officialSources": [
+    "https://www.drei.at/de/dreiplus/",
+    "https://www.magenta.at/magenta-moments",
+    "https://www.a1.net/treue",
+    "https://www.hot.at/hot-fix/?tarif=vergleich"
+  ],
+  "capture": {
+    "details": "docs/carrier-benefit-coverage.json",
+    "directHttpRequestsInFinalCaptureIncludingRobots": 30,
+    "officialHtmlPages": 26,
+    "dreiDetailPages": 22,
+    "candidateRecords": 13,
+    "passCurrentSlackValidationUsingActualCapturedPages": 12,
+    "heldInValidation": [{"provider":"drei-plus","partner":"Cineplexx","reason":"Specific Vienna participation not established by captured detail block"}],
+    "newToPreviousSourcePending": 5,
+    "notInPublicFeed": 8,
+    "alreadyInPublicFeed": 5,
+    "unrelatedPendingRowsPreservedExactly": 93,
+    "newToPendingPartners": ["FlixBus", "clever fit", "PADELZONE", "Ohana", "HoT / HOFER"],
+    "verificationMethod": "Reparse and pipeline-test real HTTP-200 snapshots without additional network calls"
+  },
+  "publicCatalogLimitations": {
+    "drei": "All 22 qualifying indexed detail URLs read. Expired or conflicting terms, regional benefits outside Vienna and incomplete trial-follow-up conditions held. No promise of all private or future offers.",
+    "a1": "Actual direct HTTP 200 now, unlike previous generic 403. Six public discount teasers retained as source evidence only; full selected products, code eligibility, renewal pricing or other app conditions not established. Alcohol excluded.",
+    "magenta": "Public overview is not the complete Moments app catalog. No offer invented from logos, generic 1+1 marketing, potential monthly savings or data-pack activation dates without a stated price.",
+    "hot": "10 EUR HOFER voucher only after first number porting AND subsequent tariff-package booking; once per number, at most five per person. Not a general reward for every existing HoT customer.",
+    "otherProviders": "spusu/yesss and other brands not asserted to have the same benefits as their underlying network. No complete partner catalog verified or adapter coverage claimed for these brands."
+  },
+  "safety": {
+    "humanSlackApproval": "unchanged and required",
+    "newSlackDelivery": "not claimed; no manual dispatch or test send",
+    "newLivePublication": "none by this task",
+    "privateCodes": "not collected or redistributed",
+    "votes": "zero for new carrier candidates, retained through Slack normalization",
+    "dates": "no invented source publication date or expiry; verification time is separate",
+    "requests": "single paced direct-HTTP lane, 48 requests maximum, robots respected, 401/403/429 pauses persist and cannot be shortened by concurrent commits",
+    "budgetsSchedulesKeysConsent": "unchanged",
+    "paidModelActorOrProviderCalls": "none triggered by this task",
+    "existingBackgroundJobs": "continue independently",
+    "nativeSourcesStoreUploads": "untouched"
+  },
+  "localEvidence": "output/carrier-benefits-2026-11-02 (raw captures, pipeline validation, tests and final status)"
+}

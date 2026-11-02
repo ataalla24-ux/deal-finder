@@ -719,7 +719,7 @@ function normalizeDeal(raw, options = {}) {
     pubDateSource: cleanText(deal.pubDateSource || deal.sourcePublishedAtSource),
     discoveredAt: toIsoDate(deal.discoveredAt),
     qualityScore: Number(deal.qualityScore) || 0,
-    votes: Number(deal.votes) || 1,
+    votes: Number(deal.votes) || (deal.carrierProvider ? 0 : 1),
     priority: Number(deal.priority) || 3,
     hot: Boolean(deal.hot),
     isNew: false,
