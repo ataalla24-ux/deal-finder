@@ -1,10 +1,10 @@
 {
-  "generatedAt": "2026-11-02T13:41:19.754Z",
+  "generatedAt": "2026-11-02T13:46:14.958Z",
   "summary": {
     "maxAgeDays": 7,
-    "total": 301,
-    "allowed": 0,
-    "blocked": 301,
+    "total": 303,
+    "allowed": 1,
+    "blocked": 302,
     "warnings": 0,
     "reasonCounts": {
       "kein konkretes Angebot erkennbar": 226,
@@ -47,12 +47,13 @@
       "redaktioneller Mehrfach-Roundup statt eindeutigem Einzelangebot": 3,
       "allgemeine Empfehlung/Gratis-Event statt konkreter Aktion": 1,
       "relative Kurz-Aktion abgelaufen (2026-10-26)": 1,
+      "älter als 7 Tage (2024-11-05)": 1,
       "kein verlässliches Quell-/Post-Datum gefunden": 110,
       "ausgeschlossene Quelle (gastro.news)": 46
     },
     "reasonCategoryCounts": {
       "kein konkreter Deal": 227,
-      "älter als 7 Tage": 146,
+      "älter als 7 Tage": 147,
       "ungültige URL": 20,
       "abgelaufen": 15,
       "nicht Wien": 6,
@@ -64,6 +65,13 @@
       "ausgeschlossene Quelle": 46
     },
     "sourceCounts": {
+      "Apify 2 Vienna Food Discovery": {
+        "total": 1,
+        "allowed": 1,
+        "blocked": 0,
+        "warnings": 0,
+        "reasonCategoryCounts": {}
+      },
       "Apify Instagram Vienna Food Offers": {
         "total": 2,
         "allowed": 0,
@@ -197,10 +205,35 @@
           "selbst syndiziert": 1,
           "abgelaufen": 1
         }
+      },
+      "Therme Wien": {
+        "total": 1,
+        "allowed": 0,
+        "blocked": 1,
+        "warnings": 0,
+        "reasonCategoryCounts": {
+          "älter als 7 Tage": 1
+        }
       }
     }
   },
-  "allowed": [],
+  "allowed": [
+    {
+      "id": "igap-1akmipr",
+      "title": "Wir verteilen gratis Döner",
+      "brand": "CIO‘S",
+      "source": "Apify 2 Vienna Food Discovery",
+      "url": "https://www.instagram.com/p/DfO_OhnRaew/",
+      "reasons": [],
+      "warnings": [],
+      "sourceDate": "2026-11-02T09:29:45.000Z",
+      "sourceDateSource": "url.instagramShortcode",
+      "sourceAgeDays": 0,
+      "expiryDate": "2026-11-05T09:30:20.000Z",
+      "expirySource": "deal.structured",
+      "urlStatus": "HTTP 200"
+    }
+  ],
   "blocked": [
     {
       "id": "jesuszentrum-events-20261026",
@@ -840,7 +873,7 @@
       "warnings": [
         "kein Ablaufdatum gefunden"
       ],
-      "sourceDate": "2026-11-02T13:39:37.945Z",
+      "sourceDate": "2026-11-02T13:44:29.483Z",
       "sourceDateSource": "url.publicationDate",
       "sourceAgeDays": 0,
       "expiryDate": "",
@@ -879,7 +912,6 @@
         "älter als 7 Tage (2026-02-22)"
       ],
       "warnings": [
-        "URL nicht eindeutig prüfbar (temporärer Fehler)",
         "kein Ablaufdatum gefunden"
       ],
       "sourceDate": "2026-02-22T21:13:07.698Z",
@@ -887,7 +919,7 @@
       "sourceAgeDays": 253,
       "expiryDate": "",
       "expirySource": "",
-      "urlStatus": "unklar: temporärer URL-Fehler"
+      "urlStatus": "HTTP 200"
     },
     {
       "id": "extra-32-20260222",
@@ -3861,6 +3893,25 @@
       "sourceAgeDays": 7,
       "expiryDate": "2026-11-07T23:59:59.999Z",
       "expirySource": "deal.structured",
+      "urlStatus": "HTTP 200"
+    },
+    {
+      "id": "power-37b50e3f9650",
+      "title": "RELAX! Tagesurlaub Gutschein Exklusiv am 8.11.: NUR € 81,75,- STATT € 109",
+      "brand": "Therme Wien",
+      "source": "Therme Wien",
+      "url": "https://thermewien.at/weltschenktag",
+      "reasons": [
+        "älter als 7 Tage (2024-11-05)"
+      ],
+      "warnings": [
+        "kein Ablaufdatum gefunden"
+      ],
+      "sourceDate": "2024-11-05T12:54:11.000Z",
+      "sourceDateSource": "url.publicationDate",
+      "sourceAgeDays": 727,
+      "expiryDate": "",
+      "expirySource": "",
       "urlStatus": "HTTP 200"
     },
     {
