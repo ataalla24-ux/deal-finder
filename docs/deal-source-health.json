@@ -1,10 +1,10 @@
 {
-  "generatedAt": "2026-11-02T06:40:47.637Z",
+  "generatedAt": "2026-11-02T06:50:13.042Z",
   "summary": {
     "filesConsidered": 32,
-    "totalCandidates": 755,
-    "uniqueCandidates": 718,
-    "distinctCandidates": 736,
+    "totalCandidates": 752,
+    "uniqueCandidates": 715,
+    "distinctCandidates": 733,
     "duplicateClusters": 18,
     "topHealthySources": [
       {
@@ -23,7 +23,7 @@
         "sourceKey": "instagram-apify",
         "sourceLabel": "Apify Instagram",
         "healthScore": 72,
-        "totalDeals": 11
+        "totalDeals": 8
       },
       {
         "sourceKey": "meta-instagram",
@@ -61,7 +61,7 @@
         "sourceKey": "instagram-apify",
         "sourceLabel": "Apify Instagram",
         "missionFitScore": 70,
-        "totalDeals": 11
+        "totalDeals": 8
       },
       {
         "sourceKey": "member-benefits",
@@ -130,7 +130,7 @@
         "sourceKey": "instagram-apify",
         "sourceLabel": "Apify Instagram",
         "precisionScore": 70,
-        "totalDeals": 11
+        "totalDeals": 8
       },
       {
         "sourceKey": "meta-instagram",
@@ -168,7 +168,7 @@
         "sourceKey": "instagram-apify",
         "sourceLabel": "Apify Instagram",
         "sourceWeightScore": 60,
-        "totalDeals": 11
+        "totalDeals": 8
       }
     ],
     "topSourcesToFix": [
@@ -231,12 +231,13 @@
     ],
     "pipelineRuns": {
       "reportedSources": 8,
-      "failedSources": [],
+      "failedSources": [
+        "wien-combined"
+      ],
       "completedWithErrors": [
         "firecrawl4",
         "food3",
-        "power",
-        "wien-combined"
+        "power"
       ]
     }
   },
@@ -385,20 +386,20 @@
       "sourceKey": "instagram-apify",
       "file": "deals-pending-instagram-apify.json",
       "sourceLabel": "Apify Instagram",
-      "totalDeals": 11,
-      "uniqueDeals": 11,
+      "totalDeals": 8,
+      "uniqueDeals": 8,
       "duplicateDeals": 0,
       "duplicateAcrossSources": 0,
       "fresh1dCount": 1,
-      "fresh7dCount": 11,
-      "viennaCount": 3,
-      "foodDrinkCount": 11,
-      "promoCount": 11,
+      "fresh7dCount": 8,
+      "viennaCount": 2,
+      "foodDrinkCount": 8,
+      "promoCount": 8,
       "missingUrlCount": 0,
       "sampleTitles": [
+        "🍕 + 🍔 Pizza nach Wunsch (25 cm) + Crispy Chicken Burger GRATIS, ab 13,50 € 🔗 Direkt zum Deal: (Bereich „Ang",
         "🎃 HALLOWEEN-MISSION IM MUTTERSCHIFF Heute ist bei uns Gruselalarm: Wer am 31.10. verkleidet vorbeikommt, beko",
-        "🎃 CIO’S HALLOWEEN GRAND OPENING! 🎃 📅 Samstag, 31. Oktober 2026 ⏰ 12:00–17:00 Uhr 🌯 GRATIS DÖNER? So geht’s",
-        "Gratis Yaprak Döner im ersten Bezirk bei 📍Rotenturmstraße 19, 1010 Wien Einfach verkleidet herkommen genießen"
+        "🎃 CIO’S HALLOWEEN GRAND OPENING! 🎃 📅 Samstag, 31. Oktober 2026 ⏰ 12:00–17:00 Uhr 🌯 GRATIS DÖNER? So geht’s"
       ],
       "lastRun": null,
       "uniqueRate": 1,
@@ -409,21 +410,21 @@
       "foodDrinkRate": 1,
       "promoRate": 1,
       "missingUrlRate": 0,
-      "averageQualityScore": 93.9,
+      "averageQualityScore": 93.5,
       "topCategories": [
         {
           "value": "essen",
-          "count": 9
+          "count": 7
         },
         {
           "value": "kaffee",
-          "count": 2
+          "count": 1
         }
       ],
       "topTypes": [
         {
           "value": "gratis",
-          "count": 9
+          "count": 6
         },
         {
           "value": "bogo",
@@ -440,7 +441,7 @@
       ],
       "healthScore": 72,
       "missionFitScore": 70,
-      "coverageScore": 17,
+      "coverageScore": 16,
       "precisionScore": 70,
       "sourceWeightScore": 60
     },
@@ -2101,25 +2102,21 @@
       "missingUrlCount": 0,
       "sampleTitles": [],
       "lastRun": {
-        "status": "completed-with-errors",
-        "startedAt": "2026-11-01T22:18:54.169Z",
-        "finishedAt": "2026-11-01T22:20:26.770Z",
-        "durationMs": 92601,
+        "status": "failed",
+        "startedAt": "2026-11-02T06:43:52.432Z",
+        "finishedAt": "2026-11-02T06:43:53.567Z",
+        "durationMs": 1135,
         "counts": {
-          "rawCandidates": 18,
+          "rawCandidates": 0,
           "normalizedCandidates": 0,
           "verifiedCandidates": 0,
           "previousDeals": 0,
           "acceptedDeals": 0,
-          "rejectedDeals": 18
+          "rejectedDeals": 0
         },
-        "rejectedByReason": {
-          "no-concrete-offer": 16,
-          "general-recommendation": 1,
-          "business-lead-generation": 1
-        },
+        "rejectedByReason": {},
         "errors": [
-          "#wienfood: Instagram scan paused: request-budget"
+          "No Graph hashtag source completed successfully; last-good output was preserved. #viennarestaurants: Instagram shared quota paused: rolling-hour budget exhausted"
         ],
         "reportFile": "deal-pipeline-last-run-wien-combined.json"
       },
@@ -2135,7 +2132,7 @@
       "topCategories": [],
       "topTypes": [],
       "issues": [
-        "letzter Lauf fand Kandidaten, aber akzeptierte keinen Deal",
+        "letzter Pipeline-Lauf ist fehlgeschlagen",
         "liefert aktuell 0 Deals"
       ],
       "healthScore": 0,
