@@ -1,5 +1,6 @@
 import fs from 'fs';
 import path from 'path';
+import { approvedDealPhotoURL } from './deal-photo-contract.mjs';
 
 export const LIVE_DEAL_EDIT_FIELDS = [
   'url',
@@ -13,6 +14,7 @@ export const LIVE_DEAL_EDIT_FIELDS = [
   'address',
   'logo',
   'logoUrl',
+  'photoUrl',
   'pubDate',
   'expires',
   'expiresOriginal',
@@ -260,6 +262,8 @@ export function normalizeLiveDealEdit(raw = {}, options = {}) {
     }
   }
 
+  if (Object.hasOwn(edit, 'photoUrl')) edit.photoUrl = approvedDealPhotoURL(edit.photoUrl, dealId);
+
   if (edit.expires && !edit.expiresOriginal) edit.expiresOriginal = edit.expires;
   return edit;
 }
@@ -320,7 +324,7 @@ function applyEditToDeal(deal, edit, checkedAt) {
   if (setIfPresent(next, edit, 'category', { normalize: (value) => cleanText(value).toLowerCase() })) changed.push('category');
   if (setIfPresent(next, edit, 'type', { normalize: (value) => cleanText(value).toLowerCase() })) changed.push('type');
   if (setIfPresent(next, edit, 'distance')) changed.push('distance');
-  for (const field of ['location', 'address', 'logo', 'logoUrl']) {
+  for (const field of ['location', 'address', 'logo', 'logoUrl', 'photoUrl']) {
     if (setIfPresent(next, edit, field, { skipEmpty: false })) changed.push(field);
   }
   if (changed.includes('brand')) {
@@ -381,7 +385,7 @@ function applyEditToDeal(deal, edit, checkedAt) {
     ...(edit.clearFields || []),
     ...(Array.isArray(deal.liveEditedFields) ? deal.liveEditedFields : []),
     ...LIVE_DEAL_EDIT_FIELDS.filter((field) => Object.hasOwn(edit, field) && edit[field] !== undefined
-      && (cleanText(edit[field]) || ['location', 'address', 'logo', 'logoUrl'].includes(field))),
+      && (cleanText(edit[field]) || ['location', 'address', 'logo', 'logoUrl', 'photoUrl'].includes(field))),
     ...changed,
   ])].sort();
   if (JSON.stringify(editedFields) !== JSON.stringify(deal.liveEditedFields)) changed.push('liveEditedFields');
