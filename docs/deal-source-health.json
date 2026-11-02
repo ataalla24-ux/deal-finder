@@ -1,35 +1,35 @@
 {
-  "generatedAt": "2026-11-02T13:30:48.417Z",
+  "generatedAt": "2026-11-02T13:37:54.526Z",
   "summary": {
     "filesConsidered": 32,
-    "totalCandidates": 747,
-    "uniqueCandidates": 724,
-    "distinctCandidates": 735,
-    "duplicateClusters": 11,
+    "totalCandidates": 741,
+    "uniqueCandidates": 716,
+    "distinctCandidates": 728,
+    "duplicateClusters": 12,
     "topHealthySources": [
-      {
-        "sourceKey": "instagram-ai",
-        "sourceLabel": "Instagram AI Agent",
-        "healthScore": 74,
-        "totalDeals": 20
-      },
-      {
-        "sourceKey": "meta-instagram",
-        "sourceLabel": "Meta Instagram Graph",
-        "healthScore": 73,
-        "totalDeals": 71
-      },
       {
         "sourceKey": "member-benefits",
         "sourceLabel": "Member Benefits",
+        "healthScore": 74,
+        "totalDeals": 108
+      },
+      {
+        "sourceKey": "instagram-ai",
+        "sourceLabel": "Instagram AI Agent",
         "healthScore": 72,
-        "totalDeals": 112
+        "totalDeals": 20
       },
       {
         "sourceKey": "instagram-apify",
         "sourceLabel": "Apify Instagram",
         "healthScore": 72,
         "totalDeals": 8
+      },
+      {
+        "sourceKey": "meta-instagram",
+        "sourceLabel": "Meta Instagram Graph",
+        "healthScore": 71,
+        "totalDeals": 69
       },
       {
         "sourceKey": "firecrawl5",
@@ -66,8 +66,8 @@
       {
         "sourceKey": "member-benefits",
         "sourceLabel": "Member Benefits",
-        "missionFitScore": 61,
-        "totalDeals": 112
+        "missionFitScore": 63,
+        "totalDeals": 108
       }
     ],
     "topCoverageSources": [
@@ -81,9 +81,9 @@
       {
         "sourceKey": "member-benefits",
         "sourceLabel": "Member Benefits",
-        "coverageScore": 62,
-        "totalDeals": 112,
-        "fresh1dCount": 0
+        "coverageScore": 69,
+        "totalDeals": 108,
+        "fresh1dCount": 13
       },
       {
         "sourceKey": "vienna-promo-radar",
@@ -95,8 +95,8 @@
       {
         "sourceKey": "meta-instagram",
         "sourceLabel": "Meta Instagram Graph",
-        "coverageScore": 45,
-        "totalDeals": 71,
+        "coverageScore": 44,
+        "totalDeals": 69,
         "fresh1dCount": 5
       },
       {
@@ -127,30 +127,30 @@
         "totalDeals": 20
       },
       {
+        "sourceKey": "member-benefits",
+        "sourceLabel": "Member Benefits",
+        "precisionScore": 72,
+        "totalDeals": 108
+      },
+      {
         "sourceKey": "meta-instagram",
         "sourceLabel": "Meta Instagram Graph",
         "precisionScore": 72,
-        "totalDeals": 71
-      },
-      {
-        "sourceKey": "instagram-apify",
-        "sourceLabel": "Apify Instagram",
-        "precisionScore": 70,
-        "totalDeals": 8
+        "totalDeals": 69
       }
     ],
     "topWeightedSources": [
       {
         "sourceKey": "member-benefits",
         "sourceLabel": "Member Benefits",
-        "sourceWeightScore": 66,
-        "totalDeals": 112
+        "sourceWeightScore": 69,
+        "totalDeals": 108
       },
       {
         "sourceKey": "meta-instagram",
         "sourceLabel": "Meta Instagram Graph",
-        "sourceWeightScore": 63,
-        "totalDeals": 71
+        "sourceWeightScore": 62,
+        "totalDeals": 69
       },
       {
         "sourceKey": "firecrawl5",
@@ -243,13 +243,100 @@
   },
   "sources": [
     {
+      "sourceKey": "member-benefits",
+      "file": "deals-pending-member-benefits.json",
+      "sourceLabel": "Member Benefits",
+      "totalDeals": 108,
+      "uniqueDeals": 108,
+      "duplicateDeals": 0,
+      "duplicateAcrossSources": 0,
+      "fresh1dCount": 13,
+      "fresh7dCount": 13,
+      "viennaCount": 80,
+      "foodDrinkCount": 86,
+      "promoCount": 88,
+      "missingUrlCount": 0,
+      "sampleTitles": [
+        "1+1 Ticket gratis bei Jüdisches Museum Wien: 1+1 Ticket gratis",
+        "20 % Rabatt bei Kekko, 10. Bezirk (Vorteilsclub)",
+        "20 % Rabatt bei La Passione (Vorteilsclub)"
+      ],
+      "lastRun": null,
+      "uniqueRate": 1,
+      "duplicateRate": 0,
+      "fresh1dRate": 0.1,
+      "fresh7dRate": 0.1,
+      "viennaRate": 0.7,
+      "foodDrinkRate": 0.8,
+      "promoRate": 0.8,
+      "missingUrlRate": 0,
+      "averageQualityScore": 64.6,
+      "topCategories": [
+        {
+          "value": "essen",
+          "count": 82
+        },
+        {
+          "value": "kultur",
+          "count": 9
+        },
+        {
+          "value": "shopping",
+          "count": 6
+        },
+        {
+          "value": "fitness",
+          "count": 3
+        },
+        {
+          "value": "reisen",
+          "count": 2
+        },
+        {
+          "value": "supermarkt",
+          "count": 2
+        }
+      ],
+      "topTypes": [
+        {
+          "value": "rabatt",
+          "count": 95
+        },
+        {
+          "value": "gratis",
+          "count": 6
+        },
+        {
+          "value": "bogo",
+          "count": 4
+        },
+        {
+          "value": "freebie",
+          "count": 2
+        },
+        {
+          "value": "gutschein",
+          "count": 1
+        }
+      ],
+      "issues": [
+        "wenige Deals sind frischer als 1 Tag",
+        "Wien-Signal ist zu schwach"
+      ],
+      "healthScore": 74,
+      "missionFitScore": 63,
+      "coverageScore": 69,
+      "precisionScore": 72,
+      "sourceWeightScore": 69
+    },
+    {
       "sourceKey": "instagram-ai",
       "file": "deals-pending-instagram-ai.json",
       "sourceLabel": "Instagram AI Agent",
       "totalDeals": 20,
-      "uniqueDeals": 15,
-      "duplicateDeals": 5,
-      "duplicateAcrossSources": 5,
+      "uniqueDeals": 14,
+      "duplicateDeals": 6,
+      "duplicateAcrossSources": 6,
       "fresh1dCount": 1,
       "fresh7dCount": 20,
       "viennaCount": 20,
@@ -262,7 +349,7 @@
         "Geburtstagsangebot mit Gratisleistung bis 31.12.2026"
       ],
       "lastRun": null,
-      "uniqueRate": 0.8,
+      "uniqueRate": 0.7,
       "duplicateRate": 0.3,
       "fresh1dRate": 0.1,
       "fresh7dRate": 1,
@@ -302,176 +389,11 @@
       "issues": [
         "wenige Deals sind frischer als 1 Tag"
       ],
-      "healthScore": 74,
+      "healthScore": 72,
       "missionFitScore": 64,
       "coverageScore": 21,
       "precisionScore": 75,
       "sourceWeightScore": 60
-    },
-    {
-      "sourceKey": "meta-instagram",
-      "file": "deals-pending-meta-instagram.json",
-      "sourceLabel": "Meta Instagram Graph",
-      "totalDeals": 71,
-      "uniqueDeals": 61,
-      "duplicateDeals": 10,
-      "duplicateAcrossSources": 5,
-      "fresh1dCount": 5,
-      "fresh7dCount": 69,
-      "viennaCount": 71,
-      "foodDrinkCount": 47,
-      "promoCount": 44,
-      "missingUrlCount": 0,
-      "sampleTitles": [
-        "2-Gang-Menü Suppe oder Dessert + Hauptspeise für €17,50; 3-Gang-Menü Suppe + Hauptspeise + Dessert für €19,50",
-        "Unser Zuckerl des Monats: Saure Drops",
-        "Mittagsangebot bei 2nd Street Burger!"
-      ],
-      "lastRun": null,
-      "uniqueRate": 0.9,
-      "duplicateRate": 0.1,
-      "fresh1dRate": 0.1,
-      "fresh7dRate": 1,
-      "viennaRate": 1,
-      "foodDrinkRate": 0.7,
-      "promoRate": 0.6,
-      "missingUrlRate": 0,
-      "averageQualityScore": 87.7,
-      "topCategories": [
-        {
-          "value": "essen",
-          "count": 40
-        },
-        {
-          "value": "shopping",
-          "count": 15
-        },
-        {
-          "value": "kultur",
-          "count": 7
-        },
-        {
-          "value": "kaffee",
-          "count": 6
-        },
-        {
-          "value": "beauty",
-          "count": 1
-        },
-        {
-          "value": "supermarkt",
-          "count": 1
-        }
-      ],
-      "topTypes": [
-        {
-          "value": "rabatt",
-          "count": 38
-        },
-        {
-          "value": "gratis",
-          "count": 28
-        },
-        {
-          "value": "bogo",
-          "count": 5
-        }
-      ],
-      "issues": [
-        "wenige Deals sind frischer als 1 Tag"
-      ],
-      "healthScore": 73,
-      "missionFitScore": 59,
-      "coverageScore": 45,
-      "precisionScore": 72,
-      "sourceWeightScore": 63
-    },
-    {
-      "sourceKey": "member-benefits",
-      "file": "deals-pending-member-benefits.json",
-      "sourceLabel": "Member Benefits",
-      "totalDeals": 112,
-      "uniqueDeals": 112,
-      "duplicateDeals": 0,
-      "duplicateAcrossSources": 0,
-      "fresh1dCount": 0,
-      "fresh7dCount": 13,
-      "viennaCount": 80,
-      "foodDrinkCount": 86,
-      "promoCount": 91,
-      "missingUrlCount": 0,
-      "sampleTitles": [
-        "1+1 Ticket gratis bei Jüdisches Museum Wien: 1+1 Ticket gratis",
-        "20 % Rabatt bei Kalimera Café (Vorteilsclub)",
-        "20 % Rabatt bei Kekko, 10. Bezirk (Vorteilsclub)"
-      ],
-      "lastRun": null,
-      "uniqueRate": 1,
-      "duplicateRate": 0,
-      "fresh1dRate": 0,
-      "fresh7dRate": 0.1,
-      "viennaRate": 0.7,
-      "foodDrinkRate": 0.8,
-      "promoRate": 0.8,
-      "missingUrlRate": 0,
-      "averageQualityScore": 64.5,
-      "topCategories": [
-        {
-          "value": "essen",
-          "count": 83
-        },
-        {
-          "value": "kultur",
-          "count": 9
-        },
-        {
-          "value": "shopping",
-          "count": 7
-        },
-        {
-          "value": "technik",
-          "count": 4
-        },
-        {
-          "value": "fitness",
-          "count": 3
-        },
-        {
-          "value": "reisen",
-          "count": 3
-        }
-      ],
-      "topTypes": [
-        {
-          "value": "rabatt",
-          "count": 99
-        },
-        {
-          "value": "gratis",
-          "count": 6
-        },
-        {
-          "value": "bogo",
-          "count": 4
-        },
-        {
-          "value": "freebie",
-          "count": 2
-        },
-        {
-          "value": "gutschein",
-          "count": 1
-        }
-      ],
-      "issues": [
-        "wenige Deals sind frischer als 1 Tag",
-        "Wien-Signal ist zu schwach"
-      ],
-      "healthScore": 72,
-      "missionFitScore": 61,
-      "coverageScore": 62,
-      "precisionScore": 70,
-      "sourceWeightScore": 66
     },
     {
       "sourceKey": "instagram-apify",
@@ -535,6 +457,84 @@
       "coverageScore": 16,
       "precisionScore": 70,
       "sourceWeightScore": 60
+    },
+    {
+      "sourceKey": "meta-instagram",
+      "file": "deals-pending-meta-instagram.json",
+      "sourceLabel": "Meta Instagram Graph",
+      "totalDeals": 69,
+      "uniqueDeals": 58,
+      "duplicateDeals": 11,
+      "duplicateAcrossSources": 6,
+      "fresh1dCount": 5,
+      "fresh7dCount": 68,
+      "viennaCount": 69,
+      "foodDrinkCount": 47,
+      "promoCount": 42,
+      "missingUrlCount": 0,
+      "sampleTitles": [
+        "2-Gang-Menü Suppe oder Dessert + Hauptspeise für €17,50; 3-Gang-Menü Suppe + Hauptspeise + Dessert für €19,50",
+        "Unser Zuckerl des Monats: Saure Drops",
+        "Mittagsangebot bei 2nd Street Burger!"
+      ],
+      "lastRun": null,
+      "uniqueRate": 0.8,
+      "duplicateRate": 0.1,
+      "fresh1dRate": 0.1,
+      "fresh7dRate": 1,
+      "viennaRate": 1,
+      "foodDrinkRate": 0.7,
+      "promoRate": 0.6,
+      "missingUrlRate": 0,
+      "averageQualityScore": 87.8,
+      "topCategories": [
+        {
+          "value": "essen",
+          "count": 40
+        },
+        {
+          "value": "shopping",
+          "count": 13
+        },
+        {
+          "value": "kultur",
+          "count": 7
+        },
+        {
+          "value": "kaffee",
+          "count": 6
+        },
+        {
+          "value": "beauty",
+          "count": 1
+        },
+        {
+          "value": "supermarkt",
+          "count": 1
+        }
+      ],
+      "topTypes": [
+        {
+          "value": "rabatt",
+          "count": 36
+        },
+        {
+          "value": "gratis",
+          "count": 28
+        },
+        {
+          "value": "bogo",
+          "count": 5
+        }
+      ],
+      "issues": [
+        "wenige Deals sind frischer als 1 Tag"
+      ],
+      "healthScore": 71,
+      "missionFitScore": 59,
+      "coverageScore": 44,
+      "precisionScore": 72,
+      "sourceWeightScore": 62
     },
     {
       "sourceKey": "firecrawl5",
