@@ -1,0 +1,53 @@
+{
+  "date": "2026-11-02",
+  "request": "Include A1 Vorteilswelt and Magenta Moments as actual benefit sources",
+  "completeAppCatalog": false,
+  "prepared": {
+    "a1PublicOfferCandidates": 4,
+    "magentaPublicOfferCandidates": 2,
+    "alreadyPublicMagentaIdRetained": "benefit-magenta-moments-oz9vs",
+    "newOffersNotInLiveFeed": 5,
+    "unrelatedPendingRowsExactlyPreserved": 106,
+    "allSixPassedSnapshotSlackValidation": true,
+    "liveFeedChanges": 0
+  },
+  "a1": {
+    "source": "https://www.a1.net/treue",
+    "actualSourceRetrieval": "2026-11-02T11:08:41.986Z",
+    "reusedSameDayHttp200Snapshot": true,
+    "webReader403NotBypassed": true,
+    "offers": [
+      "Mesh WLAN Set: 70 EUR instead of 100 EUR",
+      "30 percent discount on foodora PRO three-month plan, not free and not FreeFinder Pro",
+      "30 percent on selected Bosch household appliances, not entire assortment",
+      "30 percent on Hundetraining.me premium annual subscription"
+    ],
+    "missingFactsProminentInDescriptionAndSlackWarnings": "Account eligibility, exact selected products and, where relevant, total price, renewal and cancellation require checking in the provider app before purchase/public approval",
+    "alcoholExcluded": true,
+    "jumpDomeHeld": "Specific Vienna participation and terms not established"
+  },
+  "magenta": {
+    "newDirectHttpRequestsIncludingRobots": 5,
+    "pages": [
+      "https://www.magenta.at/magenta-moments",
+      "https://www.megaplex.at/inhalt/magenta-moments",
+      "https://www.magenta.at/meinmagenta-webview/tv/tv-mini"
+    ],
+    "actualRetrieval": "2026-11-02T11:30:57Z through 11:30:59Z",
+    "cinema": "Tuesday full-price ticket plus second free; QR before payment at cashier; no special screenings or combination. Other days 20 percent ticket discount, every day 10 percent buffet discount. Official page lists Wien Gasometer and SCN. Existing offer ID reused, no duplicate live record.",
+    "tvMini": "New subscription, personal Moments code and eligible Magenta internet excluding KLAX; consumers only. Three months without basic fee, then 3.90 EUR/month. Optional box 2 EUR/month and three-month minimum duration. Other data charges, technical requirements, non-combination and indexation terms retained. No order submitted."
+  },
+  "implementation": [
+    "Strict provider-specific public-offer parsing and official partner detail pages",
+    "Re-extraction before dispatch/approval, malformed and cross-provider URLs rejected",
+    "Multiple distinct A1 offers at one URL keep separate stable identities",
+    "Slack seen-history uses each A1 offer ID, so one shared-page delivery cannot suppress the other benefits; historical ID/URL cards remain readable",
+    "Conflicting duplicate public offer blocks held; identical copies deduplicated",
+    "A1 app-condition warnings cannot be removed by upstream normalization",
+    "A1/Magenta-only refresh preserves all other sources",
+    "Existing pacing, robots, 48-request cap and persistent source pauses retained"
+  ],
+  "publication": "Source pending only. Human Slack approval unchanged; no manual dispatch, no new live deal publication or claimed Slack delivery.",
+  "unchanged": "Native apps, Store artifacts, existing live edits/IDs/selection, schedules, budgets, keys and consent. No paid model, Actor or provider extraction triggered.",
+  "evidence": "output/a1-magenta-benefits-2026-11-02"
+}

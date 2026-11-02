@@ -1063,6 +1063,12 @@ async function validateDeal(deal, context) {
       deal = { ...deal, [field]: officialFood.deal[field] };
     }
   }
+  if (verifiedBenefit?.ok && deal.carrierProvider) {
+    deal = { ...deal, type:verifiedBenefit.deal.type, category:verifiedBenefit.deal.category,
+      carrierOfferKey:verifiedBenefit.deal.carrierOfferKey, needsReview:true,
+      missingFields:[...new Set([...(deal.missingFields || []),...(verifiedBenefit.deal.missingFields || [])])],
+      reviewMissingFields:verifiedBenefit.deal.reviewMissingFields };
+  }
   // A live, exact merchant block supplies its own dates. Page-level dates may
   // refer to a different offer or the original creation of an evergreen page.
   const evidenceHealth = officialFood?.ok ? { ...health, dateHints: {} } : health;

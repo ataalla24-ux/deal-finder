@@ -1,5 +1,6 @@
 import { officialFoodOfferKey } from './power-food-sources.js';
 import { polishOfferTitle } from './offer-title-utils.js';
+import { carrierBenefitPostKey } from './carrier-benefits.js';
 import { normalizeCategoryForScraper } from './category-utils.js';
 import { officialFamilyMealCampaignKey, semanticVenueCampaignKey, semanticVenueTimeGapKey } from './deal-evidence-utils.js';
 import { filterDiscoveryDeals, foodDiscoveryPriority } from './deal-discovery-policy.js';
@@ -189,7 +190,7 @@ function normalizeUrl(url) {
 }
 
 function dealPostKey(deal) {
-  return officialFoodOfferKey(deal) || canonicalPostKey(deal?.url);
+  return officialFoodOfferKey(deal) || carrierBenefitPostKey(deal) || canonicalPostKey(deal?.url);
 }
 
 function canonicalPostKey(url) {

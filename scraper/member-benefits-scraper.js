@@ -413,9 +413,11 @@ function readJson(file, fallback) {
   catch (error) { if (error.code === 'ENOENT') return fallback; throw error; }
 }
 
-export function mergeCarrierPending(previous, carrierDeals) {
-  const names = new Set([...CARRIER_SOURCES.map(source => source.source), 'A1 Smile']);
-  return [...(previous.deals || []).filter(deal => !names.has(deal.source) && !deal.carrierProvider), ...carrierDeals];
+export function mergeCarrierPending(previous, carrierDeals, sources = CARRIER_SOURCES) {
+  const keys = new Set(sources.map(source => source.key));
+  const names = new Set(sources.map(source => source.source));
+  if (keys.has('a1-smile')) names.add('A1 Smile');
+  return [...(previous.deals || []).filter(deal => !names.has(deal.source) && !keys.has(deal.carrierProvider)), ...carrierDeals];
 }
 
 async function main() {
@@ -424,16 +426,23 @@ async function main() {
 
   const previous = readJson(OUTPUT_PATH, { deals: [] });
   const live = readJson(path.join(ROOT, 'docs', 'deals.json'), { deals: [] });
+  const carrierSources = process.env.MEMBER_BENEFITS_SCOPE === 'a1-magenta'
+    ? CARRIER_SOURCES.filter(source => ['a1-smile', 'magenta-moments'].includes(source.key)) : CARRIER_SOURCES;
   const carriers = await collectCarrierBenefits({
     previous: previous.deals || [], live: Array.isArray(live) ? live : live.deals || [],
-    state: readCarrierPauses(), maxDeals: MAX_DEALS_PER_SOURCE,
+    state: readCarrierPauses(), maxDeals: MAX_DEALS_PER_SOURCE, sources: carrierSources,
   });
   recordCarrierPauses(carriers.state);
-  fs.writeFileSync(path.join(ROOT, 'docs', 'carrier-benefit-coverage.json'), JSON.stringify(carriers.report, null, 2) + '\n');
-  const carrierOnly = process.env.MEMBER_BENEFITS_SCOPE === 'carriers';
-  const allDeals = carrierOnly ? mergeCarrierPending(previous, carriers.deals) : [...carriers.deals];
+  const carrierReport = carrierSources.length === CARRIER_SOURCES.length ? carriers.report : {
+    ...carriers.report, refreshedProviders: carrierSources.map(source => source.key),
+    providers: CARRIER_SOURCES.map(source => carriers.report.providers.find(row => row.provider === source.key)
+      || previous.carrierReport?.providers?.find(row => row.provider === source.key)).filter(Boolean),
+  };
+  fs.writeFileSync(path.join(ROOT, 'docs', 'carrier-benefit-coverage.json'), JSON.stringify(carrierReport, null, 2) + '\n');
+  const carrierOnly = ['carriers', 'a1-magenta'].includes(process.env.MEMBER_BENEFITS_SCOPE);
+  const allDeals = carrierOnly ? mergeCarrierPending(previous, carriers.deals, carrierSources) : [...carriers.deals];
   const errors = carriers.report.providers.flatMap(provider => provider.errors.map(error => ({ source:provider.source,...error })));
-  if (carrierOnly) errors.push(...(previous.errors || []).filter(error => !CARRIER_SOURCES.some(source => source.url === error.url)));
+  if (carrierOnly) errors.push(...(previous.errors || []).filter(error => !carrierSources.some(source => source.url === error.url)));
   for (const source of SOURCES.filter(source => !CARRIER_SOURCES.some(carrier => carrier.key === source.key))) {
     if (carrierOnly) continue;
     try {
@@ -452,7 +461,7 @@ async function main() {
     errors,
     sources: SOURCES.map(({ key, source, url, membership }) => ({ key, source, url, membership })),
     deals,
-    carrierReport: carriers.report,
+    carrierReport,
     viennaFoodReport: carrierOnly ? previous.viennaFoodReport : SOURCES.find(source => source.key === 'vorteilsclub-wien').foodReport,
   };
 
