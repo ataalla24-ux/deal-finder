@@ -1,7 +1,7 @@
 {
-  "generatedAt": "2026-11-02T20:08:28.125Z",
+  "generatedAt": "2026-11-02T20:33:33.782Z",
   "source": "instagram-graph-cross-source-verification",
-  "status": "ok",
+  "status": "failed-preserved",
   "configured": true,
   "scannedFiles": [
     "deals-pending-church-events.json",
@@ -108,7 +108,7 @@
     },
     "deals-pending-instagram-ai.json": {
       "deals": 20,
-      "candidates": 4
+      "candidates": 5
     },
     "deals-pending-instagram-apify.json": {
       "deals": 8,
@@ -139,7 +139,7 @@
       "candidates": 0
     },
     "deals-pending-meta-instagram.json": {
-      "deals": 70,
+      "deals": 68,
       "candidates": 15
     },
     "deals-pending-power.json": {
@@ -180,6 +180,10 @@
       "candidates": 2
     },
     {
+      "username": "wirwo.wien",
+      "candidates": 1
+    },
+    {
       "username": "lara.kristiin",
       "candidates": 1
     },
@@ -190,16 +194,17 @@
     {
       "username": "savkovicn_",
       "candidates": 1
-    },
-    {
-      "username": "eylulbaeckerei",
-      "candidates": 1
     }
   ],
-  "fetchedPosts": 135,
-  "exactMatches": 7,
+  "fetchedPosts": 0,
+  "exactMatches": 0,
   "retainedEvidencePosts": 2000,
-  "errors": [],
+  "errors": [
+    {
+      "username": "ikazerestaurant",
+      "message": "Instagram shared quota paused: shared cooldown"
+    }
+  ],
   "accountFailures": {
     "lati.na.watson50": {
       "count": 1,
@@ -225,19 +230,25 @@
   "sharedQuota": {
     "limitPerHour": 190,
     "usageThreshold": 95,
-    "requests": 6,
-    "reserved": 10,
-    "stopped": false,
-    "reason": "",
-    "highestUsagePercent": 75,
+    "requests": 0,
+    "reserved": 0,
+    "stopped": true,
+    "reason": "Instagram shared quota paused: shared cooldown",
+    "highestUsagePercent": 0,
     "waitedMs": 0,
     "pacingMs": 0,
-    "retryAt": "",
+    "retryAt": "2026-11-02T20:40:41.088Z",
     "adaptiveSafetyCeiling": 190,
     "adaptiveIncreases": 0,
     "storageFailure": null
   },
-  "blockedEvidencePosts": 92,
-  "unmatchedCandidatePosts": 10,
-  "message": "7/17 fresh cross-source Instagram candidates matched exactly via Graph API."
+  "globalError": {
+    "username": "ikazerestaurant",
+    "status": 0,
+    "code": "SCAN_BUDGET",
+    "message": "Instagram shared quota paused: shared cooldown"
+  },
+  "blockedEvidencePosts": 93,
+  "unmatchedCandidatePosts": 17,
+  "message": "0/17 fresh cross-source Instagram candidates matched exactly via Graph API."
 }
