@@ -1,24 +1,27 @@
 {
   "schemaVersion": 1,
-  "runId": "instagram-apify2-2026-11-01T21:19:45.799Z",
+  "runId": "instagram-apify2-2026-11-02T13:44:30.738Z",
   "sourceKey": "instagram-apify2",
   "sourceLabel": "Apify 2 Vienna Food Discovery",
-  "status": "completed",
-  "startedAt": "2026-11-01T21:18:19.702Z",
-  "finishedAt": "2026-11-01T21:19:45.799Z",
-  "durationMs": 86097,
+  "status": "completed-with-errors",
+  "startedAt": "2026-11-02T13:42:59.442Z",
+  "finishedAt": "2026-11-02T13:44:30.738Z",
+  "durationMs": 91296,
   "outputFile": "docs/deals-pending-instagram-apify2.json",
   "counts": {
     "rawCandidates": 26,
-    "normalizedCandidates": 7,
+    "normalizedCandidates": 14,
     "verifiedCandidates": 0,
     "previousDeals": 0,
-    "acceptedDeals": 0,
-    "rejectedDeals": 7
+    "acceptedDeals": 1,
+    "rejectedDeals": 13
   },
   "rejectedByReason": {
     "giveaway": 1,
-    "non-food-ad": 6
+    "no-consumer-food-benefit": 5,
+    "non-food-ad": 5,
+    "alcohol-offer": 1,
+    "non-offer-content": 1
   },
   "rejectedSamples": [
     {
@@ -35,12 +38,25 @@
       }
     },
     {
-      "reason": "non-food-ad",
+      "reason": "no-consumer-food-benefit",
       "deal": {
         "id": "",
         "title": "",
         "brand": "",
-        "url": "https://www.instagram.com/p/DfNpcOmCEPL/",
+        "url": "https://www.instagram.com/p/DfPJpZzDakh/",
+        "source": "",
+        "pubDate": "",
+        "expires": "",
+        "postVerificationStatus": ""
+      }
+    },
+    {
+      "reason": "no-consumer-food-benefit",
+      "deal": {
+        "id": "",
+        "title": "",
+        "brand": "",
+        "url": "https://www.instagram.com/p/DfPAxqEiK-1/",
         "source": "",
         "pubDate": "",
         "expires": "",
@@ -53,7 +69,33 @@
         "id": "",
         "title": "",
         "brand": "",
-        "url": "https://www.instagram.com/p/DfNorabo563/",
+        "url": "https://www.instagram.com/p/DfPaYoIIgw1/",
+        "source": "",
+        "pubDate": "",
+        "expires": "",
+        "postVerificationStatus": ""
+      }
+    },
+    {
+      "reason": "no-consumer-food-benefit",
+      "deal": {
+        "id": "",
+        "title": "",
+        "brand": "",
+        "url": "https://www.instagram.com/p/DfPXThEFWiD/",
+        "source": "",
+        "pubDate": "",
+        "expires": "",
+        "postVerificationStatus": ""
+      }
+    },
+    {
+      "reason": "no-consumer-food-benefit",
+      "deal": {
+        "id": "",
+        "title": "",
+        "brand": "",
+        "url": "https://www.instagram.com/p/DfO8qTWs2-A/",
         "source": "",
         "pubDate": "",
         "expires": "",
@@ -66,7 +108,20 @@
         "id": "",
         "title": "",
         "brand": "",
-        "url": "https://www.instagram.com/p/DfNOj8vHCdS/",
+        "url": "https://www.instagram.com/p/DfPb60jIPbW/",
+        "source": "",
+        "pubDate": "",
+        "expires": "",
+        "postVerificationStatus": ""
+      }
+    },
+    {
+      "reason": "no-consumer-food-benefit",
+      "deal": {
+        "id": "",
+        "title": "",
+        "brand": "",
+        "url": "https://www.instagram.com/p/DfNPt6fiH2d/",
         "source": "",
         "pubDate": "",
         "expires": "",
@@ -79,7 +134,7 @@
         "id": "",
         "title": "",
         "brand": "",
-        "url": "https://www.instagram.com/p/DfM1mNmx2J6/",
+        "url": "https://www.instagram.com/p/DfPO40qDU20/",
         "source": "",
         "pubDate": "",
         "expires": "",
@@ -92,7 +147,7 @@
         "id": "",
         "title": "",
         "brand": "",
-        "url": "https://www.instagram.com/p/DfJxWg4I2Bx/",
+        "url": "https://www.instagram.com/p/DfO1clmij5Z/",
         "source": "",
         "pubDate": "",
         "expires": "",
@@ -105,7 +160,33 @@
         "id": "",
         "title": "",
         "brand": "",
-        "url": "https://www.instagram.com/p/DfKZFdfCGSk/",
+        "url": "https://www.instagram.com/p/DfLm9D-oCHk/",
+        "source": "",
+        "pubDate": "",
+        "expires": "",
+        "postVerificationStatus": ""
+      }
+    },
+    {
+      "reason": "alcohol-offer",
+      "deal": {
+        "id": "",
+        "title": "",
+        "brand": "",
+        "url": "https://www.instagram.com/p/DfPGRGXFb3c/",
+        "source": "",
+        "pubDate": "",
+        "expires": "",
+        "postVerificationStatus": ""
+      }
+    },
+    {
+      "reason": "non-offer-content",
+      "deal": {
+        "id": "",
+        "title": "",
+        "brand": "",
+        "url": "https://www.instagram.com/p/DfPABqsISvG/",
         "source": "",
         "pubDate": "",
         "expires": "",
@@ -114,15 +195,15 @@
     }
   ],
   "diagnostics": {
-    "pendingDeals": 0,
-    "unchangedPosts": 15,
+    "pendingDeals": 1,
+    "unchangedPosts": 10,
     "providerErrors": 0,
-    "emptySourceRecords": 0,
-    "ocrCalls": 6,
+    "emptySourceRecords": 1,
+    "ocrCalls": 8,
     "sources": [
       {
-        "key": "profile:cafe_wirr",
-        "lastAttemptAt": "2026-11-01T21:18:19.702Z",
+        "key": "profile:naanbrueder",
+        "lastAttemptAt": "2026-11-02T13:42:59.442Z",
         "postsReturned": 1,
         "status": "posts-returned",
         "consecutiveFailures": 0,
@@ -130,8 +211,26 @@
         "consecutiveEmpty": 0
       },
       {
-        "key": "profile:centimeter_vienna",
-        "lastAttemptAt": "2026-11-01T21:18:19.702Z",
+        "key": "profile:lebaron.wien",
+        "lastAttemptAt": "2026-11-02T13:42:59.442Z",
+        "postsReturned": 1,
+        "status": "posts-returned",
+        "consecutiveFailures": 0,
+        "retryAt": "",
+        "consecutiveEmpty": 0
+      },
+      {
+        "key": "profile:pizzeriapummaro",
+        "lastAttemptAt": "2026-11-02T13:42:59.442Z",
+        "postsReturned": 1,
+        "status": "posts-returned",
+        "consecutiveFailures": 0,
+        "retryAt": "",
+        "consecutiveEmpty": 0
+      },
+      {
+        "key": "profile:behalal.official",
+        "lastAttemptAt": "2026-11-02T13:42:59.442Z",
         "postsReturned": 1,
         "status": "posts-returned",
         "consecutiveFailures": 0,
@@ -139,8 +238,8 @@
         "retryAt": ""
       },
       {
-        "key": "profile:dein.anker",
-        "lastAttemptAt": "2026-11-01T21:18:19.702Z",
+        "key": "profile:viennawurstelstand",
+        "lastAttemptAt": "2026-11-02T13:42:59.442Z",
         "postsReturned": 1,
         "status": "posts-returned",
         "consecutiveFailures": 0,
@@ -148,8 +247,8 @@
         "retryAt": ""
       },
       {
-        "key": "profile:radatzwien",
-        "lastAttemptAt": "2026-11-01T21:18:19.702Z",
+        "key": "profile:baeckereidermann",
+        "lastAttemptAt": "2026-11-02T13:42:59.442Z",
         "postsReturned": 1,
         "status": "posts-returned",
         "consecutiveFailures": 0,
@@ -157,26 +256,8 @@
         "retryAt": ""
       },
       {
-        "key": "profile:santos.mex.vienna",
-        "lastAttemptAt": "2026-11-01T21:18:19.702Z",
-        "postsReturned": 1,
-        "status": "posts-returned",
-        "consecutiveFailures": 0,
-        "consecutiveEmpty": 0,
-        "retryAt": ""
-      },
-      {
-        "key": "profile:stroeckbrot",
-        "lastAttemptAt": "2026-11-01T21:18:19.702Z",
-        "postsReturned": 1,
-        "status": "posts-returned",
-        "consecutiveFailures": 0,
-        "consecutiveEmpty": 0,
-        "retryAt": ""
-      },
-      {
-        "key": "profile:vapiano_austria",
-        "lastAttemptAt": "2026-11-01T21:18:19.702Z",
+        "key": "profile:cafehummel1080",
+        "lastAttemptAt": "2026-11-02T13:42:59.442Z",
         "postsReturned": 1,
         "status": "posts-returned",
         "consecutiveFailures": 0,
@@ -185,7 +266,7 @@
       },
       {
         "key": "profile:ciosgrill",
-        "lastAttemptAt": "2026-11-01T21:18:19.702Z",
+        "lastAttemptAt": "2026-11-02T13:42:59.442Z",
         "status": "posts-returned",
         "postsReturned": 1,
         "consecutiveFailures": 0,
@@ -194,16 +275,16 @@
       },
       {
         "key": "profile:corner_xvi",
-        "lastAttemptAt": "2026-11-01T21:18:19.702Z",
-        "status": "posts-returned",
-        "postsReturned": 1,
+        "lastAttemptAt": "2026-11-02T13:42:59.442Z",
+        "status": "no-items",
+        "postsReturned": 0,
         "consecutiveFailures": 0,
-        "retryAt": "",
-        "consecutiveEmpty": 0
+        "retryAt": "2026-11-04T13:42:59.442Z",
+        "consecutiveEmpty": 1
       },
       {
         "key": "profile:foodiewien",
-        "lastAttemptAt": "2026-11-01T21:18:19.702Z",
+        "lastAttemptAt": "2026-11-02T13:42:59.442Z",
         "status": "posts-returned",
         "postsReturned": 1,
         "consecutiveFailures": 0,
@@ -212,7 +293,7 @@
       },
       {
         "key": "profile:tastyfood.vienna",
-        "lastAttemptAt": "2026-11-01T21:18:19.702Z",
+        "lastAttemptAt": "2026-11-02T13:42:59.442Z",
         "status": "posts-returned",
         "postsReturned": 1,
         "consecutiveFailures": 0,
@@ -221,7 +302,7 @@
       },
       {
         "key": "profile:hotline_5",
-        "lastAttemptAt": "2026-11-01T21:18:19.702Z",
+        "lastAttemptAt": "2026-11-02T13:42:59.442Z",
         "postsReturned": 1,
         "status": "posts-returned",
         "consecutiveFailures": 0,
@@ -230,7 +311,7 @@
       },
       {
         "key": "profile:meat_point_smashburgerbar",
-        "lastAttemptAt": "2026-11-01T21:18:19.702Z",
+        "lastAttemptAt": "2026-11-02T13:42:59.442Z",
         "postsReturned": 1,
         "status": "posts-returned",
         "consecutiveFailures": 0,
@@ -239,7 +320,7 @@
       },
       {
         "key": "profile:zushimarket",
-        "lastAttemptAt": "2026-11-01T21:18:19.702Z",
+        "lastAttemptAt": "2026-11-02T13:42:59.442Z",
         "postsReturned": 1,
         "status": "posts-returned",
         "consecutiveFailures": 0,
@@ -248,7 +329,7 @@
       },
       {
         "key": "profile:german.doener.house",
-        "lastAttemptAt": "2026-11-01T21:18:19.702Z",
+        "lastAttemptAt": "2026-11-02T13:42:59.442Z",
         "postsReturned": 1,
         "status": "posts-returned",
         "consecutiveFailures": 0,
@@ -257,7 +338,7 @@
       },
       {
         "key": "profile:woa.vienna",
-        "lastAttemptAt": "2026-11-01T21:18:19.702Z",
+        "lastAttemptAt": "2026-11-02T13:42:59.442Z",
         "postsReturned": 1,
         "status": "posts-returned",
         "consecutiveFailures": 0,
@@ -266,7 +347,7 @@
       },
       {
         "key": "profile:xo_grill",
-        "lastAttemptAt": "2026-11-01T21:18:19.702Z",
+        "lastAttemptAt": "2026-11-02T13:42:59.442Z",
         "postsReturned": 1,
         "status": "posts-returned",
         "consecutiveFailures": 0,
@@ -275,7 +356,7 @@
       },
       {
         "key": "profile:2ndstreetburger",
-        "lastAttemptAt": "2026-11-01T21:18:19.702Z",
+        "lastAttemptAt": "2026-11-02T13:42:59.442Z",
         "postsReturned": 1,
         "status": "posts-returned",
         "consecutiveFailures": 0,
@@ -284,7 +365,7 @@
       },
       {
         "key": "profile:seelokaya",
-        "lastAttemptAt": "2026-11-01T21:18:19.702Z",
+        "lastAttemptAt": "2026-11-02T13:42:59.442Z",
         "postsReturned": 1,
         "status": "posts-returned",
         "consecutiveFailures": 0,
@@ -293,7 +374,7 @@
       },
       {
         "key": "profile:blumencafe.wien",
-        "lastAttemptAt": "2026-11-01T21:18:19.702Z",
+        "lastAttemptAt": "2026-11-02T13:42:59.442Z",
         "postsReturned": 1,
         "status": "posts-returned",
         "consecutiveFailures": 0,
@@ -302,7 +383,7 @@
       },
       {
         "key": "profile:framburi_fries",
-        "lastAttemptAt": "2026-11-01T21:18:19.702Z",
+        "lastAttemptAt": "2026-11-02T13:42:59.442Z",
         "postsReturned": 1,
         "status": "posts-returned",
         "consecutiveFailures": 0,
@@ -311,7 +392,7 @@
       },
       {
         "key": "profile:ghettosmash_",
-        "lastAttemptAt": "2026-11-01T21:18:19.702Z",
+        "lastAttemptAt": "2026-11-02T13:42:59.442Z",
         "postsReturned": 1,
         "status": "posts-returned",
         "consecutiveFailures": 0,
@@ -319,8 +400,8 @@
         "consecutiveEmpty": 0
       },
       {
-        "key": "hashtag:wienfood",
-        "lastAttemptAt": "2026-11-01T21:18:19.702Z",
+        "key": "hashtag:wienisst",
+        "lastAttemptAt": "2026-11-02T13:42:59.442Z",
         "postsReturned": 1,
         "status": "posts-returned",
         "consecutiveFailures": 0,
@@ -329,7 +410,7 @@
       },
       {
         "key": "hashtag:esseninwien",
-        "lastAttemptAt": "2026-11-01T21:18:19.702Z",
+        "lastAttemptAt": "2026-11-02T13:42:59.442Z",
         "status": "posts-returned",
         "postsReturned": 1,
         "consecutiveFailures": 0,
@@ -338,7 +419,7 @@
       },
       {
         "key": "hashtag:gratiswien",
-        "lastAttemptAt": "2026-11-01T21:18:19.702Z",
+        "lastAttemptAt": "2026-11-02T13:42:59.442Z",
         "postsReturned": 1,
         "status": "posts-returned",
         "consecutiveFailures": 0,
@@ -347,7 +428,7 @@
       },
       {
         "key": "hashtag:viennafood",
-        "lastAttemptAt": "2026-11-01T21:18:19.702Z",
+        "lastAttemptAt": "2026-11-02T13:42:59.442Z",
         "postsReturned": 1,
         "status": "posts-returned",
         "consecutiveFailures": 0,
