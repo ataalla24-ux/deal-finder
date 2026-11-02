@@ -1,7 +1,7 @@
 {
-  "generatedAt": "2026-11-02T14:52:42.406Z",
+  "generatedAt": "2026-11-02T15:25:00.341Z",
   "source": "instagram-graph-cross-source-verification",
-  "status": "ok",
+  "status": "degraded",
   "configured": true,
   "scannedFiles": [
     "deals-pending-church-events.json",
@@ -140,7 +140,7 @@
     },
     "deals-pending-meta-instagram.json": {
       "deals": 69,
-      "candidates": 16
+      "candidates": 14
     },
     "deals-pending-power.json": {
       "deals": 38,
@@ -167,13 +167,13 @@
       "candidates": 0
     }
   },
-  "candidatePosts": 18,
-  "candidateAccounts": 13,
+  "candidatePosts": 16,
+  "candidateAccounts": 12,
   "skippedAccountCooldowns": 0,
   "selectedAccounts": [
     {
       "username": "ikazerestaurant",
-      "candidates": 4
+      "candidates": 3
     },
     {
       "username": "afrivision.austria",
@@ -196,10 +196,15 @@
       "candidates": 1
     }
   ],
-  "fetchedPosts": 132,
-  "exactMatches": 8,
+  "fetchedPosts": 107,
+  "exactMatches": 6,
   "retainedEvidencePosts": 2000,
-  "errors": [],
+  "errors": [
+    {
+      "username": "freefinder.at",
+      "message": "Instagram shared quota paused: rolling-hour budget exhausted"
+    }
+  ],
   "accountFailures": {
     "lati.na.watson50": {
       "count": 1,
@@ -225,19 +230,25 @@
   "sharedQuota": {
     "limitPerHour": 190,
     "usageThreshold": 95,
-    "requests": 6,
-    "reserved": 10,
-    "stopped": false,
-    "reason": "",
-    "highestUsagePercent": 38,
+    "requests": 5,
+    "reserved": 5,
+    "stopped": true,
+    "reason": "Instagram shared quota paused: rolling-hour budget exhausted",
+    "highestUsagePercent": 36,
     "waitedMs": 0,
     "pacingMs": 0,
-    "retryAt": "",
+    "retryAt": "2026-11-02T15:28:10.459Z",
     "adaptiveSafetyCeiling": 190,
     "adaptiveIncreases": 0,
     "storageFailure": null
   },
+  "globalError": {
+    "username": "freefinder.at",
+    "status": 0,
+    "code": "SCAN_BUDGET",
+    "message": "Instagram shared quota paused: rolling-hour budget exhausted"
+  },
   "blockedEvidencePosts": 90,
   "unmatchedCandidatePosts": 10,
-  "message": "8/18 fresh cross-source Instagram candidates matched exactly via Graph API."
+  "message": "6/16 fresh cross-source Instagram candidates matched exactly via Graph API."
 }
