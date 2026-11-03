@@ -1,18 +1,18 @@
 {
-  "lastUpdated": "2026-11-03T10:24:46.138Z",
+  "lastUpdated": "2026-11-03T11:40:02.882Z",
   "source": "meta-instagram",
-  "totalDeals": 75,
+  "totalDeals": 74,
   "meta": {
-    "status": "ok",
+    "status": "degraded",
     "configured": {
       "adLibrary": true,
       "instagramGraph": true
     },
     "sourceCounts": {
       "adLibrary": 11,
-      "instagramGraph": 5
+      "instagramGraph": 8
     },
-    "newDeals": 1,
+    "newDeals": 0,
     "repeatedDeals": 74
   },
   "deals": [
@@ -26,9 +26,9 @@
       "source": "Meta Anzeige",
       "originSource": "Meta Ad Library API",
       "url": "https://www.facebook.com/ads/library/?id=2287416978708195",
-      "expires": "2026-11-06T10:24:46.138Z",
+      "expires": "2026-11-06T11:40:02.882Z",
       "validFrom": "",
-      "validUntil": "2026-11-06T10:24:46.138Z",
+      "validUntil": "2026-11-06T11:40:02.882Z",
       "expirySource": "short-review-ttl",
       "expiresSource": "short-review-ttl",
       "expiryKind": "review-ttl",
@@ -47,11 +47,11 @@
       "sourcePublishedAtSource": "meta-ad-delivery-start",
       "pubDate": "2026-11-02T00:00:00.000Z",
       "pubDateSource": "meta-ad-delivery-start",
-      "discoveredAt": "2026-11-03T10:24:46.000Z",
+      "discoveredAt": "2026-11-03T11:40:02.000Z",
       "evidence": {
         "metaAdId": "2287416978708195",
         "activeAdStatus": "ACTIVE",
-        "activeAdCheckedAt": "2026-11-03T10:24:46.138Z",
+        "activeAdCheckedAt": "2026-11-03T11:40:02.882Z",
         "foodBenefitRequired": true,
         "pageId": "1450791504784522",
         "platforms": [
@@ -76,8 +76,8 @@
       "pipelineLifecycle": {
         "version": 1,
         "stage": "extracted",
-        "discoveredAt": "2026-11-03T10:24:46.000Z",
-        "extractedAt": "2026-11-03T10:24:46.000Z",
+        "discoveredAt": "2026-11-03T11:40:02.000Z",
+        "extractedAt": "2026-11-03T11:40:02.000Z",
         "validatorPassedAt": "",
         "slackSentAt": "",
         "manualDecision": "",
@@ -676,7 +676,7 @@
       "sourcePublishedAtSource": "instagram-graph-timestamp",
       "pubDate": "2026-11-02T23:02:25.000Z",
       "pubDateSource": "instagram-graph-timestamp",
-      "discoveredAt": "2026-11-03T07:54:45.000Z",
+      "discoveredAt": "2026-11-03T11:40:02.000Z",
       "evidence": {
         "mediaId": "17949394656069401",
         "username": "",
@@ -713,8 +713,8 @@
       "pipelineLifecycle": {
         "version": 1,
         "stage": "extracted",
-        "discoveredAt": "2026-11-03T07:54:45.000Z",
-        "extractedAt": "2026-11-03T07:54:45.000Z",
+        "discoveredAt": "2026-11-03T11:40:02.000Z",
+        "extractedAt": "2026-11-03T11:40:02.000Z",
         "validatorPassedAt": "",
         "slackSentAt": "",
         "manualDecision": "",
@@ -975,7 +975,7 @@
       "type": "bogo",
       "category": "essen",
       "source": "Instagram",
-      "originSource": "Meta Instagram Business Discovery",
+      "originSource": "Meta Instagram Hashtag API",
       "url": "https://www.instagram.com/reel/DfPlGNLiTiD/",
       "expires": "2026-11-05T23:59:59.999Z",
       "validFrom": "2026-11-05T00:00:00.000Z",
@@ -998,23 +998,28 @@
       "sourcePublishedAtSource": "instagram-graph-timestamp",
       "pubDate": "2026-11-02T15:01:05.000Z",
       "pubDateSource": "instagram-graph-timestamp",
-      "discoveredAt": "2026-11-03T07:54:45.000Z",
+      "discoveredAt": "2026-11-03T11:40:02.000Z",
       "evidence": {
         "mediaId": "18002768057814109",
-        "username": "freefinder.at",
-        "sourceType": "account",
-        "sourceName": "@freefinder.at",
+        "username": "",
+        "sourceType": "hashtag",
+        "sourceName": "#wienessen",
         "entityResolution": {
-          "ownerUsername": "freefinder.at",
-          "ownerRole": "merchant",
+          "ownerUsername": "",
+          "ownerRole": "unknown",
           "scoutUsername": "",
-          "merchantUsername": "freefinder.at",
+          "merchantUsername": "papa.duck.at",
           "merchantRole": "merchant",
-          "resolutionMethod": "owner-is-merchant",
+          "resolutionMethod": "caption-mention",
           "merchantCandidates": [
             {
               "username": "papa.duck.at",
               "score": 170,
+              "viennaVerified": true
+            },
+            {
+              "username": "freefinder.at",
+              "score": 145,
               "viennaVerified": true
             }
           ],
@@ -1022,6 +1027,7 @@
             "papa.duck.at"
           ],
           "bareMerchantUsernames": [
+            "freefinder.at",
             "aktion."
           ]
         },
@@ -1042,8 +1048,8 @@
       "pipelineLifecycle": {
         "version": 1,
         "stage": "extracted",
-        "discoveredAt": "2026-11-03T07:54:45.000Z",
-        "extractedAt": "2026-11-03T07:54:45.000Z",
+        "discoveredAt": "2026-11-03T11:40:02.000Z",
+        "extractedAt": "2026-11-03T11:40:02.000Z",
         "validatorPassedAt": "",
         "slackSentAt": "",
         "manualDecision": "",
@@ -1052,9 +1058,8 @@
         "publishedAt": ""
       },
       "promotionEvidence": "1+1",
-      "ownerUsername": "freefinder.at",
-      "sourceAccountType": "merchant",
-      "merchantUsername": "freefinder.at"
+      "sourceAccountType": "unknown",
+      "merchantUsername": "papa.duck.at"
     },
     {
       "id": "meta-ig-18122613757820626",
@@ -1326,9 +1331,9 @@
       "source": "Instagram",
       "originSource": "Meta Instagram Hashtag API",
       "url": "https://www.instagram.com/reel/DfP3VunBJyu/",
-      "expires": "2026-11-06T07:54:45.648Z",
+      "expires": "2026-11-06T11:40:02.882Z",
       "validFrom": "",
-      "validUntil": "2026-11-06T07:54:45.648Z",
+      "validUntil": "2026-11-06T11:40:02.882Z",
       "expirySource": "short-review-ttl",
       "expiresSource": "short-review-ttl",
       "expiryKind": "review-ttl",
@@ -1347,7 +1352,7 @@
       "sourcePublishedAtSource": "instagram-graph-timestamp",
       "pubDate": "2026-11-02T17:40:05.000Z",
       "pubDateSource": "instagram-graph-timestamp",
-      "discoveredAt": "2026-11-03T07:54:45.000Z",
+      "discoveredAt": "2026-11-03T11:40:02.000Z",
       "evidence": {
         "mediaId": "18184716670426340",
         "username": "",
@@ -1389,8 +1394,8 @@
       "pipelineLifecycle": {
         "version": 1,
         "stage": "extracted",
-        "discoveredAt": "2026-11-03T07:54:45.000Z",
-        "extractedAt": "2026-11-03T07:54:45.000Z",
+        "discoveredAt": "2026-11-03T11:40:02.000Z",
+        "extractedAt": "2026-11-03T11:40:02.000Z",
         "validatorPassedAt": "",
         "slackSentAt": "",
         "manualDecision": "",
@@ -2918,11 +2923,11 @@
       "sourcePublishedAtSource": "meta-ad-delivery-start",
       "pubDate": "2026-10-31T00:00:00.000Z",
       "pubDateSource": "meta-ad-delivery-start",
-      "discoveredAt": "2026-11-03T10:24:46.000Z",
+      "discoveredAt": "2026-11-03T11:40:02.000Z",
       "evidence": {
         "metaAdId": "1636958244742406",
         "activeAdStatus": "ACTIVE",
-        "activeAdCheckedAt": "2026-11-03T10:24:46.138Z",
+        "activeAdCheckedAt": "2026-11-03T11:40:02.882Z",
         "foodBenefitRequired": true,
         "pageId": "115598425153206",
         "platforms": [
@@ -2950,8 +2955,8 @@
       "pipelineLifecycle": {
         "version": 1,
         "stage": "extracted",
-        "discoveredAt": "2026-11-03T10:24:46.000Z",
-        "extractedAt": "2026-11-03T10:24:46.000Z",
+        "discoveredAt": "2026-11-03T11:40:02.000Z",
+        "extractedAt": "2026-11-03T11:40:02.000Z",
         "validatorPassedAt": "",
         "slackSentAt": "",
         "manualDecision": "",
@@ -5492,85 +5497,6 @@
       "merchantUsername": "freefinder.at"
     },
     {
-      "id": "meta-ig-18082604885362152",
-      "brand": "Vorteilsclub der Stadt Wien",
-      "title": "20 % auf die Einzelrechnung und profitierst darüber hinaus von mehr als 850 weiteren Vort",
-      "description": "Mittagessen mit gutem Gewissen 🌿 Im Lieber Ohne - Bistro erwarten dich täglich frisch zubereitete, vegetarische Bio-Speisen mit Zutaten aus Österreich. Genieße dein Essen direkt im Bistro oder nimm es einfach mit. Als Vorteilsclub-Mitglied sparst du 20 % auf die Einzelrechnung und profitierst darüber hinaus von mehr als 850 weiteren Vorteilen in ganz Wien. Den Link zum Vorteil findest du in unserer Bio! #VorteilsclubWien #LieberOhne #BioInWien #WienErleben #Vorteilsclub #NachhaltigLeben #Mariahilf #WienVorteile",
-      "type": "rabatt",
-      "category": "essen",
-      "source": "Instagram",
-      "originSource": "Meta Instagram Business Discovery",
-      "url": "https://www.instagram.com/reel/De_uuGZJhU9/",
-      "expires": "",
-      "validFrom": "",
-      "validUntil": "",
-      "expirySource": "recurring-schedule",
-      "expiresSource": "recurring-schedule",
-      "expiryKind": "recurring",
-      "dateConfidence": "medium",
-      "distance": "Wien",
-      "location": "mehr als 850 weiteren Vorteilen in ganz Wien. Den Link zum Vorteil findest du in unserer Bio!",
-      "city": "Wien",
-      "postalCode": "",
-      "viennaVerified": true,
-      "viennaEvidence": {
-        "verified": true,
-        "source": "content",
-        "detail": "mehr als 850 weiteren Vorteilen in ganz Wien. Den Link zum Vorteil findest du in unserer Bio!"
-      },
-      "sourcePublishedAt": "2026-10-27T11:17:43.000Z",
-      "sourcePublishedAtSource": "instagram-graph-timestamp",
-      "pubDate": "2026-10-27T11:17:43.000Z",
-      "pubDateSource": "instagram-graph-timestamp",
-      "discoveredAt": "2026-11-03T10:24:46.000Z",
-      "evidence": {
-        "mediaId": "18082604885362152",
-        "username": "vorteilsclub.wien",
-        "sourceType": "account",
-        "sourceName": "@vorteilsclub.wien",
-        "entityResolution": {
-          "ownerUsername": "vorteilsclub.wien",
-          "ownerRole": "platform",
-          "scoutUsername": "vorteilsclub.wien",
-          "merchantUsername": "",
-          "merchantRole": "",
-          "resolutionMethod": "unresolved-scout-post",
-          "merchantCandidates": [],
-          "mentionedUsernames": [],
-          "bareMerchantUsernames": []
-        },
-        "mediaEvidence": {
-          "ocrText": "",
-          "assetCount": 0,
-          "imageCount": 0,
-          "videoFrameCount": 0,
-          "ai": null
-        }
-      },
-      "qualityScore": 88,
-      "reviewTier": "high",
-      "hot": true,
-      "isNew": true,
-      "priority": 7,
-      "votes": 1,
-      "pipelineLifecycle": {
-        "version": 1,
-        "stage": "extracted",
-        "discoveredAt": "2026-11-03T10:24:46.000Z",
-        "extractedAt": "2026-11-03T10:24:46.000Z",
-        "validatorPassedAt": "",
-        "slackSentAt": "",
-        "manualDecision": "",
-        "manualDecisionAt": "",
-        "manualDecisionUser": "",
-        "publishedAt": ""
-      },
-      "promotionEvidence": "20 % auf",
-      "ownerUsername": "vorteilsclub.wien",
-      "sourceAccountType": "platform",
-      "scoutUsername": "vorteilsclub.wien"
-    },
-    {
       "id": "meta-ig-18171215689462768",
       "brand": "Weihnachtsgeschenk",
       "title": "50 % Rabatt auf ausgewählten Edelsteinschmuck",
@@ -5984,9 +5910,9 @@
       "source": "Meta Anzeige",
       "originSource": "Meta Ad Library API",
       "url": "https://www.facebook.com/ads/library/?id=1622219232897972",
-      "expires": "2026-11-06T10:24:46.138Z",
+      "expires": "2026-11-06T11:40:02.882Z",
       "validFrom": "",
-      "validUntil": "2026-11-06T10:24:46.138Z",
+      "validUntil": "2026-11-06T11:40:02.882Z",
       "expirySource": "short-review-ttl",
       "expiresSource": "short-review-ttl",
       "expiryKind": "review-ttl",
@@ -6005,11 +5931,11 @@
       "sourcePublishedAtSource": "meta-ad-delivery-start",
       "pubDate": "2026-09-28T00:00:00.000Z",
       "pubDateSource": "meta-ad-delivery-start",
-      "discoveredAt": "2026-11-03T10:24:46.000Z",
+      "discoveredAt": "2026-11-03T11:40:02.000Z",
       "evidence": {
         "metaAdId": "1622219232897972",
         "activeAdStatus": "ACTIVE",
-        "activeAdCheckedAt": "2026-11-03T10:24:46.138Z",
+        "activeAdCheckedAt": "2026-11-03T11:40:02.882Z",
         "foodBenefitRequired": true,
         "pageId": "2044992189085078",
         "platforms": [
@@ -6041,8 +5967,8 @@
       "pipelineLifecycle": {
         "version": 1,
         "stage": "extracted",
-        "discoveredAt": "2026-11-03T10:24:46.000Z",
-        "extractedAt": "2026-11-03T10:24:46.000Z",
+        "discoveredAt": "2026-11-03T11:40:02.000Z",
+        "extractedAt": "2026-11-03T11:40:02.000Z",
         "validatorPassedAt": "",
         "slackSentAt": "",
         "manualDecision": "",
@@ -6083,11 +6009,11 @@
       "sourcePublishedAtSource": "meta-ad-delivery-start",
       "pubDate": "2026-10-30T00:00:00.000Z",
       "pubDateSource": "meta-ad-delivery-start",
-      "discoveredAt": "2026-11-03T10:24:46.000Z",
+      "discoveredAt": "2026-11-03T11:40:02.000Z",
       "evidence": {
         "metaAdId": "1777887363292858",
         "activeAdStatus": "ACTIVE",
-        "activeAdCheckedAt": "2026-11-03T10:24:46.138Z",
+        "activeAdCheckedAt": "2026-11-03T11:40:02.882Z",
         "foodBenefitRequired": true,
         "pageId": "1232995246560303",
         "platforms": [
@@ -6111,8 +6037,8 @@
       "pipelineLifecycle": {
         "version": 1,
         "stage": "extracted",
-        "discoveredAt": "2026-11-03T10:24:46.000Z",
-        "extractedAt": "2026-11-03T10:24:46.000Z",
+        "discoveredAt": "2026-11-03T11:40:02.000Z",
+        "extractedAt": "2026-11-03T11:40:02.000Z",
         "validatorPassedAt": "",
         "slackSentAt": "",
         "manualDecision": "",
