@@ -1,0 +1,50 @@
+{
+  "date": "2026-11-03",
+  "scope": "Preserve shared Instagram captions; repair one existing community draft without a new submission or approval action",
+  "incident": {
+    "id": "community:f8368e18-3481-47fb-89c9-8330a91dd0c0",
+    "post": "https://www.instagram.com/reel/DfSFH3ixEFn/",
+    "originalDescription": "URL only, no caption",
+    "originalSourceStatus": "unreadable",
+    "reason": "Saved draft had no supported merchant address or action date. Location/date approval safeguards correctly refused publication.",
+    "verifiedOffer": "Noorband: 50 percent off all food, Ettenreichgasse 9, 1100 Wien, Saturday 7 November, 12-21h",
+    "year": "2026 explicitly confirmed by owner; not literally present in caption",
+    "draftCorrectionCommit": "9f6ba64df",
+    "draftWorkflow": "https://github.com/ataalla24-ux/deal-finder/actions/runs/41663858008",
+    "draftConfirmationTs": "1793719607.430359",
+    "sameSlackCard": "1793717594.689339",
+    "reactionChanged": false,
+    "newSubmissionCreated": false
+  },
+  "changes": {
+    "worker": "Community description storage and sanitized intake response now retain up to 6000 characters instead of 500. No other field limits or business routes changed.",
+    "extraction": "No OpenAI call when source is unreadable and submitted fields contain only a URL/generic placeholders. Existing crawler settings, budgets, extraction model and keys unchanged; no cache-version bump/reprocessing.",
+    "iosLocalOnly": "Read all supported URL/text representations instead of stopping at the first URL; include attachment text when selecting a draft title. No native version bump or Store upload."
+  },
+  "workerDeployment": {
+    "version": "60fb549d-302c-4047-b53b-5fc06afa53b0",
+    "percentage": 100,
+    "downloadedSourceSha256": "377cc2a07c52775af4cca1909012c47bd195ea25ad95c060bf638702249cd621",
+    "exactTwoLineChangeVerified": true,
+    "protectedSettingsComparedUnchanged": true,
+    "placeholderGuardRetained": true,
+    "scope": "Patch the downloaded active bundle only; no unrelated current-main scraper imports activated. Final no-bundle upload supersedes initial re-bundled version 3304ec85-179f-4d4a-ad2e-ccf25707936d."
+  },
+  "tests": {
+    "workerSuites": "36 tests pass, including 7 community tests",
+    "extraction": "pass, including zero model calls for link-only fixture",
+    "review": "pass",
+    "approvalIntegration": "isolated fixture pass; no real customer/Slack messages",
+    "communityCardEnrichment": "11 pass, including human-edit/reaction protection",
+    "pendingDealEdit": "pass, signed form and draft-only dispatch",
+    "iosShareSourceWiring": "pass; not a live Instagram share test",
+    "iosShareSwiftTypecheck": "pass against iOS Simulator SDK; no simulator boot or full application build"
+  },
+  "limitations": [
+    "Instagram sometimes provides only a URL; the native capture change cannot manufacture a caption that Instagram does not share.",
+    "No fresh real-device Instagram-to-Slack end-to-end test or Store release of the iPhone change.",
+    "Existing 1.42(84) iOS and 1.46(82) Android signed artifacts are not changed by this work.",
+    "Human approval and date/location validation remain mandatory. No new public deal publication requested by this repair."
+  ],
+  "localEvidence": "output/instagram-community-share-2026-11-03"
+}

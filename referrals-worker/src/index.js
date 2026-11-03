@@ -565,7 +565,7 @@ function sanitizePublicCommunitySubmission(record) {
     brand: cleanShortText(record.brand, 120),
     logo: cleanShortText(record.logo, 16),
     title: cleanShortText(record.title, 240),
-    description: cleanLongText(record.description, 500),
+    description: cleanLongText(record.description, 6000),
     category: cleanShortText(record.category, 80).toLowerCase(),
     type: cleanShortText(record.type, 40).toLowerCase(),
     distance: cleanShortText(record.distance, 200),
@@ -679,7 +679,7 @@ function normalizeCommunitySubmissionInput(body, request) {
   const host = getPreviewHost(url);
   const sourcePlatform = getSourcePlatform(host);
   const submittedTitle = cleanShortText(body?.title, 240);
-  const submittedDescription = cleanLongText(body?.description, 500);
+  const submittedDescription = cleanLongText(body?.description, 6000);
   const submittedBrand = cleanShortText(body?.brand, 120);
   const submittedTitleIsGeneric = isGenericSocialPreviewTitle(submittedTitle, sourcePlatform)
     || /^(instagram|tiktok|facebook|x)\s+deal$/i.test(submittedTitle);

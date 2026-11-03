@@ -29,4 +29,11 @@ assert.equal(extracted.title, result.title.value);
 const failed = await extractCommunityDeal(base, base, { apiKey: 'test', crawlerKey: '', fetch: async () => { throw new Error('offline'); } });
 assert.equal(failed.id, base.id);
 assert.equal(failed.communityExtraction.status, 'needs-review');
+let linkOnlyCalls = 0;
+const linkOnly = await extractCommunityDeal({ ...base, title: 'Instagram-Deal geteilt', brand: 'Instagram',
+  description: base.url }, base, { apiKey: 'test', crawlerKey: '', fetch: async () => { linkOnlyCalls++; throw new Error('must not call model'); } });
+assert.equal(linkOnlyCalls, 0);
+assert.equal(linkOnly.communityExtraction.sourceStatus, 'unreadable');
+assert.equal(linkOnly.communityExtraction.requiresReview, true);
+assert.ok(linkOnly.missingFields.includes('Gültigkeit'));
 console.log('Community extraction regression checks passed');

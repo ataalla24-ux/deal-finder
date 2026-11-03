@@ -81,7 +81,16 @@ export async function extractCommunityDeal(submission, deal, options = {}) {
   const evidence = `SUBMITTED TEXT (unverified):\n${supplied}\nSOURCE TEXT:\n${source}`;
   const fallback = () => enrichCommunityCard({ ...applyExtraction(deal, {}, evidence),
     communityExtraction: { status: 'needs-review', sourceStatus, requiresReview: true } }, options.graphEvidence);
-  if (!apiKey) return fallback();
+  const submittedFacts = [
+    clean(submission.description).replace(/https?:\/\/\S+/gi, '').trim(),
+    /^(?:Instagram[- ]Deal geteilt|Geteilter Deal-Link|Community-Deal prüfen|Instagram|TikTok)?$/i.test(clean(submission.title)) ? '' : clean(submission.title),
+    /^(?:Instagram|TikTok|Facebook|Community Fund)?$/i.test(clean(submission.brand)) ? '' : clean(submission.brand),
+    /^(?:Wien|Bitte prüfen)?$/i.test(clean(submission.distance)) ? '' : clean(submission.distance),
+    clean(submission.expires),
+  ].filter(Boolean);
+  // A model cannot recover an unreadable caption from a link and placeholder
+  // fields. Keep the saved review draft rather than spend credits guessing.
+  if (!apiKey || (!source && !submittedFacts.length)) return fallback();
   try {
     const property = { type: 'object', additionalProperties: false,
       properties: { value: { type: 'string' }, quote: { type: 'string' } }, required: ['value', 'quote'] };

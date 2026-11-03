@@ -4,15 +4,19 @@ import worker from '../src/index.js';
 
 function fixture() {
   const values = new Map();
-  const env = { REFERRAL_KV: {
+  const env = { COMMUNITY_SYNC_TOKEN: 'offline-community-test', REFERRAL_KV: {
     get: async (key, type) => type === 'json' ? JSON.parse(values.get(key) || 'null') : values.get(key) || null,
     put: async (key, value) => values.set(key, value),
-    list: async () => ({ keys: [], list_complete: true }),
+    list: async ({ prefix = '' } = {}) => ({ keys: [...values.keys()]
+      .filter(name => name.startsWith(prefix)).map(name => ({ name })), list_complete: true }),
   } };
   const call = (body, route = '/api/deals/submissions', headers = {}) => worker.fetch(new Request(`https://test${route}`, {
     method: 'POST', headers: { 'content-type': 'application/json', ...headers }, body: JSON.stringify(body),
   }), env);
-  return { values, call };
+  const pending = () => worker.fetch(new Request('https://test/api/deals/submissions/admin/pending', {
+    headers: { authorization: 'Bearer offline-community-test' },
+  }), env);
+  return { values, call, pending };
 }
 
 const draft = { brand: 'Testlokal', title: '1+1 Pizza gratis', distance: 'Testgasse 1, 1010 Wien',
@@ -67,4 +71,30 @@ test('real short offers and OnePlus users are not blocked by the placeholder saf
   }
   assert.equal((await call({ ...draft, brand: 'fnijqz' })).status, 201);
   assert.equal((await call({ ...draft, title: 'mwfffn' })).status, 201);
+});
+
+test('full shared caption survives storage, response and admin intake beyond 500 characters', async () => {
+  for (const route of ['/api/deals/submissions', '/api/deals/submit']) {
+    const { call, pending, values } = fixture();
+    const description = `${'Alle Bedingungen bleiben erhalten. '.repeat(40)}Nur am 07.11.2026, 12 bis 21 Uhr. Ettenreichgasse 9, 1100 Wien.`;
+    assert.ok(description.length > 500 && description.length < 6000);
+    const response = await call({ ...draft, description, submittedFrom: 'ios-share-extension',
+      url: 'https://www.instagram.com/reel/test/' }, route);
+    assert.equal(response.status, 201);
+    assert.equal((await response.json()).submission.description, description);
+    const saved = [...values.values()].map(value => JSON.parse(value)).find(value => value.title === draft.title);
+    assert.equal(saved.description, description);
+    const intake = await (await pending()).json();
+    assert.equal(intake.ok, true);
+    assert.equal(intake.submissions[0].description, description);
+  }
+});
+
+test('community caption size remains bounded at 6000 characters on input and output', async () => {
+  const { call, pending } = fixture();
+  const description = 'A'.repeat(7000);
+  const response = await call({ ...draft, description });
+  assert.equal(response.status, 201);
+  assert.equal((await response.json()).submission.description, 'A'.repeat(6000));
+  assert.equal((await (await pending()).json()).submissions[0].description.length, 6000);
 });
