@@ -1,8 +1,8 @@
 {
-  "generatedAt": "2026-11-03T20:59:30.017Z",
+  "generatedAt": "2026-11-03T22:09:34.084Z",
   "source": "meta-instagram-auth-health",
   "graphVersion": "v26.0",
-  "status": "quota-storage-unavailable",
+  "status": "ok",
   "configured": {
     "instagramGraph": true,
     "instagramUserId": true,
@@ -22,7 +22,7 @@
     {
       "name": "token-expiry",
       "status": "ok",
-      "detail": "Provider-verified access expires at 2026-12-14T22:55:36.000Z (41.1 days remaining)."
+      "detail": "Provider-verified access expires at 2026-12-14T22:55:36.000Z (41 days remaining)."
     },
     {
       "name": "token-permissions",
@@ -46,9 +46,8 @@
     },
     {
       "name": "business-discovery",
-      "status": "quota-storage-unavailable",
-      "detail": "Instagram shared quota paused: GitHub quota storage write-state: HTTP 403",
-      "code": "SCAN_BUDGET"
+      "status": "ok",
+      "detail": "Business Discovery works for @ciosgrill; 1 media row(s) returned."
     },
     {
       "name": "hashtag-search",
@@ -56,13 +55,13 @@
       "detail": "Set META_INSTAGRAM_HEALTHCHECK_HASHTAG to test hashtag access; this counts toward Meta hashtag limits."
     }
   ],
-  "nextAction": "Check shared GitHub quota storage availability before retrying; retain the existing reservations.",
+  "nextAction": "Meta Instagram Graph is ready for the deal collector.",
   "tokenExpiry": {
     "source": "meta-debug-token",
     "expiresAt": "2026-12-14T22:55:36.000Z",
     "accessTokenExpiresAt": "2026-12-14T22:55:36.000Z",
     "dataAccessExpiresAt": "2027-01-13T23:01:23.000Z",
-    "daysRemaining": 41.1,
+    "daysRemaining": 41,
     "status": "ok",
     "configuredExpiresAt": "2026-12-14T22:55:36.000Z"
   },
@@ -80,17 +79,11 @@
     "public_profile"
   ],
   "sharedQuota": {
-    "requests": 4,
-    "reserved": 4,
-    "stopped": true,
-    "reason": "Instagram shared quota paused: GitHub quota storage write-state: HTTP 403",
+    "requests": 5,
+    "reserved": 5,
+    "stopped": false,
+    "reason": "",
     "retryAt": "",
-    "storageFailure": {
-      "provider": "github",
-      "operation": "write-state",
-      "httpStatus": 403,
-      "rateLimited": false,
-      "retryAt": ""
-    }
+    "storageFailure": null
   }
 }
