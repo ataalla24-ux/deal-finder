@@ -10,6 +10,9 @@ export function applyPendingEdit(document, edit) {
   const fields = ['title', 'brand', 'description', 'distance', 'url'];
   const expiryChanged = !hasPeriod && String(deal.expires || '').slice(0, 10) !== normalized.expires;
   for (const field of fields) deal[field] = normalized[field];
+  // The form's address is also structured evidence, not just card display text.
+  deal.address = normalized.distance;
+  fields.push('address');
   if (hasPeriod) {
     deal.validityText = normalized.validityText;
     fields.push('validityText', ...periodFields);

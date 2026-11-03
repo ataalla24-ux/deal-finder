@@ -158,6 +158,8 @@ function normalizeDigestLine(line) {
 function parseDigestDealMessage(message, fallbackIndex = 0) {
   const text = extractSlackMessageText(message);
   if (!text.includes('Deal-ID:')) return null;
+  // Draft-save receipts reference the same Deal-ID but are not new offer cards.
+  if (/^Entwurf gespeichert:/i.test(text.trimStart())) return null;
 
   const lines = text.split('\n').map((line) => line.trim()).filter(Boolean);
   if (lines.length === 0) return null;

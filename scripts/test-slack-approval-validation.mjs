@@ -40,6 +40,20 @@ assert.equal(parsedRoundTrip.url, 'https://www.tiktok.com/@example/video/7678002
 assert.equal(parsedRoundTrip.postalCode, '1010');
 assert.equal(parsedRoundTrip.sourcePublishedAtSource, 'slack.digest-validated-source-date');
 
+const draftReceipt = {
+  text: `Entwurf gespeichert: Gratis Drink beim Pop-up\nAnbieter: Example Pop-up\nOrt: Rathausplatz, 1010 Wien\nZeitraum: 24.07.2026 bis 27.07.2026\nDeal-ID: future-social-roundtrip\nJetzt kann die urspruengliche Deal-Nachricht separat freigegeben werden.`,
+  ts: '1784550000.900', thread_ts: '1784550000.000',
+};
+assert.equal(parseDigestDealMessage(draftReceipt), null, 'save confirmation must never become a deal card');
+assert.equal(parseDigestDealMessage({ ...draftReceipt, text: '', blocks: [
+  { type: 'section', text: { type: 'mrkdwn', text: draftReceipt.text } },
+] }), null, 'Block Kit save confirmation is also a receipt, not a card');
+const withoutReceipt = extractDealsFromThreadMessages([
+  { text: roundTripMessage, ts:'1784550000.100', thread_ts:'1784550000.000' }, draftReceipt,
+], { pendingQueue: [] });
+assert.equal(withoutReceipt.length, 1);
+assert.equal(withoutReceipt[0].slackTs, '1784550000.100');
+
 const ambiguousDmyRoundTrip = parseDigestDealMessage({
   text: buildSlackMessage({
     ...parsedRoundTrip,
