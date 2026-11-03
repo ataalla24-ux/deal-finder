@@ -1,7 +1,7 @@
 {
-  "runId": "41491336011",
+  "runId": "41562159507",
   "mode": "scan",
-  "createdAt": "2026-11-02T17:27:38.012Z",
+  "createdAt": "2026-11-03T01:49:11.788Z",
   "usage": {
     "scrapingbee": {
       "provider": "scrapingbee",
@@ -45,119 +45,74 @@
   },
   "tasks": [
     {
-      "source": "IKEA Food",
-      "url": "https://www.ikea.com/at/de/food/salesareas/swedish-food-market/PRF13737264/",
+      "source": "NORDSEE",
+      "url": "https://www.nordsee.com/at/coupons/pazifisches_schollen__filet_vom_grill__beilage__softdrink_02l__garnelenspie?pdf=true",
       "provider": "scrapingbee",
       "cap": 5
     },
     {
-      "source": "Der Mann",
-      "url": "https://www.dermann.at/aktion/snack-nach-wahl-2/",
+      "source": "NORDSEE",
+      "url": "https://www.nordsee.com/at/coupons/2_classic_fish_burger__pommes_frites__1_softdrink_05l_pet?pdf=true",
       "provider": "zyte",
       "cap": 0.02
     },
     {
-      "source": "IKEA Food",
-      "url": "https://www.ikea.com/at/de/food/salesareas/swedish-food-market/PRF13733203/",
+      "source": "NORDSEE",
+      "url": "https://www.nordsee.com/at/coupons/groer_hunger?pdf=true",
       "provider": "scraperapi",
       "cap": 10
     },
     {
-      "source": "IKEA Food",
-      "url": "https://www.ikea.com/at/de/food/salesareas/restaurant/",
+      "source": "NORDSEE",
+      "url": "https://www.nordsee.com/at/coupons/garnelen_box?pdf=true",
       "provider": "scrapingbee",
       "cap": 5
-    },
-    {
-      "source": "IKEA Food",
-      "url": "https://www.ikea.com/at/de/food/salesareas/swedish-food-market/",
-      "provider": "zyte",
-      "cap": 0.02
     }
   ],
   "skipped": [],
-  "eligiblePages": 5,
-  "finishedAt": "2026-11-02T17:27:54.611Z",
-  "status": "completed",
+  "eligiblePages": 4,
+  "finishedAt": "2026-11-03T01:49:16.016Z",
+  "status": "partial",
   "results": [
     {
       "provider": "scrapingbee",
-      "source": "IKEA Food",
-      "url": "https://www.ikea.com/at/de/food/salesareas/swedish-food-market/PRF13737264/",
+      "source": "NORDSEE",
+      "url": "https://www.nordsee.com/at/coupons/pazifisches_schollen__filet_vom_grill__beilage__softdrink_02l__garnelenspie?pdf=true",
       "reserved": 5,
-      "directCandidates": 0,
-      "directRejected": [],
-      "directVisibleTextCharacters": 2322,
-      "status": "direct-no-offer",
-      "reason": "readable-page-without-extractable-offer",
-      "note": "No browser credit spent; image/PDF-only offers are not established by this HTML check."
+      "status": "failed",
+      "reason": "source-or-processing-error",
+      "httpStatus": 0,
+      "retryAt": "2026-11-04T01:49:14.943Z"
     },
     {
       "provider": "zyte",
-      "source": "Der Mann",
-      "url": "https://www.dermann.at/aktion/snack-nach-wahl-2/",
+      "source": "NORDSEE",
+      "url": "https://www.nordsee.com/at/coupons/2_classic_fish_burger__pommes_frites__1_softdrink_05l_pet?pdf=true",
       "reserved": 0.02,
-      "directCandidates": 0,
-      "directRejected": [],
-      "directVisibleTextCharacters": 375,
-      "status": "fetched",
-      "bytes": 97578,
-      "visibleTextCharacters": 619,
-      "reportedCredits": null,
-      "extractedCandidates": 0,
-      "incrementalCandidates": 0,
-      "offerLinks": [],
-      "rejected": [],
-      "verifiedCandidates": 0,
-      "verifiedIncrementalCandidates": 0,
-      "unverifiedCandidates": 0,
-      "candidates": []
+      "status": "source-paused"
     },
     {
       "provider": "scraperapi",
-      "source": "IKEA Food",
-      "url": "https://www.ikea.com/at/de/food/salesareas/swedish-food-market/PRF13733203/",
+      "source": "NORDSEE",
+      "url": "https://www.nordsee.com/at/coupons/groer_hunger?pdf=true",
       "reserved": 10,
-      "directCandidates": 0,
-      "directRejected": [],
-      "directVisibleTextCharacters": 2050,
-      "status": "direct-no-offer",
-      "reason": "readable-page-without-extractable-offer",
-      "note": "No browser credit spent; image/PDF-only offers are not established by this HTML check."
+      "status": "source-paused"
     },
     {
       "provider": "scrapingbee",
-      "source": "IKEA Food",
-      "url": "https://www.ikea.com/at/de/food/salesareas/restaurant/",
+      "source": "NORDSEE",
+      "url": "https://www.nordsee.com/at/coupons/garnelen_box?pdf=true",
       "reserved": 5,
-      "directCandidates": 0,
-      "directRejected": [],
-      "directVisibleTextCharacters": 443,
-      "status": "direct-no-offer",
-      "reason": "readable-page-without-extractable-offer",
-      "note": "No browser credit spent; image/PDF-only offers are not established by this HTML check."
-    },
-    {
-      "provider": "zyte",
-      "source": "IKEA Food",
-      "url": "https://www.ikea.com/at/de/food/salesareas/swedish-food-market/",
-      "reserved": 0.02,
-      "directCandidates": 0,
-      "directRejected": [],
-      "directVisibleTextCharacters": 422,
-      "status": "direct-no-offer",
-      "reason": "readable-page-without-extractable-offer",
-      "note": "No browser credit spent; image/PDF-only offers are not established by this HTML check."
+      "status": "source-paused"
     }
   ],
   "funnel": {
     "pagesBySource": {
-      "IKEA Food": 4,
-      "Der Mann": 1
+      "NORDSEE": 4
     },
     "statuses": {
-      "direct-no-offer": 4,
-      "fetched": 1
+      "failed": 1,
+      "source-paused": 3
     },
     "rejectionReasons": {},
     "verificationReasons": {},
