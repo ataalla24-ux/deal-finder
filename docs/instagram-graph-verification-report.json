@@ -1,7 +1,7 @@
 {
-  "generatedAt": "2026-11-03T10:28:31.168Z",
+  "generatedAt": "2026-11-03T10:37:08.463Z",
   "source": "instagram-graph-cross-source-verification",
-  "status": "ok",
+  "status": "failed-preserved",
   "configured": true,
   "scannedFiles": [
     "deals-pending-church-events.json",
@@ -196,10 +196,15 @@
       "candidates": 1
     }
   ],
-  "fetchedPosts": 135,
-  "exactMatches": 6,
+  "fetchedPosts": 0,
+  "exactMatches": 0,
   "retainedEvidencePosts": 2000,
-  "errors": [],
+  "errors": [
+    {
+      "username": "ikazerestaurant",
+      "message": "Instagram shared quota paused: request or quota unavailable"
+    }
+  ],
   "accountFailures": {
     "lati.na.watson50": {
       "count": 1,
@@ -225,11 +230,11 @@
   "sharedQuota": {
     "limitPerHour": 237,
     "usageThreshold": 95,
-    "requests": 6,
-    "reserved": 10,
+    "requests": 1,
+    "reserved": 5,
     "stopped": false,
     "reason": "",
-    "highestUsagePercent": 41,
+    "highestUsagePercent": 0,
     "waitedMs": 0,
     "pacingMs": 0,
     "retryAt": "",
@@ -237,7 +242,13 @@
     "adaptiveIncreases": 0,
     "storageFailure": null
   },
+  "globalError": {
+    "username": "ikazerestaurant",
+    "status": 0,
+    "code": "SCAN_BUDGET",
+    "message": "Instagram shared quota paused: request or quota unavailable"
+  },
   "blockedEvidencePosts": 85,
-  "unmatchedCandidatePosts": 9,
-  "message": "6/15 fresh cross-source Instagram candidates matched exactly via Graph API."
+  "unmatchedCandidatePosts": 15,
+  "message": "0/15 fresh cross-source Instagram candidates matched exactly via Graph API."
 }
