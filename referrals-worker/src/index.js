@@ -2484,7 +2484,8 @@ async function handlePendingDealEdit(request, env) {
     catch (error) {
       return pendingDealEditor.renderPendingEditor({ deal, payload: signed.payload, sig: signed.sig,
         values: { ...pendingDealEditor.pendingEditorValues(deal), ...signed.fields,
-          validityText: signed.fields.validityText ?? signed.fields.expires ?? '' }, error: error.message }, 400);
+          validityText: signed.fields.validityText ?? signed.fields.expires ?? '',
+          includeTime: signed.fields.includeTime || '' }, error: error.message }, 400);
     }
     try {
       await triggerDealEditWorkflow(env, edit, true);

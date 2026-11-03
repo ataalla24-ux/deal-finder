@@ -129,7 +129,8 @@ test('signed route dispatches full new period to draft workflow only; invalid re
       dispatches.push({ url: String(url), body: JSON.parse(init.body) });
       return new Response(null, { status: 204 });
     }
-    return Response.json({ deals: [{ ...base, id: base.dealId, expires: '' }] });
+    return Response.json({ deals: [{ ...base, id: base.dealId, expires: '', validityText: undefined,
+      expiresOriginal: '07.11.2026, 12:00 bis 07.11.2026, 21:00 Uhr' }] });
   };
   const endpoint = 'https://test/api/deals/admin/pending-edit';
   const post = fields => worker.fetch(new Request(endpoint, { method: 'POST', body: new URLSearchParams({ ...fields, payload, sig }) }), env, {});
@@ -140,7 +141,9 @@ test('signed route dispatches full new period to draft workflow only; invalid re
     for (const fields of [{ ...picker, periodEndTime: '11:00' }, { ...base, brand: '' }, { ...base, url: 'javascript:evil' }]) {
       const result = await post(fields);
       assert.equal(result.status, 400);
-      assert.ok((await result.text()).includes('Testgasse 1, 1010 Wien'));
+      const html = await result.text();
+      assert.ok(html.includes('Testgasse 1, 1010 Wien'));
+      if (!fields.includeTime) assert.ok(!/<input[^>]*name="includeTime"[^>]*checked/.test(html), 'unchecked time setting must survive a validation error');
       assert.equal(dispatches.length, 0);
     }
     const result = await post(picker);
