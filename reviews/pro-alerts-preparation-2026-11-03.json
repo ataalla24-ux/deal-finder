@@ -1,0 +1,67 @@
+{
+  "dateVienna": "2026-11-03",
+  "status": "PREPARED_ONLY_NOT_IMPLEMENTED_OR_ACTIVATED",
+  "verification": "16 existing offline push-policy and email-campaign tests passed; no transport request or customer message. These test current behavior, not an implemented new alert feature.",
+  "goal": "A concrete useful Pro extension without forcing marketing, adding model costs or promising unlimited free delivery.",
+  "recommendedOrder": ["Opt-in local reminders for saved offers", "Personalized saved-search alerts after capacity and consent verification"],
+  "currentCodeEvidence": {
+    "pushPolicy": "referrals-worker/src/daily-push-policy.js",
+    "pushQueue": "referrals-worker/src/daily-push.js",
+    "emailQuota": "merchant-worker/src/account-email.js:152",
+    "emailDigest": "merchant-worker/src/account-email-campaigns.js",
+    "iosPolicy": "FreeFinderWien/DealPushPreferences.swift",
+    "iosReminderExample": "FreeFinderWien/TrialReminderManager.swift",
+    "androidNotifications": "FreeFinderWien-Android/app/src/main/java/com/stefanataalla/freefinderwien/FreeFinderDealNotifications.kt",
+    "currentBehavior": "Pro daily selection at09 Vienna with seven-day repeat suppression; optional Wednesday/Sunday18 digests; invitation and trial reminders separate. Legacy Free marketing policy exists. This preparation does not alter any schedule or consent.",
+    "configurationCaveat": "Repository flags are not proof of deployed flags, current provider tokens, recipient counts or delivery. docs/push-config.json is web-push configuration, not evidence native APNs/FCM are off.",
+    "offlineEligibility": "Of65 current local live records, existing strict daily-push policy accepts4 and excludes61: unverified_dates25, not_approved20, not_food_or_drink10, restricted_hours5, unsafe_copy1. First-failure categories, not proof the other offers are invalid. Remote overrides and deployed DO were not included."
+  },
+  "phase1LocalFavorites": {
+    "experience": "Existing Favorites remain free. A Pro user may explicitly enable a bell on one saved deal, choose a reminder time, see the scheduled time and cancel it.",
+    "timing": "For a reliably dated offer suggest the previous evening or a user-selected time before expiry. Explicit dated time windows may be supported; unknown expiry is never guessed. For unknown end dates offer a user-chosen reminder with no claim it is expiring.",
+    "delivery": "Use OS-local notifications, not Resend, KV polling or per-recipient server pushes. Works without an active network after scheduling, subject to OS settings and delivery behavior; no guaranteed exact minute.",
+    "safety": [
+      "Schedule only after an explicit user choice and OS permission; never turn an existing No into Yes.",
+      "Cancel on unfavorite, user-disable, known hidden/expired offer, logout where applicable or verified loss of Pro. Reconcile pending requests on app foreground/feed update.",
+      "An offline device cannot learn a newly withdrawn deal. Copy must say check current availability; never promise free food or guaranteed redemption.",
+      "Do not request Android exact-alarm permission for marketing. Bound pending reminders (proposed20) and persist stable opaque IDs, including community IDs containing colons.",
+      "Do not expose private favorites to the backend solely to implement a local reminder."
+    ],
+    "additionalServerSends": 0,
+    "additionalAiCalls": 0,
+    "effortEstimate": "Approximately2-3 engineering days across both native platforms plus sequential small/large-text/light/dark and notification tests; estimate, not a delivery promise. New Store release required."
+  },
+  "phase2SavedSearchAlerts": {
+    "experience": "Profile > Angebotsalarme: saved concrete foods/categories, optional merchant, manually selected districts and optional maximum price only where a numeric price is reliable. No location permission required for district selection.",
+    "matchRules": [
+      "Only approved current public records, not pending Slack candidates; exact benefit and eligibility remain visible.",
+      "First enrollment does not blast historical inventory. Trigger on genuinely new matched offers or material verified changes, deduped across post URLs.",
+      "Prefer grouping into one personal digest; proposed maximum1 per day and3 per week, quiet hours21-09 Vienna. These are a new proposal, not a change to existing twice-weekly consent.",
+      "Exclude misleading matches: alcohol, expired/future offers outside the chosen period, missing location, uncertain price, missing required membership.",
+      "Avoid duplicate notifications for the same offer across daily selection, personal alerts and favorite reminders. Store a bounded per-device event ledger."
+    ],
+    "consent": "Separate in-app enabling control describing topic and frequency; preserve all existing choices. OS push permission alone is not new email or advertising consent. No email copy of the alert unless separately chosen and capacity verified.",
+    "implementation": "Rule-based matching using existing structured data; no new AI. Extend server payload types and BOTH native allowlists deliberately; existing policy currently accepts only daily/digest types. Use versioned opt-in registrations, production transports and server recheck before send.",
+    "effortEstimate": "Approximately3-5 additional engineering days for rule storage, validation, dedupe, bounded SQL queue and native controls, then release and monitored pilot; no activation in this task."
+  },
+  "capacity": {
+    "currentEmailGuard": { "attemptsPerUtcDay": 90, "attemptsPerUtcMonth": 2700, "includes": "All app email attempts, including ambiguous outcomes, digests and reward notices. Not90 new recipients per feature." },
+    "emailDecision": "Do not introduce daily personal emails. A day with90 already scheduled messages leaves0 attempts for new alerts. Current remaining provider quota and account usage were not read; limits were not increased.",
+    "currentPushQueue": "SQL-backed Durable Object batches20 enabled devices, records a claim before transport, retains delivery/campaign data35days and removes devices older60days. Current implementation reloads source per batch and is not yet a personal-alert queue.",
+    "cloudflareFreeDocumented": { "workersRequestsPerDay": 100000, "durableObjectRequestsPerDay": 100000, "durableObjectGbSecondsPerDay": 13000, "sqliteRowsReadPerDay": 5000000, "sqliteRowsWrittenPerDay": 100000, "sqliteAccountStorageGb": 5 },
+    "costSources": ["https://developers.cloudflare.com/workers/platform/limits/", "https://developers.cloudflare.com/durable-objects/platform/pricing/"],
+    "exampleNotCapacityProof": "1000 consenting recipients x1 additional alert require at least1000 transport attempts and, in the current claim/update pattern, about2000 delivery-row mutations, before SQL index accounting, cleanup, other features and shared quotas. This is arithmetic, not a verified available capacity or a cost guarantee.",
+    "activationGate": "Read real production opt-in audiences, current CF request/SQL/duration usage, existing campaign load and transport readiness immediately before activation. Use offline fixtures for load tests. Keep30percent measured reserve, bounded batches and a fail-closed feature budget; no automatic paid upgrade.",
+    "currentCapacityVerified": false
+  },
+  "acceptanceTestsBeforeRelease": [
+    "Explicit yes/no, OS denial/revocation and old consent migrations preserve choices.",
+    "Unknown expiry, weekday restrictions, memberships, time zones and daylight-saving transitions never create a false availability claim.",
+    "Unfavorite/hide/update cancels or reconciles reminders; app restart and duplicate callbacks do not double-send.",
+    "Native payload/version tests for iOS and Android, community IDs, light/dark/large text and working deal deep link.",
+    "Provider accepted is logged separately from device receipt. Only an explicitly approved own-device test, never a mass test.",
+    "No extra email, API title editor, scraper run, live test fixture or remote consent change."
+  ],
+  "rollback": "New features defaultoff behind separate flags; disabling stops new queue work while existing daily, digest, invitations and trial reminders continue. Pending optional local reminders are reconciled in app.",
+  "decision": "Prepare local favorite reminders first; approve implementation separately. Do not activate personal server alerts until real capacity and versioned consent are verified."
+}
