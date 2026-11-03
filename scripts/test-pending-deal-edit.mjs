@@ -14,6 +14,18 @@ const merged = mergeParsedDealsWithQueue([{slackTs:'123.4',title:'Old title'}],d
 assert.equal(merged[0].title,'Offer');
 const priorEdit = applySlackEdits(merged,[{ts:'1.0',text:'edit a titel: Old edit'}]);
 assert.equal(priorEdit.deals[0].title,'Offer');
+const withPeriod = { ...edit, validityText: '07.11.2026, 12:00 bis 09.11.2026, 21:00 Uhr' };
+applyPendingEdit(doc, withPeriod);
+const periodMerged = mergeParsedDealsWithQueue([{slackTs:'123.4',title:'Old title',expires:'2026-10-12',expiryDisplayText:'Old period'}],doc.deals);
+assert.equal(periodMerged[0].expires,'2026-11-09');
+assert.equal(periodMerged[0].validFrom,'2026-11-07');
+assert.equal(periodMerged[0].expiryDisplayText,withPeriod.validityText);
+assert.equal(periodMerged[0].description,'Full text');
+const copyOnly = { ...withPeriod, title:'Only title changed' };
+applyPendingEdit(doc,copyOnly);
+const copied = mergeParsedDealsWithQueue([{slackTs:'123.4',expires:'2026-01-01',validFrom:'2026-01-01'}],doc.deals);
+assert.equal(copied[0].expires,'2026-11-09');
+assert.equal(copied[0].validFrom,'2026-11-07');
 console.log('Pending edit isolation tests passed');
 
 const { default: worker } = await import('../referrals-worker/src/index.js');

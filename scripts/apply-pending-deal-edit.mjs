@@ -1,20 +1,35 @@
 import fs from 'node:fs';
+import { normalizePendingEdit, pendingEditorValues, periodFields } from '../referrals-worker/src/pending-deal-editor.js';
 
 export function applyPendingEdit(document, edit) {
   const deal = document.deals.find(item => item.id === edit.dealId);
   if (!deal) throw new Error('Deal is no longer pending; no live data changed');
-  const fields = ['title', 'brand', 'description', 'distance', 'url', 'expires'];
-  for (const field of fields) {
-    if (typeof edit[field] !== 'string') throw new Error(`Missing field: ${field}`);
+  const normalized = normalizePendingEdit(edit);
+  const hasPeriod = typeof normalized.validityText === 'string';
+  const periodChanged = hasPeriod && pendingEditorValues(deal).validityText !== normalized.validityText;
+  const fields = ['title', 'brand', 'description', 'distance', 'url'];
+  const expiryChanged = !hasPeriod && String(deal.expires || '').slice(0, 10) !== normalized.expires;
+  for (const field of fields) deal[field] = normalized[field];
+  if (hasPeriod) {
+    deal.validityText = normalized.validityText;
+    fields.push('validityText', ...periodFields);
+    if (periodChanged) {
+      for (const field of periodFields) {
+        delete deal[field];
+        if (normalized[field] !== undefined) deal[field] = normalized[field];
+      }
+      deal.expirySource = 'slack.human-review';
+      deal.expiresSource = 'slack.human-review';
+    }
+  } else {
+    deal.expires = normalized.expires;
+    fields.push('expires');
   }
-  if (edit.expires && !/^\d{4}-\d{2}-\d{2}$/.test(edit.expires)) throw new Error('Invalid expiry');
-  const expiryChanged = String(deal.expires || '').slice(0, 10) !== edit.expires;
-  for (const field of fields) deal[field] = edit[field];
   // An explicit date correction must not leave competing inferred dates behind.
   if (expiryChanged) {
     for (const field of ['validOn', 'validFrom', 'validUntil', 'expiresOriginal', 'expiryKind', 'expiryDisplayText']) delete deal[field];
-    deal.validUntil = edit.expires;
-    deal.expiresOriginal = edit.expires;
+    deal.validUntil = normalized.expires;
+    deal.expiresOriginal = normalized.expires;
     deal.expirySource = 'slack.human-review';
     deal.expiresSource = 'slack.human-review';
   }

@@ -1,6 +1,7 @@
 import { isFoodOrDrinkDeal } from '../../scraper/native-weekly-utils.js';
 import { readPublicDealRecords, invalidatePublicDealRecords } from './public-deal-state-cache.js';
 import { DailyPushService } from './daily-push.js';
+import * as pendingDealEditor from './pending-deal-editor.js';
 
 const JSON_HEADERS = {
   'content-type': 'application/json; charset=utf-8',
@@ -1957,6 +1958,7 @@ async function triggerDealEditWorkflow(env, edit, pending = false) {
     forceKeep: edit.forceKeep === true,
     ...(edit.restoreDeal ? { restoreDeal: edit.restoreDeal } : {}),
     editedBy: 'slack-live-review',
+    ...(pending && typeof edit.validityText === 'string' ? { validityText: edit.validityText } : {}),
   };
 
   const response = await fetch(endpoint, {
@@ -2476,21 +2478,20 @@ async function handlePendingDealEdit(request, env) {
     deal = (await response.json()).deals?.find(item => item.id === signed.base.dealId);
   } catch { return dealRemovalHtml('Bitte erneut versuchen', 'Entwurf konnte nicht geladen werden.', 502); }
   if (!deal) return dealRemovalHtml('Nicht mehr in der Warteschlange', 'Dieser Deal ist nicht mehr zur Freigabe vorgemerkt.', 409);
-  const fields = [['title','Titel'],['brand','Anbieter'],['description','Beschreibung & Bedingungen'],['distance','Ort / Adresse'],['url','Quelllink'],['expires','Gueltig bis (JJJJ-MM-TT)']];
   if (request.method === 'POST') {
-    const edit = { dealId: deal.id };
-    for (const [key] of fields) edit[key] = String(signed.fields[key] || '').trim();
-    if (!edit.title || !edit.brand || !/^https?:\/\//i.test(edit.url) || (edit.expires && !/^\d{4}-\d{2}-\d{2}$/.test(edit.expires))) {
-      return dealRemovalHtml('Bitte Angaben pruefen', 'Titel, Anbieter und ein http(s)-Quelllink sind erforderlich. Datum: JJJJ-MM-TT oder leer. Mit Zurueck bleiben deine Eingaben erhalten.', 400);
+    let edit;
+    try { edit = { ...pendingDealEditor.normalizePendingEdit(signed.fields), dealId: deal.id }; }
+    catch (error) {
+      return pendingDealEditor.renderPendingEditor({ deal, payload: signed.payload, sig: signed.sig,
+        values: { ...pendingDealEditor.pendingEditorValues(deal), ...signed.fields,
+          validityText: signed.fields.validityText ?? signed.fields.expires ?? '' }, error: error.message }, 400);
     }
-    if (edit.description.length > 12000 || edit.title.length > 250 || edit.brand.length > 200 || edit.distance.length > 1000 || edit.url.length > 2000) return dealRemovalHtml('Text zu lang', 'Bitte kuerze die Eingabe.', 400);
     try {
       await triggerDealEditWorkflow(env, edit, true);
       return dealRemovalHtml('Aenderung beauftragt', 'Der Entwurf wird aktualisiert. Warte auf die Bestaetigung im Slack-Thread, bevor du ihn freigibst. Es wird nichts automatisch veroeffentlicht.');
     } catch { return dealRemovalHtml('Nicht gespeichert', 'Der Auftrag konnte nicht gestartet werden. Bitte erneut versuchen.', 502); }
   }
-  const controls = fields.map(([key,label]) => `<label>${label}<textarea name="${key}" rows="${key === 'description' ? 9 : 2}" maxlength="${key === 'description' ? 12000 : 2000}">${escapeHtml(key === 'expires' ? String(deal[key] || '').slice(0,10) : deal[key] || '')}</textarea></label>`).join('');
-  return new Response(`<!doctype html><html lang="de"><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Deal-Entwurf bearbeiten</title><style>body{font:17px system-ui;margin:24px auto;padding:0 20px;max-width:650px}label{display:block;margin:18px 0}textarea{box-sizing:border-box;width:100%;font:inherit;padding:10px;border:1px solid #aaa;border-radius:6px}button{padding:14px 22px;font:inherit;background:#087a53;color:white;border:0;border-radius:6px}</style><h1>Deal-Entwurf bearbeiten</h1><p>Speichern aendert nur den Entwurf. Die Freigabe erfolgt danach separat in Slack.</p><form method="post"><input type="hidden" name="payload" value="${escapeHtml(signed.payload)}"><input type="hidden" name="sig" value="${escapeHtml(signed.sig)}">${controls}<button>Entwurf speichern</button></form></html>`, { headers: { 'content-type':'text/html; charset=utf-8', 'cache-control':'no-store', 'referrer-policy':'no-referrer', 'content-security-policy': "default-src 'none'; style-src 'unsafe-inline'; form-action 'self'; frame-ancestors 'none'" } });
+  return pendingDealEditor.renderPendingEditor({ deal, payload: signed.payload, sig: signed.sig });
 }
 
 async function handleSignedDealEditLink(request, env) {
