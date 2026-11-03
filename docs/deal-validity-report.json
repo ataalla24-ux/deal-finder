@@ -1,13 +1,13 @@
 {
-  "generatedAt": "2026-11-03T03:02:17.150Z",
+  "generatedAt": "2026-11-03T03:26:26.931Z",
   "summary": {
     "maxAgeDays": 7,
-    "total": 303,
-    "allowed": 0,
-    "blocked": 303,
-    "warnings": 0,
+    "total": 305,
+    "allowed": 1,
+    "blocked": 304,
+    "warnings": 1,
     "reasonCounts": {
-      "kein konkretes Angebot erkennbar": 229,
+      "kein konkretes Angebot erkennbar": 230,
       "Gottesdienste nur im Wochenlauf": 36,
       "älter als 7 Tage (2020-04-25)": 1,
       "älter als 7 Tage (2026-02-22)": 80,
@@ -16,7 +16,7 @@
       "älter als 7 Tage (2026-10-20)": 1,
       "älter als 7 Tage (2026-10-14)": 1,
       "älter als 7 Tage (2025-07-30)": 1,
-      "URL ungültig (HTTP 404)": 11,
+      "URL ungültig (HTTP 404)": 8,
       "älter als 7 Tage (2026-10-09)": 1,
       "älter als 7 Tage (2016-08-30)": 5,
       "abgelaufen (2026-11-01)": 4,
@@ -53,10 +53,10 @@
       "ausgeschlossene Quelle (gastro.news)": 46
     },
     "reasonCategoryCounts": {
-      "kein konkreter Deal": 229,
+      "kein konkreter Deal": 230,
       "Gottesdienste außerhalb Wochenlauf": 36,
       "älter als 7 Tage": 146,
-      "ungültige URL": 19,
+      "ungültige URL": 16,
       "abgelaufen": 17,
       "nicht Wien": 6,
       "Post-Datum in Zukunft": 3,
@@ -110,7 +110,7 @@
           "kein konkreter Deal": 33,
           "Gottesdienste außerhalb Wochenlauf": 35,
           "älter als 7 Tage": 32,
-          "ungültige URL": 2,
+          "ungültige URL": 1,
           "Post-Datum in Zukunft": 1,
           "sonstiges": 1
         }
@@ -166,7 +166,7 @@
         "reasonCategoryCounts": {
           "kein konkreter Deal": 92,
           "älter als 7 Tage": 94,
-          "ungültige URL": 7,
+          "ungültige URL": 5,
           "Gottesdienste außerhalb Wochenlauf": 1,
           "sonstiges": 2,
           "Post-Datum in Zukunft": 2,
@@ -183,23 +183,23 @@
         }
       },
       "Meta Instagram Business Discovery": {
-        "total": 17,
-        "allowed": 0,
-        "blocked": 17,
-        "warnings": 0,
+        "total": 21,
+        "allowed": 1,
+        "blocked": 20,
+        "warnings": 1,
         "reasonCategoryCounts": {
-          "kein konkreter Deal": 13,
-          "selbst syndiziert": 4
+          "kein konkreter Deal": 14,
+          "selbst syndiziert": 5,
+          "sonstiges": 1
         }
       },
       "Meta Instagram Hashtag API": {
-        "total": 4,
+        "total": 2,
         "allowed": 0,
-        "blocked": 4,
+        "blocked": 2,
         "warnings": 0,
         "reasonCategoryCounts": {
-          "sonstiges": 2,
-          "selbst syndiziert": 1,
+          "sonstiges": 1,
           "abgelaufen": 1
         }
       },
@@ -214,7 +214,25 @@
       }
     }
   },
-  "allowed": [],
+  "allowed": [
+    {
+      "id": "meta-ig-18080667755400115",
+      "title": "10 % off Standard and VIP until tonight, 23:59",
+      "brand": "AfriVision Austria",
+      "source": "Meta Instagram Business Discovery",
+      "url": "https://www.instagram.com/p/DfOxi14iPOc/",
+      "reasons": [],
+      "warnings": [
+        "Inhalt prüfen: Caption-Reste oder Emoji-Codes im sichtbaren Text"
+      ],
+      "sourceDate": "2026-11-02T07:30:12.000Z",
+      "sourceDateSource": "url.instagramShortcode",
+      "sourceAgeDays": 1,
+      "expiryDate": "2026-11-06T03:10:04.845Z",
+      "expirySource": "deal.structured",
+      "urlStatus": "HTTP 200"
+    }
+  ],
   "blocked": [
     {
       "id": "jesuszentrum-events-20261102",
@@ -858,7 +876,7 @@
       "warnings": [
         "kein Ablaufdatum gefunden"
       ],
-      "sourceDate": "2026-11-03T03:00:45.558Z",
+      "sourceDate": "2026-11-03T03:24:48.097Z",
       "sourceDateSource": "url.publicationDate",
       "sourceAgeDays": 0,
       "expiryDate": "",
@@ -1180,18 +1198,19 @@
       "source": "Freikirchen Wien",
       "url": "https://www.baptisten.at/wien",
       "reasons": [
-        "URL ungültig (HTTP 404)",
         "kein konkretes Angebot erkennbar",
         "Gottesdienste nur im Wochenlauf",
         "älter als 7 Tage (2026-04-19)"
       ],
-      "warnings": [],
+      "warnings": [
+        "URL nicht eindeutig prüfbar (temporärer Fehler)"
+      ],
       "sourceDate": "2026-04-19T08:59:47.145Z",
       "sourceDateSource": "deal.pubDate",
       "sourceAgeDays": 198,
       "expiryDate": "",
       "expirySource": "deal.expires",
-      "urlStatus": "ungültig: HTTP 404"
+      "urlStatus": "unklar: temporärer URL-Fehler"
     },
     {
       "id": "freikirche-7-20260419",
@@ -2256,17 +2275,18 @@
       "source": "Kirchen Verzeichnis",
       "url": "https://www.baptisten.at/wien",
       "reasons": [
-        "URL ungültig (HTTP 404)",
         "kein konkretes Angebot erkennbar",
         "älter als 7 Tage (2026-02-22)"
       ],
-      "warnings": [],
+      "warnings": [
+        "URL nicht eindeutig prüfbar (temporärer Fehler)"
+      ],
       "sourceDate": "2026-02-22T21:12:35.964Z",
       "sourceDateSource": "deal.pubDate",
       "sourceAgeDays": 254,
       "expiryDate": "",
       "expirySource": "deal.expires",
-      "urlStatus": "ungültig: HTTP 404"
+      "urlStatus": "unklar: temporärer URL-Fehler"
     },
     {
       "id": "gemeinde-9-20260222",
@@ -3054,17 +3074,18 @@
       "source": "Kirchen Verzeichnis",
       "url": "https://www.baptisten.at/wien",
       "reasons": [
-        "URL ungültig (HTTP 404)",
         "kein konkretes Angebot erkennbar",
         "älter als 7 Tage (2026-02-22)"
       ],
-      "warnings": [],
+      "warnings": [
+        "URL nicht eindeutig prüfbar (temporärer Fehler)"
+      ],
       "sourceDate": "2026-02-22T21:12:35.964Z",
       "sourceDateSource": "deal.pubDate",
       "sourceAgeDays": 254,
       "expiryDate": "",
       "expirySource": "deal.expires",
-      "urlStatus": "ungültig: HTTP 404"
+      "urlStatus": "unklar: temporärer URL-Fehler"
     },
     {
       "id": "gottesdienste-17-20260222",
@@ -3530,6 +3551,26 @@
       "urlStatus": "unklar: temporärer URL-Fehler"
     },
     {
+      "id": "meta-ig-18127791091906651",
+      "title": "10 % ends tonight at 23:59",
+      "brand": "AfriVision Austria",
+      "source": "Meta Instagram Business Discovery",
+      "url": "https://www.instagram.com/reel/DfPp6oSEihk/",
+      "reasons": [
+        "kein konkretes Angebot erkennbar"
+      ],
+      "warnings": [
+        "Inhalt prüfen: Caption-Reste oder Emoji-Codes im sichtbaren Text; Gültigkeitszeitraum nicht belegt; nicht als unbegrenzt gültig behandeln",
+        "kein Ablaufdatum gefunden"
+      ],
+      "sourceDate": "2026-11-02T15:42:47.000Z",
+      "sourceDateSource": "url.instagramShortcode",
+      "sourceAgeDays": 1,
+      "expiryDate": "",
+      "expirySource": "",
+      "urlStatus": "HTTP 200"
+    },
+    {
       "id": "meta-ig-18332493052263575",
       "title": "Gratis starten — Link in der Bio",
       "brand": "Reservierung",
@@ -3589,7 +3630,7 @@
       "id": "meta-ig-18002768057814109",
       "title": "Bei @papa.duck.at gibt es jeden Donnerstag bis Ende 2026 eine 1+1-Pizza-Aktion",
       "brand": "Papa Duck",
-      "source": "Meta Instagram Hashtag API",
+      "source": "Meta Instagram Business Discovery",
       "url": "https://www.instagram.com/reel/DfPlGNLiTiD/",
       "reasons": [
         "selbst syndizierter FreeFinder-Post"
@@ -3645,8 +3686,8 @@
     {
       "id": "meta-ig-18197613772403176",
       "title": "2-Gang-Menü Suppe oder Dessert + Hauptspeise für €17,50; 3-Gang-Menü Suppe + Hauptspeise + Dessert für €19,50",
-      "brand": "Hebenstreit",
-      "source": "Meta Instagram Hashtag API",
+      "brand": "Hebenstreit | Restaurant Wien",
+      "source": "Meta Instagram Business Discovery",
       "url": "https://www.instagram.com/p/DfO7zghtk5y/",
       "reasons": [
         "redaktioneller Mehrfach-Roundup statt eindeutigem Einzelangebot"
