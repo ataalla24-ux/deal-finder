@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-11-03T22:20:16.201Z",
+  "generatedAt": "2026-11-03T22:29:03.868Z",
   "summary": {
     "filesConsidered": 32,
     "totalCandidates": 753,
@@ -7,12 +7,6 @@
     "distinctCandidates": 737,
     "duplicateClusters": 14,
     "topHealthySources": [
-      {
-        "sourceKey": "instagram-apify2",
-        "sourceLabel": "Apify 2 Vienna Food Discovery",
-        "healthScore": 84,
-        "totalDeals": 1
-      },
       {
         "sourceKey": "joe",
         "sourceLabel": "jö Bonus Club",
@@ -29,13 +23,19 @@
         "sourceKey": "meta-instagram",
         "sourceLabel": "Meta Instagram Graph",
         "healthScore": 69,
-        "totalDeals": 69
+        "totalDeals": 70
       },
       {
         "sourceKey": "instagram-ai",
         "sourceLabel": "Instagram AI Agent",
         "healthScore": 68,
         "totalDeals": 39
+      },
+      {
+        "sourceKey": "instagram-apify",
+        "sourceLabel": "Apify Instagram",
+        "healthScore": 66,
+        "totalDeals": 8
       }
     ],
     "topMissionSources": [
@@ -52,12 +52,6 @@
         "totalDeals": 1
       },
       {
-        "sourceKey": "instagram-apify2",
-        "sourceLabel": "Apify 2 Vienna Food Discovery",
-        "missionFitScore": 72,
-        "totalDeals": 1
-      },
-      {
         "sourceKey": "wien-combined",
         "sourceLabel": "Wien Deals Combined Graph",
         "missionFitScore": 72,
@@ -68,6 +62,12 @@
         "sourceLabel": "Apify Instagram",
         "missionFitScore": 65,
         "totalDeals": 8
+      },
+      {
+        "sourceKey": "member-benefits",
+        "sourceLabel": "Member Benefits",
+        "missionFitScore": 63,
+        "totalDeals": 108
       }
     ],
     "topCoverageSources": [
@@ -95,9 +95,9 @@
       {
         "sourceKey": "meta-instagram",
         "sourceLabel": "Meta Instagram Graph",
-        "coverageScore": 47,
-        "totalDeals": 69,
-        "fresh1dCount": 7
+        "coverageScore": 49,
+        "totalDeals": 70,
+        "fresh1dCount": 9
       },
       {
         "sourceKey": "gutscheine",
@@ -112,12 +112,6 @@
         "sourceKey": "food3",
         "sourceLabel": "Firecrawl Key 2 - Food",
         "precisionScore": 80,
-        "totalDeals": 1
-      },
-      {
-        "sourceKey": "instagram-apify2",
-        "sourceLabel": "Apify 2 Vienna Food Discovery",
-        "precisionScore": 78,
         "totalDeals": 1
       },
       {
@@ -137,6 +131,12 @@
         "sourceLabel": "Wien Deals Combined Graph",
         "precisionScore": 70,
         "totalDeals": 1
+      },
+      {
+        "sourceKey": "meta-instagram",
+        "sourceLabel": "Meta Instagram Graph",
+        "precisionScore": 70,
+        "totalDeals": 70
       }
     ],
     "topWeightedSources": [
@@ -153,12 +153,6 @@
         "totalDeals": 10
       },
       {
-        "sourceKey": "instagram-apify2",
-        "sourceLabel": "Apify 2 Vienna Food Discovery",
-        "sourceWeightScore": 64,
-        "totalDeals": 1
-      },
-      {
         "sourceKey": "food3",
         "sourceLabel": "Firecrawl Key 2 - Food",
         "sourceWeightScore": 62,
@@ -168,7 +162,13 @@
         "sourceKey": "meta-instagram",
         "sourceLabel": "Meta Instagram Graph",
         "sourceWeightScore": 61,
-        "totalDeals": 69
+        "totalDeals": 70
+      },
+      {
+        "sourceKey": "instagram-ai",
+        "sourceLabel": "Instagram AI Agent",
+        "sourceWeightScore": 59,
+        "totalDeals": 39
       }
     ],
     "topSourcesToFix": [
@@ -220,10 +220,11 @@
         "sampleTitles": []
       },
       {
-        "sourceKey": "instagram-discovery",
-        "sourceLabel": "Daily Sync Instagram Discovery",
+        "sourceKey": "instagram-apify2",
+        "sourceLabel": "Apify 2 Vienna Food Discovery",
         "healthScore": 0,
         "issues": [
+          "letzter Lauf fand Kandidaten, aber akzeptierte keinen Deal",
           "liefert aktuell 0 Deals"
         ],
         "sampleTitles": []
@@ -239,75 +240,6 @@
     }
   },
   "sources": [
-    {
-      "sourceKey": "instagram-apify2",
-      "file": "deals-pending-instagram-apify2.json",
-      "sourceLabel": "Apify 2 Vienna Food Discovery",
-      "totalDeals": 1,
-      "uniqueDeals": 1,
-      "duplicateDeals": 0,
-      "duplicateAcrossSources": 0,
-      "fresh1dCount": 1,
-      "fresh7dCount": 1,
-      "viennaCount": 1,
-      "foodDrinkCount": 1,
-      "promoCount": 0,
-      "missingUrlCount": 0,
-      "sampleTitles": [
-        "26% auf euren Snack nach Wahl! 🥪 Von 02.11. bis 15.11. bekommt ihr jeden Montag bis Samstag eine ganze Reihe"
-      ],
-      "lastRun": {
-        "status": "completed",
-        "startedAt": "2026-11-03T12:55:17.544Z",
-        "finishedAt": "2026-11-03T12:57:20.161Z",
-        "durationMs": 122617,
-        "counts": {
-          "rawCandidates": 26,
-          "normalizedCandidates": 14,
-          "verifiedCandidates": 0,
-          "previousDeals": 0,
-          "acceptedDeals": 1,
-          "rejectedDeals": 13
-        },
-        "rejectedByReason": {
-          "giveaway": 2,
-          "non-food-ad": 6,
-          "no-consumer-food-benefit": 2,
-          "alcohol-offer": 3
-        },
-        "errors": [],
-        "reportFile": "deal-pipeline-last-run-instagram-apify2.json"
-      },
-      "uniqueRate": 1,
-      "duplicateRate": 0,
-      "fresh1dRate": 1,
-      "fresh7dRate": 1,
-      "viennaRate": 1,
-      "foodDrinkRate": 1,
-      "promoRate": 0,
-      "missingUrlRate": 0,
-      "averageQualityScore": 75,
-      "topCategories": [
-        {
-          "value": "essen",
-          "count": 1
-        }
-      ],
-      "topTypes": [
-        {
-          "value": "rabatt",
-          "count": 1
-        }
-      ],
-      "issues": [
-        "wenige klare Gratis-/Promo-Signale"
-      ],
-      "healthScore": 84,
-      "missionFitScore": 72,
-      "coverageScore": 11,
-      "precisionScore": 78,
-      "sourceWeightScore": 64
-    },
     {
       "sourceKey": "joe",
       "file": "deals-pending-joe.json",
@@ -461,20 +393,20 @@
       "sourceKey": "meta-instagram",
       "file": "deals-pending-meta-instagram.json",
       "sourceLabel": "Meta Instagram Graph",
-      "totalDeals": 69,
-      "uniqueDeals": 56,
+      "totalDeals": 70,
+      "uniqueDeals": 57,
       "duplicateDeals": 13,
       "duplicateAcrossSources": 9,
-      "fresh1dCount": 7,
-      "fresh7dCount": 67,
-      "viennaCount": 69,
-      "foodDrinkCount": 50,
-      "promoCount": 36,
+      "fresh1dCount": 9,
+      "fresh7dCount": 69,
+      "viennaCount": 70,
+      "foodDrinkCount": 51,
+      "promoCount": 35,
       "missingUrlCount": 0,
       "sampleTitles": [
-        "27 % auf ausgewählte Vorstellungen und profitierst darüber hinaus von mehr als 850 weiter",
-        "10 % Rabatt",
-        "45% Rabatt Jetzt 45% Rabatt berserker-coffee"
+        "Wähle drei Favoriten aus ausgewählten Gerichten unserer aktuellen Karte und genieße DEINEN Feierabend in drei Gängen um € 36 pro Person",
+        "📱💨 Keine Sorge – das war nur der schnellste Weg zu unserem Aktionsmenü 😂 🥪 Schnitzelsemmel + 🍟 Pommes + 🥤 Pepsi – nur € 9,90 🪑 Im Lok",
+        "27 % auf ausgewählte Vorstellungen und profitierst darüber hinaus von mehr als 850 weiter"
       ],
       "lastRun": null,
       "uniqueRate": 0.8,
@@ -485,15 +417,15 @@
       "foodDrinkRate": 0.7,
       "promoRate": 0.5,
       "missingUrlRate": 0,
-      "averageQualityScore": 87.5,
+      "averageQualityScore": 87.4,
       "topCategories": [
         {
           "value": "essen",
-          "count": 44
+          "count": 45
         },
         {
           "value": "shopping",
-          "count": 10
+          "count": 9
         },
         {
           "value": "kultur",
@@ -505,7 +437,7 @@
         },
         {
           "value": "technik",
-          "count": 2
+          "count": 3
         },
         {
           "value": "beauty",
@@ -515,7 +447,7 @@
       "topTypes": [
         {
           "value": "rabatt",
-          "count": 41
+          "count": 42
         },
         {
           "value": "gratis",
@@ -531,7 +463,7 @@
       ],
       "healthScore": 69,
       "missionFitScore": 56,
-      "coverageScore": 47,
+      "coverageScore": 49,
       "precisionScore": 70,
       "sourceWeightScore": 61
     },
@@ -1982,6 +1914,65 @@
       "topCategories": [],
       "topTypes": [],
       "issues": [
+        "liefert aktuell 0 Deals"
+      ],
+      "healthScore": 0,
+      "missionFitScore": 0,
+      "coverageScore": 0,
+      "precisionScore": 0,
+      "sourceWeightScore": 0
+    },
+    {
+      "sourceKey": "instagram-apify2",
+      "file": "deals-pending-instagram-apify2.json",
+      "sourceLabel": "Apify 2 Vienna Food Discovery",
+      "totalDeals": 0,
+      "uniqueDeals": 0,
+      "duplicateDeals": 0,
+      "duplicateAcrossSources": 0,
+      "fresh1dCount": 0,
+      "fresh7dCount": 0,
+      "viennaCount": 0,
+      "foodDrinkCount": 0,
+      "promoCount": 0,
+      "missingUrlCount": 0,
+      "sampleTitles": [],
+      "lastRun": {
+        "status": "completed",
+        "startedAt": "2026-11-03T22:25:24.758Z",
+        "finishedAt": "2026-11-03T22:26:49.748Z",
+        "durationMs": 84990,
+        "counts": {
+          "rawCandidates": 26,
+          "normalizedCandidates": 10,
+          "verifiedCandidates": 0,
+          "previousDeals": 0,
+          "acceptedDeals": 0,
+          "rejectedDeals": 10
+        },
+        "rejectedByReason": {
+          "missing-vienna-evidence": 1,
+          "giveaway": 3,
+          "no-consumer-food-benefit": 1,
+          "non-food-ad": 4,
+          "alcohol-offer": 1
+        },
+        "errors": [],
+        "reportFile": "deal-pipeline-last-run-instagram-apify2.json"
+      },
+      "uniqueRate": 0,
+      "duplicateRate": 0,
+      "fresh1dRate": 0,
+      "fresh7dRate": 0,
+      "viennaRate": 0,
+      "foodDrinkRate": 0,
+      "promoRate": 0,
+      "missingUrlRate": 0,
+      "averageQualityScore": 0,
+      "topCategories": [],
+      "topTypes": [],
+      "issues": [
+        "letzter Lauf fand Kandidaten, aber akzeptierte keinen Deal",
         "liefert aktuell 0 Deals"
       ],
       "healthScore": 0,
