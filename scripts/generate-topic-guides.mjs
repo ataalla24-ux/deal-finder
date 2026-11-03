@@ -252,7 +252,7 @@ const guides = [...editorialGuides, ...timelyGuides, ...recentDealGuides, ...[
       ['Hat der Foodora-Code ein Ablaufdatum?', 'Aktuell ist kein festes Ablaufdatum eingetragen. Foodora kann den Code trotzdem jederzeit ändern oder einschränken.'],
       ['Gilt der Code für jede Bestellung?', 'Nicht garantiert. Konto, Restaurant, Liefergebiet, Mindestbestellwert und Gebühren können die Einlösung beeinflussen.'],
     ],
-    related: [['Geburtstag gratis in Wien', 'geburtstag-gratis-wien.html'], ['App-Gutscheine in Wien', 'app-gutscheine-wien.html'], ['Rabatte in Wien', 'rabatte-wien.html'], ['Gratis Essen in Wien', 'gratis-essen-wien.html'], ['Aktuelle Wien-Deals', '/angebote-wien-heute.html']],
+    related: [['McDonald’s: 1+1 in App und über foodora', 'mcdonalds-chicken-mcnuggets-1plus1-oesterreich.html'], ['Geburtstag gratis in Wien', 'geburtstag-gratis-wien.html'], ['App-Gutscheine in Wien', 'app-gutscheine-wien.html'], ['Rabatte in Wien', 'rabatte-wien.html'], ['Gratis Essen in Wien', 'gratis-essen-wien.html'], ['Aktuelle Wien-Deals', '/angebote-wien-heute.html']],
   },
   {
     slug: 'interpolburger-2-euro-wien',
@@ -551,7 +551,7 @@ const guides = [...editorialGuides, ...timelyGuides, ...recentDealGuides, ...[
       ['Wie erkenne ich, ob eine 1+1-Aktion heute noch gilt?', 'Prüfe in der Originalquelle Zeitraum, teilnehmende Filiale, erforderlichen Coupon und Bestellweg. Lege beide Artikel in den Warenkorb oder frage vor der Bestellung nach, welcher Preis abgezogen wird.'],
       ['Kann ich bei 1+1 zwei verschiedene Produkte wählen?', 'Das hängt von der Aktion ab. Häufig muss es dasselbe Produkt sein oder das günstigere Produkt wird kostenlos.'],
     ],
-    related: [['Rabatte in Wien', 'rabatte-wien.html'], ['Gutscheine in Wien', 'gutscheine-wien.html'], ['App-Gutscheine in Wien', 'app-gutscheine-wien.html'], ['Gratis Essen in Wien', 'gratis-essen-wien.html'], ['Aktuelle Wien-Deals', '/angebote-wien-heute.html']],
+    related: [['McDonald’s: 1+1 in App und über foodora', 'mcdonalds-chicken-mcnuggets-1plus1-oesterreich.html'], ['Rabatte in Wien', 'rabatte-wien.html'], ['Gutscheine in Wien', 'gutscheine-wien.html'], ['App-Gutscheine in Wien', 'app-gutscheine-wien.html'], ['Gratis Essen in Wien', 'gratis-essen-wien.html'], ['Aktuelle Wien-Deals', '/angebote-wien-heute.html']],
   },
   {
     slug: 'kostenlose-freizeitangebote-wien',
