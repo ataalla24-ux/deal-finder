@@ -2,9 +2,52 @@
   "schemaVersion": 1,
   "sourceKey": "power",
   "sourceLabel": "Power Scraper",
-  "updatedAt": "2026-11-03T12:55:30.733Z",
+  "updatedAt": "2026-11-03T20:12:19.932Z",
   "runCount": 90,
   "runs": [
+    {
+      "schemaVersion": 1,
+      "runId": "power-2026-11-03T20:12:19.932Z",
+      "sourceKey": "power",
+      "sourceLabel": "Power Scraper",
+      "status": "completed-with-errors",
+      "startedAt": "2026-11-03T20:11:51.417Z",
+      "finishedAt": "2026-11-03T20:12:19.932Z",
+      "durationMs": 28515,
+      "outputFile": "docs/deals-pending-power.json",
+      "counts": {
+        "rawCandidates": 38,
+        "normalizedCandidates": 38,
+        "verifiedCandidates": 0,
+        "previousDeals": 0,
+        "acceptedDeals": 38,
+        "rejectedDeals": 0
+      },
+      "rejectedByReason": {},
+      "rejectedSamples": [],
+      "diagnostics": {
+        "healthySources": 46,
+        "failedSources": 12,
+        "sourceCount": 58,
+        "concurrency": 4,
+        "timeoutMs": 8000
+      },
+      "constraints": {},
+      "errors": [
+        "Too Good To Go: deferred until 2026-11-04T11:28:53.892Z",
+        "MediaMarkt: deferred until 2026-11-05T11:39:26.378Z",
+        "Saturn: deferred until 2026-11-06T11:31:17.379Z",
+        "Spar: deferred until 2026-11-06T11:31:18.754Z",
+        "Deichmann: deferred until 2026-11-04T18:28:58.296Z",
+        "Conrad: deferred until 2026-11-05T11:39:29.759Z",
+        "Decathlon: deferred until 2026-11-05T11:39:29.902Z",
+        "XXXLutz: deferred until 2026-11-05T11:39:30.924Z",
+        "Möbelix: deferred until 2026-11-05T11:39:30.950Z",
+        "Lego Store: deferred until 2026-11-05T11:39:31.067Z",
+        "Thalia: deferred until 2026-11-05T11:39:31.094Z",
+        "Libro: deferred until 2026-11-10T12:55:22.901Z"
+      ]
+    },
     {
       "schemaVersion": 1,
       "runId": "power-2026-11-03T12:55:30.733Z",
@@ -3697,41 +3740,6 @@
         "Müller: Browser HTTP 403",
         "Möbelix: Browser HTTP 403",
         "Lego Store: Browser HTTP 403",
-        "Libro: Browser HTTP 403"
-      ]
-    },
-    {
-      "schemaVersion": 1,
-      "runId": "power-2026-09-16T10:15:10.016Z",
-      "sourceKey": "power",
-      "sourceLabel": "Power Scraper",
-      "status": "completed-with-errors",
-      "startedAt": "2026-09-16T10:15:00.695Z",
-      "finishedAt": "2026-09-16T10:15:10.016Z",
-      "durationMs": 9321,
-      "outputFile": "docs/deals-pending-power.json",
-      "counts": {
-        "rawCandidates": 29,
-        "normalizedCandidates": 26,
-        "verifiedCandidates": 0,
-        "previousDeals": 0,
-        "acceptedDeals": 26,
-        "rejectedDeals": 0
-      },
-      "rejectedByReason": {},
-      "rejectedSamples": [],
-      "diagnostics": {
-        "healthySources": 35,
-        "failedSources": 4,
-        "sourceCount": 39,
-        "concurrency": 8,
-        "timeoutMs": 8000
-      },
-      "constraints": {},
-      "errors": [
-        "Too Good To Go: Browser HTTP 429",
-        "Müller: Browser HTTP 403",
-        "Conrad: Browser HTTP 403",
         "Libro: Browser HTTP 403"
       ]
     }
