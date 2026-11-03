@@ -1,7 +1,7 @@
 {
-  "generatedAt": "2026-11-03T07:51:20.548Z",
+  "generatedAt": "2026-11-03T08:06:38.826Z",
   "source": "instagram-graph-cross-source-verification",
-  "status": "ok",
+  "status": "degraded",
   "configured": true,
   "scannedFiles": [
     "deals-pending-church-events.json",
@@ -140,7 +140,7 @@
     },
     "deals-pending-meta-instagram.json": {
       "deals": 73,
-      "candidates": 15
+      "candidates": 14
     },
     "deals-pending-power.json": {
       "deals": 38,
@@ -167,8 +167,8 @@
       "candidates": 0
     }
   },
-  "candidatePosts": 17,
-  "candidateAccounts": 14,
+  "candidatePosts": 16,
+  "candidateAccounts": 13,
   "skippedAccountCooldowns": 0,
   "selectedAccounts": [
     {
@@ -196,10 +196,15 @@
       "candidates": 1
     }
   ],
-  "fetchedPosts": 135,
-  "exactMatches": 6,
+  "fetchedPosts": 50,
+  "exactMatches": 3,
   "retainedEvidencePosts": 2000,
-  "errors": [],
+  "errors": [
+    {
+      "username": "wienerballettakademie",
+      "message": "Instagram shared quota paused: rolling-hour budget exhausted"
+    }
+  ],
   "accountFailures": {
     "lati.na.watson50": {
       "count": 1,
@@ -225,19 +230,25 @@
   "sharedQuota": {
     "limitPerHour": 237,
     "usageThreshold": 95,
-    "requests": 6,
-    "reserved": 10,
-    "stopped": false,
-    "reason": "",
-    "highestUsagePercent": 21,
+    "requests": 2,
+    "reserved": 2,
+    "stopped": true,
+    "reason": "Instagram shared quota paused: rolling-hour budget exhausted",
+    "highestUsagePercent": 35,
     "waitedMs": 0,
     "pacingMs": 0,
-    "retryAt": "",
+    "retryAt": "2026-11-03T08:16:20.395Z",
     "adaptiveSafetyCeiling": 190,
     "adaptiveIncreases": 0,
     "storageFailure": null
   },
+  "globalError": {
+    "username": "wienerballettakademie",
+    "status": 0,
+    "code": "SCAN_BUDGET",
+    "message": "Instagram shared quota paused: rolling-hour budget exhausted"
+  },
   "blockedEvidencePosts": 86,
-  "unmatchedCandidatePosts": 11,
-  "message": "6/17 fresh cross-source Instagram candidates matched exactly via Graph API."
+  "unmatchedCandidatePosts": 13,
+  "message": "3/16 fresh cross-source Instagram candidates matched exactly via Graph API."
 }
