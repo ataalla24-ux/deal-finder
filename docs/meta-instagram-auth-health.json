@@ -1,8 +1,8 @@
 {
-  "generatedAt": "2026-11-03T19:54:47.605Z",
+  "generatedAt": "2026-11-03T20:59:30.017Z",
   "source": "meta-instagram-auth-health",
   "graphVersion": "v26.0",
-  "status": "ok",
+  "status": "quota-storage-unavailable",
   "configured": {
     "instagramGraph": true,
     "instagramUserId": true,
@@ -46,8 +46,9 @@
     },
     {
       "name": "business-discovery",
-      "status": "ok",
-      "detail": "Business Discovery works for @ciosgrill; 1 media row(s) returned."
+      "status": "quota-storage-unavailable",
+      "detail": "Instagram shared quota paused: GitHub quota storage write-state: HTTP 403",
+      "code": "SCAN_BUDGET"
     },
     {
       "name": "hashtag-search",
@@ -55,7 +56,7 @@
       "detail": "Set META_INSTAGRAM_HEALTHCHECK_HASHTAG to test hashtag access; this counts toward Meta hashtag limits."
     }
   ],
-  "nextAction": "Meta Instagram Graph is ready for the deal collector.",
+  "nextAction": "Check shared GitHub quota storage availability before retrying; retain the existing reservations.",
   "tokenExpiry": {
     "source": "meta-debug-token",
     "expiresAt": "2026-12-14T22:55:36.000Z",
@@ -79,11 +80,17 @@
     "public_profile"
   ],
   "sharedQuota": {
-    "requests": 5,
-    "reserved": 5,
-    "stopped": false,
-    "reason": "",
+    "requests": 4,
+    "reserved": 4,
+    "stopped": true,
+    "reason": "Instagram shared quota paused: GitHub quota storage write-state: HTTP 403",
     "retryAt": "",
-    "storageFailure": null
+    "storageFailure": {
+      "provider": "github",
+      "operation": "write-state",
+      "httpStatus": 403,
+      "rateLimited": false,
+      "retryAt": ""
+    }
   }
 }
