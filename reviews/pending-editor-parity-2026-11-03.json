@@ -1,0 +1,62 @@
+{
+  "date": "2026-11-03",
+  "request": "Slack Bearbeiten form must contain all fields from native free deal submission",
+  "nativeFieldsCompared": ["Anbieter", "Deal-Titel", "Adresse", "Datum / Zeitraum (optional)", "Datum und Uhrzeit waehlen", "Link (optional)", "Details"],
+  "features": {
+    "providerTitleAddressDetails": true,
+    "optionalLink": true,
+    "literalPeriodText": true,
+    "startAndEndCalendarDates": true,
+    "optionalStartAndEndTimesVienna": true,
+    "structuredDatePersistence": true,
+    "slackConfirmationContainsWholeWindow": true,
+    "legacySingleExpiryPayloadsSupported": true,
+    "inputsPreservedAfterErrors": true,
+    "humanApprovalStillSeparate": true
+  },
+  "codeCommits": ["d97c19b17f61b016aa89685244635e46e77c19b8", "914b30f2d"],
+  "liveWorker": {
+    "version": "26ae040b-fd5b-49cd-94bf-fcdbeb9900b9",
+    "percentage": 100,
+    "sha256": "5a71f4bb4531ec9755a400ba71459bd4e5403c9d268a83bd92414591e6239a9a",
+    "activeDownloadExactlyMatchesUpload": true,
+    "protectedSettingsUnchanged": true,
+    "onlyEditorModuleHandlerAndPendingValidityDispatchChanged": true,
+    "priorCaption6000AndPlaceholderGuardRetained": true,
+    "initialEditorVersionSuperseded": "4fee2362-353d-41e2-9566-a2ac28c6cd5e"
+  },
+  "actualSaveVerification": {
+    "dealId": "community:f8368e18-3481-47fb-89c9-8330a91dd0c0",
+    "actionDayConfirmedByOwnerEarlier": "2026-11-07",
+    "timeWindowConfirmedFromSameInstagramCaption": "12:00-21:00 Europe/Vienna",
+    "workflow": "https://github.com/ataalla24-ux/deal-finder/actions/runs/41667989306",
+    "workflowConclusion": "success",
+    "draftCommit": "64a15efd2",
+    "slackConfirmationTs": "1793721038.723699",
+    "slackConfirmationRead": true,
+    "reopenedLiveFormRetainsDatesAndBothTimes": true,
+    "allOtherRowsAndUnrelatedFactsPreserved": true,
+    "newSubmission": false,
+    "approvalReactionChanged": false
+  },
+  "tests": {
+    "allWorkerTests": "45 pass",
+    "actualDownloadedActiveEditor": "9 pass",
+    "pendingEditIsolationAndSignedRoutes": "pass",
+    "communityReviewAndIsolatedApproval": "pass",
+    "browserOnlyLocalFixturePosts": "invalid reversed time blocked with inputs retained; valid timed and free-form periods saved; empty link accepted",
+    "browserWidthsWithoutHorizontalOverflow": [320, 390, 1280],
+    "publicFormReadSaveAndReopen": "pass for existing Noorband draft",
+    "gitDiffCheck": "pass"
+  },
+  "limits": {
+    "freeFormDatesNotGuessed": true,
+    "unknownPeriodStillRequiresReviewBeforePublication": true,
+    "noNativeBuildOrStoreUpload": true,
+    "noNewDeviceOrSafariHandsetTest": true,
+    "noPaidModelProviderOrScraperCalls": true,
+    "noCustomerMessagesOrSlackTestPosts": true,
+    "keysBudgetsConsentAndSchedulesUnchanged": true
+  },
+  "localEvidence": "output/pending-editor-parity-2026-11-03"
+}
