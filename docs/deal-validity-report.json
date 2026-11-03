@@ -1,16 +1,16 @@
 {
-  "generatedAt": "2026-11-03T12:57:23.458Z",
+  "generatedAt": "2026-11-03T13:08:35.023Z",
   "summary": {
     "maxAgeDays": 7,
     "total": 307,
-    "allowed": 0,
-    "blocked": 307,
+    "allowed": 1,
+    "blocked": 306,
     "warnings": 0,
     "reasonCounts": {
-      "kein konkretes Angebot erkennbar": 233,
+      "kein konkretes Angebot erkennbar": 229,
       "Gottesdienste nur im Wochenlauf": 36,
       "älter als 7 Tage (2020-04-25)": 1,
-      "älter als 7 Tage (2026-02-22)": 82,
+      "älter als 7 Tage (2026-02-22)": 81,
       "URL ungültig (fehlende Ziel-URL)": 2,
       "älter als 7 Tage (2017-04-20)": 1,
       "älter als 7 Tage (2026-10-20)": 1,
@@ -23,9 +23,11 @@
       "älter als 45 Tage trotz ausdrücklich noch aktive Gültigkeit (2016-09-12)": 8,
       "nicht eindeutig in Wien": 10,
       "abgelaufen (2026-11-02)": 3,
-      "älter als 7 Tage (2026-04-19)": 29,
+      "älter als 7 Tage (2026-04-19)": 28,
       "älter als 7 Tage (2016-10-30)": 3,
       "älter als 7 Tage (2023-09-21)": 3,
+      "kostenlose Infrastruktur statt Deal": 3,
+      "älter als 7 Tage (2024-03-18)": 3,
       "älter als 7 Tage (2026-06-03)": 1,
       "älter als 45 Tage trotz ausdrücklich noch aktive Gültigkeit (2026-09-15)": 1,
       "URL ungültig (Inhalt nicht mehr verfügbar)": 6,
@@ -39,7 +41,6 @@
       "älter als 7 Tage (2023-07-18)": 1,
       "älter als 7 Tage (2009-05-01)": 1,
       "älter als 7 Tage (2014-06-07)": 1,
-      "älter als 7 Tage (2025-12-30)": 1,
       "relative Kurz-Aktion abgelaufen (2026-10-31)": 2,
       "selbst syndizierter FreeFinder-Post": 8,
       "abgelaufen (2026-08-30)": 4,
@@ -52,19 +53,26 @@
       "Ortswiderspruch: Originalangebot nennt einen Standort ausserhalb Wiens": 1
     },
     "reasonCategoryCounts": {
-      "kein konkreter Deal": 233,
+      "kein konkreter Deal": 229,
       "Gottesdienste außerhalb Wochenlauf": 36,
       "älter als 7 Tage": 148,
       "ungültige URL": 19,
       "abgelaufen": 17,
       "nicht Wien": 10,
+      "sonstiges": 7,
       "selbst syndiziert": 8,
-      "sonstiges": 4,
       "kein echtes Post-Datum": 109,
       "ausgeschlossene Quelle": 46,
       "Gewinnspiel": 1
     },
     "sourceCounts": {
+      "Apify 2 Vienna Food Discovery": {
+        "total": 1,
+        "allowed": 1,
+        "blocked": 0,
+        "warnings": 0,
+        "reasonCategoryCounts": {}
+      },
       "Apify Instagram Vienna Food Offers": {
         "total": 2,
         "allowed": 0,
@@ -105,10 +113,11 @@
         "blocked": 35,
         "warnings": 0,
         "reasonCategoryCounts": {
-          "kein konkreter Deal": 34,
+          "kein konkreter Deal": 33,
           "Gottesdienste außerhalb Wochenlauf": 35,
           "älter als 7 Tage": 32,
-          "ungültige URL": 2
+          "ungültige URL": 2,
+          "sonstiges": 1
         }
       },
       "Google News RSS": {
@@ -160,10 +169,11 @@
         "blocked": 97,
         "warnings": 0,
         "reasonCategoryCounts": {
-          "kein konkreter Deal": 94,
+          "kein konkreter Deal": 92,
           "älter als 7 Tage": 94,
           "ungültige URL": 7,
           "Gottesdienste außerhalb Wochenlauf": 1,
+          "sonstiges": 2,
           "nicht Wien": 1
         }
       },
@@ -177,12 +187,12 @@
         }
       },
       "Meta Instagram Business Discovery": {
-        "total": 20,
+        "total": 19,
         "allowed": 0,
-        "blocked": 20,
+        "blocked": 19,
         "warnings": 0,
         "reasonCategoryCounts": {
-          "kein konkreter Deal": 15,
+          "kein konkreter Deal": 14,
           "sonstiges": 1,
           "selbst syndiziert": 4
         }
@@ -209,7 +219,23 @@
       }
     }
   },
-  "allowed": [],
+  "allowed": [
+    {
+      "id": "igap-1yz022",
+      "title": "-26% auf euren Snack nach Wahl! 🥪 Von 02.11. bis 15.11. bekommt ihr jeden Montag bis Samstag eine ganze Reihe",
+      "brand": "Bäckerei DerMann",
+      "source": "Apify 2 Vienna Food Discovery",
+      "url": "https://www.instagram.com/p/DfRuATHiGLU/",
+      "reasons": [],
+      "warnings": [],
+      "sourceDate": "2026-11-03T10:56:59.000Z",
+      "sourceDateSource": "url.instagramShortcode",
+      "sourceAgeDays": 0,
+      "expiryDate": "2026-11-15",
+      "expirySource": "url.contentHints.title",
+      "urlStatus": "HTTP 200"
+    }
+  ],
   "blocked": [
     {
       "id": "jesuszentrum-events-20261102",
@@ -853,7 +879,7 @@
       "warnings": [
         "kein Ablaufdatum gefunden"
       ],
-      "sourceDate": "2026-11-03T12:54:21.033Z",
+      "sourceDate": "2026-11-03T13:06:07.940Z",
       "sourceDateSource": "url.publicationDate",
       "sourceAgeDays": 0,
       "expiryDate": "",
@@ -1498,19 +1524,17 @@
       "source": "Freikirchen Wien",
       "url": "https://www.gasometer.at",
       "reasons": [
-        "kein konkretes Angebot erkennbar",
+        "kostenlose Infrastruktur statt Deal",
         "Gottesdienste nur im Wochenlauf",
-        "älter als 7 Tage (2026-04-19)"
+        "älter als 7 Tage (2024-03-18)"
       ],
-      "warnings": [
-        "URL nicht eindeutig prüfbar (HTTP 500)"
-      ],
-      "sourceDate": "2026-04-19T08:59:47.145Z",
-      "sourceDateSource": "deal.pubDate",
-      "sourceAgeDays": 198,
+      "warnings": [],
+      "sourceDate": "2024-03-18T10:02:56.000Z",
+      "sourceDateSource": "url.publicationDate",
+      "sourceAgeDays": 960,
       "expiryDate": "",
       "expirySource": "deal.expires",
-      "urlStatus": "unklar: HTTP 500"
+      "urlStatus": "HTTP 200"
     },
     {
       "id": "freikirche-23-20260419",
@@ -2159,18 +2183,16 @@
       "source": "Kirchen Verzeichnis",
       "url": "https://www.gasometer.at",
       "reasons": [
-        "kein konkretes Angebot erkennbar",
-        "älter als 7 Tage (2026-02-22)"
+        "kostenlose Infrastruktur statt Deal",
+        "älter als 7 Tage (2024-03-18)"
       ],
-      "warnings": [
-        "URL nicht eindeutig prüfbar (HTTP 500)"
-      ],
-      "sourceDate": "2026-02-22T21:12:35.964Z",
-      "sourceDateSource": "deal.pubDate",
-      "sourceAgeDays": 254,
+      "warnings": [],
+      "sourceDate": "2024-03-18T10:02:56.000Z",
+      "sourceDateSource": "url.publicationDate",
+      "sourceAgeDays": 960,
       "expiryDate": "",
       "expirySource": "deal.expires",
-      "urlStatus": "unklar: HTTP 500"
+      "urlStatus": "HTTP 200"
     },
     {
       "id": "gemeinde-2-20260222",
@@ -2809,18 +2831,16 @@
       "source": "Kirchen Verzeichnis",
       "url": "https://www.gasometer.at",
       "reasons": [
-        "kein konkretes Angebot erkennbar",
-        "älter als 7 Tage (2026-02-22)"
+        "kostenlose Infrastruktur statt Deal",
+        "älter als 7 Tage (2024-03-18)"
       ],
-      "warnings": [
-        "URL nicht eindeutig prüfbar (HTTP 500)"
-      ],
-      "sourceDate": "2026-02-22T21:12:35.964Z",
-      "sourceDateSource": "deal.pubDate",
-      "sourceAgeDays": 254,
+      "warnings": [],
+      "sourceDate": "2024-03-18T10:02:56.000Z",
+      "sourceDateSource": "url.publicationDate",
+      "sourceAgeDays": 960,
       "expiryDate": "",
       "expirySource": "deal.expires",
-      "urlStatus": "unklar: HTTP 500"
+      "urlStatus": "HTTP 200"
     },
     {
       "id": "gottesdienste-2-20260222",
@@ -3223,15 +3243,17 @@
       "url": "https://www.orthodoxie.at",
       "reasons": [
         "kein konkretes Angebot erkennbar",
-        "älter als 7 Tage (2025-12-30)"
+        "älter als 7 Tage (2026-02-22)"
       ],
-      "warnings": [],
-      "sourceDate": "2025-12-30T14:00:40.000Z",
-      "sourceDateSource": "url.publicationDate",
-      "sourceAgeDays": 308,
+      "warnings": [
+        "URL nicht eindeutig prüfbar (temporärer Fehler)"
+      ],
+      "sourceDate": "2026-02-22T21:12:35.964Z",
+      "sourceDateSource": "deal.pubDate",
+      "sourceAgeDays": 254,
       "expiryDate": "",
       "expirySource": "deal.expires",
-      "urlStatus": "HTTP 200"
+      "urlStatus": "unklar: temporärer URL-Fehler"
     },
     {
       "id": "gottesdienste-24-20260222",
@@ -4010,26 +4032,6 @@
       "sourceDateSource": "url.instagramShortcode",
       "sourceAgeDays": 7,
       "expiryDate": "2026-11-11T23:59:59.999Z",
-      "expirySource": "deal.structured",
-      "urlStatus": "HTTP 200"
-    },
-    {
-      "id": "meta-ig-18341569375276738",
-      "title": "The first drink is on us.",
-      "brand": "Ikazerestaurantvienna",
-      "source": "Meta Instagram Business Discovery",
-      "url": "https://www.instagram.com/p/De_zrEDGPbk/",
-      "reasons": [
-        "kein konkretes Angebot erkennbar"
-      ],
-      "warnings": [
-        "Inhalt prüfen: Caption-Reste oder Emoji-Codes im sichtbaren Text",
-        "startet am 2026-11-07T00:00:00.000Z"
-      ],
-      "sourceDate": "2026-10-27T12:00:11.000Z",
-      "sourceDateSource": "url.instagramShortcode",
-      "sourceAgeDays": 7,
-      "expiryDate": "2026-11-07T23:59:59.999Z",
       "expirySource": "deal.structured",
       "urlStatus": "HTTP 200"
     },
