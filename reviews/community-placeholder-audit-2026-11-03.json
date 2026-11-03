@@ -1,0 +1,70 @@
+{
+  "date": "2026-11-03",
+  "reason": "Owner reported apparently false community submissions in Slack",
+  "slackChannel": "C0AF8TXN2KW",
+  "observedToday": [
+    { "submissionId": "ec2fa2b6-83a2-495c-8db0-301ef3f6c617", "title": "sxgtow", "threadTs": "1793701512.936059", "messageTs": "1793701513.035169" },
+    { "submissionId": "b18dc52a-2575-4fca-b871-668b4a9b1ce5", "title": "mwfffn", "threadTs": "1793701606.199839", "messageTs": "1793701606.292749" },
+    { "submissionId": "209094c4-d801-4624-8545-c54f0cd5994f", "title": "mwfffn", "threadTs": "1793702491.810129", "messageTs": "1793702491.967909" }
+  ],
+  "historicalMatchingSubmissions": 5,
+  "earliestObservedDate": "2026-10-22",
+  "provenance": {
+    "method": "Read-only exact-ID Cloudflare KV lookup and actual Slack thread reads",
+    "allEightSubmittedFrom": "android-native-free-submit",
+    "allEightReportedDevice": "Android 11; OnePlus8Pro Build/QKR1.191246.002",
+    "interpretation": "Strongly consistent with automated Android form crawling around release dates, not usable offers. Google attribution is probable, not conclusively proven.",
+    "limitations": [
+      "The existing API accepts client-supplied userAgent; this is not cryptographic provenance.",
+      "The three current source IPs did not match the documented Firebase physical-device IPv4 ranges checked.",
+      "A matching Play pre-launch video or test log was not obtained. No device-wide blacklist was applied."
+    ],
+    "rawIPsPublished": false
+  },
+  "publicFeed": { "checkedAt": "2026-11-03T14:34:11.738Z", "http": 200, "records": 79, "matchingPlaceholderRecords": 0 },
+  "serverFix": {
+    "status": "deployed and actual active source verified",
+    "workerVersion": "f3364cd2-d925-4f1a-83f4-8da7ce52304f",
+    "trafficPercentage": 100,
+    "scope": "Reject only the two observed four-field placeholder combinations before any KV write or intake dispatch, on both current and legacy submission routes",
+    "deploymentMethod": "Exact previous active bundle plus six-line guard, preserving already-live transitive behavior rather than activating unrelated newer scraper imports",
+    "protectedSettingsUnchanged": true,
+    "oldSlackCardsAndKVRecords": "untouched; retained as evidence",
+    "generalSpamOrIdempotencySolution": false
+  },
+  "androidFix": {
+    "status": "local source only, not part of already-uploaded 1.46 (82)",
+    "scope": "Firebase Test Lab system flag or Android monkey mode prevents community submission storage and production HTTP request; explicit local test notice",
+    "debugKotlinCompilation": "pass",
+    "unitSuites": 35,
+    "unitTests": 198,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0,
+    "newDeviceOrRoboRun": false
+  },
+  "offlineVerification": {
+    "workerTests": 34,
+    "actualDownloadedActiveBundleCommunityTests": 5,
+    "communityEnrichmentTests": 11,
+    "communityExtraction": "pass; injected mocks only",
+    "communityReview": "pass",
+    "communityApproval": "pass",
+    "realOnePlusAndShortLegitimateOffers": "accepted by regression tests",
+    "gitDiffCheck": "pass"
+  },
+  "unchanged": [
+    "public offers, IDs, dates, votes and approvals",
+    "Slack human approval and existing messages",
+    "keys, paid services, plans and cost limits",
+    "push consent, frequency, registration and schedules",
+    "native release versions and signed Store files"
+  ],
+  "noProductionSubmissionTests": true,
+  "noAdditionalScraperOrModelRuns": true,
+  "references": [
+    "https://support.google.com/googleplay/android-developer/answer/9842757",
+    "https://firebase.google.com/docs/test-lab/android/android-studio#modify_instrumented_test_behavior_for_test_lab",
+    "https://firebase.google.com/docs/test-lab/android/get-started#ip-blocks"
+  ]
+}

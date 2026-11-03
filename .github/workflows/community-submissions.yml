@@ -29,6 +29,7 @@ jobs:
 
       - name: Test community extraction and manual review
         run: |
+          node --test referrals-worker/test/community-submission.test.js
           node scripts/test-community-extraction.mjs
           node scripts/test-community-review.mjs
           SENTRY_DISABLED=1 node --test scripts/test-community-card-enrichment.mjs

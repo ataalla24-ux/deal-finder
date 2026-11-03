@@ -9,8 +9,8 @@ function fixture() {
     put: async (key, value) => values.set(key, value),
     list: async () => ({ keys: [], list_complete: true }),
   } };
-  const call = body => worker.fetch(new Request('https://test/api/deals/submissions', {
-    method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify(body),
+  const call = (body, route = '/api/deals/submissions', headers = {}) => worker.fetch(new Request(`https://test${route}`, {
+    method: 'POST', headers: { 'content-type': 'application/json', ...headers }, body: JSON.stringify(body),
   }), env);
   return { values, call };
 }
@@ -41,4 +41,30 @@ test('social link-only import still reaches enrichment, no link alone cannot', a
   const { call } = fixture();
   assert.equal((await call({ url: 'https://www.instagram.com/p/test/', submittedFrom: 'ios-share-extension' })).status, 201);
   assert.equal((await call({ url: '', submittedFrom: 'ios-share-extension' })).status, 400);
+});
+
+test('observed repeated placeholder combinations never write or dispatch, including legacy route', async () => {
+  const { call, values } = fixture();
+  for (const [brand, title, distance, expires] of [
+    ['fnijqz', 'mwfffn', 'zzqlyx', 'qynovx'],
+    ['tpkmbw', 'sxgtow', 'gzkzof', 'jytiul'],
+  ]) {
+    const payload = { ...draft, brand, title, distance, expires };
+    for (const route of ['/api/deals/submissions', '/api/deals/submit']) {
+      assert.equal((await call(payload, route)).status, 400);
+      assert.equal((await call({ ...payload, brand: ` ${brand.toUpperCase()} ` }, route)).status, 400);
+      assert.equal((await call({ ...payload, url: `https://${expires}/` }, route)).status, 400);
+    }
+  }
+  assert.equal(values.size, 0);
+});
+
+test('real short offers and OnePlus users are not blocked by the placeholder safeguard', async () => {
+  const { call } = fixture();
+  const headers = { 'user-agent': 'Dalvik/2.1.0 (Linux; U; Android 11; OnePlus8Pro Build/QKR1.191246.002)' };
+  for (const title of ['1 € Wrap', 'Pizza', 'KFC', 'NDLS']) {
+    assert.equal((await call({ ...draft, title }, '/api/deals/submissions', headers)).status, 201);
+  }
+  assert.equal((await call({ ...draft, brand: 'fnijqz' })).status, 201);
+  assert.equal((await call({ ...draft, title: 'mwfffn' })).status, 201);
 });

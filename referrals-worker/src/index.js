@@ -666,6 +666,16 @@ function normalizeCommunitySubmissionInput(body, request) {
   if ((manual || !url) && !['brand', 'title', 'distance'].every(key =>
     typeof body?.[key] === 'string' && body[key].trim())) return null;
 
+  // Repeated placeholder combinations observed in Android form crawls. Match
+  // all fields, not a device model, language, or a short legitimate offer title.
+  const placeholderFields = ['brand', 'title', 'distance', 'expires']
+    .map(key => cleanShortText(body?.[key]).toLowerCase());
+  const knownPlaceholders = [
+    ['fnijqz', 'mwfffn', 'zzqlyx', 'qynovx'],
+    ['tpkmbw', 'sxgtow', 'gzkzof', 'jytiul'],
+  ];
+  if (knownPlaceholders.some(fields => fields.every((value, index) => value === placeholderFields[index]))) return null;
+
   const host = getPreviewHost(url);
   const sourcePlatform = getSourcePlatform(host);
   const submittedTitle = cleanShortText(body?.title, 240);
