@@ -42,9 +42,26 @@
       "obsoleteSummerFixtures": 0,
       "privateCoverage": "unverified-session; zero readable offers, explicitly degraded"
     },
-    "githubCoverageRun": { "run": 41882381175, "conclusion": "success", "sourceCommit": "e243bad664f134b9c4b6b3beae04e85d9390c1d8" },
+    "githubCoverageRun": { "run": 41883185258, "conclusion": "success", "sourceCommit": "2427d85821f5a60ac3e48dfd335ee86bb0781235", "finalSourceFilesEqual": true },
     "extraRegressionAssertions": ["Active explicit campaign still passes normal validity after seven days", "Redirects cannot bypass another allowlisted host's persisted HTTP cooldown"],
-    "actualSlackDelivery": "Pending; no manual Slack post or approval"
+    "actualSlackDelivery": {
+      "dispatchRun": 41882752658,
+      "conclusion": "success",
+      "dispatchOutputCommit": "3b4cd9e455c7",
+      "normalValidity": "ok; no reasons or warnings; actual HTTP 200",
+      "actualNewDealCardsSent": 1,
+      "threadTs": "1793815478.336189",
+      "cardTs": "1793815478.491729",
+      "sentAt": "2026-11-04T18:04:38Z",
+      "permalink": "https://freefinder.slack.com/archives/C0AF8TXN2KW/p1793815478491729",
+      "readBack": "Exact title, three products, source date, both action years and member/app conditions verified in the actual Slack thread",
+      "lifecycle": "slack-sent",
+      "manualDecision": "",
+      "publicAppPublication": false,
+      "manualSlackTestPostsOrApprovals": 0
+    },
+    "sourceHealth": { "score": 50, "status": "completed-with-errors", "privateCoverage": "unverified-session; zero readable offers", "partialCoverageWarningVisible": true },
+    "woltPreservation": { "liveIds": ["g2-3dn8v3", "g2-ezkkws", "gs-12012fb"], "deepIdenticalBeforeAfter": true }
   },
   "unchanged": ["Wolt records", "Existing live feed", "Human approval requirement", "Actual Firecrawl provider collectors", "Schedules", "API keys", "Budgets", "Native apps", "Store releases"],
   "limitations": ["This public fallback covers source-backed OMV campaigns, not every personalized jo-app coupon", "Private authenticated coverage still requires an actual positive session and readable offer extraction"]
