@@ -2,9 +2,96 @@
   "schemaVersion": 1,
   "sourceKey": "food3",
   "sourceLabel": "Firecrawl Key 2 - Food",
-  "updatedAt": "2026-11-03T09:13:55.021Z",
+  "updatedAt": "2026-11-04T08:50:04.682Z",
   "runCount": 90,
   "runs": [
+    {
+      "schemaVersion": 1,
+      "runId": "food3-2026-11-04T08:50:04.682Z",
+      "sourceKey": "food3",
+      "sourceLabel": "Firecrawl Key 2 - Food",
+      "status": "completed-with-errors",
+      "startedAt": "2026-11-04T08:49:06.029Z",
+      "finishedAt": "2026-11-04T08:50:04.682Z",
+      "durationMs": 58653,
+      "outputFile": "docs/deals-pending-food3.json",
+      "counts": {
+        "rawCandidates": 1,
+        "normalizedCandidates": 1,
+        "verifiedCandidates": 1,
+        "previousDeals": 1,
+        "acceptedDeals": 1,
+        "rejectedDeals": 1
+      },
+      "rejectedByReason": {
+        "post-verification-rejected": 1
+      },
+      "rejectedSamples": [
+        {
+          "reason": "post-verification-rejected",
+          "deal": {
+            "id": "food3-1s4u3dl",
+            "title": "Instagram: einfach gutes Essen, ein feines Glas Wein, leckere Cocktails ... - Instagram",
+            "brand": "Instagram",
+            "url": "https://www.instagram.com/p/DfE8Bf8jEcJ/",
+            "source": "Firecrawl Food #2",
+            "pubDate": "",
+            "expires": "",
+            "postVerificationStatus": ""
+          }
+        }
+      ],
+      "diagnostics": {
+        "agentStatus": "completed-with-errors",
+        "creditsUsed": 0,
+        "configuredSources": 6,
+        "attemptedSources": 3,
+        "completedSources": 2,
+        "targetsPerRun": 3,
+        "agentTimeoutSeconds": 120,
+        "maxCreditsPerTarget": 300,
+        "sourceStats": [
+          {
+            "url": "https://www.instagram.com/explore/tags/happyhourwien/",
+            "status": "completed-search",
+            "rawCandidates": 1,
+            "searchCandidates": 1,
+            "creditsUsed": 0
+          },
+          {
+            "url": "https://www.instagram.com/explore/tags/lunchdealwien/",
+            "status": "completed",
+            "rawCandidates": 0,
+            "searchCandidates": 0,
+            "creditsUsed": 0
+          },
+          {
+            "url": "https://www.instagram.com/explore/tags/neueröffnungwien/",
+            "status": "failed",
+            "rawCandidates": 0,
+            "searchCandidates": 0,
+            "creditsUsed": 0,
+            "error": "Die angegebene Instagram-Hashtag-Seite konnte in diesem Durchlauf nicht abgerufen werden (Quellzugriff von Firecrawl nicht unterstützt). Daher sind keine verifizierbaren Originalposts, Daten oder direkten Post-Links aus der vorgeschriebenen Quelle verfügbar."
+          }
+        ],
+        "retainedPreviousDeals": 1,
+        "prunedPreviousDeals": 0,
+        "duplicateCandidatesMerged": 0,
+        "verifier": {
+          "statusCounts": {
+            "verified-meta-graph": 1
+          },
+          "verifiedOriginalPosts": 0,
+          "timestampOnlyPosts": 0,
+          "unavailableOriginalPosts": 0,
+          "registryViennaEvidence": 0
+        }
+      },
+      "constraints": {},
+      "errors": [
+        "https://www.instagram.com/explore/tags/neueröffnungwien/: Die angegebene Instagram-Hashtag-Seite konnte in diesem Durchlauf nicht abgerufen werden (Quellzugriff von Firecrawl nicht unterstützt). Daher sind keine verifizierbaren Originalposts, Daten oder direkten Post-Links aus der vorgeschriebenen Quelle verfügbar."
+      ]
+    },
     {
       "schemaVersion": 1,
       "runId": "food3-2026-11-03T09:13:55.021Z",
@@ -14008,43 +14095,6 @@
             "timestamp-derived": 16
           },
           "verifiedOriginalPosts": 14,
-          "timestampOnlyPosts": 0,
-          "unavailableOriginalPosts": 0,
-          "registryViennaEvidence": 0
-        }
-      },
-      "constraints": {},
-      "errors": []
-    },
-    {
-      "schemaVersion": 1,
-      "runId": "food3-2026-08-05T05:24:48.288Z",
-      "sourceKey": "food3",
-      "sourceLabel": "Firecrawl Key 2 - Food",
-      "status": "completed",
-      "startedAt": "2026-08-05T05:18:36.537Z",
-      "finishedAt": "2026-08-05T05:24:48.288Z",
-      "durationMs": 371751,
-      "outputFile": "docs/deals-pending-food3.json",
-      "counts": {
-        "rawCandidates": 50,
-        "normalizedCandidates": 50,
-        "verifiedCandidates": 50,
-        "previousDeals": 0,
-        "acceptedDeals": 50,
-        "rejectedDeals": 0
-      },
-      "rejectedByReason": {},
-      "rejectedSamples": [],
-      "diagnostics": {
-        "agentStatus": "completed",
-        "creditsUsed": 0,
-        "verifier": {
-          "statusCounts": {
-            "timestamp-derived": 38,
-            "verified-original-post": 12
-          },
-          "verifiedOriginalPosts": 12,
           "timestampOnlyPosts": 0,
           "unavailableOriginalPosts": 0,
           "registryViennaEvidence": 0
