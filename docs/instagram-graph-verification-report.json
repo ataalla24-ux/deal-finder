@@ -1,7 +1,7 @@
 {
-  "generatedAt": "2026-11-04T18:18:00.922Z",
+  "generatedAt": "2026-11-04T18:30:22.337Z",
   "source": "instagram-graph-cross-source-verification",
-  "status": "ok",
+  "status": "failed-preserved",
   "configured": true,
   "scannedFiles": [
     "deals-pending-church-events.json",
@@ -139,8 +139,8 @@
       "candidates": 0
     },
     "deals-pending-meta-instagram.json": {
-      "deals": 70,
-      "candidates": 7
+      "deals": 72,
+      "candidates": 8
     },
     "deals-pending-power.json": {
       "deals": 37,
@@ -167,10 +167,14 @@
       "candidates": 0
     }
   },
-  "candidatePosts": 11,
-  "candidateAccounts": 11,
+  "candidatePosts": 12,
+  "candidateAccounts": 12,
   "skippedAccountCooldowns": 0,
   "selectedAccounts": [
+    {
+      "username": "shaysfoodblog",
+      "candidates": 1
+    },
     {
       "username": "afrivision.austria",
       "candidates": 1
@@ -190,16 +194,17 @@
     {
       "username": "x.x.x.l_grill_restaurant",
       "candidates": 1
-    },
-    {
-      "username": "ikazerestaurant",
-      "candidates": 1
     }
   ],
-  "fetchedPosts": 150,
-  "exactMatches": 5,
+  "fetchedPosts": 0,
+  "exactMatches": 0,
   "retainedEvidencePosts": 2000,
-  "errors": [],
+  "errors": [
+    {
+      "username": "shaysfoodblog",
+      "message": "Instagram shared quota paused: shared cooldown"
+    }
+  ],
   "accountFailures": {
     "iris.thegoodguides": {
       "count": 3,
@@ -213,21 +218,27 @@
     }
   },
   "sharedQuota": {
-    "limitPerHour": 296,
+    "limitPerHour": 190,
     "usageThreshold": 95,
-    "requests": 6,
-    "reserved": 10,
-    "stopped": false,
-    "reason": "",
-    "highestUsagePercent": 79,
+    "requests": 0,
+    "reserved": 0,
+    "stopped": true,
+    "reason": "Instagram shared quota paused: shared cooldown",
+    "highestUsagePercent": 0,
     "waitedMs": 0,
     "pacingMs": 0,
-    "retryAt": "",
+    "retryAt": "2026-11-04T18:38:21.812Z",
     "adaptiveSafetyCeiling": 190,
     "adaptiveIncreases": 0,
     "storageFailure": null
   },
+  "globalError": {
+    "username": "shaysfoodblog",
+    "status": 0,
+    "code": "SCAN_BUDGET",
+    "message": "Instagram shared quota paused: shared cooldown"
+  },
   "blockedEvidencePosts": 76,
-  "unmatchedCandidatePosts": 6,
-  "message": "5/11 fresh cross-source Instagram candidates matched exactly via Graph API."
+  "unmatchedCandidatePosts": 12,
+  "message": "0/12 fresh cross-source Instagram candidates matched exactly via Graph API."
 }
