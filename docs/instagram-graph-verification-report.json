@@ -1,7 +1,7 @@
 {
-  "generatedAt": "2026-11-04T09:15:53.720Z",
+  "generatedAt": "2026-11-04T09:43:23.289Z",
   "source": "instagram-graph-cross-source-verification",
-  "status": "ok",
+  "status": "degraded",
   "configured": true,
   "scannedFiles": [
     "deals-pending-church-events.json",
@@ -196,10 +196,15 @@
       "candidates": 1
     }
   ],
-  "fetchedPosts": 150,
-  "exactMatches": 7,
+  "fetchedPosts": 100,
+  "exactMatches": 5,
   "retainedEvidencePosts": 2000,
-  "errors": [],
+  "errors": [
+    {
+      "username": "x.x.x.l_grill_restaurant",
+      "message": "Instagram shared quota paused: rolling-hour budget exhausted"
+    }
+  ],
   "accountFailures": {
     "iris.thegoodguides": {
       "count": 3,
@@ -215,19 +220,25 @@
   "sharedQuota": {
     "limitPerHour": 296,
     "usageThreshold": 95,
-    "requests": 6,
-    "reserved": 10,
-    "stopped": false,
-    "reason": "",
-    "highestUsagePercent": 94,
+    "requests": 4,
+    "reserved": 4,
+    "stopped": true,
+    "reason": "Instagram shared quota paused: rolling-hour budget exhausted",
+    "highestUsagePercent": 85,
     "waitedMs": 0,
     "pacingMs": 0,
-    "retryAt": "",
+    "retryAt": "2026-11-04T09:44:26.909Z",
     "adaptiveSafetyCeiling": 190,
     "adaptiveIncreases": 0,
     "storageFailure": null
   },
+  "globalError": {
+    "username": "x.x.x.l_grill_restaurant",
+    "status": 0,
+    "code": "SCAN_BUDGET",
+    "message": "Instagram shared quota paused: rolling-hour budget exhausted"
+  },
   "blockedEvidencePosts": 85,
-  "unmatchedCandidatePosts": 8,
-  "message": "7/15 fresh cross-source Instagram candidates matched exactly via Graph API."
+  "unmatchedCandidatePosts": 10,
+  "message": "5/15 fresh cross-source Instagram candidates matched exactly via Graph API."
 }
