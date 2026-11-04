@@ -32,7 +32,18 @@
     "offlineCommands": { "total": 52, "passed": 52, "failed": 0 },
     "targetedTests": 9,
     "livePublicDiscovery": { "requests": 3, "campaigns": 1, "normalSlackValidationAllowed": 1, "urlInspectionInLocalValidation": "stubbed HTTP 200; actual source HTTP 200 separately verified" },
-    "githubProducer": "Pending after publication",
+    "githubProducer": {
+      "run": 41882251533,
+      "conclusion": "success",
+      "outputCommit": "f29bea82d54369f8e92a9795c42132e54a8d9881",
+      "requests": 6,
+      "publicOmvCampaigns": 1,
+      "totalJoCandidates": 7,
+      "obsoleteSummerFixtures": 0,
+      "privateCoverage": "unverified-session; zero readable offers, explicitly degraded"
+    },
+    "githubCoverageRun": { "run": 41882381175, "conclusion": "success", "sourceCommit": "e243bad664f134b9c4b6b3beae04e85d9390c1d8" },
+    "extraRegressionAssertions": ["Active explicit campaign still passes normal validity after seven days", "Redirects cannot bypass another allowlisted host's persisted HTTP cooldown"],
     "actualSlackDelivery": "Pending; no manual Slack post or approval"
   },
   "unchanged": ["Wolt records", "Existing live feed", "Human approval requirement", "Actual Firecrawl provider collectors", "Schedules", "API keys", "Budgets", "Native apps", "Store releases"],

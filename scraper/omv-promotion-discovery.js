@@ -134,6 +134,7 @@ export async function collectOmvPromotions({ fetchImpl = fetch, now = new Date()
           const next = omvPromotionUrl(response.headers.get('location'), url);
           await response.body?.cancel();
           if (!next || redirect === 2) throw Error('untrusted-or-excessive-redirect');
+          if (Date.parse(report.pausesByHost[new URL(next).hostname]?.nextRetryAt) > +now) throw Error('redirect-target-host-paused');
           url = next; continue;
         }
         if (!response.ok) { await response.body?.cancel(); throw sourceHttpError(response.status, response.headers.get('retry-after'), now); }

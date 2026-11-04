@@ -30,6 +30,8 @@ test('current cross-year campaign produces one complete card with three named dr
   const normalized = normalizeDeal(deal, 'joe');
   const checked = await validateDealsForSlack([normalized], { now, inspectDealUrlHealth: async () => ({ ok: true, status: 200, contentHints: {}, dateHints: {} }) });
   assert.equal(checked.allowedDeals.length, 1, JSON.stringify(checked.report));
+  const stillActive = await validateDealsForSlack([normalized], { now: new Date('2026-11-20T12:00:00Z'), inspectDealUrlHealth: async () => ({ ok: true, status: 200, contentHints: {}, dateHints: {} }) });
+  assert.equal(stillActive.allowedDeals.length, 1, 'explicit active validity survives the ordinary seven-day freshness window');
   assert.equal(filterDuplicateDealsInRun([normalized, normalized]).deals.length, 1);
   assert.match(buildSlackMessage(normalized, 1), /Cherry Cream Latte/);
 });
@@ -80,6 +82,14 @@ test('hostile redirects and page budgets never trigger outside requests', async 
   assert.equal(calls, 2);
   assert.equal(result.deals.length, 0);
   assert(result.report.pages.every(p => p.error === 'untrusted-or-excessive-redirect'));
+  calls = 0;
+  const paused = await collectOmvPromotions({ now, previous: { pausesByHost: { 'www.omv.at': { nextRetryAt: '2026-11-06T17:00:00Z' } } }, fetchImpl: async value => {
+    calls++;
+    assert.equal(new URL(value).hostname, 'presse.ikp.at');
+    return new Response('', { status: 302, headers: { location: 'https://www.omv.at/de/viva/viva-kaffee' } });
+  } });
+  assert.equal(calls, 1, 'redirect cannot bypass the target host cooldown');
+  assert(paused.report.pages.some(p => p.error === 'redirect-target-host-paused'));
 });
 
 test('last-good campaigns keep original dates during failures; expired and invented old rows do not return', () => {
