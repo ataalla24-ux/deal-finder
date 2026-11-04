@@ -47,6 +47,8 @@ test('independently redeemable drinks produce three complete cards through send 
     assert(normalizeDealRecord(variant).title.includes(variant.promotionProducts[0]), 'public feed normalization preserves the named product');
   }
   assert.equal(filterDuplicateDealsInRun([...variants, ...variants]).deals.length, 3);
+  const merchantCopies = variants.map(d => ({ ...d, id: d.id.replace('5044fa7c7e98', '000000000000'), url: 'https://www.omv.at/de/viva/viva-kaffee' }));
+  assert.equal(filterDuplicateDealsInRun([...variants, ...merchantCopies]).deals.length, 3, 'the same products repeated on two official pages must not make six cards');
   assert.equal(dedupeApprovedDeals([...variants, ...variants]).length, 3);
   const allChecked = await validateDealsForSlack(variants, { now, inspectDealUrlHealth: async () => ({ ok: true, status: 200, contentHints: {}, dateHints: {} }) });
   assert.equal(allChecked.allowedDeals.length, 3);

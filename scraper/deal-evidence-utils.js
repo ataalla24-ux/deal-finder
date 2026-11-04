@@ -731,7 +731,10 @@ export function officialOmvVariantKey(deal = {}) {
       && /^\/de\/(?:viva\/viva-kaffee(?:\/.*)?|markenpartner\/joe-partner)\/?$/.test(url.pathname);
     const press = url.hostname === 'presse.ikp.at' && /^\/news-[a-z0-9-]+$/i.test(url.pathname)
       && url.searchParams.get('menueid') === '33632' && /^\d+$/.test(url.searchParams.get('id') || '');
-    return merchant || press ? `omv-variant:${match[1]}:${match[2]}` : '';
+    const start = cleanText(deal.validFrom).slice(0, 10);
+    const end = cleanText(deal.validUntil || deal.expires).slice(0, 10);
+    if (!/^20\d{2}-\d{2}-\d{2}$/.test(end) || start && !/^20\d{2}-\d{2}-\d{2}$/.test(start)) return '';
+    return merchant || press ? `omv-variant:${match[2]}:${start}:${end}` : '';
   } catch { return ''; }
 }
 
