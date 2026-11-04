@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-11-04T19:55:53.096Z",
+  "generatedAt": "2026-11-04T20:03:25.492Z",
   "summary": {
     "filesConsidered": 32,
     "totalCandidates": 747,
@@ -232,13 +232,14 @@
     ],
     "pipelineRuns": {
       "reportedSources": 9,
-      "failedSources": [],
+      "failedSources": [
+        "wien-combined"
+      ],
       "completedWithErrors": [
         "food3",
         "instagram-apify2",
         "joe",
-        "power",
-        "wien-combined"
+        "power"
       ]
     }
   },
@@ -788,28 +789,21 @@
         "📱💨 Keine Sorge – das war nur der schnellste Weg zu unserem Aktionsmenü 😂 🥪 Schnitzelsemmel + 🍟 Pommes + 🥤 Pepsi – nur € 9,90 🪑 Im Lok"
       ],
       "lastRun": {
-        "status": "completed-with-errors",
-        "startedAt": "2026-11-04T06:55:51.095Z",
-        "finishedAt": "2026-11-04T06:57:38.443Z",
-        "durationMs": 107348,
+        "status": "failed",
+        "startedAt": "2026-11-04T19:59:32.026Z",
+        "finishedAt": "2026-11-04T19:59:33.059Z",
+        "durationMs": 1033,
         "counts": {
-          "rawCandidates": 64,
-          "normalizedCandidates": 3,
-          "verifiedCandidates": 3,
+          "rawCandidates": 0,
+          "normalizedCandidates": 0,
+          "verifiedCandidates": 0,
           "previousDeals": 0,
-          "acceptedDeals": 3,
-          "rejectedDeals": 55
+          "acceptedDeals": 0,
+          "rejectedDeals": 0
         },
-        "rejectedByReason": {
-          "no-concrete-offer": 42,
-          "general-recommendation": 5,
-          "non-offer-content": 1,
-          "excluded-promotion-type": 2,
-          "alcohol-offer": 4,
-          "missing-vienna-evidence": 1
-        },
+        "rejectedByReason": {},
         "errors": [
-          "#viennafood: Instagram scan paused: request-budget"
+          "No Graph hashtag source completed successfully; last-good output was preserved. #viennarestaurants: Instagram shared quota paused: shared cooldown"
         ],
         "reportFile": "deal-pipeline-last-run-wien-combined.json"
       },
@@ -835,6 +829,7 @@
         }
       ],
       "issues": [
+        "letzter Pipeline-Lauf ist fehlgeschlagen",
         "wenige klare Gratis-/Promo-Signale",
         "hohe Überschneidung mit anderen Quellen"
       ],
