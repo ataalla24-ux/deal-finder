@@ -1,0 +1,65 @@
+name: Slack Live Deal List
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'docs/deals.json'
+      - 'docs/deal-of-the-day.json'
+      - 'docs/deal-of-the-week.json'
+      - 'scripts/slack-live-deal-list.mjs'
+      - 'scripts/test-slack-live-deal-list.mjs'
+      - 'scraper/slack-digest-utils.js'
+      - '.github/workflows/slack-live-deal-list.yml'
+  workflow_run:
+    workflows: ['pages-build-deployment']
+    branches: [main]
+    types: [completed]
+  schedule:
+    - cron: '13,43 * * * *'
+  workflow_dispatch:
+
+concurrency:
+  group: slack-live-deal-list
+  cancel-in-progress: false
+
+permissions:
+  contents: write
+
+jobs:
+  synchronize:
+    if: >-
+      github.event_name != 'workflow_run' ||
+      (github.event.workflow_run.conclusion == 'success' &&
+       github.event.workflow_run.head_repository.full_name == github.repository &&
+       github.event.workflow_run.head_branch == 'main')
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Test catalogue and approval isolation offline
+        run: node scripts/test-slack-live-deal-list.mjs
+      - name: Synchronize confirmed public deals
+        env:
+          SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
+          SLACK_CHANNEL_ID: ${{ secrets.SLACK_CHANNEL_ID }}
+          DEAL_REMOVE_LINK_SECRET: ${{ secrets.DEAL_REMOVE_LINK_SECRET }}
+        run: node scripts/slack-live-deal-list.mjs
+      - name: Retain message identities, including partial progress
+        if: always()
+        run: node scripts/commit-generated.mjs --message "Sync Slack live list message identities [skip ci]" --files reviews/slack-live-deal-list-state.json
+      - name: Save synchronization evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: slack-live-deal-list
+          path: |
+            reviews/slack-live-deal-list-state.json
+            reviews/slack-live-deal-list-report.json
+          if-no-files-found: ignore
+          retention-days: 7
