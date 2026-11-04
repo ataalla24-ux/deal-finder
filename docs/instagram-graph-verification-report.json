@@ -1,7 +1,7 @@
 {
-  "generatedAt": "2026-11-04T15:17:53.228Z",
+  "generatedAt": "2026-11-04T15:32:58.196Z",
   "source": "instagram-graph-cross-source-verification",
-  "status": "ok",
+  "status": "failed-preserved",
   "configured": true,
   "scannedFiles": [
     "deals-pending-church-events.json",
@@ -64,7 +64,7 @@
     },
     "deals-pending-firecrawl4.json": {
       "deals": 45,
-      "candidates": 2
+      "candidates": 1
     },
     "deals-pending-firecrawl5.json": {
       "deals": 0,
@@ -139,8 +139,8 @@
       "candidates": 0
     },
     "deals-pending-meta-instagram.json": {
-      "deals": 71,
-      "candidates": 11
+      "deals": 70,
+      "candidates": 12
     },
     "deals-pending-power.json": {
       "deals": 37,
@@ -176,7 +176,7 @@
       "candidates": 2
     },
     {
-      "username": "zentrum_simmering",
+      "username": "zuckero.at",
       "candidates": 1
     },
     {
@@ -196,10 +196,15 @@
       "candidates": 1
     }
   ],
-  "fetchedPosts": 150,
-  "exactMatches": 5,
+  "fetchedPosts": 0,
+  "exactMatches": 0,
   "retainedEvidencePosts": 2000,
-  "errors": [],
+  "errors": [
+    {
+      "username": "afrivision.austria",
+      "message": "Instagram shared quota paused: shared cooldown"
+    }
+  ],
   "accountFailures": {
     "iris.thegoodguides": {
       "count": 3,
@@ -215,19 +220,25 @@
   "sharedQuota": {
     "limitPerHour": 190,
     "usageThreshold": 95,
-    "requests": 6,
-    "reserved": 10,
-    "stopped": false,
-    "reason": "",
-    "highestUsagePercent": 37,
+    "requests": 0,
+    "reserved": 0,
+    "stopped": true,
+    "reason": "Instagram shared quota paused: shared cooldown",
+    "highestUsagePercent": 0,
     "waitedMs": 0,
     "pacingMs": 0,
-    "retryAt": "",
+    "retryAt": "2026-11-04T15:40:44.855Z",
     "adaptiveSafetyCeiling": 190,
     "adaptiveIncreases": 0,
     "storageFailure": null
   },
+  "globalError": {
+    "username": "afrivision.austria",
+    "status": 0,
+    "code": "SCAN_BUDGET",
+    "message": "Instagram shared quota paused: shared cooldown"
+  },
   "blockedEvidencePosts": 77,
-  "unmatchedCandidatePosts": 11,
-  "message": "5/16 fresh cross-source Instagram candidates matched exactly via Graph API."
+  "unmatchedCandidatePosts": 16,
+  "message": "0/16 fresh cross-source Instagram candidates matched exactly via Graph API."
 }
