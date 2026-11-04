@@ -5,11 +5,14 @@ import { fileURLToPath } from 'url';
 import { chromium } from 'playwright';
 
 import { cleanText, normalizeCategoryForScraper } from './category-utils.js';
+import { collectOmvPromotions, retainActiveOmvPromotions } from './omv-promotion-discovery.js';
+import { assessJoeAuthPage } from './joe-auth-health.js';
+import { buildPipelineRunReport, writePipelineRunReport } from './pipeline-run-report-utils.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 const ROOT = path.join(__dirname, '..');
-const OUTPUT_PATH = path.join(ROOT, 'docs', 'deals-pending-joe.json');
+const OUTPUT_DIR = process.env.JOE_OUTPUT_DIR || path.join(ROOT, 'docs');
 const DEFAULT_JOE_STORAGE_STATE = path.join(ROOT, '.secrets', 'joe.storage-state.json');
 const JOE_STORAGE_STATE = process.env.JOE_STORAGE_STATE || DEFAULT_JOE_STORAGE_STATE;
 const JOE_PRIVATE_BENEFITS_URL = 'https://www.joe-club.at/vorteile';
@@ -47,20 +50,6 @@ const SOURCES = [
     distance: 'BIPA Filialen Wien',
   },
 ];
-
-const CURRENT_OMV_VIVA_FREE_TASTE_DEALS = [
-  'Coconut Strawberry Sunset',
-  'Sunny Orange Espresso',
-  'Sparkling Espresso Tonic',
-  'Iced Matcha Latte',
-];
-
-const OMV_VIVA_FREE_TASTE_URL_FRAGMENTS = new Map([
-  ['Coconut Strawberry Sunset', 'coconut-strawberry-sunset'],
-  ['Sunny Orange Espresso', 'sunny-orange-espresso'],
-  ['Sparkling Espresso Tonic', 'sparkling-espresso-tonic'],
-  ['Iced Matcha Latte', 'iced-matcha-latte'],
-]);
 
 function stableHash(str) {
   let hash = 5381;
@@ -165,37 +154,6 @@ function sentence(text) {
 
 function makeDescription(parts) {
   return parts.map(sentence).filter(Boolean).join(' ');
-}
-
-function buildOmvVivaFreeTasteDeal(variant, url) {
-  return buildDeal({
-    prefix: 'joe-omv-viva-free-taste',
-    title: `Gratis ${variant} testen`,
-    description: makeDescription([
-      `In der jö App gibt es bei OMV VIVA den Vorteil “Gratis ${variant} testen”.`,
-      'Laut Screenshot ist die Aktion mit 0 Ös einlösbar und bei OMV/VIVA verfügbar.',
-      'Einlösung direkt über die jö App bzw. jö Karte an teilnehmenden OMV Stationen.',
-    ]),
-    brand: 'OMV VIVA',
-    source: 'jö Bonus Club',
-    url,
-    expires: 'Bis ca. 30.08.2026 laut jö App',
-    distance: 'OMV Stationen Wien',
-    category: 'kaffee',
-    type: 'gratis',
-    badge: 'jö',
-    hot: true,
-    qualityScore: 96,
-  });
-}
-
-function addCurrentOmvVivaFreeTasteDeals(deals, url) {
-  for (const variant of CURRENT_OMV_VIVA_FREE_TASTE_DEALS) {
-    const fragment = OMV_VIVA_FREE_TASTE_URL_FRAGMENTS.get(variant);
-    const variantUrl = fragment ? `${url.replace(/#.*$/, '')}#${fragment}` : url;
-    const deal = buildOmvVivaFreeTasteDeal(variant, variantUrl);
-    if (deal) deals.push(deal);
-  }
 }
 
 function decodeJsonString(value) {
@@ -691,7 +649,6 @@ async function extractOmvJoePage(page, source) {
     });
   }
 
-  addCurrentOmvVivaFreeTasteDeals(deals, source.url);
   return deals;
 }
 
@@ -743,21 +700,15 @@ async function extractBipaJoePage(page, source) {
   return deals.filter(Boolean);
 }
 
-async function extractLoggedInJoeBenefitsPage(page) {
+export async function extractLoggedInJoeBenefitsPage(page) {
   await page.waitForLoadState('domcontentloaded');
   await page.waitForTimeout(2000);
 
   const pageData = await page.evaluate(() => {
-    const loginSignals = [
-      'anmelden',
-      'passwort',
-      'login',
-      'einloggen',
-      'registrieren',
-    ];
     const bodyText = (document.body?.innerText || '').trim();
-    const bodyLower = bodyText.toLowerCase();
-    const requiresLogin = loginSignals.some((signal) => bodyLower.includes(signal));
+    const requiresLogin = Boolean(document.querySelector('input[type="password"],form[action*="login"]'));
+    const authenticatedControls = Array.from(document.querySelectorAll('a,button')).some(node =>
+      /^(?:abmelden|ausloggen|log\s*out)$/i.test((node.textContent || '').trim()) || /\/(?:logout|abmelden)(?:[/?#]|$)/i.test(node.getAttribute('href') || ''));
 
     const candidates = Array.from(document.querySelectorAll('a[href], button, article, section, div'))
       .map((node) => {
@@ -779,14 +730,16 @@ async function extractLoggedInJoeBenefitsPage(page) {
     return {
       bodyText,
       requiresLogin,
+      authenticatedControls,
       url: location.href,
       candidates,
     };
   });
 
-  if (pageData.requiresLogin || /\/login\b/i.test(pageData.url)) {
-    console.log('   ↳ jö Vorteile weiterhin hinter Login, kein nutzbarer auth state');
-    return [];
+  const health = assessJoeAuthPage(pageData);
+  if (!health.authenticated) {
+    console.log(`   ↳ jö Sitzung nicht als angemeldet bestätigt: ${health.status}`);
+    return { deals: [], health };
   }
 
   const deals = [];
@@ -837,11 +790,8 @@ async function extractLoggedInJoeBenefitsPage(page) {
     if (deal) deals.push(deal);
   }
 
-  if (/omv|viva|coconut strawberry sunset|matcha|gratis testen/i.test(pageData.bodyText)) {
-    addCurrentOmvVivaFreeTasteDeals(deals, pageData.url || JOE_PRIVATE_BENEFITS_URL);
-  }
-
-  return dedupeDeals(deals);
+  const unique = dedupeDeals(deals);
+  return { deals: unique, health: assessJoeAuthPage(pageData, unique.length) };
 }
 
 function dedupeDeals(deals) {
@@ -855,28 +805,44 @@ function dedupeDeals(deals) {
   });
 }
 
-async function main() {
+export async function runJoeScraper(options = {}) {
+  const startedAt = new Date();
+  const now = options.now || startedAt;
+  const outputDir = options.outputDir || OUTPUT_DIR;
+  const outputPath = path.join(outputDir, 'deals-pending-joe.json');
+  const reportPath = path.join(outputDir, 'joe-scraper-report.json');
+  const storagePath = options.storageStatePath || JOE_STORAGE_STATE;
   console.log('💎 JÖ SCRAPER (PLAYWRIGHT)');
   console.log('========================================');
 
-  const browser = await chromium.launch({
+  const browser = await (options.browserType || chromium).launch({
     headless: true,
   });
 
   try {
     const allDeals = [];
-    const authStateAvailable = hasFile(JOE_STORAGE_STATE);
+    let previous = {};
+    let previousDeals = [];
+    try { previous = JSON.parse(fs.readFileSync(reportPath, 'utf8')); } catch {}
+    try { previousDeals = JSON.parse(fs.readFileSync(outputPath, 'utf8')).deals || []; } catch {}
+    const retained = retainActiveOmvPromotions([], previousDeals, now);
+    const current = await (options.collectPublic || collectOmvPromotions)({ now, previous: previous.publicDiscovery || {}, knownCampaignUrls: retained.map(deal => deal.url) });
+    const publicDeals = retainActiveOmvPromotions(current.deals, retained, now);
+    allDeals.push(...publicDeals);
+    const sourceReports = [];
+    let auth = { status: 'not-configured', authenticated: false, readableOffers: 0 };
+    const authStateAvailable = hasFile(storagePath);
     if (authStateAvailable) {
-      console.log(`🔐 jö auth state gefunden: ${JOE_STORAGE_STATE}`);
+      console.log('🔐 gespeicherter jö auth state gefunden');
     } else {
-      console.log(`ℹ️  kein jö auth state gefunden (${JOE_STORAGE_STATE})`);
+      console.log('ℹ️ kein gespeicherter jö auth state gefunden');
     }
 
-    for (const source of SOURCES) {
+    for (const source of options.sources || SOURCES) {
       console.log(`🔎 ${source.url}`);
-      const page = await openPage(browser, source.url);
-
+      let page;
       try {
+        page = await openPage(browser, source.url);
         let deals = [];
         if (source.key === 'billa-actions') {
           deals = await extractActionsPage(page, source);
@@ -890,47 +856,73 @@ async function main() {
 
         console.log(`   ↳ ${deals.length} jö Deals`);
         allDeals.push(...deals);
+        sourceReports.push({ source: source.key, status: 'ok', candidates: deals.length });
+      } catch (error) {
+        sourceReports.push({ source: source.key, status: 'error', error: error.message });
       } finally {
-        await page.close();
+        await page?.close();
       }
     }
 
     if (authStateAvailable) {
-      const authContext = await browser.newContext({
-        userAgent: USER_AGENT,
-        locale: 'de-AT',
-        storageState: JOE_STORAGE_STATE,
-      });
+      let authContext;
       try {
+        authContext = await browser.newContext({ userAgent: USER_AGENT, locale: 'de-AT', storageState: storagePath });
         console.log(`🔎 ${JOE_PRIVATE_BENEFITS_URL} (auth)`);
         const page = await openPageInContext(authContext, JOE_PRIVATE_BENEFITS_URL);
         try {
-          const deals = await extractLoggedInJoeBenefitsPage(page);
-          console.log(`   ↳ ${deals.length} jö Auth-Deals`);
-          allDeals.push(...deals);
+          const result = await extractLoggedInJoeBenefitsPage(page);
+          auth = result.health;
+          console.log(`   ↳ ${result.deals.length} jö Auth-Deals (${auth.status})`);
+          allDeals.push(...result.deals);
         } finally {
           await page.close();
         }
+      } catch (error) {
+        auth = { status: 'auth-read-error', authenticated: false, readableOffers: 0 };
       } finally {
-        await authContext.close();
+        await authContext?.close();
       }
     }
 
+    const expired = [];
+    const unique = dedupeDeals(allDeals).filter(deal => {
+      const raw = deal.validUntil || deal.expires || '';
+      const expiry = /^20\d{2}-\d{2}-\d{2}/.test(raw) ? new Date(raw.slice(0, 10) + 'T23:59:59.999Z') : parseDateRangeEnd(raw);
+      if (expiry && +expiry < +now) { expired.push({ id: deal.id, reason: 'offer-expired' }); return false; }
+      return true;
+    });
+    const errors = [...sourceReports.filter(row => row.status === 'error').map(row => `${row.source}: ${row.error}`),
+      ...current.report.pages.filter(row => row.status !== 'ok').map(row => `${row.url}: ${row.error || row.status}`),
+      ...(auth.status === 'authenticated-offers-read' ? [] : [`jö account coverage: ${auth.status}; readable offers: ${auth.readableOffers}`])];
+    const report = { generatedAt: new Date().toISOString(), status: errors.length ? 'degraded' : 'ok',
+      authenticatedCoverage: auth, publicDiscovery: current.report, sources: sourceReports,
+      expired, candidates: unique.length, publicOmvCandidates: current.deals.length,
+      retainedPublicCampaigns: publicDeals.filter(deal => !current.deals.some(row => row.id === deal.id)).length, errors };
+    fs.mkdirSync(outputDir, { recursive: true });
+    fs.writeFileSync(reportPath, JSON.stringify(report, null, 2));
+    writePipelineRunReport(buildPipelineRunReport({ sourceKey: 'joe', sourceLabel: 'jö Bonus Club', startedAt,
+      finishedAt: new Date(), status: errors.length ? 'completed-with-errors' : 'completed',
+      rawCandidates: allDeals.length, normalizedCandidates: unique.length, acceptedDeals: unique.length,
+      rejected: expired, outputFile: 'docs/deals-pending-joe.json', errors,
+      diagnostics: { authenticatedCoverage: auth, publicOmvCandidates: current.deals.length, note: 'Candidates require normal Slack validation and human approval; zero readable private offers is not healthy account coverage.' } }), { docsDir: outputDir });
+    if (errors.length) console.log(`::warning::jö source coverage is degraded (${auth.status}); see joe-scraper-report.json`);
     const payload = {
       lastUpdated: new Date().toISOString(),
       source: 'joe-scraper',
-      totalDeals: allDeals.length,
-      deals: allDeals,
+      totalDeals: unique.length,
+      deals: unique,
     };
 
-    fs.writeFileSync(OUTPUT_PATH, JSON.stringify(payload, null, 2));
-    console.log(`💾 ${allDeals.length} Deals → ${OUTPUT_PATH}`);
+    fs.writeFileSync(outputPath, JSON.stringify(payload, null, 2));
+    console.log(`💾 ${unique.length} Deals → ${outputPath}`);
+    return { payload, report };
   } finally {
     await browser.close();
   }
 }
 
-main().catch((error) => {
+if (process.argv[1] && path.resolve(process.argv[1]) === __filename) runJoeScraper().catch((error) => {
   console.error('❌ joe scraper failed:', error);
   process.exit(1);
 });

@@ -1,0 +1,40 @@
+{
+  "date": "2026-11-04",
+  "scope": "Repair recurring OMV free-coffee discovery and expose private jo coverage honestly",
+  "diagnosis": {
+    "producerRun": 41834572701,
+    "oldSource": "joe-scraper.js unconditionally inserted four fixed summer drinks ending 2026-08-30",
+    "validator": "Correctly rejected those expired offers; the new winter promotion was never extracted",
+    "privateAccount": "Saved state existed, but zero extracted offers did not prove a usable authenticated session"
+  },
+  "verifiedCurrentPromotion": {
+    "source": "https://presse.ikp.at/news-wintergenuss-bei-omv-viva-drei-neue-kaffee-kreationen-fuer-die-kalte-jahreszeit?id=251130&menueid=33632&l=deutsch",
+    "published": "2026-11-02",
+    "validFrom": "2026-11-02",
+    "validUntil": "2027-01-31",
+    "products": ["Cherry Cream Latte", "Ube Coconut Latte", "Double Caramel Latte"],
+    "conditions": "jo members; each variety once free through the jo app; participating OMV/VIVA station and personal redeemability must be checked in the app",
+    "candidateId": "joe-omv-current-5044fa7c7e98",
+    "oneCampaignCard": true,
+    "notConfirmed": ["Zero Os requirement", "A specific Vienna address", "Every station participates"]
+  },
+  "changes": [
+    "Follow the official OMV issuer listing and merchant coffee page instead of hardcoding a seasonal release or product list",
+    "Require source-backed explicit years and validity; retain original publication dates; reject expired, conflicting and negated free offers",
+    "Bound each discovery to six pages/eight HTTP requests, HTTPS allowlisted paths, manual redirects, 2.5 MB bodies and 12 second timeouts",
+    "Persist 401/403/429 host cooldowns with at least one day and respect longer Retry-After values",
+    "Retain previously verified still-valid public campaigns across temporary discovery failures without refreshing their source dates",
+    "Remove all unconditional summer fixture generation",
+    "Distinguish login-required, unverified-session and authenticated-but-no-readable-offers; expose degraded coverage in source and pipeline health",
+    "Add a jo-only dispatch input to the existing hosting workflow for free producer verification without running its other collectors"
+  ],
+  "verification": {
+    "offlineCommands": { "total": 52, "passed": 52, "failed": 0 },
+    "targetedTests": 9,
+    "livePublicDiscovery": { "requests": 3, "campaigns": 1, "normalSlackValidationAllowed": 1, "urlInspectionInLocalValidation": "stubbed HTTP 200; actual source HTTP 200 separately verified" },
+    "githubProducer": "Pending after publication",
+    "actualSlackDelivery": "Pending; no manual Slack post or approval"
+  },
+  "unchanged": ["Wolt records", "Existing live feed", "Human approval requirement", "Actual Firecrawl provider collectors", "Schedules", "API keys", "Budgets", "Native apps", "Store releases"],
+  "limitations": ["This public fallback covers source-backed OMV campaigns, not every personalized jo-app coupon", "Private authenticated coverage still requires an actual positive session and readable offer extraction"]
+}

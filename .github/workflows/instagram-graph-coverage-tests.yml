@@ -7,6 +7,7 @@ on:
       - 'scraper/**'
       - 'scripts/review-live-deals-llm.mjs'
       - 'scripts/test-source-review-cache.mjs'
+      - 'scripts/test-joe-current-offers.mjs'
       - '.github/workflows/daily-deal-pick.yml'
       - '.github/workflows/validate-live-deals.yml'
       - 'scripts/test-apify*'
@@ -41,6 +42,7 @@ on:
       - 'scraper/**'
       - 'scripts/review-live-deals-llm.mjs'
       - 'scripts/test-source-review-cache.mjs'
+      - 'scripts/test-joe-current-offers.mjs'
       - '.github/workflows/daily-deal-pick.yml'
       - '.github/workflows/validate-live-deals.yml'
       - 'scripts/test-apify*'
@@ -88,6 +90,7 @@ jobs:
       - name: Test pagination and both collector integrations without network credentials
         run: |
           node --test scripts/test-source-review-cache.mjs
+          node --test scripts/test-joe-current-offers.mjs
           SENTRY_DISABLED=1 node --test scripts/test-community-card-enrichment.mjs
           node scripts/test-slack-food-improvements.mjs
           node --test scripts/test-food-quality-oct30.mjs

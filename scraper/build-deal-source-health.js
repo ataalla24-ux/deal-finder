@@ -255,6 +255,9 @@ function round(value) {
 
 function buildIssues(stats) {
   const issues = [];
+  if (stats.sourceKey === 'joe' && stats.lastRun?.status === 'completed-with-errors') {
+    issues.push('jö-Zugriff oder OMV-Quelle nur teilweise geprüft; Details im Pipeline-Laufbericht');
+  }
   if (stats.lastRun?.status === 'failed') issues.push('letzter Pipeline-Lauf ist fehlgeschlagen');
   if (
     Number(stats.lastRun?.counts?.rawCandidates || 0) > 0
@@ -281,7 +284,8 @@ function buildHealthScore(stats) {
     stats.promoRate * 16 +
     stats.fresh1dRate * 14 +
     (1 - stats.missingUrlRate) * 6;
-  return Math.max(0, Math.min(100, Math.round(score)));
+  const ceiling = stats.sourceKey === 'joe' && stats.lastRun?.status === 'completed-with-errors' ? 50 : 100;
+  return Math.max(0, Math.min(ceiling, Math.round(score)));
 }
 
 function buildMissionFitScore(stats) {

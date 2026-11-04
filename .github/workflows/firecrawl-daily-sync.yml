@@ -4,6 +4,11 @@ on:
   schedule:
     - cron: '20 5 * * *' # Keep Instagram API calls spaced out from cookie refresh and Apify.
   workflow_dispatch:
+    inputs:
+      joe_only:
+        description: 'Run only the free jö/OMV source check and commit its candidates/reports'
+        type: boolean
+        default: false
 
 concurrency:
   group: firecrawl-daily-sync
@@ -40,9 +45,11 @@ jobs:
         run: node scripts/load-joe-auth-state.mjs
 
       - name: Build Instagram Merchant Registry
+        if: ${{ !inputs.joe_only }}
         run: node scraper/build-instagram-merchant-registry.js
 
       - name: Check Instagram Auth
+        if: ${{ !inputs.joe_only }}
         id: instagram-auth
         env:
           INSTAGRAM_SESSIONID: ${{ secrets.INSTAGRAM_SESSIONID }}
@@ -58,7 +65,7 @@ jobs:
         run: node scripts/check-instagram-auth.mjs
 
       - name: Run Instagram Daily Sync
-        if: steps.instagram-auth.outputs.ok == 'true'
+        if: ${{ !inputs.joe_only && steps.instagram-auth.outputs.ok == 'true' }}
         env:
           INSTAGRAM_SESSIONID: ${{ secrets.INSTAGRAM_SESSIONID }}
           INSTAGRAM_COOKIES: ${{ secrets.INSTAGRAM_COOKIES }}
@@ -99,11 +106,18 @@ jobs:
           node scraper/instagram-daily-sync.js
 
       - name: Run jö Scraper
-        run: node scraper/joe-scraper.js
+        run: |
+          SENTRY_DISABLED=1 node --test scripts/test-joe-current-offers.mjs
+          node scraper/joe-scraper.js
 
       - name: Run Vienna Promo Radar
+        if: ${{ !inputs.joe_only }}
         run: node scraper/vienna-promo-radar.js
 
       - name: Commit deal updates
         run: |
-          node scripts/commit-generated.mjs --message "Daily sync sources $(date +%Y-%m-%d)" --files docs/deals-pending-instagram.json docs/deals-pending-instagram-web.json docs/deals-pending-instagram-discovery.json docs/deals-pending-joe.json docs/deals-pending-vienna-promo-radar.json docs/instagram-source-stats.json docs/instagram-discovery-report.json docs/instagram-web-report.json docs/instagram-merchant-registry.json docs/instagram-auth-health.json
+          if [ '${{ inputs.joe_only }}' = 'true' ]; then
+            node scripts/commit-generated.mjs --skip-conflicts --message "jo OMV source check $(date +%Y-%m-%dT%H:%MZ)" --files docs/deals-pending-joe.json docs/joe-scraper-report.json docs/deal-pipeline-last-run-joe.json docs/deal-pipeline-runs-joe.json
+          else
+            node scripts/commit-generated.mjs --message "Daily sync sources $(date +%Y-%m-%d)" --files docs/deals-pending-instagram.json docs/deals-pending-instagram-web.json docs/deals-pending-instagram-discovery.json docs/deals-pending-joe.json docs/joe-scraper-report.json docs/deal-pipeline-last-run-joe.json docs/deal-pipeline-runs-joe.json docs/deals-pending-vienna-promo-radar.json docs/instagram-source-stats.json docs/instagram-discovery-report.json docs/instagram-web-report.json docs/instagram-merchant-registry.json docs/instagram-auth-health.json
+          fi
