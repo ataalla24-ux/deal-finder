@@ -21,6 +21,10 @@ on:
         required: false
         default: "docs/deals-pending-tiktok.json"
         type: string
+      deal_id:
+        description: "Optional exact queued ID; guarded delete refuses human edits, decisions or reactions"
+        required: false
+        type: string
 
 concurrency:
   group: deal-state-writer
@@ -56,6 +60,7 @@ jobs:
           SLACK_CHANNEL_ID: ${{ secrets.SLACK_CHANNEL_ID }}
           SLACK_QUEUE_REPAIR_ACTION: ${{ inputs.action }}
           SLACK_QUEUE_REPAIR_URL: ${{ inputs.deal_url }}
+          SLACK_QUEUE_REPAIR_DEAL_ID: ${{ inputs.deal_id }}
           SLACK_QUEUE_REPAIR_SOURCE_PATH: ${{ inputs.source_file }}
         run: node scripts/repair-slack-queued-deal.mjs
 

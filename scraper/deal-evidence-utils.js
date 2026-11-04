@@ -127,6 +127,8 @@ function offerDay(value) {
  */
 function semanticPromotionOfferKey(deal = {}, options = {}) {
   if (options.requireSocial === true && !canonicalSocialPostKey(deal.url || deal.post_url || deal.postUrl)) return '';
+  const omvVariant = officialOmvVariantKey(deal);
+  if (omvVariant) return omvVariant;
   const brand = semanticBrandKey(deal);
   const signal = semanticOfferSignal(deal);
   const context = semanticOfferContext(deal);
@@ -717,7 +719,25 @@ export function mergeDealEvidence(left = {}, right = {}, options = {}) {
   return merged;
 }
 
+// Preserve separately redeemable OMV products even when their evidence URL is shared.
+// The strict producer ID also survives Slack text round-trips without hidden metadata.
+export function officialOmvVariantKey(deal = {}) {
+  const match = cleanText(deal.id).match(/^joe-omv-current-([a-f0-9]{12})-([a-f0-9]{12})$/);
+  if (!match || !/\bOMV\b/i.test(deal.brand || '')) return '';
+  try {
+    const url = new URL(cleanText(deal.url).replace(/&amp;/g, '&'));
+    if (url.protocol !== 'https:' || url.username || url.password || url.port) return '';
+    const merchant = ['www.omv.at', 'omv.at'].includes(url.hostname)
+      && /^\/de\/(?:viva\/viva-kaffee(?:\/.*)?|markenpartner\/joe-partner)\/?$/.test(url.pathname);
+    const press = url.hostname === 'presse.ikp.at' && /^\/news-[a-z0-9-]+$/i.test(url.pathname)
+      && url.searchParams.get('menueid') === '33632' && /^\d+$/.test(url.searchParams.get('id') || '');
+    return merchant || press ? `omv-variant:${match[1]}:${match[2]}` : '';
+  } catch { return ''; }
+}
+
 export function duplicateDealKey(deal = {}) {
+  const omvVariant = officialOmvVariantKey(deal);
+  if (omvVariant) return omvVariant;
   const postKey = canonicalInstagramPostKey(deal.url || deal.post_url || deal.postUrl)
     || canonicalInstagramPostKey(deal.post_url || deal.postUrl);
   if (postKey) return postKey;

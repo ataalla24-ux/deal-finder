@@ -1,0 +1,28 @@
+{
+  "request": "Owner explicitly requests three OMV cards instead of the earlier aggregate",
+  "supersedesPresentationOnly": "reviews/omv-joe-current-offers-2026-11-04.json",
+  "sourceFactsUnchanged": {
+    "products": ["Cherry Cream Latte", "Ube Coconut Latte", "Double Caramel Latte"],
+    "validFrom": "2026-11-02",
+    "validUntil": "2027-01-31",
+    "eligibility": "jo members; each variety once free through the app; participating station and personal eligibility must be checked",
+    "aggregateId": "joe-omv-current-5044fa7c7e98"
+  },
+  "changes": [
+    "Only explicitly independent per-variety free redemptions produce separate product IDs/cards; choosing one of several drinks remains one offer",
+    "Stable producer-scoped OMV variant identity survives source parsing, semantic merge, Slack seen cache, queued/live duplicate checks and later approval",
+    "No invented URL fragments or new source dates; generic same-campaign coffee duplicates are still suppressed",
+    "Fresh variants replace the superseded aggregate in the source outbox",
+    "Optional exact ID in existing Slack repair prevents deleting another deal on the shared evidence URL; guarded replacement refuses human edits, decisions or reactions"
+  ],
+  "verification": {
+    "offlineCommands": { "passed": 53, "failed": 0 },
+    "targetedCases": 10,
+    "sourceAndApprovalDedupe": "Three unique variants survive; a repeat of each remains suppressed",
+    "sourceUrl": "Same genuine official source for all three cards",
+    "githubProducer": "Pending",
+    "oldAggregateReplacement": "Pending",
+    "actualSlackCards": "Pending"
+  },
+  "unchanged": ["Wolt", "Live offer data", "Human approval", "Validity criteria", "Actual Firecrawl collectors", "Schedules", "Keys", "Budgets", "Native apps", "Store releases"]
+}

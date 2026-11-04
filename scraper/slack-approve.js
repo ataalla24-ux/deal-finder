@@ -13,7 +13,7 @@ import {
 import { isVagueExpiry, normalizeDealExpiry, parseExpiryDetails } from './expiry-utils.js';
 import { isDealNewByDate } from './deal-freshness-utils.js';
 import { validateDealsForSlack } from './deal-validity-agent.js';
-import { canonicalSocialPostKey, mergeDealEvidence } from './deal-evidence-utils.js';
+import { canonicalSocialPostKey, mergeDealEvidence, officialOmvVariantKey } from './deal-evidence-utils.js';
 import { advanceDealLifecycle } from './deal-lifecycle.js';
 import { isCommunitySubmission, prepareCommunityApproval } from './community-review-utils.js';
 import {
@@ -366,7 +366,7 @@ function getCanonicalUrlBrandKey(deal) {
 }
 
 function getSameUrlVariantKey(deal) {
-  const officialKey = officialFoodOfferKey(deal);
+  const officialKey = officialFoodOfferKey(deal) || officialOmvVariantKey(deal);
   if (officialKey) return officialKey;
   const id = cleanText(deal?.id).toLowerCase();
   const brand = normalizeBrandSignature(deal?.brand);

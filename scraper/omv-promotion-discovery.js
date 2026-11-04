@@ -82,7 +82,7 @@ export function parseOmvPromotion(html, pageUrl, now = new Date()) {
   if (publishedDate && +publishedDate > +now + 86400000) return reject('publication-in-future');
   const idKey = press ? `ikp-${new URL(url).searchParams.get('id')}` : new URL(url).pathname;
   const id = 'joe-omv-current-' + crypto.createHash('sha256').update(`${idKey}|${validUntil}|${names.join('|')}`).digest('hex').slice(0, 12);
-  return { rejected: [], deals: [{
+  const campaign = {
     id, brand: 'OMV VIVA', source: 'jö Bonus Club', originSource: 'OMV official public promotion',
     title: `${count || names.length || ''} OMV-Kaffeespezialitäten gratis mit jö`.trim(),
     description: [names.length ? `Sorten: ${names.join(', ')}.` : '', paragraph,
@@ -100,7 +100,19 @@ export function parseOmvPromotion(html, pageUrl, now = new Date()) {
     evidence: { source: 'official-merchant-press-release', sourceUrl: url, checkedAt: now.toISOString(),
       offerText: paragraph, offerTiming: { matchedText: window.evidence, validUntil },
       contentHash: crypto.createHash('sha256').update(text).digest('hex') },
-  }] };
+  };
+  // Separate cards require explicit per-variety redemption, not merely a choice of drinks.
+  const separate = names.length > 1 && count === names.length && /\bje(?:weils)?\s+einmal\s+gratis\b/i.test(paragraph);
+  const deals = separate ? names.map(name => ({
+    ...campaign,
+    id: `${id}-${crypto.createHash('sha256').update(name.toLowerCase()).digest('hex').slice(0, 12)}`,
+    title: `Gratis ${name} mit jö`,
+    description: `Diese Karte: ${name} einmal gratis testen. ${campaign.description}`,
+    promotionCampaignId: id,
+    promotionProducts: [name],
+    promotionCampaignProducts: names,
+  })) : [campaign];
+  return { rejected: [], deals };
 }
 
 export function retainActiveOmvPromotions(current, previous, now = new Date()) {
@@ -109,6 +121,7 @@ export function retainActiveOmvPromotions(current, previous, now = new Date()) {
     && omvPromotionUrl(deal.url) && /^20\d{2}-\d{2}-\d{2}$/.test(deal.validUntil || '') && deal.validUntil >= today
     && deal.evidence?.offerTiming?.validUntil === deal.validUntil);
   const byId = new Map(retained.map(deal => [deal.id, deal]));
+  for (const deal of current) if (deal.promotionCampaignId) byId.delete(deal.promotionCampaignId);
   for (const deal of current) byId.set(deal.id, deal);
   return [...byId.values()];
 }

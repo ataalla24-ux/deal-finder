@@ -232,4 +232,32 @@ assert.deepEqual(deleteCalls, [
   { method: 'chat.delete', payload: { channel: 'C123', ts: '100.100' } },
 ]);
 
+const sibling = { ...oldSoundcube, id: 'other-same-url', slackTs: '100.300' };
+const exactCalls = [];
+const exact = await repairQueuedSlackDeal({
+  action: 'delete', url: soundcubeUrl, expectedDealId: oldSoundcube.id, channel: 'C123',
+  queuePayload: { deals: [sibling, oldSoundcube] },
+  slackApi: async (method, payload) => { exactCalls.push({ method, payload }); return { ok: true, message: { reactions: [] } }; },
+});
+assert.deepEqual(exact.queuePayload.deals, [sibling]);
+assert.deepEqual(exactCalls.map(c => c.method), ['reactions.get', 'chat.delete']);
+assert.equal(exactCalls[1].payload.ts, oldSoundcube.slackTs);
+for (const protectedDeal of [
+  { ...oldSoundcube, editedInSlack: true },
+  { ...oldSoundcube, pipelineLifecycle: { manualDecision: 'approved' } },
+]) await assert.rejects(repairQueuedSlackDeal({
+  action: 'delete', url: soundcubeUrl, expectedDealId: oldSoundcube.id, channel: 'C123',
+  queuePayload: { deals: [protectedDeal] }, slackApi: async () => assert.fail('never delete a human decision'),
+}), /human-edited or decided/);
+await assert.rejects(repairQueuedSlackDeal({
+  action: 'delete', url: soundcubeUrl, expectedDealId: oldSoundcube.id, channel: 'C123',
+  queuePayload: { deals: [oldSoundcube] }, slackApi: async method => {
+    assert.equal(method, 'reactions.get'); return { ok: true, message: { reactions: [{ name: 'white_check_mark' }] } };
+  },
+}), /with reactions/);
+await assert.rejects(repairQueuedSlackDeal({
+  action: 'delete', url: soundcubeUrl, expectedDealId: 'missing-id', channel: 'C123',
+  queuePayload: { deals: [oldSoundcube] }, slackApi: async () => assert.fail('never delete another ID on a shared URL'),
+}), /not found/);
+
 console.log('Slack queued deal repair tests passed');

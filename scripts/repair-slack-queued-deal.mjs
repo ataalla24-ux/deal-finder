@@ -209,16 +209,27 @@ export async function repairQueuedSlackDeal(options = {}) {
     : { deals: [] };
   const queueDeals = ensureDeals(queuePayload);
   const targetKey = exactDealKey(targetUrl);
+  const expectedDealId = cleanText(options.expectedDealId);
   if (!['update', 'block', 'delete'].includes(action)) throw new Error('Action must be update, block or delete');
   if (!targetKey) throw new Error('A valid exact deal URL is required');
   if (!channel) throw new Error('Slack channel is required');
   if (typeof options.slackApi !== 'function') throw new Error('Slack API client is required');
 
-  const targetIndex = queueDeals.findIndex((deal) => exactDealKey(deal) === targetKey && cleanText(deal.slackTs));
+  const targetIndex = queueDeals.findIndex((deal) => exactDealKey(deal) === targetKey && cleanText(deal.slackTs)
+    && (!expectedDealId || cleanText(deal.id) === expectedDealId));
   if (targetIndex < 0) throw new Error(`Queued Slack deal not found for ${targetUrl}`);
   const target = queueDeals[targetIndex];
 
   if (action === 'delete') {
+    if (expectedDealId) {
+      if (hasHumanSlackEdit(target) || target.approvedAt || target.pipelineLifecycle?.manualDecision || target.pipelineLifecycle?.publishedAt) {
+        throw new Error('Exact replacement will not delete a human-edited or decided deal');
+      }
+      const reactions = await options.slackApi('reactions.get', { channel, timestamp: cleanText(target.slackTs) });
+      assertSlackResult(reactions, 'check exact replacement reactions', ['message_not_found']);
+      if (reactions.ok && !reactions.message) throw new Error('Exact replacement could not verify message reactions');
+      if (reactions.message?.reactions?.length) throw new Error('Exact replacement will not delete a deal with reactions');
+    }
     assertSlackResult(await options.slackApi('chat.delete', {
       channel,
       ts: cleanText(target.slackTs),
@@ -354,13 +365,16 @@ function resolveDocsJsonPath(value, fallback, expectedPattern) {
 }
 
 async function callSlackApi(token, method, payload, attempt = 0) {
-  const response = await fetch(`https://slack.com/api/${method}`, {
-    method: 'POST',
+  const readOnly = method === 'reactions.get';
+  const url = new URL(`https://slack.com/api/${method}`);
+  if (readOnly) url.search = new URLSearchParams(payload).toString();
+  const response = await fetch(url, {
+    method: readOnly ? 'GET' : 'POST',
     headers: {
       Authorization: `Bearer ${token}`,
       'Content-Type': 'application/json',
     },
-    body: JSON.stringify(payload),
+    ...(readOnly ? {} : { body: JSON.stringify(payload) }),
   });
   const data = await response.json();
   if ((response.status === 429 || data.error === 'ratelimited') && attempt < 5) {
@@ -393,6 +407,7 @@ async function main() {
   const result = await repairQueuedSlackDeal({
     action,
     url,
+    expectedDealId: process.env.SLACK_QUEUE_REPAIR_DEAL_ID,
     channel,
     queuePayload: readJson(queuePath),
     sourceDeals: action === 'update' ? readJson(sourcePath) : [],

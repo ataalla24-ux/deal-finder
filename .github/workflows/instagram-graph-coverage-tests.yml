@@ -8,6 +8,8 @@ on:
       - 'scripts/review-live-deals-llm.mjs'
       - 'scripts/test-source-review-cache.mjs'
       - 'scripts/test-joe-current-offers.mjs'
+      - 'scripts/*repair-slack-queued-deal.mjs'
+      - '.github/workflows/repair-slack-queued-deal.yml'
       - '.github/workflows/daily-deal-pick.yml'
       - '.github/workflows/validate-live-deals.yml'
       - 'scripts/test-apify*'
@@ -43,6 +45,8 @@ on:
       - 'scripts/review-live-deals-llm.mjs'
       - 'scripts/test-source-review-cache.mjs'
       - 'scripts/test-joe-current-offers.mjs'
+      - 'scripts/*repair-slack-queued-deal.mjs'
+      - '.github/workflows/repair-slack-queued-deal.yml'
       - '.github/workflows/daily-deal-pick.yml'
       - '.github/workflows/validate-live-deals.yml'
       - 'scripts/test-apify*'
@@ -91,6 +95,7 @@ jobs:
         run: |
           node --test scripts/test-source-review-cache.mjs
           node --test scripts/test-joe-current-offers.mjs
+          node scripts/test-repair-slack-queued-deal.mjs
           SENTRY_DISABLED=1 node --test scripts/test-community-card-enrichment.mjs
           node scripts/test-slack-food-improvements.mjs
           node --test scripts/test-food-quality-oct30.mjs
