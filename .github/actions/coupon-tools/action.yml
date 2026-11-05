@@ -14,15 +14,22 @@ runs:
       run: |
         node --input-type=module <<'NODE'
         import fs from 'node:fs';
+        import { spawnSync } from 'node:child_process';
         let needed = process.env.FORCE_COUPON_TOOLS === 'true';
         for (const f of fs.readdirSync('docs').filter(f=>/^deals-pending.*\.json$/.test(f))) {
           const b = JSON.parse(fs.readFileSync('docs/'+f,'utf8'));
           if ((Array.isArray(b)?b:b.deals||[]).some(d=>d.evidence?.media)) needed = true;
         }
+        const probe = (command, args) => spawnSync(command, args, { encoding: 'utf8', timeout: 5000 });
+        const languages = probe('tesseract', ['--list-langs']);
+        const installed = probe('ffmpeg', ['-version']).status === 0
+          && probe('pdftotext', ['-v']).status === 0 && languages.status === 0
+          && /^deu$/m.test(languages.stdout) && /^eng$/m.test(languages.stdout);
+        if (installed) needed = false;
         fs.appendFileSync(process.env.GITHUB_OUTPUT,`needed=${needed}\n`);
         NODE
     - if: steps.need.outputs.needed == 'true'
       shell: bash
       run: |
-        sudo apt-get update -qq
-        sudo apt-get install -y --no-install-recommends ffmpeg poppler-utils tesseract-ocr tesseract-ocr-deu tesseract-ocr-eng
+        timeout --kill-after=10s 60s sudo apt-get -o Acquire::Retries=1 -o Acquire::http::Timeout=20 -o Acquire::https::Timeout=20 update -qq
+        timeout --kill-after=10s 120s sudo apt-get -o Acquire::Retries=1 -o Acquire::http::Timeout=20 -o Acquire::https::Timeout=20 install -y --no-install-recommends ffmpeg poppler-utils tesseract-ocr tesseract-ocr-deu tesseract-ocr-eng

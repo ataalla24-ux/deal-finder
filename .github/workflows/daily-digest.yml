@@ -37,6 +37,7 @@ jobs:
   dispatch-deals:
     if: ${{ github.event_name != 'workflow_run' || (github.event.workflow_run.conclusion == 'success' && github.event.workflow_run.display_title != 'Meta Graph health audit') }}
     runs-on: ubuntu-latest
+    timeout-minutes: 15
     permissions:
       contents: write
     steps:
