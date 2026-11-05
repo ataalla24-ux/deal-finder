@@ -20,6 +20,48 @@ const FOOD = /\b(?:essen|speisen?|gerichte?|food|mahlzeiten?|mittagessen|restaur
 const BENEFIT = /\b(?:gratis|kostenlos\w*|kostenfrei|free|rabatt|discount|guenstiger|billiger|geschenkt|coupon|gutschein)\b|\b1\s*\+\s*1\b|\d+\s*%/i;
 const PROFESSIONAL = /\b(?:coaching|teamcoaching|erstgespraech|beratung|besichtigung\w*|entruempelung\w*|raeumung\w*|musterwohnungsraeumung|wohnungen?|wohnmesse|immobilien|buwog|webdesign|webseiten?[- ]check|seo[- ]check|reservierungssoftware|buchungssoftware|reservierungssystem|b2b)\b/i;
 
+export function getNonConsumerOfferRejection(value) {
+  const text = offerText(value);
+  const businessTool = /\b(?:software|saas|stempelkarten?|treuekarten?|kaffeestempel|loyalty\s+(?:app|software|platform|system)|kundenbindungs(?:system|software|tool))\b/.test(text);
+  const merchantAudience = /\b(?:ihre[nenmrs]*\s+(?:gaeste|kunden|kundinnen)|your\s+(?:guests|customers)|(?:cafe|restaurant|shop)\s+owners?|fuer\s+(?:gastronomen|geschaeftsinhaber|cafe-betreiber))\b/.test(text);
+  const exampleReward = /\b(?:z\.\s*b\.|zum\s+beispiel|beispielsweise|e\.\s*g\.|for\s+example|such\s+as)[^!?;]{0,100}\b(?:gratis|kostenlos\w*|free|geschenkt)\b/.test(text);
+  const toolSalesPitch = /\b(?:einsatzbereit|demo\s+(?:buchen|anfragen)|jetzt\s+testen|start\s+(?:your\s+)?free\s+trial|book\s+a\s+demo|kundenbindung\s+steigern)\b/.test(text);
+  // Concrete food words in a hypothetical reward do not turn software sales
+  // copy into a cafe offer. Consumer loyalty cards have no merchant sales pitch.
+  if (businessTool && merchantAudience && (exampleReward || toolSalesPitch)) return 'illustrative-business-reward';
+
+  const amount = '\\d{1,3}(?:[.,]\\d{1,2})?';
+  const euro = `(?:€\\s*${amount}|${amount}\\s*(?:€|eur\\b|euro\\b))`;
+  const surcharge = new RegExp(`${euro}\\s*(?:more|extra|additional|mehr|aufpreis|zuschlag)\\b(?!\\s+(?:rabatt|discount|sparen|ersparnis))|\\b(?:aufpreis|zuschlag|surcharge)\\s*(?:(?:von|nur|of|only)\\s+)?${euro}`, 'i');
+  if (!surcharge.test(text)) return '';
+
+  // Saved captions can retain a genuine discount cut off in the display copy.
+  // Such mixed posts are not pure upsells; the ordinary approval checks remain.
+  const sourceText = value && typeof value === 'object'
+    ? normalize([value.metaGraphCaption, value.originalCaption, value.caption, value.evidence?.offerDateSignal]
+      .filter(part => typeof part === 'string').join('\n')) : '';
+  const benefitText = `${text} ${sourceText}`
+    .replace(/\b(?:gluten|sugar|lactose|dairy|alcohol|caffeine|cruelty|plastic|smoke|tax|risk|fat|nut|gmo)[- ]free\b/g, '')
+    .replace(/\b(?:kein\w*|ohne|no|not)\s+(?:\d{1,2}\s*%\s*)?(?:rabatt|discount|gratis|free)\b/g, '');
+  const quantifiedSaving = /\b\d{1,2}\s*%\s*(?:rabatt|discount|off|guenstiger|billiger|weniger|auf)\b|\b(?:rabatt|discount)\s*(?:von\s+)?\d{1,2}\s*%/.test(benefitText)
+    || new RegExp(`\\b(?:save|spare?n?|ersparnis|rabatt|discount)\\s*(?:von\\s+)?${euro}`, 'i').test(benefitText)
+    || /\bearly[ -]?bird\b.{0,30}[-−]\s*\d{1,2}\s*%/.test(benefitText);
+  const promotionalPrice = benefitText.split(/[.!?](?=\s|$)|[;\n]+/).some(clause => !surcharge.test(clause)
+    && new RegExp(`\\b(?:sonderpreis|spezialpreis|aktionspreis|special\\s+price)\\b.{0,35}?${euro}`, 'i').test(clause));
+  const freeProduct = /\b(?:gratis|kostenlos\w*|free)\s+(?:[a-z-]+\s+){0,2}(?:kaffee|coffee|espresso|pizza|burger|essen|food|dessert|getraenk|drink|eintritt|entry|admission|tickets?|upgrade)\b|\b(?:kaffee|coffee|espresso|pizza|burger|dessert|getraenk|drink)\s+(?:gratis|kostenlos\w*|free)\b/.test(benefitText);
+  const bogo = /\b(?:1\s*[+&]\s*1|2\s*(?:fuer|for)\s*1|bogo)\b/.test(benefitText);
+  const euroAmount = `(?:€\\s*(${amount})|(${amount})\\s*(?:€|eur\\b|euro\\b))`;
+  const priceReduction = [...benefitText.matchAll(new RegExp(`${euroAmount}\\s*(?:statt|instead\\s+of)\\s*${euroAmount}`, 'g'))]
+    .some(match => {
+      const current = Number((match[1] || match[2]).replace(',', '.'));
+      const previous = Number((match[3] || match[4]).replace(',', '.'));
+      return current > 0 && current < previous;
+    });
+  // "Only 25 EUR more" is a surcharge, but a separate real discount in the
+  // same post still belongs in review (for example a discounted duo ticket).
+  return quantifiedSaving || promotionalPrice || freeProduct || bogo || priceReduction ? '' : 'paid-upsell-without-saving';
+}
+
 function withoutAlcoholFreeProducts(text) {
   return text
     .replace(/\b(?:ingwer|ginger|vitamin|immunity|kurkuma|turmeric|wheatgrass)[- ]shots?\b/gi, ' nonalcoholicproduct ')
@@ -36,6 +78,8 @@ export function discoveryRejection(value) {
   const text = offerText(value);
   const alcoholText = withoutAlcoholFreeProducts(text);
   if (ALCOHOL_PATTERN.test(alcoholText)) return 'alcohol-offer';
+  const nonConsumerOffer = getNonConsumerOfferRejection(value);
+  if (nonConsumerOffer) return nonConsumerOffer;
   // The social-food review lane must not bypass the ordinary offer guards.
   if (getNonOfferContentReason(text)) return 'non-offer-content';
   if (/\b(?:free to read|read (?:it|the story) for free)\b/.test(text)

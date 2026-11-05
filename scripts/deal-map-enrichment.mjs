@@ -72,6 +72,19 @@ export function extractAddresses(value) {
   return [...String(value || '').matchAll(pattern)].map(m => ({ street: m[1], number: m[2], postalCode: m[3] || '' }));
 }
 
+function hasOnsiteRedemption(deal, place) {
+  const text = normalize([deal.title, deal.description, deal.metaGraphCaption,
+    deal.viennaEvidence?.verified === true ? deal.viennaEvidence.detail : ''].filter(Boolean).join(' '));
+  if (/\b(vor ort einlosbar|(?:in|bei) (?:(?:der|einer|den|allen|teilnehmenden|unseren) )?(?:filial\w*|restaurant\w*|tankstelle\w*) (?:einlosbar|einlosen)|(?:einlosbar|einlosen|einlosung) vor ort|bei abholung)\b/.test(text)
+    && !/\b(nicht vor ort|keine abholung|nicht bei abholung|nur lieferung)\b/.test(text)) return true;
+  const experience = /\b(eintritt|eintrittskarten?|kinotickets?|kinokarten?|konzert\w*|concert|verkostung|restaurantbesuch|probetraining)\b/.test(text);
+  const namedPlace = place.replace(/\b(wien|vienna|osterreich|austria|online|app|web|tickets?|gutscheine?|coupons?)\b/g, '').replace(/[\d\s]+/g, '');
+  const brand = normalize(deal.brand);
+  const namedVenue = brand && ['bei', 'im', 'in', 'at', 'veranstaltungsort', 'location']
+    .some(prefix => ` ${text} `.includes(` ${prefix} ${brand} `));
+  return experience && Boolean(namedPlace || namedVenue || extractAddresses(text).length);
+}
+
 export function onlineOnly(deal) {
   if (/^flight-/.test(deal.id || '')) return true;
   let host = '';
@@ -79,11 +92,22 @@ export function onlineOnly(deal) {
   const offerText = normalize(`${deal.title} ${deal.description} ${deal.distance}`);
   const pickup = /\b(zur abholung|bei abholung|fur abholer|abholung moglich|auch vor ort|vor ort einlosbar)\b/.test(offerText)
     && !/\b(keine abholung|nicht (?:bei abholung|vor ort)|nur lieferung)\b/.test(offerText);
-  if (/\b(nur online|ausschliesslich online|online only|nur lieferung)\b/.test(offerText)) return true;
+  const place = normalize([deal.address, deal.location, deal.distance].filter(Boolean).join(' '));
+  const onsite = hasOnsiteRedemption(deal, place);
+  // Online ticket/coupon acquisition does not describe where it is redeemed.
+  const channelText = onsite ? offerText
+    .replace(/\b(?:nur|ausschliesslich) online (?:kauf\w*|buch\w*|bestell\w*|erhalt\w*|erwerb\w*|verfugbar|holen|sichern|reservier\w*)\b/g, '')
+    .replace(/\b\w*(?:tickets?|gutscheine?|coupons?) (?:gibt es |sind )?(?:nur|ausschliesslich) online\b(?! (?:einlosbar\w*|einlosen|nutz\w*|verwend\w*|gultig|gilt|ansehen|stream\w*))/g, '') : offerText;
+  if (/\b(nur online|ausschliesslich online|online only|nur lieferung|nur versand)\b/.test(channelText)) return true;
   if (/(^|\.)(wolt\.com|lieferando\.at|foodora\.at)$/.test(host)) return !pickup;
+  if (['wolt', 'lieferando', 'foodora'].includes(normalize(deal.brand))) return !pickup;
   if (/\b(?:uber|via|bei) (?:wolt|lieferando|foodora)\b/.test(offerText)
     || /^\s*(?:wolt|lieferando|foodora):/i.test(deal.title || '') || /lieferando\+/i.test(deal.title || '')) return !pickup;
-  const place = normalize([deal.address, deal.location, deal.distance].join(' '));
+  const digitalText = `${offerText} ${place}`
+    .replace(/\b(?:kein|keine|keinen|nicht|ohne) (?:streaming|livestream\w*|webinar\w*)\b/g, '');
+  if (!pickup && /\b(streaming|livestream\w*|webinar\w*)\b/.test(digitalText)) return true;
+  if (!pickup && !onsite && /\b(onlineshop|webshop|downloads?)\b/.test(`${offerText} ${place}`)) return true;
+  if (onsite) return false;
   if (/\b(online|onlineshop|webshop|streaming|lieferservice|lieferdienst)\b/.test(place)) return !pickup;
   if (extractAddresses([deal.address, deal.location, deal.distance].join(' ')).length) return false;
   if (/\b(filial\w*|standort\w*|vor ort|tankstelle\w*)\b/.test(place)) return false;

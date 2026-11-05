@@ -37,6 +37,10 @@ function writeCarrierPauses(directory, state) {
   fs.writeFileSync(path.join(directory, 'docs/carrier-benefit-pause.json'), JSON.stringify(state) + '\n');
 }
 
+function writeFixture(directory, name, payload) {
+  fs.writeFileSync(path.join(directory, 'docs', name), JSON.stringify(payload) + '\n');
+}
+
 const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), 'generated-state-merge-'));
 const seedDir = path.join(tempDir, 'seed');
 const remoteDir = path.join(tempDir, 'remote.git');
@@ -51,6 +55,12 @@ try {
   writeQueue(seedDir, [{ id: 'approved-old', slackTs: '100.1', title: 'Old queue row' }], '2026-08-22T09:00:00.000Z');
   fs.writeFileSync(path.join(seedDir, 'docs/vienna-food-benefit-pause.json'), '{"retryAt":""}\n');
   writeCarrierPauses(seedDir, {});
+  writeFixture(seedDir, 'deals-pending-firecrawl2.json', { deals: [
+    { id: 'corrected', title: 'Old title', verified: false },
+    { id: 'removed', title: 'Old campaign' },
+    { id: 'edited-during-prune', title: 'Original' },
+  ] });
+  writeFixture(seedDir, 'instagram-merchant-registry.json', { accounts: [{ username: 'before' }] });
   run('git', ['add', 'docs'], seedDir);
   run('git', ['commit', '-m', 'seed queue'], seedDir);
   fs.mkdirSync(remoteDir, { recursive: true });
@@ -65,6 +75,13 @@ try {
   writeQueue(concurrentDir, [{ id: 'remote-new', slackTs: '200.1', title: 'Remote deal' }], '2026-08-22T10:00:00.000Z');
   fs.writeFileSync(path.join(concurrentDir, 'docs/vienna-food-benefit-pause.json'), '{"retryAt":"2026-11-10T00:00:00Z"}\n');
   writeCarrierPauses(concurrentDir, {'https://www.a1.net':{retryAt:'2026-11-10T00:00:00Z'}});
+  writeFixture(concurrentDir, 'deals-pending-firecrawl2.json', { deals: [
+    { id: 'corrected', title: 'Reviewed title', verified: false },
+    { id: 'edited-during-prune', title: 'New human correction' },
+    { id: 'remote-source-new', title: 'Remote new offer' },
+  ] });
+  const remoteRegistry = { accounts: [{ username: 'fresh-remote', approvedDeals: 3 }] };
+  writeFixture(concurrentDir, 'instagram-merchant-registry.json', remoteRegistry);
   run('git', ['add', 'docs'], concurrentDir);
   run('git', ['commit', '-m', 'approve old and add remote'], concurrentDir);
   run('git', ['push', 'origin', 'main'], concurrentDir);
@@ -77,6 +94,18 @@ try {
   ], '2026-08-22T11:00:00.000Z');
   fs.writeFileSync(path.join(localDir, 'docs/vienna-food-benefit-pause.json'), '{"retryAt":"2026-10-24T00:00:00Z"}\n');
   writeCarrierPauses(localDir, {'https://www.drei.at':{retryAt:'2026-11-11T00:00:00Z'}});
+  writeFixture(localDir, 'deals-pending-firecrawl2.json', { deals: [
+    { id: 'corrected', title: 'Stale automated title', verified: true },
+    { id: 'removed', title: 'Stale enrichment' },
+    { id: 'local-source-new', title: 'Local new offer' },
+  ] });
+  writeFixture(localDir, 'instagram-merchant-registry.json', { accounts: [{ username: 'stale-local' }] });
+  // The ordinary strict approval writer must retain its authoritative output
+  // even when the independently rebuilt helper registry changed concurrently.
+  writeFixture(localDir, 'approval-checkpoint.json', { confirmed: true });
+  run(process.execPath, [SCRIPT_PATH, '--message', 'strict approval with registry movement',
+    '--files', 'docs/approval-checkpoint.json', 'docs/instagram-merchant-registry.json',
+    'docs/deals-pending-firecrawl2.json'], localDir);
   run(process.execPath, [
     SCRIPT_PATH,
     '--skip-conflicts',
@@ -90,12 +119,20 @@ try {
     'docs/deals-pending-all.json',
     'docs/vienna-food-benefit-pause.json',
     'docs/carrier-benefit-pause.json',
+    'docs/deals-pending-firecrawl2.json',
+    'docs/instagram-merchant-registry.json',
   ], localDir);
 
   run('git', ['clone', '--branch', 'main', remoteDir, verifyDir], tempDir);
   const payload = JSON.parse(fs.readFileSync(path.join(verifyDir, 'docs/deals-pending-all.json'), 'utf8'));
   assert.deepEqual(payload.deals.map((deal) => deal.id).sort(), ['local-new', 'remote-new']);
   assert.equal(payload.totalDeals, 2);
+  const source = JSON.parse(fs.readFileSync(path.join(verifyDir, 'docs/deals-pending-firecrawl2.json')));
+  assert.deepEqual(source.deals.map(row => row.id).sort(), ['corrected', 'edited-during-prune', 'local-source-new', 'remote-source-new']);
+  assert.deepEqual(source.deals.find(row => row.id === 'corrected'), { id: 'corrected', title: 'Reviewed title', verified: true });
+  assert.equal(source.deals.find(row => row.id === 'edited-during-prune').title, 'New human correction');
+  assert.deepEqual(JSON.parse(fs.readFileSync(path.join(verifyDir, 'docs/instagram-merchant-registry.json'))), remoteRegistry);
+  assert.deepEqual(JSON.parse(fs.readFileSync(path.join(verifyDir, 'docs/approval-checkpoint.json'))), { confirmed: true });
   assert.equal(JSON.parse(fs.readFileSync(path.join(verifyDir, 'docs/vienna-food-benefit-pause.json'))).retryAt, '2026-11-10T00:00:00Z');
   assert.deepEqual(JSON.parse(fs.readFileSync(path.join(verifyDir, 'docs/carrier-benefit-pause.json'))), {
     'https://www.a1.net':{retryAt:'2026-11-10T00:00:00Z'}, 'https://www.drei.at':{retryAt:'2026-11-11T00:00:00Z'},

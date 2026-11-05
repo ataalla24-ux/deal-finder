@@ -1011,8 +1011,9 @@ async function updateDeliverySummary(ts, label, sent, total, attempt = 0) {
   if (!result.ok) throw new Error(`Slack delivery summary failed: ${result.error || response.status}`);
 }
 
-async function slackApi(url, attempt = 0) {
+async function slackApi(url, attempt = 0, options = {}) {
   const response = await fetch(url, {
+    signal: AbortSignal.timeout(15000),
     headers: {
       Authorization: `Bearer ${SLACK_BOT_TOKEN}`,
     },
@@ -1022,19 +1023,20 @@ async function slackApi(url, attempt = 0) {
   const data = await response.json();
 
   if (response.status === 429 || data.error === 'ratelimited') {
-    if (attempt >= 5) return { ok: false, error: 'ratelimited' };
+    if (attempt >= (options.rateLimitRetries ?? 5)) return { ok: false, error: 'ratelimited' };
     const retryMs = Math.max(1000, Number(retryAfterHeader || data.retry_after || 2) * 1000);
     console.log(`  ⏳ Rate limited, waiting ${retryMs}ms...`);
     await sleep(retryMs);
-    return slackApi(url, attempt + 1);
+    return slackApi(url, attempt + 1, options);
   }
 
   return data;
 }
 
-async function findRecentDigestThreadTs(days = SEEN_DEAL_SUPPRESSION_DAYS) {
+async function findRecentDigestThreadTs(days = SEEN_DEAL_SUPPRESSION_DAYS, options = {}) {
   if (!Number.isFinite(days) || days <= 0) return [];
-  const oldest = Math.floor((Date.now() - days * 24 * 60 * 60 * 1000) / 1000);
+  const oldest = Math.floor(Math.max(Date.now() - days * 24 * 60 * 60 * 1000,
+    Date.parse(options.oldest || '') || 0) / 1000);
   let cursor = '';
   const threadTs = [];
 
@@ -1046,10 +1048,9 @@ async function findRecentDigestThreadTs(days = SEEN_DEAL_SUPPRESSION_DAYS) {
     });
     if (cursor) query.set('cursor', cursor);
 
-    const data = await slackApi(`https://slack.com/api/conversations.history?${query.toString()}`);
+    const data = await slackApi(`https://slack.com/api/conversations.history?${query.toString()}`, 0, { rateLimitRetries: 0 });
     if (!data.ok) {
-      console.log(`⚠️ Konnte alte Slack-Digests nicht lesen: ${data.error || 'unknown_error'}`);
-      break;
+      throw new Error(`Slack history unavailable: ${data.error || 'unknown_error'}`);
     }
 
     for (const msg of ensureArray(data.messages)) {
@@ -1060,6 +1061,7 @@ async function findRecentDigestThreadTs(days = SEEN_DEAL_SUPPRESSION_DAYS) {
     }
 
     cursor = cleanText(data.response_metadata?.next_cursor);
+    if (data.has_more && !cursor) throw new Error('Slack history pagination incomplete');
     if (!cursor) break;
     await sleep(300);
   }
@@ -1079,11 +1081,12 @@ async function getThreadMessages(threadTs) {
     });
     if (cursor) query.set('cursor', cursor);
 
-    const data = await slackApi(`https://slack.com/api/conversations.replies?${query.toString()}`);
-    if (!data.ok) break;
+    const data = await slackApi(`https://slack.com/api/conversations.replies?${query.toString()}`, 0, { rateLimitRetries: 0 });
+    if (!data.ok) throw new Error(`Slack thread unavailable: ${data.error || 'unknown_error'}`);
     messages.push(...ensureArray(data.messages));
 
     cursor = cleanText(data.response_metadata?.next_cursor);
+    if (data.has_more && !cursor) throw new Error('Slack thread pagination incomplete');
     if (!cursor) break;
     await sleep(300);
   }
@@ -1143,9 +1146,14 @@ function normalizeSeenPostCache(payload, options = {}) {
     : Number.POSITIVE_INFINITY;
   const sameWindow = Number(payload?.suppressionDays || suppressionDays) === suppressionDays;
   const usable = sameWindow && ageMinutes <= suppressionDays * 24 * 60;
+  const seenAtByKey = ensureObject(payload?.seenAtByKey);
   const keys = new Set((usable ? ensureArray(payload?.seenPostKeys) : [])
     .map((key) => cleanText(key))
     .filter((key) => key && key.length <= 1000)
+    .filter((key) => {
+      const seenAt = Date.parse(seenAtByKey[key] || generatedAt);
+      return Number.isFinite(seenAt) && now.getTime() - seenAt <= suppressionDays * 86400000;
+    })
     .slice(0, 5000));
   return {
     generatedAt,
@@ -1153,6 +1161,8 @@ function normalizeSeenPostCache(payload, options = {}) {
     fresh: usable && ageMinutes <= maxAgeMinutes,
     usable,
     keys,
+    seenAtByKey,
+    historyScannedAt: toIsoDate(payload?.historyScannedAt) || generatedAt,
     suppressionDays,
   };
 }
@@ -1170,12 +1180,16 @@ function loadSeenPostCache(options = {}) {
 function writeSeenPostCache(seenKeys, options = {}) {
   const cachePath = options.cachePath || SLACK_SEEN_CACHE_PATH;
   const now = options.now instanceof Date ? options.now : new Date();
+  const previous = loadSeenPostCache({ ...options, now });
   const payload = {
-    version: 1,
-    generatedAt: now.toISOString(),
+    version: 2,
+    generatedAt: options.generatedAt || now.toISOString(),
     suppressionDays: boundedInteger(options.suppressionDays, SEEN_DEAL_SUPPRESSION_DAYS, 1, 30),
     totalKeys: seenKeys.size,
     seenPostKeys: [...seenKeys].sort(),
+    seenAtByKey: Object.fromEntries([...seenKeys].map(key => [key,
+      previous.seenAtByKey[key] || (previous.keys.has(key) ? previous.generatedAt : now.toISOString())])),
+    historyScannedAt: options.historyScannedAt || previous.historyScannedAt || now.toISOString(),
   };
   const tempPath = `${cachePath}.tmp-${process.pid}`;
   fs.writeFileSync(tempPath, JSON.stringify(payload, null, 2));
@@ -1193,31 +1207,36 @@ async function loadRecentlySeenPostKeys(options = {}) {
     return cache.keys;
   }
 
-  const threadTsList = await (options.listThreads || findRecentDigestThreadTs)();
-  if (threadTsList.length === 0) {
-    if (cache.usable && cache.keys.size > 0) {
-      console.log(`⚠️ Slack-Historie leer; verwende ${cache.keys.size} Einträge aus dem letzten Seen-Cache`);
-      return cache.keys;
+  // Confirmed sends are checkpointed individually. Re-read only new headers,
+  // with overlap to recover a send interrupted before its checkpoint committed.
+  const oldest = cache.usable && cache.historyScannedAt
+    ? new Date(Date.parse(cache.historyScannedAt) - 60 * 60000).toISOString() : '';
+  const seenKeys = new Set(cache.keys);
+  let threadTsList;
+  try {
+    threadTsList = await (options.listThreads || findRecentDigestThreadTs)(SEEN_DEAL_SUPPRESSION_DAYS, { oldest });
+    for (const threadTs of threadTsList) {
+      const messages = await (options.readThread || getThreadMessages)(threadTs);
+      addSeenDealsFromThread(seenKeys, extractDealsFromThreadMessages(messages));
     }
-    writeSeenPostCache(new Set(), { ...options, now });
-    return new Set();
-  }
-
-  const seenKeys = new Set();
-
-  for (const threadTs of threadTsList) {
-    const messages = await (options.readThread || getThreadMessages)(threadTs);
-    const deals = extractDealsFromThreadMessages(messages);
-    // Delivery, not a human reaction, is what makes an offer already sent.
-    // Approval and moderation read reactions separately; this cache must not.
-    addSeenDealsFromThread(seenKeys, deals);
+  } catch (error) {
+    // Do not advance the cursor after a failed or partial read.
+    if (cache.usable) {
+      if (seenKeys.size > cache.keys.size) {
+        writeSeenPostCache(seenKeys, { ...options, now, generatedAt: cache.generatedAt,
+          historyScannedAt: cache.historyScannedAt });
+      }
+      console.log(`Slack seen refresh deferred (${error.message}); retaining ${seenKeys.size} confirmed keys`);
+      return seenKeys;
+    }
+    throw error;
   }
 
   console.log(
     `👀 Seen filter: ${seenKeys.size} exakte Post-URLs aus ${threadTsList.length} Slack-Digest(s) ` +
     `der letzten ${SEEN_DEAL_SUPPRESSION_DAYS} Tage (zugestellte Nachrichten, keine Reaktionsabfragen)`
   );
-  writeSeenPostCache(seenKeys, { ...options, now });
+  writeSeenPostCache(seenKeys, { ...options, now, historyScannedAt: now.toISOString() });
   return seenKeys;
 }
 

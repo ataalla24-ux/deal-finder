@@ -25,6 +25,12 @@ on:
       - "scraper/deal-validity-agent.js"
       - "scraper/normalize-live-deals.js"
       - "scraper/slack-digest-utils.js"
+      - "scraper/slack-notify.js"
+      - "scraper/deal-discovery-policy.js"
+      - "scraper/social-food-audit-utils.js"
+      - "scripts/test-slack-delivery-state.mjs"
+      - "scripts/test-discovery-non-consumer-offers.mjs"
+      - "scripts/test-generated-state-merge.mjs"
       - "scraper/offer-title-utils.js"
       - "scraper/pre-publication-title.js"
       - "scripts/test-pre-publication-title.mjs"
@@ -84,6 +90,10 @@ jobs:
           node scripts/test-live-deal-removal-safety.mjs
           node scripts/test-slack-deal-quality.mjs
           node scripts/test-slack-approval-validation.mjs
+          node scripts/test-slack-delivery-state.mjs
+          node scripts/test-discovery-non-consumer-offers.mjs
+          node scripts/test-map-location-classification.mjs
+          node scripts/test-generated-state-merge.mjs
 
       - name: Protect bounded food discovery
         run: |

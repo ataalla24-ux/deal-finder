@@ -49,6 +49,9 @@ jobs:
 
       - name: Test immediate approval safeguards
         run: |
+          node scripts/test-generated-state-merge.mjs
+          SENTRY_DISABLED=1 node scripts/test-discovery-non-consumer-offers.mjs
+          SENTRY_DISABLED=1 node scripts/test-map-location-classification.mjs
           SENTRY_DISABLED=1 node scripts/test-pre-publication-title.mjs
           SENTRY_DISABLED=1 node scripts/test-slack-fast-approval.mjs
           SENTRY_DISABLED=1 node scripts/test-community-approval.mjs

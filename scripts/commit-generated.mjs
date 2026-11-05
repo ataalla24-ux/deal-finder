@@ -332,18 +332,26 @@ function mergeQueueThreeWay(baseRows, remoteRows, localRows) {
   // Local removals are intentional validity/pruning decisions. In particular,
   // a remote approval deletion must not be resurrected by an unchanged checkout.
   for (const key of base.keys()) {
-    if (!local.has(key)) merged.delete(key);
+    if (!local.has(key) && jsonSignature(remote.get(key)) === jsonSignature(base.get(key))) merged.delete(key);
   }
 
   for (const [key, localDeal] of local.entries()) {
     const baseDeal = base.get(key);
     const remoteDeal = remote.get(key);
     if (!baseDeal) {
-      merged.set(key, remoteDeal ? { ...remoteDeal, ...localDeal } : localDeal);
+      merged.set(key, remoteDeal || localDeal);
       continue;
     }
     if (jsonSignature(baseDeal) !== jsonSignature(localDeal) && remoteDeal) {
-      merged.set(key, { ...remoteDeal, ...localDeal });
+      const next = { ...remoteDeal };
+      for (const field of new Set([...Object.keys(baseDeal), ...Object.keys(localDeal)])) {
+        if (jsonSignature(localDeal[field]) === jsonSignature(baseDeal[field])) continue;
+        // Preserve a concurrent correction; carry only this run's independent changes.
+        if (jsonSignature(remoteDeal[field]) !== jsonSignature(baseDeal[field])) continue;
+        if (Object.hasOwn(localDeal, field)) next[field] = localDeal[field];
+        else delete next[field];
+      }
+      merged.set(key, next);
     }
     // If remote removed a base deal, respect that deletion even when this run
     // enriched its stale local copy.
@@ -387,7 +395,9 @@ function mergeKnownGeneratedJson(state, ref, baseRef) {
     return { ...state, content: Buffer.from(`${JSON.stringify(payload, null, 2)}\n`) };
   }
 
-  if (state.path === 'docs/deals-pending-all.json') {
+  if (state.path === 'docs/deals-pending-all.json'
+      || /^docs\/deals-pending-(?:gastro2|food3|firecrawl[245])\.json$/.test(state.path)) {
+    if (![basePayload, localPayload, remotePayload].every(payload => Array.isArray(payload?.deals))) return null;
     const baseDeals = Array.isArray(basePayload?.deals) ? basePayload.deals : [];
     const remoteDeals = Array.isArray(remotePayload?.deals) ? remotePayload.deals : [];
     const localDeals = Array.isArray(localPayload?.deals) ? localPayload.deals : [];
@@ -438,6 +448,20 @@ function resolveSameFileRemoteChanges(states, baseRef, headRef, options = {}) {
   for (const state of states) {
     const changedRemotely = pathChangedBetween(baseRef, headRef, state.path);
     if (changedRemotely && !capturedMatchesRemote(state, headRef)) {
+      // This registry is rebuilt from authoritative feed/feedback/watchlist data.
+      // A stale derived snapshot must not abort an otherwise valid approval.
+      if (state.path === 'docs/instagram-merchant-registry.json') {
+        console.log('Keeping concurrent Instagram merchant registry; regular registry rebuild will include committed source changes');
+        continue;
+      }
+      if (/^docs\/deals-pending-(?:gastro2|food3|firecrawl[245])\.json$/.test(state.path)) {
+        const mergedState = mergeKnownGeneratedJson(state, headRef, baseRef);
+        if (mergedState && !options.replaceConflicts) {
+          safeStates.push(mergedState);
+          mergedFiles.push(state.path);
+          continue;
+        }
+      }
       if (['docs/vienna-food-benefit-pause.json', 'docs/carrier-benefit-pause.json'].includes(state.path)) {
         const mergedState = mergeKnownGeneratedJson(state, headRef, baseRef);
         if (mergedState) {
