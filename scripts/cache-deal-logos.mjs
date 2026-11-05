@@ -14,6 +14,11 @@ const PUBLIC_LOGO_BASE_URL = (process.env.PUBLIC_BRAND_LOGO_BASE_URL || 'https:/
 const REFRESH = process.argv.includes('--refresh');
 const MIN_LOGO_DIMENSION = 160;
 const PROTECTED_EMBLEM_FILES = new Set([
+  'backerei-dermann-dermann-at.png',
+  'backerei-schwarz-bswien-at.png',
+  'noodle-king-noodleking-at.png',
+  'cineplexx-cineplexx-at.png',
+  'hollywood-megaplex-megaplex-at.png',
   'anker-ankerbrot-at.png',
   'aeg-aeg-at.png',
   'alfies-alfies-at.png',

@@ -8,6 +8,11 @@ import { isCommunitySubmission } from './community-review-utils.js';
 const PUBLIC_BRAND_LOGO_BASE_URL = 'https://freefinder.at/assets/brand-logos';
 
 const BRAND_RULES = [
+  { key: 'noodle king', name: 'Noodle King', logo: '🍜', category: 'essen', domain: 'noodleking.at', logoFile: 'noodle-king-noodleking-at.png' },
+  { key: 'noodleking', name: 'Noodle King', logo: '🍜', category: 'essen', domain: 'noodleking.at', logoFile: 'noodle-king-noodleking-at.png' },
+  { key: 'cineplexx', name: 'Cineplexx / Constantin Film', logo: '🎬', category: 'kultur', domain: 'cineplexx.at', logoFile: 'cineplexx-cineplexx-at.png' },
+  { key: 'hollywood megaplex', name: 'Hollywood Megaplex', logo: '🎬', category: 'kultur', domain: 'megaplex.at', logoFile: 'hollywood-megaplex-megaplex-at.png' },
+  { key: 'hollywood-megaplex', name: 'Hollywood Megaplex', logo: '🎬', category: 'kultur', domain: 'megaplex.at', logoFile: 'hollywood-megaplex-megaplex-at.png' },
   { key: 'bäckerei schwarz', name: 'Bäckerei Schwarz', logo: '🥖', category: 'essen', domain: 'bswien.at', logoFile: 'backerei-schwarz-bswien-at.png' },
   { key: 'baeckerei schwarz', name: 'Bäckerei Schwarz', logo: '🥖', category: 'essen', domain: 'bswien.at', logoFile: 'backerei-schwarz-bswien-at.png' },
   { key: 'dermann', name: 'Bäckerei DerMann', logo: '🥐', category: 'essen', domain: 'dermann.at', logoFile: 'backerei-dermann-dermann-at.png' },
@@ -122,8 +127,8 @@ const BRAND_RULES = [
   { key: 'joe-club', name: 'jö Bonus Club', logo: '💳', category: 'supermarkt', domain: 'joe-club.at' },
   { key: 'wolt', name: 'Wolt', logo: '🛵', category: 'essen', domain: 'wolt.com', logoFile: 'wolt-wolt-com.png' },
   { key: 'lieferando', name: 'Lieferando', logo: '🛵', category: 'essen', domain: 'lieferando.at', logoFile: 'lieferando-lieferando-at.png' },
-  { key: 'magenta moments', name: 'Magenta Moments', logo: '🎁', category: 'technik', domain: 'magenta.at', logoFile: 'magenta-moments-magenta-at.png' },
-  { key: 'magenta.at', name: 'Magenta Moments', logo: '🎁', category: 'technik', domain: 'magenta.at', logoFile: 'magenta-moments-magenta-at.png' },
+  { key: 'magenta moments', name: 'Magenta Moments', logo: '🎁', category: 'technik', domain: 'magenta.at', logoFile: 'magenta-moments-magenta-at.png', benefitIssuer: true },
+  { key: 'magenta.at', name: 'Magenta Moments', logo: '🎁', category: 'technik', domain: 'magenta.at', logoFile: 'magenta-moments-magenta-at.png', benefitIssuer: true },
   { key: 'aeg', name: 'AEG', logo: '🏠', category: 'shopping', domain: 'aeg.at', logoFile: 'aeg-aeg-at.png' },
   { key: 'pizzamann', name: 'Pizzamann', logo: '🍕', category: 'essen', domain: 'pizzamann.at', logoFile: 'pizzamann-pizzamann-at.png' },
   { key: 'vienna marriott', name: 'Vienna Marriott Cascade Bar', logo: '🍸', category: 'bars', domain: 'viennamarriott-restaurants.com', logoFile: 'vienna-marriott-cascade-bar-viennamarriott-restaurants-com.png' },
@@ -590,6 +595,26 @@ function replaceBrandMention(text, fromBrand, toBrand) {
   return value.replace(new RegExp(`(?<![\\p{L}\\p{N}])${escaped}(?![\\p{L}\\p{N}])`, 'giu'), () => to).replace(/\s+/g, ' ').trim();
 }
 
+function cinemaRedemptionBrand(deal, explicitBrand) {
+  // Only these source-backed cinema campaigns identify the redemption operator.
+  // A generic carrier or ticket mention is not enough to invent a partner.
+  const sourceHost = extractHostFromUrl(deal.url || deal.post_url);
+  const cinemaText = normalizeAscii([deal.title, deal.description].filter(Boolean).join(' '));
+  let sourcePath = '';
+  try { sourcePath = new URL(deal.url || deal.post_url).pathname.replace(/\/$/, ''); } catch {}
+  if (sourceHost === 'drei.at' && sourcePath === '/de/dreiplus/ersparnisse/kinodonnerstag'
+      && /\b(?:kinotickets?|kinodonnerstag|cineplexx)\b/.test(cinemaText)
+      && /^(?:kinodonnerstag|drei(?: plus)?|kino|cineplexx(?:\s*\/\s*constantin film)?)$/i.test(explicitBrand)) {
+    return 'Cineplexx / Constantin Film';
+  }
+  if (sourceHost === 'magenta.at' && sourcePath === '/magenta-moments'
+      && /\bkinotickets?\b/.test(cinemaText) && /\bhollywood[- ]megaplex\b/.test(cinemaText)
+      && /^(?:magenta moments|hollywood[- ]megaplex(?:\s*\/\s*metropol)?)$/i.test(explicitBrand)) {
+    return 'Hollywood Megaplex';
+  }
+  return '';
+}
+
 function inferPreferredBrand(deal = {}) {
   // A shared-post placeholder is not a merchant. Keep it for human review until
   // extraction supplies an actual name; never turn a caption's address into it.
@@ -598,6 +623,8 @@ function inferPreferredBrand(deal = {}) {
   if (namedFoodMerchant && isDirectMessageInstruction(deal.description || deal.evidence?.textSample)
     && (!deal.brand || /^dm$|^@|instagram/i.test(deal.brand))) return namedFoodMerchant;
   const explicitBrand = cleanUiNoiseText(deal.brand || '');
+  const redemptionBrand = cinemaRedemptionBrand(deal, explicitBrand);
+  if (redemptionBrand) return redemptionBrand;
   const idSignal = cleanUiNoiseText(deal.id || '');
   const logoSignal = cleanUiNoiseText(deal.logoUrl || '');
   if (/joe-omv-viva|omv-viva/i.test(`${idSignal} ${logoSignal}`)) {
@@ -635,6 +662,7 @@ function inferPreferredBrand(deal = {}) {
   if (
     knownInTitle &&
     !knownInTitle.source &&
+    !(knownInTitle.benefitIssuer && explicitBrand && !isSourceLikeBrand(explicitBrand) && !isLikelyGenericLocation(explicitBrand)) &&
     titleHasDominantBrandRule(titleSignal, knownInTitle) &&
     !brandRuleMatchesBrand(knownInTitle, explicitBrand)
   ) {
@@ -1149,7 +1177,8 @@ function normalizeDealRecord(deal = {}) {
   }
 
   const sanitizedExpires = sanitizeExpiryText(deal.expires);
-  if (brandWasCorrected) {
+  // Issuer -> venue changes only the display identity, not membership conditions.
+  if (brandWasCorrected && !cinemaRedemptionBrand(deal, explicitBrand)) {
     title = replaceBrandMention(title, explicitBrand, brand);
     description = replaceBrandMention(description, explicitBrand, brand);
   }

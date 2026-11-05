@@ -20,6 +20,35 @@ for (const brand of ['Bäckerei Schwarz', 'Bäckerei Schwarz', 'Baeckerei Schwa
 for (const brand of ['Schwarzenberg', 'Schwarz Design', 'Bäckerei Anders']) {
   assert.doesNotMatch(normalizeDealRecord({brand,title:'Angebot',url:'https://example.com/'}).logoUrl||'',/backerei-(?:schwarz|dermann)-/);
 }
+const dreiCinema={brand:'KinoDonnerstag',title:'Drei-Kunden: 1+1 Kinotickets am Donnerstag',
+ description:'Bei teilnehmenden Cineplexx-/Constantin-Film-Kinos. Drei-Vertrag und SMS-Code erforderlich.',
+ url:'https://www.drei.at/de/dreiplus/ersparnisse/kinodonnerstag/'};
+const cinema=normalizeDealRecord(dreiCinema);
+assert.equal(cinema.brand,'Cineplexx / Constantin Film');
+assert.equal(cinema.logo,'🎬');
+assert.match(cinema.logoUrl,/cineplexx-cineplexx-at\.png$/);
+assert.match(cinema.title,/Drei/);assert.match(cinema.description,/Drei-Vertrag/);
+assert.notEqual(normalizeDealRecord({...dreiCinema,url:'https://example.com/kinodonnerstag/'}).brand,cinema.brand);
+const magentaCinema={brand:'Magenta Moments',title:'1+1 Kinotickets am Dienstag für Magenta-Kunden',
+ description:'Mit Magenta Moments dienstags bei Hollywood Megaplex und im Metropol Kino. QR-Code erforderlich.',
+ url:'https://www.magenta.at/magenta-moments'};
+const mega=normalizeDealRecord(magentaCinema);
+assert.equal(mega.brand,'Hollywood Megaplex');assert.equal(mega.logo,'🎬');
+assert.match(mega.logoUrl,/hollywood-megaplex-megaplex-at\.png$/);
+assert.match(mega.description,/Magenta Moments/);
+for(const brand of ['Hollywood Megaplex / Metropol','Hollywood-Megaplex']) {
+ const row=normalizeDealRecord({...magentaCinema,brand,url:'https://www.megaplex.at/angebote/magenta-moments'});
+ assert.equal(row.brand,'Hollywood Megaplex');assert.doesNotMatch(row.logoUrl,/magenta-moments/);
+}
+const genericCarrier=normalizeDealRecord({brand:'Magenta Moments',title:'Neuer Mobilfunktarif',url:'https://www.magenta.at/magenta-moments'});
+assert.equal(genericCarrier.brand,'Magenta Moments');assert.match(genericCarrier.logoUrl,/magenta-moments/);
+for(const brand of ['Noodle King','NoodleKing'])assert.match(normalizeDealRecord({brand,title:'20 % auf Nudelboxen',url:'https://www.instagram.com/p/example/'}).logoUrl,/noodle-king-noodleking-at\.png$/);
+assert.doesNotMatch(normalizeDealRecord({brand:'Only Noodle',title:'Nudeln',url:'https://example.com/'}).logoUrl||'',/noodle-king/);
+for(const category of ['essen','kaffee','kultur','fitness','reisen','technik','gottesdienste','unknown']) {
+ const fallback=normalizeDealRecord({brand:'Unbekannter Anbieter',title:'Aktuelles Angebot',category,url:'https://example.com/',logo:'',logoUrl:''});
+ assert.ok(fallback.logo?.trim(),category+' must keep a nonempty symbol without a known merchant or API request');
+ assert.doesNotMatch(fallback.logoUrl||'',/drei|magenta|noodleking|cineplexx|megaplex/);
+}
 
 const logoTestDir = await fs.mkdtemp(path.join(os.tmpdir(), 'deal-logo-cache-'));
 await fs.writeFile(path.join(logoTestDir, 'present.png'), Buffer.from([1, 2, 3]));
