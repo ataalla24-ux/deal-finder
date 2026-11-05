@@ -30,8 +30,30 @@
     "preservation": "All six protected live/feed/edit/featured/map/SEO documents are byte-identical to integrated main 368d341f6e; 71 records retained; Wolt and the three OMV product cards untouched",
     "workflowYaml": "All five edited/new YAML files parsed after integration",
     "productionWarning": "Existing excessively long description meta-ig-18190492012418024 retained; production validator reports zero errors",
-    "githubSourceChecks": "Pending publication",
-    "runnerToolCheck": "Pending publication"
+    "githubSourceChecks": {
+      "sourceCommit": "8382eecfe62c3936a6f6115a8252c22789afe258",
+      "instagramCoverage": { "run": 42115899374, "conclusion": "success" },
+      "powerFood": { "run": 42115899184, "conclusion": "success" },
+      "productionIntegrity": { "run": 42115899300, "conclusion": "success" },
+      "merchantPromo": { "run": 42115899195, "conclusion": "success" },
+      "repositorySafety": { "run": 42115899448, "conclusion": "success" },
+      "followup": "Additional customer-loyalty positive regressions and full local matrix rerun; final publication evidence is retained in output/pipeline-reliability-2026-11-05"
+    },
+    "runnerToolCheck": {
+      "run": 42115933603,
+      "conclusion": "success",
+      "installationSeconds": 80,
+      "verifiedTools": ["ffmpeg", "pdfimages", "pdfinfo", "pdftotext", "tesseract", "deu", "eng"],
+      "regressions": { "tests": 19, "passed": 19, "failed": 0 },
+      "generatedStateMerge": "passed"
+    },
+    "actualAgentQuotaHealth": {
+      "run": 42115899209,
+      "conclusion": "success",
+      "reportCommit": "27e709f5f7",
+      "aiHealth": { "status": "unavailable", "httpStatus": 429, "code": "insufficient_quota", "retryable": false, "billingActionRequired": true },
+      "note": "A successful collector workflow does not mean OpenAI access or classification has recovered"
+    }
   },
   "limits": {
     "openAi": "Still externally blocked by insufficient_quota; no top-up, new key, model, spend limit or budget change",
