@@ -81,8 +81,8 @@ export function consumerFoodExclusion(value) {
     !example.test(clause) && FOOD.test(clause) && /\b(?:gratis|kostenlos\w*|free|geschenkt)\b/.test(clause)
     && /\b(?:(?:fuer|an)\s+(?:alle|jeden)|(?:alle|unsere)\s+(?:gaeste|kunden|besucher)|jeder\s+(?:gast|kunde|besucher)|public|everyone)\b/.test(clause));
   const software = /\b(?:software|saas|gastroapp|kassensystem\w*|kassenabschluss|buchhaltung\w*|bilanz|steuerberater|mwst|digitale?\s+(?:kaffeestempel|stempelkarte\w*)|loyalty\s*(?:app|program)|kundenbindung|kundenbindungssoftware)\b/.test(text);
-  const businessAudience = /\b(?:fuer\s+gastronomen|fuer\s+gastronomiebetriebe|restaurantbetreiber|coffee\s+shop\s+owners|ihre[nm]?\s+(?:gaeste|kunden)|your\s+(?:guests|customers)|stammkunden|steuerberater|kassenabschluss)\b/.test(text);
-  if (software && (businessAudience || example.test(text)) && (!publicGift || example.test(text))) return 'business-lead-generation';
+  const businessAudience = /\b(?:fuer\s+gastronomen|fuer\s+gastronomiebetriebe|restaurantbetreiber|coffee\s+shop\s+owners|ihre[nm]?\s+(?:gaeste|kunden)|your\s+(?:guests|customers)|steuerberater|kassenabschluss)\b/.test(text);
+  if (software && businessAudience && (!publicGift || example.test(text))) return 'business-lead-generation';
   const helpers = /\b(?:volunteers?(?:\s+wanted)?|helfer\w*\s+gesucht|hiring|mitarbeiter\w*\s+gesucht|helping\s+hand)\b/.test(text);
   if (helpers && /\b(?:unterstuetzung|hilfe|mitarbeit\w*|helping\s+hand|kochkurse?|team|arbeit\w*|wanted)\b/.test(text)
       && !publicGift) return 'employment-only-food-benefit';

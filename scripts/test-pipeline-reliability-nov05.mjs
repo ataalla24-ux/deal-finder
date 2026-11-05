@@ -109,10 +109,15 @@ test('real B2B and work-for-reward cases cannot use the consumer or review lanes
 test('real loyalty rewards, public food distribution and low prices are retained', () => {
   for (const text of [
     'Bei unserer digitalen Stempelkarte ist dein 10. Kaffee gratis. Cafe in Wien.',
+    'Unsere digitale Stempelkarte fuer Stammkunden: Dein 10. Kaffee ist gratis im Cafe in Wien.',
+    'Unsere digitale Stempelkarte belohnt euch, zum Beispiel mit Gratis Kaffee nach 10 Besuchen. Wien.',
     'Unsere Volunteers verteilen morgen gratis Kaffee an alle Besucher in Wien.',
     'Eroeffnungsaktion: Doener fuer nur 1 Euro in 1100 Wien.',
     'Gratis Kaffee fuer alle unsere Gaeste bei der Eroeffnung in Wien.',
-  ]) assert.equal(discoveryRejection(text), '', text);
+  ]) {
+    assert.equal(discoveryRejection(text), '', text);
+    assert.equal(isUnsafeSocialFoodReviewContent(text), false, text);
+  }
 });
 
 test('explicit action date and year block old openings despite a fresh post or missing expiry', async () => {
