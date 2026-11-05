@@ -1,7 +1,7 @@
 {
-  "generatedAt": "2026-11-04T19:59:32.027Z",
-  "status": "deferred",
-  "message": "No Graph hashtag source completed successfully; last-good output was preserved.",
+  "generatedAt": "2026-11-05T07:18:25.167Z",
+  "status": "degraded",
+  "message": "0 fresh, evidence-checked Graph hashtag deal(s) found; 0 recovered from media.",
   "hashtags": [
     "viennarestaurants",
     "wienkaffee",
@@ -13,32 +13,381 @@
     "essenwien",
     "viennaeats"
   ],
-  "fetchedPosts": 0,
+  "fetchedPosts": 9,
+  "uniquePosts": 9,
   "totalDeals": 0,
-  "sources": [
-    {
-      "hashtag": "viennarestaurants",
-      "status": "deferred",
-      "fetched": 0,
-      "accepted": 0,
-      "error": "Instagram shared quota paused: shared cooldown"
-    }
-  ],
-  "rejectionReasons": {},
+  "rescueEligible": 0,
+  "rescuedDeals": 0,
+  "mediaEvidence": {
+    "status": "not-needed",
+    "eligible": 0,
+    "selected": 0,
+    "cached": 0,
+    "analyzed": 0,
+    "withOcrText": 0,
+    "withVisionImages": 0,
+    "aiCalls": 0,
+    "visionCalls": 0,
+    "aiAccepted": 0,
+    "inputTokens": 0,
+    "outputTokens": 0,
+    "totalTokens": 0,
+    "errors": [],
+    "warnings": []
+  },
+  "requestBudget": {
+    "requests": 22,
+    "maxRequests": 30,
+    "highestUsagePercent": 27,
+    "stopped": false,
+    "reason": ""
+  },
   "budgetDeferred": true,
   "sharedQuota": {
-    "limitPerHour": 190,
+    "limitPerHour": 237,
     "usageThreshold": 95,
-    "requests": 0,
-    "reserved": 0,
-    "stopped": true,
-    "reason": "Instagram shared quota paused: shared cooldown",
-    "highestUsagePercent": 0,
+    "requests": 22,
+    "reserved": 25,
+    "stopped": false,
+    "reason": "",
+    "highestUsagePercent": 27,
     "waitedMs": 0,
     "pacingMs": 0,
-    "retryAt": "2026-11-04T20:09:05.507Z",
+    "retryAt": "",
     "adaptiveSafetyCeiling": 190,
     "adaptiveIncreases": 0,
     "storageFailure": null
-  }
+  },
+  "sources": [
+    {
+      "hashtag": "viennarestaurants",
+      "status": "ok",
+      "coverage": {
+        "pages": 3,
+        "uniquePosts": 3,
+        "newPosts": 0,
+        "stopReason": "exhausted",
+        "incomplete": false,
+        "resumed": false
+      },
+      "fetched": 3,
+      "accepted": 0,
+      "mediaFieldMode": "full-media-with-owner",
+      "mediaLimit": 25
+    },
+    {
+      "hashtag": "wienkaffee",
+      "status": "ok",
+      "coverage": {
+        "pages": 1,
+        "uniquePosts": 0,
+        "newPosts": 0,
+        "stopReason": "exhausted",
+        "incomplete": false,
+        "resumed": false
+      },
+      "fetched": 0,
+      "accepted": 0,
+      "mediaFieldMode": "full-media-with-owner",
+      "mediaLimit": 25
+    },
+    {
+      "hashtag": "wienisst",
+      "status": "ok",
+      "coverage": {
+        "pages": 3,
+        "uniquePosts": 6,
+        "newPosts": 0,
+        "stopReason": "exhausted",
+        "incomplete": false,
+        "resumed": true
+      },
+      "fetched": 6,
+      "accepted": 0,
+      "mediaFieldMode": "full-media-with-owner",
+      "mediaLimit": 25
+    },
+    {
+      "hashtag": "wienergastro",
+      "status": "ok",
+      "coverage": {
+        "pages": 1,
+        "uniquePosts": 0,
+        "newPosts": 0,
+        "stopReason": "exhausted",
+        "incomplete": false,
+        "resumed": false
+      },
+      "fetched": 0,
+      "accepted": 0,
+      "mediaFieldMode": "full-media-with-owner",
+      "mediaLimit": 25
+    },
+    {
+      "hashtag": "wienfood",
+      "status": "deferred",
+      "fetched": 0,
+      "accepted": 0,
+      "error": "Instagram shared quota paused: request or quota unavailable"
+    }
+  ],
+  "rejectionReasons": {
+    "non-offer-content": 1,
+    "no-concrete-offer": 7,
+    "alcohol-offer": 1
+  },
+  "candidateAudit": [
+    {
+      "id": "18117199115152306",
+      "status": "rejected",
+      "url": "https://www.instagram.com/reel/DfU5NxzEyDD/",
+      "title": "Die Winterpizzen sind da! ❄️🍕 Ab dieser Woche gibt es bei uns unsere neuen Winterpizzen: saisonale Spezialitäten für die kalte Jahreszeit. 🎃 L’AUTUNNALE · 16,90 € Kürbiscreme, ge",
+      "text": "Die Winterpizzen sind da! ❄️🍕 Ab dieser Woche gibt es bei uns unsere neuen Winterpizzen: saisonale Spezialitäten für die kalte Jahreszeit. 🎃 L’AUTUNNALE · 16,90 € Kürbiscreme, geräucherter Provola, Salsiccia und Basilikum-Emulsion. Allergene: A, G 🫒 ASSOLUTO MEDITERRANEO · 16,50 € Tomatenessenz, Taggiasca-Oliven, schwarzer Knoblauch in Pulverform, Sardellen, Oregano und süß-sauer eingelegte Zwiebeln. Allergene: A, D 🥬 PARTENOPE · 15,90 € Escarole (Endiviensalat), Mozzarella, schwarze Oliven, Kapern und Sardellen. Allergene: A, D, G 🍯 DOLCE AMARO · 16,50 € Radicchio, Gorgonzola, Walnüsse und Honig. Allergene: A, G, H 🍄 ARDESIA · 17,50 € Pilze, Ziegenfrischkäse, Provola und schwarzer Pfeffer. Allergene: A, G Allergenlegende: A = Glutenhaltiges Getreide · D = Fisch · G = Milch und Milcherzeugnisse · H = Schalenfrüchte (Walnüsse) Welche probierst du zuerst? Schreib’s uns in die Kommentare! 👇 📍 Ennsgasse 7, 1020 Wien 🕚 Mo bis Sa 11.30 bis 22.00 · So 12.00 bis 22.00 📞 0660 123 12 88, auch per WhatsApp Zum Mitnehmen, mit Lieferung oder direkt bei uns im Lokal. #pizzeriailmercato #winterpizza #pizzawien #wien1020 #neapolitanischepizza #pizzalove #wienisst #saisonal",
+      "ownerUsername": "",
+      "ownerRole": "",
+      "scoutUsername": "",
+      "merchantUsername": "",
+      "pubDate": "2026-11-04T16:33:46+0000",
+      "rejectionReason": "no-concrete-offer",
+      "qualityScore": 0,
+      "viennaVerified": false,
+      "mediaEvidence": {
+        "analyzedAt": "",
+        "ocrText": "",
+        "assetCount": 0,
+        "imageCount": 0,
+        "videoFrameCount": 0,
+        "downloadRetries": 0,
+        "errors": [],
+        "ai": null
+      },
+      "hashtags": [
+        "wienisst"
+      ]
+    },
+    {
+      "id": "18119736571768507",
+      "status": "rejected",
+      "url": "https://www.instagram.com/reel/DfUupi2Blo7/",
+      "title": "Fisch mit herbstlichem Touch. 🐟 Gebratener Kabeljau - dazu gibt es Rollgerste und Wurzelgemüse, abgerundet mit würziger Chorizo und einer Miso Beurre Blanc. Reserviere dir deinen ",
+      "text": "Fisch mit herbstlichem Touch. 🐟 Gebratener Kabeljau - dazu gibt es Rollgerste und Wurzelgemüse, abgerundet mit würziger Chorizo und einer Miso Beurre Blanc. Reserviere dir deinen Tisch und komm vorbei. 📍 Sperling im Augarten | 📞 +43 660 1170278 #sperlingimaugarten #augartenwien #kabeljau #herbstkarte #wienisst",
+      "ownerUsername": "",
+      "ownerRole": "",
+      "scoutUsername": "",
+      "merchantUsername": "",
+      "pubDate": "2026-11-04T15:00:21+0000",
+      "rejectionReason": "no-concrete-offer",
+      "qualityScore": 0,
+      "viennaVerified": false,
+      "mediaEvidence": {
+        "analyzedAt": "",
+        "ocrText": "",
+        "assetCount": 0,
+        "imageCount": 0,
+        "videoFrameCount": 0,
+        "downloadRetries": 0,
+        "errors": [],
+        "ai": null
+      },
+      "hashtags": [
+        "wienisst"
+      ]
+    },
+    {
+      "id": "18079699721722586",
+      "status": "rejected",
+      "url": "https://www.instagram.com/p/DfUq6LNCsoR/",
+      "title": "A little taste of Christmas in Vienna’s 1st district ✨🎄 * Hotel Edition From elegant hotel restaurants & cafés, Vienna knows how to make the holiday season feel magical. Featuring",
+      "text": "A little taste of Christmas in Vienna’s 1st district ✨🎄 * Hotel Edition From elegant hotel restaurants & cafés, Vienna knows how to make the holiday season feel magical. Featuring some iconic addresses: 🤍 Mandarin Oriental 🤍 The Guesthouse 🤍 Hotel Sacher 🤍 Hotel König von Ungarn If you’re looking for a little Christmas magic, save these places for your next Vienna dining experience. 💌 Weite „Cafe Guide“ to get free Vienna guide with the best food spots in Vienna! Follow miracles_alice for more beautiful places, restaurants and hidden gems in Vienna 🥂 #Vienna #ViennaRestaurants #ChristmasInVienna #ViennaFoodGuide #ViennaLuxury Wien ViennaGuide ViennaLifestyle ChristmasVibes",
+      "ownerUsername": "",
+      "ownerRole": "",
+      "scoutUsername": "",
+      "merchantUsername": "",
+      "pubDate": "2026-11-04T14:27:40+0000",
+      "rejectionReason": "non-offer-content",
+      "qualityScore": 0,
+      "viennaVerified": false,
+      "mediaEvidence": {
+        "analyzedAt": "",
+        "ocrText": "",
+        "assetCount": 0,
+        "imageCount": 0,
+        "videoFrameCount": 0,
+        "downloadRetries": 0,
+        "errors": [],
+        "ai": null
+      },
+      "hashtags": [
+        "viennarestaurants"
+      ]
+    },
+    {
+      "id": "18140509735728348",
+      "status": "rejected",
+      "url": "https://www.instagram.com/p/DfUoEZcuMae/",
+      "title": "🪿🏆 **AUSGEZEICHNET! WIR SIND LIEBLINGS-GANSL-WIRT 2026!** 🏆🪿 Wir freuen uns riesig! ❤️ Unser Otto wurde vom Wiener Bezirksblatt und dem Gastronomie Club Wien als **Lieblings-Ga",
+      "text": "🪿🏆 **AUSGEZEICHNET! WIR SIND LIEBLINGS-GANSL-WIRT 2026!** 🏆🪿 Wir freuen uns riesig! ❤️ Unser Otto wurde vom Wiener Bezirksblatt und dem Gastronomie Club Wien als **Lieblings-Gansl-Wirt 2026 im 12. Bezirk** ausgezeichnet! Ein riesengroßes Dankeschön an unsere Gäste für eure Treue, eure Stimmen und eure Wertschätzung! 🥰 Natürlich geht's auch weiterhin um das, was wir am besten können: knuspriges Gansl, köstliche Beilagen und echte Wiener Gastlichkeit! 📞 **Jetzt Gansl vorbestellen und euren Wunschtermin sichern!** #biergasthofotto #viennarestaurants #ganslzeit #ganslesseninwien",
+      "ownerUsername": "",
+      "ownerRole": "",
+      "scoutUsername": "",
+      "merchantUsername": "",
+      "pubDate": "2026-11-04T14:02:55+0000",
+      "rejectionReason": "no-concrete-offer",
+      "qualityScore": 0,
+      "viennaVerified": false,
+      "mediaEvidence": {
+        "analyzedAt": "",
+        "ocrText": "",
+        "assetCount": 0,
+        "imageCount": 0,
+        "videoFrameCount": 0,
+        "downloadRetries": 0,
+        "errors": [],
+        "ai": null
+      },
+      "hashtags": [
+        "viennarestaurants"
+      ]
+    },
+    {
+      "id": "17927121420432629",
+      "status": "rejected",
+      "url": "https://www.instagram.com/p/DfUfnj5HSlH/",
+      "title": "🥐 GEMEINSAM SCHMECKT’S EINFACH BESSER! Vor allem, wenn man sich dafür so richtig Zeit nimmt. ☕💚 Am 8. November heißt’s beim Gangl: zusammenkommen, gemütlich brunchen und die erst",
+      "text": "🥐 GEMEINSAM SCHMECKT’S EINFACH BESSER! Vor allem, wenn man sich dafür so richtig Zeit nimmt. ☕💚 Am 8. November heißt’s beim Gangl: zusammenkommen, gemütlich brunchen und die erste Weihnachtsstimmung genießen. 🎄✨ Wir freuen uns auf einen gemütlichen Vormittag mit euch! 💚 #zumgangl #brunchzeit #gemeinsamgenießen #wienisst #weihnachtsstimmung",
+      "ownerUsername": "",
+      "ownerRole": "",
+      "scoutUsername": "",
+      "merchantUsername": "",
+      "pubDate": "2026-11-04T12:49:01+0000",
+      "rejectionReason": "no-concrete-offer",
+      "qualityScore": 0,
+      "viennaVerified": false,
+      "mediaEvidence": {
+        "analyzedAt": "",
+        "ocrText": "",
+        "assetCount": 0,
+        "imageCount": 0,
+        "videoFrameCount": 0,
+        "downloadRetries": 0,
+        "errors": [],
+        "ai": null
+      },
+      "hashtags": [
+        "wienisst"
+      ]
+    },
+    {
+      "id": "18120783236325207",
+      "status": "rejected",
+      "url": "https://www.instagram.com/p/DfUPukYljMz/",
+      "title": "🇷🇴 Gustul vine din carnea bună, restul e răbdare: ceafă de porc la grătar. Suculentă pe dinăuntru, rumenă pe margini, cu cartofi prăjiți alături. Vă așteptăm cu drag. Rezervări: ",
+      "text": "🇷🇴 Gustul vine din carnea bună, restul e răbdare: ceafă de porc la grătar. Suculentă pe dinăuntru, rumenă pe margini, cu cartofi prăjiți alături. Vă așteptăm cu drag. Rezervări: +43 650 564 1000. 🇦🇹 Gegrillt mit Geduld und ohne Eile: Schweinsschopf vom Grill. Innen saftig, außen knusprig, mit Pommes dazu. Auch zum Mitnehmen oder mit Lieferung über donaudelta.at, oder ruf an: +43 650 564 1000. 🇬🇧 Grilled pork neck – full of flavour. Juicy inside, crisp outside, with fries. Takeaway & delivery via donaudelta.at. 📍 Sechshauser Gürtel 7, 1150 Wien · 🕛 zilnic 12:00–22:30 📞 +43 650 564 1000 . #mancarecalamamaacasa #ceafa #grill #donaudelta #restaurantromanesc #romaniinviena #mancareromaneasca #romanidinaustria #rumänischesrestaurant #rumänischeküche #restaurantwien #wienisst #wien1150 #viena #rudolfsheimfünfhaus #romanianfood #viennafood #foodwien",
+      "ownerUsername": "",
+      "ownerRole": "",
+      "scoutUsername": "",
+      "merchantUsername": "",
+      "pubDate": "2026-11-04T10:30:14+0000",
+      "rejectionReason": "no-concrete-offer",
+      "qualityScore": 0,
+      "viennaVerified": false,
+      "mediaEvidence": {
+        "analyzedAt": "",
+        "ocrText": "",
+        "assetCount": 0,
+        "imageCount": 0,
+        "videoFrameCount": 0,
+        "downloadRetries": 0,
+        "errors": [],
+        "ai": null
+      },
+      "hashtags": [
+        "wienisst"
+      ]
+    },
+    {
+      "id": "18113933804607477",
+      "status": "rejected",
+      "url": "https://www.instagram.com/reel/DfUN2EbsF9h/",
+      "title": "This one’s for the steak lovers 🥩 #ViennaFood #ViennaFoodGuide #ViennaSpots #ViennaRestaurants",
+      "text": "This one’s for the steak lovers 🥩 #ViennaFood #ViennaFoodGuide #ViennaSpots #ViennaRestaurants",
+      "ownerUsername": "",
+      "ownerRole": "",
+      "scoutUsername": "",
+      "merchantUsername": "",
+      "pubDate": "2026-11-04T10:15:37+0000",
+      "rejectionReason": "no-concrete-offer",
+      "qualityScore": 0,
+      "viennaVerified": false,
+      "mediaEvidence": {
+        "analyzedAt": "",
+        "ocrText": "",
+        "assetCount": 0,
+        "imageCount": 0,
+        "videoFrameCount": 0,
+        "downloadRetries": 0,
+        "errors": [],
+        "ai": null
+      },
+      "hashtags": [
+        "viennarestaurants"
+      ]
+    },
+    {
+      "id": "18049728941819064",
+      "status": "rejected",
+      "url": "https://www.instagram.com/p/DfUI2lIDTJG/",
+      "title": "Würziges Chicken oder leuchtendes Wurzelgemüse? Unsere Tagesgerichte am Mittwoch, 04.11.: Chicken Masala mit Basmatireis Purple Explosion (vegan) mit Basmatireis Wir freuen uns auf",
+      "text": "Würziges Chicken oder leuchtendes Wurzelgemüse? Unsere Tagesgerichte am Mittwoch, 04.11.: Chicken Masala mit Basmatireis Purple Explosion (vegan) mit Basmatireis Wir freuen uns auf deine Mittagspause bei uns. 11:30-15:00 Uhr Alser Straße 21, 1080 Wien | Servitengasse 6, 1090 Wien Aktuelle Karte: fresh.at/speisekarte #FreshKitchenWien #MittagessenWien #WienIsst #Tagesgericht #LunchInVienna",
+      "ownerUsername": "",
+      "ownerRole": "",
+      "scoutUsername": "",
+      "merchantUsername": "",
+      "pubDate": "2026-11-04T09:30:05+0000",
+      "rejectionReason": "no-concrete-offer",
+      "qualityScore": 0,
+      "viennaVerified": false,
+      "mediaEvidence": {
+        "analyzedAt": "",
+        "ocrText": "",
+        "assetCount": 0,
+        "imageCount": 0,
+        "videoFrameCount": 0,
+        "downloadRetries": 0,
+        "errors": [],
+        "ai": null
+      },
+      "hashtags": [
+        "wienisst"
+      ]
+    },
+    {
+      "id": "18043397954832390",
+      "status": "rejected",
+      "url": "https://www.instagram.com/p/DfS9UBTMlv4/",
+      "title": "Herzlich willkommen beim Friseurmüller! 🍷 Macht’s euch gemütlich und genießt ein paar schöne Stunden bei gutem Essen und einem Glaserl Wein. 🤎 🕰️ Mo & Di sowie Do–Sa: 11:30–23:0",
+      "text": "Herzlich willkommen beim Friseurmüller! 🍷 Macht’s euch gemütlich und genießt ein paar schöne Stunden bei gutem Essen und einem Glaserl Wein. 🤎 🕰️ Mo & Di sowie Do–Sa: 11:30–23:00 Uhr 🕰️ Sonntag: 11:30–22:00 Uhr Mittwoch ist Ruhetag. 📍 Hameaustraße 30, 1190 Wien #friseurmüller #heuriger #wienisst #willkommen #efeucontent",
+      "ownerUsername": "",
+      "ownerRole": "",
+      "scoutUsername": "",
+      "merchantUsername": "",
+      "pubDate": "2026-11-04T07:30:04+0000",
+      "rejectionReason": "alcohol-offer",
+      "qualityScore": 0,
+      "viennaVerified": false,
+      "mediaEvidence": {
+        "analyzedAt": "",
+        "ocrText": "",
+        "assetCount": 0,
+        "imageCount": 0,
+        "videoFrameCount": 0,
+        "downloadRetries": 0,
+        "errors": [],
+        "ai": null
+      },
+      "hashtags": [
+        "wienisst"
+      ]
+    }
+  ]
 }
