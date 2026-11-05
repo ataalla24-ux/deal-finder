@@ -7,6 +7,7 @@ import { photoVisual } from './blog-photo-catalog.mjs';
 export const covers = {
   ...backfillCovers,
   ...catchupCovers,
+  'gratis-omv-kaffee': { lines: ['OMV VIVA', 'Winterkaffee mit jö.'], topic: 'Kaffee & Getränke', tone: 'yellow' },
   'blumencafe-kaffee-kuchen-6-euro-wien': { lines: ['Blumencafé', 'Kaffee & Kuchen.'], topic: 'Kaffeepause in Währing', tone: 'green' },
   'wien-guides': { lines: ['Deals & Gutscheine', 'in Wien.'], topic: 'FreeFinder Blog', tone: 'green' },
   'guenstig-essen-wien': { lines: ['Günstig essen', 'in Wien.'], topic: 'Essen nach Bezirk', tone: 'green' },

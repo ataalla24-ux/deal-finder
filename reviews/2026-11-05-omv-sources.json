@@ -1,0 +1,177 @@
+{
+  "reviewedAt": "2026-11-05",
+  "timezone": "Europe/Vienna",
+  "purpose": "Substantial update of existing gratis-omv-kaffee guide; three app-card variants map to one search intent.",
+  "primaryCampaign": {
+    "issuer": "OMV Retail Oesterreich via its ikp newsroom",
+    "published": "2026-11-02",
+    "url": "https://presse.ikp.at/news-wintergenuss-bei-omv-viva-drei-neue-kaffee-kreationen-fuer-die-kalte-jahreszeit?id=251130&menueid=33632&l=deutsch",
+    "validFrom": "2026-11-02",
+    "validUntil": "2027-01-31",
+    "varieties": [
+      "Cherry Cream Latte",
+      "Ube Coconut Latte",
+      "Double Caramel Latte"
+    ],
+    "verifiedFacts": [
+      "jo members may test each named variety once free through the jo app.",
+      "The campaign window is stated with both years, ending 31 January 2027.",
+      "The three independent app-card varieties share the same official release and publication date."
+    ],
+    "unknowns": [
+      "Personal coupon visibility and individual redeemability were not inspected.",
+      "No specific Vienna station participation, universal station availability or same-visit redemption established.",
+      "No zero-Oes requirement, fuel-purchase condition, MyStation equivalence, compulsory card scan or precise activation flow is stated in the verified winter release.",
+      "Do not transfer summer coupon/payment exclusions or old ARBOE benefit terms into this winter offer."
+    ]
+  },
+  "httpEvidence": [
+    {
+      "name": "omv-release",
+      "url": "https://presse.ikp.at/news-wintergenuss-bei-omv-viva-drei-neue-kaffee-kreationen-fuer-die-kalte-jahreszeit?id=251130&menueid=33632&l=deutsch",
+      "response": "200 https://presse.ikp.at/news-wintergenuss-bei-omv-viva-drei-neue-kaffee-kreationen-fuer-die-kalte-jahreszeit?id=251130&menueid=33632&l=deutsch",
+      "exitCode": 0,
+      "sha256": "248867498c2f430b9ec5e84c1fc3f3cde47302237c8f73d79a280807f9e40ef4",
+      "bytes": 196332,
+      "checkedAt": "2026-11-05T09:32:45.413672+00:00",
+      "method": "Normal HTTPS GET with redirects through curl; no login, TLS bypass or provider extraction."
+    },
+    {
+      "name": "omv-stations",
+      "url": "https://www.omv.at/de/mobilitaet/kraftstoffe/tankstelle-finden?id=oesterreich",
+      "response": "200 https://www.omv.at/de/mobilitaet/kraftstoffe/tankstelle-finden?id=oesterreich",
+      "exitCode": 0,
+      "sha256": "99cf1888de92e55b4ecb78ec1bc4374d221c21e9fb233ca1af0cba6b17485fd6",
+      "bytes": 258869,
+      "checkedAt": "2026-11-05T09:32:46.041193+00:00",
+      "method": "Normal HTTPS GET with redirects through curl; no login, TLS bypass or provider extraction."
+    },
+    {
+      "name": "app-store",
+      "url": "https://apps.apple.com/app/id6758958213",
+      "response": "200 https://apps.apple.com/us/app/freefinder-deals-in-wien/id6758958213",
+      "exitCode": 0,
+      "sha256": "49dcda7886847556389d1dc3a012cb800bc5a4bd4bc963a4ca4bcf49a1a1ad87",
+      "bytes": 543791,
+      "checkedAt": "2026-11-05T09:32:46.668270+00:00",
+      "method": "Normal HTTPS GET with redirects through curl; no login, TLS bypass or provider extraction."
+    },
+    {
+      "name": "google-play",
+      "url": "https://play.google.com/store/apps/details?id=com.stefanataalla.freefinderwien",
+      "response": "200 https://play.google.com/store/apps/details?id=com.stefanataalla.freefinderwien",
+      "exitCode": 0,
+      "sha256": "48f77900cdc1d47555ce8609dd15e5918cbe8021f3c465bf1fb555c3cdb9a850",
+      "bytes": 1146557,
+      "checkedAt": "2026-11-05T09:32:46.912107+00:00",
+      "method": "Normal HTTPS GET with redirects through curl; no login, TLS bypass or provider extraction."
+    }
+  ],
+  "independentCampaignReread": {
+    "method": "Normal HTTPS urllib GET plus web open, 2026-11-05",
+    "checkedAt": "2026-11-05T09:33:03.689452+00:00",
+    "status": 200,
+    "bytes": 197267,
+    "sha256": "2305a614a80134547958028920c2a3dffc2a75c45877bdd2fdc664921a6afca1",
+    "note": "Dynamic HTML may differ across requests; factual release text matched."
+  },
+  "locationEvidence": {
+    "url": "https://www.omv.at/de/mobilitaet/kraftstoffe/tankstelle-finden?id=oesterreich",
+    "verified": "Official finder lists Vienna stations and directs users to services and locations.",
+    "limitation": "A finder listing is not proof that a station participates in the winter promotion; verify the offer and product before travelling."
+  },
+  "otherCoverageChecks": [
+    {
+      "url": "https://vorteilsclub.wien.at/meine-vorteile/noodle-king",
+      "status": 200,
+      "checkedAt": "2026-11-05T09:33:03.699186+00:00",
+      "bytes": 60642,
+      "sha256": "63cae370e5d34571004e9811e71812b1463bae2a8b8583bc68ec7c9bcef38774",
+      "method": "Normal HTTPS urllib GET and web open",
+      "facts": "20 percent noodleboxes plus drink, personal consumption only, show member card before first order; no merchant end stated."
+    },
+    {
+      "url": "https://www.westfield.com/en/austria/donauzentrum/restaurants/offers/sandwich-day-bei-subway-11-gratis/208903",
+      "status": 404,
+      "method": "Normal HTTPS urllib GET",
+      "limitation": "Expired 2–4 November campaign; retained approved evidence only, not freshly readable official offer."
+    },
+    {
+      "id": "meta-ig-18190492012418024",
+      "url": "https://www.instagram.com/reel/DfS8EP4oW02/embed/captioned/",
+      "status": 200,
+      "sha256": "b04496defa967950037836771e01aadff672f4a6c846fc9558c87f52f4c93ffc",
+      "method": "Normal public Instagram embed/captioned HTTPS GET with readable caption; standard reel web fetch was throttled, no login or bypass.",
+      "facts": "Official merchant caption: double smashburger for 9.90 EUR until 31 December 2026; no precise address."
+    },
+    {
+      "id": "community:06d5f18b-d95f-41f3-9768-86d3c37f5bc8",
+      "url": "https://www.instagram.com/reel/DfSGYE1OLt_/embed/captioned/",
+      "status": 200,
+      "sha256": "ba33effdca2913deca92b6875204485d1cfca1ff50d52ac919802a9de0b1ebec",
+      "method": "Normal public Instagram embed/captioned HTTPS GET with readable caption; standard reel web fetch was throttled, no login or bypass.",
+      "facts": "Official merchant caption: buy two/get three, all doner varieties, 3–30 November, two addresses. No year in caption; retained explicit owner review anchors 2026."
+    },
+    {
+      "id": "igap-1yz022",
+      "url": "https://www.instagram.com/p/DfRuATHiGLU/embed/captioned/",
+      "status": 200,
+      "sha256": "2cde01daed6aabb2cc3012c14d98e48a71bdc5e2957ad208f085b877fbcb0273",
+      "method": "Normal public Instagram embed/captioned HTTPS GET with readable caption; standard reel web fetch was throttled, no login or bypass.",
+      "facts": "Official merchant caption: 26 percent on selected snacks, 2–15 November, Monday–Saturday. No year in caption."
+    },
+    {
+      "id": "fc4g-jl8lb5",
+      "url": "https://www.instagram.com/p/DfPJ5z_G5So/embed/captioned/",
+      "status": 200,
+      "sha256": "401bc65f5063ae15ccacc2664c051f9b18a0090d60586feb7ff4f172c5851760",
+      "method": "Normal public Instagram embed/captioned HTTPS GET with readable caption; standard reel web fetch was throttled, no login or bypass.",
+      "facts": "Official centre caption: Subway selected 15-cm varieties, 2–4 November; campaign ended."
+    },
+    {
+      "id": "meta-ig-18345124735259307",
+      "url": "https://www.instagram.com/reel/DfVARy_I2AK/embed/captioned/",
+      "status": 200,
+      "sha256": "7b4884dd9cf2de72ec71f1a40a2bef5647e5646b3c6f6cad3e33fbeecda71459",
+      "method": "Normal public Instagram embed/captioned HTTPS GET with readable caption; standard reel web fetch was throttled, no login or bypass.",
+      "facts": "Creator caption: flamm.vie 1+1 steak doner only 6 November. No merchant primary terms or exact address established."
+    },
+    {
+      "id": "igap-jppeps",
+      "url": "https://www.instagram.com/p/DfHUvy6NQRn/embed/captioned/",
+      "status": 200,
+      "sha256": "74f968155c5e7bb846ead0c425a883b3ca9368381cf7ce696c021e5047102284",
+      "method": "Normal public Instagram embed/captioned HTTPS GET with readable caption; standard reel web fetch was throttled, no login or bypass.",
+      "facts": "Official merchant caption: coffee and cake for 6 EUR on weekdays, no stated merchant end date."
+    }
+  ],
+  "limitations": [
+    "No personal jo account or actual redemption, order or merchant contact.",
+    "Other held flight/carrier/Wolt/AIDA/FatMonk cases only individually reviewed for wording/fingerprint changes; no fresh source validity implied.",
+    "No current Search Console/Analytics table available; use the dated 2–29 October 2026 baseline without inventing numbers."
+  ],
+  "concurrentDelta": {
+    "observedAt": "2026-11-05T09:38:20.716306+00:00",
+    "newId": "g2-1gkjf0g",
+    "primarySource": {
+      "url": "https://www.ikea.com/at/de/stores/wien-westbahnhof/ikea-wien-westbahnhof-angebote-pub1aba7a60/",
+      "method": "Normal HTTPS urllib GET plus web open, no login or bypass.",
+      "status": 200,
+      "bytes": 1008202,
+      "sha256": "2210b2e4ae754f16e9352e11aa4a842760439fdba766d8b1e1f8410fb7ea6a1e",
+      "checkedAt": "2026-11-05T09:38:20.716306+00:00"
+    },
+    "verifiedFacts": [
+      "At IKEA Wien Westbahnhof, restaurant consumption of at least 10 EUR earns a 10 EUR retail voucher.",
+      "Monday–Saturday, advertised date range 30 October–31 December.",
+      "The voucher is redeemable only on the same day with at least 50 EUR retail purchase."
+    ],
+    "limitations": [
+      "Campaign section does not print the year; contemporaneous official page has 2026 context and the current approved feed labels 2026.",
+      "No free restaurant meal, cash refund, universal IKEA participation, membership condition or basket test inferred.",
+      "Distinct retail-purchase conditions; editorially held today without another article or IKEA guide expansion."
+    ],
+    "normalizedExistingId": "meta-ig-18345124735259307",
+    "normalization": "Only validUntil removed; prior fresh creator-source check retained without claiming a new primary merchant check."
+  }
+}
