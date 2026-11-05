@@ -1,18 +1,12 @@
 {
-  "generatedAt": "2026-11-05T15:24:48.995Z",
+  "generatedAt": "2026-11-05T15:32:38.648Z",
   "summary": {
     "filesConsidered": 32,
-    "totalCandidates": 721,
-    "uniqueCandidates": 691,
-    "distinctCandidates": 706,
-    "duplicateClusters": 15,
+    "totalCandidates": 720,
+    "uniqueCandidates": 686,
+    "distinctCandidates": 703,
+    "duplicateClusters": 17,
     "topHealthySources": [
-      {
-        "sourceKey": "food3",
-        "sourceLabel": "Firecrawl Key 2 - Food",
-        "healthScore": 86,
-        "totalDeals": 1
-      },
       {
         "sourceKey": "member-benefits",
         "sourceLabel": "Member Benefits",
@@ -30,6 +24,12 @@
         "sourceLabel": "Meta Instagram Graph",
         "healthScore": 69,
         "totalDeals": 68
+      },
+      {
+        "sourceKey": "food3",
+        "sourceLabel": "Firecrawl Key 2 - Food",
+        "healthScore": 64,
+        "totalDeals": 1
       },
       {
         "sourceKey": "instagram-verified",
@@ -111,7 +111,7 @@
       {
         "sourceKey": "food3",
         "sourceLabel": "Firecrawl Key 2 - Food",
-        "precisionScore": 88,
+        "precisionScore": 80,
         "totalDeals": 1
       },
       {
@@ -141,12 +141,6 @@
     ],
     "topWeightedSources": [
       {
-        "sourceKey": "food3",
-        "sourceLabel": "Firecrawl Key 2 - Food",
-        "sourceWeightScore": 70,
-        "totalDeals": 1
-      },
-      {
         "sourceKey": "member-benefits",
         "sourceLabel": "Member Benefits",
         "sourceWeightScore": 70,
@@ -157,6 +151,12 @@
         "sourceLabel": "Instagram AI Agent",
         "sourceWeightScore": 62,
         "totalDeals": 36
+      },
+      {
+        "sourceKey": "food3",
+        "sourceLabel": "Firecrawl Key 2 - Food",
+        "sourceWeightScore": 62,
+        "totalDeals": 1
       },
       {
         "sourceKey": "meta-instagram",
@@ -234,6 +234,7 @@
       "reportedSources": 9,
       "failedSources": [],
       "completedWithErrors": [
+        "firecrawl4",
         "firecrawl5",
         "food3",
         "instagram-apify2",
@@ -244,74 +245,6 @@
     }
   },
   "sources": [
-    {
-      "sourceKey": "food3",
-      "file": "deals-pending-food3.json",
-      "sourceLabel": "Firecrawl Key 2 - Food",
-      "totalDeals": 1,
-      "uniqueDeals": 1,
-      "duplicateDeals": 0,
-      "duplicateAcrossSources": 0,
-      "fresh1dCount": 0,
-      "fresh7dCount": 1,
-      "viennaCount": 1,
-      "foodDrinkCount": 1,
-      "promoCount": 1,
-      "missingUrlCount": 0,
-      "sampleTitles": [
-        "Ort unklar: Wien on Instagram: \" WIEN, WIR HABEN EIN SÜSSES PROBLEM ..."
-      ],
-      "lastRun": {
-        "status": "completed-with-errors",
-        "startedAt": "2026-11-05T09:12:29.595Z",
-        "finishedAt": "2026-11-05T09:13:17.142Z",
-        "durationMs": 47547,
-        "counts": {
-          "rawCandidates": 18,
-          "normalizedCandidates": 18,
-          "verifiedCandidates": 2,
-          "previousDeals": 1,
-          "acceptedDeals": 2,
-          "rejectedDeals": 17
-        },
-        "rejectedByReason": {
-          "post-verification-rejected": 17
-        },
-        "errors": [
-          "https://www.instagram.com/explore/tags/fooddealsvienna/: Die angegebene Instagram-Hashtag-Seite ist in dieser Umgebung nicht zugänglich: Instagram leitet ohne eingeloggte Sitzung auf die Login-Seite um, und der direkte Zugriff auf die Hashtag-Seite wird vom Webzugriff nicht unterstützt. Dadurch können die aktuellen Originalposts, ihre Veröffentlichungsdaten und direkten /p/- bzw. /reel/-Links nicht verlässlich geprüft werden."
-        ],
-        "reportFile": "deal-pipeline-last-run-food3.json"
-      },
-      "uniqueRate": 1,
-      "duplicateRate": 0,
-      "fresh1dRate": 0,
-      "fresh7dRate": 1,
-      "viennaRate": 1,
-      "foodDrinkRate": 1,
-      "promoRate": 1,
-      "missingUrlRate": 0,
-      "averageQualityScore": 58,
-      "topCategories": [
-        {
-          "value": "essen",
-          "count": 1
-        }
-      ],
-      "topTypes": [
-        {
-          "value": "rabatt",
-          "count": 1
-        }
-      ],
-      "issues": [
-        "wenige Deals sind frischer als 1 Tag"
-      ],
-      "healthScore": 86,
-      "missionFitScore": 78,
-      "coverageScore": 16,
-      "precisionScore": 88,
-      "sourceWeightScore": 70
-    },
     {
       "sourceKey": "member-benefits",
       "file": "deals-pending-member-benefits.json",
@@ -486,9 +419,9 @@
       "file": "deals-pending-meta-instagram.json",
       "sourceLabel": "Meta Instagram Graph",
       "totalDeals": 68,
-      "uniqueDeals": 56,
-      "duplicateDeals": 12,
-      "duplicateAcrossSources": 10,
+      "uniqueDeals": 55,
+      "duplicateDeals": 13,
+      "duplicateAcrossSources": 11,
       "fresh1dCount": 10,
       "fresh7dCount": 65,
       "viennaCount": 68,
@@ -502,7 +435,7 @@
       ],
       "lastRun": null,
       "uniqueRate": 0.8,
-      "duplicateRate": 0.1,
+      "duplicateRate": 0.2,
       "fresh1dRate": 0.1,
       "fresh7dRate": 1,
       "viennaRate": 1,
@@ -558,6 +491,75 @@
       "coverageScore": 49,
       "precisionScore": 70,
       "sourceWeightScore": 61
+    },
+    {
+      "sourceKey": "food3",
+      "file": "deals-pending-food3.json",
+      "sourceLabel": "Firecrawl Key 2 - Food",
+      "totalDeals": 1,
+      "uniqueDeals": 0,
+      "duplicateDeals": 1,
+      "duplicateAcrossSources": 1,
+      "fresh1dCount": 0,
+      "fresh7dCount": 1,
+      "viennaCount": 1,
+      "foodDrinkCount": 1,
+      "promoCount": 1,
+      "missingUrlCount": 0,
+      "sampleTitles": [
+        "Ort unklar: Wien on Instagram: \" WIEN, WIR HABEN EIN SÜSSES PROBLEM ..."
+      ],
+      "lastRun": {
+        "status": "completed-with-errors",
+        "startedAt": "2026-11-05T09:12:29.595Z",
+        "finishedAt": "2026-11-05T09:13:17.142Z",
+        "durationMs": 47547,
+        "counts": {
+          "rawCandidates": 18,
+          "normalizedCandidates": 18,
+          "verifiedCandidates": 2,
+          "previousDeals": 1,
+          "acceptedDeals": 2,
+          "rejectedDeals": 17
+        },
+        "rejectedByReason": {
+          "post-verification-rejected": 17
+        },
+        "errors": [
+          "https://www.instagram.com/explore/tags/fooddealsvienna/: Die angegebene Instagram-Hashtag-Seite ist in dieser Umgebung nicht zugänglich: Instagram leitet ohne eingeloggte Sitzung auf die Login-Seite um, und der direkte Zugriff auf die Hashtag-Seite wird vom Webzugriff nicht unterstützt. Dadurch können die aktuellen Originalposts, ihre Veröffentlichungsdaten und direkten /p/- bzw. /reel/-Links nicht verlässlich geprüft werden."
+        ],
+        "reportFile": "deal-pipeline-last-run-food3.json"
+      },
+      "uniqueRate": 0,
+      "duplicateRate": 1,
+      "fresh1dRate": 0,
+      "fresh7dRate": 1,
+      "viennaRate": 1,
+      "foodDrinkRate": 1,
+      "promoRate": 1,
+      "missingUrlRate": 0,
+      "averageQualityScore": 58,
+      "topCategories": [
+        {
+          "value": "essen",
+          "count": 1
+        }
+      ],
+      "topTypes": [
+        {
+          "value": "rabatt",
+          "count": 1
+        }
+      ],
+      "issues": [
+        "wenige Deals sind frischer als 1 Tag",
+        "hohe Überschneidung mit anderen Quellen"
+      ],
+      "healthScore": 64,
+      "missionFitScore": 78,
+      "coverageScore": 15,
+      "precisionScore": 80,
+      "sourceWeightScore": 62
     },
     {
       "sourceKey": "instagram-verified",
@@ -783,60 +785,67 @@
       "sourceKey": "firecrawl4",
       "file": "deals-pending-firecrawl4.json",
       "sourceLabel": "Firecrawl Key 4 - Instagram Direct",
-      "totalDeals": 43,
-      "uniqueDeals": 42,
-      "duplicateDeals": 1,
-      "duplicateAcrossSources": 1,
-      "fresh1dCount": 0,
-      "fresh7dCount": 1,
-      "viennaCount": 1,
-      "foodDrinkCount": 40,
-      "promoCount": 26,
+      "totalDeals": 42,
+      "uniqueDeals": 39,
+      "duplicateDeals": 3,
+      "duplicateAcrossSources": 3,
+      "fresh1dCount": 1,
+      "fresh7dCount": 3,
+      "viennaCount": 3,
+      "foodDrinkCount": 39,
+      "promoCount": 24,
       "missingUrlCount": 0,
       "sampleTitles": [
+        "tuchlauben.eis: Wien on Instagram: \" WIEN, WIR HABEN EIN SÜSSES PROBLEM ...",
         "Gratis Döner -100% in Wien zum Halloween-Opening - Preisjäger",
-        "Secession Wien: gratis Eintritt am 1. Mittwoch - Preisjäger",
-        "Wiener Eislaufverein: Saisonstart am 5.11. mit GRATIS Eintritt (15–21 Uhr)"
+        "Secession Wien: gratis Eintritt am 1. Mittwoch - Preisjäger"
       ],
       "lastRun": {
-        "status": "completed",
-        "startedAt": "2026-11-04T15:10:16.314Z",
-        "finishedAt": "2026-11-04T15:17:16.939Z",
-        "durationMs": 420625,
+        "status": "completed-with-errors",
+        "startedAt": "2026-11-05T15:12:27.553Z",
+        "finishedAt": "2026-11-05T15:22:28.968Z",
+        "durationMs": 601415,
         "counts": {
-          "rawCandidates": 43,
-          "normalizedCandidates": 43,
-          "verifiedCandidates": 45,
-          "previousDeals": 42,
-          "acceptedDeals": 45,
-          "rejectedDeals": 32
+          "rawCandidates": 30,
+          "normalizedCandidates": 29,
+          "verifiedCandidates": 42,
+          "previousDeals": 43,
+          "acceptedDeals": 42,
+          "rejectedDeals": 23
         },
         "rejectedByReason": {
-          "post-verification-rejected": 32
+          "missing-concrete-offer-or-giveaway": 1,
+          "post-verification-rejected": 22
         },
-        "errors": [],
+        "errors": [
+          "Breite Ergänzung 2: Firecrawl Agent nach 360s abgebrochen"
+        ],
         "reportFile": "deal-pipeline-last-run-firecrawl4.json"
       },
-      "uniqueRate": 1,
-      "duplicateRate": 0,
+      "uniqueRate": 0.9,
+      "duplicateRate": 0.1,
       "fresh1dRate": 0,
-      "fresh7dRate": 0,
-      "viennaRate": 0,
+      "fresh7dRate": 0.1,
+      "viennaRate": 0.1,
       "foodDrinkRate": 0.9,
       "promoRate": 0.6,
       "missingUrlRate": 0,
-      "averageQualityScore": 64.3,
+      "averageQualityScore": 64.2,
       "topCategories": [
         {
           "value": "essen",
-          "count": 40
+          "count": 38
         },
         {
           "value": "beauty",
           "count": 1
         },
         {
-          "value": "kultur",
+          "value": "kaffee",
+          "count": 1
+        },
+        {
+          "value": "reisen",
           "count": 1
         },
         {
@@ -847,15 +856,15 @@
       "topTypes": [
         {
           "value": "rabatt",
-          "count": 17
+          "count": 19
         },
         {
           "value": "bogo",
-          "count": 16
+          "count": 15
         },
         {
           "value": "gratis",
-          "count": 10
+          "count": 8
         }
       ],
       "issues": [
@@ -863,10 +872,10 @@
         "Wien-Signal ist zu schwach"
       ],
       "healthScore": 56,
-      "missionFitScore": 48,
+      "missionFitScore": 50,
       "coverageScore": 29,
-      "precisionScore": 49,
-      "sourceWeightScore": 47
+      "precisionScore": 51,
+      "sourceWeightScore": 48
     },
     {
       "sourceKey": "power",
