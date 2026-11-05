@@ -16,6 +16,7 @@ import { validateDealsForSlack } from './deal-validity-agent.js';
 import { canonicalSocialPostKey, mergeDealEvidence, officialOmvVariantKey } from './deal-evidence-utils.js';
 import { advanceDealLifecycle } from './deal-lifecycle.js';
 import { isCommunitySubmission, prepareCommunityApproval } from './community-review-utils.js';
+import { preparePublicationTitle } from './pre-publication-title.js';
 import {
   loadReviewFeedback,
   resolveHumanReviewDecision,
@@ -744,13 +745,18 @@ function normalizePendingDeal(raw) {
 
 async function validateApprovalCandidates(deals, options = {}) {
   const now = options.now instanceof Date ? options.now : new Date();
-  const validation = await validateDealsForSlack(ensureArray(deals).map(deal => prepareCommunityApproval(deal, now)), {
+  const existingDeals = options.existingDeals ?? loadExistingApprovedDeals();
+  const existingIds = new Set(existingDeals.map(deal => deal.id));
+  const candidates = ensureArray(deals).map(deal => prepareCommunityApproval(
+    preparePublicationTitle(deal, { existingIds }), now,
+  ));
+  const validation = await validateDealsForSlack(candidates, {
     ...options, now, communityApproval: true,
   });
   if (!(options.requireMap ?? process.env.APPROVAL_REQUIRE_MAP === '1')) return validation;
   const { requireApprovalMap } = await import('../scripts/approval-map-readiness.mjs');
   const readiness = await requireApprovalMap(validation, {
-    existingDeals: loadExistingApprovedDeals(),
+    existingDeals,
     map: loadJson(path.join(DOCS_DIR, 'deal-map-locations.json'), { locations: [] }),
     catalog: {...loadJson(path.join(ROOT, 'reviews/map-location-catalog.json'), {}),
       chainRules: loadJson(path.join(ROOT, 'reviews/map-chain-rules.json'), {}).rules || []},
