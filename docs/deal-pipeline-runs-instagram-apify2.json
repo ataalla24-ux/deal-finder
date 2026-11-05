@@ -2,9 +2,169 @@
   "schemaVersion": 1,
   "sourceKey": "instagram-apify2",
   "sourceLabel": "Apify 2 Vienna Food Discovery",
-  "updatedAt": "2026-11-05T13:24:50.906Z",
-  "runCount": 28,
+  "updatedAt": "2026-11-05T22:45:22.355Z",
+  "runCount": 29,
   "runs": [
+    {
+      "schemaVersion": 1,
+      "runId": "instagram-apify2-2026-11-05T22:45:22.355Z",
+      "sourceKey": "instagram-apify2",
+      "sourceLabel": "Apify 2 Vienna Food Discovery",
+      "status": "completed-with-errors",
+      "startedAt": "2026-11-05T22:44:32.564Z",
+      "finishedAt": "2026-11-05T22:45:22.355Z",
+      "durationMs": 49791,
+      "outputFile": "docs/deals-pending-instagram-apify2.json",
+      "counts": {
+        "rawCandidates": 10,
+        "normalizedCandidates": 2,
+        "verifiedCandidates": 0,
+        "previousDeals": 0,
+        "acceptedDeals": 0,
+        "rejectedDeals": 2
+      },
+      "rejectedByReason": {
+        "no-consumer-food-benefit": 1,
+        "non-food-ad": 1
+      },
+      "rejectedSamples": [
+        {
+          "reason": "no-consumer-food-benefit",
+          "deal": {
+            "id": "",
+            "title": "",
+            "brand": "",
+            "url": "https://www.instagram.com/p/DfXe-LQCv9d/",
+            "source": "",
+            "pubDate": "",
+            "expires": "",
+            "postVerificationStatus": ""
+          }
+        },
+        {
+          "reason": "non-food-ad",
+          "deal": {
+            "id": "",
+            "title": "",
+            "brand": "",
+            "url": "https://www.instagram.com/p/DfXOhpDiLMZ/",
+            "source": "",
+            "pubDate": "",
+            "expires": "",
+            "postVerificationStatus": ""
+          }
+        }
+      ],
+      "diagnostics": {
+        "pendingDeals": 0,
+        "unchangedPosts": 1,
+        "providerErrors": 6,
+        "emptySourceRecords": 1,
+        "ocrCalls": 2,
+        "sources": [
+          {
+            "key": "profile:assal.burger",
+            "lastAttemptAt": "2026-11-05T22:44:32.564Z",
+            "postsReturned": 0,
+            "status": "not-found",
+            "consecutiveFailures": 2,
+            "consecutiveEmpty": 3,
+            "retryAt": "2026-12-05T22:44:32.564Z"
+          },
+          {
+            "key": "profile:rollercoasterrestaurant",
+            "lastAttemptAt": "2026-11-05T22:44:32.564Z",
+            "postsReturned": 0,
+            "status": "not-found",
+            "consecutiveFailures": 2,
+            "consecutiveEmpty": 3,
+            "retryAt": "2026-12-05T22:44:32.564Z"
+          },
+          {
+            "key": "profile:merdins_cheesy_doener",
+            "lastAttemptAt": "2026-11-05T22:44:32.564Z",
+            "postsReturned": 0,
+            "status": "not-found",
+            "consecutiveFailures": 2,
+            "consecutiveEmpty": 3,
+            "retryAt": "2026-12-05T22:44:32.564Z"
+          },
+          {
+            "key": "profile:thedistrictkebab",
+            "lastAttemptAt": "2026-11-05T22:44:32.564Z",
+            "postsReturned": 0,
+            "status": "not-found",
+            "consecutiveFailures": 2,
+            "consecutiveEmpty": 3,
+            "retryAt": "2026-12-05T22:44:32.564Z"
+          },
+          {
+            "key": "profile:birbsbagel",
+            "lastAttemptAt": "2026-11-05T22:44:32.564Z",
+            "postsReturned": 0,
+            "status": "not-found",
+            "consecutiveFailures": 2,
+            "consecutiveEmpty": 3,
+            "retryAt": "2026-12-05T22:44:32.564Z"
+          },
+          {
+            "key": "profile:mangalet.at",
+            "lastAttemptAt": "2026-11-05T22:44:32.564Z",
+            "postsReturned": 0,
+            "status": "not-found",
+            "consecutiveFailures": 2,
+            "consecutiveEmpty": 3,
+            "retryAt": "2026-12-05T22:44:32.564Z"
+          },
+          {
+            "key": "hashtag:neueroeffnungwien",
+            "lastAttemptAt": "2026-11-05T22:44:32.564Z",
+            "postsReturned": 0,
+            "status": "no-items",
+            "consecutiveFailures": 1,
+            "consecutiveEmpty": 4,
+            "retryAt": "2026-11-12T22:44:32.564Z"
+          },
+          {
+            "key": "hashtag:wienfood",
+            "lastAttemptAt": "2026-11-05T22:44:32.564Z",
+            "postsReturned": 1,
+            "status": "posts-returned",
+            "consecutiveFailures": 0,
+            "retryAt": "",
+            "consecutiveEmpty": 0
+          },
+          {
+            "key": "hashtag:esseninwien",
+            "lastAttemptAt": "2026-11-05T22:44:32.564Z",
+            "status": "posts-returned",
+            "postsReturned": 1,
+            "consecutiveFailures": 0,
+            "consecutiveEmpty": 0,
+            "retryAt": ""
+          },
+          {
+            "key": "hashtag:gratiswien",
+            "lastAttemptAt": "2026-11-05T22:44:32.564Z",
+            "postsReturned": 1,
+            "status": "posts-returned",
+            "consecutiveFailures": 0,
+            "consecutiveEmpty": 0,
+            "retryAt": ""
+          }
+        ]
+      },
+      "constraints": {
+        "profiles": 22,
+        "hashtags": 4,
+        "perSource": 1,
+        "posts": 26,
+        "ocrPosts": 8,
+        "dailyUsd": 0.15,
+        "cycleUsd": 4.65
+      },
+      "errors": []
+    },
     {
       "schemaVersion": 1,
       "runId": "instagram-apify2-2026-11-05T13:24:50.906Z",
