@@ -51,6 +51,11 @@ export const photoRecipes = {
 
 // Match the benefit, not a merchant word in the URL (Pizza Rando offers döner).
 export const articlePhotos = {
+  'fat-monk-dc-tower-wien-lieferando-rabatt': 'bowl',
+  'marden-wien-1120-lieferando-super-deals': 'restaurant',
+  'brille24-novlens-50-prozent-glaeser-oesterreich': 'smartphone',
+  'urfa-wien-huhn-steak-sandwich-350': 'kebab',
+  'wolt-7-euro-neukunden-wien-aida-honu': 'delivery',
   'ikea-westbahnhof-10-euro-gutschein-restaurant-wien': 'family-lunch',
   'flamm-wien-steak-doener-1plus1-6-november': 'kebab',
   'noodle-king-wien-20-prozent-vorteilsclub': 'biang-noodles',

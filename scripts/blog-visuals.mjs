@@ -1,14 +1,14 @@
 import { load } from 'cheerio';
 import { backfillCovers } from './blog-backfill-20261018.mjs';
 import { catchupCovers } from './blog-backfill-20261030.mjs';
-import { novemberGuides } from './blog-backfill-20261105.mjs';
+import { novemberGuides, heldRecheckGuides } from './blog-backfill-20261105.mjs';
 import { photoVisual } from './blog-photo-catalog.mjs';
 
 // Editorial subject metadata is retained for generators; images are photographs.
 export const covers = {
   ...backfillCovers,
   ...catchupCovers,
-  ...Object.fromEntries(novemberGuides.map(guide => [guide.slug, { lines: [guide.title], topic: guide.eyebrow, tone: 'yellow' }])),
+  ...Object.fromEntries([...novemberGuides, ...heldRecheckGuides].map(guide => [guide.slug, { lines: [guide.title], topic: guide.eyebrow, tone: 'yellow' }])),
   'gratis-omv-kaffee': { lines: ['OMV VIVA', 'Winterkaffee mit jö.'], topic: 'Kaffee & Getränke', tone: 'yellow' },
   'blumencafe-kaffee-kuchen-6-euro-wien': { lines: ['Blumencafé', 'Kaffee & Kuchen.'], topic: 'Kaffeepause in Währing', tone: 'green' },
   'wien-guides': { lines: ['Deals & Gutscheine', 'in Wien.'], topic: 'FreeFinder Blog', tone: 'green' },

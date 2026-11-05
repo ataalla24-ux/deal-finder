@@ -26,7 +26,7 @@
       "source": "https://wolt.com/de-at/aut/vienna/restaurant/schnitzel-stube-by-monte",
       "contentHash": "8f88609e127e45923cf0509223312058194539b16d8633eb532d93973296c202",
       "status": "held",
-      "reason": "Owner-retained Wolt record reviewed individually: false structured expiry was cleared and copy now explicitly says the public discount was not clearly visible. Fingerprint observation only, no feed edit, new offer claim or independent fresh discount confirmation today. Held pending primary redemption conditions; no merchant end inferred.",
+      "reason": "Exact Wolt URL HTTP404; fully loaded browser explicitly states this restaurant/shop is no longer at Wolt. This does not establish physical restaurant closure. No current 7-EUR offer article, feed removal or merchant expiry invented.",
       "priorCoverageObservation": {
         "id": "g2-3dn8v3",
         "observedTitle": "7 € Wolt-Rabatt auf Bestellungen über 16 €",
@@ -36,9 +36,29 @@
         "reason": "Owner-retained Wolt record; expiry and current discount unresolved. No feed change or current-offer article."
       },
       "reviewedAt": "2026-11-05",
-      "decisionType": "retained-evidence-false-expiry-cleared",
-      "coverageEvidence": "reviews/2026-11-05-blog-coverage.json",
-      "coverageReviewNote": "Owner-retained Wolt record reviewed individually: false structured expiry was cleared and copy now explicitly says the public discount was not clearly visible. Fingerprint observation only, no feed edit, new offer claim or independent fresh discount confirmation today. Held pending primary redemption conditions; no merchant end inferred."
+      "decisionType": "merchant-not-on-platform",
+      "coverageEvidence": "reviews/blog-held-recheck-2026-11-05.json",
+      "coverageReviewNote": "Exact Wolt URL HTTP404; fully loaded browser explicitly states this restaurant/shop is no longer at Wolt. This does not establish physical restaurant closure. No current 7-EUR offer article, feed removal or merchant expiry invented.",
+      "heldRecheckPriorObservation": {
+        "id": "g2-3dn8v3",
+        "observedTitle": "7 € Wolt-Rabatt auf Bestellungen über 16 €",
+        "source": "https://wolt.com/de-at/aut/vienna/restaurant/schnitzel-stube-by-monte",
+        "contentHash": "8f88609e127e45923cf0509223312058194539b16d8633eb532d93973296c202",
+        "status": "held",
+        "reason": "Owner-retained Wolt record reviewed individually: false structured expiry was cleared and copy now explicitly says the public discount was not clearly visible. Fingerprint observation only, no feed edit, new offer claim or independent fresh discount confirmation today. Held pending primary redemption conditions; no merchant end inferred.",
+        "priorCoverageObservation": {
+          "id": "g2-3dn8v3",
+          "observedTitle": "7 € Wolt-Rabatt auf Bestellungen über 16 €",
+          "source": "https://wolt.com/de-at/aut/vienna/restaurant/schnitzel-stube-by-monte",
+          "contentHash": "19b4437eb23f1ef05d05afda9ce9ee49006bc585fac130afd85f7b15e3f9b8bf",
+          "status": "held",
+          "reason": "Owner-retained Wolt record; expiry and current discount unresolved. No feed change or current-offer article."
+        },
+        "reviewedAt": "2026-11-05",
+        "decisionType": "retained-evidence-false-expiry-cleared",
+        "coverageEvidence": "reviews/2026-11-05-blog-coverage.json",
+        "coverageReviewNote": "Owner-retained Wolt record reviewed individually: false structured expiry was cleared and copy now explicitly says the public discount was not clearly visible. Fingerprint observation only, no feed edit, new offer claim or independent fresh discount confirmation today. Held pending primary redemption conditions; no merchant end inferred."
+      }
     },
     {
       "id": "g2-1ys8kis",
@@ -77,8 +97,20 @@
       "observedTitle": "30 % auf Hähnchenbrust & weitere Lieferando-Super-Deals",
       "source": "https://www.lieferando.at/speisekarte/marden-1120-wien",
       "contentHash": "c7b545a87e96a53bd70670cae59c7753cffca38c4dc0d4daf7c226bc9fdd1729",
-      "status": "held",
-      "reason": "Marden: retained Lieferando prices not freshly confirmed; no new current-price article."
+      "status": "covered",
+      "reviewedAt": "2026-11-05",
+      "decisionType": "fresh-source-qualified",
+      "coverageEvidence": "reviews/blog-held-recheck-2026-11-05.json",
+      "coverageReviewNote": "Current fully loaded Lieferando menu explicitly shows 30 percent and three discounted price pairs, Rosaliagasse 1/1120. Direct HTTP403 overcome through normal browser, not a security bypass. No claimed fixed end.",
+      "heldRecheckPriorObservation": {
+        "id": "g2-mpwntm",
+        "observedTitle": "30 % auf Hähnchenbrust & weitere Lieferando-Super-Deals",
+        "source": "https://www.lieferando.at/speisekarte/marden-1120-wien",
+        "contentHash": "c7b545a87e96a53bd70670cae59c7753cffca38c4dc0d4daf7c226bc9fdd1729",
+        "status": "held",
+        "reason": "Marden: retained Lieferando prices not freshly confirmed; no new current-price article."
+      },
+      "slug": "marden-wien-1120-lieferando-super-deals"
     },
     {
       "id": "meta-ig-18113401520589405",
@@ -281,7 +313,19 @@
       "source": "https://www.ryanair.com/gb/en/trip/flights/select?adults=1&teens=0&children=0&infants=0&originIata=VIE&destinationIata=AGA&dateOut=2026-11-26&dateIn=2026-11-28&isReturn=true&discount=0&promoCode=",
       "contentHash": "7a82cd50596b0018d84beba00ed289d0687a2a8c8e6fc05d4a62c603b1970df4",
       "status": "held",
-      "reason": "Cached flight price without a fresh bookable quote. No current fare promise."
+      "reason": "Both exact date legs read in the public Ryanair browser selection. Lowest displayed Basic fares sum to 131.98 EUR versus saved 65.98 EUR. Old fare not current. This is a displayed-fare observation, not completed checkout, baggage-inclusive price or future guarantee.",
+      "reviewedAt": "2026-11-05",
+      "decisionType": "live-fare-changed",
+      "coverageEvidence": "reviews/blog-held-recheck-2026-11-05.json",
+      "coverageReviewNote": "Both exact date legs read in the public Ryanair browser selection. Lowest displayed Basic fares sum to 131.98 EUR versus saved 65.98 EUR. Old fare not current. This is a displayed-fare observation, not completed checkout, baggage-inclusive price or future guarantee.",
+      "heldRecheckPriorObservation": {
+        "id": "flight-10yozoj",
+        "observedTitle": "Wien–Agadir hin und zurück ab 65,98 €",
+        "source": "https://www.ryanair.com/gb/en/trip/flights/select?adults=1&teens=0&children=0&infants=0&originIata=VIE&destinationIata=AGA&dateOut=2026-11-26&dateIn=2026-11-28&isReturn=true&discount=0&promoCode=",
+        "contentHash": "7a82cd50596b0018d84beba00ed289d0687a2a8c8e6fc05d4a62c603b1970df4",
+        "status": "held",
+        "reason": "Cached flight price without a fresh bookable quote. No current fare promise."
+      }
     },
     {
       "id": "flight-5i0ef4",
@@ -289,7 +333,19 @@
       "source": "https://www.ryanair.com/gb/en/trip/flights/select?adults=1&teens=0&children=0&infants=0&originIata=VIE&destinationIata=BNX&dateOut=2026-11-14&dateIn=2026-11-20&isReturn=true&discount=0&promoCode=",
       "contentHash": "186c6460366beedc10da377ac524333ea7a7581bd69ee6fe9dcde5e457b62d28",
       "status": "held",
-      "reason": "Cached flight price without a fresh bookable quote. No current fare promise."
+      "reason": "Both exact date legs read in the public Ryanair browser selection. Lowest displayed Basic fares sum to 47.59 EUR versus saved 29.98 EUR. Old fare not current. This is a displayed-fare observation, not completed checkout, baggage-inclusive price or future guarantee.",
+      "reviewedAt": "2026-11-05",
+      "decisionType": "live-fare-changed",
+      "coverageEvidence": "reviews/blog-held-recheck-2026-11-05.json",
+      "coverageReviewNote": "Both exact date legs read in the public Ryanair browser selection. Lowest displayed Basic fares sum to 47.59 EUR versus saved 29.98 EUR. Old fare not current. This is a displayed-fare observation, not completed checkout, baggage-inclusive price or future guarantee.",
+      "heldRecheckPriorObservation": {
+        "id": "flight-5i0ef4",
+        "observedTitle": "Wien–Banja Luka hin und zurück ab 29,98 €",
+        "source": "https://www.ryanair.com/gb/en/trip/flights/select?adults=1&teens=0&children=0&infants=0&originIata=VIE&destinationIata=BNX&dateOut=2026-11-14&dateIn=2026-11-20&isReturn=true&discount=0&promoCode=",
+        "contentHash": "186c6460366beedc10da377ac524333ea7a7581bd69ee6fe9dcde5e457b62d28",
+        "status": "held",
+        "reason": "Cached flight price without a fresh bookable quote. No current fare promise."
+      }
     },
     {
       "id": "flight-1aicckv",
@@ -297,7 +353,19 @@
       "source": "https://www.ryanair.com/gb/en/trip/flights/select?adults=1&teens=0&children=0&infants=0&originIata=VIE&destinationIata=CTA&dateOut=2026-11-05&dateIn=2026-11-11&isReturn=true&discount=0&promoCode=",
       "contentHash": "e82a77125959fdbd35bfb77da86e9a416d52b1baea70ca398c9ba7202bace26a",
       "status": "held",
-      "reason": "Cached flight price without a fresh bookable quote. No current fare promise."
+      "reason": "Current Ryanair selection shows no available outbound on 5 Nov 2026 for this exact Catania itinerary. No current return-fare article or substitute date.",
+      "reviewedAt": "2026-11-05",
+      "decisionType": "outbound-unavailable",
+      "coverageEvidence": "reviews/blog-held-recheck-2026-11-05.json",
+      "coverageReviewNote": "Current Ryanair selection shows no available outbound on 5 Nov 2026 for this exact Catania itinerary. No current return-fare article or substitute date.",
+      "heldRecheckPriorObservation": {
+        "id": "flight-1aicckv",
+        "observedTitle": "Wien–Catania hin und zurück ab 56,98 €",
+        "source": "https://www.ryanair.com/gb/en/trip/flights/select?adults=1&teens=0&children=0&infants=0&originIata=VIE&destinationIata=CTA&dateOut=2026-11-05&dateIn=2026-11-11&isReturn=true&discount=0&promoCode=",
+        "contentHash": "e82a77125959fdbd35bfb77da86e9a416d52b1baea70ca398c9ba7202bace26a",
+        "status": "held",
+        "reason": "Cached flight price without a fresh bookable quote. No current fare promise."
+      }
     },
     {
       "id": "flight-rj2ol1",
@@ -313,7 +381,19 @@
       "source": "https://www.ryanair.com/gb/en/trip/flights/select?adults=1&teens=0&children=0&infants=0&originIata=VIE&destinationIata=PFO&dateOut=2026-11-25&dateIn=2026-11-30&isReturn=true&discount=0&promoCode=",
       "contentHash": "c463fe6946f0cc4a977f7deff80f9cfe0cf7b3ffaab49b1d5517322ad64f2d4c",
       "status": "held",
-      "reason": "Cached flight price without a fresh bookable quote. No current fare promise."
+      "reason": "Both exact date legs read in the public Ryanair browser selection. Lowest displayed Basic fares sum to 76.35 EUR versus saved 61.49 EUR. Old fare not current. This is a displayed-fare observation, not completed checkout, baggage-inclusive price or future guarantee.",
+      "reviewedAt": "2026-11-05",
+      "decisionType": "live-fare-changed",
+      "coverageEvidence": "reviews/blog-held-recheck-2026-11-05.json",
+      "coverageReviewNote": "Both exact date legs read in the public Ryanair browser selection. Lowest displayed Basic fares sum to 76.35 EUR versus saved 61.49 EUR. Old fare not current. This is a displayed-fare observation, not completed checkout, baggage-inclusive price or future guarantee.",
+      "heldRecheckPriorObservation": {
+        "id": "flight-1b0v2p3",
+        "observedTitle": "Wien–Paphos hin und zurück ab 61,49 €",
+        "source": "https://www.ryanair.com/gb/en/trip/flights/select?adults=1&teens=0&children=0&infants=0&originIata=VIE&destinationIata=PFO&dateOut=2026-11-25&dateIn=2026-11-30&isReturn=true&discount=0&promoCode=",
+        "contentHash": "c463fe6946f0cc4a977f7deff80f9cfe0cf7b3ffaab49b1d5517322ad64f2d4c",
+        "status": "held",
+        "reason": "Cached flight price without a fresh bookable quote. No current fare promise."
+      }
     },
     {
       "id": "g2-3cen4",
@@ -449,7 +529,20 @@
       "source": "https://wolt.com/en/aut/vienna/aut_woltplusweeks-jan26_all-rx-week3_slot3",
       "contentHash": "9fe84da6beac335eaab91b9d63b098b4b6c886330ba0af7433eff563106b5db1",
       "status": "held",
-      "reason": "Honu: January-2026 campaign URL is not evidence of a current October offer."
+      "reason": "Old Jan26-style category URL currently loads an active Wolt list, so URL age alone does NOT prove expiry. Current Honu Schultergasse page and opened offer details show 7 EUR/16 EUR only for new users with local number, home delivery, no stacking. Exact old 5-EUR claim not confirmed; current variant described separately.",
+      "reviewedAt": "2026-11-05",
+      "decisionType": "different-current-variant",
+      "coverageEvidence": "reviews/blog-held-recheck-2026-11-05.json",
+      "coverageReviewNote": "Old Jan26-style category URL currently loads an active Wolt list, so URL age alone does NOT prove expiry. Current Honu Schultergasse page and opened offer details show 7 EUR/16 EUR only for new users with local number, home delivery, no stacking. Exact old 5-EUR claim not confirmed; current variant described separately.",
+      "heldRecheckPriorObservation": {
+        "id": "g2-ezkkws",
+        "observedTitle": "5 € Rabatt auf Honu Tiki Bowls über Wolt",
+        "source": "https://wolt.com/en/aut/vienna/aut_woltplusweeks-jan26_all-rx-week3_slot3",
+        "contentHash": "9fe84da6beac335eaab91b9d63b098b4b6c886330ba0af7433eff563106b5db1",
+        "status": "held",
+        "reason": "Honu: January-2026 campaign URL is not evidence of a current October offer."
+      },
+      "relatedSlug": "wolt-7-euro-neukunden-wien-aida-honu"
     },
     {
       "id": "benefit-drei-plus-1fwwa4y",
@@ -599,10 +692,9 @@
       "observedTitle": "Huhn- oder Steak-Sandwich für je 3,50 €",
       "source": "https://www.instagram.com/p/DfQQKdqo-95/",
       "contentHash": "154eac934a2d2d97c97a4d15569653442af68faa7a9dd1a3f11fd3613f098608",
-      "status": "held",
-      "reason": "Individual copy-only change reviewed: title now states each Huhn/Steak sandwich at 3.50 EUR and description explicitly leaves reopening day/end unknown. Retained 3 November official evidence remains the prior source check; no fresh merchant continuation or seven-day availability established today. Hold retained, no new article.",
+      "status": "covered",
       "reviewedAt": "2026-11-05",
-      "decisionType": "retained-evidence-duration-unresolved",
+      "decisionType": "fresh-source-qualified",
       "evidence": "reviews/2026-11-03-blog-coverage.json",
       "priorCoverageObservation": {
         "id": "meta-ig-18122257859070013",
@@ -615,8 +707,33 @@
         "decisionType": "source-verified-duration-open",
         "evidence": "reviews/2026-11-03-blog-coverage.json"
       },
-      "coverageEvidence": "reviews/2026-11-05-blog-coverage.json",
-      "coverageReviewNote": "Individual copy-only change reviewed: title now states each Huhn/Steak sandwich at 3.50 EUR and description explicitly leaves reopening day/end unknown. Retained 3 November official evidence remains the prior source check; no fresh merchant continuation or seven-day availability established today. Hold retained, no new article."
+      "coverageEvidence": "reviews/blog-held-recheck-2026-11-05.json",
+      "coverageReviewNote": "Fresh original 2 Nov price post remains pinned, plus own merchant reel DfXHXIouNYE displayed eight hours old on 5 Nov explicitly says promotions continue. Continuation is general, not a new repetition of each price; article clearly qualifies this inference and retains unknown end, availability and individual redemption. No invented seven-day guarantee.",
+      "heldRecheckPriorObservation": {
+        "id": "meta-ig-18122257859070013",
+        "observedTitle": "Huhn- oder Steak-Sandwich für je 3,50 €",
+        "source": "https://www.instagram.com/p/DfQQKdqo-95/",
+        "contentHash": "154eac934a2d2d97c97a4d15569653442af68faa7a9dd1a3f11fd3613f098608",
+        "status": "held",
+        "reason": "Individual copy-only change reviewed: title now states each Huhn/Steak sandwich at 3.50 EUR and description explicitly leaves reopening day/end unknown. Retained 3 November official evidence remains the prior source check; no fresh merchant continuation or seven-day availability established today. Hold retained, no new article.",
+        "reviewedAt": "2026-11-05",
+        "decisionType": "retained-evidence-duration-unresolved",
+        "evidence": "reviews/2026-11-03-blog-coverage.json",
+        "priorCoverageObservation": {
+          "id": "meta-ig-18122257859070013",
+          "observedTitle": "🥰 🎁 UNSER WIEDERERÖFFNUNGSANGEBOT Huhn Sandwich & Steak Sandwich 🔥 NUR 3,50 € PRO SANDWICH!",
+          "source": "https://www.instagram.com/p/DfQQKdqo-95/",
+          "contentHash": "b57329129222f3fb5704e70d5141648e51f581b976bd8c7565a92c9cdde10e71",
+          "status": "held",
+          "reason": "Fresh official Instagram embed identifies urfa.pizzeria10 and Huhn/Steak sandwiches at 3.50 EUR, Wienerbergstrasse 8, 1100 Wien, from 10:00. Reopening-specific duration/end is unspecified; no seven-day continuation or recurring schedule established. Deferred today for the longer-lived, fully bounded McDonald's guide expansion.",
+          "reviewedAt": "2026-11-03",
+          "decisionType": "source-verified-duration-open",
+          "evidence": "reviews/2026-11-03-blog-coverage.json"
+        },
+        "coverageEvidence": "reviews/2026-11-05-blog-coverage.json",
+        "coverageReviewNote": "Individual copy-only change reviewed: title now states each Huhn/Steak sandwich at 3.50 EUR and description explicitly leaves reopening day/end unknown. Retained 3 November official evidence remains the prior source check; no fresh merchant continuation or seven-day availability established today. Hold retained, no new article."
+      },
+      "slug": "urfa-wien-huhn-steak-sandwich-350"
     },
     {
       "id": "flight-jnykc6",
@@ -624,9 +741,9 @@
       "source": "https://www.ryanair.com/gb/en/trip/flights/select?adults=1&teens=0&children=0&infants=0&originIata=VIE&destinationIata=BCN&dateOut=2026-12-14&dateIn=2026-12-16&isReturn=true&discount=0&promoCode=",
       "contentHash": "7a253eab9905654ab3406ef476b78a8dd21d256bcaba27fdcc4d77015c5ca1ba",
       "status": "held",
-      "reason": "Individual title/description cleanup adds German route/date wording and expressly dates the captured fare to 2 November 2026. No fresh bookable airline quote today; departure/storage date does not guarantee price or campaign duration. Previous flight hold retained, not a new article occasion.",
+      "reason": "Both exact date legs read in the public Ryanair browser selection. Lowest displayed Basic fares sum to 107.11 EUR versus saved 55.98 EUR. Old fare not current. This is a displayed-fare observation, not completed checkout, baggage-inclusive price or future guarantee.",
       "reviewedAt": "2026-11-05",
-      "decisionType": "retained-evidence-copy-clarification",
+      "decisionType": "live-fare-changed",
       "evidence": "reviews/2026-11-03-blog-coverage.json",
       "priorCoverageObservation": {
         "id": "flight-jnykc6",
@@ -639,8 +756,32 @@
         "decisionType": "unverified-live-fare",
         "evidence": "reviews/2026-11-03-blog-coverage.json"
       },
-      "coverageEvidence": "reviews/2026-11-05-blog-coverage.json",
-      "coverageReviewNote": "Individual title/description cleanup adds German route/date wording and expressly dates the captured fare to 2 November 2026. No fresh bookable airline quote today; departure/storage date does not guarantee price or campaign duration. Previous flight hold retained, not a new article occasion."
+      "coverageEvidence": "reviews/blog-held-recheck-2026-11-05.json",
+      "coverageReviewNote": "Both exact date legs read in the public Ryanair browser selection. Lowest displayed Basic fares sum to 107.11 EUR versus saved 55.98 EUR. Old fare not current. This is a displayed-fare observation, not completed checkout, baggage-inclusive price or future guarantee.",
+      "heldRecheckPriorObservation": {
+        "id": "flight-jnykc6",
+        "observedTitle": "Wien–Barcelona hin und zurück ab 55,98 €",
+        "source": "https://www.ryanair.com/gb/en/trip/flights/select?adults=1&teens=0&children=0&infants=0&originIata=VIE&destinationIata=BCN&dateOut=2026-12-14&dateIn=2026-12-16&isReturn=true&discount=0&promoCode=",
+        "contentHash": "7a253eab9905654ab3406ef476b78a8dd21d256bcaba27fdcc4d77015c5ca1ba",
+        "status": "held",
+        "reason": "Individual title/description cleanup adds German route/date wording and expressly dates the captured fare to 2 November 2026. No fresh bookable airline quote today; departure/storage date does not guarantee price or campaign duration. Previous flight hold retained, not a new article occasion.",
+        "reviewedAt": "2026-11-05",
+        "decisionType": "retained-evidence-copy-clarification",
+        "evidence": "reviews/2026-11-03-blog-coverage.json",
+        "priorCoverageObservation": {
+          "id": "flight-jnykc6",
+          "observedTitle": "Hin & zurück nach Barcelona ab €55.98",
+          "source": "https://www.ryanair.com/gb/en/trip/flights/select?adults=1&teens=0&children=0&infants=0&originIata=VIE&destinationIata=BCN&dateOut=2026-12-14&dateIn=2026-12-16&isReturn=true&discount=0&promoCode=",
+          "contentHash": "bbeff3f96d2059f6624bd692bb30af32917e202b23ccb682d690824d77f862a1",
+          "status": "held",
+          "reason": "Cached route/date price without a fresh currently bookable airline quote. A departure date is not a fare guarantee or merchant campaign end; no current airfare article.",
+          "reviewedAt": "2026-11-03",
+          "decisionType": "unverified-live-fare",
+          "evidence": "reviews/2026-11-03-blog-coverage.json"
+        },
+        "coverageEvidence": "reviews/2026-11-05-blog-coverage.json",
+        "coverageReviewNote": "Individual title/description cleanup adds German route/date wording and expressly dates the captured fare to 2 November 2026. No fresh bookable airline quote today; departure/storage date does not guarantee price or campaign duration. Previous flight hold retained, not a new article occasion."
+      }
     },
     {
       "id": "flight-1jh1qx0",
@@ -648,9 +789,9 @@
       "source": "https://www.ryanair.com/gb/en/trip/flights/select?adults=1&teens=0&children=0&infants=0&originIata=VIE&destinationIata=BLQ&dateOut=2026-12-14&dateIn=2026-12-20&isReturn=true&discount=0&promoCode=",
       "contentHash": "227d6b507c1dc1a1a2de350f13463bfba31e72fef01a3db0ed34886489fadb59",
       "status": "held",
-      "reason": "Individual title/description cleanup adds German route/date wording and expressly dates the captured fare to 2 November 2026. No fresh bookable airline quote today; departure/storage date does not guarantee price or campaign duration. Previous flight hold retained, not a new article occasion.",
+      "reason": "Both exact date legs read in the public Ryanair browser selection. Lowest displayed Basic fares sum to 55.39 EUR versus saved 40.98 EUR. Old fare not current. This is a displayed-fare observation, not completed checkout, baggage-inclusive price or future guarantee.",
       "reviewedAt": "2026-11-05",
-      "decisionType": "retained-evidence-copy-clarification",
+      "decisionType": "live-fare-changed",
       "evidence": "reviews/2026-11-03-blog-coverage.json",
       "priorCoverageObservation": {
         "id": "flight-1jh1qx0",
@@ -663,8 +804,32 @@
         "decisionType": "unverified-live-fare",
         "evidence": "reviews/2026-11-03-blog-coverage.json"
       },
-      "coverageEvidence": "reviews/2026-11-05-blog-coverage.json",
-      "coverageReviewNote": "Individual title/description cleanup adds German route/date wording and expressly dates the captured fare to 2 November 2026. No fresh bookable airline quote today; departure/storage date does not guarantee price or campaign duration. Previous flight hold retained, not a new article occasion."
+      "coverageEvidence": "reviews/blog-held-recheck-2026-11-05.json",
+      "coverageReviewNote": "Both exact date legs read in the public Ryanair browser selection. Lowest displayed Basic fares sum to 55.39 EUR versus saved 40.98 EUR. Old fare not current. This is a displayed-fare observation, not completed checkout, baggage-inclusive price or future guarantee.",
+      "heldRecheckPriorObservation": {
+        "id": "flight-1jh1qx0",
+        "observedTitle": "Wien–Bologna hin und zurück ab 40,98 €",
+        "source": "https://www.ryanair.com/gb/en/trip/flights/select?adults=1&teens=0&children=0&infants=0&originIata=VIE&destinationIata=BLQ&dateOut=2026-12-14&dateIn=2026-12-20&isReturn=true&discount=0&promoCode=",
+        "contentHash": "227d6b507c1dc1a1a2de350f13463bfba31e72fef01a3db0ed34886489fadb59",
+        "status": "held",
+        "reason": "Individual title/description cleanup adds German route/date wording and expressly dates the captured fare to 2 November 2026. No fresh bookable airline quote today; departure/storage date does not guarantee price or campaign duration. Previous flight hold retained, not a new article occasion.",
+        "reviewedAt": "2026-11-05",
+        "decisionType": "retained-evidence-copy-clarification",
+        "evidence": "reviews/2026-11-03-blog-coverage.json",
+        "priorCoverageObservation": {
+          "id": "flight-1jh1qx0",
+          "observedTitle": "Hin & zurück nach Bologna ab €40.98",
+          "source": "https://www.ryanair.com/gb/en/trip/flights/select?adults=1&teens=0&children=0&infants=0&originIata=VIE&destinationIata=BLQ&dateOut=2026-12-14&dateIn=2026-12-20&isReturn=true&discount=0&promoCode=",
+          "contentHash": "6a0036e332f055d527c3e74d8d91f8ab34d64e56c9f3f103e2c3275d40439590",
+          "status": "held",
+          "reason": "Cached route/date price without a fresh currently bookable airline quote. A departure date is not a fare guarantee or merchant campaign end; no current airfare article.",
+          "reviewedAt": "2026-11-03",
+          "decisionType": "unverified-live-fare",
+          "evidence": "reviews/2026-11-03-blog-coverage.json"
+        },
+        "coverageEvidence": "reviews/2026-11-05-blog-coverage.json",
+        "coverageReviewNote": "Individual title/description cleanup adds German route/date wording and expressly dates the captured fare to 2 November 2026. No fresh bookable airline quote today; departure/storage date does not guarantee price or campaign duration. Previous flight hold retained, not a new article occasion."
+      }
     },
     {
       "id": "flight-19ftcd9",
@@ -672,9 +837,9 @@
       "source": "https://www.ryanair.com/gb/en/trip/flights/select?adults=1&teens=0&children=0&infants=0&originIata=VIE&destinationIata=CGN&dateOut=2026-12-10&dateIn=2026-12-15&isReturn=true&discount=0&promoCode=",
       "contentHash": "65023b7a50a96728d68e66053c6564abb220a0a1cffad38982ba2161d5e5377e",
       "status": "held",
-      "reason": "Individual title/description cleanup adds German route/date wording and expressly dates the captured fare to 2 November 2026. No fresh bookable airline quote today; departure/storage date does not guarantee price or campaign duration. Previous flight hold retained, not a new article occasion.",
+      "reason": "Both exact date legs read in the public Ryanair browser selection. Lowest displayed Basic fares sum to 79.36 EUR versus saved 59.21 EUR. Old fare not current. This is a displayed-fare observation, not completed checkout, baggage-inclusive price or future guarantee.",
       "reviewedAt": "2026-11-05",
-      "decisionType": "retained-evidence-copy-clarification",
+      "decisionType": "live-fare-changed",
       "evidence": "reviews/2026-11-03-blog-coverage.json",
       "priorCoverageObservation": {
         "id": "flight-19ftcd9",
@@ -687,8 +852,32 @@
         "decisionType": "unverified-live-fare",
         "evidence": "reviews/2026-11-03-blog-coverage.json"
       },
-      "coverageEvidence": "reviews/2026-11-05-blog-coverage.json",
-      "coverageReviewNote": "Individual title/description cleanup adds German route/date wording and expressly dates the captured fare to 2 November 2026. No fresh bookable airline quote today; departure/storage date does not guarantee price or campaign duration. Previous flight hold retained, not a new article occasion."
+      "coverageEvidence": "reviews/blog-held-recheck-2026-11-05.json",
+      "coverageReviewNote": "Both exact date legs read in the public Ryanair browser selection. Lowest displayed Basic fares sum to 79.36 EUR versus saved 59.21 EUR. Old fare not current. This is a displayed-fare observation, not completed checkout, baggage-inclusive price or future guarantee.",
+      "heldRecheckPriorObservation": {
+        "id": "flight-19ftcd9",
+        "observedTitle": "Wien–Köln hin und zurück ab 59,21 €",
+        "source": "https://www.ryanair.com/gb/en/trip/flights/select?adults=1&teens=0&children=0&infants=0&originIata=VIE&destinationIata=CGN&dateOut=2026-12-10&dateIn=2026-12-15&isReturn=true&discount=0&promoCode=",
+        "contentHash": "65023b7a50a96728d68e66053c6564abb220a0a1cffad38982ba2161d5e5377e",
+        "status": "held",
+        "reason": "Individual title/description cleanup adds German route/date wording and expressly dates the captured fare to 2 November 2026. No fresh bookable airline quote today; departure/storage date does not guarantee price or campaign duration. Previous flight hold retained, not a new article occasion.",
+        "reviewedAt": "2026-11-05",
+        "decisionType": "retained-evidence-copy-clarification",
+        "evidence": "reviews/2026-11-03-blog-coverage.json",
+        "priorCoverageObservation": {
+          "id": "flight-19ftcd9",
+          "observedTitle": "Hin & zurück nach Cologne ab €59.21",
+          "source": "https://www.ryanair.com/gb/en/trip/flights/select?adults=1&teens=0&children=0&infants=0&originIata=VIE&destinationIata=CGN&dateOut=2026-12-10&dateIn=2026-12-15&isReturn=true&discount=0&promoCode=",
+          "contentHash": "ccb1b7829054831adc1f4f1d2b61d9c607047169b35f42fc1843b70c30df7490",
+          "status": "held",
+          "reason": "Cached route/date price without a fresh currently bookable airline quote. A departure date is not a fare guarantee or merchant campaign end; no current airfare article.",
+          "reviewedAt": "2026-11-03",
+          "decisionType": "unverified-live-fare",
+          "evidence": "reviews/2026-11-03-blog-coverage.json"
+        },
+        "coverageEvidence": "reviews/2026-11-05-blog-coverage.json",
+        "coverageReviewNote": "Individual title/description cleanup adds German route/date wording and expressly dates the captured fare to 2 November 2026. No fresh bookable airline quote today; departure/storage date does not guarantee price or campaign duration. Previous flight hold retained, not a new article occasion."
+      }
     },
     {
       "id": "flight-1nqm22i",
@@ -696,9 +885,9 @@
       "source": "https://www.ryanair.com/gb/en/trip/flights/select?adults=1&teens=0&children=0&infants=0&originIata=VIE&destinationIata=MLA&dateOut=2026-12-11&dateIn=2026-12-15&isReturn=true&discount=0&promoCode=",
       "contentHash": "affaf0f9634dc234ae3de403a4eb4c39cdbc9d0e7099ad749aab37a5c04216dc",
       "status": "held",
-      "reason": "Individual title/description cleanup adds German route/date wording and expressly dates the captured fare to 2 November 2026. No fresh bookable airline quote today; departure/storage date does not guarantee price or campaign duration. Previous flight hold retained, not a new article occasion.",
+      "reason": "Both exact date legs read in the public Ryanair browser selection. Lowest displayed Basic fares sum to 79.90 EUR versus saved 43.98 EUR. Old fare not current. This is a displayed-fare observation, not completed checkout, baggage-inclusive price or future guarantee.",
       "reviewedAt": "2026-11-05",
-      "decisionType": "retained-evidence-copy-clarification",
+      "decisionType": "live-fare-changed",
       "evidence": "reviews/2026-11-03-blog-coverage.json",
       "priorCoverageObservation": {
         "id": "flight-1nqm22i",
@@ -711,8 +900,32 @@
         "decisionType": "unverified-live-fare",
         "evidence": "reviews/2026-11-03-blog-coverage.json"
       },
-      "coverageEvidence": "reviews/2026-11-05-blog-coverage.json",
-      "coverageReviewNote": "Individual title/description cleanup adds German route/date wording and expressly dates the captured fare to 2 November 2026. No fresh bookable airline quote today; departure/storage date does not guarantee price or campaign duration. Previous flight hold retained, not a new article occasion."
+      "coverageEvidence": "reviews/blog-held-recheck-2026-11-05.json",
+      "coverageReviewNote": "Both exact date legs read in the public Ryanair browser selection. Lowest displayed Basic fares sum to 79.90 EUR versus saved 43.98 EUR. Old fare not current. This is a displayed-fare observation, not completed checkout, baggage-inclusive price or future guarantee.",
+      "heldRecheckPriorObservation": {
+        "id": "flight-1nqm22i",
+        "observedTitle": "Wien–Malta hin und zurück ab 43,98 €",
+        "source": "https://www.ryanair.com/gb/en/trip/flights/select?adults=1&teens=0&children=0&infants=0&originIata=VIE&destinationIata=MLA&dateOut=2026-12-11&dateIn=2026-12-15&isReturn=true&discount=0&promoCode=",
+        "contentHash": "affaf0f9634dc234ae3de403a4eb4c39cdbc9d0e7099ad749aab37a5c04216dc",
+        "status": "held",
+        "reason": "Individual title/description cleanup adds German route/date wording and expressly dates the captured fare to 2 November 2026. No fresh bookable airline quote today; departure/storage date does not guarantee price or campaign duration. Previous flight hold retained, not a new article occasion.",
+        "reviewedAt": "2026-11-05",
+        "decisionType": "retained-evidence-copy-clarification",
+        "evidence": "reviews/2026-11-03-blog-coverage.json",
+        "priorCoverageObservation": {
+          "id": "flight-1nqm22i",
+          "observedTitle": "Hin & zurück nach Malta ab €43.98",
+          "source": "https://www.ryanair.com/gb/en/trip/flights/select?adults=1&teens=0&children=0&infants=0&originIata=VIE&destinationIata=MLA&dateOut=2026-12-11&dateIn=2026-12-15&isReturn=true&discount=0&promoCode=",
+          "contentHash": "7780ee15b6d22f00dea6b4e363956484c9441db4d0f395b44da517ffe20c888c",
+          "status": "held",
+          "reason": "Cached route/date price without a fresh currently bookable airline quote. A departure date is not a fare guarantee or merchant campaign end; no current airfare article.",
+          "reviewedAt": "2026-11-03",
+          "decisionType": "unverified-live-fare",
+          "evidence": "reviews/2026-11-03-blog-coverage.json"
+        },
+        "coverageEvidence": "reviews/2026-11-05-blog-coverage.json",
+        "coverageReviewNote": "Individual title/description cleanup adds German route/date wording and expressly dates the captured fare to 2 November 2026. No fresh bookable airline quote today; departure/storage date does not guarantee price or campaign duration. Previous flight hold retained, not a new article occasion."
+      }
     },
     {
       "id": "flight-1n42w4t",
@@ -720,9 +933,9 @@
       "source": "https://www.ryanair.com/gb/en/trip/flights/select?adults=1&teens=0&children=0&infants=0&originIata=VIE&destinationIata=PMI&dateOut=2026-12-20&dateIn=2026-12-23&isReturn=true&discount=0&promoCode=",
       "contentHash": "c41fb62bfe3a5e7dc9182f4cdd39134fcff7cf43515dd4e37c126adf18cf27ea",
       "status": "held",
-      "reason": "Individual title/description cleanup adds German route/date wording and expressly dates the captured fare to 2 November 2026. No fresh bookable airline quote today; departure/storage date does not guarantee price or campaign duration. Previous flight hold retained, not a new article occasion.",
+      "reason": "Both exact date legs read in the public Ryanair browser selection. Lowest displayed Basic fares sum to 54.98 EUR versus saved 44.98 EUR. Old fare not current. This is a displayed-fare observation, not completed checkout, baggage-inclusive price or future guarantee.",
       "reviewedAt": "2026-11-05",
-      "decisionType": "retained-evidence-copy-clarification",
+      "decisionType": "live-fare-changed",
       "evidence": "reviews/2026-11-03-blog-coverage.json",
       "priorCoverageObservation": {
         "id": "flight-1n42w4t",
@@ -735,8 +948,32 @@
         "decisionType": "unverified-live-fare",
         "evidence": "reviews/2026-11-03-blog-coverage.json"
       },
-      "coverageEvidence": "reviews/2026-11-05-blog-coverage.json",
-      "coverageReviewNote": "Individual title/description cleanup adds German route/date wording and expressly dates the captured fare to 2 November 2026. No fresh bookable airline quote today; departure/storage date does not guarantee price or campaign duration. Previous flight hold retained, not a new article occasion."
+      "coverageEvidence": "reviews/blog-held-recheck-2026-11-05.json",
+      "coverageReviewNote": "Both exact date legs read in the public Ryanair browser selection. Lowest displayed Basic fares sum to 54.98 EUR versus saved 44.98 EUR. Old fare not current. This is a displayed-fare observation, not completed checkout, baggage-inclusive price or future guarantee.",
+      "heldRecheckPriorObservation": {
+        "id": "flight-1n42w4t",
+        "observedTitle": "Wien–Palma hin und zurück ab 44,98 €",
+        "source": "https://www.ryanair.com/gb/en/trip/flights/select?adults=1&teens=0&children=0&infants=0&originIata=VIE&destinationIata=PMI&dateOut=2026-12-20&dateIn=2026-12-23&isReturn=true&discount=0&promoCode=",
+        "contentHash": "c41fb62bfe3a5e7dc9182f4cdd39134fcff7cf43515dd4e37c126adf18cf27ea",
+        "status": "held",
+        "reason": "Individual title/description cleanup adds German route/date wording and expressly dates the captured fare to 2 November 2026. No fresh bookable airline quote today; departure/storage date does not guarantee price or campaign duration. Previous flight hold retained, not a new article occasion.",
+        "reviewedAt": "2026-11-05",
+        "decisionType": "retained-evidence-copy-clarification",
+        "evidence": "reviews/2026-11-03-blog-coverage.json",
+        "priorCoverageObservation": {
+          "id": "flight-1n42w4t",
+          "observedTitle": "Hin & zurück nach Palma ab €44.98",
+          "source": "https://www.ryanair.com/gb/en/trip/flights/select?adults=1&teens=0&children=0&infants=0&originIata=VIE&destinationIata=PMI&dateOut=2026-12-20&dateIn=2026-12-23&isReturn=true&discount=0&promoCode=",
+          "contentHash": "fa5ab814db6d87011a48740bd7fff5a86d2bb83ca49403b2e2a018e897cd17f4",
+          "status": "held",
+          "reason": "Cached route/date price without a fresh currently bookable airline quote. A departure date is not a fare guarantee or merchant campaign end; no current airfare article.",
+          "reviewedAt": "2026-11-03",
+          "decisionType": "unverified-live-fare",
+          "evidence": "reviews/2026-11-03-blog-coverage.json"
+        },
+        "coverageEvidence": "reviews/2026-11-05-blog-coverage.json",
+        "coverageReviewNote": "Individual title/description cleanup adds German route/date wording and expressly dates the captured fare to 2 November 2026. No fresh bookable airline quote today; departure/storage date does not guarantee price or campaign duration. Previous flight hold retained, not a new article occasion."
+      }
     },
     {
       "id": "flight-1srbhui",
@@ -744,9 +981,9 @@
       "source": "https://www.ryanair.com/gb/en/trip/flights/select?adults=1&teens=0&children=0&infants=0&originIata=VIE&destinationIata=EDI&dateOut=2026-11-22&dateIn=2026-11-28&isReturn=true&discount=0&promoCode=",
       "contentHash": "633686a3df6015f4dcd6b7fc404d2149fad71884643386b99b98f1f0d5221066",
       "status": "held",
-      "reason": "Individual title/description cleanup adds German route/date wording and expressly dates the captured fare to 2 November 2026. No fresh bookable airline quote today; departure/storage date does not guarantee price or campaign duration. Previous flight hold retained, not a new article occasion.",
+      "reason": "Both exact date legs read in the public Ryanair browser selection. Lowest displayed Basic fares sum to 121.04 EUR versus saved 63.98 EUR. Old fare not current. This is a displayed-fare observation, not completed checkout, baggage-inclusive price or future guarantee.",
       "reviewedAt": "2026-11-05",
-      "decisionType": "retained-evidence-copy-clarification",
+      "decisionType": "live-fare-changed",
       "evidence": "reviews/2026-11-03-blog-coverage.json",
       "priorCoverageObservation": {
         "id": "flight-1srbhui",
@@ -759,19 +996,56 @@
         "decisionType": "unverified-live-fare",
         "evidence": "reviews/2026-11-03-blog-coverage.json"
       },
-      "coverageEvidence": "reviews/2026-11-05-blog-coverage.json",
-      "coverageReviewNote": "Individual title/description cleanup adds German route/date wording and expressly dates the captured fare to 2 November 2026. No fresh bookable airline quote today; departure/storage date does not guarantee price or campaign duration. Previous flight hold retained, not a new article occasion."
+      "coverageEvidence": "reviews/blog-held-recheck-2026-11-05.json",
+      "coverageReviewNote": "Both exact date legs read in the public Ryanair browser selection. Lowest displayed Basic fares sum to 121.04 EUR versus saved 63.98 EUR. Old fare not current. This is a displayed-fare observation, not completed checkout, baggage-inclusive price or future guarantee.",
+      "heldRecheckPriorObservation": {
+        "id": "flight-1srbhui",
+        "observedTitle": "Wien–Edinburgh hin und zurück ab 63,98 €",
+        "source": "https://www.ryanair.com/gb/en/trip/flights/select?adults=1&teens=0&children=0&infants=0&originIata=VIE&destinationIata=EDI&dateOut=2026-11-22&dateIn=2026-11-28&isReturn=true&discount=0&promoCode=",
+        "contentHash": "633686a3df6015f4dcd6b7fc404d2149fad71884643386b99b98f1f0d5221066",
+        "status": "held",
+        "reason": "Individual title/description cleanup adds German route/date wording and expressly dates the captured fare to 2 November 2026. No fresh bookable airline quote today; departure/storage date does not guarantee price or campaign duration. Previous flight hold retained, not a new article occasion.",
+        "reviewedAt": "2026-11-05",
+        "decisionType": "retained-evidence-copy-clarification",
+        "evidence": "reviews/2026-11-03-blog-coverage.json",
+        "priorCoverageObservation": {
+          "id": "flight-1srbhui",
+          "observedTitle": "Hin & zurück nach Edinburgh ab €63.98",
+          "source": "https://www.ryanair.com/gb/en/trip/flights/select?adults=1&teens=0&children=0&infants=0&originIata=VIE&destinationIata=EDI&dateOut=2026-11-22&dateIn=2026-11-28&isReturn=true&discount=0&promoCode=",
+          "contentHash": "5cfb8a2c67f60763061c4bfdb50e658c1946fd9ab4b48eb827fde9cef7256d72",
+          "status": "held",
+          "reason": "Cached route/date price without a fresh currently bookable airline quote. A departure date is not a fare guarantee or merchant campaign end; no current airfare article.",
+          "reviewedAt": "2026-11-03",
+          "decisionType": "unverified-live-fare",
+          "evidence": "reviews/2026-11-03-blog-coverage.json"
+        },
+        "coverageEvidence": "reviews/2026-11-05-blog-coverage.json",
+        "coverageReviewNote": "Individual title/description cleanup adds German route/date wording and expressly dates the captured fare to 2 November 2026. No fresh bookable airline quote today; departure/storage date does not guarantee price or campaign duration. Previous flight hold retained, not a new article occasion."
+      }
     },
     {
       "id": "gs-574207",
       "observedTitle": "50% Gutschein für alles Gläser + Gratis-Versand",
       "source": "https://www.gutscheine.at/brille24-de",
       "contentHash": "815fb47abb318b915d709baae763299ff046d43af6fa9a777ba1962cebbd525a",
-      "status": "held",
-      "reason": "Official Brille24 page confirms 50 percent only on surcharge-bearing glass extras with a new pair, not frames or already reduced glasses. The exact claimed voucher, free delivery to Austria and merchant end 19 Nov are not established; no current Austrian coupon article.",
-      "reviewedAt": "2026-11-03",
-      "decisionType": "exact-claim-not-confirmed",
-      "evidence": "reviews/2026-11-03-blog-coverage.json"
+      "status": "covered",
+      "reviewedAt": "2026-11-05",
+      "decisionType": "fresh-source-qualified",
+      "evidence": "reviews/2026-11-03-blog-coverage.json",
+      "coverageEvidence": "reviews/blog-held-recheck-2026-11-05.json",
+      "coverageReviewNote": "Official Brille24 homepage NOVLENS banner AND its actual terms popup now confirm 50 percent on lenses, free shipping, exclusion of already reduced glasses and 19 Nov 2026. Austria is an official delivery country; no personal Austrian checkout test or claim of half-price frames.",
+      "heldRecheckPriorObservation": {
+        "id": "gs-574207",
+        "observedTitle": "50% Gutschein für alles Gläser + Gratis-Versand",
+        "source": "https://www.gutscheine.at/brille24-de",
+        "contentHash": "815fb47abb318b915d709baae763299ff046d43af6fa9a777ba1962cebbd525a",
+        "status": "held",
+        "reason": "Official Brille24 page confirms 50 percent only on surcharge-bearing glass extras with a new pair, not frames or already reduced glasses. The exact claimed voucher, free delivery to Austria and merchant end 19 Nov are not established; no current Austrian coupon article.",
+        "reviewedAt": "2026-11-03",
+        "decisionType": "exact-claim-not-confirmed",
+        "evidence": "reviews/2026-11-03-blog-coverage.json"
+      },
+      "slug": "brille24-novlens-50-prozent-glaeser-oesterreich"
     },
     {
       "id": "benefit-hot-vorteile-cdbe54a8a6ea1656",
@@ -970,11 +1244,24 @@
       "observedTitle": "Burger & Nuggets: lokale 1+1-Gutscheine bei McDonald's",
       "source": "https://www.preisjaeger.at/deals/mc-donalds-1-1-lokaler-deal-370655",
       "contentHash": "25f8833ef1108f9009b52eb8f93537ced4574ef8241c6c3bd9b03b379648a8c0",
-      "status": "held",
-      "reason": "Local burger/nugget paper coupons through 8 Nov 2026 at three named Vienna stores are a different offer from the existing nationwide MyMcDonald's McNuggets article and the newly researched breakfast-delivery offer. Linked Preisjaeger evidence is not a fresh official primary redemption confirmation; fewer than seven full days remain. Held, not blanket covered by same merchant.",
-      "reviewedAt": "2026-11-03",
-      "decisionType": "primary-terms-not-confirmed",
-      "evidence": "reviews/2026-11-03-blog-coverage.json"
+      "status": "covered",
+      "reviewedAt": "2026-11-05",
+      "decisionType": "fresh-source-qualified",
+      "evidence": "reviews/2026-11-03-blog-coverage.json",
+      "coverageEvidence": "reviews/blog-held-recheck-2026-11-05.json",
+      "coverageReviewNote": "Actual public photo of original local McDonalds coupon cover visually read: 17 Oct-8 Nov 2026, three specified Vienna branches plus two Lower Austrian branches. New local section in established guide; paper coupon required, cover not a redeemable individual coupon, no nationwide/in-app/foodora scope conflation.",
+      "heldRecheckPriorObservation": {
+        "id": "fc4g-rw3rck",
+        "observedTitle": "Burger & Nuggets: lokale 1+1-Gutscheine bei McDonald's",
+        "source": "https://www.preisjaeger.at/deals/mc-donalds-1-1-lokaler-deal-370655",
+        "contentHash": "25f8833ef1108f9009b52eb8f93537ced4574ef8241c6c3bd9b03b379648a8c0",
+        "status": "held",
+        "reason": "Local burger/nugget paper coupons through 8 Nov 2026 at three named Vienna stores are a different offer from the existing nationwide MyMcDonald's McNuggets article and the newly researched breakfast-delivery offer. Linked Preisjaeger evidence is not a fresh official primary redemption confirmation; fewer than seven full days remain. Held, not blanket covered by same merchant.",
+        "reviewedAt": "2026-11-03",
+        "decisionType": "primary-terms-not-confirmed",
+        "evidence": "reviews/2026-11-03-blog-coverage.json"
+      },
+      "slug": "mcdonalds-chicken-mcnuggets-1plus1-oesterreich"
     },
     {
       "id": "fc4g-1xapt6l",
@@ -982,9 +1269,9 @@
       "source": "https://www.preisjaeger.at/deals/wiener-eislaufverein-saisonstart-am-511-mit-gratis-eintritt-15-21-uhr-371624",
       "contentHash": "6e0806adaf42c8a926e16dc41bc7bb3e4b315e5735fbbcfe8b4e0a49408c0464",
       "status": "held",
-      "reason": "Official free-entry event was 5 November 2026, 15:00-21:00 Vienna and has ended by this catch-up review. No new current-offer page, invented repeat or free-equipment promise.",
+      "reason": "Fresh official WEV announcement explicitly confirms free entry only 5 Nov 2026, 15:00-21:00 Vienna. Review is after 21:00. No new current-offer article or invented extension.",
       "reviewedAt": "2026-11-05",
-      "decisionType": "source-verified-event-ended",
+      "decisionType": "official-event-ended",
       "evidence": "reviews/2026-11-03-blog-coverage.json",
       "priorCatchupDecision": {
         "id": "fc4g-1xapt6l",
@@ -996,6 +1283,30 @@
         "reviewedAt": "2026-11-03",
         "decisionType": "verified-short-horizon-deferred",
         "evidence": "reviews/2026-11-03-blog-coverage.json"
+      },
+      "coverageEvidence": "reviews/blog-held-recheck-2026-11-05.json",
+      "coverageReviewNote": "Fresh official WEV announcement explicitly confirms free entry only 5 Nov 2026, 15:00-21:00 Vienna. Review is after 21:00. No new current-offer article or invented extension.",
+      "heldRecheckPriorObservation": {
+        "id": "fc4g-1xapt6l",
+        "observedTitle": "Gratis Eislaufen am 5.11. von 15 bis 21 Uhr",
+        "source": "https://www.preisjaeger.at/deals/wiener-eislaufverein-saisonstart-am-511-mit-gratis-eintritt-15-21-uhr-371624",
+        "contentHash": "6e0806adaf42c8a926e16dc41bc7bb3e4b315e5735fbbcfe8b4e0a49408c0464",
+        "status": "held",
+        "reason": "Official free-entry event was 5 November 2026, 15:00-21:00 Vienna and has ended by this catch-up review. No new current-offer page, invented repeat or free-equipment promise.",
+        "reviewedAt": "2026-11-05",
+        "decisionType": "source-verified-event-ended",
+        "evidence": "reviews/2026-11-03-blog-coverage.json",
+        "priorCatchupDecision": {
+          "id": "fc4g-1xapt6l",
+          "observedTitle": "Gratis Eislaufen am 5.11. von 15 bis 21 Uhr",
+          "source": "https://www.preisjaeger.at/deals/wiener-eislaufverein-saisonstart-am-511-mit-gratis-eintritt-15-21-uhr-371624",
+          "contentHash": "6e0806adaf42c8a926e16dc41bc7bb3e4b315e5735fbbcfe8b4e0a49408c0464",
+          "status": "held",
+          "reason": "Official Wiener Eislauf-Verein news checked today confirms free entry 5 Nov 2026, 15:00-21:00, Lothringerstrasse 22, 1030 Wien. Only two days ahead, so lower priority than bounded Food offer through 30 Nov; no dedicated article today. Free entry does not establish free equipment or locker rental.",
+          "reviewedAt": "2026-11-03",
+          "decisionType": "verified-short-horizon-deferred",
+          "evidence": "reviews/2026-11-03-blog-coverage.json"
+        }
       }
     },
     {
@@ -1004,9 +1315,9 @@
       "source": "https://wolt.com/en/aut/vienna/venue/aida-neubaugasse",
       "contentHash": "05e106c7682b071c6b47af5e9c6c1ebc75766f5a76bb32c1363f2d4899733f2a",
       "status": "held",
-      "reason": "Individual copy-only change now explicitly labels AIDA Wolt discount as saved unconfirmed evidence and asks readers to check product selection/stacking. No fresh independent product-level proof of 50 percent plus 7 EUR from 16 EUR today. Previous hold retained; no invented current offer or end.",
+      "reason": "Current Wolt page shows 20 percent on selected items and separate 7 EUR/16 EUR offer ONLY for new users with local number, home delivery, no stacking. Old 50-percent PLUS 7-EUR combination NOT confirmed and conflicts with non-combination rule. Publish only correctly bounded current 7-EUR variant, not full coverage of old claim.",
       "reviewedAt": "2026-11-05",
-      "decisionType": "retained-evidence-current-discount-unconfirmed",
+      "decisionType": "different-current-variant",
       "evidence": "reviews/2026-11-03-blog-coverage.json",
       "priorCoverageObservation": {
         "id": "g2-awsiz4",
@@ -1019,18 +1330,42 @@
         "decisionType": "current-discount-not-confirmed",
         "evidence": "reviews/2026-11-03-blog-coverage.json"
       },
-      "coverageEvidence": "reviews/2026-11-05-blog-coverage.json",
-      "coverageReviewNote": "Individual copy-only change now explicitly labels AIDA Wolt discount as saved unconfirmed evidence and asks readers to check product selection/stacking. No fresh independent product-level proof of 50 percent plus 7 EUR from 16 EUR today. Previous hold retained; no invented current offer or end."
+      "coverageEvidence": "reviews/blog-held-recheck-2026-11-05.json",
+      "coverageReviewNote": "Current Wolt page shows 20 percent on selected items and separate 7 EUR/16 EUR offer ONLY for new users with local number, home delivery, no stacking. Old 50-percent PLUS 7-EUR combination NOT confirmed and conflicts with non-combination rule. Publish only correctly bounded current 7-EUR variant, not full coverage of old claim.",
+      "heldRecheckPriorObservation": {
+        "id": "g2-awsiz4",
+        "observedTitle": "50 % auf ausgewählte Artikel; 7 € ab 16 €",
+        "source": "https://wolt.com/en/aut/vienna/venue/aida-neubaugasse",
+        "contentHash": "05e106c7682b071c6b47af5e9c6c1ebc75766f5a76bb32c1363f2d4899733f2a",
+        "status": "held",
+        "reason": "Individual copy-only change now explicitly labels AIDA Wolt discount as saved unconfirmed evidence and asks readers to check product selection/stacking. No fresh independent product-level proof of 50 percent plus 7 EUR from 16 EUR today. Previous hold retained; no invented current offer or end.",
+        "reviewedAt": "2026-11-05",
+        "decisionType": "retained-evidence-current-discount-unconfirmed",
+        "evidence": "reviews/2026-11-03-blog-coverage.json",
+        "priorCoverageObservation": {
+          "id": "g2-awsiz4",
+          "observedTitle": "50 % Rabatt auf ausgewählte Artikel; zusätzlich 7 € Rabatt ab 16 € Bestellung",
+          "source": "https://wolt.com/en/aut/vienna/venue/aida-neubaugasse",
+          "contentHash": "750b2c69102efca47b113f6ff1f80a446f9ced198bc4fe0d2f3289cbe1e3abd8",
+          "status": "held",
+          "reason": "AIDA Wolt listing has no fresh product-level confirmation of both 50 percent and extra 7 EUR from 16 EUR; no invented dishes, eligibility or campaign end. Held pending fresh official offer conditions, not covered merely by coffee guides.",
+          "reviewedAt": "2026-11-03",
+          "decisionType": "current-discount-not-confirmed",
+          "evidence": "reviews/2026-11-03-blog-coverage.json"
+        },
+        "coverageEvidence": "reviews/2026-11-05-blog-coverage.json",
+        "coverageReviewNote": "Individual copy-only change now explicitly labels AIDA Wolt discount as saved unconfirmed evidence and asks readers to check product selection/stacking. No fresh independent product-level proof of 50 percent plus 7 EUR from 16 EUR today. Previous hold retained; no invented current offer or end."
+      },
+      "relatedSlug": "wolt-7-euro-neukunden-wien-aida-honu"
     },
     {
       "id": "g2-1hv8enr",
       "observedTitle": "50 % Rabatt auf ausgewählte Produkte",
       "source": "https://www.lieferando.at/speisekarte/fat-monk-wien-donau-city-strasse",
       "contentHash": "496b960e4cff3bfdc12c905b942351f2139a5e7cbd4de9d990fc41dbbe5afe01",
-      "status": "held",
-      "reason": "Individual copy-only change now explicitly labels Fat Monk Lieferando 50-percent selection as saved unconfirmed evidence. No new independent product-level confirmation today. Previous hold retained; no inferred dishes, current prices or campaign end.",
+      "status": "covered",
       "reviewedAt": "2026-11-05",
-      "decisionType": "retained-evidence-current-discount-unconfirmed",
+      "decisionType": "fresh-source-qualified",
       "evidence": "reviews/2026-11-03-blog-coverage.json",
       "priorCoverageObservation": {
         "id": "g2-1hv8enr",
@@ -1043,8 +1378,33 @@
         "decisionType": "current-discount-not-confirmed",
         "evidence": "reviews/2026-11-03-blog-coverage.json"
       },
-      "coverageEvidence": "reviews/2026-11-05-blog-coverage.json",
-      "coverageReviewNote": "Individual copy-only change now explicitly labels Fat Monk Lieferando 50-percent selection as saved unconfirmed evidence. No new independent product-level confirmation today. Previous hold retained; no inferred dishes, current prices or campaign end."
+      "coverageEvidence": "reviews/blog-held-recheck-2026-11-05.json",
+      "coverageReviewNote": "Current fully loaded Lieferando menu: four 40-percent price pairs, up to 50 percent only with Lieferando+. Narrow eligibility and lack of paid checkout stated. Direct HTTP403 did not mean expiry; browser independently readable.",
+      "heldRecheckPriorObservation": {
+        "id": "g2-1hv8enr",
+        "observedTitle": "50 % Rabatt auf ausgewählte Produkte",
+        "source": "https://www.lieferando.at/speisekarte/fat-monk-wien-donau-city-strasse",
+        "contentHash": "496b960e4cff3bfdc12c905b942351f2139a5e7cbd4de9d990fc41dbbe5afe01",
+        "status": "held",
+        "reason": "Individual copy-only change now explicitly labels Fat Monk Lieferando 50-percent selection as saved unconfirmed evidence. No new independent product-level confirmation today. Previous hold retained; no inferred dishes, current prices or campaign end.",
+        "reviewedAt": "2026-11-05",
+        "decisionType": "retained-evidence-current-discount-unconfirmed",
+        "evidence": "reviews/2026-11-03-blog-coverage.json",
+        "priorCoverageObservation": {
+          "id": "g2-1hv8enr",
+          "observedTitle": "50 % Rabatt auf ausgewählte Produkte (auf der Seite konkret als 50%-Artikel ausgewiesen)",
+          "source": "https://www.lieferando.at/speisekarte/fat-monk-wien-donau-city-strasse",
+          "contentHash": "38d7608aff86818725f6a90bb8491b502e5ae1a6e39aa473c46f5961f947a403",
+          "status": "held",
+          "reason": "Fat Monk DC Tower Lieferando listing has no fresh product-level confirmation of the claimed 50-percent selection. Held pending primary terms; no inferred bowls, prices or end, not covered by other bowl merchants.",
+          "reviewedAt": "2026-11-03",
+          "decisionType": "current-discount-not-confirmed",
+          "evidence": "reviews/2026-11-03-blog-coverage.json"
+        },
+        "coverageEvidence": "reviews/2026-11-05-blog-coverage.json",
+        "coverageReviewNote": "Individual copy-only change now explicitly labels Fat Monk Lieferando 50-percent selection as saved unconfirmed evidence. No new independent product-level confirmation today. Previous hold retained; no inferred dishes, current prices or campaign end."
+      },
+      "slug": "fat-monk-dc-tower-wien-lieferando-rabatt"
     },
     {
       "id": "meta-ig-17882020905631209",

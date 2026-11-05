@@ -6,7 +6,7 @@ import { load } from 'cheerio';
 import { polishHtml } from './polish-website.mjs';
 import { backfillGuides } from './blog-backfill-20261018.mjs';
 import { catchupGuides } from './blog-backfill-20261030.mjs';
-import { novemberGuides } from './blog-backfill-20261105.mjs';
+import { novemberGuides, heldRecheckGuides } from './blog-backfill-20261105.mjs';
 
 const dailyGuides = [
   {
@@ -65,7 +65,7 @@ const dailyGuides = [
   },
 ];
 
-const editorialGuides = [...backfillGuides, ...catchupGuides, ...dailyGuides, ...novemberGuides];
+const editorialGuides = [...backfillGuides, ...catchupGuides, ...dailyGuides, ...novemberGuides, ...heldRecheckGuides];
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const BLOG_DIR = path.join(ROOT, 'docs', 'blog');
