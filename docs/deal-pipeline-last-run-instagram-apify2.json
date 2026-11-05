@@ -1,15 +1,15 @@
 {
   "schemaVersion": 1,
-  "runId": "instagram-apify2-2026-11-04T22:44:23.964Z",
+  "runId": "instagram-apify2-2026-11-05T13:24:50.906Z",
   "sourceKey": "instagram-apify2",
   "sourceLabel": "Apify 2 Vienna Food Discovery",
   "status": "completed-with-errors",
-  "startedAt": "2026-11-04T22:43:32.421Z",
-  "finishedAt": "2026-11-04T22:44:23.964Z",
-  "durationMs": 51543,
+  "startedAt": "2026-11-05T13:24:00.232Z",
+  "finishedAt": "2026-11-05T13:24:50.906Z",
+  "durationMs": 50674,
   "outputFile": "docs/deals-pending-instagram-apify2.json",
   "counts": {
-    "rawCandidates": 10,
+    "rawCandidates": 5,
     "normalizedCandidates": 3,
     "verifiedCandidates": 0,
     "previousDeals": 0,
@@ -17,17 +17,30 @@
     "rejectedDeals": 3
   },
   "rejectedByReason": {
-    "no-consumer-food-benefit": 2,
-    "non-food-ad": 1
+    "non-food-ad": 2,
+    "alcohol-offer": 1
   },
   "rejectedSamples": [
     {
-      "reason": "no-consumer-food-benefit",
+      "reason": "non-food-ad",
       "deal": {
         "id": "",
         "title": "",
         "brand": "",
-        "url": "https://www.instagram.com/p/DfVGxbOmF0r/",
+        "url": "https://www.instagram.com/p/DfXG7BYIfrV/",
+        "source": "",
+        "pubDate": "",
+        "expires": "",
+        "postVerificationStatus": ""
+      }
+    },
+    {
+      "reason": "alcohol-offer",
+      "deal": {
+        "id": "",
+        "title": "",
+        "brand": "",
+        "url": "https://www.instagram.com/p/DfW0vNYCKJl/",
         "source": "",
         "pubDate": "",
         "expires": "",
@@ -40,20 +53,7 @@
         "id": "",
         "title": "",
         "brand": "",
-        "url": "https://www.instagram.com/p/DfVgCIttsuH/",
-        "source": "",
-        "pubDate": "",
-        "expires": "",
-        "postVerificationStatus": ""
-      }
-    },
-    {
-      "reason": "no-consumer-food-benefit",
-      "deal": {
-        "id": "",
-        "title": "",
-        "brand": "",
-        "url": "https://www.instagram.com/p/DfUnzYzHEkN/",
+        "url": "https://www.instagram.com/p/DfXFzpNjL4r/",
         "source": "",
         "pubDate": "",
         "expires": "",
@@ -64,67 +64,22 @@
   "diagnostics": {
     "pendingDeals": 0,
     "unchangedPosts": 1,
-    "providerErrors": 6,
+    "providerErrors": 1,
     "emptySourceRecords": 0,
     "ocrCalls": 3,
     "sources": [
       {
-        "key": "profile:corner_xvi",
-        "lastAttemptAt": "2026-11-04T22:43:32.421Z",
-        "status": "not-found",
+        "key": "profile:meat_point_smashburgerbar",
+        "lastAttemptAt": "2026-11-05T13:24:00.232Z",
         "postsReturned": 0,
+        "status": "not-found",
         "consecutiveFailures": 1,
-        "retryAt": "2026-12-04T22:43:32.421Z",
+        "retryAt": "2026-12-05T13:24:00.232Z",
         "consecutiveEmpty": 1
       },
       {
-        "key": "profile:dein.anker",
-        "lastAttemptAt": "2026-11-04T22:43:32.421Z",
-        "postsReturned": 0,
-        "status": "not-found",
-        "consecutiveFailures": 1,
-        "consecutiveEmpty": 0,
-        "retryAt": "2026-12-04T22:43:32.421Z"
-      },
-      {
-        "key": "profile:radatzwien",
-        "lastAttemptAt": "2026-11-04T22:43:32.421Z",
-        "postsReturned": 0,
-        "status": "not-found",
-        "consecutiveFailures": 1,
-        "consecutiveEmpty": 0,
-        "retryAt": "2026-12-04T22:43:32.421Z"
-      },
-      {
-        "key": "profile:santos.mex.vienna",
-        "lastAttemptAt": "2026-11-04T22:43:32.421Z",
-        "postsReturned": 0,
-        "status": "not-found",
-        "consecutiveFailures": 1,
-        "consecutiveEmpty": 0,
-        "retryAt": "2026-12-04T22:43:32.421Z"
-      },
-      {
-        "key": "profile:stroeckbrot",
-        "lastAttemptAt": "2026-11-04T22:43:32.421Z",
-        "postsReturned": 0,
-        "status": "not-found",
-        "consecutiveFailures": 1,
-        "consecutiveEmpty": 0,
-        "retryAt": "2026-12-04T22:43:32.421Z"
-      },
-      {
-        "key": "profile:vapiano_austria",
-        "lastAttemptAt": "2026-11-04T22:43:32.421Z",
-        "postsReturned": 0,
-        "status": "not-found",
-        "consecutiveFailures": 1,
-        "consecutiveEmpty": 0,
-        "retryAt": "2026-12-04T22:43:32.421Z"
-      },
-      {
-        "key": "hashtag:wienfood",
-        "lastAttemptAt": "2026-11-04T22:43:32.421Z",
+        "key": "hashtag:wienisst",
+        "lastAttemptAt": "2026-11-05T13:24:00.232Z",
         "postsReturned": 1,
         "status": "posts-returned",
         "consecutiveFailures": 0,
@@ -133,7 +88,7 @@
       },
       {
         "key": "hashtag:esseninwien",
-        "lastAttemptAt": "2026-11-04T22:43:32.421Z",
+        "lastAttemptAt": "2026-11-05T13:24:00.232Z",
         "status": "posts-returned",
         "postsReturned": 1,
         "consecutiveFailures": 0,
@@ -142,7 +97,7 @@
       },
       {
         "key": "hashtag:gratiswien",
-        "lastAttemptAt": "2026-11-04T22:43:32.421Z",
+        "lastAttemptAt": "2026-11-05T13:24:00.232Z",
         "postsReturned": 1,
         "status": "posts-returned",
         "consecutiveFailures": 0,
@@ -151,7 +106,7 @@
       },
       {
         "key": "hashtag:viennafood",
-        "lastAttemptAt": "2026-11-04T22:43:32.421Z",
+        "lastAttemptAt": "2026-11-05T13:24:00.232Z",
         "postsReturned": 1,
         "status": "posts-returned",
         "consecutiveFailures": 0,

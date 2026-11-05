@@ -2,9 +2,137 @@
   "schemaVersion": 1,
   "sourceKey": "instagram-apify2",
   "sourceLabel": "Apify 2 Vienna Food Discovery",
-  "updatedAt": "2026-11-04T22:44:23.964Z",
-  "runCount": 27,
+  "updatedAt": "2026-11-05T13:24:50.906Z",
+  "runCount": 28,
   "runs": [
+    {
+      "schemaVersion": 1,
+      "runId": "instagram-apify2-2026-11-05T13:24:50.906Z",
+      "sourceKey": "instagram-apify2",
+      "sourceLabel": "Apify 2 Vienna Food Discovery",
+      "status": "completed-with-errors",
+      "startedAt": "2026-11-05T13:24:00.232Z",
+      "finishedAt": "2026-11-05T13:24:50.906Z",
+      "durationMs": 50674,
+      "outputFile": "docs/deals-pending-instagram-apify2.json",
+      "counts": {
+        "rawCandidates": 5,
+        "normalizedCandidates": 3,
+        "verifiedCandidates": 0,
+        "previousDeals": 0,
+        "acceptedDeals": 0,
+        "rejectedDeals": 3
+      },
+      "rejectedByReason": {
+        "non-food-ad": 2,
+        "alcohol-offer": 1
+      },
+      "rejectedSamples": [
+        {
+          "reason": "non-food-ad",
+          "deal": {
+            "id": "",
+            "title": "",
+            "brand": "",
+            "url": "https://www.instagram.com/p/DfXG7BYIfrV/",
+            "source": "",
+            "pubDate": "",
+            "expires": "",
+            "postVerificationStatus": ""
+          }
+        },
+        {
+          "reason": "alcohol-offer",
+          "deal": {
+            "id": "",
+            "title": "",
+            "brand": "",
+            "url": "https://www.instagram.com/p/DfW0vNYCKJl/",
+            "source": "",
+            "pubDate": "",
+            "expires": "",
+            "postVerificationStatus": ""
+          }
+        },
+        {
+          "reason": "non-food-ad",
+          "deal": {
+            "id": "",
+            "title": "",
+            "brand": "",
+            "url": "https://www.instagram.com/p/DfXFzpNjL4r/",
+            "source": "",
+            "pubDate": "",
+            "expires": "",
+            "postVerificationStatus": ""
+          }
+        }
+      ],
+      "diagnostics": {
+        "pendingDeals": 0,
+        "unchangedPosts": 1,
+        "providerErrors": 1,
+        "emptySourceRecords": 0,
+        "ocrCalls": 3,
+        "sources": [
+          {
+            "key": "profile:meat_point_smashburgerbar",
+            "lastAttemptAt": "2026-11-05T13:24:00.232Z",
+            "postsReturned": 0,
+            "status": "not-found",
+            "consecutiveFailures": 1,
+            "retryAt": "2026-12-05T13:24:00.232Z",
+            "consecutiveEmpty": 1
+          },
+          {
+            "key": "hashtag:wienisst",
+            "lastAttemptAt": "2026-11-05T13:24:00.232Z",
+            "postsReturned": 1,
+            "status": "posts-returned",
+            "consecutiveFailures": 0,
+            "retryAt": "",
+            "consecutiveEmpty": 0
+          },
+          {
+            "key": "hashtag:esseninwien",
+            "lastAttemptAt": "2026-11-05T13:24:00.232Z",
+            "status": "posts-returned",
+            "postsReturned": 1,
+            "consecutiveFailures": 0,
+            "consecutiveEmpty": 0,
+            "retryAt": ""
+          },
+          {
+            "key": "hashtag:gratiswien",
+            "lastAttemptAt": "2026-11-05T13:24:00.232Z",
+            "postsReturned": 1,
+            "status": "posts-returned",
+            "consecutiveFailures": 0,
+            "consecutiveEmpty": 0,
+            "retryAt": ""
+          },
+          {
+            "key": "hashtag:viennafood",
+            "lastAttemptAt": "2026-11-05T13:24:00.232Z",
+            "postsReturned": 1,
+            "status": "posts-returned",
+            "consecutiveFailures": 0,
+            "retryAt": "",
+            "consecutiveEmpty": 0
+          }
+        ]
+      },
+      "constraints": {
+        "profiles": 22,
+        "hashtags": 4,
+        "perSource": 1,
+        "posts": 26,
+        "ocrPosts": 8,
+        "dailyUsd": 0.15,
+        "cycleUsd": 4.65
+      },
+      "errors": []
+    },
     {
       "schemaVersion": 1,
       "runId": "instagram-apify2-2026-11-04T22:44:23.964Z",
