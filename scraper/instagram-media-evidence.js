@@ -7,6 +7,7 @@ import { extractLowFoodPrice, isFoodDrinkSource } from './food-discovery-utils.j
 import { mergeMediaBacklog, saveMediaBacklog } from './instagram-media-backlog.js';
 import { extractActiveOfferWindow } from './instagram-ai-validity-utils.js';
 import { discoveryRejection, foodDiscoveryPriority } from './deal-discovery-policy.js';
+import { freeCreditOpenAiFetch } from './ai-credit-budget.js';
 
 const execFileAsync = promisify(execFile);
 const DAY_MS = 24 * 60 * 60 * 1000;
@@ -496,16 +497,16 @@ function safeInputImage(value) {
 }
 
 export async function requestOpenAi(url, init, options = {}) {
-  const fetchImpl = options.fetchImpl || fetch;
+  const fetchImpl = options.fetchImpl || freeCreditOpenAiFetch;
   const sleep = options.sleepImpl || ((ms) => new Promise((resolve) => setTimeout(resolve, ms)));
   for (let attempt = 0; attempt < 2; attempt += 1) {
     const response = await fetchImpl(url, init);
     if (response.ok) return response;
     const body = await response.json().catch(() => ({}));
     const codes = [body?.error?.code, body?.error?.type];
-    const knownCodes = ['insufficient_quota', 'billing_hard_limit_reached', 'billing_not_active', 'usage_limit_reached', 'organization_usage_limit_exceeded', 'rate_limit_exceeded', 'rate_limit_error', 'slow_down', 'invalid_api_key', 'model_not_found'];
+    const knownCodes = ['insufficient_quota', 'billing_hard_limit_reached', 'billing_not_active', 'credit_balance_exhausted', 'organization_spend_limit_exceeded', 'project_spend_limit_exceeded', 'usage_limit_reached', 'organization_usage_limit_exceeded', 'rate_limit_exceeded', 'rate_limit_error', 'slow_down', 'invalid_api_key', 'model_not_found'];
     const code = codes.find((value) => knownCodes.includes(value)) || 'unclassified';
-    const quota = codes.some((value) => /^(?:insufficient_quota|billing_hard_limit_reached|billing_not_active|usage_limit_reached|organization_usage_limit_exceeded)$/.test(String(value)));
+    const quota = codes.some((value) => /^(?:insufficient_quota|billing_hard_limit_reached|billing_not_active|credit_balance_exhausted|organization_spend_limit_exceeded|project_spend_limit_exceeded|usage_limit_reached|organization_usage_limit_exceeded)$/.test(String(value)));
     const transient = !quota && (response.status === 429 || response.status >= 500);
     const header = response.headers?.get?.('retry-after');
     const requestedWait = header ? (Number.isFinite(Number(header)) ? Number(header) * 1000 : Date.parse(header) - Date.now()) : 1500;

@@ -22,7 +22,10 @@ function storageFailure(result, operation) {
 
 // A dedicated branch keeps operational reservations out of main. Content SHA
 // compare-and-swap makes reservations safe across independent GitHub runners.
-export function githubQuotaStore(env, fetchImpl = globalThis.fetch, { sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms)) } = {}) {
+export function githubQuotaStore(env, fetchImpl = globalThis.fetch, {
+  sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms)),
+  branch = BRANCH, file = FILE, initialPauseMs = HOUR + 45 * 60000, clock = Date.now,
+} = {}) {
   const repo = env.GITHUB_REPOSITORY;
   const token = env.GH_TOKEN || env.GITHUB_TOKEN;
   if (!/^[\w.-]+\/[\w.-]+$/.test(repo || '') || !token) throw pause('missing GitHub quota credentials');
@@ -43,11 +46,11 @@ export function githubQuotaStore(env, fetchImpl = globalThis.fetch, { sleep = (m
   let cached = null;
   const initialize = async () => {
     if (initialized) return;
-    const ref = await request(`/git/ref/heads/${BRANCH}`);
+    const ref = await request(`/git/ref/heads/${branch}`);
     if (ref.status === 404) {
       const main = await request('/git/ref/heads/main');
       if (main.status !== 200) throw storageFailure(main, 'read-main');
-      const created = await request('/git/refs', 'POST', { ref: `refs/heads/${BRANCH}`, sha: main.data.object.sha });
+      const created = await request('/git/refs', 'POST', { ref: `refs/heads/${branch}`, sha: main.data.object.sha });
       if (![201, 422].includes(created.status)) throw storageFailure(created, 'create-branch');
     } else if (ref.status !== 200) throw storageFailure(ref, 'read-branch');
     initialized = true;
@@ -57,13 +60,13 @@ export function githubQuotaStore(env, fetchImpl = globalThis.fetch, { sleep = (m
       await initialize();
       // Still check the shared pause before each request. Authenticated 304
       // responses reuse verified state without consuming GitHub's primary quota.
-      const result = await request(`/contents/${FILE}?ref=${encodeURIComponent(BRANCH)}`, 'GET', undefined, cached?.etag);
+      const result = await request(`/contents/${file}?ref=${encodeURIComponent(branch)}`, 'GET', undefined, cached?.etag);
       if (result.status === 304 && cached) return structuredClone(cached.entry);
       if (result.status === 404) {
         // On rollout, old runners may still spend for up to 45 minutes. Drain
         // that overlap plus a full hour before admitting untracked new calls.
-        await this.compareAndSwap(null, { version: 1, reservations: [], pausedUntil: Date.now() + HOUR + 45 * 60000 });
-        const initialized = await request(`/contents/${FILE}?ref=${encodeURIComponent(BRANCH)}`);
+        await this.compareAndSwap(null, { version: 1, reservations: [], pausedUntil: clock() + initialPauseMs });
+        const initialized = await request(`/contents/${file}?ref=${encodeURIComponent(branch)}`);
         if (initialized.status !== 200) throw storageFailure(initialized, 'read-initial-state');
         const state = JSON.parse(Buffer.from(initialized.data.content, 'base64').toString('utf8'));
         if (state.version !== 1 || !Array.isArray(state.reservations) || !Number.isFinite(state.pausedUntil)) throw pause('invalid initialized quota');
@@ -79,11 +82,11 @@ export function githubQuotaStore(env, fetchImpl = globalThis.fetch, { sleep = (m
     async compareAndSwap(revision, state) {
       const serialized = `${JSON.stringify(state)}\n`;
       const body = {
-        branch: BRANCH, message: 'Update shared Instagram quota [skip ci]',
+        branch, message: 'Update shared automation reservations [skip ci]',
         content: Buffer.from(serialized).toString('base64'), ...(revision ? { sha: revision } : {}),
       };
       for (let attempt = 0; attempt < 2; attempt += 1) {
-        const result = await request(`/contents/${FILE}`, 'PUT', body);
+        const result = await request(`/contents/${file}`, 'PUT', body);
         if ([200, 201].includes(result.status)) { cached = null; return true; }
         if ([409, 422].includes(result.status)) return false;
         if (![500, 502, 503, 504].includes(result.status)) throw storageFailure(result, 'write-state');
@@ -95,7 +98,7 @@ export function githubQuotaStore(env, fetchImpl = globalThis.fetch, { sleep = (m
         // A 5xx does not prove the write failed. Resolve that ambiguity with a
         // fresh read; retry once only if the original SHA is still current.
         cached = null;
-        const current = await request(`/contents/${FILE}?ref=${encodeURIComponent(BRANCH)}`);
+        const current = await request(`/contents/${file}?ref=${encodeURIComponent(branch)}`);
         if (current.status === 200) {
           if (typeof current.data.sha !== 'string' || typeof current.data.content !== 'string') throw pause('invalid quota reconciliation');
           if (Buffer.from(current.data.content, 'base64').toString('utf8') === serialized) return true;

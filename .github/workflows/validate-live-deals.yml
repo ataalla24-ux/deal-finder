@@ -43,8 +43,16 @@ jobs:
           URL_CHECK_TIMEOUT_MS: 7000
         run: node scraper/normalize-live-deals.js
 
-      - name: Test conservative expiry review
-        run: node --test scripts/test-verified-expiry-review.mjs scripts/test-verified-expiry-apply.mjs
+      - name: Test conservative expiry review and authorized maintenance
+        run: node --test scripts/test-verified-expiry-review.mjs scripts/test-verified-expiry-apply.mjs scripts/test-automatic-maintenance.mjs scripts/test-ai-credit-budget.mjs
+
+      - name: Maintain explicit expiry and source-backed copy
+        env:
+          SENTRY_DISABLED: '1'
+          AUTOMATIC_MAINTENANCE_APPLY: '1'
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+          GH_TOKEN: ${{ github.token }}
+        run: node scripts/automatic-deal-maintenance.mjs
 
       - name: Read fresh expiry evidence (review only)
         timeout-minutes: 25
@@ -61,6 +69,7 @@ jobs:
         if: ${{ vars.ENABLE_LIVE_DEAL_LLM_REVIEW == '1' }}
         env:
           OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+          GH_TOKEN: ${{ github.token }}
           OPENAI_MODEL: ${{ secrets.OPENAI_MODEL }}
           DEAL_REVIEW_APPLY: '0'
           LIVE_DEAL_REMOVALS_ENABLED: '0'
@@ -85,6 +94,16 @@ jobs:
       - name: Cache brand logos
         run: npm run logos:cache
 
+      - name: Reconcile verified map coverage without paid geocoding
+        env:
+          MAP_REFRESH_BUSINESS: '1'
+          MAP_SOURCE_REQUESTS: '8'
+          MAP_GEOCODE_REQUESTS: '20'
+        run: |
+          node scripts/enrich-deal-map.mjs
+          node scripts/validate-deal-map-locations.mjs
+          node scripts/validate-map-coverage.mjs
+
       - name: Apply strictly source-verified expiry
         timeout-minutes: 15
         env:
@@ -100,7 +119,7 @@ jobs:
 
       - name: Commit validated live deals
         run: |
-          node scripts/commit-generated.mjs --message "Validate live deals $(date +%Y-%m-%d)" --files docs/deals.json docs/live-deal-validation-report.json docs/live-deal-review-candidates.json docs/live-deal-llm-review.json docs/live-deal-edit-report.json docs/verified-expiry-review.json docs/source-review-cache.json reviews/verified-expiry-state.json reviews/verified-expiry-report.json reviews/verified-expiry-archive.json
+          node scripts/commit-generated.mjs --message "Validate live deals $(date +%Y-%m-%d)" --files docs/deals.json docs/live-deal-validation-report.json docs/live-deal-review-candidates.json docs/live-deal-llm-review.json docs/live-deal-edit-report.json docs/verified-expiry-review.json docs/source-review-cache.json reviews/verified-expiry-state.json reviews/verified-expiry-report.json reviews/verified-expiry-archive.json docs/automatic-deal-maintenance-report.json reviews/automatic-deal-maintenance-state.json docs/deal-map-locations.json reviews/map-location-catalog.json reviews/map-geocode-cache.json reviews/map-source-address-cache.json reviews/map-business-campaigns.json reviews/map-coverage.json
 
       - name: Read-only operations overview
         if: ${{ always() }}

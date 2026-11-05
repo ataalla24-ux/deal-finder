@@ -38,6 +38,7 @@ jobs:
       - run: npm ci
       - name: Verify map safeguards
         run: |
+          node --test scripts/test-automatic-maintenance.mjs
           node scripts/test-deal-map-enrichment.mjs
           node scripts/test-deal-map-chain-rules.mjs
           node scripts/test-map-location-pipeline.mjs

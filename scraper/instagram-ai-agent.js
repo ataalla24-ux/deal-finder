@@ -15,6 +15,7 @@ import { normalizeCategoryForScraper } from './category-utils.js';
 import { discoveryRejection } from './deal-discovery-policy.js';
 import { sourceHttpError } from './source-http-policy.js';
 import { requestOpenAi } from './instagram-media-evidence.js';
+import { modelForTask } from './ai-credit-budget.js';
 import { createInstagramWebAccess } from './instagram-web-access-policy.js';
 import { runInstagramSearchQueries } from './instagram-search-discovery.js';
 import { canonicalInstagramPostKey } from './deal-evidence-utils.js';
@@ -94,7 +95,7 @@ const CONFIG = {
   previewFetchEnabled: process.env.INSTAGRAM_AI_FETCH_PAGES !== '0',
   renderFetchEnabled: process.env.INSTAGRAM_AI_RENDER_PAGES !== '0',
   aiEnabled: process.env.INSTAGRAM_AI_DISABLE_AI !== '1',
-  model: process.env.OPENAI_MODEL || process.env.INSTAGRAM_AI_MODEL || 'gpt-4.1-mini',
+  model: modelForTask('review', process.env.INSTAGRAM_AI_MODEL),
 };
 
 const INSTAGRAM_COOKIE_HINTS = loadInstagramCookieHints();
@@ -2316,8 +2317,9 @@ export async function classifyWithOpenAi(candidates, options = {}) {
       : 'OpenAI classification failed (timeout-or-invalid-response)';
     return { deals: [], errors: [message], usage: emptyUsage,
       health: { status: 'unavailable', httpStatus: error.status || null, code: error.code || 'request-failed',
-        retryable: !/quota|billing|usage_limit/.test(error.code || '') && (error.status === 429 || error.status >= 500),
-        billingActionRequired: /quota|billing|usage_limit/.test(error.code || '') } };
+        retryable: !/quota|billing|usage_limit|spend_limit|credit/.test(error.code || '') && (error.status === 429 || error.status >= 500),
+        billingActionRequired: /quota|billing|usage_limit|spend_limit|credit_balance/.test(error.code || ''),
+        budgetDeferred: error.code === 'free_credit_budget_deferred' } };
   }
 }
 

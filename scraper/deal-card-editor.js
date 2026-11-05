@@ -1,5 +1,6 @@
 import { createHash } from 'node:crypto';
 import { isSocialInstructionTitle } from './offer-title-utils.js';
+import { freeCreditOpenAiFetch, modelForTask } from './ai-credit-budget.js';
 
 const VERSION = 2;
 const clean = value => String(value || '').toWellFormed().replace(/\s+/g, ' ').trim();
@@ -151,8 +152,8 @@ export function applyCardEditorial(deal, proposal, { status = 'draft', now = new
 }
 
 export function createCardEditor({ enabled = process.env.DEAL_CARD_EDITOR_ENABLED === '1',
-  apiKey = process.env.OPENAI_API_KEY, request = fetch,
-  model = process.env.DEAL_CARD_EDITOR_MODEL || 'gpt-4.1-mini', maxCalls = 40,
+  apiKey = process.env.OPENAI_API_KEY, request = freeCreditOpenAiFetch,
+  model = modelForTask('editor', process.env.DEAL_CARD_EDITOR_MODEL), maxCalls = 40,
   cache = {}, onCache = () => {}, maxDurationMs = 120000, clock = Date.now } = {}) {
   if (enabled !== true) return async deal => deal;
   let calls = 0;
@@ -166,7 +167,7 @@ export function createCardEditor({ enabled = process.env.DEAL_CARD_EDITOR_ENABLE
     const response = await request('https://api.openai.com/v1/chat/completions', {
       method: 'POST', signal: AbortSignal.timeout(Math.max(1, Math.min(25000, Math.floor(remainingMs)))),
       headers: { Authorization: `Bearer ${apiKey}`, 'Content-Type': 'application/json' },
-      body: JSON.stringify({ model, temperature: 0, store: false, max_tokens: 2400,
+      body: JSON.stringify({ model: name === 'deal_card_title_check' ? modelForTask('review') : model, temperature: 0, store: false, max_tokens: 2400,
         response_format: { type: 'json_schema', json_schema: { name, strict: true,
           schema: { type: 'object', additionalProperties: false, properties, required: Object.keys(properties) } } },
         messages: [{ role: 'system', content: system }, { role: 'user', content: JSON.stringify(input) }],

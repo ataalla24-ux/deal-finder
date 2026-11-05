@@ -2,6 +2,7 @@ import crypto from 'node:crypto';
 import { canonicalInstagramPostKey } from './deal-evidence-utils.js';
 import { parseExpiryShape } from './expiry-utils.js';
 import { enrichCommunityCard } from './community-card-enrichment.js';
+import { freeCreditOpenAiFetch, modelForTask } from './ai-credit-budget.js';
 
 const clean = value => String(value || '').replace(/\s+/g, ' ').trim();
 const fields = ['title', 'brand', 'description', 'address', 'validity'];
@@ -94,10 +95,10 @@ export async function extractCommunityDeal(submission, deal, options = {}) {
   try {
     const property = { type: 'object', additionalProperties: false,
       properties: { value: { type: 'string' }, quote: { type: 'string' } }, required: ['value', 'quote'] };
-    const response = await request('https://api.openai.com/v1/chat/completions', {
+    const response = await (options.fetch || freeCreditOpenAiFetch)('https://api.openai.com/v1/chat/completions', {
       method: 'POST', signal: AbortSignal.timeout(30000),
       headers: { Authorization: `Bearer ${apiKey}`, 'Content-Type': 'application/json' },
-      body: JSON.stringify({ model: process.env.COMMUNITY_EXTRACTION_MODEL || 'gpt-4.1-mini',
+      body: JSON.stringify({ model: modelForTask('extract', process.env.COMMUNITY_EXTRACTION_MODEL),
         temperature: 0, store: false, max_tokens: 2400,
         response_format: { type: 'json_schema', json_schema: { name: 'community_deal_draft', strict: true,
           schema: { type: 'object', additionalProperties: false, properties: Object.fromEntries(fields.map(k => [k, property])), required: fields } } },

@@ -4,6 +4,7 @@ import crypto from 'crypto';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import { dealMapReviewBlock, loadDealMapReviewContext, reviewDealMap } from './deal-map-review.mjs';
+import { automaticMaintenanceReviewCandidates } from './automatic-maintenance-review.mjs';
 import { activeBusinessDeals } from './deal-map-business.mjs';
 
 const __filename = fileURLToPath(import.meta.url);
@@ -92,6 +93,12 @@ function loadReviewCandidates() {
   try {
     let checkedAt = '';
     const candidates = [];
+    const maintenancePath = path.join(ROOT, 'docs', 'automatic-deal-maintenance-report.json');
+    if (fs.existsSync(maintenancePath)) {
+      const maintenance = JSON.parse(fs.readFileSync(maintenancePath, 'utf8'));
+      candidates.push(...automaticMaintenanceReviewCandidates(maintenance));
+      checkedAt = newestTimestamp(checkedAt, maintenance.checkedAt);
+    }
     const expiryPath = path.join(ROOT, 'docs', 'verified-expiry-review.json');
     if (fs.existsSync(expiryPath)) {
       const expiry = JSON.parse(fs.readFileSync(expiryPath, 'utf8'));

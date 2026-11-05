@@ -23,6 +23,10 @@ const SOURCE_INPUTS = [
   'reviews/verified-expiry-state.json',
   'reviews/verified-expiry-archive.json',
   'scripts/verified-expiry-apply.mjs',
+  'reviews/automatic-maintenance-policy.json',
+  'reviews/automatic-deal-maintenance-state.json',
+  'scripts/automatic-deal-maintenance.mjs',
+  'docs/instagram-graph-post-evidence.json',
   'scripts/enrich-deal-map.mjs',
   'scripts/deal-map-enrichment.mjs',
   'scripts/deal-map-chain-rules.mjs',
@@ -80,7 +84,7 @@ function fixture(t, { optionalInputs = false, largeCache = false } = {}) {
   write(seed, 'README.md', 'Unrelated main state\n');
   if (optionalInputs) for (const file of OPTIONAL_OUTPUTS) write(seed, file, {});
   if (largeCache) write(seed, 'reviews/map-source-address-cache.json', { fixture: 'x'.repeat(2 * 1024 * 1024) });
-  for (const file of SOURCE_INPUTS) write(seed, file, '// Map source version 1\n');
+  for (const file of SOURCE_INPUTS) write(seed, file, file.startsWith('reviews/automatic-') || file === 'docs/instagram-graph-post-evidence.json' ? {} : '// Map source version 1\n');
 
   // Local hooks deliberately have no network or live-data dependencies. The map
   // hook records the exact feed bytes it read, including stamping/sanitization.
@@ -205,6 +209,27 @@ test('map-only batch can cross unrelated main changes with optional inputs absen
   assert.equal(remoteText(f, 'README.md'), 'Keep this remote documentation edit');
   assert.deepEqual(JSON.parse(remoteText(f, MAP)), { generated: 'local' });
   assert.deepEqual(JSON.parse(remoteText(f, COVERAGE)), { generated: 'local' });
+});
+
+test('canonical feed writer archives source-proven expiry before stamping and mapping the remaining feed', t => {
+  const f = fixture(t);
+  const expired = { id: 'expired', brand: 'Cafe Wien', title: 'Gratis Kaffee', description: 'Aktion in Wien.',
+    url: 'https://example.com/coffee', validUntil: '2025-10-01', expiryKind: 'end',
+    expires: '2025-10-01T23:59:59.999Z', metaGraphCaption: 'Gratis Kaffee. Gueltig bis 01.10.2025.' };
+  const future = { id: 'future', title: 'Kaffee fuer 2 Euro', votes: 17 };
+  publishRemote(f, 'reviews/automatic-maintenance-policy.json', { version: 1, enabled: true, automaticExpiry: true,
+    automaticLocalCopy: true, expiryGraceHours: 12, maxNewHidesPerRun: 5, protectedMerchants: ['Wolt'] });
+  publishRemote(f, 'docs/live-deal-edits.json', { edits: [] });
+  run('git', ['pull', '--ff-only', 'origin', 'main'], f.local);
+  write(f.local, FEED, { deals: [expired, future], totalDeals: 2 });
+  const result = generate(f, [FEED]);
+  assert.equal(result.status, 0, result.output);
+  const published = JSON.parse(remoteText(f, FEED));
+  assert.deepEqual(published.deals.map(deal => deal.id), ['future']);
+  assert.equal(published.deals[0].votes, 17);
+  const archive = JSON.parse(remoteText(f, 'reviews/automatic-deal-maintenance-state.json'));
+  assert.deepEqual(archive.hidden[0].originalDeal, expired);
+  assert.deepEqual(JSON.parse(remoteText(f, MAP)).dealIds, ['future']);
 });
 
 test('large unchanged source caches do not break map-only writers', t => {

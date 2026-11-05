@@ -49,6 +49,7 @@ jobs:
       - name: Scan current TikTok deals
         env:
           OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+          GH_TOKEN: ${{ github.token }}
           OPENAI_MODEL: ${{ secrets.OPENAI_MODEL }}
           TIKTOK_MEDIA_MAX_AGE_HOURS: '72'
           TIKTOK_MEDIA_MAX_POSTS_PER_RUN: '16'

@@ -38,6 +38,7 @@ jobs:
         env:
           COMMUNITY_SYNC_TOKEN: ${{ secrets.COMMUNITY_SYNC_TOKEN }}
           OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+          GH_TOKEN: ${{ github.token }}
           FIRECRAWL_API_KEY: ${{ secrets.FIRECRAWL_API_KEY }}
         run: node scraper/fetch-community-submissions.js
 

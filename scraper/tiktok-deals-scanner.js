@@ -1,4 +1,5 @@
 import '../sentry/instrument.mjs';
+import { modelForTask } from './ai-credit-budget.js';
 
 import fs from 'fs';
 import path from 'path';
@@ -395,7 +396,7 @@ export function buildTikTokMediaConfig(env = process.env) {
     mediaVisionDetail: ['low', 'high', 'auto'].includes(cleanText(env.TIKTOK_MEDIA_VISION_DETAIL, 20).toLowerCase())
       ? cleanText(env.TIKTOK_MEDIA_VISION_DETAIL, 20).toLowerCase()
       : 'high',
-    mediaLlmModel: cleanText(env.TIKTOK_MEDIA_LLM_MODEL || env.OPENAI_MODEL || 'gpt-4.1-mini', 100),
+    mediaLlmModel: modelForTask('vision', env.TIKTOK_MEDIA_LLM_MODEL),
     mediaLlmMaxCallsPerRun: boundedNumber(env.TIKTOK_MEDIA_LLM_MAX_CALLS_PER_RUN, 12, 0, 20),
     mediaLlmConcurrency: boundedNumber(env.TIKTOK_MEDIA_LLM_CONCURRENCY, 2, 1, 4),
     mediaLlmMinOcrChars: boundedNumber(env.TIKTOK_MEDIA_LLM_MIN_OCR_CHARS, 12, 5, 200),

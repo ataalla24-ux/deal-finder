@@ -10,6 +10,7 @@ import path from 'path';
 import { fileURLToPath } from 'url';
 import { cleanText, extractDealsFromThreadMessages, extractSlackMessageText } from './slack-digest-utils.js';
 import { normalizeDealRecord } from './deal-normalization-utils.js';
+import { freeCreditOpenAiFetch, modelForTask } from './ai-credit-budget.js';
 import { inspectDealUrlHealth } from './expiry-utils.js';
 import { discoveryRejection, foodDiscoveryPriority } from './deal-discovery-policy.js';
 import { featuredSelectionHistory, recentFeaturedDealIds } from './featured-selection-history.js';
@@ -23,7 +24,7 @@ const REVIEW_CACHE_PATH = path.join(__dirname, '..', 'docs', 'source-review-cach
 
 const SLACK_BOT_TOKEN = process.env.SLACK_BOT_TOKEN || '';
 const SLACK_CHANNEL_ID = process.env.SLACK_CHANNEL_ID || '';
-const FEATURED_LLM_MODEL = process.env.FEATURED_DEAL_REVIEW_MODEL || process.env.DEAL_REVIEW_MODEL || process.env.OPENAI_MODEL || 'gpt-4.1-mini';
+const FEATURED_LLM_MODEL = modelForTask('review', process.env.FEATURED_DEAL_REVIEW_MODEL || process.env.DEAL_REVIEW_MODEL);
 const FEATURED_WEEKLY_LLM_REQUIRED = process.env.FEATURED_WEEKLY_LLM_REQUIRED === '1';
 const FEATURED_WEEKLY_LLM_MIN_CONFIDENCE = Math.max(0, Math.min(1, Number(process.env.FEATURED_WEEKLY_LLM_MIN_CONFIDENCE || 0.55)));
 const FEATURED_TARGET_TIMEOUT_MS = Number(process.env.FEATURED_DEAL_TARGET_TIMEOUT_MS || process.env.URL_CHECK_TIMEOUT_MS || 7000);
@@ -520,7 +521,7 @@ async function reviewWeeklyDealActiveWithLLM(deal, options = {}) {
         reusedAt: now.toISOString(), reviewedAt: cached.reviewedAt };
 
     try {
-        const response = await (options.request || fetch)('https://api.openai.com/v1/chat/completions', {
+        const response = await (options.request || freeCreditOpenAiFetch)('https://api.openai.com/v1/chat/completions', {
             method: 'POST',
             headers: {
                 'content-type': 'application/json',

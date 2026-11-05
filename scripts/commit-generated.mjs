@@ -6,6 +6,7 @@ import { spawnSync } from 'child_process';
 
 import { stampDealsFeedFile } from './deals-feed-contract.mjs';
 import { mergeSourceOutbox } from './generated-source-merge.mjs';
+import { maintainFeedFile } from './automatic-deal-maintenance.mjs';
 
 const DEFAULT_REMOTE = process.env.GIT_GENERATED_REMOTE || 'origin';
 const DEFAULT_BRANCH = process.env.GIT_GENERATED_BRANCH || process.env.GITHUB_REF_NAME || 'main';
@@ -27,6 +28,10 @@ const MAP_INPUT_FILES = [
   'reviews/verified-expiry-state.json',
   'reviews/verified-expiry-archive.json',
   'scripts/verified-expiry-apply.mjs',
+  'reviews/automatic-maintenance-policy.json',
+  'reviews/automatic-deal-maintenance-state.json',
+  'scripts/automatic-deal-maintenance.mjs',
+  'docs/instagram-graph-post-evidence.json',
   'reviews/map-addresses.json',
   'reviews/map-chain-rules.json',
   // These are read/modify/write inputs as well as generated outputs.
@@ -564,6 +569,9 @@ async function main() {
     .map(normalizeRepoPath)
     .includes(dealsPath);
   if (includesDealsFeed && statusChanged(dealsPath)) {
+    const maintenance = await maintainFeedFile({ allowAi: false, apply: true });
+    if (maintenance.changed) console.log(`Source-backed maintenance: ${maintenance.report.hidden.length} expired, ${maintenance.report.corrected.length} corrected`);
+    options.patterns.push('reviews/automatic-deal-maintenance-state.json');
     const guideSync = spawnSync(process.execPath, ['scripts/sync-deal-guides.mjs'], {
       cwd: process.cwd(), env: process.env, encoding: 'utf8',
     });

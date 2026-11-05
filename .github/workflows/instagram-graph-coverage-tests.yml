@@ -8,6 +8,12 @@ on:
       - 'scripts/review-live-deals-llm.mjs'
       - 'scripts/test-source-review-cache.mjs'
       - 'scripts/test-pipeline-reliability-nov05.mjs'
+      - 'scripts/test-ai-credit-budget.mjs'
+      - 'scripts/test-automatic-maintenance.mjs'
+      - 'scripts/automatic-deal-maintenance.mjs'
+      - 'scripts/automatic-maintenance-review.mjs'
+      - 'reviews/ai-credit-policy.json'
+      - 'reviews/automatic-maintenance-policy.json'
       - 'scripts/generated-source-merge.mjs'
       - 'scripts/coupon-tools-preflight.mjs'
       - '.github/actions/coupon-tools/**'
@@ -49,6 +55,12 @@ on:
       - 'scripts/review-live-deals-llm.mjs'
       - 'scripts/test-source-review-cache.mjs'
       - 'scripts/test-pipeline-reliability-nov05.mjs'
+      - 'scripts/test-ai-credit-budget.mjs'
+      - 'scripts/test-automatic-maintenance.mjs'
+      - 'scripts/automatic-deal-maintenance.mjs'
+      - 'scripts/automatic-maintenance-review.mjs'
+      - 'reviews/ai-credit-policy.json'
+      - 'reviews/automatic-maintenance-policy.json'
       - 'scripts/generated-source-merge.mjs'
       - 'scripts/coupon-tools-preflight.mjs'
       - '.github/actions/coupon-tools/**'
@@ -103,6 +115,7 @@ jobs:
         run: |
           node --test scripts/test-source-review-cache.mjs
           node --test scripts/test-pipeline-reliability-nov05.mjs
+          node --test scripts/test-ai-credit-budget.mjs scripts/test-automatic-maintenance.mjs
           node --test scripts/test-joe-current-offers.mjs
           node scripts/test-repair-slack-queued-deal.mjs
           SENTRY_DISABLED=1 node --test scripts/test-community-card-enrichment.mjs

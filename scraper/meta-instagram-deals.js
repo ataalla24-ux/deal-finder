@@ -1,4 +1,5 @@
 import { sharedInstagramFetch } from './instagram-shared-quota.js';
+import { modelForTask } from './ai-credit-budget.js';
 import { scanAdLibraryCoverage, hasFreshActiveAdEvidence, isAdPayloadTooLarge, smallerAdPageSize } from './meta-ad-library-coverage.js';
 import { selectDiscoveryAccounts } from './vienna-merchant-discovery.js';
 import { selectCoverageAccounts, selectCoverageHashtags, accountCoverageSummary } from './instagram-source-scheduler.js';
@@ -334,7 +335,7 @@ export function buildConfig(env = process.env, now = new Date()) {
     mediaVisionDetail: ['low', 'high', 'auto'].includes(cleanText(env.META_INSTAGRAM_MEDIA_VISION_DETAIL, 20).toLowerCase())
       ? cleanText(env.META_INSTAGRAM_MEDIA_VISION_DETAIL, 20).toLowerCase()
       : 'high',
-    mediaLlmModel: cleanText(env.META_INSTAGRAM_MEDIA_LLM_MODEL || env.OPENAI_MODEL || 'gpt-4.1-mini', 100),
+    mediaLlmModel: modelForTask('vision', env.META_INSTAGRAM_MEDIA_LLM_MODEL),
     mediaLlmMaxCallsPerRun: numberEnv(env, 'META_INSTAGRAM_MEDIA_LLM_MAX_CALLS_PER_RUN', 8, 0, 30),
     mediaLlmConcurrency: numberEnv(env, 'META_INSTAGRAM_MEDIA_LLM_CONCURRENCY', 2, 1, 4),
     mediaLlmMinOcrChars: numberEnv(env, 'META_INSTAGRAM_MEDIA_LLM_MIN_OCR_CHARS', 20, 5, 500),

@@ -31,6 +31,11 @@ on:
       - "scripts/test-slack-delivery-state.mjs"
       - "scripts/test-discovery-non-consumer-offers.mjs"
       - "scripts/test-generated-state-merge.mjs"
+      - "scraper/ai-credit-budget.js"
+      - "scripts/automatic-deal-maintenance.mjs"
+      - "scripts/automatic-maintenance-review.mjs"
+      - "scripts/test-ai-credit-budget.mjs"
+      - "scripts/test-automatic-maintenance.mjs"
       - "scraper/offer-title-utils.js"
       - "scraper/pre-publication-title.js"
       - "scripts/test-pre-publication-title.mjs"
@@ -96,6 +101,7 @@ jobs:
           node scripts/test-discovery-non-consumer-offers.mjs
           node scripts/test-map-location-classification.mjs
           node scripts/test-generated-state-merge.mjs
+          node --test scripts/test-ai-credit-budget.mjs scripts/test-automatic-maintenance.mjs
 
       - name: Protect bounded food discovery
         run: |

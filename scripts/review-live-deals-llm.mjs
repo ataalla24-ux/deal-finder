@@ -4,6 +4,7 @@ import { fileURLToPath } from 'node:url';
 
 import { inspectDealUrlHealth } from '../scraper/expiry-utils.js';
 import { sanitizeLlmProposedPatch } from './live-deal-llm-patch-utils.mjs';
+import { freeCreditOpenAiFetch, modelForTask } from '../scraper/ai-credit-budget.js';
 import { cachedSourceReview, loadSourceReviewCache, rememberSourceReview, reviewClockContext,
   reviewFingerprint, saveSourceReviewCache } from '../scraper/source-review-cache.js';
 
@@ -15,7 +16,7 @@ const DEALS_PATH = path.join(DOCS_DIR, 'deals.json');
 const REPORT_PATH = path.join(DOCS_DIR, 'live-deal-llm-review.json');
 const CACHE_PATH = path.join(DOCS_DIR, 'source-review-cache.json');
 
-const MODEL = cleanText(process.env.DEAL_REVIEW_MODEL || process.env.OPENAI_MODEL || 'gpt-4.1-mini');
+const MODEL = modelForTask('review', process.env.DEAL_REVIEW_MODEL);
 const MAX_DEALS = numberEnv('DEAL_REVIEW_MAX_DEALS', 160);
 const CHUNK_SIZE = Math.max(1, Math.min(32, numberEnv('DEAL_REVIEW_CHUNK_SIZE', 24)));
 const MIN_REMOVE_CONFIDENCE = Math.max(0, Math.min(1, numberEnv('DEAL_REVIEW_MIN_REMOVE_CONFIDENCE', 0.86)));
@@ -570,7 +571,7 @@ function shouldRemove(review) {
 }
 
 async function requestLiveDealChunk(deals, referenceDate) {
-  const response = await fetch('https://api.openai.com/v1/chat/completions', {
+  const response = await freeCreditOpenAiFetch('https://api.openai.com/v1/chat/completions', {
     method: 'POST',
     headers: {
       'content-type': 'application/json',
