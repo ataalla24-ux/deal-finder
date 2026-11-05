@@ -82,6 +82,7 @@ const rawEdit = {
   title: payloadValue(payload, 'title', 'LIVE_DEAL_EDIT_TITLE'),
   brand: payloadValue(payload, 'brand', 'LIVE_DEAL_EDIT_BRAND'),
   description: payloadValue(payload, 'description', 'LIVE_DEAL_EDIT_DESCRIPTION'),
+  flightPrice: payload.flightPrice,
   category: payloadValue(payload, 'category', 'LIVE_DEAL_EDIT_CATEGORY'),
   type: payloadValue(payload, 'type', 'LIVE_DEAL_EDIT_TYPE'),
   distance: payloadValue(payload, 'distance', 'LIVE_DEAL_EDIT_DISTANCE'),

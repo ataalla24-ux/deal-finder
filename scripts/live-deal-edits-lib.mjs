@@ -7,6 +7,7 @@ export const LIVE_DEAL_EDIT_FIELDS = [
   'title',
   'brand',
   'description',
+  'flightPrice',
   'category',
   'type',
   'distance',
@@ -137,6 +138,17 @@ export function normalizePinnedRank(value) {
   return Number.isFinite(number) ? number : null;
 }
 
+export function normalizeFlightPrice(value) {
+  if (!value || typeof value !== 'object' || Array.isArray(value)) return null;
+  const amount = typeof value.value === 'number' ? value.value : NaN;
+  const cents = Math.round(amount * 100);
+  const checkedAt = cleanText(value.checkedAt);
+  if (value.currencyCode !== 'EUR' || !Number.isSafeInteger(cents) || cents <= 0
+    || amount !== cents / 100 || !Number.isFinite(Date.parse(checkedAt))
+    || new Date(checkedAt).toISOString() !== checkedAt) return null;
+  return { value: cents / 100, currencyCode: 'EUR', checkedAt: new Date(checkedAt).toISOString() };
+}
+
 function pad2(value) {
   return String(value).padStart(2, '0');
 }
@@ -254,6 +266,9 @@ export function normalizeLiveDealEdit(raw = {}, options = {}) {
       if (field === 'pinnedRank') {
         const pinnedRank = normalizePinnedRank(raw[field]);
         if (pinnedRank && pinnedRank > 0) edit[field] = pinnedRank;
+      } else if (field === 'flightPrice') {
+        const price = normalizeFlightPrice(raw[field]);
+        if (price) edit[field] = price;
       } else {
         edit[field] = cleanText(raw[field]);
       }
@@ -317,6 +332,25 @@ function applyEditToDeal(deal, edit, checkedAt) {
 
   const next = { ...deal };
   const changed = [];
+  const flightPrice = normalizeFlightPrice(edit.flightPrice);
+  const canApplyFlightPrice = Boolean(flightPrice && next.flight?.provider
+    && next.flight?.price?.currencyCode === 'EUR'
+    && next.flight?.outbound?.departureDate && next.flight?.inbound?.departureDate);
+  if (canApplyFlightPrice) {
+    const price = { ...next.flight.price, ...flightPrice, formatted: `€${flightPrice.value.toFixed(2)}` };
+    if (JSON.stringify(price) !== JSON.stringify(next.flight.price)) {
+      next.flight = { ...next.flight, price };
+      changed.push('flight.price');
+    }
+    // A manually observed price is not a continuous live quote or a proven bargain.
+    if (Array.isArray(next.flight.badges)) {
+      const badges = next.flight.badges.filter(badge => !['Live-Fare', 'Schnäppchen', 'Top-Schnäppchen'].includes(badge));
+      if (badges.length !== next.flight.badges.length) {
+        next.flight = { ...next.flight, badges };
+        changed.push('flight.badges');
+      }
+    }
+  }
   if (setIfPresent(next, edit, 'url')) changed.push('url');
   if (setIfPresent(next, edit, 'title')) changed.push('title');
   if (setIfPresent(next, edit, 'brand')) changed.push('brand');
@@ -385,6 +419,7 @@ function applyEditToDeal(deal, edit, checkedAt) {
     ...(edit.clearFields || []),
     ...(Array.isArray(deal.liveEditedFields) ? deal.liveEditedFields : []),
     ...LIVE_DEAL_EDIT_FIELDS.filter((field) => Object.hasOwn(edit, field) && edit[field] !== undefined
+      && (field !== 'flightPrice' || canApplyFlightPrice)
       && (cleanText(edit[field]) || ['location', 'address', 'logo', 'logoUrl', 'photoUrl'].includes(field))),
     ...changed,
   ])].sort();

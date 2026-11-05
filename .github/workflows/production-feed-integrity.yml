@@ -43,6 +43,7 @@ on:
       - "scripts/test-deal-redemptions.mjs"
       - "reviews/deal-redemptions.json"
       - "scripts/live-deal-edits-lib.mjs"
+      - "scripts/test-live-flight-price.mjs"
       - "scripts/test-source-backed-content.mjs"
       - "scripts/apply-reviewed-content.mjs"
       - "reviews/**"
@@ -88,6 +89,7 @@ jobs:
           node scripts/test-pre-publication-title.mjs
           node scripts/test-deal-logo-normalization.mjs
           node scripts/test-live-deal-removal-safety.mjs
+          node scripts/test-live-flight-price.mjs
           node scripts/test-slack-deal-quality.mjs
           node scripts/test-slack-approval-validation.mjs
           node scripts/test-slack-delivery-state.mjs
