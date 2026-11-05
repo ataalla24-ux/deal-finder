@@ -8,6 +8,10 @@ import { isCommunitySubmission } from './community-review-utils.js';
 const PUBLIC_BRAND_LOGO_BASE_URL = 'https://freefinder.at/assets/brand-logos';
 
 const BRAND_RULES = [
+  { key: 'bäckerei schwarz', name: 'Bäckerei Schwarz', logo: '🥖', category: 'essen', domain: 'bswien.at', logoFile: 'backerei-schwarz-bswien-at.png' },
+  { key: 'baeckerei schwarz', name: 'Bäckerei Schwarz', logo: '🥖', category: 'essen', domain: 'bswien.at', logoFile: 'backerei-schwarz-bswien-at.png' },
+  { key: 'dermann', name: 'Bäckerei DerMann', logo: '🥐', category: 'essen', domain: 'dermann.at', logoFile: 'backerei-dermann-dermann-at.png' },
+  { key: 'der mann', name: 'Bäckerei DerMann', logo: '🥐', category: 'essen', domain: 'dermann.at', logoFile: 'backerei-dermann-dermann-at.png' },
   { key: 'duruvienna', name: 'Duru Döner', logo: '🌯', category: 'essen' },
   { key: 'duru döner', name: 'Duru Döner', logo: '🌯', category: 'essen' },
   { key: 'duru kebap', name: 'Duru Döner', logo: '🌯', category: 'essen' },

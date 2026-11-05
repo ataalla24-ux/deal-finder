@@ -9,6 +9,18 @@ import {
 } from '../scraper/deal-normalization-utils.js';
 import { repairCachedLogoReference } from './cache-deal-logos.mjs';
 
+for (const brand of ['DerMann', 'Der Mann', 'Bäckerei DerMann', 'Bäckerei DerMann']) {
+  assert.equal(normalizeDealRecord({brand,title:'26 % auf Snacks',url:'https://www.instagram.com/p/fixture/'}).logoUrl,
+    'https://freefinder.at/assets/brand-logos/backerei-dermann-dermann-at.png');
+}
+for (const brand of ['Bäckerei Schwarz', 'Bäckerei Schwarz', 'Baeckerei Schwarz']) {
+  assert.equal(normalizeDealRecord({brand,title:'3 Baguettes kaufen, 1 gratis',url:'https://www.bswien.at/aktionen'}).logoUrl,
+    'https://freefinder.at/assets/brand-logos/backerei-schwarz-bswien-at.png');
+}
+for (const brand of ['Schwarzenberg', 'Schwarz Design', 'Bäckerei Anders']) {
+  assert.doesNotMatch(normalizeDealRecord({brand,title:'Angebot',url:'https://example.com/'}).logoUrl||'',/backerei-(?:schwarz|dermann)-/);
+}
+
 const logoTestDir = await fs.mkdtemp(path.join(os.tmpdir(), 'deal-logo-cache-'));
 await fs.writeFile(path.join(logoTestDir, 'present.png'), Buffer.from([1, 2, 3]));
 const logoBaseUrl = 'https://freefinder.at/assets/brand-logos';

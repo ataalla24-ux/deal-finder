@@ -71,3 +71,36 @@ assert.equal(inspectDealLocation(unusual,{map:{locations:[unusualLocation]},revi
 for(const changed of [{number:'12'},{postalCode:'1020'},{street:'Tuchlaubenplatz'}])
   assert.equal(inspectDealLocation(unusual,{map:{locations:[unusualLocation]},reviewed:{[unusual.id]:{locations:[{...unusualAddress,...changed}]}},today:'2026-09-30'}).locationIds.length,0);
 console.log('Map enrichment: exact matches, online exclusion, branch dates, ambiguity, cache, budget and idempotency passed.');
+
+const tenant = { ...existing, id:'shared-building-shop', name:'Phone shop', address:deal.distance, dealIds:['phone'] };
+const cinema = {id:'cinema-benefit',brand:'Mobile provider',title:'1+1 Kinotickets',distance:'Wien'};
+const venueReview = {[cinema.id]:{evidenceUrl:'https://example.com/participants',locations:[{...address,venueName:'Cinema Vienna'}]}};
+const phone = {id:'phone',brand:'Phone shop',distance:deal.distance};
+const venueInput = {deals:[phone,cinema],map:{...map,locations:[tenant]},reviewed:venueReview,now,
+  lookup:async()=>{throw Error('Exact coordinate already known; no geocoding allowed');},maxRequests:0};
+assert.equal(inspectDealLocation(cinema,{map:venueInput.map,reviewed:venueReview,today:'2026-09-30'}).locationIds.length,0);
+const venues = await enrichMap(venueInput);
+const cinemaPin = venues.map.locations.find(x=>x.dealIds.includes(cinema.id));
+assert.equal(cinemaPin.name,'Cinema Vienna');
+assert.notEqual(cinemaPin.id,tenant.id);
+assert.equal(cinemaPin.coordinateReferenceId,tenant.id);
+for(const field of ['latitude','longitude','address','source']) assert.equal(cinemaPin[field],tenant[field]);
+assert.equal(cinemaPin.attribution,undefined,'Non-City coordinate sources must not be misattributed');
+assert.deepEqual(venues.map.locations.find(x=>x.id===tenant.id),tenant);
+assert.equal(venues.requests,0);
+const repeatVenue = await enrichMap({...venueInput,map:venues.map,catalog:venues.catalog,cache:venues.cache});
+assert.deepEqual(repeatVenue.map,venues.map);
+assert.deepEqual(repeatVenue.catalog,venues.catalog);
+const twoVenues = await enrichMap({...venueInput,reviewed:{[cinema.id]:{...venueReview[cinema.id],locations:[
+  {...address,venueName:'Cinema Vienna'},{...address,venueName:'Second cinema'}]}}});
+assert.equal(twoVenues.map.locations.filter(x=>x.dealIds.includes(cinema.id)).length,2);
+const chainVenues = await enrichMap({...venueInput,reviewed:{},catalog:{chainRules:[{
+  id:'cinema',reviewed:true,brands:[cinema.brand],sourceUrls:['https://example.com/deal'],titleTerms:['Kinotickets'],
+  validFrom:'2026-09-01',evidenceUrl:'https://example.com/participants',locationIds:[],excludedLocationIds:[],
+  addresses:venueReview[cinema.id].locations}]},deals:[phone,{...cinema,url:'https://example.com/deal'}]});
+assert.equal(chainVenues.map.locations.find(x=>x.dealIds.includes(cinema.id)).name,'Cinema Vienna');
+for(const changed of [{number:'20'},{postalCode:'1020'},{street:'Othergasse'}]) {
+  const wrong = await enrichMap({...venueInput,reviewed:{[cinema.id]:{locations:[{...address,...changed,venueName:'Cinema Vienna'}]}}});
+  assert.equal(wrong.map.locations.some(x=>x.dealIds.includes(cinema.id)),false);
+}
+console.log('Reviewed redemption venues keep tenant identity, coordinate provenance and stable IDs without extra lookups.');

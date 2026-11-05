@@ -37,6 +37,12 @@ function matchesAddress(location, address) {
 }
 const sameBranchWindow = (location, address) => (location.validFrom || '') === (address.validFrom || '')
   && (location.validUntil || '') === (address.validUntil || '');
+// An exact building coordinate is reusable, but another tenant's identity is not.
+const sameReviewedVenue = (location, address) => address.venueName === undefined
+  || (typeof address.venueName === 'string' && Boolean(normalize(address.venueName))
+    && normalize(location.name) === normalize(address.venueName));
+const matchesReviewedBranch = (location, address) => matchesAddress(location, address)
+  && sameBranchWindow(location, address) && sameReviewedVenue(location, address);
 
 function catalogLocations(map = {}, catalog = {}) {
   return [...new Map([...(catalog.locations || []), ...(map.locations || [])].map(location => [location.id, location])).values()];
@@ -159,7 +165,7 @@ export function inspectDealLocation(deal, { map = {}, catalog = {}, reviewed = {
     const selected=chain.locationIds.map(id=>locations.find(location=>location.id===id&&verifiedLocation(location,today)));
     if(!selected.every(Boolean)) return {...base,status:'needs-review',reason:'chain-branch-catalog-incomplete'};
     const addresses=chain.addresses||[];
-    const addressLocations=addresses.map(address=>locations.find(location=>verifiedLocation(location,today)&&matchesAddress(location,address)&&sameBranchWindow(location,address)));
+    const addressLocations=addresses.map(address=>locations.find(location=>verifiedLocation(location,today)&&matchesReviewedBranch(location,address)));
     return {...base,addresses,status:addressLocations.every(Boolean)?(chain.incomplete===true?'partially-mapped':'mapped'):'address-ready',reason:'reviewed-chain-campaign',
       ...(chain.incomplete===true?{incomplete:true}:{}),
       locationIds:[...new Set([...chain.locationIds,...addressLocations.filter(Boolean).map(location=>location.id)])],chainRuleId:chain.id};
@@ -195,7 +201,7 @@ export function inspectDealLocation(deal, { map = {}, catalog = {}, reviewed = {
     return { ...base, status: 'mapped', reason: 'existing-registry', locationIds: narrowed.map(x => x.id) };
   }
   if (candidates.addresses.length) {
-    const matches = candidates.addresses.map(address => locations.find(location => matchesAddress(location, address) && sameBranchWindow(location, address)));
+    const matches = candidates.addresses.map(address => locations.find(location => matchesReviewedBranch(location, address)));
     return { ...base, status: matches.every(Boolean) ? (incomplete ? 'partially-mapped' : 'mapped') : 'address-ready', reason: matches.every(Boolean) ? 'verified-address-reuse' : '',
       locationIds: [...new Set(matches.filter(Boolean).map(x => x.id))] };
   }
@@ -320,7 +326,7 @@ export async function enrichMap({ deals, map, reviewed = {}, cache = {}, catalog
       added++;
     }
     for (const address of assessment.addresses) {
-      if (assessment.locationIds.some(id => matchesAddress(known.find(x => x.id === id), address))) continue;
+      if (assessment.locationIds.some(id => matchesReviewedBranch(known.find(x => x.id === id), address))) continue;
       const key = geocodeKey(address);
       const cached = cache[key];
       const knownAddress = known.find(location => matchesAddress(location, address))
@@ -334,12 +340,20 @@ export async function enrichMap({ deals, map, reviewed = {}, cache = {}, catalog
       if (!result || !verifiedLocation({ ...result, confidence: 1 }) || !matchesAddress(result, address)) {
         failures.push('no-exact-coordinate-match'); continue;
       }
-      const id = createHash('sha256').update(`${key}|${address.validFrom || ''}|${address.validUntil || ''}`).digest('hex').slice(0, 16);
-      attach({ id: `address-${id}`, name: deal.brand || deal.title, address: result.address,
+      const venueName = typeof address.venueName === 'string' ? address.venueName.trim() : '';
+      if (address.venueName !== undefined && !normalize(venueName)) {
+        failures.push('invalid-reviewed-venue-name'); continue;
+      }
+      const identity = `${key}|${address.validFrom || ''}|${address.validUntil || ''}${venueName ? `|venue:${normalize(venueName)}` : ''}`;
+      const id = createHash('sha256').update(identity).digest('hex').slice(0, 16);
+      const attribution = venueName ? (result.attribution || (/data\.wien\.gv\.at/.test(result.source) ? 'Datenquelle: Stadt Wien - data.wien.gv.at' : ''))
+        : 'Datenquelle: Stadt Wien - data.wien.gv.at';
+      attach({ id: `address-${id}`, name: venueName || deal.brand || deal.title, address: result.address,
         latitude: result.latitude, longitude: result.longitude, confidence: 1,
         source: result.source, managedBy: manager, dealIds: [deal.id],
-        evidenceUrl: reviewed[deal.id]?.evidenceUrl || deal.url,
-        attribution: 'Datenquelle: Stadt Wien - data.wien.gv.at',
+        evidenceUrl: reviewed[deal.id]?.evidenceUrl || address.evidenceUrl || deal.url,
+        ...(venueName && knownAddress?.id ? { coordinateReferenceId: knownAddress.id } : {}),
+        ...(attribution ? { attribution } : {}),
         ...(address.validFrom ? { validFrom: address.validFrom } : {}),
         ...(address.validUntil ? { validUntil: address.validUntil } : {}) }, deal);
       added++;
@@ -369,7 +383,7 @@ export async function enrichMap({ deals, map, reviewed = {}, cache = {}, catalog
     const previousIds = override ? [] : datedLocationIds(deal, map, catalog, candidatesFor(deal, reviewed, today).addresses, today);
     const currentIds = active.filter(location => location.dealIds.includes(deal.id)).map(location => location.id);
     const reviewedIds = override ? catalogEntries.filter(location =>
-      (override.locations || []).some(address => matchesAddress(location, address) && sameBranchWindow(location, address))).map(location => location.id) : [];
+      (override.locations || []).some(address => matchesReviewedBranch(location, address))).map(location => location.id) : [];
     const ids = [...new Set([...previousIds, ...currentIds, ...reviewedIds])];
     return catalogEntries.some(location => ids.includes(location.id) && (location.validFrom || location.validUntil))
       ? [{ dealId: deal.id, fingerprint: locationFingerprint(deal), locationIds: ids }] : [];
