@@ -1,7 +1,7 @@
 {
-  "runId": "41942135773",
+  "runId": "42058825426",
   "mode": "scan",
-  "createdAt": "2026-11-05T00:33:16.018Z",
+  "createdAt": "2026-11-05T15:49:26.485Z",
   "usage": {
     "scrapingbee": {
       "provider": "scrapingbee",
@@ -43,8 +43,151 @@
       "planFields": []
     }
   },
-  "tasks": [],
-  "skipped": [],
-  "eligiblePages": 0,
-  "status": "skipped"
+  "tasks": [
+    {
+      "source": "NORDSEE",
+      "url": "https://www.nordsee.com/at/coupons/pazifisches_schollen__filet_vom_grill__beilage__softdrink_02l__garnelenspie?pdf=true",
+      "provider": "zyte",
+      "cap": 0.02
+    },
+    {
+      "source": "IKEA Food",
+      "url": "https://www.ikea.com/at/de/food/salesareas/bistro/",
+      "provider": "scraperapi",
+      "cap": 10
+    },
+    {
+      "source": "NORDSEE",
+      "url": "https://www.nordsee.com/at/coupons/2_classic_fish_burger__pommes_frites__1_softdrink_05l_pet?pdf=true",
+      "provider": "zyte",
+      "cap": 0.02
+    },
+    {
+      "source": "IKEA Food",
+      "url": "https://www.ikea.com/at/de/food/salesareas/swedish-cafe/",
+      "provider": "scraperapi",
+      "cap": 10
+    },
+    {
+      "source": "NORDSEE",
+      "url": "https://www.nordsee.com/at/coupons/groer_hunger?pdf=true",
+      "provider": "zyte",
+      "cap": 0.02
+    },
+    {
+      "source": "IKEA Food",
+      "url": "https://www.ikea.com/at/de/food/salesareas/restaurant",
+      "provider": "scraperapi",
+      "cap": 10
+    },
+    {
+      "source": "NORDSEE",
+      "url": "https://www.nordsee.com/at/coupons/garnelen_box?pdf=true",
+      "provider": "zyte",
+      "cap": 0.02
+    },
+    {
+      "source": "IKEA Food",
+      "url": "https://www.ikea.com/at/de/food/salesareas/restaurant/?categories=SC017",
+      "provider": "scraperapi",
+      "cap": 10
+    }
+  ],
+  "skipped": [
+    {
+      "provider": "scrapingbee",
+      "reason": "scrapingbee-trial-unverified-or-expired"
+    }
+  ],
+  "eligiblePages": 8,
+  "finishedAt": "2026-11-05T15:49:31.423Z",
+  "status": "partial",
+  "results": [
+    {
+      "provider": "zyte",
+      "source": "NORDSEE",
+      "url": "https://www.nordsee.com/at/coupons/pazifisches_schollen__filet_vom_grill__beilage__softdrink_02l__garnelenspie?pdf=true",
+      "reserved": 0.02,
+      "status": "failed",
+      "reason": "source-or-processing-error",
+      "httpStatus": 0,
+      "retryAt": "2026-11-06T15:49:29.186Z"
+    },
+    {
+      "provider": "scraperapi",
+      "source": "IKEA Food",
+      "url": "https://www.ikea.com/at/de/food/salesareas/bistro/",
+      "reserved": 10,
+      "directCandidates": 0,
+      "directRejected": [],
+      "directVisibleTextCharacters": 378,
+      "status": "failed",
+      "reason": "provider-cost-limit",
+      "httpStatus": 403,
+      "retryAt": "2026-11-08T15:49:29.186Z"
+    },
+    {
+      "provider": "zyte",
+      "source": "NORDSEE",
+      "url": "https://www.nordsee.com/at/coupons/2_classic_fish_burger__pommes_frites__1_softdrink_05l_pet?pdf=true",
+      "reserved": 0.02,
+      "status": "source-paused"
+    },
+    {
+      "provider": "scraperapi",
+      "source": "IKEA Food",
+      "url": "https://www.ikea.com/at/de/food/salesareas/swedish-cafe/",
+      "reserved": 10,
+      "status": "source-paused"
+    },
+    {
+      "provider": "zyte",
+      "source": "NORDSEE",
+      "url": "https://www.nordsee.com/at/coupons/groer_hunger?pdf=true",
+      "reserved": 0.02,
+      "status": "source-paused"
+    },
+    {
+      "provider": "scraperapi",
+      "source": "IKEA Food",
+      "url": "https://www.ikea.com/at/de/food/salesareas/restaurant",
+      "reserved": 10,
+      "status": "source-paused"
+    },
+    {
+      "provider": "zyte",
+      "source": "NORDSEE",
+      "url": "https://www.nordsee.com/at/coupons/garnelen_box?pdf=true",
+      "reserved": 0.02,
+      "status": "source-paused"
+    },
+    {
+      "provider": "scraperapi",
+      "source": "IKEA Food",
+      "url": "https://www.ikea.com/at/de/food/salesareas/restaurant/?categories=SC017",
+      "reserved": 10,
+      "status": "source-paused"
+    }
+  ],
+  "funnel": {
+    "pagesBySource": {
+      "NORDSEE": 4,
+      "IKEA Food": 4
+    },
+    "statuses": {
+      "failed": 2,
+      "source-paused": 6
+    },
+    "rejectionReasons": {},
+    "verificationReasons": {},
+    "directCandidates": 0,
+    "renderedCandidates": 0,
+    "verifiedCandidates": 0
+  },
+  "uniqueVerifiedCandidates": 0,
+  "alreadyKnown": 0,
+  "newPendingCandidates": 0,
+  "pendingCandidates": 0,
+  "slackMessagesSent": 0,
+  "note": "New pending candidates still require central Slack validation and human approval."
 }
