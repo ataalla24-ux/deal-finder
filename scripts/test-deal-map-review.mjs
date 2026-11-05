@@ -190,7 +190,7 @@ try {
   assert.equal(loadDealMapReviewContext({ root: temp }).mapAvailable, false);
 
   // Exercise the actual CLI only in a throwaway fixture with dry-run forced.
-  for (const file of ['slack-live-deal-review.mjs', 'deal-map-review.mjs', 'deal-map-enrichment.mjs', 'deal-map-business.mjs']) {
+  for (const file of ['slack-live-deal-review.mjs', 'deal-map-review.mjs', 'deal-map-enrichment.mjs', 'deal-map-chain-rules.mjs', 'deal-map-business.mjs']) {
     fs.copyFileSync(path.join(root, 'scripts', file), path.join(temp, 'scripts', file));
   }
   fs.rmSync(path.join(temp, 'docs/deal-map-locations.json'));

@@ -7,7 +7,10 @@ on:
   push:
     branches: [main]
     paths:
+      - 'docs/deals.json'
+      - 'docs/live-deal-edits.json'
       - 'reviews/map-addresses.json'
+      - 'reviews/map-chain-rules.json'
       - 'scripts/deal-map-*.mjs'
       - 'scripts/enrich-deal-map.mjs'
       - '.github/workflows/deal-map-sync.yml'
@@ -36,6 +39,7 @@ jobs:
       - name: Verify map safeguards
         run: |
           node scripts/test-deal-map-enrichment.mjs
+          node scripts/test-deal-map-chain-rules.mjs
           node scripts/test-map-location-pipeline.mjs
           node scripts/test-map-geocode-fairness.mjs
           node scripts/test-deal-map-source-addresses.mjs

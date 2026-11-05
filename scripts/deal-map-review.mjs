@@ -10,6 +10,8 @@ const text = (value, max = 240) => Array.from(String(value || '').toWellFormed()
 const escapeSlack = value => value.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
 const reasonLabels = {
   'existing-registry': 'Die Filiale ist im Kartenregister bereits sicher zugeordnet.',
+  'reviewed-chain-campaign': 'Alle bestaetigten teilnehmenden Filialen dieser Aktion sind zugeordnet.',
+  'chain-branch-catalog-incomplete': 'Eine bestaetigte Filiale fehlt im Koordinatenregister; keine geratenen Kartenpunkte.',
   'published-map-coverage': 'Der unver\u00e4nderte Deal ist im aktuellen Kartenregister einem verifizierten Standort zugeordnet.',
   'verified-address-reuse': 'Die Adresse stimmt mit einem verifizierten Kartenstandort \u00fcberein.',
   'named-venue': 'Die konkret genannte Filiale ist als Kartenstandort verifiziert.',
@@ -33,6 +35,7 @@ export function loadDealMapReviewContext({ root = ROOT, now = new Date() } = {})
   const map = optionalJson(path.join(root, 'docs', 'deal-map-locations.json'));
   const reviewed = optionalJson(path.join(root, 'reviews', 'map-addresses.json'));
   const catalog = optionalJson(path.join(root, 'reviews', 'map-location-catalog.json'));
+  if(catalog) catalog.chainRules=optionalJson(path.join(root,'reviews','map-chain-rules.json'))?.rules||[];
   const coverage = optionalJson(path.join(root, 'reviews', 'map-coverage.json'));
   return {
     map: Array.isArray(map?.locations) ? map : { locations: [] },

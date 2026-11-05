@@ -18,12 +18,14 @@ const OPTIONAL_OUTPUTS = [
 ];
 const OUTPUTS = [MAP, COVERAGE, 'reviews/map-geocode-cache.json', ...OPTIONAL_OUTPUTS];
 const SOURCE_INPUTS = [
+  'reviews/map-chain-rules.json',
   'docs/live-deal-edits.json',
   'reviews/verified-expiry-state.json',
   'reviews/verified-expiry-archive.json',
   'scripts/verified-expiry-apply.mjs',
   'scripts/enrich-deal-map.mjs',
   'scripts/deal-map-enrichment.mjs',
+  'scripts/deal-map-chain-rules.mjs',
   'scripts/deal-map-source-addresses.mjs',
   'scripts/deal-map-business.mjs',
   'scripts/sync-deal-map-references.mjs',
@@ -233,7 +235,7 @@ test('feed writers retain the final stamped feed and every map hook output', t =
   assert.match(remoteText(f, 'docs/angebote-wien-heute.html'), /Local fixture/);
 });
 
-for (const file of [FEED, 'reviews/map-addresses.json', ...OPTIONAL_OUTPUTS, 'scripts/deal-map-enrichment.mjs']) {
+for (const file of [FEED, 'reviews/map-addresses.json', 'reviews/map-chain-rules.json', ...OPTIONAL_OUTPUTS, 'scripts/deal-map-enrichment.mjs', 'scripts/deal-map-chain-rules.mjs']) {
   test(`uncommitted input omitted from map batch is rejected: ${file}`, t => {
     const f = fixture(t);
     changeMap(f);

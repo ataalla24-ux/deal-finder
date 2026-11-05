@@ -25,6 +25,7 @@ if (process.env.MAP_REFRESH_BUSINESS === '1') {
 const deals = [...regularDeals, ...activeBusinessDeals(business, now)];
 const map = await read('docs/deal-map-locations.json');
 const catalog = await optional('reviews/map-location-catalog.json');
+catalog.chainRules=(await optional('reviews/map-chain-rules.json')).rules||[];
 const reviewed = await optional('reviews/map-addresses.json');
 const sourceCache = await optional('reviews/map-source-address-cache.json');
 // Approval stays fast: network source discovery belongs to scheduled reconciliation.

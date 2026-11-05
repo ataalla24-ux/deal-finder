@@ -13,7 +13,7 @@ const read = file => JSON.parse(fs.readFileSync(path.join(temp, 'docs', file), '
 try {
   for (const dir of ['scraper', 'sentry']) fs.cpSync(path.join(root, dir), path.join(temp, dir), { recursive: true });
   fs.mkdirSync(path.join(temp, 'scripts'));
-  for (const file of ['deal-map-review.mjs', 'deal-map-enrichment.mjs', 'approval-map-readiness.mjs']) {
+  for (const file of ['deal-map-review.mjs', 'deal-map-enrichment.mjs', 'deal-map-chain-rules.mjs', 'approval-map-readiness.mjs']) {
     fs.copyFileSync(path.join(root, 'scripts', file), path.join(temp, 'scripts', file));
   }
   fs.copyFileSync(path.join(root, 'package.json'), path.join(temp, 'package.json'));

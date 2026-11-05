@@ -1,4 +1,5 @@
 import { createHash } from 'node:crypto';
+import { matchChainRule } from './deal-map-chain-rules.mjs';
 
 export const GEO_ENDPOINT = 'https://data.wien.gv.at/daten/geo';
 const manager = 'exact-vienna-address-v1';
@@ -144,6 +145,18 @@ export function inspectDealLocation(deal, { map = {}, catalog = {}, reviewed = {
   const candidates = candidatesFor(deal, reviewed, today);
   const base = { locationIds: [], addresses: candidates.addresses, reason: candidates.reason, channel: 'onsite-or-unknown' };
   if (candidates.reason === 'online-only') return { ...base, status: 'online-only', channel: 'online' };
+  const chain=matchChainRule(deal,catalog.chainRules,today);
+  // Manual choices, concrete addresses and named branches take precedence.
+  if(chain&&!reviewed[deal.id]&&candidates.reason==='missing-exact-address'
+    &&!namedVenueMatches(deal,catalogLocations(map,catalog)).length) {
+    const locations=catalogLocations(map,catalog);
+    const selected=chain.locationIds.map(id=>locations.find(location=>location.id===id&&verifiedLocation(location,today)));
+    if(!selected.every(Boolean)) return {...base,status:'needs-review',reason:'chain-branch-catalog-incomplete'};
+    const addresses=chain.addresses||[];
+    const addressLocations=addresses.map(address=>locations.find(location=>verifiedLocation(location,today)&&matchesAddress(location,address)&&sameBranchWindow(location,address)));
+    return {...base,addresses,status:addressLocations.every(Boolean)?'mapped':'address-ready',reason:'reviewed-chain-campaign',
+      locationIds:[...new Set([...chain.locationIds,...addressLocations.filter(Boolean).map(location=>location.id)])],chainRuleId:chain.id};
+  }
   const fingerprint = locationFingerprint(deal);
   const priorExclusion = (map.geocodingExclusions || []).find(entry => entry.dealId === deal.id && entry.fingerprint === fingerprint);
   const datedIds = datedLocationIds(deal, map, catalog, candidates.addresses, today);

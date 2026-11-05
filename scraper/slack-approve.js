@@ -752,7 +752,8 @@ async function validateApprovalCandidates(deals, options = {}) {
   const readiness = await requireApprovalMap(validation, {
     existingDeals: loadExistingApprovedDeals(),
     map: loadJson(path.join(DOCS_DIR, 'deal-map-locations.json'), { locations: [] }),
-    catalog: loadJson(path.join(ROOT, 'reviews/map-location-catalog.json'), {}),
+    catalog: {...loadJson(path.join(ROOT, 'reviews/map-location-catalog.json'), {}),
+      chainRules: loadJson(path.join(ROOT, 'reviews/map-chain-rules.json'), {}).rules || []},
     reviewed: loadJson(path.join(ROOT, 'reviews/map-addresses.json'), {}),
     cache: loadJson(path.join(ROOT, 'reviews/map-geocode-cache.json'), {}), now,
     maxRequests: process.env.APPROVAL_MAP_GEOCODE_REQUESTS ?? 8,

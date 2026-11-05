@@ -27,10 +27,12 @@ const MAP_INPUT_FILES = [
   'reviews/verified-expiry-archive.json',
   'scripts/verified-expiry-apply.mjs',
   'reviews/map-addresses.json',
+  'reviews/map-chain-rules.json',
   // These are read/modify/write inputs as well as generated outputs.
   ...MAP_GENERATED_FILES.filter(file => file !== 'reviews/map-coverage.json'),
   'scripts/enrich-deal-map.mjs',
   'scripts/deal-map-enrichment.mjs',
+  'scripts/deal-map-chain-rules.mjs',
   'scripts/deal-map-source-addresses.mjs',
   'scripts/deal-map-business.mjs',
   'scripts/sync-deal-map-references.mjs',

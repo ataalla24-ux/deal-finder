@@ -12,7 +12,7 @@ export async function requireApprovalMap(validation, { existingDeals = [], map =
     maxRequests: Math.max(0, Math.min(8, Number(maxRequests) || 0)) });
   const today = new Intl.DateTimeFormat('sv-SE', { timeZone: 'Europe/Vienna' }).format(now);
   const checks = new Map(candidates.map(deal => [deal.id,
-    inspectDealLocation(deal, { map: enriched.map, catalog: enriched.catalog, reviewed, today })]));
+    inspectDealLocation(deal, { map: enriched.map, catalog: {...enriched.catalog,chainRules:catalog.chainRules}, reviewed, today })]));
   const results = validation.results.map(result => {
     if (!result.decision.allowed) return result;
     const check = checks.get(result.deal.id);

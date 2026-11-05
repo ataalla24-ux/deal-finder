@@ -95,7 +95,7 @@ try {
   // Test the real daily-review entry point without tokens, sends, or live files.
   fs.mkdirSync(path.join(temp, 'scripts'));
   fs.mkdirSync(path.join(temp, 'docs'));
-  for (const file of ['slack-live-deal-review.mjs', 'deal-map-review.mjs', 'deal-map-enrichment.mjs', 'deal-map-business.mjs']) {
+  for (const file of ['slack-live-deal-review.mjs', 'deal-map-review.mjs', 'deal-map-enrichment.mjs', 'deal-map-chain-rules.mjs', 'deal-map-business.mjs']) {
     fs.copyFileSync(path.join(root, 'scripts', file), path.join(temp, 'scripts', file));
   }
   write('reviews/map-business-campaigns.json', projection.snapshot);

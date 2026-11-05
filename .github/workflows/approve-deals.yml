@@ -53,6 +53,7 @@ jobs:
           SENTRY_DISABLED=1 node scripts/test-community-approval.mjs
           SENTRY_DISABLED=1 node scripts/test-community-approval-integration.mjs
           SENTRY_DISABLED=1 node scripts/test-approval-map-readiness.mjs
+          SENTRY_DISABLED=1 node scripts/test-deal-map-chain-rules.mjs
 
       - name: ✅ Read Slack ✅ Reactions & Approve
         id: approval
