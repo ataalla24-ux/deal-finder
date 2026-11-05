@@ -51,6 +51,17 @@ export const photoRecipes = {
 
 // Match the benefit, not a merchant word in the URL (Pizza Rando offers döner).
 export const articlePhotos = {
+  'ikea-westbahnhof-10-euro-gutschein-restaurant-wien': 'family-lunch',
+  'flamm-wien-steak-doener-1plus1-6-november': 'kebab',
+  'noodle-king-wien-20-prozent-vorteilsclub': 'biang-noodles',
+  'baeckerei-schwarz-baguette-3plus1-wien': 'groceries',
+  'abby-smashburger-990-wien-rochusmarkt': 'burger',
+  'der-mann-snacks-26-prozent-wien-november': 'cafe-breakfast',
+  'hot-hofer-10-euro-gutschein-rufnummernmitnahme': 'smartphone',
+  'padelzone-wien-rabatt-drei': 'city',
+  'flixbus-drei-10-prozent-rabatt-wien': 'city',
+  'clever-fit-wien-drei-rabatt': 'city',
+  'burger-king-wolt-2-fuer-1-wien-annagasse': 'burger',
   'gratis-omv-kaffee': 'coffee',
   'blumencafe-kaffee-kuchen-6-euro-wien': 'coffee',
   'only-noodle-biang-biang-1plus1-wien': 'biang-noodles',

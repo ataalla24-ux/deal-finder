@@ -6,6 +6,7 @@ import { load } from 'cheerio';
 import { polishHtml } from './polish-website.mjs';
 import { backfillGuides } from './blog-backfill-20261018.mjs';
 import { catchupGuides } from './blog-backfill-20261030.mjs';
+import { novemberGuides } from './blog-backfill-20261105.mjs';
 
 const dailyGuides = [
   {
@@ -64,7 +65,7 @@ const dailyGuides = [
   },
 ];
 
-const editorialGuides = [...backfillGuides, ...catchupGuides, ...dailyGuides];
+const editorialGuides = [...backfillGuides, ...catchupGuides, ...dailyGuides, ...novemberGuides];
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const BLOG_DIR = path.join(ROOT, 'docs', 'blog');
@@ -216,7 +217,7 @@ const recentDealGuides = [
 ];
 
 function quickDeal(guide) {
-  const reviewed = dealGuides.find(item => item.slug === guide.slug);
+  const reviewed = guide.quickFacts || dealGuides.find(item => item.slug === guide.slug);
   if (!reviewed?.what) return '';
   return `<section class="article-note" data-guide-reviewed="${escapeHtml(reviewed.reviewedAt)}" aria-label="Deal auf einen Blick">
     <h2>Dein Deal auf einen Blick</h2>
@@ -260,18 +261,19 @@ const guides = [...editorialGuides, ...timelyGuides, ...recentDealGuides, ...[
   },
   {
     slug: 'foodora-60-prozent-rabatt-genuss-wien',
-    title: 'Foodora Gutschein GENUSS in Wien: Einlösen & Gebühren',
-    meta: 'GENUSS bei Foodora einlösen: Rabatt, Mindestbestellwert und Liefergebühren im Warenkorb prüfen. 60 Prozent sind nicht für jedes Konto bestätigt.',
+    title: 'Foodora Gutscheincode Wien: GENUSS und Bedingungen',
+    meta: 'Foodora Gutscheincode GENUSS in Wien: Einlösung, Mindestbestellwert und Gebühren prüfen. 60 % sind historisch dokumentiert, heute nicht pauschal bestätigt.',
     eyebrow: 'Foodora Gutschein Wien',
-    headline: 'Foodora Gutschein GENUSS in Wien einlösen',
+    headline: 'Foodora Gutscheincode GENUSS in Wien: Was gilt für dich?',
     intro: 'Für GENUSS wurden am 28. September 2026 in FreeFinder 60 Prozent Rabatt dokumentiert. Das belegt die damalige Einlösung, keinen garantierten heutigen Rabatt für jedes Konto. Prüfe Code, Bedingungen und Endbetrag in deinem eigenen Foodora-Warenkorb.',
-    published: '2026-09-28', publishedLabel: '28. September 2026', modified: '2026-10-09', modifiedLabel: '9. Oktober 2026', dealPage: true,
+    published: '2026-09-28', publishedLabel: '28. September 2026', modified: '2026-11-05', modifiedLabel: '5. November 2026', dealPage: true, refreshCard: true,
     image: '/assets/current-ios/deals-home.jpg', imageAvif: '/assets/current-ios/deals-home-400.avif 400w, /assets/current-ios/deals-home-736.avif 736w', imageWidth: 736, imageHeight: 414,
     imageAlt: 'FreeFinder App mit Foodora-Rabatt und kostenlosen Angeboten in Wien',
     sections: [
       ['rabatt', 'Wie viel spart der Foodora-Code GENUSS?', `<p>Mit dem Gutscheincode <strong>GENUSS</strong> sind laut dem bisherigen FreeFinder-Eintrag <strong>60 Prozent Rabatt</strong> bei Foodora möglich. Der Vorteil kann für Bestellungen bei teilnehmenden Restaurants und Shops angezeigt werden.</p><p>Der Code wurde am 28. September 2026 erneut erfolgreich verwendet. Da Foodora Gutscheine nach Konto, Liefergebiet, Warenkorb oder Kampagne ausspielen kann, sollte der Rabatt vor dem Absenden der Bestellung im Warenkorb sichtbar sein.</p>`],
       ['einloesen', 'Foodora-Gutscheincode GENUSS einlösen', `<ol><li>Foodora öffnen und ein Restaurant oder einen Shop auswählen.</li><li>Artikel in den Warenkorb legen und die Lieferadresse prüfen.</li><li>Im Bereich für Gutscheine oder Promo-Codes <strong>GENUSS</strong> eingeben.</li><li>Auf „Anwenden“ tippen und kontrollieren, ob 60 Prozent Rabatt abgezogen werden.</li><li>Erst danach bestellen und den Endbetrag inklusive Liefer- und Servicegebühren prüfen.</li></ol><div class="article-note"><strong>Wichtig</strong>Der Code ist nur erfolgreich eingelöst, wenn die Ermäßigung im Warenkorb tatsächlich angezeigt wird. Ein sichtbares Eingabefeld allein garantiert keinen Rabatt.</div>`],
       ['bedingungen', 'Welche Bedingungen solltest du prüfen?', `<p>Im aktuellen Eintrag ist <strong>kein festes Ablaufdatum</strong> hinterlegt. Trotzdem können Foodora-Kampagnen jederzeit geändert oder auf bestimmte Konten, Neukunden, Restaurants, Mindestbestellwerte oder Liefergebiete beschränkt werden.</p><ul><li>Gilt der Code für dein Konto?</li><li>Wird ein Mindestbestellwert verlangt?</li><li>Sind Liefer-, Service- oder Verpackungsgebühren vom Rabatt ausgenommen?</li><li>Gilt der Rabatt für alle Restaurants oder nur teilnehmende Anbieter?</li><li>Wird der Endpreis nach dem Einlösen wirklich um 60 Prozent reduziert?</li></ul>`],
+      ['code-abgelehnt', 'Warum wird ein Foodora-Gutscheincode nicht angenommen?', `<p>Eine Ablehnung ist kein Beleg dafür, dass du einen anderen Schreibstil des Codes brauchst. Lies die konkrete Meldung im Warenkorb: Sie kann etwa auf das Konto, den Mindestbestellwert oder die ausgewählten Produkte hinweisen. Verändere deine Bestellung nicht allein für eine erwartete Ersparnis, solange der endgültige Rabatt nicht angezeigt wird.</p><p>Vergleiche den Gesamtbetrag mit Lieferung und Gebühren vor und nach dem Anwenden. Ein Prozentnachlass auf berechtigte Speisen ist nicht automatisch derselbe Nachlass auf die vollständige Rechnung. Wenn GENUSS nicht gilt, ist die dokumentierte frühere Verwendung kein Anspruch auf eine heutige Einlösung. Weitere getrennt beschriebene Aktionen findest du im <a href="mcdonalds-chicken-mcnuggets-1plus1-oesterreich.html">McDonald’s-Guide mit App- und foodora-Angeboten</a>; dessen eigene Bedingungen gelten unabhängig von GENUSS.</p>`],
       ['quelle', 'Aktualität des Foodora-Rabatts', `<p>Die FreeFinder-App führt den Deal mit dem Code <strong>GENUSS</strong> und verlinkt direkt zur <a href="https://www.foodora.at/campaigns?lat=48.20807&amp;lng=16.37122&amp;url_key=AT_food_HVA1_loggedout" rel="noopener">Foodora-Kampagnenübersicht</a>. Die dokumentierte Verwendung am 28. September 2026 bestätigt nur die damalige Einlösung. Die öffentliche Kampagnenübersicht ersetzt keine heutige Bestätigung in deinem Warenkorb.</p><p>Da Foodora die Teilnahmebedingungen dynamisch pro Bestellung prüfen kann, solltest du den Rabatt auch bei jeder späteren Bestellung direkt im Warenkorb kontrollieren.</p>`],
     ],
     faqs: [
@@ -355,24 +357,28 @@ const guides = [...editorialGuides, ...timelyGuides, ...recentDealGuides, ...[
   },
   {
     slug: 'dahab-doener-1plus1-wien',
-    title: 'Dahab Döner in 1220 Wien',
-    meta: '1+1 Döner bei Dahab Döner in Wien: Beim Kauf von zwei Dönern gibt es einen weiteren gratis. Wagramer Straße 126, Bedingungen und Zeitraum prüfen.',
-    eyebrow: '1+1 Döner Wien',
-    headline: 'Dahab Döner in 1220 Wien: September-Aktion beendet',
-    intro: 'Archiv der Dahab-Aktion vom 21. bis 25. September 2026 in der Wagramer Straße 126, 1220 Wien. Diese Aktion ist beendet. Aktuelle Wiener Angebote findest du in der verlinkten Übersicht.',
-    published: '2026-09-23', publishedLabel: '23. September 2026', modified: '2026-10-05', modifiedLabel: '5. Oktober 2026',
-    expires: '2026-09-25T23:59:59+02:00',
+    refreshCard: true,
+    title: 'Dahab Döner Wien: 3 für 2 im November',
+    meta: 'Dahab Döner: 3 zum Preis von 2 vom 3. bis 30. November 2026. Alle Dönersorten, Rußbergstraße 9 und Wagramer Straße 126; Bedingungen vor Ort prüfen.',
+    eyebrow: 'Drei Döner zum Preis von zwei · Wien',
+    headline: 'Dahab Döner Wien: drei Döner zum Preis von zwei im November',
+    intro: 'Dahab kündigt eine neue Novemberaktion an: Beim Kauf von zwei Dönern gibt es einen dritten gratis. Der Originalbeitrag nennt alle Dönersorten und zwei Wiener Standorte. Diese neue Aktion ersetzt im Artikel die bereits beendete Septemberankündigung.',
+    published: '2026-09-23', publishedLabel: '23. September 2026', modified: '2026-11-05', modifiedLabel: '5. November 2026',
+    dealPage: true, topic: 'essen', expires: '2026-11-30T23:59:59+01:00',
     image: '/assets/current-ios/deals-home.jpg', imageAvif: '/assets/current-ios/deals-home-400.avif 400w, /assets/current-ios/deals-home-736.avif 736w', imageWidth: 736, imageHeight: 414,
     imageAlt: 'FreeFinder App mit 1+1-Döner-Angeboten in Wien',
     sections: [
-      ['angebot', 'So funktioniert die Dahab-Aktion', `<p>Beim <strong>1+1-Angebot von Dahab Döner</strong> kaufst du zwei Döner und erhältst einen weiteren Döner gratis. Der Originalbeitrag nennt den Zeitraum <strong>Montag, 21. September bis Freitag, 25. September 2026</strong>.</p><p>Das Angebot gilt laut Beitrag bei Dahab Döner in der <strong>Wagramer Straße 126, 1220 Wien</strong>. Prüfe vor der Bestellung, welche Dönerarten eingeschlossen sind.</p>`],
-      ['einloesen', 'Vor Ort richtig einlösen', `<ol><li>Vor dem Besuch den <a href="https://www.instagram.com/reel/Ddhgq4YO5av/" rel="noopener">Originalbeitrag von Dahab Döner</a> öffnen.</li><li>Zur Filiale in der Wagramer Straße 126, 1220 Wien gehen.</li><li>Zwei Döner bestellen und die 1+1-Aktion angeben.</li><li>Vor dem Bezahlen kontrollieren, dass der dritte Döner korrekt gratis berücksichtigt wird.</li></ol><div class="article-note"><strong>Gültigkeit prüfen</strong>Der Beitrag nennt den Zeitraum bis 25. September 2026. Öffnungszeiten und Verfügbarkeit können sich ändern.</div>`],
-      ['quelle', 'Originalquelle und Bedingungen', `<p>Quelle ist der <a href="https://www.instagram.com/reel/Ddhgq4YO5av/" rel="noopener">Originalbeitrag von Dahab Döner</a>. Da Social-Media-Aktionen kurzfristig geändert oder vorzeitig beendet werden können, solltest du den Beitrag und die Bedingungen am selben Tag erneut prüfen.</p><p>Weitere Kebab- und Food-Angebote findest du in der <a href="/angebote-wien-heute.html">aktuellen Wien-Deals-Übersicht</a>.</p>`],
+      ['angebot', 'Welche Novemberaktion ist angekündigt?', `<p>Die neue Ankündigung auf dem eigenen Dahab-Account nennt <strong>3. bis 30. November</strong>, alle Dönersorten und die Mechanik <strong>drei Döner zum Preis von zwei</strong>. Das ist keine 1+1-Aktion mit nur einem bezahlten Döner. Die ursprüngliche URL dieser Seite bleibt bestehen, damit ältere Links nicht ins Leere führen.</p><p>Das Jahr steht nicht im kurzen Aktionswortlaut; die aktuelle, freigegebene App-Zuordnung und die vorhandene Datumsprüfung verorten den Beitrag im November 2026. Aus dem alten Septemberbeitrag wird keine automatische Verlängerung abgeleitet.</p>`],
+      ['standorte', 'Zwei genannte Wiener Standorte', `<ul><li><strong>Rußbergstraße 9, 1210 Wien</strong></li><li><strong>Wagramer Straße 126, 1220 Wien</strong></li></ul><p>Diese beiden Adressen werden in der gesicherten Novemberankündigung genannt. Eine beliebige weitere Filiale oder Lieferung über eine Plattform ist dadurch nicht eingeschlossen. Prüfe Öffnungszeiten, Teilnahme und gewünschte Dönervarianten vor einer eigens geplanten Anfahrt.</p>`],
+      ['einloesen', 'So bereitest du die Bestellung vor', `<ol><li>Den neuen <a href="https://www.instagram.com/reel/DfSGYE1OLt_/" rel="noopener" data-track="deal_outbound">Novemberbeitrag von Dahab</a> öffnen.</li><li>Vor der Bestellung nach der 3-für-2-Aktion und der gewünschten Kombination fragen.</li><li>Drei teilnehmende Döner auswählen und klären, wie unterschiedliche Preise behandelt werden.</li><li>Auf dem Bon die drei Produkte und den tatsächlich berechneten Gesamtbetrag kontrollieren.</li></ol><p>Ein konkreter Einzelpreis oder eine Regel für unterschiedlich teure Varianten liegt nicht vollständig vor. Deshalb wird hier weder ein fester Menüpreis noch eine besondere Gratisvariante erfunden.</p>`],
+      ['vergleich', 'Was bedeutet 3 für 2 rechnerisch?', `<p>Bei drei gleich teuren, vollständig teilnehmenden Dönern bezahlst du zwei statt drei Stück. Gegenüber drei regulären Einzelkäufen ist das rechnerisch ein Drittel weniger. Diese Rechnung setzt gleiche Preise voraus und berücksichtigt keine zusätzlichen Getränke, Extras oder Anfahrt.</p><p>Wenn ihr nur zwei Portionen braucht, ist eine dritte Portion nicht automatisch eine Geldersparnis. Ein sinnvoller Vergleich richtet sich nach der Bestellung, die ihr ohnehin machen würdet. Der konkrete Produktpreis bleibt vor Ort zu klären.</p>`],
+      ['quelle', 'Originalquelle und Aktualität', `<p>Grundlage ist die im Review vom 5. November 2026 gesicherte <a href="https://www.instagram.com/reel/DfSGYE1OLt_/" rel="noopener" data-track="deal_outbound">Ankündigung von @dahabdoener</a>. Sie nennt den neuen Zeitraum und beide Standorte. Eine persönliche Bestellung oder Verfügbarkeitsprüfung wurde nicht durchgeführt. Das Dönerfoto ist ein Symbolfoto.</p><p>Die frühere Septemberaktion ist beendet und wird nicht mehr als aktueller Anlass beworben. Nach dem 30. November dient auch diese Fassung als Archiv, sofern keine eigenständige neue Ankündigung vorliegt.</p>`],
     ],
     faqs: [
-      ['Wie viele Döner bekomme ich?', 'Laut dem Angebot gibt es beim Kauf von zwei Dönern einen dritten gratis.'],
-      ['Wo gilt die Aktion?', 'Der Beitrag nennt Dahab Döner, Wagramer Straße 126, 1220 Wien.'],
-      ['Wie lange gilt die Aktion?', 'Angekündigt ist sie vom 21. bis 25. September 2026. Prüfe die aktuelle Verfügbarkeit vor Ort.'],
+      ['Wie viele Döner sind gemeint?', 'Drei Döner zum Preis von zwei, nicht zwei zum Preis von einem.'],
+      ['Welche Standorte werden genannt?', 'Rußbergstraße 9 in 1210 und Wagramer Straße 126 in 1220 Wien.'],
+      ['Welcher Zeitraum ist angekündigt?', '3. bis 30. November, im freigegebenen App-Eintrag für 2026 erfasst.'],
+      ['Ist ein fester Einzelpreis bestätigt?', 'Nein, den tatsächlichen Preis und mögliche Varianten vor Ort klären.'],
     ],
     related: [['Gratis Essen in Wien', 'gratis-essen-wien.html'], ['1+1-Aktionen in Wien', 'eins-plus-eins-wien.html'], ['Aktuelle Wien-Deals', '/angebote-wien-heute.html']],
   },
@@ -758,24 +764,27 @@ const guides = [...editorialGuides, ...timelyGuides, ...recentDealGuides, ...[
   },
   {
     slug: 'gratis-heissgetraenk-ikea-wien',
+    refreshCard: true,
     title: 'Gratis Heißgetränk bei IKEA in Wien mit IKEA Family',
     meta: 'Gratis Heißgetränk bei IKEA in Wien: IKEA Family Mitglieder erhalten Kaffee, Tee oder heiße Schokolade im Restaurant. Voraussetzungen und Ablauf.',
     eyebrow: 'Gratis Kaffee Wien',
     headline: 'Gratis Kaffee, Tee oder heiße Schokolade bei IKEA.',
-    intro: 'IKEA Österreich lädt IKEA Family Mitglieder bei jedem Besuch im Einrichtungshaus auf ein Heißgetränk im Restaurant ein. So funktioniert der kostenlose Vorteil in Wien.',
-    published: '2026-09-01', publishedLabel: '1. September 2026', modified: '2026-09-01', modifiedLabel: '1. September 2026',
+    intro: 'IKEA Family Mitglieder können in teilnehmenden IKEA-Restaurants ein kostenloses Heißgetränk erhalten. Wichtig für Wien: Die offizielle Vorteilsseite schließt IKEA Wien Westbahnhof ausdrücklich aus.',
+    published: '2026-09-01', publishedLabel: '1. September 2026', modified: '2026-11-05', modifiedLabel: '5. November 2026',
+    quickFacts: { what: 'Kaffee, Tee oder heiße Schokolade kostenlos mit IKEA Family.', where: 'In teilnehmenden IKEA-Restaurants; IKEA Wien Westbahnhof ist ausdrücklich ausgenommen.', when: 'Kein fixes Enddatum auf der offiziellen Vorteilsseite. Teilnahme und Restaurantöffnung vor dem Besuch prüfen.', how: 'IKEA Family Karte an der Restaurantkasse vorzeigen.', sourceUrl: 'https://www.ikea.com/at/de/ikea-family/benefits/', reviewedAt: '2026-11-05' },
     image: '/assets/blog/omv-viva-eiskaffee-gratis.jpg', imageAvif: '/assets/blog/omv-viva-eiskaffee-gratis-800.avif 800w, /assets/blog/omv-viva-eiskaffee-gratis-1600.avif 1600w', imageWidth: 1600, imageHeight: 900,
     imageAlt: 'Heißgetränk als Beispiel für einen kostenlosen Kaffeevorteil in Wien',
     sections: [
       ['vorteil', 'Was ist bei IKEA gratis?', `<p>Als <strong>IKEA Family Mitglied</strong> erhältst du laut IKEA Österreich bei jedem Besuch im Einrichtungshaus ein Heißgetränk im Restaurant kostenlos. Genannt werden Kaffee, Tee und heiße Schokolade.</p><p>Der Vorteil gilt für das Getränk im IKEA-Restaurant. Er ist kein allgemeiner Rabatt auf den gesamten Einkauf und kann nicht automatisch auf andere Speisen oder To-go-Produkte übertragen werden.</p>`],
       ['voraussetzungen', 'Welche Voraussetzung gibt es?', `<p>Du brauchst eine kostenlose IKEA Family Mitgliedschaft und musst deine digitale oder physische Karte an der Restaurantkasse vorzeigen. Die Mitgliedschaft kannst du direkt über IKEA Österreich anmelden oder in der IKEA App verwalten.</p><div class="article-note"><strong>Verfügbarkeit beachten</strong>IKEA weist darauf hin, dass Vorteile nach Datum, Saison und Region variieren können. Prüfe deshalb vor dem Besuch die aktuelle Vorteilseite und das gewünschte Wiener Einrichtungshaus.</div>`],
-      ['wien', 'IKEA-Standorte in und rund um Wien prüfen', `<p>Öffne vor der Fahrt die offizielle Standortseite des gewünschten Einrichtungshauses und kontrolliere Restaurantöffnungszeiten sowie eventuelle Hinweise zur Ausgabe. Die konkrete Verfügbarkeit kann vom Restaurantbetrieb und der Tagesauslastung abhängen.</p><p>Weitere aktuelle Gratis- und Rabattaktionen in Wien findest du in der <a href="/angebote-wien-heute.html">FreeFinder-Übersicht</a> und im Guide <a href="gratis-kaffee-wien.html">Gratis Kaffee in Wien</a>.</p>`],
+      ['wien', 'Wichtig: Wien Westbahnhof ist ausgenommen', `<p>Die offizielle IKEA-Family-Vorteilsseite nennt ausdrücklich die Ausnahme <strong>IKEA Wien Westbahnhof</strong>. Fahre deshalb nicht wegen dieses allgemeinen Heißgetränkevorteils dorthin. In und rund um Wien kommen stattdessen die teilnehmenden Restaurants in Wien Nord und Vösendorf infrage; Restaurantöffnungszeiten und tatsächliche Ausgabe vorher prüfen.</p><p>Die gesonderte <a href="ikea-westbahnhof-10-euro-gutschein-restaurant-wien.html">10-Euro-Gutscheinaktion nach dem Essen am Westbahnhof</a> ist ein anderer Vorteil mit zwei Mindestbeträgen. Sie ersetzt weder den Mitgliedsnachweis noch macht sie Kaffee oder Essen automatisch kostenlos.</p><p>Weitere Möglichkeiten findest du im Guide <a href="gratis-kaffee-wien.html">Gratis Kaffee in Wien</a>.</p>`],
       ['einloesen', 'So löst du den Vorteil ein', `<ol><li>IKEA Family Karte in der App öffnen oder Karte bereithalten.</li><li>Im IKEA-Restaurant ein Heißgetränk auswählen.</li><li>Die Karte vor dem Bezahlen an der Kasse vorzeigen.</li><li>Prüfen, ob der Getränkepreis auf null gesetzt wird.</li><li>Bei Unklarheiten vor der Bestellung kurz beim Restaurant nachfragen.</li></ol>`],
-      ['quelle', 'Offizielle IKEA-Quelle', `<p>Die Angaben stammen direkt aus den <a href="https://www.ikea.com/at/de/ikea-family/benefits/" rel="noopener">IKEA Family Vorteilen Österreich</a>. Dort nennt IKEA den kostenlosen Kaffee, Tee oder die heiße Schokolade und weist auf mögliche regionale oder zeitliche Änderungen hin.</p>`],
+      ['quelle', 'Offizielle IKEA-Quelle', `<p>Die <a href="https://www.ikea.com/at/de/ikea-family/benefits/" rel="noopener">offiziellen IKEA Family Vorteile Österreich</a> wurden am 5. November 2026 gelesen. Die Seite nennt die drei Heißgetränke, das Vorzeigen der Karte und ausdrücklich die Ausnahme Wien Westbahnhof. Keine persönliche Einlösung oder heutige Bestandsprüfung durchgeführt.</p>`],
     ],
     faqs: [
       ['Wer bekommt das gratis Heißgetränk bei IKEA?', 'IKEA Family Mitglieder erhalten den Vorteil beim Besuch im Einrichtungshaus. Die Karte muss an der Restaurantkasse vorgezeigt werden.'],
       ['Welche Getränke sind gratis?', 'IKEA nennt Kaffee, Tee und heiße Schokolade als kostenlose Heißgetränke. Die aktuelle Auswahl kann je Standort variieren.'],
+      ['Gilt es bei IKEA Wien Westbahnhof?', 'Nein. Die offizielle Vorteilsseite nimmt IKEA Wien Westbahnhof ausdrücklich aus.'],
       ['Muss ich etwas kaufen?', 'Die offizielle Vorteilbeschreibung nennt den Besuch im Einrichtungshaus und die IKEA-Family-Karte, aber keinen verpflichtenden zusätzlichen Einkauf. Prüfe die aktuelle Ausgabe vor Ort.'],
     ],
     related: [['Gratis Kaffee in Wien', 'gratis-kaffee-wien.html'], ['Kostenlose Angebote in Wien', 'kostenlose-angebote-wien.html'], ['Gratis Essen in Wien', 'gratis-essen-wien.html'], ['Aktuelle Wien-Deals', '/angebote-wien-heute.html']],
@@ -995,7 +1004,7 @@ for (const guide of selectedGuides.filter((guide) => guide.modified)) {
 }
 fs.writeFileSync(sitemapPath, sitemap);
 
-const selectedBackfill = selectedGuides.filter(guide => editorialGuides.includes(guide));
+const selectedBackfill = selectedGuides.filter(guide => editorialGuides.includes(guide) || guide.refreshCard);
 if (selectedBackfill.length) {
   const indexPath = path.join(BLOG_DIR, 'index.html');
   let index = fs.readFileSync(indexPath, 'utf8');

@@ -4,6 +4,7 @@ import { fileURLToPath } from 'node:url';
 import { createHash } from 'node:crypto';
 import { backfillGuides } from './blog-backfill-20261018.mjs';
 import { catchupGuides } from './blog-backfill-20261030.mjs';
+import { novemberGuides } from './blog-backfill-20261105.mjs';
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const read = file => fs.readFileSync(path.join(root, file), 'utf8');
@@ -14,7 +15,7 @@ const feedText = read('docs/deals.json');
 const feed = JSON.parse(feedText);
 const previous = JSON.parse(read('reviews/blog-backfill-2026-10-18.json'));
 const mapping = new Map(Object.entries(previous.existingCoverage));
-for (const guide of [...backfillGuides, ...catchupGuides]) {
+for (const guide of [...backfillGuides, ...catchupGuides, ...novemberGuides]) {
   for (const id of guide.ids) mapping.set(id, guide.slug);
 }
 for (const id of ['power-food-eca409ce31f3', 'power-food-fea2efd7d1c2']) mapping.set(id, 'nordsee-coupons-wien');
