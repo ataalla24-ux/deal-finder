@@ -1,0 +1,1414 @@
+{
+  "at": "2026-11-05T15:14:54.214Z",
+  "feedVersion": "ff1-efcdcb9e8590ac2fb63c",
+  "totalDeals": 71,
+  "mapPoints": 234,
+  "mappedDeals": 45,
+  "fullyMapped": 44,
+  "onlineDeals": 26,
+  "remaining": [
+    {
+      "id": "igap-1yz022",
+      "brand": "Bäckerei DerMann",
+      "title": "26 % auf ausgewählte Snacks (Mo–Sa)",
+      "url": "https://www.instagram.com/p/DfRuATHiGLU/",
+      "place": "Vienna, Austria | Wien",
+      "status": "partially-mapped",
+      "reason": "",
+      "channel": "onsite-or-unknown",
+      "locationCount": 50,
+      "needsReview": true,
+      "fingerprint": "d061ab20cff8f51c8a1f21b8",
+      "failures": [
+        "reviewed-location-list-incomplete",
+        "no-exact-coordinate-match",
+        "no-exact-coordinate-match",
+        "no-exact-coordinate-match",
+        "no-exact-coordinate-match",
+        "no-exact-coordinate-match"
+      ]
+    }
+  ],
+  "suites": [
+    {
+      "name": "test-deal-map-chain-rules.mjs",
+      "exitCode": 0,
+      "signal": null
+    },
+    {
+      "name": "test-deal-map-enrichment.mjs",
+      "exitCode": 0,
+      "signal": null
+    },
+    {
+      "name": "test-map-location-pipeline.mjs",
+      "exitCode": 0,
+      "signal": null
+    },
+    {
+      "name": "test-map-geocode-fairness.mjs",
+      "exitCode": 0,
+      "signal": null
+    },
+    {
+      "name": "test-deal-map-source-addresses.mjs",
+      "exitCode": 0,
+      "signal": null
+    },
+    {
+      "name": "test-deal-map-business.mjs",
+      "exitCode": 0,
+      "signal": null
+    },
+    {
+      "name": "test-map-commit-consistency.mjs",
+      "exitCode": 0,
+      "signal": null
+    },
+    {
+      "name": "test-deal-map-review.mjs",
+      "exitCode": 0,
+      "signal": null
+    },
+    {
+      "name": "test-slack-business-map-review.mjs",
+      "exitCode": 0,
+      "signal": null
+    },
+    {
+      "name": "test-community-approval-integration.mjs",
+      "exitCode": 0,
+      "signal": null
+    },
+    {
+      "name": "test-approval-map-readiness.mjs",
+      "exitCode": 0,
+      "signal": null
+    },
+    {
+      "name": "test-live-deal-removal-safety.mjs",
+      "exitCode": 0,
+      "signal": null
+    },
+    {
+      "name": "test-featured-deal-reference-sync.mjs",
+      "exitCode": 0,
+      "signal": null
+    },
+    {
+      "name": "test-deals-feed-contract.mjs",
+      "exitCode": 0,
+      "signal": null
+    },
+    {
+      "name": "test-seo-deals-page.mjs",
+      "exitCode": 0,
+      "signal": null
+    },
+    {
+      "name": "test-card-editor-disabled.mjs",
+      "exitCode": 0,
+      "signal": null
+    },
+    {
+      "name": "validate-deal-map-locations.mjs",
+      "exitCode": 0,
+      "signal": null
+    },
+    {
+      "name": "validate-map-coverage.mjs",
+      "exitCode": 0,
+      "signal": null
+    },
+    {
+      "name": "validate-production-feed.mjs",
+      "exitCode": 0,
+      "signal": null
+    }
+  ],
+  "passed": 19,
+  "additions": [
+    {
+      "id": "pizzamann-official-1133",
+      "name": "Pizza Mann Ziegelofengasse",
+      "address": "Ziegelofengasse 41, 1050 Wien",
+      "latitude": 48.1920203,
+      "longitude": 16.36001740000006,
+      "confidence": 1,
+      "source": "official_merchant_directory_marker",
+      "evidenceUrl": "https://www.pizzamann.at/filialen",
+      "coordinateEvidenceUrl": "https://www.pizzamann.at/api/filialen",
+      "reviewedAt": "2026-11-05T14:59:41.592Z"
+    },
+    {
+      "id": "urfa-pizzeria-wienerberg-reviewed",
+      "name": "Urfa Pizzeria",
+      "address": "Wienerbergstraße 8, 1100 Wien",
+      "latitude": 48.1700115,
+      "longitude": 16.3455747,
+      "confidence": 0.95,
+      "source": "merchant_identity_and_address_cross_checked_venue_poi",
+      "evidenceUrl": "https://www.instagram.com/p/DfQQKdqo-95/",
+      "coordinateEvidenceUrl": "https://de.restaurantguru.com/Urfa-Vienna",
+      "additionalEvidenceUrls": [
+        "https://www.instagram.com/urfa.pizzeria10/",
+        "https://www.oeffnungszeitenbuch.de/filiale/Wien-Urfa%2520Pizzeria-3889587E.html"
+      ],
+      "reviewedAt": "2026-11-05T14:59:41.592Z",
+      "reviewNote": "Exact same reel author and profile visibly identify URFA Pizzeria and Wienerbergstrasse8/1100. Two named restaurant POIs with matching telephone agree within25m. This is a venue POI, NOT a City address match or an invented8A/1120 substitution. Merchant-stated postcode retained; administrative-address mismatch remains documented."
+    },
+    {
+      "id": "foodsharing-public-308",
+      "name": "Die Tafel Österreich - der Verein für sozialen Transfer,  1230 Wien",
+      "address": "Laxenburger Straße 365/A6, 1230 Wien",
+      "latitude": 48.136221,
+      "longitude": 16.363299,
+      "confidence": 0.95,
+      "source": "official_public_foodsharing_point_marker_and_address",
+      "evidenceUrl": "https://foodsharing.at/fairteiler/308",
+      "coordinateEvidenceUrl": "https://foodsharing.at/api/map/markers/food-share-points",
+      "detailsEvidenceUrl": "https://foodsharing.at/api/map/markers/food-share-points/308",
+      "reviewedAt": "2026-11-05T14:59:41.592Z",
+      "accessNote": "Zugang über Halban-Kurz-Straße; nicht barrierefrei."
+    },
+    {
+      "id": "foodsharing-public-561",
+      "name": "VHS Landstraße, 1030 Wien",
+      "address": "Hainburger Straße 29, 1030 Wien",
+      "latitude": 48.200231,
+      "longitude": 16.395945,
+      "confidence": 0.95,
+      "source": "official_public_foodsharing_point_marker_and_address",
+      "evidenceUrl": "https://foodsharing.at/fairteiler/561",
+      "coordinateEvidenceUrl": "https://foodsharing.at/api/map/markers/food-share-points",
+      "detailsEvidenceUrl": "https://foodsharing.at/api/map/markers/food-share-points/561",
+      "reviewedAt": "2026-11-05T14:59:41.592Z",
+      "accessNote": "Zugangszeiten und Hausregeln auf der Standortseite prüfen."
+    },
+    {
+      "id": "foodsharing-public-717",
+      "name": "Das Jetzt, 1170 Wien",
+      "address": "Parhamerplatz 16, 1170 Wien",
+      "latitude": 48.216579,
+      "longitude": 16.327615,
+      "confidence": 0.95,
+      "source": "official_public_foodsharing_point_marker_and_address",
+      "evidenceUrl": "https://foodsharing.at/fairteiler/717",
+      "coordinateEvidenceUrl": "https://foodsharing.at/api/map/markers/food-share-points",
+      "detailsEvidenceUrl": "https://foodsharing.at/api/map/markers/food-share-points/717",
+      "reviewedAt": "2026-11-05T14:59:41.592Z",
+      "accessNote": "Zugangszeiten und Hausregeln auf der Standortseite prüfen."
+    },
+    {
+      "id": "foodsharing-public-720",
+      "name": "Verein LOGIN",
+      "address": "Weiglgasse 19, 1150 Wien",
+      "latitude": 48.18698,
+      "longitude": 16.321477,
+      "confidence": 0.95,
+      "source": "official_public_foodsharing_point_marker_and_address",
+      "evidenceUrl": "https://foodsharing.at/fairteiler/720",
+      "coordinateEvidenceUrl": "https://foodsharing.at/api/map/markers/food-share-points",
+      "detailsEvidenceUrl": "https://foodsharing.at/api/map/markers/food-share-points/720",
+      "reviewedAt": "2026-11-05T14:59:41.592Z",
+      "accessNote": "Zugangszeiten und Hausregeln auf der Standortseite prüfen."
+    },
+    {
+      "id": "foodsharing-public-881",
+      "name": "Hannovergasse 1200 Wien",
+      "address": "Hannovergasse 21, 1200 Wien",
+      "latitude": 48.23142,
+      "longitude": 16.3685,
+      "confidence": 0.95,
+      "source": "official_public_foodsharing_point_marker_and_address",
+      "evidenceUrl": "https://foodsharing.at/fairteiler/881",
+      "coordinateEvidenceUrl": "https://foodsharing.at/api/map/markers/food-share-points",
+      "detailsEvidenceUrl": "https://foodsharing.at/api/map/markers/food-share-points/881",
+      "reviewedAt": "2026-11-05T14:59:41.592Z",
+      "accessNote": "Innenhof beim Eingang der Boulderbar."
+    },
+    {
+      "id": "foodsharing-public-885",
+      "name": "Stadtteilmanagement Seestadt Aspern, 1220  Wien",
+      "address": "Hannah-Arendt-Platz 1, 1220 Wien",
+      "latitude": 48.224122,
+      "longitude": 16.501646,
+      "confidence": 0.95,
+      "source": "official_public_foodsharing_point_marker_and_address",
+      "evidenceUrl": "https://foodsharing.at/fairteiler/885",
+      "coordinateEvidenceUrl": "https://foodsharing.at/api/map/markers/food-share-points",
+      "detailsEvidenceUrl": "https://foodsharing.at/api/map/markers/food-share-points/885",
+      "reviewedAt": "2026-11-05T14:59:41.592Z",
+      "accessNote": "Ohne Kühlschrank; nur ungekühlt geeignete Lebensmittel."
+    },
+    {
+      "id": "foodsharing-public-990",
+      "name": "neunerhaus Café, 1050 Wien",
+      "address": "Margaretenstraße 166, 1050 Wien",
+      "latitude": 48.186105,
+      "longitude": 16.344891,
+      "confidence": 0.95,
+      "source": "official_public_foodsharing_point_marker_and_address",
+      "evidenceUrl": "https://foodsharing.at/fairteiler/990",
+      "coordinateEvidenceUrl": "https://foodsharing.at/api/map/markers/food-share-points",
+      "detailsEvidenceUrl": "https://foodsharing.at/api/map/markers/food-share-points/990",
+      "reviewedAt": "2026-11-05T14:59:41.592Z",
+      "accessNote": "Zugangszeiten und Hausregeln auf der Standortseite prüfen."
+    },
+    {
+      "id": "foodsharing-public-1165",
+      "name": "Badeschiff, 1010 Wien",
+      "address": "Franz-Josefs-Kai 4, 1010 Wien",
+      "latitude": 48.211784,
+      "longitude": 16.381606,
+      "confidence": 0.95,
+      "source": "official_public_foodsharing_point_marker_and_address",
+      "evidenceUrl": "https://foodsharing.at/fairteiler/1165",
+      "coordinateEvidenceUrl": "https://foodsharing.at/api/map/markers/food-share-points",
+      "detailsEvidenceUrl": "https://foodsharing.at/api/map/markers/food-share-points/1165",
+      "reviewedAt": "2026-11-05T14:59:41.592Z",
+      "accessNote": "Rechter Eingang beim Pool, Durchgang vor der Glastür."
+    },
+    {
+      "id": "foodsharing-public-1475",
+      "name": "mdw – Universität für Musik und darstellende Kunst 1030 Wien",
+      "address": "Anton-von-Webern-Platz 1, 1030 Wien",
+      "latitude": 48.202023,
+      "longitude": 16.386418,
+      "confidence": 0.95,
+      "source": "official_public_foodsharing_point_marker_and_address",
+      "evidenceUrl": "https://foodsharing.at/fairteiler/1475",
+      "coordinateEvidenceUrl": "https://foodsharing.at/api/map/markers/food-share-points",
+      "detailsEvidenceUrl": "https://foodsharing.at/api/map/markers/food-share-points/1475",
+      "reviewedAt": "2026-11-05T14:59:41.592Z",
+      "accessNote": "Haus Riegel K, Erdgeschoss, nach der Portierloge."
+    },
+    {
+      "id": "foodsharing-public-2258",
+      "name": "GB* Stadtteilbüro 1210",
+      "address": "Brünner Straße 34-38/8, R10, 1210 Wien",
+      "latitude": 48.2623,
+      "longitude": 16.400676,
+      "confidence": 0.95,
+      "source": "official_public_foodsharing_point_marker_and_address",
+      "evidenceUrl": "https://foodsharing.at/fairteiler/2258",
+      "coordinateEvidenceUrl": "https://foodsharing.at/api/map/markers/food-share-points",
+      "detailsEvidenceUrl": "https://foodsharing.at/api/map/markers/food-share-points/2258",
+      "reviewedAt": "2026-11-05T14:59:41.592Z",
+      "accessNote": "Stadtteilbüro: Brünner Straße 34-38/8, Raum10."
+    },
+    {
+      "id": "foodsharing-public-2642",
+      "name": "VHS Stöbergasse 11, 1050  Wien",
+      "address": "Stöbergasse 11, 1050 Wien",
+      "latitude": 48.185473,
+      "longitude": 16.354906,
+      "confidence": 0.95,
+      "source": "official_public_foodsharing_point_marker_and_address",
+      "evidenceUrl": "https://foodsharing.at/fairteiler/2642",
+      "coordinateEvidenceUrl": "https://foodsharing.at/api/map/markers/food-share-points",
+      "detailsEvidenceUrl": "https://foodsharing.at/api/map/markers/food-share-points/2642",
+      "reviewedAt": "2026-11-05T14:59:41.592Z",
+      "accessNote": "Erdgeschoss, Kinderwagenraum."
+    },
+    {
+      "id": "foodsharing-public-3458",
+      "name": "VHS Großfeldsiedlung 1210",
+      "address": "Kürschnergasse 9, 1210 Wien",
+      "latitude": 48.272047,
+      "longitude": 16.446455,
+      "confidence": 0.95,
+      "source": "official_public_foodsharing_point_marker_and_address",
+      "evidenceUrl": "https://foodsharing.at/fairteiler/3458",
+      "coordinateEvidenceUrl": "https://foodsharing.at/api/map/markers/food-share-points",
+      "detailsEvidenceUrl": "https://foodsharing.at/api/map/markers/food-share-points/3458",
+      "reviewedAt": "2026-11-05T14:59:41.592Z",
+      "accessNote": "Zugangszeiten und Hausregeln auf der Standortseite prüfen."
+    },
+    {
+      "id": "dermann-reviewed-am-europlatz-2",
+      "name": "DerMann Am Europlatz",
+      "address": "Am Europlatz 2, 1120 Wien",
+      "latitude": 48.17090394,
+      "longitude": 16.33311589,
+      "confidence": 1,
+      "source": "https://data.wien.gv.at/daten/geo?service=WFS&request=GetFeature&version=1.1.0&typeName=ogdwien%3AADRESSENOGD&outputFormat=json&srsName=EPSG%3A4326&maxFeatures=30&propertyName=NAME%2CNAME_STR%2CNAME_ONR%2CPLZ%2CSHAPE&cql_filter=NAME_STR+ILIKE+%27Am+Europlatz%27+AND+%28NAME_ONR+ILIKE+%272%25%27+OR+NAME_ONR+ILIKE+%27%25-2%27%29",
+      "evidenceUrl": "https://www.dermann.at/filiale/am-euro-platz-2-europlaza/",
+      "reviewedAt": "2026-11-05T14:59:41.592Z",
+      "coordinateReview": "Selected the exact unsuffixed named City address feature; no arbitrary entrance/Obj1 selection and no general fuzzy geocoder rule.",
+      "attribution": "Datenquelle: Stadt Wien - data.wien.gv.at"
+    },
+    {
+      "id": "dermann-reviewed-perfektastrasse-100",
+      "name": "DerMann Perfektastraße",
+      "address": "Perfektastraße 100, 1230 Wien",
+      "latitude": 48.13737712,
+      "longitude": 16.30291292,
+      "confidence": 1,
+      "source": "https://data.wien.gv.at/daten/geo?service=WFS&request=GetFeature&version=1.1.0&typeName=ogdwien%3AADRESSENOGD&outputFormat=json&srsName=EPSG%3A4326&maxFeatures=100&propertyName=NAME%2CNAME_STR%2CNAME_ONR%2CPLZ%2CSHAPE&cql_filter=%28NAME_STR+ILIKE+%27Perfektastra%C3%9Fe%27+OR+NAME_STR+ILIKE+%27Perfekta+Stra%C3%9Fe%27%29+AND+%28NAME_ONR+ILIKE+%27100%27%29",
+      "evidenceUrl": "https://www.dermann.at/filiale/perfektastrasse-100/",
+      "reviewedAt": "2026-11-05T14:59:41.592Z",
+      "coordinateReview": "Selected the exact unsuffixed named City address feature; no arbitrary entrance/Obj1 selection and no general fuzzy geocoder rule.",
+      "attribution": "Datenquelle: Stadt Wien - data.wien.gv.at"
+    },
+    {
+      "id": "dermann-reviewed-arbeitergasse",
+      "name": "DerMann Arbeitergasse / Margaretengürtel",
+      "address": "Margaretengürtel 120, 1050 Wien",
+      "latitude": 48.18417937,
+      "longitude": 16.34599984,
+      "confidence": 0.95,
+      "source": "merchant_storefront_jsonld_same_official_branch_phone",
+      "evidenceUrl": "https://www.dermann.at/filiale/arbeitergasse-margaretenguertel/",
+      "coordinateEvidenceUrl": "https://wolt.com/de-at/aut/vienna/venue/der-mann-arbeitergasse/items/konditorei-5",
+      "additionalEvidenceUrls": [
+        "https://firmen.wko.at/%22der-mann-der-verw%C3%B6hnt%22-backwaren-gmbh-und-co-og/wien/?firmaid=74b09d14-1b5d-4f53-a763-41d39b4d53b7"
+      ],
+      "reviewedAt": "2026-11-05T14:59:41.592Z",
+      "reviewNote": "Current merchant storefront names exact corner, same official branch phone9140, and supplies actual shop coordinates. WKO legal branch address120 is corroborating postal address, not coordinate selection: nearby Selfish is a distinct shop. Do not use its building-address point instead."
+    },
+    {
+      "id": "noodle-vienna-3a69cd5cf0f0",
+      "name": "Noodle King Billrothstraße",
+      "address": "Billrothstraße 83, 1190 Wien",
+      "latitude": 48.24533367,
+      "longitude": 16.34306295,
+      "source": "https://data.wien.gv.at/daten/geo?service=WFS&request=GetFeature&version=1.1.0&typeName=ogdwien%3AADRESSENOGD&outputFormat=json&srsName=EPSG%3A4326&maxFeatures=100&propertyName=NAME%2CNAME_STR%2CNAME_ONR%2CPLZ%2CSHAPE&cql_filter=%28NAME_STR+ILIKE+%27Walfischgasse%27+AND+NAME_ONR+ILIKE+%274%27%29+OR+%28NAME_STR+ILIKE+%27Billrothstra%C3%9Fe%27+AND+NAME_ONR+ILIKE+%2783%27%29+OR+%28NAME_STR+ILIKE+%27Landstra%C3%9Fer+Hauptstra%C3%9Fe%27+AND+NAME_ONR+ILIKE+%2779%27%29+OR+%28NAME_STR+ILIKE+%27D%C3%B6blerhofstra%C3%9Fe%27+AND+NAME_ONR+ILIKE+%2710%27%29+OR+%28NAME_STR+ILIKE+%27Kagraner+Platz%27+AND+NAME_ONR+ILIKE+%271-4%27%29+OR+%28NAME_STR+ILIKE+%27Hietzinger+Hauptstra%C3%9Fe%27+AND+NAME_ONR+ILIKE+%276%27%29+OR+%28NAME_STR+ILIKE+%27Adolf-Sch%C3%A4rf-Platz%27+AND+NAME_ONR+ILIKE+%277%27%29+OR+%28NAME_STR+ILIKE+%27Mariahilfer+G%C3%BCrtel%27+AND+NAME_ONR+ILIKE+%271%27%29",
+      "attribution": "Datenquelle: Stadt Wien - data.wien.gv.at",
+      "confidence": 1,
+      "evidenceUrl": "https://noodleking.app/billrothstrassse?k4y_ot=2",
+      "reviewedAt": "2026-11-05T15:12:52.351Z",
+      "reviewNote": "Exact City address, matched by full street, number and postcode."
+    },
+    {
+      "id": "noodle-vienna-0c3e9b2c43b1",
+      "name": "Noodle King Landstraßer Hauptstraße",
+      "address": "Landstraßer Hauptstraße 79, 1030 Wien",
+      "latitude": 48.20026046,
+      "longitude": 16.39343605,
+      "source": "https://data.wien.gv.at/daten/geo?service=WFS&request=GetFeature&version=1.1.0&typeName=ogdwien%3AADRESSENOGD&outputFormat=json&srsName=EPSG%3A4326&maxFeatures=100&propertyName=NAME%2CNAME_STR%2CNAME_ONR%2CPLZ%2CSHAPE&cql_filter=%28NAME_STR+ILIKE+%27Walfischgasse%27+AND+NAME_ONR+ILIKE+%274%27%29+OR+%28NAME_STR+ILIKE+%27Billrothstra%C3%9Fe%27+AND+NAME_ONR+ILIKE+%2783%27%29+OR+%28NAME_STR+ILIKE+%27Landstra%C3%9Fer+Hauptstra%C3%9Fe%27+AND+NAME_ONR+ILIKE+%2779%27%29+OR+%28NAME_STR+ILIKE+%27D%C3%B6blerhofstra%C3%9Fe%27+AND+NAME_ONR+ILIKE+%2710%27%29+OR+%28NAME_STR+ILIKE+%27Kagraner+Platz%27+AND+NAME_ONR+ILIKE+%271-4%27%29+OR+%28NAME_STR+ILIKE+%27Hietzinger+Hauptstra%C3%9Fe%27+AND+NAME_ONR+ILIKE+%276%27%29+OR+%28NAME_STR+ILIKE+%27Adolf-Sch%C3%A4rf-Platz%27+AND+NAME_ONR+ILIKE+%277%27%29+OR+%28NAME_STR+ILIKE+%27Mariahilfer+G%C3%BCrtel%27+AND+NAME_ONR+ILIKE+%271%27%29",
+      "attribution": "Datenquelle: Stadt Wien - data.wien.gv.at",
+      "confidence": 1,
+      "evidenceUrl": "https://noodleking.app/landstrasse?k4y_ot=2",
+      "reviewedAt": "2026-11-05T15:12:52.351Z",
+      "reviewNote": "Exact City address, matched by full street, number and postcode."
+    },
+    {
+      "id": "noodle-vienna-86423e54864f",
+      "name": "Noodle King Döblerhofstraße",
+      "address": "Döblerhofstraße 10, 1030 Wien",
+      "latitude": 48.18537726,
+      "longitude": 16.41330672,
+      "source": "https://data.wien.gv.at/daten/geo?service=WFS&request=GetFeature&version=1.1.0&typeName=ogdwien%3AADRESSENOGD&outputFormat=json&srsName=EPSG%3A4326&maxFeatures=100&propertyName=NAME%2CNAME_STR%2CNAME_ONR%2CPLZ%2CSHAPE&cql_filter=%28NAME_STR+ILIKE+%27Walfischgasse%27+AND+NAME_ONR+ILIKE+%274%27%29+OR+%28NAME_STR+ILIKE+%27Billrothstra%C3%9Fe%27+AND+NAME_ONR+ILIKE+%2783%27%29+OR+%28NAME_STR+ILIKE+%27Landstra%C3%9Fer+Hauptstra%C3%9Fe%27+AND+NAME_ONR+ILIKE+%2779%27%29+OR+%28NAME_STR+ILIKE+%27D%C3%B6blerhofstra%C3%9Fe%27+AND+NAME_ONR+ILIKE+%2710%27%29+OR+%28NAME_STR+ILIKE+%27Kagraner+Platz%27+AND+NAME_ONR+ILIKE+%271-4%27%29+OR+%28NAME_STR+ILIKE+%27Hietzinger+Hauptstra%C3%9Fe%27+AND+NAME_ONR+ILIKE+%276%27%29+OR+%28NAME_STR+ILIKE+%27Adolf-Sch%C3%A4rf-Platz%27+AND+NAME_ONR+ILIKE+%277%27%29+OR+%28NAME_STR+ILIKE+%27Mariahilfer+G%C3%BCrtel%27+AND+NAME_ONR+ILIKE+%271%27%29",
+      "attribution": "Datenquelle: Stadt Wien - data.wien.gv.at",
+      "confidence": 1,
+      "evidenceUrl": "https://noodleking.app/helio-tower?k4y_ot=2",
+      "reviewedAt": "2026-11-05T15:12:52.351Z",
+      "reviewNote": "Exact City address, matched by full street, number and postcode."
+    },
+    {
+      "id": "noodle-vienna-8c310fb67786",
+      "name": "Noodle King Kagraner Platz",
+      "address": "Kagraner Platz 1-4, 1220 Wien",
+      "latitude": 48.2503415,
+      "longitude": 16.4440366,
+      "source": "exact_merchant_address_and_phone_matched_restaurant_poi",
+      "coordinateEvidenceUrl": "https://de.restaurantguru.com/Noodle-King-Kagran-1-Vienna",
+      "confidence": 0.95,
+      "evidenceUrl": "https://noodleking.app/kagran?k4y_ot=2",
+      "reviewedAt": "2026-11-05T15:12:52.351Z",
+      "reviewNote": "Actual named restaurant POI matches the exact official branch address1-4 and unique telephone9262123. Generic merchant JSON-LD incorrectly repeats Walfischgasse and is NOT used."
+    },
+    {
+      "id": "noodle-vienna-ab9b27e6d943",
+      "name": "Noodle King Hietzinger Hauptstraße",
+      "address": "Hietzinger Hauptstraße 6, 1130 Wien",
+      "latitude": 48.18728205,
+      "longitude": 16.30280626,
+      "source": "https://data.wien.gv.at/daten/geo?service=WFS&request=GetFeature&version=1.1.0&typeName=ogdwien%3AADRESSENOGD&outputFormat=json&srsName=EPSG%3A4326&maxFeatures=100&propertyName=NAME%2CNAME_STR%2CNAME_ONR%2CPLZ%2CSHAPE&cql_filter=%28NAME_STR+ILIKE+%27Walfischgasse%27+AND+NAME_ONR+ILIKE+%274%27%29+OR+%28NAME_STR+ILIKE+%27Billrothstra%C3%9Fe%27+AND+NAME_ONR+ILIKE+%2783%27%29+OR+%28NAME_STR+ILIKE+%27Landstra%C3%9Fer+Hauptstra%C3%9Fe%27+AND+NAME_ONR+ILIKE+%2779%27%29+OR+%28NAME_STR+ILIKE+%27D%C3%B6blerhofstra%C3%9Fe%27+AND+NAME_ONR+ILIKE+%2710%27%29+OR+%28NAME_STR+ILIKE+%27Kagraner+Platz%27+AND+NAME_ONR+ILIKE+%271-4%27%29+OR+%28NAME_STR+ILIKE+%27Hietzinger+Hauptstra%C3%9Fe%27+AND+NAME_ONR+ILIKE+%276%27%29+OR+%28NAME_STR+ILIKE+%27Adolf-Sch%C3%A4rf-Platz%27+AND+NAME_ONR+ILIKE+%277%27%29+OR+%28NAME_STR+ILIKE+%27Mariahilfer+G%C3%BCrtel%27+AND+NAME_ONR+ILIKE+%271%27%29",
+      "attribution": "Datenquelle: Stadt Wien - data.wien.gv.at",
+      "confidence": 1,
+      "evidenceUrl": "https://noodleking.app/hietzing?k4y_ot=2",
+      "reviewedAt": "2026-11-05T15:12:52.351Z",
+      "reviewNote": "Exact City address, matched by full street, number and postcode."
+    },
+    {
+      "id": "noodle-vienna-2b0af485f108",
+      "name": "Noodle King Dr.-Adolf-Schärf-Platz",
+      "address": "Dr.-Adolf-Schärf-Platz 7, 1220 Wien",
+      "latitude": 48.24435507,
+      "longitude": 16.43299782,
+      "source": "https://data.wien.gv.at/daten/geo?service=WFS&request=GetFeature&version=1.1.0&typeName=ogdwien%3AADRESSENOGD&outputFormat=json&srsName=EPSG%3A4326&maxFeatures=30&propertyName=NAME%2CNAME_STR%2CNAME_ONR%2CPLZ%2CSHAPE&cql_filter=NAME_STR+ILIKE+%27Dr.-Adolf-Sch%C3%A4rf-Platz%27+AND+%28NAME_ONR+ILIKE+%277%25%27+OR+NAME_ONR+ILIKE+%27%25-7%27%29",
+      "attribution": "Datenquelle: Stadt Wien - data.wien.gv.at",
+      "confidence": 1,
+      "evidenceUrl": "https://noodleking.app/1220-wien?k4y_ot=2",
+      "reviewedAt": "2026-11-05T15:12:52.351Z",
+      "reviewNote": "Full official City street name includes Dr.; same branch at7 corroborated by merchant directory and named restaurant listing. No global fuzzy matcher."
+    },
+    {
+      "id": "noodle-vienna-47323f77fd00",
+      "name": "Noodle King Mariahilfer Gürtel",
+      "address": "Mariahilfer Gürtel 1, 1150 Wien",
+      "latitude": 48.19033082,
+      "longitude": 16.33705745,
+      "source": "https://data.wien.gv.at/daten/geo?service=WFS&request=GetFeature&version=1.1.0&typeName=ogdwien%3AADRESSENOGD&outputFormat=json&srsName=EPSG%3A4326&maxFeatures=100&propertyName=NAME%2CNAME_STR%2CNAME_ONR%2CPLZ%2CSHAPE&cql_filter=%28NAME_STR+ILIKE+%27Walfischgasse%27+AND+NAME_ONR+ILIKE+%274%27%29+OR+%28NAME_STR+ILIKE+%27Billrothstra%C3%9Fe%27+AND+NAME_ONR+ILIKE+%2783%27%29+OR+%28NAME_STR+ILIKE+%27Landstra%C3%9Fer+Hauptstra%C3%9Fe%27+AND+NAME_ONR+ILIKE+%2779%27%29+OR+%28NAME_STR+ILIKE+%27D%C3%B6blerhofstra%C3%9Fe%27+AND+NAME_ONR+ILIKE+%2710%27%29+OR+%28NAME_STR+ILIKE+%27Kagraner+Platz%27+AND+NAME_ONR+ILIKE+%271-4%27%29+OR+%28NAME_STR+ILIKE+%27Hietzinger+Hauptstra%C3%9Fe%27+AND+NAME_ONR+ILIKE+%276%27%29+OR+%28NAME_STR+ILIKE+%27Adolf-Sch%C3%A4rf-Platz%27+AND+NAME_ONR+ILIKE+%277%27%29+OR+%28NAME_STR+ILIKE+%27Mariahilfer+G%C3%BCrtel%27+AND+NAME_ONR+ILIKE+%271%27%29",
+      "attribution": "Datenquelle: Stadt Wien - data.wien.gv.at",
+      "confidence": 1,
+      "evidenceUrl": "https://noodleking.app/mariahilfer-gurtel?k4y_ot=2",
+      "reviewedAt": "2026-11-05T15:12:52.351Z",
+      "reviewNote": "Exact City address, matched by full street, number and postcode."
+    },
+    {
+      "id": "noodle-vienna-09e39408cbee",
+      "name": "Noodle King Grillgasse",
+      "address": "Grillgasse 4, 1110 Wien",
+      "latitude": 48.1740149,
+      "longitude": 16.41579045,
+      "source": "https://data.wien.gv.at/daten/geo?service=WFS&request=GetFeature&version=1.1.0&typeName=ogdwien%3AADRESSENOGD&outputFormat=json&srsName=EPSG%3A4326&maxFeatures=100&propertyName=NAME%2CNAME_STR%2CNAME_ONR%2CPLZ%2CSHAPE&cql_filter=%28NAME_STR+ILIKE+%27Grillgasse%27+AND+NAME_ONR+ILIKE+%274%27%29+OR+%28NAME_STR+ILIKE+%27Rechte+Wienzeile%27+AND+NAME_ONR+ILIKE+%27207%27%29+OR+%28NAME_STR+ILIKE+%27Wiedner+Hauptstra%C3%9Fe%27+AND+NAME_ONR+ILIKE+%2737%27%29+OR+%28NAME_STR+ILIKE+%27Perfektastra%C3%9Fe%27+AND+NAME_ONR+ILIKE+%2711%27%29+OR+%28NAME_STR+ILIKE+%27Sterngasse%27+AND+NAME_ONR+ILIKE+%271%27%29+OR+%28NAME_STR+ILIKE+%27Meidlinger+Hauptstra%C3%9Fe%27+AND+NAME_ONR+ILIKE+%2773%27%29+OR+%28NAME_STR+ILIKE+%27Favoritenstra%C3%9Fe%27+AND+NAME_ONR+ILIKE+%27130%27%29+OR+%28NAME_STR+ILIKE+%27Gewerbeparkstra%C3%9Fe%27+AND+NAME_ONR+ILIKE+%278%27%29",
+      "attribution": "Datenquelle: Stadt Wien - data.wien.gv.at",
+      "confidence": 1,
+      "evidenceUrl": "https://noodleking.app/grillgasse?k4y_ot=2",
+      "reviewedAt": "2026-11-05T15:12:52.351Z",
+      "reviewNote": "Exact City address, matched by full street, number and postcode."
+    },
+    {
+      "id": "noodle-vienna-5f0b8f78e740",
+      "name": "Noodle King Rechte Wienzeile",
+      "address": "Rechte Wienzeile 207, 1120 Wien",
+      "latitude": 48.18538619,
+      "longitude": 16.33605542,
+      "source": "https://data.wien.gv.at/daten/geo?service=WFS&request=GetFeature&version=1.1.0&typeName=ogdwien%3AADRESSENOGD&outputFormat=json&srsName=EPSG%3A4326&maxFeatures=100&propertyName=NAME%2CNAME_STR%2CNAME_ONR%2CPLZ%2CSHAPE&cql_filter=%28NAME_STR+ILIKE+%27Grillgasse%27+AND+NAME_ONR+ILIKE+%274%27%29+OR+%28NAME_STR+ILIKE+%27Rechte+Wienzeile%27+AND+NAME_ONR+ILIKE+%27207%27%29+OR+%28NAME_STR+ILIKE+%27Wiedner+Hauptstra%C3%9Fe%27+AND+NAME_ONR+ILIKE+%2737%27%29+OR+%28NAME_STR+ILIKE+%27Perfektastra%C3%9Fe%27+AND+NAME_ONR+ILIKE+%2711%27%29+OR+%28NAME_STR+ILIKE+%27Sterngasse%27+AND+NAME_ONR+ILIKE+%271%27%29+OR+%28NAME_STR+ILIKE+%27Meidlinger+Hauptstra%C3%9Fe%27+AND+NAME_ONR+ILIKE+%2773%27%29+OR+%28NAME_STR+ILIKE+%27Favoritenstra%C3%9Fe%27+AND+NAME_ONR+ILIKE+%27130%27%29+OR+%28NAME_STR+ILIKE+%27Gewerbeparkstra%C3%9Fe%27+AND+NAME_ONR+ILIKE+%278%27%29",
+      "attribution": "Datenquelle: Stadt Wien - data.wien.gv.at",
+      "confidence": 1,
+      "evidenceUrl": "https://noodleking.app/schoenbrunner?k4y_ot=2",
+      "reviewedAt": "2026-11-05T15:12:52.351Z",
+      "reviewNote": "Exact City address, matched by full street, number and postcode."
+    },
+    {
+      "id": "noodle-vienna-d59195ef532a",
+      "name": "Noodle King Wiedner Hauptstraße",
+      "address": "Wiedner Hauptstraße 37, 1040 Wien",
+      "latitude": 48.1941584,
+      "longitude": 16.36746592,
+      "source": "https://data.wien.gv.at/daten/geo?service=WFS&request=GetFeature&version=1.1.0&typeName=ogdwien%3AADRESSENOGD&outputFormat=json&srsName=EPSG%3A4326&maxFeatures=100&propertyName=NAME%2CNAME_STR%2CNAME_ONR%2CPLZ%2CSHAPE&cql_filter=%28NAME_STR+ILIKE+%27Grillgasse%27+AND+NAME_ONR+ILIKE+%274%27%29+OR+%28NAME_STR+ILIKE+%27Rechte+Wienzeile%27+AND+NAME_ONR+ILIKE+%27207%27%29+OR+%28NAME_STR+ILIKE+%27Wiedner+Hauptstra%C3%9Fe%27+AND+NAME_ONR+ILIKE+%2737%27%29+OR+%28NAME_STR+ILIKE+%27Perfektastra%C3%9Fe%27+AND+NAME_ONR+ILIKE+%2711%27%29+OR+%28NAME_STR+ILIKE+%27Sterngasse%27+AND+NAME_ONR+ILIKE+%271%27%29+OR+%28NAME_STR+ILIKE+%27Meidlinger+Hauptstra%C3%9Fe%27+AND+NAME_ONR+ILIKE+%2773%27%29+OR+%28NAME_STR+ILIKE+%27Favoritenstra%C3%9Fe%27+AND+NAME_ONR+ILIKE+%27130%27%29+OR+%28NAME_STR+ILIKE+%27Gewerbeparkstra%C3%9Fe%27+AND+NAME_ONR+ILIKE+%278%27%29",
+      "attribution": "Datenquelle: Stadt Wien - data.wien.gv.at",
+      "confidence": 1,
+      "evidenceUrl": "https://noodleking.app/wiedner?k4y_ot=2",
+      "reviewedAt": "2026-11-05T15:12:52.351Z",
+      "reviewNote": "Exact City address, matched by full street, number and postcode."
+    },
+    {
+      "id": "noodle-vienna-bf5d7813f311",
+      "name": "Noodle King Perfektastraße",
+      "address": "Perfektastraße 11, 1230 Wien",
+      "latitude": 48.13763611,
+      "longitude": 16.32283734,
+      "source": "https://data.wien.gv.at/daten/geo?service=WFS&request=GetFeature&version=1.1.0&typeName=ogdwien%3AADRESSENOGD&outputFormat=json&srsName=EPSG%3A4326&maxFeatures=100&propertyName=NAME%2CNAME_STR%2CNAME_ONR%2CPLZ%2CSHAPE&cql_filter=%28NAME_STR+ILIKE+%27Grillgasse%27+AND+NAME_ONR+ILIKE+%274%27%29+OR+%28NAME_STR+ILIKE+%27Rechte+Wienzeile%27+AND+NAME_ONR+ILIKE+%27207%27%29+OR+%28NAME_STR+ILIKE+%27Wiedner+Hauptstra%C3%9Fe%27+AND+NAME_ONR+ILIKE+%2737%27%29+OR+%28NAME_STR+ILIKE+%27Perfektastra%C3%9Fe%27+AND+NAME_ONR+ILIKE+%2711%27%29+OR+%28NAME_STR+ILIKE+%27Sterngasse%27+AND+NAME_ONR+ILIKE+%271%27%29+OR+%28NAME_STR+ILIKE+%27Meidlinger+Hauptstra%C3%9Fe%27+AND+NAME_ONR+ILIKE+%2773%27%29+OR+%28NAME_STR+ILIKE+%27Favoritenstra%C3%9Fe%27+AND+NAME_ONR+ILIKE+%27130%27%29+OR+%28NAME_STR+ILIKE+%27Gewerbeparkstra%C3%9Fe%27+AND+NAME_ONR+ILIKE+%278%27%29",
+      "attribution": "Datenquelle: Stadt Wien - data.wien.gv.at",
+      "confidence": 1,
+      "evidenceUrl": "https://noodleking.app/perfekta?k4y_ot=2",
+      "reviewedAt": "2026-11-05T15:12:52.351Z",
+      "reviewNote": "Exact City address, matched by full street, number and postcode."
+    },
+    {
+      "id": "noodle-vienna-c0d1f64a477e",
+      "name": "Noodle King Sterngasse",
+      "address": "Sterngasse 1, 1230 Wien",
+      "latitude": 48.14817191,
+      "longitude": 16.34451197,
+      "source": "https://data.wien.gv.at/daten/geo?service=WFS&request=GetFeature&version=1.1.0&typeName=ogdwien%3AADRESSENOGD&outputFormat=json&srsName=EPSG%3A4326&maxFeatures=100&propertyName=NAME%2CNAME_STR%2CNAME_ONR%2CPLZ%2CSHAPE&cql_filter=%28NAME_STR+ILIKE+%27Grillgasse%27+AND+NAME_ONR+ILIKE+%274%27%29+OR+%28NAME_STR+ILIKE+%27Rechte+Wienzeile%27+AND+NAME_ONR+ILIKE+%27207%27%29+OR+%28NAME_STR+ILIKE+%27Wiedner+Hauptstra%C3%9Fe%27+AND+NAME_ONR+ILIKE+%2737%27%29+OR+%28NAME_STR+ILIKE+%27Perfektastra%C3%9Fe%27+AND+NAME_ONR+ILIKE+%2711%27%29+OR+%28NAME_STR+ILIKE+%27Sterngasse%27+AND+NAME_ONR+ILIKE+%271%27%29+OR+%28NAME_STR+ILIKE+%27Meidlinger+Hauptstra%C3%9Fe%27+AND+NAME_ONR+ILIKE+%2773%27%29+OR+%28NAME_STR+ILIKE+%27Favoritenstra%C3%9Fe%27+AND+NAME_ONR+ILIKE+%27130%27%29+OR+%28NAME_STR+ILIKE+%27Gewerbeparkstra%C3%9Fe%27+AND+NAME_ONR+ILIKE+%278%27%29",
+      "attribution": "Datenquelle: Stadt Wien - data.wien.gv.at",
+      "confidence": 1,
+      "evidenceUrl": "https://noodleking.app/c23?k4y_ot=2",
+      "reviewedAt": "2026-11-05T15:12:52.351Z",
+      "reviewNote": "Exact City address, matched by full street, number and postcode."
+    },
+    {
+      "id": "noodle-vienna-b0cfb9a61d09",
+      "name": "Noodle King Meidlinger Hauptstraße",
+      "address": "Meidlinger Hauptstraße 73, 1120 Wien",
+      "latitude": 48.17534585,
+      "longitude": 16.3305221,
+      "source": "https://data.wien.gv.at/daten/geo?service=WFS&request=GetFeature&version=1.1.0&typeName=ogdwien%3AADRESSENOGD&outputFormat=json&srsName=EPSG%3A4326&maxFeatures=100&propertyName=NAME%2CNAME_STR%2CNAME_ONR%2CPLZ%2CSHAPE&cql_filter=%28NAME_STR+ILIKE+%27Grillgasse%27+AND+NAME_ONR+ILIKE+%274%27%29+OR+%28NAME_STR+ILIKE+%27Rechte+Wienzeile%27+AND+NAME_ONR+ILIKE+%27207%27%29+OR+%28NAME_STR+ILIKE+%27Wiedner+Hauptstra%C3%9Fe%27+AND+NAME_ONR+ILIKE+%2737%27%29+OR+%28NAME_STR+ILIKE+%27Perfektastra%C3%9Fe%27+AND+NAME_ONR+ILIKE+%2711%27%29+OR+%28NAME_STR+ILIKE+%27Sterngasse%27+AND+NAME_ONR+ILIKE+%271%27%29+OR+%28NAME_STR+ILIKE+%27Meidlinger+Hauptstra%C3%9Fe%27+AND+NAME_ONR+ILIKE+%2773%27%29+OR+%28NAME_STR+ILIKE+%27Favoritenstra%C3%9Fe%27+AND+NAME_ONR+ILIKE+%27130%27%29+OR+%28NAME_STR+ILIKE+%27Gewerbeparkstra%C3%9Fe%27+AND+NAME_ONR+ILIKE+%278%27%29",
+      "attribution": "Datenquelle: Stadt Wien - data.wien.gv.at",
+      "confidence": 1,
+      "evidenceUrl": "https://noodleking.app/arcade?k4y_ot=2",
+      "reviewedAt": "2026-11-05T15:12:52.351Z",
+      "reviewNote": "Exact City address, matched by full street, number and postcode."
+    },
+    {
+      "id": "noodle-vienna-79e405106d75",
+      "name": "Noodle King Währinger Straße",
+      "address": "Währinger Straße 14, 1090 Wien",
+      "latitude": 48.21694206,
+      "longitude": 16.35974274,
+      "source": "https://data.wien.gv.at/daten/geo?service=WFS&request=GetFeature&version=1.1.0&typeName=ogdwien%3AADRESSENOGD&outputFormat=json&srsName=EPSG%3A4326&maxFeatures=100&propertyName=NAME%2CNAME_STR%2CNAME_ONR%2CPLZ%2CSHAPE&cql_filter=%28NAME_STR+ILIKE+%27W%C3%A4hringer+Stra%C3%9Fe%27+AND+NAME_ONR+ILIKE+%2714%27%29+OR+%28NAME_STR+ILIKE+%27Leopold-Ungar-Platz%27+AND+NAME_ONR+ILIKE+%272%27%29+OR+%28NAME_STR+ILIKE+%27Br%C3%BCnner+Stra%C3%9Fe%27+AND+NAME_ONR+ILIKE+%27219-221%27%29+OR+%28NAME_STR+ILIKE+%27Favoritenstra%C3%9Fe%27+AND+NAME_ONR+ILIKE+%27239%27%29+OR+%28NAME_STR+ILIKE+%27Schmutzergasse%27+AND+NAME_ONR+ILIKE+%272%27%29+OR+%28NAME_STR+ILIKE+%27Pius-Parsch-Platz%27+AND+NAME_ONR+ILIKE+%275%27%29+OR+%28NAME_STR+ILIKE+%27Ungargasse%27+AND+NAME_ONR+ILIKE+%2775%27%29+OR+%28NAME_STR+ILIKE+%27Elterleinplatz%27+AND+NAME_ONR+ILIKE+%2711-13%27%29",
+      "attribution": "Datenquelle: Stadt Wien - data.wien.gv.at",
+      "confidence": 1,
+      "evidenceUrl": "https://noodleking.app/waehringerstrasse?k4y_ot=2",
+      "reviewedAt": "2026-11-05T15:12:52.351Z",
+      "reviewNote": "Exact City address, matched by full street, number and postcode."
+    },
+    {
+      "id": "noodle-vienna-7a77c4aa2880",
+      "name": "Noodle King Leopold-Ungar-Platz",
+      "address": "Leopold-Ungar-Platz 2, 1190 Wien",
+      "latitude": 48.24848913,
+      "longitude": 16.36751771,
+      "source": "https://data.wien.gv.at/daten/geo?service=WFS&request=GetFeature&version=1.1.0&typeName=ogdwien%3AADRESSENOGD&outputFormat=json&srsName=EPSG%3A4326&maxFeatures=100&propertyName=NAME%2CNAME_STR%2CNAME_ONR%2CPLZ%2CSHAPE&cql_filter=%28NAME_STR+ILIKE+%27W%C3%A4hringer+Stra%C3%9Fe%27+AND+NAME_ONR+ILIKE+%2714%27%29+OR+%28NAME_STR+ILIKE+%27Leopold-Ungar-Platz%27+AND+NAME_ONR+ILIKE+%272%27%29+OR+%28NAME_STR+ILIKE+%27Br%C3%BCnner+Stra%C3%9Fe%27+AND+NAME_ONR+ILIKE+%27219-221%27%29+OR+%28NAME_STR+ILIKE+%27Favoritenstra%C3%9Fe%27+AND+NAME_ONR+ILIKE+%27239%27%29+OR+%28NAME_STR+ILIKE+%27Schmutzergasse%27+AND+NAME_ONR+ILIKE+%272%27%29+OR+%28NAME_STR+ILIKE+%27Pius-Parsch-Platz%27+AND+NAME_ONR+ILIKE+%275%27%29+OR+%28NAME_STR+ILIKE+%27Ungargasse%27+AND+NAME_ONR+ILIKE+%2775%27%29+OR+%28NAME_STR+ILIKE+%27Elterleinplatz%27+AND+NAME_ONR+ILIKE+%2711-13%27%29",
+      "attribution": "Datenquelle: Stadt Wien - data.wien.gv.at",
+      "confidence": 1,
+      "evidenceUrl": "https://noodleking.app/leopold-ungar-platz?k4y_ot=2",
+      "reviewedAt": "2026-11-05T15:12:52.351Z",
+      "reviewNote": "Exact City address, matched by full street, number and postcode."
+    },
+    {
+      "id": "noodle-vienna-8e34f8670628",
+      "name": "Noodle King Brünner Straße",
+      "address": "Brünner Straße 219-221, 1210 Wien",
+      "latitude": 48.29280373,
+      "longitude": 16.41743545,
+      "source": "merchant_storefront_jsonld_exact_branch",
+      "coordinateEvidenceUrl": "https://www.foodora.at/en/restaurant/bpjt/noodle-king-b7-stammersdorf",
+      "additionalEvidenceUrls": [
+        "https://www.b7-shopping.at/shops/"
+      ],
+      "confidence": 0.95,
+      "evidenceUrl": "https://noodleking.app/b7-ekazent?k4y_ot=2",
+      "reviewedAt": "2026-11-05T15:12:52.351Z",
+      "reviewNote": "Exact merchant storefront supplies B7 branch name,addressTop2 and restaurant coordinates; official B7 directory independently names NoodleKing. Not a guessed range entrance."
+    },
+    {
+      "id": "noodle-vienna-7c99085169e2",
+      "name": "Noodle King Schmutzergasse",
+      "address": "Schmutzergasse 2, 1150 Wien",
+      "latitude": 48.19955866,
+      "longitude": 16.31828713,
+      "source": "https://data.wien.gv.at/daten/geo?service=WFS&request=GetFeature&version=1.1.0&typeName=ogdwien%3AADRESSENOGD&outputFormat=json&srsName=EPSG%3A4326&maxFeatures=100&propertyName=NAME%2CNAME_STR%2CNAME_ONR%2CPLZ%2CSHAPE&cql_filter=%28NAME_STR+ILIKE+%27W%C3%A4hringer+Stra%C3%9Fe%27+AND+NAME_ONR+ILIKE+%2714%27%29+OR+%28NAME_STR+ILIKE+%27Leopold-Ungar-Platz%27+AND+NAME_ONR+ILIKE+%272%27%29+OR+%28NAME_STR+ILIKE+%27Br%C3%BCnner+Stra%C3%9Fe%27+AND+NAME_ONR+ILIKE+%27219-221%27%29+OR+%28NAME_STR+ILIKE+%27Favoritenstra%C3%9Fe%27+AND+NAME_ONR+ILIKE+%27239%27%29+OR+%28NAME_STR+ILIKE+%27Schmutzergasse%27+AND+NAME_ONR+ILIKE+%272%27%29+OR+%28NAME_STR+ILIKE+%27Pius-Parsch-Platz%27+AND+NAME_ONR+ILIKE+%275%27%29+OR+%28NAME_STR+ILIKE+%27Ungargasse%27+AND+NAME_ONR+ILIKE+%2775%27%29+OR+%28NAME_STR+ILIKE+%27Elterleinplatz%27+AND+NAME_ONR+ILIKE+%2711-13%27%29",
+      "attribution": "Datenquelle: Stadt Wien - data.wien.gv.at",
+      "confidence": 1,
+      "evidenceUrl": "https://noodleking.app/schmutzergasse?k4y_ot=2",
+      "reviewedAt": "2026-11-05T15:12:52.351Z",
+      "reviewNote": "Exact City address, matched by full street, number and postcode."
+    },
+    {
+      "id": "noodle-vienna-f4b76756bacf",
+      "name": "Noodle King Pius-Parsch-Platz",
+      "address": "Pius-Parsch-Platz 5, 1210 Wien",
+      "latitude": 48.25906554,
+      "longitude": 16.40019127,
+      "source": "https://data.wien.gv.at/daten/geo?service=WFS&request=GetFeature&version=1.1.0&typeName=ogdwien%3AADRESSENOGD&outputFormat=json&srsName=EPSG%3A4326&maxFeatures=100&propertyName=NAME%2CNAME_STR%2CNAME_ONR%2CPLZ%2CSHAPE&cql_filter=%28NAME_STR+ILIKE+%27W%C3%A4hringer+Stra%C3%9Fe%27+AND+NAME_ONR+ILIKE+%2714%27%29+OR+%28NAME_STR+ILIKE+%27Leopold-Ungar-Platz%27+AND+NAME_ONR+ILIKE+%272%27%29+OR+%28NAME_STR+ILIKE+%27Br%C3%BCnner+Stra%C3%9Fe%27+AND+NAME_ONR+ILIKE+%27219-221%27%29+OR+%28NAME_STR+ILIKE+%27Favoritenstra%C3%9Fe%27+AND+NAME_ONR+ILIKE+%27239%27%29+OR+%28NAME_STR+ILIKE+%27Schmutzergasse%27+AND+NAME_ONR+ILIKE+%272%27%29+OR+%28NAME_STR+ILIKE+%27Pius-Parsch-Platz%27+AND+NAME_ONR+ILIKE+%275%27%29+OR+%28NAME_STR+ILIKE+%27Ungargasse%27+AND+NAME_ONR+ILIKE+%2775%27%29+OR+%28NAME_STR+ILIKE+%27Elterleinplatz%27+AND+NAME_ONR+ILIKE+%2711-13%27%29",
+      "attribution": "Datenquelle: Stadt Wien - data.wien.gv.at",
+      "confidence": 1,
+      "evidenceUrl": "https://noodleking.app/floridsdorf?k4y_ot=2",
+      "reviewedAt": "2026-11-05T15:12:52.351Z",
+      "reviewNote": "Exact City address, matched by full street, number and postcode."
+    },
+    {
+      "id": "noodle-vienna-a5ded8d8b9c3",
+      "name": "Noodle King Ungargasse",
+      "address": "Ungargasse 75, 1030 Wien",
+      "latitude": 48.19481545,
+      "longitude": 16.3868635,
+      "source": "https://data.wien.gv.at/daten/geo?service=WFS&request=GetFeature&version=1.1.0&typeName=ogdwien%3AADRESSENOGD&outputFormat=json&srsName=EPSG%3A4326&maxFeatures=100&propertyName=NAME%2CNAME_STR%2CNAME_ONR%2CPLZ%2CSHAPE&cql_filter=%28NAME_STR+ILIKE+%27W%C3%A4hringer+Stra%C3%9Fe%27+AND+NAME_ONR+ILIKE+%2714%27%29+OR+%28NAME_STR+ILIKE+%27Leopold-Ungar-Platz%27+AND+NAME_ONR+ILIKE+%272%27%29+OR+%28NAME_STR+ILIKE+%27Br%C3%BCnner+Stra%C3%9Fe%27+AND+NAME_ONR+ILIKE+%27219-221%27%29+OR+%28NAME_STR+ILIKE+%27Favoritenstra%C3%9Fe%27+AND+NAME_ONR+ILIKE+%27239%27%29+OR+%28NAME_STR+ILIKE+%27Schmutzergasse%27+AND+NAME_ONR+ILIKE+%272%27%29+OR+%28NAME_STR+ILIKE+%27Pius-Parsch-Platz%27+AND+NAME_ONR+ILIKE+%275%27%29+OR+%28NAME_STR+ILIKE+%27Ungargasse%27+AND+NAME_ONR+ILIKE+%2775%27%29+OR+%28NAME_STR+ILIKE+%27Elterleinplatz%27+AND+NAME_ONR+ILIKE+%2711-13%27%29",
+      "attribution": "Datenquelle: Stadt Wien - data.wien.gv.at",
+      "confidence": 1,
+      "evidenceUrl": "https://noodleking.app/ungargasse-75?k4y_ot=2",
+      "reviewedAt": "2026-11-05T15:12:52.351Z",
+      "reviewNote": "Exact City address, matched by full street, number and postcode."
+    },
+    {
+      "id": "noodle-vienna-a65dc4ddf859",
+      "name": "Noodle King Elterleinplatz",
+      "address": "Elterleinplatz 12, 1170 Wien",
+      "latitude": 48.21851215,
+      "longitude": 16.33144269,
+      "source": "https://data.wien.gv.at/daten/geo?service=WFS&request=GetFeature&version=1.1.0&typeName=ogdwien%3AADRESSENOGD&outputFormat=json&srsName=EPSG%3A4326&maxFeatures=30&propertyName=NAME%2CNAME_STR%2CNAME_ONR%2CPLZ%2CSHAPE&cql_filter=NAME_STR+ILIKE+%27Elterleinplatz%27+AND+%28NAME_ONR+ILIKE+%2712%25%27+OR+NAME_ONR+ILIKE+%27%25-12%27%29",
+      "attribution": "Datenquelle: Stadt Wien - data.wien.gv.at",
+      "additionalEvidenceUrls": [
+        "https://www.zentrum-hernals.at/",
+        "https://www.mapcarta.com/de/N9441791643"
+      ],
+      "confidence": 1,
+      "evidenceUrl": "https://noodleking.app/ekz-hernals?k4y_ot=2",
+      "reviewedAt": "2026-11-05T15:12:52.351Z",
+      "reviewNote": "Official center directory lists NoodleKing at ZentrumHernals,Elterleinplatz12; merchant order page uses11-13/3. Exact named mall building12 point corroborated by actual named NoodleKing OSM POI within25m,not arbitrary neighboring11/13 entrance. Original merchant address alias retained in sourceLabel."
+    }
+  ],
+  "foodsharing": {
+    "currentPublicViennaPoints": 20,
+    "included": [
+      {
+        "id": 308,
+        "pointId": "foodsharing-public-308",
+        "address": "Laxenburger Straße 365/A6, 1230 Wien",
+        "coordinateSource": "official public marker API",
+        "priorPointRetained": false,
+        "accessConditions": "So findet Ihr den Fair-Teiler bei der Tafel Österreich:\r\n\r\nAdresse: 1230 Wien, Laxenburger Straße 365/A6\r\nZugang zum Großmarkt am Besten über den Eingang in der Halban-Kurz-Straße\r\n\r\nMontag - Donnerstag von 9:00-14:00 Uhr,\r\nFreitag von 9:00 - 13:30 Uhr geöffnet\r\n\r\nUnser Fairteiler ist leider nicht barrierefrei!\r\n\r\nmit den Öffis: \r\n67B bis Halban-Kurz-Straße\r\n"
+      },
+      {
+        "id": 561,
+        "pointId": "foodsharing-public-561",
+        "address": "Hainburger Straße 29, 1030 Wien",
+        "coordinateSource": "official public marker API",
+        "priorPointRetained": false,
+        "accessConditions": "Reguläre Öffnungszeiten\r\n*Mo-Fr 9.00 -19.30 (wenn Kurse stattfinden meist bis 21.00 Uhr)\r\n\r\nBitte Fairteiler Regeln beachten:\r\n1. Bitte trennt Backwaren, frische Lebensmittel und zubereiteten Speisen voneinander.\r\n2. Bitte legt keine losen Backwaren in die Fairteiler. Ihr könnt sie zB in Gefriersäcken abgepackt in den Fairteiler legen (mengenmäßig f. 1 Person)\r\n3. Bitte legt erdbehaftete Lebensmittel nach unten, dann rieselt nichts auf darunterliegendes Essen.\r\n4. Bitte deckt zubereitete Speisen gut ab, oder legt diese in einen verschlossenen Behälter.\r\n5. Zubereitete Speisen, Selbst-(Ein)-Gekochtes, Selbst-Konserviertes usw. brauchen eine vollständige Zutatenliste und das Herstellungsdatum.\r\n6. Lebensmittel dürfen im Fairteiler nicht in Mülltüten, Müllsäcken usw. gelagert werden.\r\n7. Achtet darauf, dass Kühlschrank und Schrank immer richtig verschlossen sind.\r\n8. Bitte achtet im Fairteiler auf Hygiene und Sauberkeit. Sollte sich etwas im Fairteiler befinden, das nicht unseren Richtlinien entspricht, bitte nimm es mit und entsorge es fachgerecht.\r\n9. Du nutzt diesen Fairteiler regelmäßig, dh du bringst und/oder holst Sachen ab und freust dich über diesen Fairteiler? Wir würden uns freuen, wenn du unser Reinigungsteam unterstützen könntest. Nimm einfach Kontakt mit der Fairteilerverantwortlichen auf. Wir freuen uns sehr über deine Unterstützung.\r\n\r\nLebensmittel mit abgelaufenem "
+      },
+      {
+        "id": 717,
+        "pointId": "foodsharing-public-717",
+        "address": "Parhamerplatz 16, 1170 Wien",
+        "coordinateSource": "official public marker API",
+        "priorPointRetained": false,
+        "accessConditions": "Dieser Fairteiler ist entsprechend der Öffnungszeiten der \"Jetzt\"-Bar täglich ab 17h zugänglich.\r\nEr steht gleich im Eingangsbereich und auch ungekühlte Lebensmittel können eingelagert werden.\r\nIhr könnt den Bereich auch zur Weitergabe von Büchern, Geschirr oder anderen kleineren Dingen des täglichen Bedarfs nutzen.\r\n\r\nFAIRTEILER REGELN:\r\n-) Brot und Gebäck bitte in den Brotschrank, nicht im Regal darunter und nicht in Müllsäcken am Boden\r\n-) im Regal unterm Brotschrank bitte nur Konserven\r\n-) Backwaren bitte in den Kühlschrank\r\n-) individuell verpackte Einheiten bitte in möglichst kleine Portionen bündeln\r\n-) bitte nicht original verpackte Lebensmittel beschriften, idealerweise auch mit Herstellungs-Datum\r\n-) selbst zubereitete Speisen müssen mit Zutaten und Inhaltsstoffen versehen sein\r\n-) offene Lebensmittel in Original-Verpackungen bitte nicht einlagern\r\n-) bitte die Kühlschrank-Tür nur so kurz wie möglich offen lassen\r\n-) augenscheinlich unbrauchbare Lebensmittel könnt ihr gern selbstständig entsorgen\r\n-) grobe Verunreinigungen bitte entfernen oder an der Bar melden. Wir kümmern uns beizeiten darum\r\n-) bitte keinen Alkohol einlagern\r\n-) keinesfalls Lebensmittel am Boden lagern"
+      },
+      {
+        "id": 720,
+        "pointId": "foodsharing-public-720",
+        "address": "Weiglgasse 19, 1150 Wien",
+        "coordinateSource": "official public marker API",
+        "priorPointRetained": false,
+        "accessConditions": "Gassenlokal: Eingang Ecke Weiglgasse/Jheringgasse\r\nÖffnungszeiten: \r\nMo-Do 10-16h und Fr 10-14h\r\nFairteiler Öffnungszeiten:\r\nMontag bis Donnerstag von 11.00h bis 15.00h\r\nTelefonnummer 0664 8323607\r\n\r\nLiebe Foodsaver*innen,\r\nwenn ihr größere Mengen an Lebensmitteln habt, die die Kapazität der Fair-Teiler übersteigt, könnt ihr Lebensmittel auch zu anderen Organisationen bringen. **Bitte fragt vorher immer telefonisch nach** ob das was ihr bringen möchtet von ihnen gebraucht wird.\r\nAbgabestellen Wien (Liste u. Karte): https://www.google.com/maps/d/viewer?mid=1cDgxGnPJm7upWJoR5gi_40yZD4h3VMMD&ll=48.19799271939188%2C16.354152512182665&z=20\r\n\r\n* Bitte trennt Backwaren, frische Lebensmittel und zubereiteten Speisen voneinander.\r\n* Bitte legt keine losen Backwaren in die Fairteiler. Ihr könnt sie zB in Gefriersäcken abgepackt in den Fairteiler legen (mengenmäßig f. 1 Person)\r\n* Bitte legt erdbehaftete Lebensmittel nach unten, dann rieselt nichts auf darunterliegendes Essen.\r\n* Bitte deckt zubereitete Speisen gut ab, oder legt diese in einen verschlossenen Behälter.\r\n* Zubereitete Speisen, Selbst-(Ein)-Gekochtes, Selbst-Konserviertes usw. brauchen eine vollständige Zutatenliste und das Herstellungsdatum.\r\n* Lebensmittel dürfen im Fairteiler nicht in Mülltüten, Müllsäcken usw. gelagert werden.\r\n* Achtet darauf, dass der Schrank immer richtig verschlossen ist.\r\n* Bitte achtet im Fairteile"
+      },
+      {
+        "id": 736,
+        "pointId": "address-151ea8063c3a057f",
+        "address": "Putzendoplergasse 4, 1230 Wien",
+        "coordinateSource": "official public marker API",
+        "priorPointRetained": true,
+        "accessConditions": "Der Fair-Teiler steht gleich beim Eingang.\r\nÖffnungszeiten: Mo-Do 9.00-19.00 und Fr 9.00-14.00\r\nÖffentliche Verkehrsmittel: U-Bahn U6 Station Alterlaa, Bus 64A, 66A\r\n\r\n"
+      },
+      {
+        "id": 881,
+        "pointId": "foodsharing-public-881",
+        "address": "Hannovergasse 21, 1200 Wien",
+        "coordinateSource": "official public marker API",
+        "priorPointRetained": false,
+        "accessConditions": "Bei der Hausnummer 21 in den Hof zur Boulderbar gehen. Der Fairteiler steht beim Eingang der Boulderbar im Außenbereich und ist frei zugänglich!\n\nÖffnungszeiten:\nMo-Fr 7:00 bis 23:00 \nSa 7:00 bis 22:00\nSo 8:30 bis 22:00\n\n"
+      },
+      {
+        "id": 885,
+        "pointId": "foodsharing-public-885",
+        "address": "Hannah-Arendt-Platz 1, 1220 Wien",
+        "coordinateSource": "official public marker API",
+        "priorPointRetained": false,
+        "accessConditions": "Öffnungszeiten (Stand 5.8.2021):\n  Montag          13-18 Uhr\n  Dienstag          9-13 Uhr\n  Mittwoch        13-18 Uhr\n  Donnerstag      9-18 Uhr\n  Freitag           14-18 Uhr\n\nAktuell OHNE Kühlschrank.\nDaher bitte nur Lebensmittel, die ungekühlt angeboten werden können!\n\nHinweise, Anregungen, Angebote zur Mitarbeit, u.s.w. bitte an fragen@meine.seestadt.info\n\nBitte Backwaren, frische Lebensmittel und zubereitete Speisen trennen.\nBackwaren nicht lose in den Fairteiler geben, nur abgepackt z.B. in Gefriersäcken (Menge für eine Person).\nBitte erdbehaftete Lebensmittel nach unten legen, dann rieselt nichts auf darunterliegendes Essen.\nBitte zubereitete Speisen gut abdecken oder in verschlossenen Behälter legen.\nZubereitete Speisen, Selbst-Gekochtes, Selbst-Konserviertes u. dgl. nur mit vollständiger Zutatenliste u. Herstellungsdatum!\nLebensmittel dürfen im Fairteiler nicht in Mülltüten, Müllsäcken und ähnlichem gelagert werden.\nDen Kühlschrank immer richtig verschließen.\nAuf Hygiene und Sauberkeit achten. Dinge im Fairteiler, die nicht unseren Richtlinien entsprechen, bitte entsorgen.\nDu nutzt diesen Fairteiler und  bringst oder holst Sachen und freust dich über diesen Fairteiler? Wir würden uns freuen, wenn du unser Reinigungsteam unterstützen könntest. Nimm einfach Kontakt mit der/den/dem Fairteilerverantwortlichen auf. Wir freuen uns sehr über deine Unterstützung.\nLebensmittel m"
+      },
+      {
+        "id": 990,
+        "pointId": "foodsharing-public-990",
+        "address": "Margaretenstraße 166, 1050 Wien",
+        "coordinateSource": "official public marker API",
+        "priorPointRetained": false,
+        "accessConditions": "Unser Personal kühlt die Sachen ein und verteilt sie über ein Regal neben dem Tresen.\r\n\r\nGrößere Mengen in Bio-Qualität nehmen wir auch geren für unsere Küche entgegen und verarbeiten die Lebenstmittel dort. Diese können wir auch außerhalb der Öffnungszeiten nach telefonischer Vereinbarung entgegen nehmen.\r\n\r\nFür unseren Fairteiler eigenen sich vor allem Lebensmittel, die lange haltbar sind oder nicht mehr weiterverarbeitet werden müssen.\r\n\r\nÖffnungszeiten: Montag - Freitag von 10 - 15 Uhr.\r\nT +43 677 62 58 56 78 \r\n\r\nWir bekommen täglich Gebäck von der Bäckerei Felzl \r\n\r\n"
+      },
+      {
+        "id": 1165,
+        "pointId": "foodsharing-public-1165",
+        "address": "Franz-Josefs-Kai 4, 1010 Wien",
+        "coordinateSource": "official public marker API",
+        "priorPointRetained": false,
+        "accessConditions": "Herzlich Willkommen beim Badeschiff Wien!\r\nDas Schiff liegt bei der Urania unten an der Donaukanal-Promenade.\r\nDer Glaskühlschrank steht im Badeschiff beim rechten Eingang (also dem Eingang, der näher beim Pool ist). Dort im Durchgang, (also vor der Glastür, die ins eigentliche Schiff führt), links an der Wand. \r\n* Bitte keine Lebensmittel auf oder neben den Kühlschrank stellen und die allgemeinen Hinweise zu Fairteilern beachten.\r\n* Bitte trennt Backwaren, frische Lebensmittel und zubereiteten Speisen voneinander.\r\n* Bitte legt keine losen Backwaren in die Fairteiler. Ihr könnt sie zB in Gefriersäcken abgepackt in den Fairteiler legen (mengenmäßig f. 1 Person)\r\n* Bitte legt erdbehaftete Lebensmittel nach unten, dann rieselt nichts auf darunterliegendes Essen.\r\n* Bitte deckt zubereitete Speisen gut ab, oder legt diese in einen verschlossenen Behälter.\r\n* Zubereitete Speisen, Selbst-(Ein)-Gekochtes, Selbst-Konserviertes usw. brauchen eine vollständige Zutatenliste und das Herstellungsdatum.\r\nLebensmittel dürfen im Fairteiler nicht in Mülltüten, Müllsäcken usw. gelagert werden.\r\n* Bitte achtet im Fairteiler auf Hygiene und Sauberkeit. Sollte sich etwas im Fairteiler befinden, das nicht unseren Richtlinien entspricht, bitte nimm es mit und entsorge es fachgerecht.\r\n* Du nutzt diesen Fairteiler regelmäßig, dh du bringst und/oder holst Sachen ab und freust dich über diesen Fairteile"
+      },
+      {
+        "id": 1293,
+        "pointId": "address-549130d0805113b3",
+        "address": "Ludo-Hartmann-Platz 7, 1160 Wien",
+        "coordinateSource": "official public marker API",
+        "priorPointRetained": true,
+        "accessConditions": "Der Fairteiler ist zurück! 💚🥰\n\nReguläre Öffnungszeiten \t\nMontag bis Mittwoch:   09:30-12:00 und 13:00-16:30\nDonnerstag:                    09:30-12:00 und 13:00-18:00\nFreitag:                             09:30-12:00 und 13:00-15:00\n\nSamstag\tGeschlossen\nSonntag\tGeschlossen\n\n\nAdresse: Ludo-Hartmann-Platz 7, 1160 Wien\nÖffentliche Verkehrsmittel:\nU-Bahn U6, Straßenbahn 46, Autobus 48A \n\n"
+      },
+      {
+        "id": 1475,
+        "pointId": "foodsharing-public-1475",
+        "address": "Anton-von-Webern-Platz 1, 1030 Wien",
+        "coordinateSource": "official public marker API",
+        "priorPointRetained": false,
+        "accessConditions": "Der Fairteiler steht im Haus Riegel (Gebäudeteil K), Erdgeschoss, nach der Portierloge links, dann rechts, gegenüber vom Getränkeautomaten. \r\nDer Fairteiler beinhaltet einen kleinen Kühlschrank und ein Regal siehe Bilder auf der Pinnwand. \r\nBitte eher kleine Mengen bringen wegen dem kleinen Kühli und eher Snacks und Obst für die Pause zum gleich essen. \r\n\r\nÖffnungszeiten der gesamten mdw\r\nMontag – Freitag 8.00 – 22.00 Uhr\r\nSamstag 8.00 – 18.00 Uhr\r\n\r\n"
+      },
+      {
+        "id": 2258,
+        "pointId": "foodsharing-public-2258",
+        "address": "Brünner Straße 34-38/8, R10, 1210 Wien",
+        "coordinateSource": "official public marker API",
+        "priorPointRetained": false,
+        "accessConditions": "Adresse\r\nGebietsbetreuung Stadterneuerung 21/22\r\nBrünner Straße 34-38/8, R10, 1210 Wien\r\n\r\nÖffnungszeiten\r\nMO: 14:00–18:00\r\nDI: 09:00–13:00\r\nMI: 14:00–18:00\r\nDO: 09:00–18:00\r\nFR: 14:00–18:00\r\n\r\nBitte beachtet beim Bringen und Nehmen von Lebensmitteln folgendes:\r\n•\tMund-Nasen-Schutz tragen \r\n•\tHandschuhe tragen oder Hände davor desinfizieren\r\n•\tKein offenes Brot und Gebäck und hineingeben. Macht kleine Sackerl mit 2- 5 Stück Inhalt\r\n•\tBei fertig gekochten Speisen: Stellt diese luftdicht verpackt in kleinen Behältern, beschriftet mit Datum & Inhalt in den Kühlschrank – bitte keine 5 oder 10 Liter-Kübel\r\n•\tKeine Buffetware oder offene Speisen/Packungen in den Fairteiler geben\r\n•\tVerstärkt auf Sauberkeit und Hygiene achten\r\n•\tMithilfe beim Reinigen\r\n•\tKeine Lebensmittel angreifen und wieder hineinlegen\r\n•\tBitte helft alle mit den Fair-Teiler sauber zu halten und entsorgt nicht mehr genießbare Lebensmittel, falls etwas dort ist\r\n•\tBitte postet hier auf der Pinnwand, wenn ihr den Fair-Teiler befüllt habt und womit\r\n\r\n"
+      },
+      {
+        "id": 2283,
+        "pointId": "address-296c8f9b19632a69",
+        "address": "Ahornergasse 4, 1070 Wien",
+        "coordinateSource": "official public marker API",
+        "priorPointRetained": true,
+        "accessConditions": "24/7 - der Fairteiler ist rund um die Uhr geöffnet.\r\nEs befindet sich hier kein Kühlschrank.\r\n\r\n1. Bitte trennt Backwaren, frische Lebensmittel und zubereiteten Speisen voneinander.\r\n2. Bitte legt keine losen Backwaren in die Fairteiler. Ihr könnt sie zB in Gefriersäcken abgepackt in den Fairteiler legen (mengenmäßig f. 1 Person)\r\n3. Bitte legt erdbehaftete Lebensmittel nach unten, dann rieselt nichts auf darunterliegendes Essen.\r\n4. Bitte deckt zubereitete Speisen gut ab, oder legt diese in einen verschlossenen Behälter.\r\n5. Zubereitete Speisen, Selbst-(Ein)-Gekochtes, Selbst-Konserviertes usw. brauchen eine vollständige Zutatenliste und das Herstellungsdatum.\r\n6. Lebensmittel dürfen im Fairteiler nicht in Mülltüten, Müllsäcken usw. gelagert werden.\r\n7. Achtet darauf, dass der Schrank immer richtig verschlossen ist.\r\n8. Bitte achtet im Fairteiler auf Hygiene und Sauberkeit. Sollte sich etwas im Fairteiler befinden, das nicht unseren Richtlinien entspricht, bitte nimm es mit und entsorge es fachgerecht.\r\n9. Du nutzt diesen Fairteiler regelmäßig, dh du bringst und/oder holst Sachen ab und freust dich über diesen Fairteiler? Wir würden uns freuen, wenn du unser Reinigungsteam unterstützen könntest. Nimm einfach Kontakt mit der/den/dem Fairteilerverantwortlichen auf. Wir freuen uns sehr über deine Unterstützung.\r\n10. Lebensmittel mit abgelaufenem Mindesthaltbarkeitsdatum (MHD) dür"
+      },
+      {
+        "id": 2642,
+        "pointId": "foodsharing-public-2642",
+        "address": "Stöbergasse 11, 1050 Wien",
+        "coordinateSource": "official public marker API",
+        "priorPointRetained": false,
+        "accessConditions": "* Bitte trennt Backwaren, frische Lebensmittel und zubereiteten Speisen voneinander.\r\n* Bitte legt keine losen Backwaren in die Fairteiler. Ihr könnt sie zB in Gefriersäcken abgepackt in den Fairteiler legen (mengenmäßig f. 1 Person)\r\n* Bitte legt erdbehaftete Lebensmittel nach unten, dann rieselt nichts auf darunterliegendes Essen.\r\n* Bitte deckt zubereitete Speisen gut ab, oder legt diese in einen verschlossenen Behälter.\r\n* Zubereitete Speisen, Selbst-(Ein)-Gekochtes, Selbst-Konserviertes usw. brauchen eine vollständige Zutatenliste und das Herstellungsdatum.\r\n* Lebensmittel dürfen im Fairteiler nicht in Mülltüten, Müllsäcken usw. gelagert werden.\r\n* Achtet darauf, dass der Schrank immer richtig verschlossen ist.\r\n* Bitte achtet im Fairteiler auf Hygiene und Sauberkeit. Sollte sich etwas im Fairteiler befinden, das nicht unseren Richtlinien entspricht, bitte nimm es mit und entsorge es fachgerecht.\r\nDu nutzt diesen Fairteiler regelmäßig, dh du bringst und/oder holst Sachen ab und freust dich über diesen Fairteiler? Wir würden uns freuen, wenn du unser Reinigungsteam unterstützen könntest. Nimm einfach Kontakt mit der/den/dem Fairteilerverantwortlichen auf. Wir freuen uns sehr über deine Unterstützung.\r\nLebensmittel mit abgelaufenem Mindesthaltbarkeitsdatum (MHD) dürfen im Fairteiler weitergegeben werden. Lebensmittel mit abgelaufenem Verbrauchsdatum dürfen nicht weitergegebe"
+      },
+      {
+        "id": 3458,
+        "pointId": "foodsharing-public-3458",
+        "address": "Kürschnergasse 9, 1210 Wien",
+        "coordinateSource": "official public marker API",
+        "priorPointRetained": false,
+        "accessConditions": "1. Bitte trennt Backwaren, frische Lebensmittel und zubereiteten Speisen voneinander.\n2. Bitte legt keine losen Backwaren in die Fairteiler. Ihr könnt sie zB in Gefriersäcken abgepackt in den Fairteiler legen    (mengenmäßig f. 1 Person)\n3. Bitte legt erdbehaftete Lebensmittel nach unten, dann rieselt nichts auf darunterliegendes Essen.\n4. Bitte deckt zubereitete Speisen gut ab, oder legt diese in einen verschlossenen Behälter.\n5. Zubereitete Speisen, Selbst-(Ein)-Gekochtes, Selbst-Konserviertes usw. brauchen eine vollständige Zutatenliste und das   Herstellungsdatum.\n6. Lebensmittel dürfen im Fairteiler nicht in Mülltüten, Müllsäcken usw. gelagert werden.\n7. Achtet darauf, dass der Schrank immer richtig verschlossen ist.\n8. Bitte achtet im Fairteiler auf Hygiene und Sauberkeit. Sollte sich etwas im Fairteiler befinden, das nicht unseren Richtlinien entspricht, bitte nimm es mit und entsorge es fachgerecht.\n9. Du nutzt diesen Fairteiler regelmäßig, dh du bringst und/oder holst Sachen ab und freust dich über diesen Fairteiler? Wir würden uns freuen, wenn du unser Reinigungsteam unterstützen könntest. Nimm einfach Kontakt mit der/den/dem Fairteilerverantwortlichen auf. Wir freuen uns sehr über deine Unterstützung.\n10. Lebensmittel mit abgelaufenem Mindesthaltbarkeitsdatum (MHD) dürfen im Fairteiler weitergegeben werden. Lebensmittel mit abgelaufenem Verbrauchsdatum dürfen nicht w"
+      }
+    ],
+    "excluded": [
+      {
+        "id": 419,
+        "reason": "Official individual page explicitly says closed; old building demolished."
+      },
+      {
+        "id": 537,
+        "reason": "Official name says not in operation; latest dated update says inactive."
+      },
+      {
+        "id": 797,
+        "reason": "Official individual page says there is no Fairteiler at this address."
+      },
+      {
+        "id": 1071,
+        "reason": "Official description says basement fire-safety restrictions prevent use."
+      },
+      {
+        "id": 919,
+        "reason": "Official individual page explicitly states this independent site is not a foodsharing Fairteiler. Not classified as closed."
+      },
+      {
+        "id": 690,
+        "reason": "Zeiselmauer is outside Vienna; bounding-box proximity is not a Vienna address."
+      }
+    ],
+    "snapshotNotPhysicalOpeningProof": true
+  },
+  "urfaPoiCorroborationMeters": 16.8839347699504,
+  "noodleKing": {
+    "ownerConfirmedAllVienna": true,
+    "currentOfficialInventory": 24,
+    "proof": [
+      {
+        "sourceLabel": "Noodle King Walfischgasse Meet the king! Walfischgasse 4/1c1010 Wien ca. 15 Min. 0.0 (0)",
+        "sourceUrl": "https://noodleking.app/walfischgasse?k4y_ot=2",
+        "reviewedAddress": "Walfischgasse 4, 1010 Wien",
+        "pointId": "address-0118eaf9dd3cfe23",
+        "existingPointReused": true,
+        "coordinateSource": {
+          "latitude": 48.20333166,
+          "longitude": 16.37096045,
+          "source": "https://data.wien.gv.at/daten/geo?service=WFS&request=GetFeature&version=1.1.0&typeName=ogdwien%3AADRESSENOGD&outputFormat=json&srsName=EPSG%3A4326&maxFeatures=100&propertyName=NAME%2CNAME_STR%2CNAME_ONR%2CPLZ%2CSHAPE&cql_filter=%28NAME_STR+ILIKE+%27Walfischgasse%27+AND+NAME_ONR+ILIKE+%274%27%29+OR+%28NAME_STR+ILIKE+%27Billrothstra%C3%9Fe%27+AND+NAME_ONR+ILIKE+%2783%27%29+OR+%28NAME_STR+ILIKE+%27Landstra%C3%9Fer+Hauptstra%C3%9Fe%27+AND+NAME_ONR+ILIKE+%2779%27%29+OR+%28NAME_STR+ILIKE+%27D%C3%B6blerhofstra%C3%9Fe%27+AND+NAME_ONR+ILIKE+%2710%27%29+OR+%28NAME_STR+ILIKE+%27Kagraner+Platz%27+AND+NAME_ONR+ILIKE+%271-4%27%29+OR+%28NAME_STR+ILIKE+%27Hietzinger+Hauptstra%C3%9Fe%27+AND+NAME_ONR+ILIKE+%276%27%29+OR+%28NAME_STR+ILIKE+%27Adolf-Sch%C3%A4rf-Platz%27+AND+NAME_ONR+ILIKE+%277%27%29+OR+%28NAME_STR+ILIKE+%27Mariahilfer+G%C3%BCrtel%27+AND+NAME_ONR+ILIKE+%271%27%29",
+          "attribution": "Datenquelle: Stadt Wien - data.wien.gv.at"
+        },
+        "reviewNote": "Exact City address, matched by full street, number and postcode."
+      },
+      {
+        "sourceLabel": "Noodle King Billrothstraße Meet the king! Billrothstraße 831190 Wien ca. 15 Min. 0.0 (0)",
+        "sourceUrl": "https://noodleking.app/billrothstrassse?k4y_ot=2",
+        "reviewedAddress": "Billrothstraße 83, 1190 Wien",
+        "pointId": "noodle-vienna-3a69cd5cf0f0",
+        "existingPointReused": false,
+        "coordinateSource": {
+          "latitude": 48.24533367,
+          "longitude": 16.34306295,
+          "source": "https://data.wien.gv.at/daten/geo?service=WFS&request=GetFeature&version=1.1.0&typeName=ogdwien%3AADRESSENOGD&outputFormat=json&srsName=EPSG%3A4326&maxFeatures=100&propertyName=NAME%2CNAME_STR%2CNAME_ONR%2CPLZ%2CSHAPE&cql_filter=%28NAME_STR+ILIKE+%27Walfischgasse%27+AND+NAME_ONR+ILIKE+%274%27%29+OR+%28NAME_STR+ILIKE+%27Billrothstra%C3%9Fe%27+AND+NAME_ONR+ILIKE+%2783%27%29+OR+%28NAME_STR+ILIKE+%27Landstra%C3%9Fer+Hauptstra%C3%9Fe%27+AND+NAME_ONR+ILIKE+%2779%27%29+OR+%28NAME_STR+ILIKE+%27D%C3%B6blerhofstra%C3%9Fe%27+AND+NAME_ONR+ILIKE+%2710%27%29+OR+%28NAME_STR+ILIKE+%27Kagraner+Platz%27+AND+NAME_ONR+ILIKE+%271-4%27%29+OR+%28NAME_STR+ILIKE+%27Hietzinger+Hauptstra%C3%9Fe%27+AND+NAME_ONR+ILIKE+%276%27%29+OR+%28NAME_STR+ILIKE+%27Adolf-Sch%C3%A4rf-Platz%27+AND+NAME_ONR+ILIKE+%277%27%29+OR+%28NAME_STR+ILIKE+%27Mariahilfer+G%C3%BCrtel%27+AND+NAME_ONR+ILIKE+%271%27%29",
+          "attribution": "Datenquelle: Stadt Wien - data.wien.gv.at"
+        },
+        "reviewNote": "Exact City address, matched by full street, number and postcode."
+      },
+      {
+        "sourceLabel": "Noodle King Landstraße in Wien Meet the king! Landstraße Hauptstraße 791030 Wien ca. 15 Min. 0.0 (0)",
+        "sourceUrl": "https://noodleking.app/landstrasse?k4y_ot=2",
+        "reviewedAddress": "Landstraßer Hauptstraße 79, 1030 Wien",
+        "pointId": "noodle-vienna-0c3e9b2c43b1",
+        "existingPointReused": false,
+        "coordinateSource": {
+          "latitude": 48.20026046,
+          "longitude": 16.39343605,
+          "source": "https://data.wien.gv.at/daten/geo?service=WFS&request=GetFeature&version=1.1.0&typeName=ogdwien%3AADRESSENOGD&outputFormat=json&srsName=EPSG%3A4326&maxFeatures=100&propertyName=NAME%2CNAME_STR%2CNAME_ONR%2CPLZ%2CSHAPE&cql_filter=%28NAME_STR+ILIKE+%27Walfischgasse%27+AND+NAME_ONR+ILIKE+%274%27%29+OR+%28NAME_STR+ILIKE+%27Billrothstra%C3%9Fe%27+AND+NAME_ONR+ILIKE+%2783%27%29+OR+%28NAME_STR+ILIKE+%27Landstra%C3%9Fer+Hauptstra%C3%9Fe%27+AND+NAME_ONR+ILIKE+%2779%27%29+OR+%28NAME_STR+ILIKE+%27D%C3%B6blerhofstra%C3%9Fe%27+AND+NAME_ONR+ILIKE+%2710%27%29+OR+%28NAME_STR+ILIKE+%27Kagraner+Platz%27+AND+NAME_ONR+ILIKE+%271-4%27%29+OR+%28NAME_STR+ILIKE+%27Hietzinger+Hauptstra%C3%9Fe%27+AND+NAME_ONR+ILIKE+%276%27%29+OR+%28NAME_STR+ILIKE+%27Adolf-Sch%C3%A4rf-Platz%27+AND+NAME_ONR+ILIKE+%277%27%29+OR+%28NAME_STR+ILIKE+%27Mariahilfer+G%C3%BCrtel%27+AND+NAME_ONR+ILIKE+%271%27%29",
+          "attribution": "Datenquelle: Stadt Wien - data.wien.gv.at"
+        },
+        "reviewNote": "Exact City address, matched by full street, number and postcode."
+      },
+      {
+        "sourceLabel": "Noodle King Helio Tower Meet the king! Döblerhofstraße 101030 Wien ca. 15 Min. 0.0 (0)",
+        "sourceUrl": "https://noodleking.app/helio-tower?k4y_ot=2",
+        "reviewedAddress": "Döblerhofstraße 10, 1030 Wien",
+        "pointId": "noodle-vienna-86423e54864f",
+        "existingPointReused": false,
+        "coordinateSource": {
+          "latitude": 48.18537726,
+          "longitude": 16.41330672,
+          "source": "https://data.wien.gv.at/daten/geo?service=WFS&request=GetFeature&version=1.1.0&typeName=ogdwien%3AADRESSENOGD&outputFormat=json&srsName=EPSG%3A4326&maxFeatures=100&propertyName=NAME%2CNAME_STR%2CNAME_ONR%2CPLZ%2CSHAPE&cql_filter=%28NAME_STR+ILIKE+%27Walfischgasse%27+AND+NAME_ONR+ILIKE+%274%27%29+OR+%28NAME_STR+ILIKE+%27Billrothstra%C3%9Fe%27+AND+NAME_ONR+ILIKE+%2783%27%29+OR+%28NAME_STR+ILIKE+%27Landstra%C3%9Fer+Hauptstra%C3%9Fe%27+AND+NAME_ONR+ILIKE+%2779%27%29+OR+%28NAME_STR+ILIKE+%27D%C3%B6blerhofstra%C3%9Fe%27+AND+NAME_ONR+ILIKE+%2710%27%29+OR+%28NAME_STR+ILIKE+%27Kagraner+Platz%27+AND+NAME_ONR+ILIKE+%271-4%27%29+OR+%28NAME_STR+ILIKE+%27Hietzinger+Hauptstra%C3%9Fe%27+AND+NAME_ONR+ILIKE+%276%27%29+OR+%28NAME_STR+ILIKE+%27Adolf-Sch%C3%A4rf-Platz%27+AND+NAME_ONR+ILIKE+%277%27%29+OR+%28NAME_STR+ILIKE+%27Mariahilfer+G%C3%BCrtel%27+AND+NAME_ONR+ILIKE+%271%27%29",
+          "attribution": "Datenquelle: Stadt Wien - data.wien.gv.at"
+        },
+        "reviewNote": "Exact City address, matched by full street, number and postcode."
+      },
+      {
+        "sourceLabel": "Noodle King Kagranerplatz Meet the king! Kagraner Pl. 1-41220 Wien ca. 15 Min. 0.0 (0)",
+        "sourceUrl": "https://noodleking.app/kagran?k4y_ot=2",
+        "reviewedAddress": "Kagraner Platz 1-4, 1220 Wien",
+        "pointId": "noodle-vienna-8c310fb67786",
+        "existingPointReused": false,
+        "coordinateSource": {
+          "latitude": 48.2503415,
+          "longitude": 16.4440366,
+          "source": "exact_merchant_address_and_phone_matched_restaurant_poi",
+          "coordinateEvidenceUrl": "https://de.restaurantguru.com/Noodle-King-Kagran-1-Vienna"
+        },
+        "reviewNote": "Actual named restaurant POI matches the exact official branch address1-4 and unique telephone9262123. Generic merchant JSON-LD incorrectly repeats Walfischgasse and is NOT used."
+      },
+      {
+        "sourceLabel": "Noodle King Hietzing Meet the king! Hietzinger Hauptstraße 61130 Wien ca. 15 Min. 0.0 (0)",
+        "sourceUrl": "https://noodleking.app/hietzing?k4y_ot=2",
+        "reviewedAddress": "Hietzinger Hauptstraße 6, 1130 Wien",
+        "pointId": "noodle-vienna-ab9b27e6d943",
+        "existingPointReused": false,
+        "coordinateSource": {
+          "latitude": 48.18728205,
+          "longitude": 16.30280626,
+          "source": "https://data.wien.gv.at/daten/geo?service=WFS&request=GetFeature&version=1.1.0&typeName=ogdwien%3AADRESSENOGD&outputFormat=json&srsName=EPSG%3A4326&maxFeatures=100&propertyName=NAME%2CNAME_STR%2CNAME_ONR%2CPLZ%2CSHAPE&cql_filter=%28NAME_STR+ILIKE+%27Walfischgasse%27+AND+NAME_ONR+ILIKE+%274%27%29+OR+%28NAME_STR+ILIKE+%27Billrothstra%C3%9Fe%27+AND+NAME_ONR+ILIKE+%2783%27%29+OR+%28NAME_STR+ILIKE+%27Landstra%C3%9Fer+Hauptstra%C3%9Fe%27+AND+NAME_ONR+ILIKE+%2779%27%29+OR+%28NAME_STR+ILIKE+%27D%C3%B6blerhofstra%C3%9Fe%27+AND+NAME_ONR+ILIKE+%2710%27%29+OR+%28NAME_STR+ILIKE+%27Kagraner+Platz%27+AND+NAME_ONR+ILIKE+%271-4%27%29+OR+%28NAME_STR+ILIKE+%27Hietzinger+Hauptstra%C3%9Fe%27+AND+NAME_ONR+ILIKE+%276%27%29+OR+%28NAME_STR+ILIKE+%27Adolf-Sch%C3%A4rf-Platz%27+AND+NAME_ONR+ILIKE+%277%27%29+OR+%28NAME_STR+ILIKE+%27Mariahilfer+G%C3%BCrtel%27+AND+NAME_ONR+ILIKE+%271%27%29",
+          "attribution": "Datenquelle: Stadt Wien - data.wien.gv.at"
+        },
+        "reviewNote": "Exact City address, matched by full street, number and postcode."
+      },
+      {
+        "sourceLabel": "Noodle King Vienna 22 Meet the king! Adolf-Schärf-Platz 71220 Wien ca. 15 Min. 0.0 (0)",
+        "sourceUrl": "https://noodleking.app/1220-wien?k4y_ot=2",
+        "reviewedAddress": "Dr.-Adolf-Schärf-Platz 7, 1220 Wien",
+        "pointId": "noodle-vienna-2b0af485f108",
+        "existingPointReused": false,
+        "coordinateSource": {
+          "latitude": 48.24435507,
+          "longitude": 16.43299782,
+          "source": "https://data.wien.gv.at/daten/geo?service=WFS&request=GetFeature&version=1.1.0&typeName=ogdwien%3AADRESSENOGD&outputFormat=json&srsName=EPSG%3A4326&maxFeatures=30&propertyName=NAME%2CNAME_STR%2CNAME_ONR%2CPLZ%2CSHAPE&cql_filter=NAME_STR+ILIKE+%27Dr.-Adolf-Sch%C3%A4rf-Platz%27+AND+%28NAME_ONR+ILIKE+%277%25%27+OR+NAME_ONR+ILIKE+%27%25-7%27%29",
+          "attribution": "Datenquelle: Stadt Wien - data.wien.gv.at"
+        },
+        "reviewNote": "Full official City street name includes Dr.; same branch at7 corroborated by merchant directory and named restaurant listing. No global fuzzy matcher."
+      },
+      {
+        "sourceLabel": "Noodle King Mariahilfer Gürtel Meet the king! Mariahilfer Gürtel 1,1150 Wien ca. 15 Min. 0.0 (0)",
+        "sourceUrl": "https://noodleking.app/mariahilfer-gurtel?k4y_ot=2",
+        "reviewedAddress": "Mariahilfer Gürtel 1, 1150 Wien",
+        "pointId": "noodle-vienna-47323f77fd00",
+        "existingPointReused": false,
+        "coordinateSource": {
+          "latitude": 48.19033082,
+          "longitude": 16.33705745,
+          "source": "https://data.wien.gv.at/daten/geo?service=WFS&request=GetFeature&version=1.1.0&typeName=ogdwien%3AADRESSENOGD&outputFormat=json&srsName=EPSG%3A4326&maxFeatures=100&propertyName=NAME%2CNAME_STR%2CNAME_ONR%2CPLZ%2CSHAPE&cql_filter=%28NAME_STR+ILIKE+%27Walfischgasse%27+AND+NAME_ONR+ILIKE+%274%27%29+OR+%28NAME_STR+ILIKE+%27Billrothstra%C3%9Fe%27+AND+NAME_ONR+ILIKE+%2783%27%29+OR+%28NAME_STR+ILIKE+%27Landstra%C3%9Fer+Hauptstra%C3%9Fe%27+AND+NAME_ONR+ILIKE+%2779%27%29+OR+%28NAME_STR+ILIKE+%27D%C3%B6blerhofstra%C3%9Fe%27+AND+NAME_ONR+ILIKE+%2710%27%29+OR+%28NAME_STR+ILIKE+%27Kagraner+Platz%27+AND+NAME_ONR+ILIKE+%271-4%27%29+OR+%28NAME_STR+ILIKE+%27Hietzinger+Hauptstra%C3%9Fe%27+AND+NAME_ONR+ILIKE+%276%27%29+OR+%28NAME_STR+ILIKE+%27Adolf-Sch%C3%A4rf-Platz%27+AND+NAME_ONR+ILIKE+%277%27%29+OR+%28NAME_STR+ILIKE+%27Mariahilfer+G%C3%BCrtel%27+AND+NAME_ONR+ILIKE+%271%27%29",
+          "attribution": "Datenquelle: Stadt Wien - data.wien.gv.at"
+        },
+        "reviewNote": "Exact City address, matched by full street, number and postcode."
+      },
+      {
+        "sourceLabel": "Noodle King Grillgasse Meet the king! Grillgasse 4/6-71110 Wien ca. 15 Min. 0.0 (0)",
+        "sourceUrl": "https://noodleking.app/grillgasse?k4y_ot=2",
+        "reviewedAddress": "Grillgasse 4, 1110 Wien",
+        "pointId": "noodle-vienna-09e39408cbee",
+        "existingPointReused": false,
+        "coordinateSource": {
+          "latitude": 48.1740149,
+          "longitude": 16.41579045,
+          "source": "https://data.wien.gv.at/daten/geo?service=WFS&request=GetFeature&version=1.1.0&typeName=ogdwien%3AADRESSENOGD&outputFormat=json&srsName=EPSG%3A4326&maxFeatures=100&propertyName=NAME%2CNAME_STR%2CNAME_ONR%2CPLZ%2CSHAPE&cql_filter=%28NAME_STR+ILIKE+%27Grillgasse%27+AND+NAME_ONR+ILIKE+%274%27%29+OR+%28NAME_STR+ILIKE+%27Rechte+Wienzeile%27+AND+NAME_ONR+ILIKE+%27207%27%29+OR+%28NAME_STR+ILIKE+%27Wiedner+Hauptstra%C3%9Fe%27+AND+NAME_ONR+ILIKE+%2737%27%29+OR+%28NAME_STR+ILIKE+%27Perfektastra%C3%9Fe%27+AND+NAME_ONR+ILIKE+%2711%27%29+OR+%28NAME_STR+ILIKE+%27Sterngasse%27+AND+NAME_ONR+ILIKE+%271%27%29+OR+%28NAME_STR+ILIKE+%27Meidlinger+Hauptstra%C3%9Fe%27+AND+NAME_ONR+ILIKE+%2773%27%29+OR+%28NAME_STR+ILIKE+%27Favoritenstra%C3%9Fe%27+AND+NAME_ONR+ILIKE+%27130%27%29+OR+%28NAME_STR+ILIKE+%27Gewerbeparkstra%C3%9Fe%27+AND+NAME_ONR+ILIKE+%278%27%29",
+          "attribution": "Datenquelle: Stadt Wien - data.wien.gv.at"
+        },
+        "reviewNote": "Exact City address, matched by full street, number and postcode."
+      },
+      {
+        "sourceLabel": "Noodle King Rechte Wienzeile Meet the king! Rechte Wienzeile 2071120 Wien ca. 15 Min. 0.0 (0)",
+        "sourceUrl": "https://noodleking.app/schoenbrunner?k4y_ot=2",
+        "reviewedAddress": "Rechte Wienzeile 207, 1120 Wien",
+        "pointId": "noodle-vienna-5f0b8f78e740",
+        "existingPointReused": false,
+        "coordinateSource": {
+          "latitude": 48.18538619,
+          "longitude": 16.33605542,
+          "source": "https://data.wien.gv.at/daten/geo?service=WFS&request=GetFeature&version=1.1.0&typeName=ogdwien%3AADRESSENOGD&outputFormat=json&srsName=EPSG%3A4326&maxFeatures=100&propertyName=NAME%2CNAME_STR%2CNAME_ONR%2CPLZ%2CSHAPE&cql_filter=%28NAME_STR+ILIKE+%27Grillgasse%27+AND+NAME_ONR+ILIKE+%274%27%29+OR+%28NAME_STR+ILIKE+%27Rechte+Wienzeile%27+AND+NAME_ONR+ILIKE+%27207%27%29+OR+%28NAME_STR+ILIKE+%27Wiedner+Hauptstra%C3%9Fe%27+AND+NAME_ONR+ILIKE+%2737%27%29+OR+%28NAME_STR+ILIKE+%27Perfektastra%C3%9Fe%27+AND+NAME_ONR+ILIKE+%2711%27%29+OR+%28NAME_STR+ILIKE+%27Sterngasse%27+AND+NAME_ONR+ILIKE+%271%27%29+OR+%28NAME_STR+ILIKE+%27Meidlinger+Hauptstra%C3%9Fe%27+AND+NAME_ONR+ILIKE+%2773%27%29+OR+%28NAME_STR+ILIKE+%27Favoritenstra%C3%9Fe%27+AND+NAME_ONR+ILIKE+%27130%27%29+OR+%28NAME_STR+ILIKE+%27Gewerbeparkstra%C3%9Fe%27+AND+NAME_ONR+ILIKE+%278%27%29",
+          "attribution": "Datenquelle: Stadt Wien - data.wien.gv.at"
+        },
+        "reviewNote": "Exact City address, matched by full street, number and postcode."
+      },
+      {
+        "sourceLabel": "Noodle King Wiedner Hauptstraße Meet the king! Wiedner Hauptstraße 37/1,1040 Wien ca. 15 Min. 0.0 (0)",
+        "sourceUrl": "https://noodleking.app/wiedner?k4y_ot=2",
+        "reviewedAddress": "Wiedner Hauptstraße 37, 1040 Wien",
+        "pointId": "noodle-vienna-d59195ef532a",
+        "existingPointReused": false,
+        "coordinateSource": {
+          "latitude": 48.1941584,
+          "longitude": 16.36746592,
+          "source": "https://data.wien.gv.at/daten/geo?service=WFS&request=GetFeature&version=1.1.0&typeName=ogdwien%3AADRESSENOGD&outputFormat=json&srsName=EPSG%3A4326&maxFeatures=100&propertyName=NAME%2CNAME_STR%2CNAME_ONR%2CPLZ%2CSHAPE&cql_filter=%28NAME_STR+ILIKE+%27Grillgasse%27+AND+NAME_ONR+ILIKE+%274%27%29+OR+%28NAME_STR+ILIKE+%27Rechte+Wienzeile%27+AND+NAME_ONR+ILIKE+%27207%27%29+OR+%28NAME_STR+ILIKE+%27Wiedner+Hauptstra%C3%9Fe%27+AND+NAME_ONR+ILIKE+%2737%27%29+OR+%28NAME_STR+ILIKE+%27Perfektastra%C3%9Fe%27+AND+NAME_ONR+ILIKE+%2711%27%29+OR+%28NAME_STR+ILIKE+%27Sterngasse%27+AND+NAME_ONR+ILIKE+%271%27%29+OR+%28NAME_STR+ILIKE+%27Meidlinger+Hauptstra%C3%9Fe%27+AND+NAME_ONR+ILIKE+%2773%27%29+OR+%28NAME_STR+ILIKE+%27Favoritenstra%C3%9Fe%27+AND+NAME_ONR+ILIKE+%27130%27%29+OR+%28NAME_STR+ILIKE+%27Gewerbeparkstra%C3%9Fe%27+AND+NAME_ONR+ILIKE+%278%27%29",
+          "attribution": "Datenquelle: Stadt Wien - data.wien.gv.at"
+        },
+        "reviewNote": "Exact City address, matched by full street, number and postcode."
+      },
+      {
+        "sourceLabel": "Noodle King Perfektastraße Meet the king! Perfektastraße 11,1230 Wien ca. 15 Min. 0.0 (0)",
+        "sourceUrl": "https://noodleking.app/perfekta?k4y_ot=2",
+        "reviewedAddress": "Perfektastraße 11, 1230 Wien",
+        "pointId": "noodle-vienna-bf5d7813f311",
+        "existingPointReused": false,
+        "coordinateSource": {
+          "latitude": 48.13763611,
+          "longitude": 16.32283734,
+          "source": "https://data.wien.gv.at/daten/geo?service=WFS&request=GetFeature&version=1.1.0&typeName=ogdwien%3AADRESSENOGD&outputFormat=json&srsName=EPSG%3A4326&maxFeatures=100&propertyName=NAME%2CNAME_STR%2CNAME_ONR%2CPLZ%2CSHAPE&cql_filter=%28NAME_STR+ILIKE+%27Grillgasse%27+AND+NAME_ONR+ILIKE+%274%27%29+OR+%28NAME_STR+ILIKE+%27Rechte+Wienzeile%27+AND+NAME_ONR+ILIKE+%27207%27%29+OR+%28NAME_STR+ILIKE+%27Wiedner+Hauptstra%C3%9Fe%27+AND+NAME_ONR+ILIKE+%2737%27%29+OR+%28NAME_STR+ILIKE+%27Perfektastra%C3%9Fe%27+AND+NAME_ONR+ILIKE+%2711%27%29+OR+%28NAME_STR+ILIKE+%27Sterngasse%27+AND+NAME_ONR+ILIKE+%271%27%29+OR+%28NAME_STR+ILIKE+%27Meidlinger+Hauptstra%C3%9Fe%27+AND+NAME_ONR+ILIKE+%2773%27%29+OR+%28NAME_STR+ILIKE+%27Favoritenstra%C3%9Fe%27+AND+NAME_ONR+ILIKE+%27130%27%29+OR+%28NAME_STR+ILIKE+%27Gewerbeparkstra%C3%9Fe%27+AND+NAME_ONR+ILIKE+%278%27%29",
+          "attribution": "Datenquelle: Stadt Wien - data.wien.gv.at"
+        },
+        "reviewNote": "Exact City address, matched by full street, number and postcode."
+      },
+      {
+        "sourceLabel": "Noodle King Center C23 Meet the king! Sterngasse 1 / Lokal 31230 Wien ca. 15 Min. 0.0 (0)",
+        "sourceUrl": "https://noodleking.app/c23?k4y_ot=2",
+        "reviewedAddress": "Sterngasse 1, 1230 Wien",
+        "pointId": "noodle-vienna-c0d1f64a477e",
+        "existingPointReused": false,
+        "coordinateSource": {
+          "latitude": 48.14817191,
+          "longitude": 16.34451197,
+          "source": "https://data.wien.gv.at/daten/geo?service=WFS&request=GetFeature&version=1.1.0&typeName=ogdwien%3AADRESSENOGD&outputFormat=json&srsName=EPSG%3A4326&maxFeatures=100&propertyName=NAME%2CNAME_STR%2CNAME_ONR%2CPLZ%2CSHAPE&cql_filter=%28NAME_STR+ILIKE+%27Grillgasse%27+AND+NAME_ONR+ILIKE+%274%27%29+OR+%28NAME_STR+ILIKE+%27Rechte+Wienzeile%27+AND+NAME_ONR+ILIKE+%27207%27%29+OR+%28NAME_STR+ILIKE+%27Wiedner+Hauptstra%C3%9Fe%27+AND+NAME_ONR+ILIKE+%2737%27%29+OR+%28NAME_STR+ILIKE+%27Perfektastra%C3%9Fe%27+AND+NAME_ONR+ILIKE+%2711%27%29+OR+%28NAME_STR+ILIKE+%27Sterngasse%27+AND+NAME_ONR+ILIKE+%271%27%29+OR+%28NAME_STR+ILIKE+%27Meidlinger+Hauptstra%C3%9Fe%27+AND+NAME_ONR+ILIKE+%2773%27%29+OR+%28NAME_STR+ILIKE+%27Favoritenstra%C3%9Fe%27+AND+NAME_ONR+ILIKE+%27130%27%29+OR+%28NAME_STR+ILIKE+%27Gewerbeparkstra%C3%9Fe%27+AND+NAME_ONR+ILIKE+%278%27%29",
+          "attribution": "Datenquelle: Stadt Wien - data.wien.gv.at"
+        },
+        "reviewNote": "Exact City address, matched by full street, number and postcode."
+      },
+      {
+        "sourceLabel": "Noodle King Meidlinger Arcade Meet the king! Meidlinger Hauptstraße 73/GM 07A1120 Wien ca. 15 Min. 0.0 (0)",
+        "sourceUrl": "https://noodleking.app/arcade?k4y_ot=2",
+        "reviewedAddress": "Meidlinger Hauptstraße 73, 1120 Wien",
+        "pointId": "noodle-vienna-b0cfb9a61d09",
+        "existingPointReused": false,
+        "coordinateSource": {
+          "latitude": 48.17534585,
+          "longitude": 16.3305221,
+          "source": "https://data.wien.gv.at/daten/geo?service=WFS&request=GetFeature&version=1.1.0&typeName=ogdwien%3AADRESSENOGD&outputFormat=json&srsName=EPSG%3A4326&maxFeatures=100&propertyName=NAME%2CNAME_STR%2CNAME_ONR%2CPLZ%2CSHAPE&cql_filter=%28NAME_STR+ILIKE+%27Grillgasse%27+AND+NAME_ONR+ILIKE+%274%27%29+OR+%28NAME_STR+ILIKE+%27Rechte+Wienzeile%27+AND+NAME_ONR+ILIKE+%27207%27%29+OR+%28NAME_STR+ILIKE+%27Wiedner+Hauptstra%C3%9Fe%27+AND+NAME_ONR+ILIKE+%2737%27%29+OR+%28NAME_STR+ILIKE+%27Perfektastra%C3%9Fe%27+AND+NAME_ONR+ILIKE+%2711%27%29+OR+%28NAME_STR+ILIKE+%27Sterngasse%27+AND+NAME_ONR+ILIKE+%271%27%29+OR+%28NAME_STR+ILIKE+%27Meidlinger+Hauptstra%C3%9Fe%27+AND+NAME_ONR+ILIKE+%2773%27%29+OR+%28NAME_STR+ILIKE+%27Favoritenstra%C3%9Fe%27+AND+NAME_ONR+ILIKE+%27130%27%29+OR+%28NAME_STR+ILIKE+%27Gewerbeparkstra%C3%9Fe%27+AND+NAME_ONR+ILIKE+%278%27%29",
+          "attribution": "Datenquelle: Stadt Wien - data.wien.gv.at"
+        },
+        "reviewNote": "Exact City address, matched by full street, number and postcode."
+      },
+      {
+        "sourceLabel": "Noodle King Favoritenstraße Meet the king! Favoritenstraße 1301100 Wien ca. 15 Min. 0.0 (0)",
+        "sourceUrl": "https://noodleking.app/favoritenstrasse?k4y_ot=2",
+        "reviewedAddress": "Favoritenstraße 130, 1100 Wien",
+        "pointId": "mcd-vienna-b34ed3e03772",
+        "existingPointReused": true,
+        "coordinateSource": {
+          "latitude": 48.17496698,
+          "longitude": 16.37763493,
+          "source": "https://data.wien.gv.at/daten/geo?service=WFS&request=GetFeature&version=1.1.0&typeName=ogdwien%3AADRESSENOGD&outputFormat=json&srsName=EPSG%3A4326&maxFeatures=100&propertyName=NAME%2CNAME_STR%2CNAME_ONR%2CPLZ%2CSHAPE&cql_filter=%28NAME_STR+ILIKE+%27Grillgasse%27+AND+NAME_ONR+ILIKE+%274%27%29+OR+%28NAME_STR+ILIKE+%27Rechte+Wienzeile%27+AND+NAME_ONR+ILIKE+%27207%27%29+OR+%28NAME_STR+ILIKE+%27Wiedner+Hauptstra%C3%9Fe%27+AND+NAME_ONR+ILIKE+%2737%27%29+OR+%28NAME_STR+ILIKE+%27Perfektastra%C3%9Fe%27+AND+NAME_ONR+ILIKE+%2711%27%29+OR+%28NAME_STR+ILIKE+%27Sterngasse%27+AND+NAME_ONR+ILIKE+%271%27%29+OR+%28NAME_STR+ILIKE+%27Meidlinger+Hauptstra%C3%9Fe%27+AND+NAME_ONR+ILIKE+%2773%27%29+OR+%28NAME_STR+ILIKE+%27Favoritenstra%C3%9Fe%27+AND+NAME_ONR+ILIKE+%27130%27%29+OR+%28NAME_STR+ILIKE+%27Gewerbeparkstra%C3%9Fe%27+AND+NAME_ONR+ILIKE+%278%27%29",
+          "attribution": "Datenquelle: Stadt Wien - data.wien.gv.at"
+        },
+        "reviewNote": "Exact City address, matched by full street, number and postcode."
+      },
+      {
+        "sourceLabel": "Noodle King Gewerbepark Meet the king! Gewerbeparkstraße 8, PIO Halle Top B1220 Wien ca. 15 Min. 0.0 (0)",
+        "sourceUrl": "https://noodleking.app/gewerbepark?k4y_ot=2",
+        "reviewedAddress": "Gewerbeparkstraße 8, 1220 Wien",
+        "pointId": "address-69931694663e68d7",
+        "existingPointReused": true,
+        "coordinateSource": {
+          "latitude": 48.24653638,
+          "longitude": 16.46264013,
+          "source": "https://data.wien.gv.at/daten/geo?service=WFS&request=GetFeature&version=1.1.0&typeName=ogdwien%3AADRESSENOGD&outputFormat=json&srsName=EPSG%3A4326&maxFeatures=100&propertyName=NAME%2CNAME_STR%2CNAME_ONR%2CPLZ%2CSHAPE&cql_filter=%28NAME_STR+ILIKE+%27Grillgasse%27+AND+NAME_ONR+ILIKE+%274%27%29+OR+%28NAME_STR+ILIKE+%27Rechte+Wienzeile%27+AND+NAME_ONR+ILIKE+%27207%27%29+OR+%28NAME_STR+ILIKE+%27Wiedner+Hauptstra%C3%9Fe%27+AND+NAME_ONR+ILIKE+%2737%27%29+OR+%28NAME_STR+ILIKE+%27Perfektastra%C3%9Fe%27+AND+NAME_ONR+ILIKE+%2711%27%29+OR+%28NAME_STR+ILIKE+%27Sterngasse%27+AND+NAME_ONR+ILIKE+%271%27%29+OR+%28NAME_STR+ILIKE+%27Meidlinger+Hauptstra%C3%9Fe%27+AND+NAME_ONR+ILIKE+%2773%27%29+OR+%28NAME_STR+ILIKE+%27Favoritenstra%C3%9Fe%27+AND+NAME_ONR+ILIKE+%27130%27%29+OR+%28NAME_STR+ILIKE+%27Gewerbeparkstra%C3%9Fe%27+AND+NAME_ONR+ILIKE+%278%27%29",
+          "attribution": "Datenquelle: Stadt Wien - data.wien.gv.at"
+        },
+        "reviewNote": "Exact City address, matched by full street, number and postcode."
+      },
+      {
+        "sourceLabel": "Noodle King Währingerstraße Meet the king! Währinger Str. 141090 Wien ca. 15 Min. 0.0 (0)",
+        "sourceUrl": "https://noodleking.app/waehringerstrasse?k4y_ot=2",
+        "reviewedAddress": "Währinger Straße 14, 1090 Wien",
+        "pointId": "noodle-vienna-79e405106d75",
+        "existingPointReused": false,
+        "coordinateSource": {
+          "latitude": 48.21694206,
+          "longitude": 16.35974274,
+          "source": "https://data.wien.gv.at/daten/geo?service=WFS&request=GetFeature&version=1.1.0&typeName=ogdwien%3AADRESSENOGD&outputFormat=json&srsName=EPSG%3A4326&maxFeatures=100&propertyName=NAME%2CNAME_STR%2CNAME_ONR%2CPLZ%2CSHAPE&cql_filter=%28NAME_STR+ILIKE+%27W%C3%A4hringer+Stra%C3%9Fe%27+AND+NAME_ONR+ILIKE+%2714%27%29+OR+%28NAME_STR+ILIKE+%27Leopold-Ungar-Platz%27+AND+NAME_ONR+ILIKE+%272%27%29+OR+%28NAME_STR+ILIKE+%27Br%C3%BCnner+Stra%C3%9Fe%27+AND+NAME_ONR+ILIKE+%27219-221%27%29+OR+%28NAME_STR+ILIKE+%27Favoritenstra%C3%9Fe%27+AND+NAME_ONR+ILIKE+%27239%27%29+OR+%28NAME_STR+ILIKE+%27Schmutzergasse%27+AND+NAME_ONR+ILIKE+%272%27%29+OR+%28NAME_STR+ILIKE+%27Pius-Parsch-Platz%27+AND+NAME_ONR+ILIKE+%275%27%29+OR+%28NAME_STR+ILIKE+%27Ungargasse%27+AND+NAME_ONR+ILIKE+%2775%27%29+OR+%28NAME_STR+ILIKE+%27Elterleinplatz%27+AND+NAME_ONR+ILIKE+%2711-13%27%29",
+          "attribution": "Datenquelle: Stadt Wien - data.wien.gv.at"
+        },
+        "reviewNote": "Exact City address, matched by full street, number and postcode."
+      },
+      {
+        "sourceLabel": "Noodle King Leopold-Ungar-Platz Meet the king! Leopold-Ungar-Platz 2 /Top 1021190 Wien ca. 15 Min. 0.0 (0)",
+        "sourceUrl": "https://noodleking.app/leopold-ungar-platz?k4y_ot=2",
+        "reviewedAddress": "Leopold-Ungar-Platz 2, 1190 Wien",
+        "pointId": "noodle-vienna-7a77c4aa2880",
+        "existingPointReused": false,
+        "coordinateSource": {
+          "latitude": 48.24848913,
+          "longitude": 16.36751771,
+          "source": "https://data.wien.gv.at/daten/geo?service=WFS&request=GetFeature&version=1.1.0&typeName=ogdwien%3AADRESSENOGD&outputFormat=json&srsName=EPSG%3A4326&maxFeatures=100&propertyName=NAME%2CNAME_STR%2CNAME_ONR%2CPLZ%2CSHAPE&cql_filter=%28NAME_STR+ILIKE+%27W%C3%A4hringer+Stra%C3%9Fe%27+AND+NAME_ONR+ILIKE+%2714%27%29+OR+%28NAME_STR+ILIKE+%27Leopold-Ungar-Platz%27+AND+NAME_ONR+ILIKE+%272%27%29+OR+%28NAME_STR+ILIKE+%27Br%C3%BCnner+Stra%C3%9Fe%27+AND+NAME_ONR+ILIKE+%27219-221%27%29+OR+%28NAME_STR+ILIKE+%27Favoritenstra%C3%9Fe%27+AND+NAME_ONR+ILIKE+%27239%27%29+OR+%28NAME_STR+ILIKE+%27Schmutzergasse%27+AND+NAME_ONR+ILIKE+%272%27%29+OR+%28NAME_STR+ILIKE+%27Pius-Parsch-Platz%27+AND+NAME_ONR+ILIKE+%275%27%29+OR+%28NAME_STR+ILIKE+%27Ungargasse%27+AND+NAME_ONR+ILIKE+%2775%27%29+OR+%28NAME_STR+ILIKE+%27Elterleinplatz%27+AND+NAME_ONR+ILIKE+%2711-13%27%29",
+          "attribution": "Datenquelle: Stadt Wien - data.wien.gv.at"
+        },
+        "reviewNote": "Exact City address, matched by full street, number and postcode."
+      },
+      {
+        "sourceLabel": "Noodle King EKAZENT B7 Meet the king! Brünner Straße 219-221/ Top 21210 Wien ca. 15 Min. 0.0 (0)",
+        "sourceUrl": "https://noodleking.app/b7-ekazent?k4y_ot=2",
+        "reviewedAddress": "Brünner Straße 219-221, 1210 Wien",
+        "pointId": "noodle-vienna-8e34f8670628",
+        "existingPointReused": false,
+        "coordinateSource": {
+          "latitude": 48.29280373,
+          "longitude": 16.41743545,
+          "source": "merchant_storefront_jsonld_exact_branch",
+          "coordinateEvidenceUrl": "https://www.foodora.at/en/restaurant/bpjt/noodle-king-b7-stammersdorf",
+          "additionalEvidenceUrls": [
+            "https://www.b7-shopping.at/shops/"
+          ]
+        },
+        "reviewNote": "Exact merchant storefront supplies B7 branch name,addressTop2 and restaurant coordinates; official B7 directory independently names NoodleKing. Not a guessed range entrance."
+      },
+      {
+        "sourceLabel": "Noodle King Hanssonzentrum Meet the king! Favoritenstraße 239/31100 Wien ca. 15 Min. 0.0 (0)",
+        "sourceUrl": "https://noodleking.app/hanssonzentrum?k4y_ot=2",
+        "reviewedAddress": "Favoritenstraße 239, 1100 Wien",
+        "pointId": "address-5ce427e0dad2d367",
+        "existingPointReused": true,
+        "coordinateSource": {
+          "latitude": 48.15339953,
+          "longitude": 16.3826022,
+          "source": "https://data.wien.gv.at/daten/geo?service=WFS&request=GetFeature&version=1.1.0&typeName=ogdwien%3AADRESSENOGD&outputFormat=json&srsName=EPSG%3A4326&maxFeatures=100&propertyName=NAME%2CNAME_STR%2CNAME_ONR%2CPLZ%2CSHAPE&cql_filter=%28NAME_STR+ILIKE+%27W%C3%A4hringer+Stra%C3%9Fe%27+AND+NAME_ONR+ILIKE+%2714%27%29+OR+%28NAME_STR+ILIKE+%27Leopold-Ungar-Platz%27+AND+NAME_ONR+ILIKE+%272%27%29+OR+%28NAME_STR+ILIKE+%27Br%C3%BCnner+Stra%C3%9Fe%27+AND+NAME_ONR+ILIKE+%27219-221%27%29+OR+%28NAME_STR+ILIKE+%27Favoritenstra%C3%9Fe%27+AND+NAME_ONR+ILIKE+%27239%27%29+OR+%28NAME_STR+ILIKE+%27Schmutzergasse%27+AND+NAME_ONR+ILIKE+%272%27%29+OR+%28NAME_STR+ILIKE+%27Pius-Parsch-Platz%27+AND+NAME_ONR+ILIKE+%275%27%29+OR+%28NAME_STR+ILIKE+%27Ungargasse%27+AND+NAME_ONR+ILIKE+%2775%27%29+OR+%28NAME_STR+ILIKE+%27Elterleinplatz%27+AND+NAME_ONR+ILIKE+%2711-13%27%29",
+          "attribution": "Datenquelle: Stadt Wien - data.wien.gv.at"
+        },
+        "reviewNote": "Exact City address, matched by full street, number and postcode."
+      },
+      {
+        "sourceLabel": "Noodle King Schmutzergasse Meet the king! Schmutzergasse 21150 Wien ca. 15 Min. 0.0 (0)",
+        "sourceUrl": "https://noodleking.app/schmutzergasse?k4y_ot=2",
+        "reviewedAddress": "Schmutzergasse 2, 1150 Wien",
+        "pointId": "noodle-vienna-7c99085169e2",
+        "existingPointReused": false,
+        "coordinateSource": {
+          "latitude": 48.19955866,
+          "longitude": 16.31828713,
+          "source": "https://data.wien.gv.at/daten/geo?service=WFS&request=GetFeature&version=1.1.0&typeName=ogdwien%3AADRESSENOGD&outputFormat=json&srsName=EPSG%3A4326&maxFeatures=100&propertyName=NAME%2CNAME_STR%2CNAME_ONR%2CPLZ%2CSHAPE&cql_filter=%28NAME_STR+ILIKE+%27W%C3%A4hringer+Stra%C3%9Fe%27+AND+NAME_ONR+ILIKE+%2714%27%29+OR+%28NAME_STR+ILIKE+%27Leopold-Ungar-Platz%27+AND+NAME_ONR+ILIKE+%272%27%29+OR+%28NAME_STR+ILIKE+%27Br%C3%BCnner+Stra%C3%9Fe%27+AND+NAME_ONR+ILIKE+%27219-221%27%29+OR+%28NAME_STR+ILIKE+%27Favoritenstra%C3%9Fe%27+AND+NAME_ONR+ILIKE+%27239%27%29+OR+%28NAME_STR+ILIKE+%27Schmutzergasse%27+AND+NAME_ONR+ILIKE+%272%27%29+OR+%28NAME_STR+ILIKE+%27Pius-Parsch-Platz%27+AND+NAME_ONR+ILIKE+%275%27%29+OR+%28NAME_STR+ILIKE+%27Ungargasse%27+AND+NAME_ONR+ILIKE+%2775%27%29+OR+%28NAME_STR+ILIKE+%27Elterleinplatz%27+AND+NAME_ONR+ILIKE+%2711-13%27%29",
+          "attribution": "Datenquelle: Stadt Wien - data.wien.gv.at"
+        },
+        "reviewNote": "Exact City address, matched by full street, number and postcode."
+      },
+      {
+        "sourceLabel": "Noodle King Floridsdorf Meet the king! Pius-Parsch-Platz 51210 Wien ca. 15 Min. 0.0 (0)",
+        "sourceUrl": "https://noodleking.app/floridsdorf?k4y_ot=2",
+        "reviewedAddress": "Pius-Parsch-Platz 5, 1210 Wien",
+        "pointId": "noodle-vienna-f4b76756bacf",
+        "existingPointReused": false,
+        "coordinateSource": {
+          "latitude": 48.25906554,
+          "longitude": 16.40019127,
+          "source": "https://data.wien.gv.at/daten/geo?service=WFS&request=GetFeature&version=1.1.0&typeName=ogdwien%3AADRESSENOGD&outputFormat=json&srsName=EPSG%3A4326&maxFeatures=100&propertyName=NAME%2CNAME_STR%2CNAME_ONR%2CPLZ%2CSHAPE&cql_filter=%28NAME_STR+ILIKE+%27W%C3%A4hringer+Stra%C3%9Fe%27+AND+NAME_ONR+ILIKE+%2714%27%29+OR+%28NAME_STR+ILIKE+%27Leopold-Ungar-Platz%27+AND+NAME_ONR+ILIKE+%272%27%29+OR+%28NAME_STR+ILIKE+%27Br%C3%BCnner+Stra%C3%9Fe%27+AND+NAME_ONR+ILIKE+%27219-221%27%29+OR+%28NAME_STR+ILIKE+%27Favoritenstra%C3%9Fe%27+AND+NAME_ONR+ILIKE+%27239%27%29+OR+%28NAME_STR+ILIKE+%27Schmutzergasse%27+AND+NAME_ONR+ILIKE+%272%27%29+OR+%28NAME_STR+ILIKE+%27Pius-Parsch-Platz%27+AND+NAME_ONR+ILIKE+%275%27%29+OR+%28NAME_STR+ILIKE+%27Ungargasse%27+AND+NAME_ONR+ILIKE+%2775%27%29+OR+%28NAME_STR+ILIKE+%27Elterleinplatz%27+AND+NAME_ONR+ILIKE+%2711-13%27%29",
+          "attribution": "Datenquelle: Stadt Wien - data.wien.gv.at"
+        },
+        "reviewNote": "Exact City address, matched by full street, number and postcode."
+      },
+      {
+        "sourceLabel": "Noodle King Ungargasse Meet the king! Ungargasse 751030 Wien ca. 15 Min. 0.0 (0)",
+        "sourceUrl": "https://noodleking.app/ungargasse-75?k4y_ot=2",
+        "reviewedAddress": "Ungargasse 75, 1030 Wien",
+        "pointId": "noodle-vienna-a5ded8d8b9c3",
+        "existingPointReused": false,
+        "coordinateSource": {
+          "latitude": 48.19481545,
+          "longitude": 16.3868635,
+          "source": "https://data.wien.gv.at/daten/geo?service=WFS&request=GetFeature&version=1.1.0&typeName=ogdwien%3AADRESSENOGD&outputFormat=json&srsName=EPSG%3A4326&maxFeatures=100&propertyName=NAME%2CNAME_STR%2CNAME_ONR%2CPLZ%2CSHAPE&cql_filter=%28NAME_STR+ILIKE+%27W%C3%A4hringer+Stra%C3%9Fe%27+AND+NAME_ONR+ILIKE+%2714%27%29+OR+%28NAME_STR+ILIKE+%27Leopold-Ungar-Platz%27+AND+NAME_ONR+ILIKE+%272%27%29+OR+%28NAME_STR+ILIKE+%27Br%C3%BCnner+Stra%C3%9Fe%27+AND+NAME_ONR+ILIKE+%27219-221%27%29+OR+%28NAME_STR+ILIKE+%27Favoritenstra%C3%9Fe%27+AND+NAME_ONR+ILIKE+%27239%27%29+OR+%28NAME_STR+ILIKE+%27Schmutzergasse%27+AND+NAME_ONR+ILIKE+%272%27%29+OR+%28NAME_STR+ILIKE+%27Pius-Parsch-Platz%27+AND+NAME_ONR+ILIKE+%275%27%29+OR+%28NAME_STR+ILIKE+%27Ungargasse%27+AND+NAME_ONR+ILIKE+%2775%27%29+OR+%28NAME_STR+ILIKE+%27Elterleinplatz%27+AND+NAME_ONR+ILIKE+%2711-13%27%29",
+          "attribution": "Datenquelle: Stadt Wien - data.wien.gv.at"
+        },
+        "reviewNote": "Exact City address, matched by full street, number and postcode."
+      },
+      {
+        "sourceLabel": "Noodle King EKZ Hernals Der König der Nudeln Elterleinplatz 11-13/31170 Wien ca. 15 Min. 0.0 (0)",
+        "sourceUrl": "https://noodleking.app/ekz-hernals?k4y_ot=2",
+        "reviewedAddress": "Elterleinplatz 12, 1170 Wien",
+        "pointId": "noodle-vienna-a65dc4ddf859",
+        "existingPointReused": false,
+        "coordinateSource": {
+          "latitude": 48.21851215,
+          "longitude": 16.33144269,
+          "source": "https://data.wien.gv.at/daten/geo?service=WFS&request=GetFeature&version=1.1.0&typeName=ogdwien%3AADRESSENOGD&outputFormat=json&srsName=EPSG%3A4326&maxFeatures=30&propertyName=NAME%2CNAME_STR%2CNAME_ONR%2CPLZ%2CSHAPE&cql_filter=NAME_STR+ILIKE+%27Elterleinplatz%27+AND+%28NAME_ONR+ILIKE+%2712%25%27+OR+NAME_ONR+ILIKE+%27%25-12%27%29",
+          "attribution": "Datenquelle: Stadt Wien - data.wien.gv.at",
+          "additionalEvidenceUrls": [
+            "https://www.zentrum-hernals.at/",
+            "https://www.mapcarta.com/de/N9441791643"
+          ]
+        },
+        "reviewNote": "Official center directory lists NoodleKing at ZentrumHernals,Elterleinplatz12; merchant order page uses11-13/3. Exact named mall building12 point corroborated by actual named NoodleKing OSM POI within25m,not arbitrary neighboring11/13 entrance. Original merchant address alias retained in sourceLabel."
+      }
+    ]
+  },
+  "preservation": {
+    "allIdsOrderPricesDatesVotesApprovalsHidesRetained": true,
+    "other68RecordsExactlyUnchanged": true,
+    "allOld197PointsAndLinksRetained": true,
+    "oldThreeFoodsharingPointsRetained": true,
+    "dailyWeeklyByteUnchanged": true,
+    "mapNoRequestReplayStable": true,
+    "allPersistentEditsReplay": true
+  },
+  "limitations": [
+    "DerMann50of68shops mapped;18named station/market/mall/entrance points remain unverified.",
+    "NoodleKing24current official directory branches mapped; participation of all Vienna branches explicitly owner-confirmed,not independently read from private coupon conditions. No historical/future branch completeness claim.",
+    "Urfa venue point corroborated by two directories and original merchant identity/address; not a City-address8A/1120 match. Merchant-stated1100 retained.",
+    "Foodsharing inventory is the current public snapshot, no stock guarantee or on-site opening verification; no private food baskets.",
+    "No fresh native device/UI test. Publication not yet verified."
+  ],
+  "limits": {
+    "paidApiActorModelProviderCalls": 0,
+    "manualCustomerMessages": 0,
+    "nativeBuildsStoreDeviceActions": 0,
+    "newKeysBudgetsTariffsConsentsSchedules": 0,
+    "geocoderChanges": 0,
+    "extractionsFromPaidServices": 0
+  },
+  "sources": [
+    {
+      "file": "before-deals.raw",
+      "sha256": "c4f3fb44ff0b0df51c2878c6987a731b27a1829747c8386200d668910a7f32bc"
+    },
+    {
+      "file": "dermann-arbeiter-official.raw",
+      "sha256": "e1e87ee6b4e7ac38036d78a30447b68874c0236a644f169a59c69bc290cb2362"
+    },
+    {
+      "file": "dermann-custom.raw",
+      "sha256": "664334ed7e622354a126545c5013bb3096afd3a2ca05568cfbd710cf48f4f3c5"
+    },
+    {
+      "file": "dermann-filter.raw",
+      "sha256": "0f3686f302c55115dd582965fbafde7c259d76ed9c1615ecfc6da6db0613595a"
+    },
+    {
+      "file": "dermann-handels-directory.raw",
+      "sha256": "b5be75221ea4072f39039cbd5fed4389cdb0e38f99fa234139341df772f4956c"
+    },
+    {
+      "file": "dermann-wko-margaret.raw",
+      "sha256": "72fd11c0e69889590697469a0264c972ea3a806d975246ae1a979cbe63e91b20"
+    },
+    {
+      "file": "dermann-wko.raw",
+      "sha256": "313eebd67716c6cd11ec8a037b7e6b45f415206e9aec0bdc6491de117c3bf944"
+    },
+    {
+      "file": "dermann-wolt-arbeiter.raw",
+      "sha256": "4671672824b73e8b10b8e654a4bedaac31f9e510559b2be26e8ed7d18d0421f0"
+    },
+    {
+      "file": "dermann-wolt-brand.raw",
+      "sha256": "80b2a4db2437b63186b1096672b4020107d89299125b81dbb490491a390bca30"
+    },
+    {
+      "file": "foodsharing-common-0.raw",
+      "sha256": "88bfa6f253b322c2c1532615f1af82c39fe55227bd71a7c561aad6b3322e416d"
+    },
+    {
+      "file": "foodsharing-common-1.raw",
+      "sha256": "311ceb389daf8f283bc543858eda28ac5053e564fbedc18e701f1b68c13621a9"
+    },
+    {
+      "file": "foodsharing-common-2.raw",
+      "sha256": "146dacbf9e98cbe56d277554c89456b4483a5f784a770c393a28121885a9e09e"
+    },
+    {
+      "file": "foodsharing-common-3.raw",
+      "sha256": "c096177527d8ba3218f37cc75959993b13d8f8c367c0aa2f2aa4b76253bb2edc"
+    },
+    {
+      "file": "foodsharing-common-4.raw",
+      "sha256": "682daf7b885a0f67063c1ed8400f5aaece55616a50cb4b13c5633127a80e652a"
+    },
+    {
+      "file": "foodsharing-common-5.raw",
+      "sha256": "c381cd99e7d450d326e5e4e9bb35a2a178c5593eeea1704fde565e15440567b8"
+    },
+    {
+      "file": "foodsharing-common-6.raw",
+      "sha256": "503651c47b64e74d3407510563e30d6513bdc909e3c1c4603bdb50e3d9bc66ad"
+    },
+    {
+      "file": "foodsharing-common-7.raw",
+      "sha256": "01ef49642ca5b047aa39ef682608ade546ea50bd9005f116700be8c109e3bb81"
+    },
+    {
+      "file": "foodsharing-common-8.raw",
+      "sha256": "14903b4f236616e11c3c1fd3180f224017c12c2e1ef7a37881cfefba46ecb6ed"
+    },
+    {
+      "file": "foodsharing-map-module.raw",
+      "sha256": "01b152f0b327dc82428756aeb107656db8177d56b4e8b462f6eafb87af8c0f4c"
+    },
+    {
+      "file": "foodsharing-map-source.raw",
+      "sha256": "d5558cd419c8d46bdc958064cb97f963d1ea793866414c025906ec15033512ed"
+    },
+    {
+      "file": "foodsharing-point-1071.raw",
+      "sha256": "64966c19c7d55770b7b8ec5154aa5fc2b9ca927d6f1e3ee11e27e8f77a0d163c"
+    },
+    {
+      "file": "foodsharing-point-1165.raw",
+      "sha256": "9dbdd244d420d747c047fe01b7b9cd02c1b334609f3e0fbf1b1e80533ff16a59"
+    },
+    {
+      "file": "foodsharing-point-1293.raw",
+      "sha256": "e33038bb5eaa5b854f571abcc589a8cddc054f8e135c91824e5a66b734c5660b"
+    },
+    {
+      "file": "foodsharing-point-1475.raw",
+      "sha256": "ef68adb5beaa09f984d1cde111d60486f309be32c2d41793cdd5d0be1ca1ef06"
+    },
+    {
+      "file": "foodsharing-point-2258.raw",
+      "sha256": "dfa18230bbf04b046aa143297dd5aa119d6cc4ab5fbdb5d2dc72c10577fcc560"
+    },
+    {
+      "file": "foodsharing-point-2283.raw",
+      "sha256": "9a3e0fdaf151bd92f9441e4e4c292aeff7d1b780020b30d6304bc8b329304590"
+    },
+    {
+      "file": "foodsharing-point-2642.raw",
+      "sha256": "aa261bea8804293718e50ab4c34254f8fefca204cd19c9bbcc1c1c26d04bcda1"
+    },
+    {
+      "file": "foodsharing-point-308.raw",
+      "sha256": "d71cae94dfde85db05b2c3f5f0000bdff07521b70dca4f4427552a189e388760"
+    },
+    {
+      "file": "foodsharing-point-3458.raw",
+      "sha256": "2645cbe33753d1e796342c10c42c3908aa5ea90496c818efc5017e91bf49be87"
+    },
+    {
+      "file": "foodsharing-point-419.raw",
+      "sha256": "aef6dd5162cf21bd662949469903f27e601cb6ccd4310c955e3f26e09fe4ee74"
+    },
+    {
+      "file": "foodsharing-point-537.raw",
+      "sha256": "4a7675643cde4dde9e31d3a9aa50f96fcf509e3c0e1e87a0b54e273194dd8491"
+    },
+    {
+      "file": "foodsharing-point-561.raw",
+      "sha256": "db66bc401169f3340027a9a1e9d0076a5666de00ff2fa8cc48a01882bcbacf82"
+    },
+    {
+      "file": "foodsharing-point-717.raw",
+      "sha256": "5664d4d4c69673dbeeb36cd9b52db41559ac4ce6af9001c538075ce98511bc45"
+    },
+    {
+      "file": "foodsharing-point-720.raw",
+      "sha256": "52d1490199a8f057275302ae962ab025e7ad08657a42ca044a9dc389bac2c479"
+    },
+    {
+      "file": "foodsharing-point-736.raw",
+      "sha256": "94b0258f1f6cf640f6ce6e58e1ad283f70b4f13ea31d7b5d1b779840968c19a9"
+    },
+    {
+      "file": "foodsharing-point-797.raw",
+      "sha256": "29a5d11f0bf3795c6d57a473f9da4843be4f3c626edaef0dc15de17bdac776c1"
+    },
+    {
+      "file": "foodsharing-point-881.raw",
+      "sha256": "5591cbca631522667f8b2034dd545bbbbfd57a2923980171e0b3a7847b08a87e"
+    },
+    {
+      "file": "foodsharing-point-885.raw",
+      "sha256": "c3c5088439d8dc8c4771fc00c9c7ce8ba6a4c9d961a596e2da1579b58f11f2e5"
+    },
+    {
+      "file": "foodsharing-point-919.raw",
+      "sha256": "02ee3b0b4d8aafc0150934c96990b3fce2c9f9f897c44afc662510ca7f1b2ee0"
+    },
+    {
+      "file": "foodsharing-point-990.raw",
+      "sha256": "c134f2e6453431d05a7beb46e7f42db1d1023236e4c75e14071ea95af229a28a"
+    },
+    {
+      "file": "foodsharing-public-points.raw",
+      "sha256": "dc8cf6512a6a057ccf1100b0da1b397fcf9d043ed6ed529390825a12a17b5afa"
+    },
+    {
+      "file": "nominatim-handelskai.raw",
+      "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+    },
+    {
+      "file": "nominatim-urfa.raw",
+      "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+    },
+    {
+      "file": "noodle-benefit-current.raw",
+      "sha256": "dc73c4515cc929e0c8cfcd62352fa4afe2301ae8bc966e155fa68c7f2f68302d"
+    },
+    {
+      "file": "noodle-news.raw",
+      "sha256": "808d9fa2e6e0e9330b5ba290fdca41727e39b34dc01bc6b2bcc63194171fe882"
+    },
+    {
+      "file": "noodle-official.raw",
+      "sha256": "07c1926a5f732adb347942f265ea542e32994be305dc13a3e520059aaf0e6f70"
+    },
+    {
+      "file": "openhours-map-calls.raw",
+      "sha256": "d36e836511413436053f2aba31ca532e8dff88b192e1d7400d78e3b658fd0a47"
+    },
+    {
+      "file": "osm-merchant-points.raw",
+      "sha256": "7cd905d731bc5983f218aa91824747ef52e7b2cef4a2bf4aa2adba91dc3e61e6"
+    },
+    {
+      "file": "pizza-app.raw",
+      "sha256": "09a74502a800d4258433bb29b56d44a4d6b93e7ef1e71ec0134579035cc8f822"
+    },
+    {
+      "file": "pizza-directory.raw",
+      "sha256": "5338fb24f7efb07c09a55d1e4033f10a62887c2d8dd9aa0c8210ae5cc6361e74"
+    },
+    {
+      "file": "pizza-template.raw",
+      "sha256": "61f6e114cc690154d42a3f502f9297e13355dcd10ebc178037839b1ae747390a"
+    },
+    {
+      "file": "source-before-angebote-wien-heute.raw",
+      "sha256": "b4992e835bb468086a560cffcfd75b7add689954a0a280098892a7a2e6790414"
+    },
+    {
+      "file": "source-before-deal-map-locations.raw",
+      "sha256": "d9525e2ec6318b552b9ee285bf8454ec1ef1b0a78ad1f11845d86270756c7748"
+    },
+    {
+      "file": "source-before-deal-of-the-day.raw",
+      "sha256": "98935c81da2d15b6285faa1f624e7a7f07c19a2ed41d2179c2595714a081c9a4"
+    },
+    {
+      "file": "source-before-deal-of-the-week.raw",
+      "sha256": "66522736afef4fdbd3ce47107a253b285014547da163b77a7fa11b18b3f41181"
+    },
+    {
+      "file": "source-before-deals.raw",
+      "sha256": "c4f3fb44ff0b0df51c2878c6987a731b27a1829747c8386200d668910a7f32bc"
+    },
+    {
+      "file": "source-before-live-deal-edits.raw",
+      "sha256": "f7ab700a0a822556aff1a66d5299b275fec03a51bc63a473f8a031559223a3ea"
+    },
+    {
+      "file": "urfa-delivery.raw",
+      "sha256": "78e370fb559a9e5ee6f8ccf563a6570e9188efe09b5744ec9be9e690b64e8eb1"
+    },
+    {
+      "file": "urfa-directory.raw",
+      "sha256": "9be23790c6a1da8a72e6296d4c25133ddd9813c0824e8a294aefb9fde4ca82e4"
+    },
+    {
+      "file": "urfa-guru.raw",
+      "sha256": "5ad6cfb48aedc04e9efeb3e44ef69a1d9c0c56100acbaa6a609d0fb2e7d81e31"
+    },
+    {
+      "file": "urfa-menu-radar.raw",
+      "sha256": "a8fb990e73f4f78f94931ebdb67391a07e0ce010005cb97143a499f299c46f1d"
+    },
+    {
+      "file": "urfa-official.raw",
+      "sha256": "0c10c2b66dee6086a5221d172adc30f1e4244e1777f798bdd788b2f3683782a4"
+    }
+  ]
+}
