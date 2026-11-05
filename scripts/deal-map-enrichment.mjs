@@ -27,6 +27,10 @@ export function verifiedLocation(location, today = '') {
 
 const addressKey = address => normalize(`${address.street} ${address.number}`).replace(/ /g, '');
 function matchesAddress(location, address) {
+  // Reviewed street names such as Tuchlauben have no conventional street suffix.
+  const compact = value => normalize(value).replace(/ /g, '');
+  if (/^1\d{3}$/.test(address.postalCode || '') && address.street && address.number
+    && compact(location.address) === compact(`${address.street} ${address.number}, ${address.postalCode} Wien`)) return true;
   return extractAddresses(location.address).some(candidate => (addressKey(candidate) === addressKey(address)
       || (String(address.number).includes('/') && addressKey(candidate) === addressKey({ ...address, number: address.number.split('/')[0] })))
     && (!address.postalCode || candidate.postalCode === address.postalCode));
@@ -143,7 +147,9 @@ function namedVenueMatches(deal, locations) {
 
 export function inspectDealLocation(deal, { map = {}, catalog = {}, reviewed = {}, today = new Intl.DateTimeFormat('sv-SE', { timeZone: 'Europe/Vienna' }).format(new Date()) } = {}) {
   const candidates = candidatesFor(deal, reviewed, today);
-  const base = { locationIds: [], addresses: candidates.addresses, reason: candidates.reason, channel: 'onsite-or-unknown' };
+  const incomplete = reviewed[deal.id]?.incomplete === true;
+  const base = { locationIds: [], addresses: candidates.addresses, reason: candidates.reason, channel: 'onsite-or-unknown',
+    ...(incomplete ? { incomplete: true } : {}) };
   if (candidates.reason === 'online-only') return { ...base, status: 'online-only', channel: 'online' };
   const chain=matchChainRule(deal,catalog.chainRules,today);
   // Manual choices, concrete addresses and named branches take precedence.
@@ -154,7 +160,8 @@ export function inspectDealLocation(deal, { map = {}, catalog = {}, reviewed = {
     if(!selected.every(Boolean)) return {...base,status:'needs-review',reason:'chain-branch-catalog-incomplete'};
     const addresses=chain.addresses||[];
     const addressLocations=addresses.map(address=>locations.find(location=>verifiedLocation(location,today)&&matchesAddress(location,address)&&sameBranchWindow(location,address)));
-    return {...base,addresses,status:addressLocations.every(Boolean)?'mapped':'address-ready',reason:'reviewed-chain-campaign',
+    return {...base,addresses,status:addressLocations.every(Boolean)?(chain.incomplete===true?'partially-mapped':'mapped'):'address-ready',reason:'reviewed-chain-campaign',
+      ...(chain.incomplete===true?{incomplete:true}:{}),
       locationIds:[...new Set([...chain.locationIds,...addressLocations.filter(Boolean).map(location=>location.id)])],chainRuleId:chain.id};
   }
   const fingerprint = locationFingerprint(deal);
@@ -189,7 +196,7 @@ export function inspectDealLocation(deal, { map = {}, catalog = {}, reviewed = {
   }
   if (candidates.addresses.length) {
     const matches = candidates.addresses.map(address => locations.find(location => matchesAddress(location, address) && sameBranchWindow(location, address)));
-    return { ...base, status: matches.every(Boolean) ? 'mapped' : 'address-ready', reason: matches.every(Boolean) ? 'verified-address-reuse' : '',
+    return { ...base, status: matches.every(Boolean) ? (incomplete ? 'partially-mapped' : 'mapped') : 'address-ready', reason: matches.every(Boolean) ? 'verified-address-reuse' : '',
       locationIds: [...new Set(matches.filter(Boolean).map(x => x.id))] };
   }
   const named = namedVenueMatches(deal, locations);
@@ -306,7 +313,7 @@ export async function enrichMap({ deals, map, reviewed = {}, cache = {}, catalog
       if (!assessment.locationIds.includes(location.id)) location.dealIds = location.dealIds.filter(id => id !== deal.id);
     }
     let added = 0;
-    const failures = [];
+    const failures = assessment.incomplete ? ['reviewed-location-list-incomplete'] : [];
     for (const locationId of assessment.locationIds) {
       const location = known.find(x => x.id === locationId);
       attach(location, deal, assessment.reason !== 'existing-registry');

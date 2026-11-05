@@ -1,5 +1,5 @@
 import assert from 'node:assert/strict';
-import { candidatesFor, enrichMap, extractAddresses, onlineOnly, selectExactFeature } from './deal-map-enrichment.mjs';
+import { candidatesFor, enrichMap, extractAddresses, onlineOnly, selectExactFeature, inspectDealLocation } from './deal-map-enrichment.mjs';
 
 assert.deepEqual(extractAddresses('Alpizena, Braunhubergasse 19, 1110 Wien'), [{ street: 'Braunhubergasse', number: '19', postalCode: '1110' }]);
 assert.equal(extractAddresses('Wien, 20% Rabatt').length, 0);
@@ -52,4 +52,22 @@ const existing = { id: 'old', dealIds: ['another'], name: 'Existing chain', addr
   latitude: 48.24, longitude: 16.43, source: 'official-store-finder', confidence: 1 };
 const preserved = await enrichMap({ deals: [deal, { id: 'another', brand: 'Existing chain', distance: 'Wien' }], map: { ...map, locations: [existing] }, lookup, now });
 assert.deepEqual(preserved.map.locations[0], existing);
+const partialReview = { test: { incomplete: true, locations: [address] } };
+const partial = await enrichMap({ deals: [deal], map: first.map, catalog: first.catalog, cache: first.cache,
+  reviewed: partialReview, now, lookup: async()=>{throw Error('unexpected lookup');} });
+assert.equal(partial.report.deals[0].status, 'partially-mapped');
+assert.equal(partial.report.deals[0].needsReview, true);
+assert.deepEqual(partial.report.deals[0].failures, ['reviewed-location-list-incomplete']);
+assert.equal(partial.map.locations.length, 1);
+assert.equal(inspectDealLocation(deal,{map:partial.map,reviewed:partialReview,today:'2026-09-30'}).status,'partially-mapped');
+const completeReview = { test: { locations: [address] } };
+assert.equal(inspectDealLocation(deal,{map:partial.map,reviewed:completeReview,today:'2026-09-30'}).status,'mapped');
+const unusual = { id:'unusual-street',brand:'Fixture',distance:'Wien' };
+const unusualAddress = {street:'Tuchlauben',number:'13',postalCode:'1010'};
+const unusualReview = {[unusual.id]:{locations:[unusualAddress]}};
+const unusualLocation = {id:'tuchlauben',name:'Fixture',address:'Tuchlauben 13, 1010 Wien',
+  latitude:48.21,longitude:16.37,source:'verified-fixture',confidence:1};
+assert.equal(inspectDealLocation(unusual,{map:{locations:[unusualLocation]},reviewed:unusualReview,today:'2026-09-30'}).status,'mapped');
+for(const changed of [{number:'12'},{postalCode:'1020'},{street:'Tuchlaubenplatz'}])
+  assert.equal(inspectDealLocation(unusual,{map:{locations:[unusualLocation]},reviewed:{[unusual.id]:{locations:[{...unusualAddress,...changed}]}},today:'2026-09-30'}).locationIds.length,0);
 console.log('Map enrichment: exact matches, online exclusion, branch dates, ambiguity, cache, budget and idempotency passed.');
