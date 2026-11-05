@@ -1,12 +1,18 @@
 {
-  "generatedAt": "2026-11-05T08:54:56.279Z",
+  "generatedAt": "2026-11-05T09:14:28.789Z",
   "summary": {
     "filesConsidered": 32,
-    "totalCandidates": 733,
-    "uniqueCandidates": 699,
-    "distinctCandidates": 716,
+    "totalCandidates": 734,
+    "uniqueCandidates": 700,
+    "distinctCandidates": 717,
     "duplicateClusters": 17,
     "topHealthySources": [
+      {
+        "sourceKey": "food3",
+        "sourceLabel": "Firecrawl Key 2 - Food",
+        "healthScore": 75,
+        "totalDeals": 2
+      },
       {
         "sourceKey": "member-benefits",
         "sourceLabel": "Member Benefits",
@@ -26,12 +32,6 @@
         "totalDeals": 73
       },
       {
-        "sourceKey": "food3",
-        "sourceLabel": "Firecrawl Key 2 - Food",
-        "healthScore": 64,
-        "totalDeals": 1
-      },
-      {
         "sourceKey": "instagram-verified",
         "sourceLabel": "Instagram",
         "healthScore": 61,
@@ -43,7 +43,7 @@
         "sourceKey": "food3",
         "sourceLabel": "Firecrawl Key 2 - Food",
         "missionFitScore": 78,
-        "totalDeals": 1
+        "totalDeals": 2
       },
       {
         "sourceKey": "joe",
@@ -111,8 +111,8 @@
       {
         "sourceKey": "food3",
         "sourceLabel": "Firecrawl Key 2 - Food",
-        "precisionScore": 80,
-        "totalDeals": 1
+        "precisionScore": 84,
+        "totalDeals": 2
       },
       {
         "sourceKey": "instagram-ai",
@@ -147,6 +147,12 @@
         "totalDeals": 109
       },
       {
+        "sourceKey": "food3",
+        "sourceLabel": "Firecrawl Key 2 - Food",
+        "sourceWeightScore": 66,
+        "totalDeals": 2
+      },
+      {
         "sourceKey": "instagram-ai",
         "sourceLabel": "Instagram AI Agent",
         "sourceWeightScore": 63,
@@ -157,12 +163,6 @@
         "sourceLabel": "Meta Instagram Graph",
         "sourceWeightScore": 62,
         "totalDeals": 73
-      },
-      {
-        "sourceKey": "food3",
-        "sourceLabel": "Firecrawl Key 2 - Food",
-        "sourceWeightScore": 62,
-        "totalDeals": 1
       },
       {
         "sourceKey": "gastro2",
@@ -243,6 +243,80 @@
     }
   },
   "sources": [
+    {
+      "sourceKey": "food3",
+      "file": "deals-pending-food3.json",
+      "sourceLabel": "Firecrawl Key 2 - Food",
+      "totalDeals": 2,
+      "uniqueDeals": 1,
+      "duplicateDeals": 1,
+      "duplicateAcrossSources": 1,
+      "fresh1dCount": 0,
+      "fresh7dCount": 2,
+      "viennaCount": 2,
+      "foodDrinkCount": 2,
+      "promoCount": 2,
+      "missingUrlCount": 0,
+      "sampleTitles": [
+        "Papa Duck: THE ONLY +2 I'LL ACCEPT! Pizza schmeckt zu zweit ... - Instagram",
+        "Ort unklar: Wien on Instagram: \" WIEN, WIR HABEN EIN SÜSSES PROBLEM ..."
+      ],
+      "lastRun": {
+        "status": "completed-with-errors",
+        "startedAt": "2026-11-05T09:12:29.595Z",
+        "finishedAt": "2026-11-05T09:13:17.142Z",
+        "durationMs": 47547,
+        "counts": {
+          "rawCandidates": 18,
+          "normalizedCandidates": 18,
+          "verifiedCandidates": 2,
+          "previousDeals": 1,
+          "acceptedDeals": 2,
+          "rejectedDeals": 17
+        },
+        "rejectedByReason": {
+          "post-verification-rejected": 17
+        },
+        "errors": [
+          "https://www.instagram.com/explore/tags/fooddealsvienna/: Die angegebene Instagram-Hashtag-Seite ist in dieser Umgebung nicht zugänglich: Instagram leitet ohne eingeloggte Sitzung auf die Login-Seite um, und der direkte Zugriff auf die Hashtag-Seite wird vom Webzugriff nicht unterstützt. Dadurch können die aktuellen Originalposts, ihre Veröffentlichungsdaten und direkten /p/- bzw. /reel/-Links nicht verlässlich geprüft werden."
+        ],
+        "reportFile": "deal-pipeline-last-run-food3.json"
+      },
+      "uniqueRate": 0.5,
+      "duplicateRate": 0.5,
+      "fresh1dRate": 0,
+      "fresh7dRate": 1,
+      "viennaRate": 1,
+      "foodDrinkRate": 1,
+      "promoRate": 1,
+      "missingUrlRate": 0,
+      "averageQualityScore": 64,
+      "topCategories": [
+        {
+          "value": "essen",
+          "count": 2
+        }
+      ],
+      "topTypes": [
+        {
+          "value": "bogo",
+          "count": 1
+        },
+        {
+          "value": "rabatt",
+          "count": 1
+        }
+      ],
+      "issues": [
+        "wenige Deals sind frischer als 1 Tag",
+        "hohe Überschneidung mit anderen Quellen"
+      ],
+      "healthScore": 75,
+      "missionFitScore": 78,
+      "coverageScore": 16,
+      "precisionScore": 84,
+      "sourceWeightScore": 66
+    },
     {
       "sourceKey": "member-benefits",
       "file": "deals-pending-member-benefits.json",
@@ -339,7 +413,7 @@
       "duplicateDeals": 10,
       "duplicateAcrossSources": 10,
       "fresh1dCount": 4,
-      "fresh7dCount": 36,
+      "fresh7dCount": 35,
       "viennaCount": 36,
       "foodDrinkCount": 31,
       "promoCount": 21,
@@ -491,75 +565,6 @@
       "sourceWeightScore": 62
     },
     {
-      "sourceKey": "food3",
-      "file": "deals-pending-food3.json",
-      "sourceLabel": "Firecrawl Key 2 - Food",
-      "totalDeals": 1,
-      "uniqueDeals": 0,
-      "duplicateDeals": 1,
-      "duplicateAcrossSources": 1,
-      "fresh1dCount": 0,
-      "fresh7dCount": 1,
-      "viennaCount": 1,
-      "foodDrinkCount": 1,
-      "promoCount": 1,
-      "missingUrlCount": 0,
-      "sampleTitles": [
-        "Papa Duck: THE ONLY +2 I'LL ACCEPT! Pizza schmeckt zu zweit ... - Instagram"
-      ],
-      "lastRun": {
-        "status": "completed-with-errors",
-        "startedAt": "2026-11-04T08:49:06.029Z",
-        "finishedAt": "2026-11-04T08:50:04.682Z",
-        "durationMs": 58653,
-        "counts": {
-          "rawCandidates": 1,
-          "normalizedCandidates": 1,
-          "verifiedCandidates": 1,
-          "previousDeals": 1,
-          "acceptedDeals": 1,
-          "rejectedDeals": 1
-        },
-        "rejectedByReason": {
-          "post-verification-rejected": 1
-        },
-        "errors": [
-          "https://www.instagram.com/explore/tags/neueröffnungwien/: Die angegebene Instagram-Hashtag-Seite konnte in diesem Durchlauf nicht abgerufen werden (Quellzugriff von Firecrawl nicht unterstützt). Daher sind keine verifizierbaren Originalposts, Daten oder direkten Post-Links aus der vorgeschriebenen Quelle verfügbar."
-        ],
-        "reportFile": "deal-pipeline-last-run-food3.json"
-      },
-      "uniqueRate": 0,
-      "duplicateRate": 1,
-      "fresh1dRate": 0,
-      "fresh7dRate": 1,
-      "viennaRate": 1,
-      "foodDrinkRate": 1,
-      "promoRate": 1,
-      "missingUrlRate": 0,
-      "averageQualityScore": 70,
-      "topCategories": [
-        {
-          "value": "essen",
-          "count": 1
-        }
-      ],
-      "topTypes": [
-        {
-          "value": "bogo",
-          "count": 1
-        }
-      ],
-      "issues": [
-        "wenige Deals sind frischer als 1 Tag",
-        "hohe Überschneidung mit anderen Quellen"
-      ],
-      "healthScore": 64,
-      "missionFitScore": 78,
-      "coverageScore": 15,
-      "precisionScore": 80,
-      "sourceWeightScore": 62
-    },
-    {
       "sourceKey": "instagram-verified",
       "file": "deals-pending-instagram-verified.json",
       "sourceLabel": "Instagram",
@@ -631,7 +636,7 @@
       "duplicateDeals": 0,
       "duplicateAcrossSources": 0,
       "fresh1dCount": 0,
-      "fresh7dCount": 4,
+      "fresh7dCount": 3,
       "viennaCount": 0,
       "foodDrinkCount": 4,
       "promoCount": 3,
@@ -645,7 +650,7 @@
       "uniqueRate": 1,
       "duplicateRate": 0,
       "fresh1dRate": 0,
-      "fresh7dRate": 1,
+      "fresh7dRate": 0.8,
       "viennaRate": 0,
       "foodDrinkRate": 1,
       "promoRate": 0.8,
