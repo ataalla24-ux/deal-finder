@@ -1,0 +1,42 @@
+{
+  "scope": "Storage races, bounded dispatch prerequisites, OpenAI quota diagnosis, action dates and B2B review exclusions",
+  "baseline": "059a5363f5",
+  "integration": "Owner-approved merge preserving main fixes acaa0677b7 and 664251bbb4, based on 368d341f6e; existing delivery checkpoints, Firecrawl queue merging, mixed-offer rules and fail-closed bounded installation retained",
+  "failuresObserved": {
+    "dailySync": { "run": 42034304865, "failedStep": "Commit deal updates", "conflictingFile": "docs/instagram-merchant-registry.json" },
+    "consumables": { "run": 42007496406, "failedStep": "Commit deals", "conflictingFile": "docs/deals-pending-firecrawl2.json" },
+    "dispatch": { "run": 42102578110, "stalledStep": "coupon-tools package installation", "laterConclusion": "success without intervention", "ownerExplicitlyRequestedNoCancellation": true },
+    "openAiLiveProbe": { "run": 42108404586, "checkedAt": "2026-11-05T20:59:31Z", "httpStatus": 429, "code": "insufficient_quota", "classification": "API billing/quota exhaustion, not ordinary request pacing", "accountBalanceOrProjectCapNotIndependentlyRead": true }
+  },
+  "changes": [
+    "Three-way merging of source-specific outboxes preserves new findings and concurrent remote additions, field-level proofs/edits and remote removals",
+    "Known conflicting collector commits use conflict-aware saving; derived remote registry state stays authoritative; live-feed/map consistency and ordinary queue safeguards unchanged",
+    "Retain main's installed-tool detection and bounded fail-closed package operations; add pdfimages/pdfinfo checks and an offline diagnostic; no paid fallback",
+    "Recognize named-weekday action dates across headline punctuation; explicit old years never roll forward; evaluate social caption action windows while retaining reviewed dates and stronger source evidence",
+    "Do not mistake explicit calendar years for non-Vienna postal codes; real conflicting 20xx address postcodes remain rejected",
+    "Block accounting/loyalty-software examples and work-for-reward recruitment in both ordinary and social-review paths, while preserving real loyalty rewards and public food giveaways",
+    "Use existing sanitized OpenAI request handling in the AI Agent, with deadline and distinct quota health; no ordinary retry for exhausted quota and no raw provider messages persisted"
+  ],
+  "verification": {
+    "preIntegrationOfflineCommands": { "total": 74, "passed": 74, "failed": 0 },
+    "integratedOfflineCommands": "Pending rerun after safe integration",
+    "newRegressionGroups": 8,
+    "actualSavedProblemCards": {
+      "matched": 5,
+      "ordinaryAllowed": 0,
+      "socialReviewAllowed": 0,
+      "reasons": ["CIO action expired on 2026-10-31", "Karma work-for-reward", "NiKa business software", "Stempel hypothetical reward software", "VIP ticket upgrade, not a consumer food saving"]
+    },
+    "preservation": "All six protected live/feed/edit/featured/map/SEO documents remain byte-identical in the working tree; 71 records retained; Wolt and the three OMV product cards untouched",
+    "workflowYaml": "All five edited/new YAML files parsed",
+    "githubSourceChecks": "Pending publication",
+    "runnerToolCheck": "Pending publication"
+  },
+  "limits": {
+    "openAi": "Still externally blocked by insufficient_quota; no top-up, new key, model, spend limit or budget change",
+    "manualDecisions": "No Slack card deleted, reaction changed, customer message or approval/publication action",
+    "sources": "No extra paid collector/Actor/geocoder run; actual Firecrawl provider extraction code and Wolt unchanged",
+    "releases": "No native, device, Store, consent or schedule changes",
+    "runningJobs": "No regular workflow cancelled or restarted"
+  }
+}

@@ -7,6 +7,10 @@ on:
       - 'scraper/**'
       - 'scripts/review-live-deals-llm.mjs'
       - 'scripts/test-source-review-cache.mjs'
+      - 'scripts/test-pipeline-reliability-nov05.mjs'
+      - 'scripts/generated-source-merge.mjs'
+      - 'scripts/coupon-tools-preflight.mjs'
+      - '.github/actions/coupon-tools/**'
       - 'scripts/test-joe-current-offers.mjs'
       - 'scripts/*repair-slack-queued-deal.mjs'
       - '.github/workflows/repair-slack-queued-deal.yml'
@@ -44,6 +48,10 @@ on:
       - 'scraper/**'
       - 'scripts/review-live-deals-llm.mjs'
       - 'scripts/test-source-review-cache.mjs'
+      - 'scripts/test-pipeline-reliability-nov05.mjs'
+      - 'scripts/generated-source-merge.mjs'
+      - 'scripts/coupon-tools-preflight.mjs'
+      - '.github/actions/coupon-tools/**'
       - 'scripts/test-joe-current-offers.mjs'
       - 'scripts/*repair-slack-queued-deal.mjs'
       - '.github/workflows/repair-slack-queued-deal.yml'
@@ -94,6 +102,7 @@ jobs:
       - name: Test pagination and both collector integrations without network credentials
         run: |
           node --test scripts/test-source-review-cache.mjs
+          node --test scripts/test-pipeline-reliability-nov05.mjs
           node --test scripts/test-joe-current-offers.mjs
           node scripts/test-repair-slack-queued-deal.mjs
           SENTRY_DISABLED=1 node --test scripts/test-community-card-enrichment.mjs

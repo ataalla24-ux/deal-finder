@@ -23,7 +23,9 @@ runs:
         const probe = (command, args) => spawnSync(command, args, { encoding: 'utf8', timeout: 5000 });
         const languages = probe('tesseract', ['--list-langs']);
         const installed = probe('ffmpeg', ['-version']).status === 0
-          && probe('pdftotext', ['-v']).status === 0 && languages.status === 0
+          && probe('pdftotext', ['-v']).status === 0
+          && probe('pdfimages', ['-v']).status === 0
+          && probe('pdfinfo', ['-v']).status === 0 && languages.status === 0
           && /^deu$/m.test(languages.stdout) && /^eng$/m.test(languages.stdout);
         if (installed) needed = false;
         fs.appendFileSync(process.env.GITHUB_OUTPUT,`needed=${needed}\n`);

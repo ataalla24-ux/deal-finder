@@ -31,7 +31,7 @@ export function getNonConsumerOfferRejection(value) {
   if (businessTool && merchantAudience && (exampleReward || toolSalesPitch)) return 'illustrative-business-reward';
 
   const amount = '\\d{1,3}(?:[.,]\\d{1,2})?';
-  const euro = `(?:€\\s*${amount}|${amount}\\s*(?:€|eur\\b|euro\\b))`;
+  const euro = `(?:(?:€|\\beur)\\s*${amount}|${amount}\\s*(?:€|eur\\b|euro\\b))`;
   const surcharge = new RegExp(`${euro}\\s*(?:more|extra|additional|mehr|aufpreis|zuschlag)\\b(?!\\s+(?:rabatt|discount|sparen|ersparnis))|\\b(?:aufpreis|zuschlag|surcharge)\\s*(?:(?:von|nur|of|only)\\s+)?${euro}`, 'i');
   if (!surcharge.test(text)) return '';
 
@@ -74,12 +74,29 @@ function withoutAlcoholFreeProducts(text) {
     .replace(/\b(?:kein(?:en)?|ohne)\s+alkohol\b/gi, '');
 }
 
+export function consumerFoodExclusion(value) {
+  const text = offerText(value);
+  const example = /\bz\.\s*b\.|\b(?:zum beispiel|beispielsweise|for example)\b|\be\.\s*g\./i;
+  const publicGift = text.split(/[!?;\n]|\.(?=\s)/).some(clause =>
+    !example.test(clause) && FOOD.test(clause) && /\b(?:gratis|kostenlos\w*|free|geschenkt)\b/.test(clause)
+    && /\b(?:(?:fuer|an)\s+(?:alle|jeden)|(?:alle|unsere)\s+(?:gaeste|kunden|besucher)|jeder\s+(?:gast|kunde|besucher)|public|everyone)\b/.test(clause));
+  const software = /\b(?:software|saas|gastroapp|kassensystem\w*|kassenabschluss|buchhaltung\w*|bilanz|steuerberater|mwst|digitale?\s+(?:kaffeestempel|stempelkarte\w*)|loyalty\s*(?:app|program)|kundenbindung|kundenbindungssoftware)\b/.test(text);
+  const businessAudience = /\b(?:fuer\s+gastronomen|fuer\s+gastronomiebetriebe|restaurantbetreiber|coffee\s+shop\s+owners|ihre[nm]?\s+(?:gaeste|kunden)|your\s+(?:guests|customers)|stammkunden|steuerberater|kassenabschluss)\b/.test(text);
+  if (software && (businessAudience || example.test(text)) && (!publicGift || example.test(text))) return 'business-lead-generation';
+  const helpers = /\b(?:volunteers?(?:\s+wanted)?|helfer\w*\s+gesucht|hiring|mitarbeiter\w*\s+gesucht|helping\s+hand)\b/.test(text);
+  if (helpers && /\b(?:unterstuetzung|hilfe|mitarbeit\w*|helping\s+hand|kochkurse?|team|arbeit\w*|wanted)\b/.test(text)
+      && !publicGift) return 'employment-only-food-benefit';
+  return '';
+}
+
 export function discoveryRejection(value) {
   const text = offerText(value);
   const alcoholText = withoutAlcoholFreeProducts(text);
   if (ALCOHOL_PATTERN.test(alcoholText)) return 'alcohol-offer';
   const nonConsumerOffer = getNonConsumerOfferRejection(value);
   if (nonConsumerOffer) return nonConsumerOffer;
+  const consumerExclusion = consumerFoodExclusion(value);
+  if (consumerExclusion) return consumerExclusion;
   // The social-food review lane must not bypass the ordinary offer guards.
   if (getNonOfferContentReason(text)) return 'non-offer-content';
   if (/\b(?:free to read|read (?:it|the story) for free)\b/.test(text)

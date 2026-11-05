@@ -14,6 +14,7 @@ import {
 import { normalizeCategoryForScraper } from './category-utils.js';
 import { discoveryRejection } from './deal-discovery-policy.js';
 import { sourceHttpError } from './source-http-policy.js';
+import { requestOpenAi } from './instagram-media-evidence.js';
 import { createInstagramWebAccess } from './instagram-web-access-policy.js';
 import { runInstagramSearchQueries } from './instagram-search-discovery.js';
 import { canonicalInstagramPostKey } from './deal-evidence-utils.js';
@@ -2206,11 +2207,12 @@ function mergeAiDeal(candidate, aiRow) {
   return deal;
 }
 
-async function classifyWithOpenAi(candidates) {
+export async function classifyWithOpenAi(candidates, options = {}) {
   const emptyUsage = { inputTokens: 0, outputTokens: 0, totalTokens: 0 };
   if (candidates.length === 0) return { deals: [], errors: [], usage: emptyUsage };
-  if (!CONFIG.aiEnabled) return { deals: [], errors: ['LLM deaktiviert'], usage: emptyUsage };
-  if (!process.env.OPENAI_API_KEY) return { deals: [], errors: ['OPENAI_API_KEY fehlt'], usage: emptyUsage };
+  if (!(options.enabled ?? CONFIG.aiEnabled)) return { deals: [], errors: ['LLM deaktiviert'], usage: emptyUsage };
+  const apiKey = options.apiKey || process.env.OPENAI_API_KEY;
+  if (!apiKey) return { deals: [], errors: ['OPENAI_API_KEY fehlt'], usage: emptyUsage };
 
   const payload = buildAiPrompt(candidates);
   const viennaDateParts = Object.fromEntries(new Intl.DateTimeFormat('en-GB', {
@@ -2279,16 +2281,16 @@ async function classifyWithOpenAi(candidates) {
   };
 
   try {
-    const response = await fetch('https://api.openai.com/v1/chat/completions', {
+    const response = await requestOpenAi('https://api.openai.com/v1/chat/completions', {
       method: 'POST',
+      signal: AbortSignal.timeout(45000),
       headers: {
-        authorization: `Bearer ${process.env.OPENAI_API_KEY}`,
+        authorization: `Bearer ${apiKey}`,
         'content-type': 'application/json',
       },
       body: JSON.stringify(body),
-    });
+    }, { fetchImpl: options.fetchImpl, sleepImpl: options.sleepImpl });
     const text = await response.text();
-    if (!response.ok) throw new Error(`OpenAI HTTP ${response.status}: ${unicodeSafeTruncate(text, 260)}`);
     const parsed = JSON.parse(text);
     const content = parsed.choices?.[0]?.message?.content || '{}';
     const classified = JSON.parse(content);
@@ -2302,6 +2304,7 @@ async function classifyWithOpenAi(candidates) {
     return {
       deals,
       errors: [],
+      health: { status: 'ok' },
       usage: {
         inputTokens: Number(parsed.usage?.prompt_tokens || 0),
         outputTokens: Number(parsed.usage?.completion_tokens || 0),
@@ -2309,7 +2312,12 @@ async function classifyWithOpenAi(candidates) {
       },
     };
   } catch (error) {
-    return { deals: [], errors: [error.message], usage: emptyUsage };
+    const message = Number.isInteger(error?.status) ? `OpenAI HTTP ${error.status} (${error.code || 'unclassified'})`
+      : 'OpenAI classification failed (timeout-or-invalid-response)';
+    return { deals: [], errors: [message], usage: emptyUsage,
+      health: { status: 'unavailable', httpStatus: error.status || null, code: error.code || 'request-failed',
+        retryable: !/quota|billing|usage_limit/.test(error.code || '') && (error.status === 429 || error.status >= 500),
+        billingActionRequired: /quota|billing|usage_limit/.test(error.code || '') } };
   }
 }
 
@@ -2615,6 +2623,7 @@ async function main() {
     aiRescueCandidates: aiCandidates.filter((candidate) => candidate.aiRescueAttempt).length,
     aiRescued: aiCandidates.filter((candidate) => candidate.aiRescueAttempt && !candidate.rejectionReason).length,
     aiUsage: aiResult.usage,
+    aiHealth: aiResult.health || { status: 'not-used' },
     moderation: {
       removed: moderationFilter.removed.length,
       reasons: moderationCounts(moderationFilter.removed),

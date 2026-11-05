@@ -1,0 +1,26 @@
+name: Pipeline Reliability Check
+on:
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  offline-and-tools:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    env:
+      SENTRY_DISABLED: '1'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: npm ci
+      - uses: ./.github/actions/coupon-tools
+        with:
+          force: 'true'
+      - name: Verify tool availability without extracting merchant media
+        run: node scripts/coupon-tools-preflight.mjs --require
+      - name: Verify race, expiry, review and quota safety without external calls
+        run: |
+          node --test scripts/test-pipeline-reliability-nov05.mjs scripts/test-official-coupon-media.mjs
+          node scripts/test-generated-state-merge.mjs

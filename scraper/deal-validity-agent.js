@@ -331,7 +331,13 @@ function hasViennaEvidence(deal, health = null) {
 }
 
 function hasNonViennaPostalCode(value) {
-  const matches = cleanText(value).match(/(?:^|\D)(\d{4})(?=\D|$)/g) || [];
+  // A calendar year in an offer date is not an Austrian postal code.
+  // Bare address postcodes (including 20xx) must still remain conflicting.
+  const locationText = cleanText(value).normalize('NFKD').replace(/[\u0300-\u036f]/g, '')
+    .replace(/\b20\d{2}-\d{2}-\d{2}(?=T|\b)/gi, ' ')
+    .replace(/\b[0-3]?\d[./][01]?\d[./]20\d{2}\b/g, ' ')
+    .replace(/\b(?:janner|jaenner|januar|january|jan|februar|february|feb|marz|maerz|march|mar|april|apr|mai|may|juni|june|jun|juli|july|jul|august|aug|september|sept?|oktober|october|okt|oct|november|nov|dezember|december|dez|dec)\.?\s+20\d{2}\b/gi, ' ');
+  const matches = locationText.match(/(?:^|\D)(\d{4})(?=\D|$)/g) || [];
   return matches.some((match) => {
     const postalCode = Number(match.replace(/\D/g, ''));
     const isViennaPostalCode = postalCode >= 1010 && postalCode <= 1230 && postalCode % 10 === 0;
@@ -730,6 +736,16 @@ function collectExpiryCandidates(deal, health, now) {
 
   const hints = reliableDateHints(health);
   const contentHints = reliableContentHints(health);
+  const manualPeriod = deal.communityDateReview || [deal.slackEditedFields, deal.liveEditedFields].flatMap(fields => Array.isArray(fields) ? fields : [])
+    .some(field => /date|datum|valid|expir|ablauf|zeitraum/i.test(field));
+  if (isSocialPostDeal(deal) && !manualPeriod) {
+    const captionWindow = extractActiveOfferWindow([deal.title, deal.description, deal.metaGraphCaption,
+      deal.evidence?.textSample].filter(Boolean).join(' '), { now, pubDate: deal.sourcePublishedAt || deal.pubDate });
+    if (captionWindow?.endDate) add('deal.caption.offer-window', captionWindow.evidence, {
+      kind: captionWindow.kind, raw: captionWindow.evidence,
+      validFrom: toIsoDate(captionWindow.startDate), validUntil: toIsoDate(captionWindow.endDate), confidence: 'high',
+    }, 94);
+  }
   if (isSocialPostDeal(deal) && cleanText(contentHints.title)) {
     const contentWindow = extractActiveOfferWindow(contentHints.title, {
       now,

@@ -2,7 +2,7 @@ import { canonicalSocialPostKey } from './deal-evidence-utils.js';
 import { concreteFoodOfferTitle, socialOfferDisplayText } from './offer-title-utils.js';
 import { advanceDealLifecycle, lifecycleState } from './deal-lifecycle.js';
 import { extractActiveOfferWindow } from './instagram-ai-validity-utils.js';
-import { getNonConsumerOfferRejection } from './deal-discovery-policy.js';
+import { consumerFoodExclusion, getNonConsumerOfferRejection } from './deal-discovery-policy.js';
 import {
   inferInstagramAccountRole,
   instagramUsernameDisplayName,
@@ -40,6 +40,7 @@ const VIENNA_PATTERNS = [
 ];
 
 const HARD_REJECTION_PATTERNS = [
+  /(?:business-lead-generation|employment-only-food-benefit|non-food-ad)/i,
   /(?:expired|abgelaufen|offer-expired|ad-inactive|aktion galt|kurz-aktion ist abgelaufen)/i,
   /(?:terminal)/i,
   /(?:non-vienna|nicht wien|wrong.location|außerhalb wien|ausserhalb wien)/i,
@@ -146,7 +147,8 @@ export function isHardSocialRejection(value) {
 
 export function isUnsafeSocialFoodReviewContent(value) {
   const text = cleanText(value, 8000);
-  return UNSAFE_REVIEW_CONTENT_PATTERNS.some((pattern) => pattern.test(text))
+  return Boolean(consumerFoodExclusion(text))
+    || UNSAFE_REVIEW_CONTENT_PATTERNS.some((pattern) => pattern.test(text))
     || Boolean(getEditorialRoundupPromotionReason(text))
     || Boolean(getNonOfferContentReason(text))
     || Boolean(getNonConsumerOfferRejection(text));

@@ -5,6 +5,7 @@ import path from 'path';
 import { spawnSync } from 'child_process';
 
 import { stampDealsFeedFile } from './deals-feed-contract.mjs';
+import { mergeSourceOutbox } from './generated-source-merge.mjs';
 
 const DEFAULT_REMOTE = process.env.GIT_GENERATED_REMOTE || 'origin';
 const DEFAULT_BRANCH = process.env.GIT_GENERATED_BRANCH || process.env.GITHUB_REF_NAME || 'main';
@@ -436,6 +437,12 @@ function mergeKnownGeneratedJson(state, ref, baseRef) {
     return { ...state, content: Buffer.from(`${JSON.stringify(payload, null, 2)}\n`) };
   }
 
+  if (/^docs\/deals-pending-(?!all\.json$)[a-z0-9-]+\.json$/.test(state.path)) {
+    try {
+      const payload = mergeSourceOutbox(basePayload, remotePayload, localPayload);
+      return { ...state, content: Buffer.from(`${JSON.stringify(payload, null, 2)}\n`) };
+    } catch { return null; }
+  }
   return null;
 }
 

@@ -495,7 +495,7 @@ function safeInputImage(value) {
   return safeHttpsUrl(image);
 }
 
-async function requestOpenAi(url, init, options = {}) {
+export async function requestOpenAi(url, init, options = {}) {
   const fetchImpl = options.fetchImpl || fetch;
   const sleep = options.sleepImpl || ((ms) => new Promise((resolve) => setTimeout(resolve, ms)));
   for (let attempt = 0; attempt < 2; attempt += 1) {

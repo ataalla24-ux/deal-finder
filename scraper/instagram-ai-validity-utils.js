@@ -333,7 +333,16 @@ function weekdayIndex(value) {
 function parseDatedWeekday(text, referenceDate) {
   const regex = new RegExp(`\\b(${WEEKDAY_PATTERN})\\s*,?\\s*(?:den\\s+)?([0-3]?\\d)[./]([01]?\\d)(?:[./](20\\d{2}))?\\.?\\b`, 'i');
   const match = text.match(regex);
-  if (!match) return null;
+  if (!match) {
+    const named = text.match(new RegExp(`\\b(${WEEKDAY_PATTERN})\\s*,?\\s*(?:den\\s+)?([0-3]?\\d)\\.?\\s+(${MONTH_PATTERN})\\s+(20\\d{2})\\b`, 'i'));
+    if (!named || !/\b(?:gratis|kostenlos|free|rabatt|aktion|angebot|deal|opening|eroeffnung)\b/.test(text)) return null;
+    const prefix = text.slice(Math.max(0, named.index - 70), named.index);
+    if (/\b(?:veroeffentlicht|gepostet|published|posted|postdatum|upload)\b[^.!?]*$/.test(prefix)) return null;
+    const date = utcDayEnd(Number(named[4]), MONTHS[named[3]], Number(named[2]));
+    // An explicit year must not roll forward to fit a stale weekday label.
+    if (!date) return null;
+    return buildWindow('single', date, date, named[0]);
+  }
   const month = Number(match[3]) - 1;
   const year = parseYear(match[4], month, referenceDate);
   const endDate = utcDayEnd(year, month, Number(match[2]));
