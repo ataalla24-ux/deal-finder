@@ -27,6 +27,8 @@ const FOOD_PLATFORMS = new Set([
 function foodIdentity(value) {
   const text = String(value || '');
   if (/flight|flugversp|entsch.digung|workshops?|craft kits|waschmittel|multigrill|watt|software|app downloaden|free to read|kaffeemaschine/i.test(text)) return false;
+  // Joined Austrian merchant handles often spell Doener with "oe".
+  if (/d(?:ö|oe)ner(?:[._\d\s]|$)/i.test(text)) return true;
   return isFoodDrinkSource(text) || /noodles?|dimsum|dim.sum|schnitzel|hotpot|bistro|deli(?:[._\s]|$)|cafe|caf[eé]|baeckerei|b.ckerei|restaurant|bakery|focaccia|kitchen|sandwich|kebap|kebab|sushi|grill(?:[._\s]|$)/i.test(text);
 }
 const EXCLUDED = new Map([

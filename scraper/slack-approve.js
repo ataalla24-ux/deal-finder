@@ -744,9 +744,28 @@ function normalizePendingDeal(raw) {
 
 async function validateApprovalCandidates(deals, options = {}) {
   const now = options.now instanceof Date ? options.now : new Date();
-  return validateDealsForSlack(ensureArray(deals).map(deal => prepareCommunityApproval(deal, now)), {
+  const validation = await validateDealsForSlack(ensureArray(deals).map(deal => prepareCommunityApproval(deal, now)), {
     ...options, now, communityApproval: true,
   });
+  if (!(options.requireMap ?? process.env.APPROVAL_REQUIRE_MAP === '1')) return validation;
+  const { requireApprovalMap } = await import('../scripts/approval-map-readiness.mjs');
+  const readiness = await requireApprovalMap(validation, {
+    existingDeals: loadExistingApprovedDeals(),
+    map: loadJson(path.join(DOCS_DIR, 'deal-map-locations.json'), { locations: [] }),
+    catalog: loadJson(path.join(ROOT, 'reviews/map-location-catalog.json'), {}),
+    reviewed: loadJson(path.join(ROOT, 'reviews/map-addresses.json'), {}),
+    cache: loadJson(path.join(ROOT, 'reviews/map-geocode-cache.json'), {}), now,
+    maxRequests: process.env.APPROVAL_MAP_GEOCODE_REQUESTS ?? 8,
+  });
+  if (readiness.changed) {
+    for (const [file, payload] of [
+      ['docs/deal-map-locations.json', readiness.map],
+      ['reviews/map-location-catalog.json', readiness.catalog],
+      ['reviews/map-geocode-cache.json', readiness.cache],
+      ['reviews/approval-map-readiness.json', { checkedAt: now.toISOString(), requests: readiness.requests, checks: readiness.checks }],
+    ]) fs.writeFileSync(path.join(ROOT, file), JSON.stringify(payload, null, 2) + '\n');
+  }
+  return readiness.validation;
 }
 
 function recoverTargetedCommunityDeal(message, event, sourceDeals, botUserId) {

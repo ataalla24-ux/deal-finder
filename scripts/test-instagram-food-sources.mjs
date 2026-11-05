@@ -67,6 +67,7 @@ test('real food sources, named products, scouts, groceries and unfamiliar mercha
     { username: 'wolt.oesterreich', category: 'delivery' },
     { username: 'lidloesterreich', category: 'supermarkt' },
     { username: 'obscure_venue', origins: ['vienna-directory'], merchants: [{ kind: 'restaurant' }] },
+    { username: 'dahabdoener' }, { username: 'steakdoener_wien' }, { username: 'doener1020' },
   ];
   const before = structuredClone(original);
   const result = selectInstagramFoodAccounts(original);
@@ -74,6 +75,12 @@ test('real food sources, named products, scouts, groceries and unfamiliar mercha
   assert.deepEqual(original, before, 'source/history objects are never edited');
   const selected = selectCoverageAccounts(result.accounts, { maxAccountsPerRun: 20, foodAccountShare: 1 }, {}, now);
   assert.equal(selected.length, original.length, 'valid grocery/scout sources can use food slots');
+});
+
+test('Doener source identity does not admit a Londoner, software or a human-blocked account', () => {
+  const result = selectInstagramFoodAccounts([{username:'londoner'},
+    {username:'doener_software'}, {username:'dahabdoener',blockedByModeration:true}]);
+  assert.equal(result.accounts.length,0);
 });
 
 test('published approved Vienna food sources survive without changing any live record', () => {

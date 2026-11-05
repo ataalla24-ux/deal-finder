@@ -13,12 +13,13 @@ const read = file => JSON.parse(fs.readFileSync(path.join(temp, 'docs', file), '
 try {
   for (const dir of ['scraper', 'sentry']) fs.cpSync(path.join(root, dir), path.join(temp, dir), { recursive: true });
   fs.mkdirSync(path.join(temp, 'scripts'));
-  for (const file of ['deal-map-review.mjs', 'deal-map-enrichment.mjs']) {
+  for (const file of ['deal-map-review.mjs', 'deal-map-enrichment.mjs', 'approval-map-readiness.mjs']) {
     fs.copyFileSync(path.join(root, 'scripts', file), path.join(temp, 'scripts', file));
   }
   fs.copyFileSync(path.join(root, 'package.json'), path.join(temp, 'package.json'));
   fs.symlinkSync(path.join(root, 'node_modules'), path.join(temp, 'node_modules'), 'dir');
   fs.mkdirSync(path.join(temp, 'docs'));
+  fs.mkdirSync(path.join(temp, 'reviews'));
   process.env.SENTRY_DISABLED = '1';
   process.env.SLACK_BOT_TOKEN = 'test-only';
   process.env.SLACK_CHANNEL_ID = 'C_TEST';
@@ -71,6 +72,14 @@ try {
   edited.expiresOriginal = nextMonth;
   edited.expirySource = 'slack.human-review';
   write('deals-pending-all.json', { deals: [edited] });
+  process.env.APPROVAL_REQUIRE_MAP = '1';
+  process.env.APPROVAL_MAP_GEOCODE_REQUESTS = '0';
+  await main();
+  assert.equal(read('deals.json').deals.length, 0, 'a human approval without a map location stays pending');
+  assert.match(read('deals-pending-all.json').deals[0].approvalBlock.reasons.join(' '), /Kartenstandort fehlt/);
+  write('deal-map-locations.json', { locations: [{ id: 'reviewed-branch', name: source.brand,
+    address: source.address, latitude: 48.232, longitude: 16.386, confidence: 1,
+    source: 'official-fixture', dealIds: [source.id] }] });
   await main();
   assert.equal(read('deals.json').deals.length, 1, 'a corrected blocked approval can publish');
   assert.equal(read('deals-pending-all.json').deals.length, 0);

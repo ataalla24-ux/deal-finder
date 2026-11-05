@@ -1387,6 +1387,8 @@ function writeDealValidityReport(report, reportPath = DEFAULT_REPORT_PATH) {
 
 export {
   DEFAULT_REPORT_PATH,
+  buildSummary,
+  buildReport,
   validateDealsForSlack,
   writeDealValidityReport,
 };
