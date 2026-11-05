@@ -90,6 +90,7 @@ jobs:
         # The regression test runs before any message is sent.
         run: |
           node scripts/test-slack-unicode.mjs
+          SENTRY_DISABLED=1 node scripts/test-slack-directory-recruitment.mjs
           node --test scripts/test-deal-card-editor.mjs scripts/test-card-editor-v2.mjs scripts/test-card-editor-retry.mjs scripts/test-card-editor-disabled.mjs
           SENTRY_DISABLED=1 node --test scripts/test-community-card-enrichment.mjs
           node scripts/test-card-editor-approval.mjs

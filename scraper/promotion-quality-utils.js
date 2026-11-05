@@ -109,6 +109,19 @@ export function getEditorialRoundupPromotionReason(value) {
 export function getNonOfferContentReason(value) {
   const text = cleanPromotionText(value);
   if (!text) return '';
+  const volunteerRecruitment = /\b(?:volunteers?\s+wanted|freiwillige\s+gesucht|helping\s+hand)\b/i.test(text);
+  const publicFoodGift = text.split(/[.!?;]+/).some(clause =>
+    /\b(?:g[aä]ste|gaeste|kunden|kundinnen|besucher|public)\b/i.test(clause)
+    && /\b(?:gratis|kostenlos\w*|free)\b/i.test(clause)
+    && /\b(?:kaffee|coffee|essen|food|pizza|burger|d[oö]ner|doener|kebap|kebab|drink|getr[aä]nk)\b/i.test(clause));
+  if (volunteerRecruitment && !publicFoodGift) {
+    return 'Freiwilligensuche mit Gegenleistung statt oeffentlichem Kundenangebot';
+  }
+  const offerDirectory = /\b(?:current\s+promotions|aktuelle\s+gastro\s+aktionen|hier\s+(?:finden\s+sie|findest\s+du)\s+(?:die\s+|alle\s+)?(?:aktuellen?\s+)?(?:gastronomie)?angebote)\b/i.test(text);
+  const namedFreeFood = /\b(?:kaffee|coffee|pizza|burger|d[oö]ner|doener|kebap|kebab|getr[aä]nk)\s+(?:einmal\s+)?(?:gratis|kostenlos|free)\b/i.test(text);
+  if (offerDirectory && !publicFoodGift && !namedFreeFood && !INDEPENDENT_PROMOTION_PATTERN.test(text)) {
+    return 'Angebotsuebersicht ohne benannten konkreten Vorteil';
+  }
   const freePriceDirectory = /\b(?:free|kostenlose?)\s+(?:map|karte|app)\b.{0,60}\b(?:real\s+prices|echten?\s+Preisen|Preisvergleich)\b/i.test(text);
   if (freePriceDirectory && !INDEPENDENT_PROMOTION_PATTERN.test(text)) {
     return 'kostenloses Preisverzeichnis statt konkretem Einzelangebot';
