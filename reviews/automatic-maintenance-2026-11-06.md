@@ -87,6 +87,13 @@ in private output. All 87 distinct final test commands passed, including the
 A post-push GitHub schema check exposed a duplicate environment key tolerated
 by the basic YAML parser. It was removed and the workflow-permission suite now
 checks duplicate keys in every YAML mapping, including a negative regression.
+The first real 32-candidate Agent request hit its bounded deadline. Agent
+classification now splits into at most four candidates per completion, preserves
+prior successful batches on failure, and exposes a safe funding-deferral reason.
+The access check also tests this actual batch path on 14 synthetic B2B examples.
+An older normalization fixture also changed expected review counts at UTC
+midnight. Its fixture and child now share an explicit frozen clock; all removal,
+manual-protection and grace assertions remain unchanged.
 Post-push GitHub/model-probe receipts are retained separately in
 `output/free-credit-maintenance-2026-11-06` in the shared workspace.
 

@@ -154,7 +154,7 @@ try {
 
 const normalizationDir = fs.mkdtempSync(path.join(os.tmpdir(), 'freefinder-live-normalization-'));
 try {
-  const now = new Date();
+  const now = new Date('2026-11-06T18:00:00.000Z');
   const yesterday = new Date(now.getTime() - 24 * 60 * 60 * 1000).toISOString();
   const oldExpiry = '2025-12-31T23:59:59.999Z';
   const futureStart = new Date(now.getTime() + 3 * 24 * 60 * 60 * 1000).toISOString();
@@ -266,7 +266,10 @@ try {
     fs.writeFileSync(path.join(normalizationDir, file), JSON.stringify({ deals: [] }));
   }
 
-  const normalization = spawnSync(process.execPath, ['scraper/normalize-live-deals.js'], {
+  // Freeze the child too: normalized day-end dates otherwise change the review
+  // counts at UTC midnight although none of the tested removal rules changed.
+  const freezeClock = `const RealDate=Date;globalThis.Date=class extends RealDate{constructor(...args){super(...(args.length?args:[${+now}]))}static now(){return ${+now}}};`;
+  const normalization = spawnSync(process.execPath, ['--import', `data:text/javascript,${encodeURIComponent(freezeClock)}`, 'scraper/normalize-live-deals.js'], {
     cwd: path.resolve('.'),
     env: {
       ...process.env,

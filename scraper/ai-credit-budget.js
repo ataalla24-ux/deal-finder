@@ -14,7 +14,7 @@ const SAFE_ERRORS = ['insufficient_quota', 'credit_balance_exhausted', 'billing_
   'usage_limit_reached', 'rate_limit_exceeded', 'rate_limit_error', 'slow_down', 'invalid_api_key', 'model_not_found'];
 const defaults = { extract: 'gpt-6-luna', vision: 'gpt-6.1-terra', editor: 'gpt-6.1-terra', review: 'gpt-6.1-sol' };
 const paused = reason => Object.assign(new Error(`AI free-credit budget deferred: ${reason}`), {
-  code: 'free_credit_budget_deferred', haltBatch: true, retryAfterMs: 3600000,
+  code: 'free_credit_budget_deferred', budgetReason: reason, haltBatch: true, retryAfterMs: 3600000,
 });
 const money = value => Math.ceil(value * 1000000) / 1000000;
 function safeResponse(response, payload) {

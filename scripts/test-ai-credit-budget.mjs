@@ -4,6 +4,7 @@ import fs from 'node:fs';
 import { createCreditBudget, loadAiCreditPolicy, modelForTask, prepareBudgetedRequest, validateCreditPolicy } from '../scraper/ai-credit-budget.js';
 import { requestOpenAi } from '../scraper/instagram-media-evidence.js';
 import { githubQuotaStore } from '../scraper/instagram-shared-quota.js';
+import { classifyWithOpenAi } from '../scraper/instagram-ai-agent.js';
 
 const now = Date.parse('2026-11-06T12:00:00Z');
 const policy = loadAiCreditPolicy();
@@ -17,6 +18,37 @@ function memory(initial) {
     get state() { return structuredClone(state); } };
 }
 const successful = () => Response.json({ choices: [{ message: { content: '{"ok":true}' } }], usage: { prompt_tokens: 20, completion_tokens: 5, total_tokens: 25 } });
+
+test('Instagram full-description classification uses small bounded batches and stops after a partial failure', async () => {
+  const candidates = Array.from({ length: 14 }, (_, index) => ({ url: `https://www.instagram.com/p/Synthetic${index}/`,
+    title: 'B2B software example', description: 'Stempelsoftware fuer Gastronomen, keine einloesbare Aktion.',
+    pubDate: new Date().toISOString(), pubDateSource: 'instagram-graph-timestamp' }));
+  const seen = [];
+  const fetchImpl = async (_url, init) => {
+    const body = JSON.parse(init.body), rows = JSON.parse(body.messages[1].content).candidates;
+    assert.equal(body.max_tokens, 4096);
+    assert.ok(rows.length <= 4);
+    assert.deepEqual(rows.map(row => row.index), rows.map((_, i) => i));
+    seen.push(rows.map(row => row.url));
+    return Response.json({ choices: [{ finish_reason: 'stop', message: { content: '{"deals":[]}' } }],
+      usage: { prompt_tokens: 20, completion_tokens: 5, total_tokens: 25 } });
+  };
+  const options = { enabled: true, apiKey: 'fixture-not-a-secret', fetchImpl };
+  const result = await classifyWithOpenAi(candidates, options);
+  assert.equal(result.health.status, 'ok');
+  assert.equal(result.usage.totalTokens, 100);
+  assert.deepEqual(seen.flat(), candidates.map(row => row.url));
+  let calls = 0;
+  const partial = await classifyWithOpenAi(candidates, { ...options, fetchImpl: async (...args) => {
+    if (++calls === 2) throw Object.assign(Error('fixture pause'), { code: 'free_credit_budget_deferred', budgetReason: 'shared-spend-limit' });
+    return fetchImpl(...args);
+  } });
+  assert.equal(calls, 2);
+  assert.equal(partial.usage.totalTokens, 25);
+  assert.equal(partial.health.completedCandidates, 4);
+  assert.equal(partial.health.deferredCandidates, 10);
+  assert.equal(partial.health.budgetReason, 'shared-spend-limit');
+});
 
 test('role routing is explicit, supported and priced, never an unpriced automatic fallback', () => {
   assert.equal(modelForTask('vision'), 'gpt-6.1-terra');

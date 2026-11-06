@@ -2209,6 +2209,25 @@ function mergeAiDeal(candidate, aiRow) {
 }
 
 export async function classifyWithOpenAi(candidates, options = {}) {
+  // Full redemption descriptions for 32 posts cannot reliably fit one bounded
+  // completion. Keep the deadline and funding cap, not a larger unbounded call.
+  const batchSize = 4;
+  if (candidates.length <= batchSize) return classifyAiBatch(candidates, options);
+  const result = { deals: [], errors: [], usage: { inputTokens: 0, outputTokens: 0, totalTokens: 0 }, health: { status: 'ok' } };
+  for (let offset = 0; offset < candidates.length; offset += batchSize) {
+    const batch = await classifyAiBatch(candidates.slice(offset, offset + batchSize), options);
+    result.deals.push(...batch.deals);
+    result.errors.push(...batch.errors);
+    for (const key of Object.keys(result.usage)) result.usage[key] += batch.usage[key] || 0;
+    if (batch.errors.length) {
+      result.health = { ...batch.health, completedCandidates: offset, deferredCandidates: candidates.length - offset };
+      break;
+    }
+  }
+  return result;
+}
+
+async function classifyAiBatch(candidates, options = {}) {
   const emptyUsage = { inputTokens: 0, outputTokens: 0, totalTokens: 0 };
   if (candidates.length === 0) return { deals: [], errors: [], usage: emptyUsage };
   if (!(options.enabled ?? CONFIG.aiEnabled)) return { deals: [], errors: ['LLM deaktiviert'], usage: emptyUsage };
@@ -2225,6 +2244,7 @@ export async function classifyWithOpenAi(candidates, options = {}) {
   const currentDateVienna = `${viennaDateParts.year}-${viennaDateParts.month}-${viennaDateParts.day}`;
   const body = {
     model: CONFIG.model,
+    max_tokens: 4096,
     temperature: 0.1,
     response_format: {
       type: 'json_schema',
@@ -2293,6 +2313,7 @@ export async function classifyWithOpenAi(candidates, options = {}) {
     }, { fetchImpl: options.fetchImpl, sleepImpl: options.sleepImpl });
     const text = await response.text();
     const parsed = JSON.parse(text);
+    if (parsed.choices?.[0]?.finish_reason && parsed.choices[0].finish_reason !== 'stop') throw Error('incomplete-classification');
     const content = parsed.choices?.[0]?.message?.content || '{}';
     const classified = JSON.parse(content);
     const deals = [];
@@ -2319,7 +2340,8 @@ export async function classifyWithOpenAi(candidates, options = {}) {
       health: { status: 'unavailable', httpStatus: error.status || null, code: error.code || 'request-failed',
         retryable: !/quota|billing|usage_limit|spend_limit|credit/.test(error.code || '') && (error.status === 429 || error.status >= 500),
         billingActionRequired: /quota|billing|usage_limit|spend_limit|credit_balance/.test(error.code || ''),
-        budgetDeferred: error.code === 'free_credit_budget_deferred' } };
+        budgetDeferred: error.code === 'free_credit_budget_deferred',
+        ...(error.budgetReason ? { budgetReason: error.budgetReason } : {}) } };
   }
 }
 

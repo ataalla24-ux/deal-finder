@@ -1,4 +1,5 @@
 import { freeCreditOpenAiFetch, modelForTask } from '../scraper/ai-credit-budget.js';
+import { classifyWithOpenAi } from '../scraper/instagram-ai-agent.js';
 
 if (!process.env.OPENAI_API_KEY) throw Error('Existing OpenAI API key missing');
 const today = new Intl.DateTimeFormat('en-CA', { timeZone: 'Europe/Vienna' }).format(new Date());
@@ -27,3 +28,13 @@ for (const task of ['extract', 'vision', 'review']) {
   if (!cases.every(row => result[row.id] === row.accepted) || !(body.usage?.total_tokens > 0)) throw Error(`Structured quality checks failed for ${model}`);
   console.log(JSON.stringify({ task, model, status: 'ok', qualityCasesPassed: cases.length, tokens: body.usage.total_tokens, slackDelivery: false }));
 }
+
+const synthetic = Array.from({ length: 14 }, (_, index) => ({
+  url: `https://www.instagram.com/p/SyntheticBudgetProbe${index}/`,
+  title: 'Software fuer Gastronomen', description: 'B2B-Stempelsoftware, hypothetische Praemie Gratis Espresso, nur Demo buchen. Kein Endkundenangebot.',
+  pubDate: new Date().toISOString(), pubDateSource: 'instagram-graph-timestamp', source: 'synthetic-api-probe',
+}));
+const batched = await classifyWithOpenAi(synthetic);
+if (batched.health?.status !== 'ok' || batched.errors.length || batched.deals.length || !batched.usage.totalTokens) throw Error('Bounded Instagram batch probe failed');
+console.log(JSON.stringify({ task: 'instagram-bounded-batches', status: 'ok', candidates: synthetic.length,
+  tokens: batched.usage.totalTokens, rejectedBusinessExamples: synthetic.length, slackDelivery: false }));
