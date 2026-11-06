@@ -89,11 +89,11 @@ export function photoKey(deal) {
   return pool[index % pool.length];
 }
 
-export function dealPhoto(deal) {
+export function dealPhoto(deal, {root=ROOT}={}) {
   if(deal.photoUrl){
     try {
-      const asset=readBoundPhotoSnapshot(deal,{root:ROOT}),src=new URL(deal.photoUrl).pathname;
-      return {key:`bound-${deal.id}`,src,width:asset.size.width,height:asset.size.height,
+      const asset=readBoundPhotoSnapshot(deal,{root}),src=new URL(deal.photoUrl).pathname;
+      return {key:`bound-${deal.id}`,src,srcset:`${src} ${asset.size.width}w`,width:asset.size.width,height:asset.size.height,
         alt:asset.review.kind==='editorial-illustration'?`Symbolfoto: ${deal.title}`:`Angebotsfoto: ${deal.title}`};
     }catch{/* Invalid or revoked image falls back to the existing symbolic selection. */}
   }

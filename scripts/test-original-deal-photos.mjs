@@ -92,15 +92,18 @@ test('revocation and symlink escape fail before any image/model request',()=>fix
 
 test('website uses the same bound editorial image and rejects changed or revoked subjects',()=>fixture(async root=>{
   const {deal,review,filename}=await bound(root);
-  // dealPhoto uses the repository root; test the binding primitive with isolated files.
   const {readBoundPhotoSnapshot}=await import('./original-deal-photo.mjs');
   const illustration={...review,rights:'owned-original',kind:'editorial-illustration',showsActualProduct:false,showsIllustratedProduct:true};
   write(root,'reviews/deal-photos/'+filename+'.json',illustration);
   assert.equal(readBoundPhotoSnapshot(deal,{root}).review.kind,'editorial-illustration');
+  const photo=dealPhoto(deal,{root});
+  assert.equal(photo.src,new URL(deal.photoUrl).pathname);
+  assert.equal(photo.srcset,`${photo.src} ${review.width}w`,'responsive rendering never emits srcset="undefined"');
+  assert.match(photo.alt,/^Symbolfoto:/);
   assert.throws(()=>readBoundPhotoSnapshot({...deal,description:'Different food'},{root}),/stale/);
   write(root,'reviews/deal-photos/'+filename+'.json',{...illustration,revoked:true});
   assert.throws(()=>readBoundPhotoSnapshot(deal,{root}),/current permission or ownership/);
-  assert.ok(!dealPhoto(deal)?.src?.includes('approved-deal-photos'));
+  assert.ok(!dealPhoto(deal,{root})?.src?.includes('approved-deal-photos'));
 }));
 
 test('image binding survives edit-store replay and disables image on changed deal only',()=>{

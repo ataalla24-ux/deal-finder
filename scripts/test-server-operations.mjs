@@ -6,7 +6,7 @@ import os from 'node:os';
 import path from 'node:path';
 import { maintenanceEvidenceFor, refreshMaintenanceEvidence } from './refresh-maintenance-evidence.mjs';
 import { buildRecoveryQueue, updatePublicationPilot, creditSnapshot, writeOperationsReport,
-  buildPublicationReviewPack, redemptionSummary, summarizeSourceReport } from './server-operations-report.mjs';
+  buildPublicationReviewPack, redemptionSummary, summarizeSourceReport, nativeImageSummary } from './server-operations-report.mjs';
 import { auditServerQuality } from './server-quality-audit.mjs';
 import { processDeals } from '../scraper/smart-summary.js';
 import { normalizeDealRecord } from '../scraper/deal-normalization-utils.js';
@@ -230,12 +230,26 @@ test('redemption audit reuses exact time-bound codec and never mistakes descript
   assert.equal(redemptionSummary(input,null,now).completeCoverage,false);
   const valid=redemptionSummary(input,{reviews:[review]},now);
   assert.equal(valid.byMethod.onsite,1);assert.equal(valid.rows[0].hasPublicCode,false);
+  assert.equal(valid.sourceReviewedRoutes,1);assert.equal(valid.unconfirmedReviews,0);
   assert.equal(valid.rows[0].externalStepRequired,false);
   for(const patch of [{expectedDescription:'Different terms.'},{expectedTitle:'Different offer'},
     {reviewUntil:'2026-11-05T12:00:00Z'}]){
     assert.equal(redemptionSummary(input,{reviews:[{...review,...patch}]},now).byMethod['not-verified'],1);
   }
   assert.equal(redemptionSummary(input,{reviews:[{...review,method:'provider_coupon',url:ready.url}]},now).rows[0].externalStepRequired,true);
+  const unknown=redemptionSummary(input,{reviews:[{...review,method:'unknown'}]},now);
+  assert.equal(unknown.sourceReviewedRoutes,0);assert.equal(unknown.unconfirmedReviews,1);
+  assert.equal(unknown.completeCoverage,false);assert.equal(unknown.missingReviews,0);
+  assert.equal(redemptionSummary(input,null,now).missingReviews,1);
+});
+
+test('native image summary separates repaired primary photos from small bundled fallbacks and absent counts',()=>{
+  const summary=nativeImageSummary({status:'current',observedDeals:68,reviewedPlatformImages:20,
+    lowResolutionDeals:['a','b'],reviewedPrimaryPhotoDeals:['a','b'],effectiveLowResolutionDeals:[],sharedAssignments:[]});
+  assert.match(summary,/2 Angebote mit zu kleinen gebuendelten Fallback/);
+  assert.match(summary,/2 Angebote mit aktuell gebundenem/);
+  assert.match(summary,/0 verbleibende primaere Aufloesungsluecken/);
+  assert.match(nativeImageSummary({status:'older-observation'}),/unbekannt verbleibende primaere/);
 });
 
 test('source audit distinguishes Meta branches, retained outbox and actual candidate audit from Slack delivery',()=>{

@@ -122,12 +122,19 @@ export function redemptionSummary(live, manifest, now=new Date()) {
   const reviewed=applyDealRedemptions(live,manifest,+now);
   const byMethod=countBy(reviewed.map(d=>d.redemption?.method||'not-verified'));
   return {checkedAt:now.toISOString(),feedHash:hash(live),total:live.length,byMethod,
+    sourceReviewedRoutes:reviewed.filter(d=>d.redemption && d.redemption.method!=='unknown').length,
+    unconfirmedReviews:byMethod.unknown||0,missingReviews:byMethod['not-verified']||0,
     completeCoverage:reviewed.every(d=>d.redemption && d.redemption.method!=='unknown'),
     rows:reviewed.map(d=>({id:d.id,title:d.title,brand:d.brand,method:d.redemption?.method||'not-verified',
       reviewUntil:d.redemption?.reviewUntil||null,hasInstructions:Boolean(d.redemption?.instructions),
       hasPublicCode:Boolean(d.redemption?.publicCode),externalStepRequired:['external','provider_coupon'].includes(d.redemption?.method),
       missingDescription:!String(d.description||'').trim()})),
-    caveat:'Descriptions do not prove complete redemption. Personal coupons, provider checkout and eligibility still require the provider; review TTL is not offer validity.'};
+    caveat:'Descriptions do not prove complete redemption. Unknown reviews are not verified routes. Booking-route checks do not confirm current fares. Personal coupons, provider checkout and eligibility still require the provider; review TTL is not offer validity.'};
+}
+
+export function nativeImageSummary(native) {
+  const count=key=>Array.isArray(native[key])?native[key].length:'unbekannt';
+  return `\n## Native Bilder\n\n- Auswahlpruefung: ${native.status}; ${native.observedDeals||0} aktuelle Angebote.\n- ${native.reviewedPlatformImages||0} Plattformbilder inhaltlich geprueft (einschliesslich Cache).\n- ${count('lowResolutionDeals')} Angebote mit zu kleinen gebuendelten Fallback-Motiven.\n- ${count('reviewedPrimaryPhotoDeals')} Angebote mit aktuell gebundenem, dokumentiertem primaerem Bild; ${count('effectiveLowResolutionDeals')} verbleibende primaere Aufloesungsluecken.\n- ${count('sharedAssignments')} mehrfach verwendete Fallback-Plattformmotive. Ein neues primaeres Bild vergroessert nicht die alte Fallback-Datei.\n- Kein Nachweis der installierten App-Version oder der Darstellung beim Empfaenger.\n`;
 }
 
 export function creditSnapshot(ledger, policy, now = new Date()) {
@@ -234,10 +241,10 @@ export async function writeOperationsReport({ root = process.cwd(), now = new Da
       ['automatic-publication-review-pack.json',reviewPack]]) fs.writeFileSync(path.join(root,'reviews',file),JSON.stringify(value,null,2)+'\n');
     const native=report.images.nativeSelection;
     const imageSummary=qualitySnapshot.status==='current'
-      ? `\n## Native Bilder\n\n- Auswahlpruefung: ${native.status}; ${native.observedDeals||0} aktuelle Angebote.\n- ${native.reviewedPlatformImages||0} Plattformbilder inhaltlich geprueft (einschliesslich Cache).\n- ${native.lowResolutionDeals?.length||0} Angebote mit zu kleinen Originalbildern; ${native.sharedAssignments?.length||0} mehrfach verwendete Plattformmotive.\n- Kein Nachweis der installierten App-Version oder der Darstellung beim Empfaenger.\n`
+      ? nativeImageSummary(native)
       : '\n## Native Bilder\n\n- Aktueller Pruefstand fehlt; historische Bildzaehler werden nicht als heutiges Ergebnis ausgegeben. Keine Entwarnung oder bestaetigte Bildqualitaet.\n';
     const freshnessSummary=`\n## Aktualitaet\n\n- Entwurfsregeln frisch und lokal geprueft, ohne Modell- oder Quellenaufruf. ${report.sourceRecovery.uniqueIds} unterschiedliche IDs in ${queue.length} Eintraegen; doppelte IDs bleiben Prueffaelle.\n- Live-/Bildpruefstand: ${qualitySnapshot.status}; letzte Pruefung ${qualitySnapshot.checkedAt || 'unbekannt'}. Bei veraltetem Stand sind leere Hinweisliste und Bildzaehler KEIN Entwarnungsnachweis.\n`;
-    const readinessSummary=`\n## Freigabe und Einloesung\n\n- ${pilot.evaluation.currentSamples} Pilotfaelle aktuell, ${pilot.evaluation.archivedSamples} fruehere Pruefstaende unveraendert archiviert. Keine alten Bewertungen uebernehmen.\n- Aktueller, unbewerteter Pruefbogen: ${reviewPack.cases.length} Faelle; reviews/automatic-publication-review-pack.json. Keine unabhaengige menschliche Bewertung erfunden.\n- Verifizierte Einloesewege: ${live.length-(report.redemptions.byMethod['not-verified']||0)} von ${live.length}; fehlende Beschreibungen sind kein Ersatz fuer Einloesepruefung.\n- Karte frisch lokal geprueft: ${JSON.stringify(report.map.byStatus)}.\n\n## Quellen\n\n${report.sources.map(s=>'- '+s.file+': '+s.status+'; '+JSON.stringify(s.counts||{})+'; Slack-Zustellungen nicht aus Kandidaten ableiten.').join('\n')}\n`;
+    const readinessSummary=`\n## Freigabe und Einloesung\n\n- ${pilot.evaluation.currentSamples} Pilotfaelle aktuell, ${pilot.evaluation.archivedSamples} fruehere Pruefstaende unveraendert archiviert. Keine alten Bewertungen uebernehmen.\n- Aktueller, unbewerteter Pruefbogen: ${reviewPack.cases.length} Faelle; reviews/automatic-publication-review-pack.json. Keine unabhaengige menschliche Bewertung erfunden.\n- Quellengepruefte Einloese-/Buchungswege: ${report.redemptions.sourceReviewedRoutes} von ${live.length}; ${report.redemptions.unconfirmedReviews} ausdruecklich unbestaetigte, ${report.redemptions.missingReviews} fehlende aktuelle Einloesepruefungen. Besuchsinfos sind keine Gutscheine; ein Buchungslink bestaetigt keinen aktuellen Flugpreis.\n- Karte frisch lokal geprueft: ${JSON.stringify(report.map.byStatus)}.\n\n## Quellen\n\n${report.sources.map(s=>'- '+s.file+': '+s.status+'; '+JSON.stringify(s.counts||{})+'; Slack-Zustellungen nicht aus Kandidaten ableiten.').join('\n')}\n`;
     fs.writeFileSync(path.join(root,'reviews/server-operations-report.md'),markdown+imageSummary+freshnessSummary+readinessSummary);
     if(process.env.GITHUB_STEP_SUMMARY)fs.appendFileSync(process.env.GITHUB_STEP_SUMMARY,markdown+imageSummary+freshnessSummary+readinessSummary);
   }
