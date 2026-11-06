@@ -20,7 +20,7 @@ test('native observation expires on artwork-relevant feed changes and never cert
   const deals=[{id:'one',title:'Pizza',brand:'Example',category:'essen'}];
   const snapshot={artworkInputHash:artworkInputHash(deals),tests:['test-artwork-native-parity','test-artwork-library-assets','test-deal-photo-sharing'].map(name=>({name,status:'passed'}))};
   assert.equal(nativeContractStatus(deals,snapshot).status,'observed-contracts-pass');
-  assert.equal(nativeContractStatus([{...deals[0],description:'terms'}],snapshot).status,'observed-contracts-pass');
+  assert.equal(nativeContractStatus([{...deals[0],description:'terms'}],snapshot).status,'feed-changed-recheck-required');
   assert.equal(nativeContractStatus([{...deals[0],title:'Burger'}],snapshot).status,'feed-changed-recheck-required');
   assert.equal(nativeContractStatus([...deals,{id:'two',title:'Pizza'}],snapshot).status,'feed-changed-recheck-required');
   assert.equal(nativeContractStatus(deals,{...snapshot,tests:[]}).status,'native-tests-incomplete');

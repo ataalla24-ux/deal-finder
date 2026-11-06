@@ -5,21 +5,21 @@ import {createHash} from 'node:crypto';
 import {spawnSync} from 'node:child_process';
 
 const hash=value=>createHash('sha256').update(value).digest('hex');
-export const artworkInputHash=deals=>hash(JSON.stringify(deals.map(d=>[d.id,d.title,d.category||'',d.brand||'',d.photoUrl||'',d.imageUrl||'']).sort((a,b)=>a[0].localeCompare(b[0]))));
+export const artworkInputHash=deals=>hash(JSON.stringify(deals.map(d=>[d.id,d.title,d.description||'',d.category||'',d.brand||'',d.photoUrl||'',d.imageUrl||'']).sort((a,b)=>a[0].localeCompare(b[0]))));
 const required=['test-artwork-native-parity','test-artwork-library-assets','test-deal-photo-sharing'];
 
 export function nativeContractStatus(deals,snapshot){
   if(!snapshot)return {status:'missing-native-observation',semanticImageReview:false,recipientUiTest:false};
   const valid=required.every(name=>snapshot.tests?.some(t=>t.name===name&&t.status==='passed'));
   return {status:!valid?'native-tests-incomplete':snapshot.artworkInputHash!==artworkInputHash(deals)?'feed-changed-recheck-required':'observed-contracts-pass',
-    checkedAt:snapshot.checkedAt,sourceHashes:snapshot.sourceHashes||{},semanticImageReview:false,recipientUiTest:false,
-    caveat:'Current local native source was tested, not every installed Store version. Native source or library changes require a new observation.'};
+    checkedAt:snapshot.checkedAt,sourceHashes:snapshot.sourceHashes||{},semanticImageReview:false,recipientUiTest:false,displayTransformationsTested:false,
+    caveat:'Raw-feed artwork policy parity and asset/share wiring only; display transformations and actual recipient UI are not exercised. Not every installed Store version. Native source or library changes require a new observation.'};
 }
 
 export function observeNativeContracts({root=process.cwd(),nativeRoot,now=new Date()}={}){
   if(!nativeRoot)throw Error('Explicit native source checkout required');
   const feed=path.join(root,'docs/deals.json'),deals=JSON.parse(fs.readFileSync(feed,'utf8')).deals;
-  const sourceFiles=['FreeFinderWien/DealsHomeArtwork.swift','FreeFinderWien/DealsHomeStyle.swift',
+  const sourceFiles=['FreeFinderWien/DealsHomeArtwork.swift','FreeFinderWien/DealsHomeStyle.swift','FreeFinderWien/ContentView.swift','FreeFinderWien/DealCardText.swift',
     'FreeFinderWien-Android/app/src/main/java/com/stefanataalla/freefinderwien/DealsHomeArtwork.kt',
     'FreeFinderWien-Android/app/src/main/java/com/stefanataalla/freefinderwien/MainActivity.kt',
     'FreeFinderWien-Android/app/src/main/java/com/stefanataalla/freefinderwien/FreeFinderShareSheet.kt',

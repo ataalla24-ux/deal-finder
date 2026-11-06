@@ -20,6 +20,8 @@ test('summaries never overwrite full conditions or protected descriptions; missi
   assert.deepEqual(processDeals([empty]).deals,[empty]);
   const fragment={...full,description:'Owner note with a deliberate ending...',liveEditedFields:['description']};
   assert.equal(normalizeDealRecord(fragment).description,fragment.description);
+  const slack={id:'fixture',brand:'Example',title:'Zu jedem Döner gibts ein leckeres Tiramisu gratis',description:'Manuell gepruefte Bedingungen.',slackEditedFields:['description']};
+  assert.equal(normalizeDealRecord(slack).description,slack.description);
   const derived=processDeals([deal]).deals[0];
   assert.equal(derived.description,'');
   assert.deepEqual(processDeals([derived]).deals,[derived]);

@@ -1119,6 +1119,7 @@ function isFalsePositiveFreeDeal(deal = {}) {
 function normalizeDealRecord(deal = {}) {
   deal = sanitizePublicDealText(deal);
   const editedFields = new Set(Array.isArray(deal.liveEditedFields) ? deal.liveEditedFields : []);
+  const descriptionIsProtected = editedFields.has('description') || (deal.slackEditedFields || []).includes('description');
   let title = cleanTitleForDisplay(deal.title || '');
   let description = cleanUiNoiseText(deal.description || '');
   if (!editedFields.has('title') && isPromotionalIntro(title)) {
@@ -1182,7 +1183,7 @@ function normalizeDealRecord(deal = {}) {
     title = replaceBrandMention(title, explicitBrand, brand);
     description = replaceBrandMention(description, explicitBrand, brand);
   }
-  description = [...(deal.liveEditedFields || []), ...(deal.slackEditedFields || [])].includes('description')
+  description = descriptionIsProtected
     ? String(deal.description || '') : cleanDescriptionForDisplay(description, {
     ...deal,
     brand,
@@ -1192,7 +1193,7 @@ function normalizeDealRecord(deal = {}) {
   });
 
   // A short heading never discards conditions that existed only in the old title.
-  if (titleWasPolished && !editedFields.has('description') && !description.includes(originalTitle)) {
+  if (titleWasPolished && !descriptionIsProtected && !description.includes(originalTitle)) {
     description = [description, originalTitle].filter(Boolean).join(' ');
   }
 

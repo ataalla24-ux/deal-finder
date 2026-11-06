@@ -267,7 +267,7 @@ async function main() {
   };
 
   writeJson(inputPath, nextData);
-  console.log(`✅ ${improved} Beschreibungen verbessert.`);
+  console.log(`✅ ${improved} separate Kurzfassungen ergänzt; vollständige Beschreibungen erhalten.`);
 }
 
 if (process.argv[1] && path.resolve(process.argv[1]) === __filename) main().catch((error) => {
