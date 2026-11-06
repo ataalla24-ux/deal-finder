@@ -55,7 +55,8 @@ function literalSourceEnds(value, kind) {
 }
 const matchingEdits = (deal, edits) => edits.filter(edit => edit.dealId === deal.id || deal.url && edit.url === deal.url);
 const protectedFields = (deal, edits) => new Set([...(deal.liveEditedFields || []), ...(deal.slackEditedFields || []),
-  ...matchingEdits(deal, edits).flatMap(edit => Object.keys(edit).filter(key => !['dealId', 'url', 'createdAt', 'updatedAt', 'editedBy', 'hidden', 'restoreDeal'].includes(key)))]);
+  ...matchingEdits(deal, edits).flatMap(edit => [...(edit.clearFields || []),
+    ...Object.keys(edit).filter(key => !['dealId', 'url', 'createdAt', 'updatedAt', 'editedBy', 'hidden', 'restoreDeal'].includes(key))])]);
 const protectedDeal = (deal, edits, policy) => Boolean(deal.forceKeep || deal.campaignId || deal.isBusinessAdvertisement
   || matchingEdits(deal, edits).some(edit => edit.forceKeep || edit.hidden)
   || (policy.protectedMerchants || []).some(brand => clean(deal.brand).toLowerCase() === brand.toLowerCase()));

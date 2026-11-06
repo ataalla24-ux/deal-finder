@@ -102,6 +102,8 @@ test('manual titles and descriptions are preserved; deterministic compaction kee
   for (const field of ['title', 'description']) {
     assert.deepEqual(maintainDeals([{ ...input, liveEditedFields: [field] }], { policy, now }).deals[0], { ...input, liveEditedFields: [field] });
     assert.deepEqual(maintainDeals([input], { policy, now, edits: [{ dealId: input.id, [field]: input[field] }] }).deals[0], input);
+    const cleared = { ...input, [field]: '' };
+    assert.deepEqual(maintainDeals([cleared], { policy, now, edits: [{ dealId: input.id, clearFields: [field] }] }).deals[0], cleared);
   }
 });
 
