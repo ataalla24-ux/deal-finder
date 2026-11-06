@@ -55,7 +55,7 @@ jobs:
       - name: Verify safe correction and preservation rules
         if: steps.slot.outputs.run == 'true'
         run: |
-          node --test scripts/test-ai-credit-budget.mjs scripts/test-automatic-maintenance.mjs scripts/test-server-quality.mjs scripts/test-server-operations.mjs scripts/test-server-blog.mjs scripts/test-lightweight-state-committer.mjs scripts/test-native-artwork-review.mjs
+          node --test scripts/test-ai-credit-budget.mjs scripts/test-automatic-maintenance.mjs scripts/test-server-quality.mjs scripts/test-server-operations.mjs scripts/test-server-blog.mjs scripts/test-lightweight-state-committer.mjs scripts/test-native-artwork-review.mjs scripts/test-server-quality-publication-workflow.mjs
           node scripts/test-pre-publication-title.mjs
           node scripts/test-deal-photo-contract.mjs
           node scripts/test-queue-workflow-safety.mjs
@@ -102,10 +102,10 @@ jobs:
           reviews/automatic-publication-pilot.json docs/carrier-benefit-pause.json
           reviews/map-coverage.json reviews/map-location-catalog.json reviews/map-geocode-cache.json
           reviews/map-source-address-cache.json reviews/map-business-campaigns.json
-      - name: Verify actual public feed, featured offers and map
+      - name: Separate completed quality work from pending publication
         if: steps.slot.outputs.run == 'true'
-        timeout-minutes: 5
-        run: node scripts/verify-server-quality-public.mjs
+        run: |
+          echo 'Qualitaetspruefung abgeschlossen; oeffentliche Veroeffentlichung separat durch Server Quality Publication nach erfolgreichem Pages-Deployment pruefen. Ein gruener Qualitaetslauf ist kein Veroeffentlichungsnachweis.' >> "$GITHUB_STEP_SUMMARY"
       - name: Preserve evidence for review
         if: ${{ always() && steps.slot.outputs.run == 'true' }}
         uses: actions/upload-artifact@v4
@@ -123,5 +123,4 @@ jobs:
             reviews/server-blog-report.json
             reviews/native-contract-observation.json
             reviews/native-artwork-observation.json
-            output/server-quality-public-proof.json
           retention-days: 30

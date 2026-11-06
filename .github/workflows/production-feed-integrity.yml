@@ -42,6 +42,8 @@ on:
       - "scraper/community-extraction.js"
       - "scraper/fetch-community-submissions.js"
       - ".github/workflows/server-deal-quality.yml"
+      - ".github/workflows/server-quality-publication.yml"
+      - "scripts/test-server-quality-publication-workflow.mjs"
       - "scripts/automatic-maintenance-review.mjs"
       - "scripts/test-ai-credit-budget.mjs"
       - "scripts/test-automatic-maintenance.mjs"
@@ -91,7 +93,9 @@ jobs:
         run: npm run test:feed-contract
 
       - name: Validate reviewed in-app redemption details
-        run: node scripts/test-deal-redemptions.mjs
+        run: |
+          node scripts/test-deal-redemptions.mjs
+          node --test scripts/test-server-quality-publication-workflow.mjs
 
       - name: Protect source-backed content and manual review
         env:

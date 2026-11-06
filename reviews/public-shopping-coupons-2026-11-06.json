@@ -1,0 +1,44 @@
+{
+  "version": 1,
+  "date": "2026-11-06",
+  "scope": "Two existing approved shopping vouchers only; public coupon reveal through normal browser UI, no new offer approval.",
+  "records": [
+    {
+      "id": "gs-17514",
+      "source": "https://www.gutscheine.at/matratzen-discount?code=17514",
+      "observedCode": "SUPER15",
+      "discountPercent": 15,
+      "observedScope": "Whole range, all customers; no end date displayed.",
+      "merchantDestinationObserved": "https://matratzen.discount/",
+      "changedFields": ["description", "redemption"]
+    },
+    {
+      "id": "gs-91769",
+      "source": "https://www.gutscheine.at/shein?code=91769",
+      "observedCode": "DESHEIN30",
+      "discountPercent": 30,
+      "minimumOrderEur": 29,
+      "newCustomersOnly": true,
+      "observedScope": "Exact existing voucherId 91769, distinct from the separate newsletter offer; no end date displayed.",
+      "merchantDestinationObserved": "https://at.shein.com/",
+      "beforeTitle": "30 % Rabatt bei SHEIN",
+      "afterTitle": "30 % Rabatt ab 29 € für SHEIN-Neukunden",
+      "changedFields": ["title", "description", "summary", "redemption"]
+    }
+  ],
+  "preservation": {
+    "liveRecords": 67,
+    "unrelatedRecordsUnchanged": 65,
+    "idsOrderPricesDatesVotesApprovalsAndHidesPreserved": true,
+    "mapDailyWeeklyBytesUnchanged": true,
+    "persistentLiveEditReplayExact": true,
+    "mapSourceAndGeocoderRequests": 0
+  },
+  "limitations": [
+    "Coupon publisher evidence, not a successful merchant checkout or independently confirmed acceptance.",
+    "No purchase, login, newsletter signup or merchant customer-data submission.",
+    "No offer expiry invented. Public-code metadata expires after a 24-hour review window and is rejected when the exact title, description or source changes.",
+    "Source and approved original data retained. No guarantee that other historical offers are complete or all public codes remain accepted."
+  ],
+  "publication": "Prepared locally; actual public readback recorded separately after deployment."
+}

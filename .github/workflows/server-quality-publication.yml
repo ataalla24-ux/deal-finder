@@ -1,0 +1,37 @@
+name: Server Quality Publication
+on:
+  workflow_run:
+    workflows: ['pages-build-deployment']
+    branches: [main]
+    types: [completed]
+permissions:
+  contents: read
+concurrency:
+  group: server-quality-publication
+  cancel-in-progress: false
+jobs:
+  verify:
+    if: >-
+      github.event.workflow_run.conclusion == 'success' &&
+      github.event.workflow_run.head_repository.full_name == github.repository &&
+      github.event.workflow_run.head_branch == 'main'
+    runs-on: ubuntu-latest
+    timeout-minutes: 6
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Verify all four actual public documents against current main
+        timeout-minutes: 5
+        run: node scripts/verify-server-quality-public.mjs
+      - name: Preserve public readback evidence including failures
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: server-quality-publication-${{ github.run_id }}
+          path: output/server-quality-public-proof.json
+          if-no-files-found: error
+          retention-days: 30
