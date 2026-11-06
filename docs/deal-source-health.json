@@ -1,10 +1,10 @@
 {
-  "generatedAt": "2026-11-06T13:05:12.891Z",
+  "generatedAt": "2026-11-06T13:10:26.344Z",
   "summary": {
     "filesConsidered": 32,
-    "totalCandidates": 685,
-    "uniqueCandidates": 651,
-    "distinctCandidates": 668,
+    "totalCandidates": 689,
+    "uniqueCandidates": 655,
+    "distinctCandidates": 672,
     "duplicateClusters": 17,
     "topHealthySources": [
       {
@@ -873,14 +873,14 @@
       "sourceKey": "power",
       "file": "deals-pending-power.json",
       "sourceLabel": "Power Scraper",
-      "totalDeals": 33,
-      "uniqueDeals": 33,
+      "totalDeals": 37,
+      "uniqueDeals": 37,
       "duplicateDeals": 0,
       "duplicateAcrossSources": 0,
       "fresh1dCount": 0,
       "fresh7dCount": 0,
-      "viennaCount": 10,
-      "foodDrinkCount": 23,
+      "viennaCount": 14,
+      "foodDrinkCount": 25,
       "promoCount": 12,
       "missingUrlCount": 0,
       "sampleTitles": [
@@ -890,27 +890,27 @@
       ],
       "lastRun": {
         "status": "completed-with-errors",
-        "startedAt": "2026-11-05T20:45:30.593Z",
-        "finishedAt": "2026-11-05T20:45:54.912Z",
-        "durationMs": 24319,
+        "startedAt": "2026-11-06T13:06:27.137Z",
+        "finishedAt": "2026-11-06T13:06:56.482Z",
+        "durationMs": 29345,
         "counts": {
-          "rawCandidates": 33,
-          "normalizedCandidates": 33,
+          "rawCandidates": 37,
+          "normalizedCandidates": 37,
           "verifiedCandidates": 0,
           "previousDeals": 0,
-          "acceptedDeals": 33,
+          "acceptedDeals": 37,
           "rejectedDeals": 0
         },
         "rejectedByReason": {},
         "errors": [
           "Too Good To Go: deferred until 2026-11-11T13:09:08.553Z",
-          "Mussty: The operation was aborted due to timeout",
           "Cuadro: fetch failed",
           "MediaMarkt: deferred until 2026-11-12T13:23:38.046Z",
-          "Saturn: deferred until 2026-11-06T11:31:17.379Z",
-          "Spar: deferred until 2026-11-06T11:31:18.754Z",
+          "Saturn: HTTP 403",
+          "Spar: HTTP 403",
           "Conrad: deferred until 2026-11-12T13:23:40.770Z",
-          "Decathlon: deferred until 2026-11-12T13:23:40.913Z"
+          "Decathlon: deferred until 2026-11-12T13:23:40.913Z",
+          "XXXLutz: deferred until 2026-11-12T13:23:42.127Z"
         ],
         "reportFile": "deal-pipeline-last-run-power.json"
       },
@@ -918,23 +918,23 @@
       "duplicateRate": 0,
       "fresh1dRate": 0,
       "fresh7dRate": 0,
-      "viennaRate": 0.3,
+      "viennaRate": 0.4,
       "foodDrinkRate": 0.7,
-      "promoRate": 0.4,
+      "promoRate": 0.3,
       "missingUrlRate": 0,
-      "averageQualityScore": 58.9,
+      "averageQualityScore": 61,
       "topCategories": [
         {
           "value": "essen",
           "count": 16
         },
         {
-          "value": "kaffee",
-          "count": 5
+          "value": "trinken",
+          "count": 8
         },
         {
-          "value": "trinken",
-          "count": 4
+          "value": "kaffee",
+          "count": 5
         },
         {
           "value": "sport",
@@ -952,7 +952,7 @@
       "topTypes": [
         {
           "value": "rabatt",
-          "count": 25
+          "count": 29
         },
         {
           "value": "gratis",
@@ -969,12 +969,13 @@
       ],
       "issues": [
         "wenige Deals sind frischer als 1 Tag",
+        "wenige klare Gratis-/Promo-Signale",
         "Wien-Signal ist zu schwach"
       ],
-      "healthScore": 55,
-      "missionFitScore": 40,
-      "coverageScore": 24,
-      "precisionScore": 48,
+      "healthScore": 56,
+      "missionFitScore": 39,
+      "coverageScore": 26,
+      "precisionScore": 49,
       "sourceWeightScore": 43
     },
     {
@@ -1910,20 +1911,20 @@
       "sampleTitles": [],
       "lastRun": {
         "status": "completed-with-errors",
-        "startedAt": "2026-11-05T22:44:32.564Z",
-        "finishedAt": "2026-11-05T22:45:22.355Z",
-        "durationMs": 49791,
+        "startedAt": "2026-11-06T13:06:25.544Z",
+        "finishedAt": "2026-11-06T13:07:30.057Z",
+        "durationMs": 64513,
         "counts": {
-          "rawCandidates": 10,
-          "normalizedCandidates": 2,
+          "rawCandidates": 12,
+          "normalizedCandidates": 4,
           "verifiedCandidates": 0,
           "previousDeals": 0,
           "acceptedDeals": 0,
-          "rejectedDeals": 2
+          "rejectedDeals": 4
         },
         "rejectedByReason": {
-          "no-consumer-food-benefit": 1,
-          "non-food-ad": 1
+          "post-older-than-seven-days": 2,
+          "no-consumer-food-benefit": 2
         },
         "errors": [],
         "reportFile": "deal-pipeline-last-run-instagram-apify2.json"
