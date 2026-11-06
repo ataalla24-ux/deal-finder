@@ -7,7 +7,7 @@ import { polishHtml } from './polish-website.mjs';
 import { backfillGuides } from './blog-backfill-20261018.mjs';
 import { catchupGuides } from './blog-backfill-20261030.mjs';
 import { novemberGuides, heldRecheckGuides } from './blog-backfill-20261105.mjs';
-import { applyBlogPublication, updateBlogSitemap } from './server-blog-content.mjs';
+import { applyBlogPublication, applyBlogIndexPublication, updateBlogSitemap } from './server-blog-content.mjs';
 
 const dailyGuides = [
   {
@@ -891,11 +891,11 @@ function escapeHtml(value) {
   return String(value).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#39;');
 }
 
-function renderGuide(guide) {
+function renderGuide(guide, renderNow = now) {
   const canonical = `https://freefinder.at/blog/${guide.slug}.html`;
   const published = guide.published || PUBLISHED;
   const publishedLabel = guide.publishedLabel || PUBLISHED_LABEL;
-  const expired = Boolean(guide.expires && Date.parse(guide.expires) < now);
+  const expired = Boolean(guide.expires && Date.parse(guide.expires) < renderNow);
   const isDealPage = Boolean(guide.expires || guide.dealPage);
   const statusBanner = isDealPage ? `<div class="deal-status-banner" data-deal-status-banner${expired ? '' : ' hidden'}><strong>Aktion beendet.</strong>Der angekündigte Aktionszeitraum ist vorbei. Dieser Artikel bleibt als Archiv online. Aktuelle Treffer findest du unter <a href="/angebote-wien-heute.html">Angebote in Wien heute</a>.</div>` : '';
   const wordCount = guide.sections.map((section) => section[2].replace(/<[^>]+>/g, ' ').split(/\s+/).length).reduce((a, b) => a + b, 0);
@@ -985,10 +985,23 @@ if (unknownSlugs.length) throw new Error(`Unknown guides: ${unknownSlugs.join(',
 const selectedGuides = guides.filter(g => selectedSlugs.length === 0 || selectedSlugs.includes(g.slug));
 const publicationsFile = path.join(ROOT, 'reviews/server-blog-publications.json');
 const publications = fs.existsSync(publicationsFile) ? JSON.parse(fs.readFileSync(publicationsFile, 'utf8')).entries : {};
+// Check the actual published files before reconstructing generator templates.
+// Otherwise a manual correction could disappear before replay sees it.
+for (const guide of selectedGuides) {
+  const publication = publications[guide.slug];
+  if (publication?.kind !== 'revision') continue;
+  applyBlogPublication(fs.readFileSync(path.join(BLOG_DIR, `${guide.slug}.html`), 'utf8'), publication, guide.slug);
+  applyBlogIndexPublication(fs.readFileSync(path.join(BLOG_DIR, 'index.html'), 'utf8'), publication, guide.slug);
+}
 // Validate all persistent additions before writing; changed base copy needs review.
-const renderedGuides = selectedGuides.map(guide => ({ guide,
-  html: applyBlogPublication(polishHtml(renderGuide(guide), `blog/${guide.slug}.html`, now), publications[guide.slug], guide.slug),
-}));
+const renderedGuides = selectedGuides.map(guide => {
+  const publication = publications[guide.slug], file = `blog/${guide.slug}.html`;
+  // Review identity is stable; known expiry only changes the existing archive UI.
+  const renderNow = publication?.kind === 'revision' ? Date.parse(`${publication.day}T12:00:00Z`) : now;
+  let html = applyBlogPublication(polishHtml(renderGuide(guide, renderNow), file, renderNow), publication, guide.slug);
+  if (publication?.kind === 'revision' && guide.expires && Date.parse(guide.expires) < now) html = polishHtml(html, file, now);
+  return { guide, html };
+});
 for (const { guide, html } of renderedGuides) fs.writeFileSync(path.join(BLOG_DIR, `${guide.slug}.html`), html);
 
 const sitemapPath = path.join(ROOT, 'docs', 'sitemap.xml');
@@ -1029,6 +1042,8 @@ if (selectedBackfill.length) {
   });
   if (!index.includes('<div class="post-grid">')) throw new Error('Blog index grid missing');
   if (pending.size) index = index.replace('<div class="post-grid">', `<div class="post-grid">\n        ${[...pending.values()].map(card).join('\n        ')}`);
-  fs.writeFileSync(indexPath, polishHtml(index, 'blog/index.html', now));
+  index = polishHtml(index, 'blog/index.html', now);
+  for (const guide of selectedBackfill) index = applyBlogIndexPublication(index, publications[guide.slug], guide.slug);
+  fs.writeFileSync(indexPath, index);
 }
 console.log(`Generated ${selectedGuides.length} selected SEO guides in docs/blog`);

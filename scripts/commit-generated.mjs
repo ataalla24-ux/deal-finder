@@ -297,7 +297,8 @@ function captureBlogConsistency(states, baseRef) {
   if (batch.version !== 1 || !/^[a-z0-9-]+$/.test(batch.slug) || !/^20\d{2}-\d{2}-\d{2}$/.test(batch.day)
     || !Array.isArray(batch.inputs) || !Array.isArray(batch.outputs)) throw Error('Invalid blog publication batch');
   const required = [batchPath, 'reviews/server-blog-publications.json', 'reviews/server-blog-state.json',
-    'reviews/server-blog-report.json', `reviews/${batch.day}-daily-blog.json`, `docs/blog/${batch.slug}.html`, 'docs/sitemap.xml'];
+    'reviews/server-blog-report.json', `reviews/${batch.day}-daily-blog.json`, `docs/blog/${batch.slug}.html`, 'docs/sitemap.xml',
+    ...(batch.kind === 'revision' ? ['docs/blog/index.html'] : [])];
   if (required.some(file => !batch.outputs.includes(file) || !batch.inputs.includes(file))
     || !batch.inputs.includes('docs/deals.json') || !batch.inputs.includes('reviews/maintenance-source-evidence.json')) throw Error('Incomplete blog publication batch');
   const paths = [...new Set([...batch.inputs, ...batch.outputs])];

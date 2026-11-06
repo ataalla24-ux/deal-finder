@@ -8,6 +8,7 @@ on:
     branches: [main]
     paths:
       - 'scripts/server-blog-*.mjs'
+      - 'scripts/test-server-blog*.mjs'
       - 'scripts/verify-server-blog-public.mjs'
       - 'scripts/vienna-blog-slot.mjs'
       - '.github/workflows/server-blog.yml'
@@ -40,12 +41,12 @@ jobs:
       - name: Check publication, source and concurrency safeguards
         if: steps.slot.outputs.run == 'true'
         run: |
-          node --test scripts/test-server-blog.mjs scripts/test-server-blog-publication.mjs scripts/test-lightweight-state-committer.mjs
+          node --test scripts/test-server-blog.mjs scripts/test-server-blog-publication.mjs scripts/test-server-blog-revision.mjs scripts/test-lightweight-state-committer.mjs
           node scripts/test-queue-workflow-safety.mjs
       - name: Refresh bounded official evidence only if today needs editorial work
         if: steps.slot.outputs.run == 'true'
         run: node scripts/refresh-maintenance-evidence.mjs --blog-day
-      - name: Prepare one independently verified existing-guide update
+      - name: Prepare one independently verified full guide revision
         if: steps.slot.outputs.run == 'true'
         env:
           OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
@@ -66,15 +67,8 @@ jobs:
           'reviews/*-daily-blog.json'
           reviews/maintenance-source-evidence.json reviews/maintenance-source-report.json
           docs/carrier-benefit-pause.json
-      - name: Verify actual public article and sitemap, not just Git success
-        if: steps.slot.outputs.run == 'true'
-        timeout-minutes: 5
-        run: node scripts/verify-server-blog-public.mjs
-      - name: Keep actual public receipt for the operating report
-        if: steps.slot.outputs.run == 'true'
-        run: >-
-          node scripts/commit-generated.mjs --message "Record verified server blog publication"
-          --files reviews/server-blog-public-receipt.json
+      # Actual readback follows a successful Pages deployment in Server Blog Publication.
+      # A completed writer is not evidence that a new article is public.
       - name: Preserve draft, evidence and publication receipt
         if: ${{ always() && steps.slot.outputs.run == 'true' }}
         uses: actions/upload-artifact@v4
