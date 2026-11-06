@@ -1,10 +1,10 @@
 {
-  "generatedAt": "2026-11-06T10:09:39.913Z",
+  "generatedAt": "2026-11-06T10:11:19.449Z",
   "summary": {
     "filesConsidered": 32,
-    "totalCandidates": 719,
-    "uniqueCandidates": 683,
-    "distinctCandidates": 701,
+    "totalCandidates": 720,
+    "uniqueCandidates": 684,
+    "distinctCandidates": 702,
     "duplicateClusters": 18,
     "topHealthySources": [
       {
@@ -182,16 +182,6 @@
         "sampleTitles": []
       },
       {
-        "sourceKey": "firecrawl2",
-        "sourceLabel": "Firecrawl Key 3 - Consumables",
-        "healthScore": 0,
-        "issues": [
-          "letzter Lauf fand Kandidaten, aber akzeptierte keinen Deal",
-          "liefert aktuell 0 Deals"
-        ],
-        "sampleTitles": []
-      },
-      {
         "sourceKey": "firecrawl5",
         "sourceLabel": "Firecrawl Key 5 - Instagram Gastro",
         "healthScore": 0,
@@ -225,6 +215,15 @@
         "healthScore": 0,
         "issues": [
           "letzter Lauf fand Kandidaten, aber akzeptierte keinen Deal",
+          "liefert aktuell 0 Deals"
+        ],
+        "sampleTitles": []
+      },
+      {
+        "sourceKey": "instagram-discovery",
+        "sourceLabel": "Daily Sync Instagram Discovery",
+        "healthScore": 0,
+        "issues": [
           "liefert aktuell 0 Deals"
         ],
         "sampleTitles": []
@@ -1533,6 +1532,75 @@
       "sourceWeightScore": 33
     },
     {
+      "sourceKey": "firecrawl2",
+      "file": "deals-pending-firecrawl2.json",
+      "sourceLabel": "Firecrawl Key 3 - Consumables",
+      "totalDeals": 1,
+      "uniqueDeals": 1,
+      "duplicateDeals": 0,
+      "duplicateAcrossSources": 0,
+      "fresh1dCount": 1,
+      "fresh7dCount": 1,
+      "viennaCount": 0,
+      "foodDrinkCount": 0,
+      "promoCount": 0,
+      "missingUrlCount": 0,
+      "sampleTitles": [
+        "Topkino: 23 hours ago · ... Bipa Gutschein zur Maske. Freitag, 6.11., um 20:00 Uhr & Samstag, 7.11., um 19:45 Uhr Topkino, Wien #"
+      ],
+      "lastRun": {
+        "status": "completed",
+        "startedAt": "2026-11-06T10:08:27.412Z",
+        "finishedAt": "2026-11-06T10:09:11.022Z",
+        "durationMs": 43610,
+        "counts": {
+          "rawCandidates": 17,
+          "normalizedCandidates": 15,
+          "verifiedCandidates": 1,
+          "previousDeals": 0,
+          "acceptedDeals": 1,
+          "rejectedDeals": 16
+        },
+        "rejectedByReason": {
+          "missing-concrete-offer": 2,
+          "post-verification-rejected": 14
+        },
+        "errors": [],
+        "reportFile": "deal-pipeline-last-run-firecrawl2.json"
+      },
+      "uniqueRate": 1,
+      "duplicateRate": 0,
+      "fresh1dRate": 1,
+      "fresh7dRate": 1,
+      "viennaRate": 0,
+      "foodDrinkRate": 0,
+      "promoRate": 0,
+      "missingUrlRate": 0,
+      "averageQualityScore": 62,
+      "topCategories": [
+        {
+          "value": "beauty",
+          "count": 1
+        }
+      ],
+      "topTypes": [
+        {
+          "value": "rabatt",
+          "count": 1
+        }
+      ],
+      "issues": [
+        "geringe Food-/Drink-Relevanz",
+        "wenige klare Gratis-/Promo-Signale",
+        "Wien-Signal ist zu schwach"
+      ],
+      "healthScore": 42,
+      "missionFitScore": 22,
+      "coverageScore": 1,
+      "precisionScore": 26,
+      "sourceWeightScore": 24
+    },
+    {
       "sourceKey": "vienna-promo-radar",
       "file": "deals-pending-vienna-promo-radar.json",
       "sourceLabel": "Vienna Promo Radar",
@@ -1694,62 +1762,6 @@
       "topCategories": [],
       "topTypes": [],
       "issues": [
-        "liefert aktuell 0 Deals"
-      ],
-      "healthScore": 0,
-      "missionFitScore": 0,
-      "coverageScore": 0,
-      "precisionScore": 0,
-      "sourceWeightScore": 0
-    },
-    {
-      "sourceKey": "firecrawl2",
-      "file": "deals-pending-firecrawl2.json",
-      "sourceLabel": "Firecrawl Key 3 - Consumables",
-      "totalDeals": 0,
-      "uniqueDeals": 0,
-      "duplicateDeals": 0,
-      "duplicateAcrossSources": 0,
-      "fresh1dCount": 0,
-      "fresh7dCount": 0,
-      "viennaCount": 0,
-      "foodDrinkCount": 0,
-      "promoCount": 0,
-      "missingUrlCount": 0,
-      "sampleTitles": [],
-      "lastRun": {
-        "status": "completed",
-        "startedAt": "2026-11-04T10:10:44.242Z",
-        "finishedAt": "2026-11-04T10:11:40.327Z",
-        "durationMs": 56085,
-        "counts": {
-          "rawCandidates": 17,
-          "normalizedCandidates": 13,
-          "verifiedCandidates": 0,
-          "previousDeals": 0,
-          "acceptedDeals": 0,
-          "rejectedDeals": 17
-        },
-        "rejectedByReason": {
-          "missing-concrete-offer": 4,
-          "post-verification-rejected": 13
-        },
-        "errors": [],
-        "reportFile": "deal-pipeline-last-run-firecrawl2.json"
-      },
-      "uniqueRate": 0,
-      "duplicateRate": 0,
-      "fresh1dRate": 0,
-      "fresh7dRate": 0,
-      "viennaRate": 0,
-      "foodDrinkRate": 0,
-      "promoRate": 0,
-      "missingUrlRate": 0,
-      "averageQualityScore": 0,
-      "topCategories": [],
-      "topTypes": [],
-      "issues": [
-        "letzter Lauf fand Kandidaten, aber akzeptierte keinen Deal",
         "liefert aktuell 0 Deals"
       ],
       "healthScore": 0,
