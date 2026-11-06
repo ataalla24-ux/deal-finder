@@ -170,10 +170,12 @@ test('image reviews are content-addressed, bounded and cannot claim photo rights
   fs.writeFileSync(path.join(cwd,'docs/assets/fixture.webp'),Buffer.from('offline-image-fixture'));
   const cache={},deal={title:'Burger',brand:'Test'},photo={src:'/assets/fixture.webp',alt:'Symbolfoto: Burger'};
   let calls=0;
-  const request=async(_url,init)=>{calls++;const body=JSON.parse(init.body);assert.equal(body.model,'gpt-6.1-terra');assert.equal(body.max_tokens,700);return Response.json({choices:[{finish_reason:'stop',message:{content:JSON.stringify({matchesProduct:true,emptyTableOrPackaging:false,uncertain:false})}}]});};
+  const request=async(_url,init)=>{calls++;const body=JSON.parse(init.body);assert.equal(body.model,'gpt-6.1-terra');assert.equal(body.max_tokens,700);const context=JSON.parse(body.messages[1].content[0].text);assert('description' in context);assert('category' in context);return Response.json({choices:[{finish_reason:'stop',message:{content:JSON.stringify({matchesProduct:true,emptyTableOrPackaging:false,uncertain:false})}}]});};
   const result=await reviewPhoto(deal,photo,{root:cwd,cache,now,request});
   assert.equal(result.provesMerchantPhoto,false);assert.equal(result.automaticReplacement,false);
   await reviewPhoto(deal,photo,{root:cwd,cache,now,request});assert.equal(calls,1);
   await reviewPhoto({...deal,title:'Pizza'},photo,{root:cwd,cache,now,request});assert.equal(calls,2);
+  await reviewPhoto({...deal,description:'Nur veganer Burger'},photo,{root:cwd,cache,now,request});assert.equal(calls,3,'product details invalidate a former image match');
+  await reviewPhoto({...deal,description:'Nur veganer Burger'},photo,{root:cwd,cache,now,request,allowNew:false});assert.equal(calls,3,'cached reviews remain usable with model requests disabled');
   assert.equal((await reviewPhoto(deal,{src:'/assets/../../private.webp'},{root:cwd,cache,now,request})).status,'invalid-image-path');
 }));
