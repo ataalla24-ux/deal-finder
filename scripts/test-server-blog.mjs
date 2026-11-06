@@ -37,7 +37,7 @@ test('server blog records at most one daily attempt, writes only review artifact
     const write=(file,value)=>fs.writeFileSync(path.join(root,file),JSON.stringify(value));
     write('docs/deals.json',{deals:[deal]});write('reviews/blog-coverage-2026-10-30.json',coverage);
     write('reviews/maintenance-source-evidence.json',{entries:{[url]:{url,brand:deal.brand,status:'verified',text,hash:digest(text),checkedAt:now.toISOString()}}});
-    const original='<article>Existing verified guide</article>';fs.writeFileSync(path.join(root,'docs/blog/clever-fit-wien.html'),original);
+    const original='<link rel="canonical" href="https://freefinder.at/blog/clever-fit-wien.html"><script type="application/ld+json">{"@type":"Article"}</script><div class="article-meta"><span>Original date</span><span>Original reading time</span></div><article class="article-body">Existing verified guide<h2 id="quelle">Quelle</h2></article>';fs.writeFileSync(path.join(root,'docs/blog/clever-fit-wien.html'),original);
     let calls=0;
     const request=async()=>{calls++;return{ok:true,json:async()=>({choices:[{finish_reason:'stop',message:{content:JSON.stringify({useful:false,title:'',sections:[]})}}]})};};
     const report=await prepareServerBlog({root,now,allowAi:true,request});

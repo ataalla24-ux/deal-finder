@@ -5,7 +5,7 @@ import { createHash } from 'node:crypto';
 import { load } from 'cheerio';
 import { maintenanceEvidenceFor } from './refresh-maintenance-evidence.mjs';
 import { freeCreditOpenAiFetch, modelForTask } from '../scraper/ai-credit-budget.js';
-import { validateBlogDraft, blogDigest } from './server-blog-content.mjs';
+import { validateBlogDraft, blogDigest, inspectBlogArticle } from './server-blog-content.mjs';
 export { validateBlogDraft } from './server-blog-content.mjs';
 
 const read = (root, file, fallback) => { try { return JSON.parse(fs.readFileSync(path.join(root,file),'utf8')); } catch(e) { if(e.code==='ENOENT')return fallback;throw e; } };
@@ -32,8 +32,17 @@ export async function prepareServerBlog({root=process.cwd(),now=new Date(),allow
   const deals=read(root,'docs/deals.json',{}).deals||[],day=localDay(now);
   const state=read(root,'reviews/server-blog-state.json',{version:1,attempts:[]});
   const evidence=maintenanceEvidenceFor(deals,read(root,'reviews/maintenance-source-evidence.json',{}),now);
-  const candidates=blogCandidates(deals,read(root,'reviews/blog-coverage-2026-10-30.json',{}),evidence,now);
+  const publications=read(root,'reviews/server-blog-publications.json',{entries:{}});
+  const heldGuides=[];
+  const candidates=blogCandidates(deals,read(root,'reviews/blog-coverage-2026-10-30.json',{}),evidence,now).filter(candidate=>{
+    const file=path.join(root,'docs/blog',candidate.slug+'.html');
+    const prior=publications.entries[candidate.slug];
+    const reason=!fs.existsSync(file)?'guide-file-missing':(prior?.history?.length||0)>=2?'broader-editorial-revision-needed':inspectBlogArticle(fs.readFileSync(file,'utf8'),candidate.slug);
+    if(reason)heldGuides.push({id:candidate.id,slug:candidate.slug,reason});
+    return !reason;
+  });
   const report={checkedAt:now.toISOString(),day,status:'no-fresh-substantive-candidate',eligible:candidates.map(c=>({id:c.id,slug:c.slug})),
+    heldGuides,
     modelCalls:0,automaticPublicationEnabled:false,localBlogReplacementReady:false,
     note:'Draft preparation only. Existing daily editorial publication stays active until equivalent server publication is verified.'};
   // A dated existing editorial result prevents competing work, even if its live

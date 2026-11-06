@@ -101,6 +101,20 @@ test('rejects unconfirmed old-article conditions and long verbatim source copyin
   } finally { f.close(); }
 });
 
+test('unsupported legacy guide is held before any model or budget request', async () => {
+  const f = fixture();
+  const old = process.env.OPENAI_API_KEY;
+  process.env.OPENAI_API_KEY = 'fixture-not-a-real-key';
+  try {
+    f.write(`docs/blog/${slug}.html`, original.replace('id="quelle"', 'id="legacy-source"'));
+    const report = await prepareServerBlog({ root: f.root, now, allowAi: true, request: async () => { throw Error('must not be called'); } });
+    assert.equal(report.modelCalls, 0);
+    assert.equal(report.eligible.length, 0);
+    assert.equal(report.heldGuides[0].reason, 'unsupported-guide-layout');
+    assert.equal(f.json('reviews/server-blog-state.json').attempts.length, 0);
+  } finally { if (old === undefined) delete process.env.OPENAI_API_KEY; else process.env.OPENAI_API_KEY = old; f.close(); }
+});
+
 for (const change of ['article', 'source', 'feed', 'review', 'day']) test(`publication rejects changed ${change} before any article write`, async () => {
   const f = fixture();
   try {

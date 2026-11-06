@@ -7,6 +7,22 @@ const clean = value => String(value || '').replace(/\s+/g, ' ').trim();
 const escape = value => String(value).replace(/[&<>"']/g, char => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[char]);
 const marker = '[data-server-blog-update]';
 
+export function inspectBlogArticle(html, slug) {
+  const $ = load(html);
+  if ($('article.article-body').length !== 1 || $('article.article-body #quelle').length !== 1
+    || $('.article-meta span').length < 2 || $(marker).length > 1
+    || $('link[rel="canonical"]').attr('href') !== `https://freefinder.at/blog/${slug}.html`) return 'unsupported-guide-layout';
+  try {
+    const schemas = $('script[type="application/ld+json"]').toArray().flatMap(node => {
+      const schema = JSON.parse($(node).text()); return schema['@graph'] || [schema];
+    });
+    if (schemas.filter(item => item['@type'] === 'Article').length !== 1) return 'unsupported-article-schema';
+  } catch { return 'invalid-article-schema'; }
+  $('script,style,nav,footer').remove();
+  if (clean($('main').text() || $('article').text()).length > 16000) return 'article-too-long-for-complete-review';
+  return null;
+}
+
 export function validateBlogDraft(draft, candidate) {
   if (draft?.useful !== true || typeof draft.title !== 'string' || draft.title.length < 10
     || draft.title.length > 100 || /[<>]|https?:/i.test(draft.title)) return false;
