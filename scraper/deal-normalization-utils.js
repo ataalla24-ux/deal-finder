@@ -1182,7 +1182,8 @@ function normalizeDealRecord(deal = {}) {
     title = replaceBrandMention(title, explicitBrand, brand);
     description = replaceBrandMention(description, explicitBrand, brand);
   }
-  description = cleanDescriptionForDisplay(description, {
+  description = [...(deal.liveEditedFields || []), ...(deal.slackEditedFields || [])].includes('description')
+    ? String(deal.description || '') : cleanDescriptionForDisplay(description, {
     ...deal,
     brand,
     title,

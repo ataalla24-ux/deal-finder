@@ -7,6 +7,7 @@ import { titleClaimGuard } from '../scraper/deal-card-editor.js';
 import { freeCreditOpenAiFetch, modelForTask } from '../scraper/ai-credit-budget.js';
 import { canonicalInstagramPostKey } from '../scraper/deal-evidence-utils.js';
 import { parseExpiryShape } from '../scraper/expiry-utils.js';
+import { maintenanceEvidenceFor } from './refresh-maintenance-evidence.mjs';
 export { automaticMaintenanceReviewCandidates } from './automatic-maintenance-review.mjs';
 
 const clean = value => String(value || '').replace(/\s+/g, ' ').trim();
@@ -20,7 +21,7 @@ const exactDay = value => {
   return Number.isFinite(+date) && date.toISOString().slice(0, 10) === text ? text : '';
 };
 export const sourceTexts = (deal, latest) => (latest?.blockingReason || latest?.graphAccepted === false || deal.metaGraphBlockingReason
-  ? [] : latest ? [latest.caption, latest.ocrText] : [deal.metaGraphCaption, deal.metaGraphOcrText, deal.caption,
+  ? [] : latest ? [latest.caption, latest.ocrText, latest.officialText] : [deal.metaGraphCaption, deal.metaGraphOcrText, deal.caption,
   deal.evidence?.textSample, deal.evidence?.offerDateSignal, deal.evidence?.media?.ocr?.footer,
   deal.evidence?.offerTiming?.matchedText]).map(clean).filter(Boolean);
 
@@ -240,6 +241,9 @@ export async function maintainFeedFile({ cwd = process.cwd(), allowAi = false, a
   if (policy.version !== 1 || policy.enabled !== true) return maintainDeals(deals, { policy, now });
   const edits = read(path.join(cwd, 'docs/live-deal-edits.json'), {}).edits || [];
   const sourceEvidence = latestMaintenanceEvidence(deals, read(path.join(cwd, 'docs/instagram-graph-post-evidence.json'), {}).posts || [], now);
+  for (const [id, evidence] of maintenanceEvidenceFor(deals, read(path.join(cwd, 'reviews/maintenance-source-evidence.json'), {}), now)) {
+    if (!sourceEvidence.has(id)) sourceEvidence.set(id, evidence);
+  }
   const beforeState = read(statePath, {});
   const result = maintainDeals(deals, { policy, edits, state: beforeState, now, sourceEvidence });
   result.report.ai = { attempted: 0, corrected: 0, deferred: 0 };

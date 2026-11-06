@@ -6,12 +6,13 @@ import { inspectSourceBackedQuality } from '../scraper/source-backed-quality.js'
 import { loadDealMapReviewContext, reviewDealMap } from './deal-map-review.mjs';
 import { dealPhoto } from './deal-photos.mjs';
 import { freeCreditOpenAiFetch, modelForTask } from '../scraper/ai-credit-budget.js';
+import { maintenanceEvidenceFor } from './refresh-maintenance-evidence.mjs';
 
 const read = (file, fallback) => { try { return JSON.parse(fs.readFileSync(file,'utf8')); } catch(error) { if(error.code === 'ENOENT') return fallback; throw error; } };
 const write = (file, data) => {fs.mkdirSync(path.dirname(file),{recursive:true});fs.writeFileSync(file,JSON.stringify(data,null,2)+'\n');};
 const hash = value => createHash('sha256').update(value).digest('hex');
 
-export async function reviewPhoto(deal, photo, {root, cache, now, request=freeCreditOpenAiFetch}={}) {
+export async function reviewPhoto(deal, photo, {root, cache, now, request=freeCreditOpenAiFetch, allowNew=true}={}) {
   if (!photo?.src?.startsWith('/assets/')) return {status:'missing-image'};
   const file = path.resolve(root,'docs',`.${photo.src}`), base=path.resolve(root,'docs/assets');
   if (!file.startsWith(base+path.sep)) return {status:'invalid-image-path'};
@@ -19,6 +20,7 @@ export async function reviewPhoto(deal, photo, {root, cache, now, request=freeCr
   const bytes=fs.readFileSync(file);
   const key=hash(JSON.stringify([2,hash(bytes),deal.title,deal.brand,photo.alt]));
   if (cache[key]) return {...cache[key],cached:true};
+  if (!allowNew) return {status:'not-reviewed'};
   if(bytes.length > 1500000 || !/\.(webp|jpg|jpeg|png)$/.test(file)) return {status:'image-format-needs-review'};
   const mime = file.endsWith('.webp')?'image/webp':file.endsWith('.png')?'image/png':'image/jpeg';
   const response=await request('https://api.openai.com/v1/chat/completions',{
@@ -46,13 +48,14 @@ export async function auditServerQuality({root=process.cwd(),now=new Date(),allo
   const today=new Intl.DateTimeFormat('sv-SE',{timeZone:'Europe/Vienna'}).format(now);
   const cachePath=path.join(root,'reviews/server-photo-audit-cache.json'),beforeCache=read(cachePath,{version:1,entries:{}});
   const cache=structuredClone(beforeCache), rows=[],images=new Map();
+  const evidence=maintenanceEvidenceFor(deals,read(path.join(root,'reviews/maintenance-source-evidence.json'),{}),now);
   let modelCalls=0,photoDeferred=0;
   for(const deal of deals){
-    const map=reviewDealMap(deal,context),quality=inspectSourceBackedQuality(deal,{mapReview:map,today}),photo=dealPhoto(deal);
+    const map=reviewDealMap(deal,context),quality=inspectSourceBackedQuality(deal,{mapReview:map,today,evidenceTexts:[evidence.get(deal.id)?.officialText]}),photo=dealPhoto(deal);
     if(photo?.src)images.set(photo.src,[...(images.get(photo.src)||[]),deal.id]);
     let imageReview={status:'not-reviewed'};
-    if(allowAi && apply && process.env.OPENAI_API_KEY && modelCalls<2 && !photoDeferred){
-      try {imageReview=await reviewPhoto(deal,photo,{root,cache:cache.entries,now,request:(...args)=>{modelCalls++;return request(...args);}});}
+    {
+      try {imageReview=await reviewPhoto(deal,photo,{root,cache:cache.entries,now,allowNew:Boolean(allowAi && apply && process.env.OPENAI_API_KEY && modelCalls<2 && !photoDeferred),request:(...args)=>{modelCalls++;return request(...args);}});}
       catch {photoDeferred++;imageReview={status:'deferred'};}
     }
     rows.push({...quality,map:{status:map.status,reason:map.reason,locationIds:map.locationIds||[]},

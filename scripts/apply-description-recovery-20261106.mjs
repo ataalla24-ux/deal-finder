@@ -1,0 +1,24 @@
+import fs from 'node:fs';
+import assert from 'node:assert/strict';
+import { execFileSync } from 'node:child_process';
+import { loadLiveDealEditStore, normalizeLiveDealEdit, upsertLiveDealEdit, applyLiveDealEditsToBundle, saveLiveDealEditStore } from './live-deal-edits-lib.mjs';
+
+const review=JSON.parse(fs.readFileSync('reviews/description-recovery-2026-11-06.json'));
+const before=JSON.parse(fs.readFileSync('docs/deals.json'));
+const target=before.deals.find(d=>d.id===review.dealId);
+assert(target,'Existing live target required');
+const old=JSON.parse(execFileSync('git',['show',review.approvedSourceCommit+':docs/deals.json'],{encoding:'utf8',maxBuffer:5000000})).deals.find(d=>d.id===target.id);
+assert.equal(old.description,review.description);
+assert.equal(old.url,target.url);
+assert.equal(old.validFrom,target.validFrom);
+assert.equal(old.validUntil,target.validUntil);
+assert(!target.description || target.description===review.description,'Never overwrite a concurrent new description');
+const at=new Date().toISOString(),file='docs/live-deal-edits.json';
+const edit=normalizeLiveDealEdit({dealId:target.id,description:review.description,editedBy:'source-backed-restoration-2026-11-06'},{nowIso:at});
+const store=upsertLiveDealEdit(loadLiveDealEditStore(file),edit,at);
+const result=applyLiveDealEditsToBundle(before,store,{checkedAt:at,allowRemovals:false,allowManualRemovals:false});
+assert.deepEqual(result.bundle.deals.filter(d=>d.id!==target.id),before.deals.filter(d=>d.id!==target.id));
+assert.equal(result.bundle.deals.find(d=>d.id===target.id).description,review.description);
+saveLiveDealEditStore(file,store,at);
+fs.writeFileSync('docs/deals.json',JSON.stringify(result.bundle,null,2)+'\n');
+console.log('Restored only the previously approved Dahab description through persistent live edits.');

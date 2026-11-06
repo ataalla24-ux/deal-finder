@@ -13,6 +13,9 @@ on:
       - 'docs/live-deal-edits.json'
       - 'scripts/automatic-deal-maintenance.mjs'
       - 'scripts/server-quality-audit.mjs'
+      - 'scripts/server-operations-report.mjs'
+      - 'scripts/refresh-maintenance-evidence.mjs'
+      - 'scraper/ai-credit-budget.js'
       - 'scripts/verify-server-quality-public.mjs'
       - 'scraper/source-backed-quality.js'
       - 'reviews/automatic-maintenance-policy.json'
@@ -46,10 +49,13 @@ jobs:
       - name: Verify safe correction and preservation rules
         if: steps.slot.outputs.run == 'true'
         run: |
-          node --test scripts/test-ai-credit-budget.mjs scripts/test-automatic-maintenance.mjs scripts/test-server-quality.mjs
+          node --test scripts/test-ai-credit-budget.mjs scripts/test-automatic-maintenance.mjs scripts/test-server-quality.mjs scripts/test-server-operations.mjs
           node scripts/test-pre-publication-title.mjs
           node scripts/test-deal-photo-contract.mjs
           node scripts/test-queue-workflow-safety.mjs
+      - name: Refresh missing conditions from known official offer pages
+        if: steps.slot.outputs.run == 'true'
+        run: node scripts/refresh-maintenance-evidence.mjs
       - name: Maintain source-backed text and explicit expiry
         if: steps.slot.outputs.run == 'true'
         env:
@@ -73,6 +79,11 @@ jobs:
           OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
           GH_TOKEN: ${{ github.token }}
         run: node scripts/server-quality-audit.mjs
+      - name: Record recovery queue, shadow pilot and bounded credit usage
+        if: steps.slot.outputs.run == 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: node scripts/server-operations-report.mjs
       - name: Commit guarded maintenance and audit
         if: steps.slot.outputs.run == 'true'
         run: >-
@@ -80,6 +91,9 @@ jobs:
           --files docs/deals.json docs/automatic-deal-maintenance-report.json
           reviews/automatic-deal-maintenance-state.json reviews/server-quality-audit.json
           reviews/server-photo-audit-cache.json docs/deal-map-locations.json
+          reviews/maintenance-source-evidence.json reviews/maintenance-source-report.json
+          reviews/server-operations-report.json reviews/server-operations-report.md
+          reviews/automatic-publication-pilot.json docs/carrier-benefit-pause.json
           reviews/map-coverage.json reviews/map-location-catalog.json reviews/map-geocode-cache.json
           reviews/map-source-address-cache.json reviews/map-business-campaigns.json
       - name: Verify actual public feed, featured offers and map
@@ -96,5 +110,9 @@ jobs:
             docs/automatic-deal-maintenance-report.json
             reviews/automatic-deal-maintenance-state.json
             reviews/map-coverage.json
+            reviews/maintenance-source-report.json
+            reviews/server-operations-report.json
+            reviews/server-operations-report.md
+            reviews/automatic-publication-pilot.json
             output/server-quality-public-proof.json
           retention-days: 30

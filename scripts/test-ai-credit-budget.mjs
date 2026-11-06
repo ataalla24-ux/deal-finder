@@ -55,6 +55,20 @@ test('role routing is explicit, supported and priced, never an unpriced automati
   assert.equal(modelForTask('review'), 'gpt-6.1-sol');
   assert.equal(modelForTask('extract'), 'gpt-6-luna');
   assert.throws(() => modelForTask('review', 'unpriced-or-future-model'));
+  for (const role of ['extract', 'vision', 'editor', 'review']) {
+    assert.throws(() => modelForTask(role, 'gpt-4.1-mini'));
+  }
+});
+
+test('retired model cannot make a provider request or reserve credits through a stale override', async () => {
+  let calls = 0;
+  const store = memory();
+  const request = createCreditBudget({ store, policy, clock: () => now,
+    request: async () => { calls++; return successful(); } });
+  assert.throws(() => prepareBudgetedRequest(url, init('gpt-4.1-mini')));
+  await assert.rejects(request(url, init('gpt-4.1-mini')));
+  assert.equal(calls, 0);
+  assert.equal(store.state.reservations.length, 0);
 });
 
 test('free-only policy rejects expiry, paid fallback, unsafe provider state and calendar reset', () => {

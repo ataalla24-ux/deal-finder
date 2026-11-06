@@ -224,15 +224,18 @@ function pickBestDescription(deal) {
 function processDeals(deals) {
   let improved = 0;
   const nextDeals = deals.map((deal) => {
+    const protectedDescription = [...(deal.liveEditedFields || []), ...(deal.slackEditedFields || [])].includes('description');
+    // A card summary must not replace full redemption terms or an explicit clear.
+    if (protectedDescription || cleanUiNoiseText(deal.description || '').trim()) return deal;
     const nextDescription = pickBestDescription(deal);
-    const previousDescription = cleanUiNoiseText(deal.description || '');
+    const previousDescription = cleanUiNoiseText(deal.summary || '');
     if (!nextDescription || nextDescription === previousDescription) {
       return deal;
     }
     improved += 1;
     return {
       ...deal,
-      description: nextDescription,
+      summary: nextDescription,
     };
   });
 
@@ -267,7 +270,7 @@ async function main() {
   console.log(`✅ ${improved} Beschreibungen verbessert.`);
 }
 
-main().catch((error) => {
+if (process.argv[1] && path.resolve(process.argv[1]) === __filename) main().catch((error) => {
   console.error('❌ smart-summary fehlgeschlagen:', error);
   process.exit(1);
 });

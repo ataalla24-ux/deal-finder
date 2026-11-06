@@ -131,7 +131,7 @@ function makeDeal(source, { url,brand,title,facts,scope='Österreich',dates={},i
     votes:0,hot:false,isNew:true,priority:4,qualityScore:65,needsReview:true,lastCheckedAt:now.toISOString(),
     reviewMissingFields:[...(dates.validUntil ? [] : ['Ablauf']),...missing],
     ...(missing.length ? {missingFields:missing} : {}),
-    evidence:{ type:'official-carrier-benefit',sourceUrl:url,provider:source.key,contentHash:fingerprint(description),checkedAt:now.toISOString(),
+    evidence:{ type:'official-carrier-benefit',sourceUrl:url,provider:source.key,contentHash:fingerprint(description),checkedAt:now.toISOString(),textSample:facts,
       ...(viennaContext ? {viennaContext} : {}) } };
 }
 

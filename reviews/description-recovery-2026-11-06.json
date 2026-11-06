@@ -1,0 +1,18 @@
+{
+  "date": "2026-11-06",
+  "scope": "Restore one previously approved description; no invented new offer",
+  "dealId": "community:06d5f18b-d95f-41f3-9768-86d3c37f5bc8",
+  "approvedSourceCommit": "c37f66f8db39370deb057774320229b07470b769",
+  "sourceReview": "reviews/dahab-community-release-2026-11-03.json",
+  "description": "Bei Dahab Döner zwei Döner kaufen und den dritten Döner gratis erhalten. Die Aktion gilt für alle Dönersorten vom 3. bis 30. November. Teilnehmende Standorte: Rußbergstraße 9, 1210 Wien, und Wagramer Straße 126, 1220 Wien.",
+  "cause": "Smart Summary shortened full terms to 112 characters ending in ellipsis. Display normalization subsequently discards truncated descriptions. This path also ignored Slack manual-description protection.",
+  "fix": "Existing full and protected descriptions are preserved. Derived short copy is stored separately as summary, never as redemption terms. Importing the summary module no longer executes a production-feed write.",
+  "remainingUnverified": [
+    {"id":"fc4g-eg5ndc","reason":"Westfield detail could not be freshly read; do not replace its September-November campaign with a different NORDSEE promotion."},
+    {"id":"g2-1ffpc0f","reason":"Current NORDSEE coupons exist, but not enough evidence to assign their exact terms to this older 10-40 percent record."},
+    {"id":"gs-17514","reason":"15 percent teaser exists; public page masks the code and does not establish its complete individual terms."},
+    {"id":"gs-91769","reason":"30 percent teaser exists alongside a different newsletter offer; code masked, cannot conflate the two."},
+    {"id":"gs-12012fb","reason":"Wolt remains explicitly protected; no substitute code or changed validity."},
+    {"id":"joe-omv-xlrh16","reason":"Stored source is a station-list PDF, not current 30 percent TopWash voucher conditions."}
+  ]
+}

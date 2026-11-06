@@ -31,6 +31,8 @@ const MAP_INPUT_FILES = [
   'reviews/automatic-maintenance-policy.json',
   'reviews/automatic-deal-maintenance-state.json',
   'scripts/automatic-deal-maintenance.mjs',
+  'scripts/refresh-maintenance-evidence.mjs',
+  'reviews/maintenance-source-evidence.json',
   'docs/instagram-graph-post-evidence.json',
   'reviews/map-addresses.json',
   'reviews/map-chain-rules.json',

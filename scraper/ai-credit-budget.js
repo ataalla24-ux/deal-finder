@@ -7,7 +7,6 @@ const RATES = {
   'gpt-6-luna': [0.1, 0.5],
   'gpt-6.1-terra': [1, 5],
   'gpt-6.1-sol': [2, 10],
-  'gpt-4.1-mini': [0.4, 1.6],
 };
 const SAFE_ERRORS = ['insufficient_quota', 'credit_balance_exhausted', 'billing_hard_limit_reached', 'billing_not_active',
   'organization_spend_limit_exceeded', 'project_spend_limit_exceeded', 'organization_usage_limit_exceeded',

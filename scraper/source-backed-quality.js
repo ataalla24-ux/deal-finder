@@ -7,7 +7,7 @@ const exactDay = value => /^20\d{2}-\d{2}-\d{2}$/.test(value || '')
 
 // This shared inspection is advisory. Source verification and human approval
 // remain independent gates; a good-looking title is not proof of a real offer.
-export function inspectSourceBackedQuality(deal, { mapReview, today = '' } = {}) {
+export function inspectSourceBackedQuality(deal, { mapReview, today = '', evidenceTexts = [] } = {}) {
   const issues = [];
   const add = (code, label) => issues.push({code, label});
   if (!text(deal.title) || /^(?:Instagram[- ]Deal geteilt|Community[- ]Deal|Geteilter Deal-Link)/i.test(deal.title)) add('missing-offer', 'Konkretes Produkt und Vorteil fehlen.');
@@ -24,7 +24,7 @@ export function inspectSourceBackedQuality(deal, { mapReview, today = '' } = {})
   if (deal.evidence?.media && process.env.COUPON_TOOLS_AVAILABLE === '0') add('media-deferred', 'Bild/PDF-Pruefung wartet auf OCR-Werkzeuge.');
   if (mapReview && !['mapped','online-only'].includes(mapReview.status)) add('map-incomplete', 'Einloesestandorte sind noch nicht vollstaendig bestaetigt.');
   const raw = [deal.metaGraphCaption, deal.metaGraphOcrText, deal.caption, deal.evidence?.textSample,
-    deal.evidence?.offerTiming?.matchedText].map(text).filter(Boolean);
+    deal.evidence?.offerTiming?.matchedText, ...evidenceTexts].map(text).filter(Boolean);
   if (!raw.length) add('evidence-missing', 'Kein gespeicherter Originaltext fuer automatische Korrektur.');
   return { id:deal.id, issues, requiresReview:issues.length > 0,
     publicationMode:'human-approval', automaticPublicationAllowed:false,
