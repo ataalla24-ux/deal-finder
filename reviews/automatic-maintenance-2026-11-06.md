@@ -84,6 +84,9 @@ missing fixture packaging for the new pure Slack-review helper. Those were
 corrected without weakening existing assertions. Original failures are retained
 in private output. All 87 distinct final test commands passed, including the
 58-case map commit consistency suite. Workflow YAML and source syntax passed.
+A post-push GitHub schema check exposed a duplicate environment key tolerated
+by the basic YAML parser. It was removed and the workflow-permission suite now
+checks duplicate keys in every YAML mapping, including a negative regression.
 Post-push GitHub/model-probe receipts are retained separately in
 `output/free-credit-maintenance-2026-11-06` in the shared workspace.
 
