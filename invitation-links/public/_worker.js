@@ -1,3 +1,5 @@
+import { resolveDealLink } from './deals.js';
+
 const CODE = /^RM-[A-F0-9]{24}$/;
 const TOKEN = /^[A-Za-z0-9_-]{16}$/;
 const DEAL = /^[A-Za-z0-9_-]{1,160}$/;
@@ -35,9 +37,12 @@ export default {
     }
     const url = new URL(request.url);
     if (url.pathname === '/_link-health') {
-      return response(request, 'FreeFinder invitation links v1', 200);
+      return response(request, 'FreeFinder invitation links v2; compact-deal-v1', 200);
     }
     const destination = new URL('https://freefinder.at/');
+    if (url.pathname.startsWith('/d/')) {
+      return resolveDealLink(request, invitationCode, response);
+    }
     if (url.pathname.startsWith('/i/')) {
       const code = invitationCode(url.pathname.slice(3));
       const deals = url.searchParams.getAll('deal');

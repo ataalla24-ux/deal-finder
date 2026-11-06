@@ -1,12 +1,28 @@
 # Invitation links
 
+## Compact deal sharing
+
+`https://www.freefinder.at/d/<12-character-token>` resolves the SHA-256-derived
+72-bit token against the actual public feed. Optional `i` retains all 96 bits of
+the existing invitation code; `r` retains the legacy six-character referral
+suffix. No alias database, KV writes, new permissions or tracking cookies.
+The only downstream read is the fixed public feed, cached for 180 seconds,
+bounded to 2 MiB/2,000 records and eight seconds. Unknown offers return 410;
+ambiguous IDs or unavailable feeds fail closed, never redirect to another offer.
+Native photo sharing supplies the actual card attachment and short caption.
+Link-only recipient previews are controlled by the recipient, not this redirect.
+
+The destination is the same apex URL understood by existing native apps; do not
+add `www` to associated domains without implementing native short-token parsing.
+Run `node --test invitation-links/*.test.js` before deploying this Pages service.
+
 `https://www.freefinder.at/i/<token>` redirects to the existing
 `https://freefinder.at/invite.html?invite=RM-<24 uppercase hex digits>` URL.
 An optional validated `deal` query parameter is preserved.
 
 The 16-character Base64URL token contains all 96 bits of the existing public
 invitation code. No alias database, KV writes, account lookup, cookies, messages,
-reward creation or downstream fetches are used by this service.
+reward creation or downstream fetches are used by the invitation route.
 
 ## Compatibility
 
