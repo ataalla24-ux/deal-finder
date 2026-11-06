@@ -1,7 +1,7 @@
 {
-  "runId": "42137699056",
+  "runId": "42242699802",
   "mode": "scan",
-  "createdAt": "2026-11-06T00:33:46.937Z",
+  "createdAt": "2026-11-06T15:24:50.725Z",
   "usage": {
     "scrapingbee": {
       "provider": "scrapingbee",
@@ -45,14 +45,14 @@
   },
   "tasks": [
     {
-      "source": "Burger King",
-      "url": "https://www.burgerking.at/de/bkapp",
+      "source": "BackWerk",
+      "url": "https://back-werk.at/de/aktuell",
       "provider": "zyte",
       "cap": 0.02
     },
     {
-      "source": "KFC",
-      "url": "https://kfc.co.at/",
+      "source": "BackWerk",
+      "url": "https://back-werk.at/de/aktuell/es-ist-snackbox-zeit-id2618",
       "provider": "scraperapi",
       "cap": 10
     }
@@ -64,24 +64,26 @@
     }
   ],
   "eligiblePages": 2,
-  "finishedAt": "2026-11-06T00:34:20.386Z",
+  "finishedAt": "2026-11-06T15:25:37.599Z",
   "status": "completed",
   "results": [
     {
       "provider": "zyte",
-      "source": "Burger King",
-      "url": "https://www.burgerking.at/de/bkapp",
+      "source": "BackWerk",
+      "url": "https://back-werk.at/de/aktuell",
       "reserved": 0.02,
       "directCandidates": 0,
       "directRejected": [],
-      "directVisibleTextCharacters": 0,
+      "directVisibleTextCharacters": 360,
       "status": "fetched",
-      "bytes": 15687,
-      "visibleTextCharacters": 167,
+      "bytes": 128128,
+      "visibleTextCharacters": 6755,
       "reportedCredits": null,
       "extractedCandidates": 0,
       "incrementalCandidates": 0,
-      "offerLinks": [],
+      "offerLinks": [
+        "https://back-werk.at/de/aktuell/es-ist-snackbox-zeit-id2618"
+      ],
       "rejected": [],
       "verifiedCandidates": 0,
       "verifiedIncrementalCandidates": 0,
@@ -90,43 +92,56 @@
     },
     {
       "provider": "scraperapi",
-      "source": "KFC",
-      "url": "https://kfc.co.at/",
+      "source": "BackWerk",
+      "url": "https://back-werk.at/de/aktuell/es-ist-snackbox-zeit-id2618",
       "reserved": 10,
-      "directCandidates": 1,
-      "directRejected": [],
-      "directVisibleTextCharacters": 4546,
-      "status": "direct-sufficient",
-      "verifiedCandidates": 1,
+      "directCandidates": 0,
+      "directRejected": [
+        {
+          "reason": "offer-expired",
+          "title": "Es ist Snackbox-Zeit - drei belegte Weckerl für 5,90€",
+          "text": "Es ist Snackbox-Zeit - drei belegte Weckerl für 5,90€ Es ist Snackbox-Zeit Die BackWerk-Snackbox ist ideal, um dir einen leckeren Dreierpack für unterwegs zu einem Deal-Preis zu sichern. Bis zum 04. Mai bekommst du die M"
+        }
+      ],
+      "directVisibleTextCharacters": 326,
+      "status": "fetched",
+      "bytes": 109749,
+      "visibleTextCharacters": 6783,
+      "reportedCredits": 10,
+      "extractedCandidates": 0,
+      "incrementalCandidates": 0,
+      "offerLinks": [],
+      "rejected": [
+        {
+          "reason": "Engagement-Aktion ohne garantierte Gegenleistung",
+          "title": "Es ist Snackbox-Zeit - drei belegte Weckerl für 5,90€",
+          "text": "Consent Details [#IABV2SETTINGS#] About This website uses cookies We process your data on our website using various technologies (including cookies). Some processing activities are technically necessary, while others hel"
+        }
+      ],
+      "verifiedCandidates": 0,
       "verifiedIncrementalCandidates": 0,
       "unverifiedCandidates": 0,
-      "candidates": [
-        {
-          "id": "power-food-73cf88790a2d",
-          "title": "Unser Preiskracher: Crispy Cheese Burger mit Käse, Gurkerl und Ketchup um 1,70 Euro",
-          "confirmed": true,
-          "reason": ""
-        }
-      ]
+      "candidates": []
     }
   ],
   "funnel": {
     "pagesBySource": {
-      "Burger King": 1,
-      "KFC": 1
+      "BackWerk": 2
     },
     "statuses": {
-      "fetched": 1,
-      "direct-sufficient": 1
+      "fetched": 2
     },
-    "rejectionReasons": {},
+    "rejectionReasons": {
+      "offer-expired": 1,
+      "Engagement-Aktion ohne garantierte Gegenleistung": 1
+    },
     "verificationReasons": {},
-    "directCandidates": 1,
+    "directCandidates": 0,
     "renderedCandidates": 0,
-    "verifiedCandidates": 1
+    "verifiedCandidates": 0
   },
-  "uniqueVerifiedCandidates": 1,
-  "alreadyKnown": 1,
+  "uniqueVerifiedCandidates": 0,
+  "alreadyKnown": 0,
   "newPendingCandidates": 0,
   "pendingCandidates": 0,
   "slackMessagesSent": 0,
