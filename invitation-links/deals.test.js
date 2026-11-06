@@ -59,7 +59,7 @@ test('actual worker uses only bounded public cached reads, preserves HEAD and ca
   globalThis.fetch = async (url, options) => {
     assert.equal(url, 'https://freefinder.at/deals.json');
     assert.equal(options.cf.cacheTtl, 180);
-    assert.equal(options.redirect, 'error');
+    assert.equal(options.redirect, 'manual');
     return new Response(payload);
   };
   try {
@@ -73,5 +73,20 @@ test('actual worker uses only bounded public cached reads, preserves HEAD and ca
       assert.equal((await worker.fetch(request('/d/UoJ7Ip8gAf8e'))).status, 503);
     }
     assert.equal((await worker.fetch(request('/d/UoJ7Ip8gAf8e', 'POST'))).status, 405);
+  } finally { globalThis.fetch = original; }
+});
+
+test('upstream redirects are rejected without following them', async () => {
+  const original = globalThis.fetch;
+  let calls = 0;
+  globalThis.fetch = async (url, options) => {
+    calls++;
+    assert.equal(url, 'https://freefinder.at/deals.json');
+    assert.equal(options.redirect, 'manual');
+    return new Response('', { status: 302, headers: { location: 'https://example.com/untrusted' } });
+  };
+  try {
+    assert.equal((await worker.fetch(request('/d/UoJ7Ip8gAf8e'))).status, 503);
+    assert.equal(calls, 1);
   } finally { globalThis.fetch = original; }
 });

@@ -12,7 +12,7 @@ export async function dealToken(id) {
 async function readDeals() {
   const result = await fetch(FEED, {
     headers: { accept: 'application/json' },
-    redirect: 'error',
+    redirect: 'manual',
     signal: AbortSignal.timeout(8000),
     cf: { cacheTtl: 180, cacheEverything: true },
   });
