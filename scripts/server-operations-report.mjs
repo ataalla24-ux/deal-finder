@@ -33,15 +33,26 @@ export function updatePublicationPilot(previous, queue, { now = new Date(), even
   // Only actual scheduled GitHub events count toward the multi-run observation.
   if (event === 'schedule' && /^\d+$/.test(runId) && /^[a-f0-9]{40}$/.test(sha)
     && !state.regularRuns.some(r => r.runId === runId)) state.regularRuns.push({ runId, sha, observedAt: now.toISOString() });
-  for (const row of queue) {
+  const current=new Map(queue.map(row=>[row.id,row]));
+  for(const sample of state.samples){
+    const row=current.get(sample.id);
+    sample.source=row?.source||sample.source||'unknown';
+    sample.currentFingerprintMatches=Boolean(row&&row.fingerprint===sample.fingerprint);
+  }
+  const groups=new Map();
+  for(const row of queue){const key=row.priority+'|'+row.source;groups.set(key,[...(groups.get(key)||[]),row]);}
+  const representative=[];
+  while([...groups.values()].some(rows=>rows.length))for(const rows of groups.values())if(rows.length)representative.push(rows.shift());
+  for (const row of representative) {
     if (state.samples.length >= 50) break;
-    if (!state.samples.some(s => s.fingerprint === row.fingerprint)) state.samples.push({
+    if (!state.samples.some(s => s.id === row.id)) state.samples.push({
       id: row.id, fingerprint: row.fingerprint, expected: null, observed: row.priority,
+      source:row.source||'unknown',currentFingerprintMatches:true,
       issues: row.issues, sampledAt: now.toISOString(), reviewStatus: 'awaiting-independent-human-label' });
   }
   state.automaticPublicationEnabled = false;
   state.evaluatedCases = state.samples.filter(s => ['approve', 'reject', 'hold'].includes(s.expected)
-    && s.reviewStatus === 'human-reviewed' && s.reviewedBy && s.reviewedAt).length;
+    && s.reviewStatus === 'human-reviewed' && s.reviewedBy && s.reviewedAt && s.currentFingerprintMatches).length;
   state.status = 'shadow-only';
   state.requirements = { atLeastHumanReviewedCases: 30, targetCases: 50, atLeastRegularRuns: 3,
     activationRequiresSeparateDecision: true, cannotInferHumanApprovalFromFeedPresence: true };
@@ -108,8 +119,9 @@ export async function writeOperationsReport({ root = process.cwd(), now = new Da
     maintenance:{ checkedAt:maintenance.checkedAt, corrected:maintenance.corrected || [], hidden:maintenance.hidden || [], ai:maintenance.ai || null },
     missingInformation:quality.live?.filter(r=>r.requiresReview) || [],
     images:{ shared:quality.sharedWebsiteImages || [], review:quality.live?.filter(r=>r.websitePhoto?.status === 'needs-review').map(r=>r.id) || [],
-      native:quality.checks?.nativeImages ? 'inspected' : 'requires-native-contract-audit' },
+      native:quality.nativeContracts||{status:'requires-native-contract-audit'},semanticNativeImageReview:false },
     publicationPilot:{ status:pilot.status, sampled:pilot.samples.length, independentlyReviewed:pilot.evaluatedCases, regularRuns:pilot.regularRuns.length, automaticPublicationEnabled:false },
+    blog:read(root,'reviews/server-blog-report.json',{status:'not-run',automaticPublicationEnabled:false,localBlogReplacementReady:false}),
     sources:['apify-discovery','meta-instagram','power-scraper','instagram-ai'].map(name=>sourceSummary(root,`docs/${name}-report.json`,now)),
     credits:creditSnapshot(await readCreditLedger(request),loadAiCreditPolicy(),now),
     routing:Object.fromEntries(['extract','vision','editor','review'].map(role=>[role,modelForTask(role)])),

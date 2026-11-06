@@ -35,14 +35,14 @@ export async function refreshMaintenanceEvidence({ root = process.cwd(), now = n
   const client = fetchPage || offline ? null : createCarrierFetcher({ now, state: readCarrierPauses(), maxRequests: 5, recordPause: recordCarrierPauses });
   const get = fetchPage || client?.fetchPage;
   const missing = deals.filter(d => !clean(d.description));
-  const selected = [...new Map(missing.filter(d => supported(d.url)).map(d => [d.url, d])).values()]
+  const selected = [...new Map(deals.filter(d => supported(d.url)).map(d => [d.url, d])).values()]
     .sort((a, b) => (Date.parse(cache.entries[a.url]?.checkedAt) || 0) - (Date.parse(cache.entries[b.url]?.checkedAt) || 0));
   let requests = 0;
   for (const deal of selected) {
     const previous = cache.entries[deal.url];
-    if (offline || requests >= 4 || previous?.parserVersion === 2 && Date.parse(previous?.nextAttemptAt) > +now) continue;
+    if (offline || requests >= 4 || previous?.parserVersion === 3 && Date.parse(previous?.nextAttemptAt) > +now) continue;
     requests++;
-    let next = { url: deal.url, parserVersion: 2, checkedAt: now.toISOString(), nextAttemptAt: new Date(+now + 86400000).toISOString(), status: 'deferred' };
+    let next = { url: deal.url, parserVersion: 3, checkedAt: now.toISOString(), nextAttemptAt: new Date(+now + 86400000).toISOString(), status: 'deferred' };
     try {
       const page = await get(deal.url);
       if (page.finalUrl !== deal.url) throw Error('unexpected-source-redirect');
@@ -50,9 +50,9 @@ export async function refreshMaintenanceEvidence({ root = process.cwd(), now = n
       if (!parsed.deal) next.reason = parsed.reason || 'source-not-confirmed';
       else if (!sameMerchant(parsed.deal.brand, deal.brand, deal.url)) next.reason = 'merchant-identity-changed';
       else {
-        const text = clean(parsed.deal.description);
+        const text = clean(parsed.deal.evidence?.textSample);
         if (!text || text.length > 16000) throw Error('invalid-source-text');
-        next = { ...next, status: 'verified', brand: deal.brand, text, hash: digest(text) };
+        next = { ...next, status: 'verified', brand: deal.brand, text, hash: digest(text), sourceKind:'official-page-paragraphs' };
       }
     } catch (error) { next.reason = error.httpStatus ? `source-http-${error.httpStatus}` : 'source-unavailable-or-invalid'; }
     cache.entries[deal.url] = next;

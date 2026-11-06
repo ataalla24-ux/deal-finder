@@ -11,9 +11,22 @@ import { inspectSourceBackedQuality } from '../scraper/source-backed-quality.js'
 import { reviewPhoto } from './server-quality-audit.mjs';
 import { sourceTexts } from './automatic-deal-maintenance.mjs';
 import { verifyPublicQuality } from './verify-server-quality-public.mjs';
+import { artworkInputHash,nativeContractStatus } from './native-contract-observation.mjs';
 
 const now = new Date('2026-11-06T12:00:00Z');
 const policy = {version:1, enabled:true, automaticExpiry:true, automaticLocalCopy:true, maxNewHidesPerRun:5, maxAiCandidatesPerRun:4};
+
+test('native observation expires on artwork-relevant feed changes and never certifies semantic match or recipient UI',()=>{
+  const deals=[{id:'one',title:'Pizza',brand:'Example',category:'essen'}];
+  const snapshot={artworkInputHash:artworkInputHash(deals),tests:['test-artwork-native-parity','test-artwork-library-assets','test-deal-photo-sharing'].map(name=>({name,status:'passed'}))};
+  assert.equal(nativeContractStatus(deals,snapshot).status,'observed-contracts-pass');
+  assert.equal(nativeContractStatus([{...deals[0],description:'terms'}],snapshot).status,'observed-contracts-pass');
+  assert.equal(nativeContractStatus([{...deals[0],title:'Burger'}],snapshot).status,'feed-changed-recheck-required');
+  assert.equal(nativeContractStatus([...deals,{id:'two',title:'Pizza'}],snapshot).status,'feed-changed-recheck-required');
+  assert.equal(nativeContractStatus(deals,{...snapshot,tests:[]}).status,'native-tests-incomplete');
+  assert.equal(nativeContractStatus(deals,snapshot).semanticImageReview,false);
+  assert.equal(nativeContractStatus(deals,snapshot).recipientUiTest,false);
+});
 
 test('publication requires actual bytes for all four public documents; green local tests are insufficient',()=>fixture(async({cwd,put})=>{
   const files=['deals.json','deal-map-locations.json','deal-of-the-day.json','deal-of-the-week.json'];

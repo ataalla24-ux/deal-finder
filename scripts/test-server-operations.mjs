@@ -64,6 +64,10 @@ test('pilot needs independent labels and real scheduled runs; replays and manual
   state=updatePublicationPilot(state,queue,{now,event:'schedule',runId:'2',sha:'b'.repeat(40)});
   state=updatePublicationPilot(state,queue,{now,event:'schedule',runId:'2',sha:'b'.repeat(40)});
   assert.equal(state.regularRuns.length,1);assert.equal(state.automaticPublicationEnabled,false);
+  state.samples[0]={...state.samples[0],expected:'hold',reviewStatus:'human-reviewed',reviewedBy:'fixture',reviewedAt:now.toISOString()};
+  state=updatePublicationPilot(state,queue,{now});assert.equal(state.evaluatedCases,1);
+  state=updatePublicationPilot(state,queue.map(row=>row.id===state.samples[0].id?{...row,fingerprint:'changed'}:row),{now});
+  assert.equal(state.evaluatedCases,0);assert.equal(new Set(state.samples.map(row=>row.id)).size,state.samples.length);
 });
 test('credit summary includes unsettled charges, reports missing data honestly and never claims provider balance',()=>{
   const policy={periodId:'fixture',periodLimitUsd:38,rollingDayLimitUsd:2,expiresAt:'2026-11-20T08:10:11Z'};

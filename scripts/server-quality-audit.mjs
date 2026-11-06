@@ -7,6 +7,7 @@ import { loadDealMapReviewContext, reviewDealMap } from './deal-map-review.mjs';
 import { dealPhoto } from './deal-photos.mjs';
 import { freeCreditOpenAiFetch, modelForTask } from '../scraper/ai-credit-budget.js';
 import { maintenanceEvidenceFor } from './refresh-maintenance-evidence.mjs';
+import { nativeContractStatus } from './native-contract-observation.mjs';
 
 const read = (file, fallback) => { try { return JSON.parse(fs.readFileSync(file,'utf8')); } catch(error) { if(error.code === 'ENOENT') return fallback; throw error; } };
 const write = (file, data) => {fs.mkdirSync(path.dirname(file),{recursive:true});fs.writeFileSync(file,JSON.stringify(data,null,2)+'\n');};
@@ -66,6 +67,7 @@ export async function auditServerQuality({root=process.cwd(),now=new Date(),allo
     .map(deal=>inspectSourceBackedQuality(deal,{mapReview:reviewDealMap(deal,context),today}));
   const report={version:1,checkedAt:now.toISOString(),feedHash:hash(JSON.stringify(deals)),liveCount:deals.length,
     checks:{sourceCopyDate:true,map:true,websiteImages:true,nativeImages:false,blogContent:false},
+    nativeContracts:nativeContractStatus(deals,read(path.join(root,'reviews/native-contract-observation.json'),null)),
     modelCalls,photoDeferred,automaticPublicationEnabled:false,
     live:rows,pending:{count:pendingRows.length,reviewNeeded:pendingRows.filter(r=>r.requiresReview).length,rows:pendingRows},
     sharedWebsiteImages:[...images].filter(([,ids])=>ids.length>1).map(([src,ids])=>({src,dealIds:ids})),
