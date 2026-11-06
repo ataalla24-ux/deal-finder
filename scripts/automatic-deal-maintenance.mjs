@@ -8,6 +8,7 @@ import { freeCreditOpenAiFetch, modelForTask } from '../scraper/ai-credit-budget
 import { canonicalInstagramPostKey } from '../scraper/deal-evidence-utils.js';
 import { parseExpiryShape } from '../scraper/expiry-utils.js';
 import { maintenanceEvidenceFor } from './refresh-maintenance-evidence.mjs';
+import { isBenefitOnlyTitle } from '../scraper/offer-title-utils.js';
 export { automaticMaintenanceReviewCandidates } from './automatic-maintenance-review.mjs';
 
 const clean = value => String(value || '').replace(/\s+/g, ' ').trim();
@@ -72,6 +73,7 @@ export const maintenanceFingerprint = deal => hash(['id', 'url', 'brand', 'title
 export function copyReviewReasons(deal, fields = new Set()) {
   const reasons = [];
   if (!fields.has('title') && (clean(deal.title).length > 50 || !clean(deal.title)
+    || isBenefitOnlyTitle(deal.title)
     || /^(?:Instagram|TikTok|Community[- ]Deal)|gemeinsam schmeckt|jetzt sichern|mega deal/i.test(clean(deal.title)))) reasons.push('title');
   if (!fields.has('description') && !clean(deal.description)) reasons.push('description');
   if (!dateFields.some(key => fields.has(key) || clean(deal[key]))) reasons.push('dates');

@@ -9,6 +9,8 @@ on:
       - 'docs/deal-of-the-week.json'
       - 'scripts/slack-live-deal-list.mjs'
       - 'scripts/test-slack-live-deal-list.mjs'
+      - 'scripts/test-lightweight-state-committer.mjs'
+      - 'scripts/refresh-maintenance-evidence.mjs'
       - 'scraper/slack-digest-utils.js'
       - '.github/workflows/slack-live-deal-list.yml'
   workflow_run:
@@ -43,7 +45,9 @@ jobs:
         with:
           node-version: '22'
       - name: Test catalogue and approval isolation offline
-        run: node scripts/test-slack-live-deal-list.mjs
+        run: |
+          node --test scripts/test-lightweight-state-committer.mjs
+          node scripts/test-slack-live-deal-list.mjs
       - name: Synchronize confirmed public deals
         env:
           SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}

@@ -2,7 +2,6 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { createHash } from 'node:crypto';
-import { createCarrierFetcher, parseDreiDetail, readCarrierPauses, recordCarrierPauses } from '../scraper/carrier-benefits.js';
 
 const read = (root, file, fallback) => { try { return JSON.parse(fs.readFileSync(path.join(root, file), 'utf8')); } catch (e) { if (e.code === 'ENOENT') return fallback; throw e; } };
 const digest = value => createHash('sha256').update(value).digest('hex');
@@ -32,6 +31,9 @@ export function maintenanceEvidenceFor(deals, cache, now = new Date()) {
 export async function refreshMaintenanceEvidence({ root = process.cwd(), now = new Date(), fetchPage, apply = true, offline = false } = {}) {
   const feed = read(root, 'docs/deals.json', {}), deals = feed.deals || [];
   const cache = read(root, 'reviews/maintenance-source-evidence.json', { version: 1, entries: {} });
+  // Cached readers and lightweight Slack state commits do not install parsers.
+  const { createCarrierFetcher, parseDreiDetail, readCarrierPauses, recordCarrierPauses } = offline
+    ? {} : await import('../scraper/carrier-benefits.js');
   const client = fetchPage || offline ? null : createCarrierFetcher({ now, state: readCarrierPauses(), maxRequests: 5, recordPause: recordCarrierPauses });
   const get = fetchPage || client?.fetchPage;
   const missing = deals.filter(d => !clean(d.description));

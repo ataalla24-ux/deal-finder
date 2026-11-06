@@ -27,6 +27,12 @@ export function isSocialInstructionTitle(value = '') {
   return /^(?:kommentier(?:e|t)?|folg(?:e|t)|markier(?:e|t)?|schreib(?:e|t)?|teil(?:e|t)?)\b|\b(?:per DM|direktnachricht)\b/iu.test(String(value).trim());
 }
 
+// Advisory only: a benefit or eligibility clause alone does not name the offer.
+export function isBenefitOnlyTitle(value = '') {
+  const title = stripSlackEmojiCodes(value).replace(/\p{Extended_Pictographic}|\uFE0F/gu, '').trim();
+  return /^(?:(?:jetzt|bis zu|ab)\s+)?(?:\d+(?:[,.]\d+)?\s*(?:%|prozent|€|euro)\s*(?:rabatt|sparen|ersparnis|preisvorteil)?|[12]\s*\+\s*1(?:\s+gratis)?|gratis|kostenlos)(?:\s+(?:mit|für|fuer)\s+.+)?[.!]*$/iu.test(title);
+}
+
 // Rewrite only complete, evidenced patterns. Unknown or ambiguous copy stays for review.
 export function polishOfferTitle(value = '', description = '') {
   const original = String(value).trim();

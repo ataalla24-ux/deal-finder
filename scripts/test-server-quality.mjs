@@ -16,6 +16,22 @@ import { artworkInputHash,nativeContractStatus } from './native-contract-observa
 const now = new Date('2026-11-06T12:00:00Z');
 const policy = {version:1, enabled:true, automaticExpiry:true, automaticLocalCopy:true, maxNewHidesPerRun:5, maxAiCandidatesPerRun:4};
 
+test('benefit-only titles, address identities and earlier validation warnings remain review cases',()=>{
+  for(const title of ['25 % sparen','35 % Rabatt','20% Rabatt mit dem Vorteilsclub Wien','1+1 gratis','Gratis']) {
+    const deal={title,description:'Vollstaendige Bedingungen',expires:'2026-11-30'};
+    assert(copyReviewReasons(deal).includes('title'));
+    assert(!copyReviewReasons(deal,new Set(['title'])).includes('title'));
+    assert(inspectSourceBackedQuality(deal).issues.some(i=>i.code==='product-unspecified'));
+  }
+  for(const title of ['6 Krapfen für 9 €','1+1 Pizza gratis mit Gutschein','20 % auf alle Speisen','Gratis Kaffee','30 % Rabatt bei SHEIN']) {
+    assert(!copyReviewReasons({title,description:'Bedingungen',expires:'2026-11-30'}).includes('title'));
+  }
+  const check=inspectSourceBackedQuality({title:'6 Krapfen für 9 €',brand:'Landstraßer Hauptstraße 2',validity:{warnings:['Originaltext pruefen']}});
+  assert(check.issues.some(i=>i.code==='merchant-looks-like-address'));
+  assert(check.issues.some(i=>i.code==='upstream-validity-review'));
+  assert.equal(check.automaticPublicationAllowed,false);
+});
+
 test('native observation expires on artwork-relevant feed changes and never certifies semantic match or recipient UI',()=>{
   const deals=[{id:'one',title:'Pizza',brand:'Example',category:'essen'}];
   const snapshot={artworkInputHash:artworkInputHash(deals),tests:['test-artwork-native-parity','test-artwork-library-assets','test-deal-photo-sharing'].map(name=>({name,status:'passed'}))};
