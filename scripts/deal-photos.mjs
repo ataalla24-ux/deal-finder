@@ -2,6 +2,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { createHash } from 'node:crypto';
+import {readBoundPhotoSnapshot} from './original-deal-photo.mjs';
 
 // Indices reference the existing native DealsHomeImages atlas, not merchant photos.
 export const photoDefinitions = {
@@ -89,6 +90,13 @@ export function photoKey(deal) {
 }
 
 export function dealPhoto(deal) {
+  if(deal.photoUrl){
+    try {
+      const asset=readBoundPhotoSnapshot(deal,{root:ROOT}),src=new URL(deal.photoUrl).pathname;
+      return {key:`bound-${deal.id}`,src,width:asset.size.width,height:asset.size.height,
+        alt:asset.review.kind==='editorial-illustration'?`Symbolfoto: ${deal.title}`:`Angebotsfoto: ${deal.title}`};
+    }catch{/* Invalid or revoked image falls back to the existing symbolic selection. */}
+  }
   const key = photoKey(deal);
   const title = normalize(deal.title), brand = normalize(deal.brand);
   const specificProduct = [

@@ -13,6 +13,7 @@ import {reviewBoundOriginalPhoto} from './native-artwork-review.mjs';
 import {validateOriginalDealPhotos} from './validate-original-deal-photos.mjs';
 import {auditServerQuality} from './server-quality-audit.mjs';
 import {maintainFeedFile} from './automatic-deal-maintenance.mjs';
+import {dealPhoto} from './deal-photos.mjs';
 
 const repository=path.resolve(path.dirname(fileURLToPath(import.meta.url)),'..');
 const now=new Date('2026-11-06T14:00:00Z');
@@ -56,6 +57,15 @@ test('public visibility is not permission and arbitrary extra fields cannot appr
   validatePhotoPermission({...permission,rights:'owned-original'});
 });
 
+test('owned editorial illustrations are explicit and cannot impersonate an actual merchant photograph',()=>{
+  const illustration={...permission,rights:'owned-original',kind:'editorial-illustration',showsActualProduct:false,showsIllustratedProduct:true};
+  validatePhotoPermission(illustration);
+  for(const patch of [{rights:'merchant-permission'},{showsActualProduct:true},{showsIllustratedProduct:false},
+    {kind:'trust-this-image'},{rightsEvidence:''},{cropChecked:false}])
+    assert.throws(()=>validatePhotoPermission({...illustration,...patch}));
+  assert.throws(()=>validatePhotoPermission({...permission,showsActualProduct:false}));
+});
+
 test('bound original verifies exact subject, file and card hashes',()=>fixture(async root=>{
   const {deal,review,filename}=await bound(root);assert.ok(await inspectBoundOriginalPhoto(deal,{root}));
   for(const patch of [{title:'Kebab 1+1'},{brand:'Different merchant'},{description:'Vegan only'},{category:'freizeit'},{url:'https://merchant.example/new'}])
@@ -78,6 +88,19 @@ test('revocation and symlink escape fail before any image/model request',()=>fix
   fs.unlinkSync(file);write(root,'outside.jpg',await image());fs.symlinkSync(path.join(root,'outside.jpg'),file);
   await assert.rejects(inspectBoundOriginalPhoto(deal,{root}),/outside-review/);
   assert.equal((await validateOriginalDealPhotos([deal],{root})).errors,1);
+}));
+
+test('website uses the same bound editorial image and rejects changed or revoked subjects',()=>fixture(async root=>{
+  const {deal,review,filename}=await bound(root);
+  // dealPhoto uses the repository root; test the binding primitive with isolated files.
+  const {readBoundPhotoSnapshot}=await import('./original-deal-photo.mjs');
+  const illustration={...review,rights:'owned-original',kind:'editorial-illustration',showsActualProduct:false,showsIllustratedProduct:true};
+  write(root,'reviews/deal-photos/'+filename+'.json',illustration);
+  assert.equal(readBoundPhotoSnapshot(deal,{root}).review.kind,'editorial-illustration');
+  assert.throws(()=>readBoundPhotoSnapshot({...deal,description:'Different food'},{root}),/stale/);
+  write(root,'reviews/deal-photos/'+filename+'.json',{...illustration,revoked:true});
+  assert.throws(()=>readBoundPhotoSnapshot(deal,{root}),/current permission or ownership/);
+  assert.ok(!dealPhoto(deal)?.src?.includes('approved-deal-photos'));
 }));
 
 test('image binding survives edit-store replay and disables image on changed deal only',()=>{

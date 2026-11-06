@@ -18,7 +18,11 @@ export function validatePhotoPermission(request) {
   if (!['https:','http:'].includes(url.protocol) || url.username || url.password) throw Error('Invalid public source URL');
   if (!['merchant-permission','owned-original'].includes(request.rights) || request.revoked === true)
     throw Error('Document current permission or ownership; public visibility is not permission');
-  if (request.matchesOffer !== true || request.showsActualProduct !== true || request.cropChecked !== true)
+  if(request.kind!==undefined && !['merchant-photo','editorial-illustration'].includes(request.kind))throw Error('Unknown image kind');
+  const illustration=request.kind==='editorial-illustration';
+  if(illustration && (request.rights!=='owned-original' || request.showsActualProduct!==false || request.showsIllustratedProduct!==true))
+    throw Error('Owned editorial illustrations must not claim an actual merchant product');
+  if (request.matchesOffer !== true || (!illustration && request.showsActualProduct !== true) || request.cropChecked !== true)
     throw Error('Review product relevance, visible food and 2.7:1 crop first');
 }
 
@@ -41,7 +45,7 @@ export async function normalizeOriginalPhoto(bytes) {
   return {bytes:normalized,card,size:normalizedSize,crop};
 }
 
-export async function inspectBoundOriginalPhoto(deal,{root=process.cwd()}={}) {
+export function readBoundPhotoSnapshot(deal,{root=process.cwd()}={}) {
   if (!deal.photoUrl) return null;
   const url = approvedDealPhotoURL(deal.photoUrl,deal.id);
   if (!url) throw Error('unapproved-photo-url');
@@ -58,11 +62,17 @@ export async function inspectBoundOriginalPhoto(deal,{root=process.cwd()}={}) {
     throw Error('original-photo-integrity-failed');
   const size = inspectOriginalJPEG(bytes);
   if (size.width!==review.width || size.height!==review.height) throw Error('original-photo-size-mismatch');
-  const {default:sharp} = await import('sharp');
   const width = Math.floor(Math.min(size.width,size.height*2.7)),height=Math.floor(width/2.7);
   if (width<600 || height<222) throw Error('Original card crop is too small');
   const crop={left:Math.floor((size.width-width)/2),top:Math.floor((size.height-height)/2),width,height};
   if (JSON.stringify(crop)!==JSON.stringify(review.crop)) throw Error('original-photo-crop-mismatch');
+  return {bytes,size,crop,review};
+}
+
+export async function inspectBoundOriginalPhoto(deal,{root=process.cwd()}={}) {
+  if(!deal.photoUrl)return null;
+  const {bytes,size,crop,review}=readBoundPhotoSnapshot(deal,{root});
+  const {default:sharp} = await import('sharp');
   const card = await sharp(bytes,{failOn:'warning',limitInputPixels:12_000_000}).extract(crop).jpeg({quality:90}).toBuffer();
   if (photoDigest(card)!==review.cardSha256) throw Error('original-photo-crop-integrity-failed');
   return {bytes,card,size,crop,review};

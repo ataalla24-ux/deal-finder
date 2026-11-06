@@ -86,6 +86,9 @@ export async function auditServerQuality({root=process.cwd(),now=new Date(),allo
     nativeSelection:{...native,entries:undefined,observedDeals:native.entries.size,recipientUiTest:false,
       reviewedPlatformImages:rows.reduce((sum,r)=>sum+Object.values(r.nativePhoto.platforms||{}).filter(p=>['symbolic-match','needs-review'].includes(p.semanticStatus)).length,0),
       lowResolutionDeals:rows.filter(r=>Object.values(r.nativePhoto.platforms||{}).some(p=>p.sourceResolution?.requiresHigherResolution)).map(r=>r.id),
+      reviewedPrimaryPhotoDeals:rows.filter(r=>r.nativePhoto.originalPhoto?.bindingStatus==='current' && r.nativePhoto.originalPhoto?.permissionStatus==='documented').map(r=>r.id),
+      effectiveLowResolutionDeals:rows.filter(r=>Object.values(r.nativePhoto.platforms||{}).some(p=>p.sourceResolution?.requiresHigherResolution)
+        && !(r.nativePhoto.originalPhoto?.bindingStatus==='current' && r.nativePhoto.originalPhoto?.permissionStatus==='documented')).map(r=>r.id),
       sharedAssignments:['ios','android'].flatMap(platform=>{
         const selected=new Map();
         for(const row of native.entries.values()){

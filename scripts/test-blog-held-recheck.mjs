@@ -76,7 +76,7 @@ assert.equal(review.decisions.find(e => e.id === 'fc4g-rw3rck').slug, mcdSlug);
 
 const fixture = fs.mkdtempSync(path.join(root, 'tmp', 'blog-held-recheck-'));
 try {
-  for (const file of ['scripts/server-blog-content.mjs', 'scripts/generate-topic-guides.mjs', 'scripts/polish-website.mjs', 'scripts/blog-visuals.mjs', 'scripts/blog-photo-catalog.mjs', 'scripts/deal-photos.mjs', 'scripts/blog-backfill-20261018.mjs', 'scripts/blog-backfill-20261030.mjs', 'scripts/blog-backfill-20261105.mjs', 'reviews/deal-guides.json', 'docs/blog/index.html', 'docs/sitemap.xml']) {
+  for (const file of ['scripts/original-deal-photo.mjs', 'scripts/deal-photo-contract.mjs', 'scripts/server-blog-content.mjs', 'scripts/generate-topic-guides.mjs', 'scripts/polish-website.mjs', 'scripts/blog-visuals.mjs', 'scripts/blog-photo-catalog.mjs', 'scripts/deal-photos.mjs', 'scripts/blog-backfill-20261018.mjs', 'scripts/blog-backfill-20261030.mjs', 'scripts/blog-backfill-20261105.mjs', 'reviews/deal-guides.json', 'docs/blog/index.html', 'docs/sitemap.xml']) {
     fs.mkdirSync(path.dirname(path.join(fixture, file)), { recursive: true });
     fs.copyFileSync(path.join(root, file), path.join(fixture, file));
   }

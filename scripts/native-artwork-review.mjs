@@ -43,6 +43,7 @@ export async function reviewBoundOriginalPhoto(deal,{root,cache,now,allowNew=()=
   catch(error) {return {status:'needs-review',url:deal.photoUrl,reason:error.code==='ENOENT'?'photo-review-or-file-missing':error.message,automaticReplacement:false};}
   if(String(deal.description||'').length>6000)return {status:'needs-review',reason:'photo-context-too-long',automaticReplacement:false};
   const context={id:deal.id,title:deal.title,brand:deal.brand,category:deal.category||'',description:deal.description||'',
+    imageKind:asset.review.kind||'merchant-photo',
     subjectHash:asset.review.subjectHash};
   const key=hash(JSON.stringify(['bound-original-photo-v1',hash(asset.bytes),hash(asset.card),context]));
   let verdict=cache[key];
@@ -64,6 +65,7 @@ export async function reviewBoundOriginalPhoto(deal,{root,cache,now,allowNew=()=
     cache[key]=verdict;
   }else verdict={status:'not-reviewed'};
   return {...verdict,url:deal.photoUrl,permissionStatus:'documented',bindingStatus:'current',
+    imageKind:asset.review.kind||'merchant-photo',
     fullSha256:hash(asset.bytes),cardSha256:hash(asset.card),crop:asset.crop,
     provesMerchantPhoto:false,automaticReplacement:false,recipientUiTest:false};
 }

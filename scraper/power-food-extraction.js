@@ -87,7 +87,7 @@ export function extractFoodExpiry(text, now) {
       : "";
   };
   const end = text.match(
-    /\bbis\s+(?:zum\s+)?(\d{1,2})\.\s*(\d{1,2})\.\s*(20\d{2})?/i,
+    /\bbis\s+(?:(?:zum|inklusive|inkl\.)\s+)?(\d{1,2})\.\s*(\d{1,2})\.\s*(20\d{2})?/i,
   );
   const compact = text.match(
     /(\d{1,2})\.\s*[-–]\s*(\d{1,2})\.\s*(\d{1,2})\.\s*(20\d{2})/,
@@ -146,6 +146,24 @@ export function extractFoodOffers(html, source, options = {}) {
   }
   const blocks = [];
   const rejected = [];
+  // This official campaign puts its binding product/date conditions in a
+  // separate footnote. Keep both periods separate; never use the longer one
+  // for the shorter-lived products or borrow terms from another campaign.
+  if (source.foodoraFootnote && new URL(pageUrl).pathname === '/') {
+    const heading=$('h2').filter((i,e)=>/^1\s*\+\s*1\s*=\s*1$/.test(foodText($(e).text())));
+    const notes=$('.column_attr > p').filter((i,e)=>/^\*\*\s+Beim Kauf/.test(foodText($(e).text())));
+    if(heading.length===1 && notes.length===1){
+      const note=foodText(notes.text());
+      const parts=note.match(/^\*\*\s+(Beim Kauf eines McMuffin Fresh Chicken, Nougatburgers oder Hashbrowns über die Bestellplattform foodora bis 10:30 Uhr und bis inklusive \d{2}\.\d{2}\.20\d{2}) oder (beim Kauf eines Hamburger Royal TS, Crispy Veggie Burgers, Filet-o-Fish, 6er Chicken McNuggets oder McPops® Strawberry, McPops® Chocolate oder McPops® Stracciatella über die Bestellplattform foodora bis inklusive \d{2}\.\d{2}\.20\d{2}) (erhalten .+)$/);
+      if(parts && /ein zweites Exemplar des jeweils gewählten Produktes gratis/.test(parts[3])
+          && /Mindestbestellwert unverändert/.test(parts[3])
+          && /In allen teilnehmenden Restaurants in Österreich/.test(parts[3])
+          && /www\.foodora\.at\/mcdonalds/.test(parts[3])){
+        blocks.push({text:`${parts[1]} ${parts[3]}`,title:"1+1 Frühstück bei McDonald's über foodora",method:'official-campaign-footnote'});
+        blocks.push({text:`${parts[2]} ${parts[3]}`,title:'1+1 Burger, Nuggets oder McPops über foodora',method:'official-campaign-footnote'});
+      }else rejected.push({reason:'campaign-footnote-changed',url:pageUrl});
+    }
+  }
   // Only opt-in merchants with verified promotional image captions. Keep the
   // exact source text; this neither performs OCR nor establishes Vienna scope.
   if (source.imageOfferSelector) {
@@ -327,7 +345,7 @@ export function extractFoodOffers(html, source, options = {}) {
         : /cocktail|spritz|drink|getränk|bier|beer/i.test(title)
           ? "trinken"
           : source.category;
-    const bogo = /\d+\s*\+\s*\d+|\b2\s*(?:für|for)\s*1\b/i.test(t);
+    const bogo = b.method === 'official-campaign-footnote' || /\d+\s*\+\s*\d+|\b2\s*(?:für|for)\s*1\b/i.test(t);
     const conditional =
       /\b(?:kauf|bestell|mitglied|punkte|coupon|markerl|ab einem|zu jedem|zweite|zweiten)\w*/i.test(
         t,

@@ -34,6 +34,7 @@ on:
       - "scraper/slack-notify.js"
       - "scraper/slack-approve.js"
       - "scripts/test-power-*.mjs"
+      - "scripts/test-mcdonalds-foodora-footnote.mjs"
       - "package*.json"
       - ".github/workflows/power*.yml"
   push:
@@ -71,6 +72,7 @@ on:
       - "scraper/slack-notify.js"
       - "scraper/slack-approve.js"
       - "scripts/test-power-*.mjs"
+      - "scripts/test-mcdonalds-foodora-footnote.mjs"
       - "package*.json"
       - ".github/workflows/power*.yml"
 permissions:
@@ -101,6 +103,7 @@ jobs:
           node scripts/test-instagram-ai-agent.mjs
           node scripts/test-wien-deals-combined.mjs
           node scripts/test-power-food.mjs
+          node --test scripts/test-mcdonalds-foodora-footnote.mjs
           node --test scripts/test-official-coupon-media.mjs
           node scripts/test-deal-validity-evidence.mjs
           node scripts/test-slack-approval-validation.mjs

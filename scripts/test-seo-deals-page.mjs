@@ -20,6 +20,8 @@ fs.copyFileSync(path.join(ROOT, 'scripts/blog-backfill-20261018.mjs'), path.join
 fs.copyFileSync(path.join(ROOT, 'scripts/blog-backfill-20261030.mjs'), path.join(fixtureRoot, 'scripts/blog-backfill-20261030.mjs'));
 fs.copyFileSync(path.join(ROOT, 'scripts/blog-backfill-20261105.mjs'), path.join(fixtureRoot, 'scripts/blog-backfill-20261105.mjs'));
 fs.copyFileSync(path.join(ROOT, 'scripts/deal-photos.mjs'), path.join(fixtureRoot, 'scripts/deal-photos.mjs'));
+for (const file of ['original-deal-photo.mjs','deal-photo-contract.mjs'])
+  fs.copyFileSync(path.join(ROOT,'scripts',file),path.join(fixtureRoot,'scripts',file));
 fs.cpSync(path.join(ROOT, 'docs/assets/deal-photos'), path.join(fixtureRoot, 'docs/assets/deal-photos'), { recursive: true });
 fs.symlinkSync(path.join(ROOT, 'node_modules'), path.join(fixtureRoot, 'node_modules'), 'dir');
 

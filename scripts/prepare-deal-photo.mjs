@@ -27,7 +27,8 @@ const existing = store.edits.find(edit => edit.dealId === deal.id);
 if (existing?.hidden) throw new Error('Cannot assign an image to a hidden deal');
 const review = {version:2,dealId:deal.id,file:filename,sourceURL:request.sourceURL,
   rights:request.rights,rightsEvidence:request.rightsEvidence,reviewedBy:request.reviewedBy,
-  matchesOffer:true,showsActualProduct:true,cropChecked:true,
+  matchesOffer:true,cropChecked:true,
+  ...(request.kind==='editorial-illustration'?{kind:request.kind,showsActualProduct:false,showsIllustratedProduct:true}:{showsActualProduct:true}),
   titleAtReview:deal.title,brandAtReview:deal.brand,subjectHash:photoSubjectHash(deal),
   photoUrl,...size,crop,sha256:photoDigest(bytes),cardSha256:photoDigest(card),
   originalSha256:photoDigest(sourceBytes),reviewedAt:new Date().toISOString()};
