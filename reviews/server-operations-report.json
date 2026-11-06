@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "checkedAt": "2026-11-06T10:50:43.487Z",
+  "checkedAt": "2026-11-06T10:56:02.085Z",
   "liveCount": 67,
   "liveIds": [
     "g2-1gkjf0g",
@@ -3758,10 +3758,9 @@
         "priority": "venue-verification-needed",
         "issues": [
           "long-title",
-          "invalid-date",
           "map-incomplete"
         ],
-        "fingerprint": "668713c0c4298791de65e778884da998299af8dc0a442e3f055169df0f6a6e39",
+        "fingerprint": "acb705d090059ad51877ced71174c2a75a06bc3d09dc507325f73daaf3f76b62",
         "automaticPublicationAllowed": false
       },
       {
@@ -4121,10 +4120,9 @@
         "priority": "venue-verification-needed",
         "issues": [
           "long-title",
-          "invalid-date",
           "map-incomplete"
         ],
-        "fingerprint": "7612c3499dbfeda5fc77f1e98d5c1d867439662b901253df7790cf4642706cb6",
+        "fingerprint": "6a11df55ed852d16b41308e2f74a88306d8b264296831d7a5831742ea9f7968c",
         "automaticPublicationAllowed": false
       },
       {
@@ -5456,12 +5454,20 @@
     ]
   },
   "maintenance": {
-    "checkedAt": "2026-11-06T10:40:24.017Z",
-    "corrected": [],
+    "checkedAt": "2026-11-06T10:55:14.344Z",
+    "corrected": [
+      {
+        "id": "benefit-drei-plus-b23e1ae26ce0bac1",
+        "fields": [
+          "description"
+        ],
+        "method": "quoted-terra-draft-sol-verification"
+      }
+    ],
     "hidden": [],
     "ai": {
-      "attempted": 0,
-      "corrected": 0,
+      "attempted": 3,
+      "corrected": 1,
       "deferred": 0
     }
   },
@@ -5604,7 +5610,13 @@
       "websitePhoto": {
         "src": "/assets/blog/photos/kebab.webp",
         "key": "kebab",
-        "status": "not-reviewed"
+        "matchesProduct": true,
+        "emptyTableOrPackaging": false,
+        "uncertain": false,
+        "status": "symbolic-match",
+        "checkedAt": "2026-11-06T10:55:52.272Z",
+        "provesMerchantPhoto": false,
+        "automaticReplacement": false
       },
       "nativePhoto": "not-inspected-by-this-web-audit"
     },
@@ -5822,32 +5834,6 @@
         "status": "online-only",
         "reason": "online-only",
         "locationIds": []
-      },
-      "websitePhoto": {
-        "src": "/assets/blog/photos/gift.webp",
-        "key": "gift",
-        "status": "not-reviewed"
-      },
-      "nativePhoto": "not-inspected-by-this-web-audit"
-    },
-    {
-      "id": "benefit-drei-plus-b23e1ae26ce0bac1",
-      "issues": [
-        {
-          "code": "missing-conditions",
-          "label": "Beschreibung und Einloesebedingungen fehlen."
-        }
-      ],
-      "requiresReview": true,
-      "publicationMode": "human-approval",
-      "automaticPublicationAllowed": false,
-      "fingerprint": "6bc6c8e304c1cc0aa72bd3510e461d5fda9389975da6585d91150a1f1a788aa5",
-      "map": {
-        "status": "mapped",
-        "reason": "verified-address-reuse",
-        "locationIds": [
-          "address-14ef1519772ccef9"
-        ]
       },
       "websitePhoto": {
         "src": "/assets/blog/photos/gift.webp",
@@ -7276,7 +7262,7 @@
     {
       "file": "docs/apify-discovery-report.json",
       "observedAt": "2026-11-05T22:44:32.564Z",
-      "ageHours": 12.1,
+      "ageHours": 12.19,
       "stale": false,
       "status": "partial",
       "counts": {
@@ -7291,8 +7277,8 @@
     },
     {
       "file": "docs/meta-instagram-report.json",
-      "observedAt": "2026-11-06T09:25:48.403Z",
-      "ageHours": 1.42,
+      "observedAt": "2026-11-06T10:39:54.912Z",
+      "ageHours": 0.27,
       "stale": false,
       "status": "ok",
       "counts": {},
@@ -7301,7 +7287,7 @@
     {
       "file": "docs/power-scraper-report.json",
       "observedAt": "2026-11-05T20:45:54.911Z",
-      "ageHours": 14.08,
+      "ageHours": 14.17,
       "stale": false,
       "status": "see-source-results",
       "counts": {
@@ -7316,7 +7302,7 @@
     {
       "file": "docs/instagram-ai-report.json",
       "observedAt": "2026-11-06T08:05:42.518Z",
-      "ageHours": 2.75,
+      "ageHours": 2.84,
       "stale": false,
       "status": "see-source-results",
       "counts": {
@@ -7329,8 +7315,22 @@
     }
   ],
   "credits": {
-    "status": "unavailable-or-invalid",
-    "providerBalanceKnown": false
+    "status": "internal-ledger",
+    "observedAt": "2026-11-06T10:56:02.085Z",
+    "providerBalanceKnown": false,
+    "periodId": "subscription-2026-11-05",
+    "periodLimitUsd": 38,
+    "rollingDayLimitUsd": 2,
+    "periodReservedOrSettledUsd": 0.518942,
+    "rollingDayReservedOrSettledUsd": 0.518942,
+    "unsettledReservations": 1,
+    "expiresAt": "2026-11-20T08:10:11Z",
+    "expired": false,
+    "modelsLast24Hours": {
+      "gpt-6.1-terra": 75,
+      "gpt-6-luna": 23,
+      "gpt-6.1-sol": 27
+    }
   },
   "routing": {
     "extract": "gpt-6-luna",
