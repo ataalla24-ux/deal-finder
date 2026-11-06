@@ -81,8 +81,9 @@ test('coupon preflight skips installed tools and bounds both package operations'
   assert.match(action, /60s sudo apt-get/);
   assert.match(action, /120s sudo apt-get/);
   assert.match(action, /if \(installed\) needed = false/);
-  assert.match(action, /probe\('pdfimages'/);
-  assert.match(action, /probe\('pdfinfo'/);
+  assert.match(action, /inspectCouponTools/);
+  assert.match(action, /COUPON_TOOLS_AVAILABLE/);
+  assert.match(action, /MISSING_COUPON_PACKAGES/);
   assert.doesNotMatch(action, /exit 0|continue-on-error/);
 });
 

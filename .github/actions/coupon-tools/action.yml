@@ -14,24 +14,37 @@ runs:
       run: |
         node --input-type=module <<'NODE'
         import fs from 'node:fs';
-        import { spawnSync } from 'node:child_process';
+        import { inspectCouponTools } from './scripts/coupon-tools-preflight.mjs';
         let needed = process.env.FORCE_COUPON_TOOLS === 'true';
         for (const f of fs.readdirSync('docs').filter(f=>/^deals-pending.*\.json$/.test(f))) {
           const b = JSON.parse(fs.readFileSync('docs/'+f,'utf8'));
           if ((Array.isArray(b)?b:b.deals||[]).some(d=>d.evidence?.media)) needed = true;
         }
-        const probe = (command, args) => spawnSync(command, args, { encoding: 'utf8', timeout: 5000 });
-        const languages = probe('tesseract', ['--list-langs']);
-        const installed = probe('ffmpeg', ['-version']).status === 0
-          && probe('pdftotext', ['-v']).status === 0
-          && probe('pdfimages', ['-v']).status === 0
-          && probe('pdfinfo', ['-v']).status === 0 && languages.status === 0
-          && /^deu$/m.test(languages.stdout) && /^eng$/m.test(languages.stdout);
+        const inspection = inspectCouponTools();
+        const installed = inspection.available;
         if (installed) needed = false;
-        fs.appendFileSync(process.env.GITHUB_OUTPUT,`needed=${needed}\n`);
+        fs.appendFileSync(process.env.GITHUB_OUTPUT,`needed=${needed}\npackages=${inspection.packages.join(' ')}\n`);
         NODE
     - if: steps.need.outputs.needed == 'true'
       shell: bash
+      env:
+        MISSING_COUPON_PACKAGES: ${{ steps.need.outputs.packages }}
       run: |
-        timeout --kill-after=10s 60s sudo apt-get -o Acquire::Retries=1 -o Acquire::http::Timeout=20 -o Acquire::https::Timeout=20 update -qq
-        timeout --kill-after=10s 120s sudo apt-get -o Acquire::Retries=1 -o Acquire::http::Timeout=20 -o Acquire::https::Timeout=20 install -y --no-install-recommends ffmpeg poppler-utils tesseract-ocr tesseract-ocr-deu tesseract-ocr-eng
+        if ! timeout --kill-after=10s 60s sudo apt-get -o Acquire::Retries=1 -o Acquire::http::Timeout=20 -o Acquire::https::Timeout=20 update -qq; then
+          echo '::warning::Coupon package index unavailable; verification will check actual tools.'
+        fi
+        read -r -a packages <<< "$MISSING_COUPON_PACKAGES"
+        if ! timeout --kill-after=10s 120s sudo apt-get -o Acquire::Retries=1 -o Acquire::http::Timeout=20 -o Acquire::https::Timeout=20 install -y --no-install-recommends "${packages[@]}"; then
+          echo '::warning::Coupon tools incomplete; media-dependent offers must wait, other offers may proceed.'
+        fi
+    - name: Publish actual media verification capability
+      shell: bash
+      run: |
+        node --input-type=module <<'NODE'
+        import fs from 'node:fs';
+        import { inspectCouponTools } from './scripts/coupon-tools-preflight.mjs';
+        const result = inspectCouponTools();
+        fs.appendFileSync(process.env.GITHUB_ENV, `COUPON_TOOLS_AVAILABLE=${result.available ? '1' : '0'}\n`);
+        fs.appendFileSync(process.env.GITHUB_STEP_SUMMARY, result.available
+          ? 'Coupon media tools ready.\n' : 'Coupon media verification deferred: missing ' + result.packages.join(', ') + '. No media offer may bypass verification.\n');
+        NODE

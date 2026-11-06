@@ -33,6 +33,13 @@ on:
       - "scripts/test-generated-state-merge.mjs"
       - "scraper/ai-credit-budget.js"
       - "scripts/automatic-deal-maintenance.mjs"
+      - "scripts/server-quality-audit.mjs"
+      - "scripts/vienna-quality-slot.mjs"
+      - "scripts/test-server-quality.mjs"
+      - "scraper/source-backed-quality.js"
+      - "scraper/community-extraction.js"
+      - "scraper/fetch-community-submissions.js"
+      - ".github/workflows/server-deal-quality.yml"
       - "scripts/automatic-maintenance-review.mjs"
       - "scripts/test-ai-credit-budget.mjs"
       - "scripts/test-automatic-maintenance.mjs"
@@ -102,6 +109,9 @@ jobs:
           node scripts/test-map-location-classification.mjs
           node scripts/test-generated-state-merge.mjs
           node --test scripts/test-ai-credit-budget.mjs scripts/test-automatic-maintenance.mjs
+          node --test scripts/test-server-quality.mjs
+          node scripts/test-community-extraction.mjs
+          node scripts/test-community-card-enrichment.mjs
 
       - name: Protect bounded food discovery
         run: |

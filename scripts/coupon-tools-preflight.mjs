@@ -6,7 +6,7 @@ export function inspectCouponTools(run = spawnSync) {
   const packages = new Set();
   const tools = {};
   for (const [tool, args, pkg] of [
-    ['ffmpeg', ['-version'], 'ffmpeg'], ['pdfimages', ['-v'], 'poppler-utils'],
+    ['ffmpeg', ['-version'], 'ffmpeg'], ['ffprobe', ['-version'], 'ffmpeg'], ['pdfimages', ['-v'], 'poppler-utils'],
     ['pdfinfo', ['-v'], 'poppler-utils'], ['pdftotext', ['-v'], 'poppler-utils'],
     ['tesseract', ['--version'], 'tesseract-ocr'],
   ]) {

@@ -4,7 +4,7 @@ import path from 'path';
 import { fileURLToPath } from 'url';
 import { extractCommunityDeal, extractionKey } from './community-extraction.js';
 import { loadInstagramGraphEvidence } from './instagram-graph-evidence.js';
-import { enrichCommunityCard } from './community-card-enrichment.js';
+import { enrichCommunityCard, communityHasHumanDecision } from './community-card-enrichment.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -134,11 +134,12 @@ async function main() {
     while (cursor < submissions.length) {
       const index = cursor++;
       const submission = submissions[index];
-      const key = extractionKey(submission);
+      const key = extractionKey(submission, graphEvidence);
       const old = cached.get(cleanText(submission.id));
+      if (old && communityHasHumanDecision(old)) { deals[index] = old; continue; }
       const age = Date.now() - Date.parse(old?.communityExtraction?.checkedAt || '');
       if (old?.communityExtraction?.key === key && age >= 0 && age < 6 * 60 * 60 * 1000) {
-        // New Graph evidence need not wait for, or invalidate, the paid extraction cache.
+        // Only changed exact-post content invalidates this cache, not fetch timestamps.
         deals[index] = enrichCommunityCard(old, graphEvidence);
         continue;
       }

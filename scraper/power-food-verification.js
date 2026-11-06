@@ -66,6 +66,8 @@ export async function verifyOfficialFoodDeal(deal, options = {}) {
       isAllowedFoodUrl(deal.url, s),
   );
   if (!source) return { ok: false, reason: "untrusted-merchant" };
+  if (deal.evidence?.media && !options.couponMedia?.readAsset && process.env.COUPON_TOOLS_AVAILABLE === '0')
+    return { ok: false, deferred: true, reason: 'coupon-tools-unavailable' };
   const cache = options.cache || new Map();
   const key = source.name + "|" + deal.url;
   if (!cache.has(key))
@@ -89,6 +91,8 @@ export async function verifyOfficialFoodDeal(deal, options = {}) {
       ...(options.couponMedia || {}),
     }));
     parsed = await cache.get(mediaKey);
+    if (parsed.assets?.some(asset => asset.status === 'deferred'))
+      return { ok: false, deferred: true, reason: 'coupon-tools-unavailable' };
   }
   // Re-extract from the current official page. A caller-supplied hash or
   // freshly stamped crawler date alone can never relax freshness checks.

@@ -19,6 +19,19 @@ assert.equal(applyExtraction(base, { brand: field('Thalia') }, text).brand, base
 assert.equal(applyExtraction(base, result, 'Unrelated evidence').title, base.title);
 assert.ok(applyExtraction(base, {}, '').missingFields.includes('Genaue Adresse/Standorte'));
 assert.notEqual(extractionKey({ title: 'a' }), extractionKey({ title: 'b' }));
+const graph=new Map([['test',{url:base.url,caption:text,verifiedAt:'2026-11-06T00:00:00Z'}]]);
+// Keys use the canonical exact-post identifier, not an account or unrelated post.
+const {canonicalInstagramPostKey}=await import('../scraper/deal-evidence-utils.js');
+const graphKey=canonicalInstagramPostKey(base.url);
+graph.set(graphKey,{url:base.url,caption:text});
+assert.notEqual(extractionKey(base,graph),extractionKey(base));
+const firstKey=extractionKey(base,graph);graph.get(graphKey).verifiedAt='2026-11-06T12:00:00Z';
+assert.equal(extractionKey(base,graph),firstKey);
+graph.get(graphKey).graphAccepted=false;assert.equal(extractionKey(base,graph),extractionKey(base));
+const protectedDeal={...base,slackEditedFields:['title']};
+assert.strictEqual(applyExtraction(protectedDeal,result,text),protectedDeal);
+assert.strictEqual(await extractCommunityDeal(base,protectedDeal,{fetch:()=>assert.fail('human edits must not call APIs')}),protectedDeal);
+assert.equal(applyExtraction(base,{validity:{value:'Veroeffentlicht am 04.10.2026',quote:'Veroeffentlicht am 04.10.2026'}},'Veroeffentlicht am 04.10.2026').validOn,undefined);
 let calls = 0;
 const extracted = await extractCommunityDeal({ ...base, description: text }, base, {
   apiKey: 'test', crawlerKey: '', fetch: async () => { calls++; return {

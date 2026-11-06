@@ -154,12 +154,12 @@ test('provider billing failures are redacted, globally paused and not retried as
 
 test('all production OpenAI entry points use the common gate; no raw unbudgeted default fetch', () => {
   for (const file of ['scraper/instagram-media-evidence.js', 'scraper/instagram-ai-agent.js', 'scraper/community-extraction.js',
-    'scraper/deal-card-editor.js', 'scraper/set-daily-deal.js', 'scripts/review-live-deals-llm.mjs', 'scripts/automatic-deal-maintenance.mjs']) {
+    'scraper/deal-card-editor.js', 'scraper/set-daily-deal.js', 'scripts/review-live-deals-llm.mjs', 'scripts/automatic-deal-maintenance.mjs', 'scripts/server-quality-audit.mjs']) {
     const source = fs.readFileSync(file, 'utf8');
     assert.match(source, /freeCreditOpenAiFetch|requestOpenAi/, file);
     assert.doesNotMatch(source, /await fetch\('https:\/\/api\.openai\.com/, file);
   }
-  const workflows = ['instagram-ai-access-check', 'instagram-ai-agent', 'meta-instagram-deals', 'tiktok-deals', 'wien-deals-combined', 'community-submissions', 'daily-deal-pick', 'validate-live-deals'];
+  const workflows = ['instagram-ai-access-check', 'instagram-ai-agent', 'meta-instagram-deals', 'tiktok-deals', 'wien-deals-combined', 'community-submissions', 'daily-deal-pick', 'validate-live-deals', 'server-deal-quality'];
   for (const name of workflows) assert.match(fs.readFileSync(`.github/workflows/${name}.yml`, 'utf8'), /GH_TOKEN: \$\{\{ github.token \}\}/, name);
 });
 

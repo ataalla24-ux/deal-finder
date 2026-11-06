@@ -122,6 +122,7 @@ async function ocrCard(file, dir, index, deadline) {
 }
 
 export async function readCouponAsset(asset, data) {
+  if (process.env.COUPON_TOOLS_AVAILABLE === '0') throw new Error('coupon-tools-unavailable');
   const deadline = Date.now()+180000;
   const dir = await fs.mkdtemp(path.join(os.tmpdir(),'freefinder-coupon-'));
   try {
@@ -203,6 +204,7 @@ export async function extractCouponMediaOffers(html, source, options = {}) {
   if (options.assetUrl) selected = assets.filter(a=>a.url===options.assetUrl);
   for (const asset of selected) {
     try {
+      if (!options.readAsset && process.env.COUPON_TOOLS_AVAILABLE === '0') throw new Error('coupon-tools-unavailable');
       const data = await (options.fetchAsset || fetchCouponAsset)(asset);
       const bound = {...asset,sha256:HASH(data)};
       const cards = await (options.readAsset || readCouponAsset)(bound,data);
@@ -214,7 +216,7 @@ export async function extractCouponMediaOffers(html, source, options = {}) {
       }
       result.assets.push({url:asset.url,kind:asset.kind,status:'ok',bytes:data.length,cards:cards.length,sha256:bound.sha256});
     } catch (error) {
-      result.assets.push({url:asset.url,kind:asset.kind,status:'error',error:error.message,...sourceFailureFields(error)});
+      result.assets.push({url:asset.url,kind:asset.kind,status:error.message === 'coupon-tools-unavailable' ? 'deferred' : 'error',error:error.message,...sourceFailureFields(error)});
       if ([401,403,429].includes(error.status || error.httpStatus) || /HTTP (401|403|429)/.test(error.message)) break;
     }
   }
