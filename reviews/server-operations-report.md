@@ -1,13 +1,13 @@
 # FreeFinder Betriebsbericht
 
-Stand: 2026-11-06T19:16:37.468Z
+Stand: 2026-11-06T19:19:11.225Z
 
 - 68 Live-Angebote; 353 nicht-live Entwuerfe geprueft.
 - 0 neue IDs seit letzter Bestandsaufnahme; keine automatische Erfolgszuordnung.
 - 0 Entwuerfe ohne formale Pruefluecke, weiterhin menschliche Freigabe.
 - Pilot: 50 Faelle gesammelt, 0 unabhaengig bewertet, 0 regulaere Qualitaetslaeufe beobachtet. Automatische Freigabe AUS.
 - Neue Slack-Zustellungen: hier nicht nachgewiesen.
-- API: internal-ledger; 0.744503 USD intern gebucht/reserviert in 24 Stunden. Kein Anbieter-Kontostand.
+- API: internal-ledger; 0.746131 USD intern gebucht/reserviert in 24 Stunden. Kein Anbieter-Kontostand.
 
 ## Naechste Schritte
 
@@ -19,12 +19,15 @@ Stand: 2026-11-06T19:16:37.468Z
 
 ## Native Bilder
 
-- Aktueller Pruefstand fehlt; historische Bildzaehler werden nicht als heutiges Ergebnis ausgegeben. Keine Entwarnung oder bestaetigte Bildqualitaet.
+- Auswahlpruefung: observed-selection-current; 68 aktuelle Angebote.
+- 24 Plattformbilder inhaltlich geprueft (einschliesslich Cache).
+- 31 Angebote mit zu kleinen Originalbildern; 0 mehrfach verwendete Plattformmotive.
+- Kein Nachweis der installierten App-Version oder der Darstellung beim Empfaenger.
 
 ## Aktualitaet
 
 - Entwurfsregeln frisch und lokal geprueft, ohne Modell- oder Quellenaufruf. 351 unterschiedliche IDs in 353 Eintraegen; doppelte IDs bleiben Prueffaelle.
-- Live-/Bildpruefstand: stale-or-missing; letzte Pruefung 2026-11-06T15:41:49.518Z. Bei veraltetem Stand sind leere Hinweisliste und Bildzaehler KEIN Entwarnungsnachweis.
+- Live-/Bildpruefstand: current; letzte Pruefung 2026-11-06T19:19:01.172Z. Bei veraltetem Stand sind leere Hinweisliste und Bildzaehler KEIN Entwarnungsnachweis.
 
 ## Freigabe und Einloesung
 
