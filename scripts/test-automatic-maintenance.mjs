@@ -162,8 +162,7 @@ test('a grounded automatic AI title uses two roles and preserves all original co
     const result = await maintainFeedFile({ cwd: root, now, apply: true, allowAi: true, request });
     assert.deepEqual(models, ['gpt-6.1-terra', 'gpt-6.1-sol']);
     assert.equal(result.deals[0].title, 'Gratis Kaffee mit Gutschein');
-    assert(result.deals[0].description.includes(input.description));
-    assert(result.deals[0].description.includes(input.title));
+    assert.equal(result.deals[0].description,input.description,'title-only patch must not append unreviewed text');
     assert.equal(result.deals[0].votes, 17);
     assert.equal(result.deals[0].approvedAt, input.approvedAt);
     assert.equal(result.state.corrections[0].originalTitle, input.title);

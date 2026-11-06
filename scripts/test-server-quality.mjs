@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
-import { copyReviewReasons, groundedDatePatch, maintainFeedFile, maintainDeals } from './automatic-deal-maintenance.mjs';
+import { copyReviewReasons, groundedDatePatch, groundedMaintenanceDescription, maintainFeedFile, maintainDeals } from './automatic-deal-maintenance.mjs';
 import { verifyOfficialFoodDeal } from '../scraper/power-food-verification.js';
 import { extractCouponMediaOffers } from '../scraper/official-coupon-media.js';
 import { viennaQualitySlot } from './vienna-quality-slot.mjs';
@@ -103,10 +103,12 @@ test('missing conditions and date can be completed without rewriting a protected
   const quote='Gratis Kaffee mit Gutschein. Nur am 07.11.2026. Solange der Vorrat reicht.';
   const deal={id:'test',title:'Gratis Kaffee mit Gutschein',description:'',metaGraphCaption:quote,liveEditedFields:['title'],votes:12};
   put('docs/deals.json',{deals:[deal]});
-  const request=mock({title:'HALLO',quote,conditionsQuote:quote,dateQuote:'Nur am 07.11.2026'});
+  const description='Mit Gutschein bekommst du am 07.11.2026 einen kostenlosen Kaffee, solange Vorrat vorhanden ist.';
+  const request=mock({title:'HALLO',quote,description,conditionsQuote:quote,dateQuote:'Nur am 07.11.2026'});
   const result=await maintainFeedFile({cwd,now,apply:true,allowAi:true,request});
   assert.equal(result.deals[0].title,deal.title);
-  assert.equal(result.deals[0].description,quote);
+  assert.equal(result.deals[0].description,description);
+  assert.equal(result.state.corrections[0].conditionsQuote,quote,'source passage remains audit evidence');
   assert.equal(result.deals[0].validOn,'2026-11-07');
   assert.equal(result.deals[0].votes,12);
   assert.deepEqual(maintainDeals([deal],{policy,now,state:result.state}).deals,result.deals);
@@ -119,7 +121,7 @@ test('manual clears stay empty, second review can veto, unchanged failed review 
   const deal={id:'test',title:'Die allerbeste neue fantastische Kaffeeaktion mit besonders vielen Worten und mehr',description:'',metaGraphCaption:quote};
   put('docs/deals.json',{deals:[deal]});
   put('docs/live-deal-edits.json',{edits:[{dealId:'test',clearFields:['description','validUntil']}]});
-  let calls=0; const response=mock({title:'Gratis Kaffee mit Gutschein',quote,conditionsQuote:quote,dateQuote:'Nur am 07.11.2026'},false);
+  let calls=0; const response=mock({title:'Gratis Kaffee mit Gutschein',quote,description:'Mit Gutschein ist ein Kaffee kostenlos.',conditionsQuote:quote,dateQuote:'Nur am 07.11.2026'},false);
   const request=(...args)=>{calls++;return response(...args);};
   const result=await maintainFeedFile({cwd,now,apply:true,allowAi:true,request});
   assert.deepEqual(result.deals,[deal]);
@@ -127,6 +129,14 @@ test('manual clears stay empty, second review can veto, unchanged failed review 
   await maintainFeedFile({cwd,now,apply:true,allowAi:true,request});
   assert.equal(calls,2,'same evidence must not spend again every dispatch');
 }));
+
+test('description proposals reject copied source blocks and unsupported numbers before independent review',()=>{
+  const source='Zum Einkauf erhalten Mitglieder beim Kauf von zwei gleichwertigen Pizzen eine weitere Pizza kostenlos dazu und zeigen dazu ihren eigenen Gutschein vor der Bestellung an der Kassa vor. Gültig bis 30.11.2026.';
+  assert.equal(groundedMaintenanceDescription(source,source,[source]),false);
+  assert.equal(groundedMaintenanceDescription('Mit Gutschein kaufen Mitglieder zwei Pizzen und erhalten eine dritte gleichwertige Pizza gratis. Vor dem Bestellen an der Kassa vorzeigen; gültig bis 30.11.2026.',source,[source]),true);
+  for(const text of ['Mit Gutschein gibt es 50 % Rabatt für Mitglieder.','<b>Mit Gutschein gibt es eine weitere Pizza gratis.</b>','Mehr unter https://example.com gibt es für alle.'])assert.equal(groundedMaintenanceDescription(text,source,[source]),false);
+  assert.equal(groundedMaintenanceDescription('Mit Gutschein ist eine dritte Pizza kostenlos.', 'Nicht belegte Quelle', [source]),false);
+});
 
 test('missing OCR tools defer only coupon media with zero source requests and never approve it',async()=>{
   const old=process.env.COUPON_TOOLS_AVAILABLE;
