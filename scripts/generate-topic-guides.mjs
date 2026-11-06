@@ -665,7 +665,7 @@ const guides = [...editorialGuides, ...timelyGuides, ...recentDealGuides, ...[
       ['Kann ich Restaurant-Gutscheine mit anderen Rabatten kombinieren?', 'Meist nur, wenn die Aktion dies ausdrücklich erlaubt. Häufig sind weitere Coupons, Mittagsmenüs oder bereits reduzierte Speisen ausgeschlossen.'],
       ['Gelten Restaurant-Gutscheine auch bei Lieferung?', 'Nur wenn Lieferung als Einlöseart genannt ist. Lieferplattform, Mindestbestellwert und zusätzliche Gebühren können sich von der Einlösung im Lokal unterscheiden.'],
     ],
-    related: [['Gutscheine in Wien', 'gutscheine-wien.html'], ['Gratis Essen in Wien', 'gratis-essen-wien.html'], ['Geburtstag gratis in Wien', 'geburtstag-gratis-wien.html'], ['1+1-Aktionen in Wien', 'eins-plus-eins-wien.html'], ['Aktuelle Wien-Deals', '/angebote-wien-heute.html']],
+    related: [['NORDSEE: Coupons und Menüpreise', 'nordsee-coupons-wien.html'], ['Gutscheine in Wien', 'gutscheine-wien.html'], ['Gratis Essen in Wien', 'gratis-essen-wien.html'], ['Geburtstag gratis in Wien', 'geburtstag-gratis-wien.html'], ['1+1-Aktionen in Wien', 'eins-plus-eins-wien.html'], ['Aktuelle Wien-Deals', '/angebote-wien-heute.html']],
   },
   {
     slug: 'app-gutscheine-wien',
