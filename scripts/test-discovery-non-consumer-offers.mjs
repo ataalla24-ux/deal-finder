@@ -11,6 +11,17 @@ import { earlyPostRejection } from '../scraper/apify-food-discovery-policy.js';
 import { validateDealsForSlack } from '../scraper/deal-validity-agent.js';
 
 const fixtures = JSON.parse(fs.readFileSync(new URL('./fixtures/discovery-non-consumer-offers.json', import.meta.url), 'utf8'));
+fixtures.rejected.push(
+  {id:'trade-marketplace-nov06',title:'0 % Provision, keine Grundgebuehr',brand:'Installateur',
+    url:'https://www.instagram.com/p/DfaJXt5oUhY/',reason:'business-lead-generation',
+    description:'Zufriedene Kunden kommen wieder: Mit dem Serviceabo bucht der Kunde nach dem ersten Auftrag wiederkehrende Wartungen bei Ihrem Betrieb. 0 % Provision, keine Grundgebuehr - fuer Installateure in Wien und Niederoesterreich. Jetzt kostenlos registrieren.'},
+  {id:'trade-jobs-nov06',title:'0 % Servicegebuehr Offene Auftraege ansehen',brand:'Elektriker',
+    url:'https://www.instagram.com/reel/DfaEX2PnJP8/',reason:'business-lead-generation',
+    description:'In Wien warten Kunden auf Elektriker und Installateure. Fuer Betriebe: Kostenlos registrieren. Kein Abo. Erster Auftrag: 0 % Servicegebuehr. Offene Auftraege ansehen.'},
+  {id:'cuvee-gift-nov06',title:'Gansl-Special im Silberwirt',brand:'Silberwirt',
+    url:'https://www.instagram.com/p/DfZirWGCPB4/',reason:'alcohol-offer',
+    description:'Gansl-Special fuer 4 Personen: Gansl um je 34,90 Euro pro Person. Eine Flasche Cuvee G gratis dazu! Silberwirt, Schlossgasse 21, 1050 Wien.'}
+);
 const now = new Date('2026-11-05T20:00:00.000Z');
 const review = input => ({
   pubDate: now.toISOString(), sourcePublishedAt: now.toISOString(), status: 'rejected',
@@ -113,4 +124,13 @@ test('only a paid upsell is rejected; free-from, negated discounts and regular b
     'VIP is only €25 more. Gluten-free pizza and free wifi in Vienna.',
     'VIP nur 25 € mehr. Kein 20 % Rabatt auf Tickets in Wien.',
   ]) assert.equal(getNonConsumerOfferRejection(text), 'paid-upsell-without-saving', text);
+});
+
+test('trade customer perks and explicitly alcohol-free cuvee are not business recruiting or alcoholic gifts',()=>{
+  for(const text of ['Fuer Installateure in Wien: 10 % Rabatt auf jede Pizza.',
+    'Kostenlos registrieren: Restaurant fuer Handwerker in Wien, jeder zehnte Kaffee gratis.',
+    'Gansl mit einer Flasche alkoholfreie Cuvee gratis in Wien.',
+    'Kaffee fuer 2 Euro fuer alle Gaeste, keine Provision fuer Betriebe genannt.']){
+    assert.equal(discoveryRejection(text),'',text);
+  }
 });

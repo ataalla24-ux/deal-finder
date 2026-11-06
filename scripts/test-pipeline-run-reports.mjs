@@ -5,6 +5,7 @@ import path from 'node:path';
 
 import {
   buildPipelineRunReport,
+  githubRunProvenance,
   pipelineReportPaths,
   summarizeVerifiedDeals,
   writePipelineRunReport,
@@ -31,6 +32,15 @@ assert.equal(report.counts.acceptedDeals, 2);
 assert.equal(report.counts.rejectedDeals, 3);
 assert.equal(report.rejectedByReason['not-free'], 2);
 assert.equal(report.rejectedByReason['not-vienna'], 1);
+const github={GITHUB_REPOSITORY:'ataalla24-ux/deal-finder',GITHUB_RUN_ID:'123',GITHUB_SHA:'a'.repeat(40),
+  GITHUB_EVENT_NAME:'schedule',GITHUB_RUN_ATTEMPT:'1',OPENAI_API_KEY:'never-persist-this'};
+assert.equal(githubRunProvenance({}),null);
+assert.equal(githubRunProvenance({...github,GITHUB_SHA:'bad'}),null);
+assert.equal(githubRunProvenance({...github,GITHUB_REPOSITORY:'bad?secret'}),null);
+assert.equal(githubRunProvenance(github).event,'schedule');
+assert.equal(githubRunProvenance({...github,GITHUB_EVENT_NAME:'workflow_dispatch'}).event,'workflow_dispatch');
+assert(!JSON.stringify(githubRunProvenance(github)).includes('never-persist-this'));
+assert.equal(buildPipelineRunReport({sourceKey:'fixture',env:github}).runProvenance.headSha,github.GITHUB_SHA);
 
 const verifier = summarizeVerifiedDeals([
   { postVerification: { status: 'verified-original-post' } },

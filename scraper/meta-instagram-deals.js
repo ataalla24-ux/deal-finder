@@ -15,6 +15,7 @@ import { fileURLToPath } from 'url';
 import { normalizeCategoryForScraper } from './category-utils.js';
 import { extractLowFoodPrice, getAdFoodBenefitRejection, getMetaNonOfferRejection, isFoodDrinkSource, weakFoodPromotionReason } from './food-discovery-utils.js';
 import { discoveryRejection } from './deal-discovery-policy.js';
+import { githubRunProvenance } from './pipeline-run-report-utils.js';
 import { locationConflictReason } from './deal-factual-guards.js';
 import { polishOfferTitle } from './offer-title-utils.js';
 import { inferPreferredBrand } from './deal-normalization-utils.js';
@@ -2164,6 +2165,7 @@ export async function runMetaInstagramCollector(options = {}) {
 
   const report = {
     generatedAt: now.toISOString(),
+    runProvenance: githubRunProvenance(),
     source: 'meta-instagram',
     status: 'running',
     configured,

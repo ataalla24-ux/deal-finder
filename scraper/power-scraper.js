@@ -20,6 +20,7 @@ import {
 } from './deal-normalization-utils.js';
 import {
   buildPipelineRunReport,
+  githubRunProvenance,
   writeFailedPipelineRunReport,
   writePipelineRunReport,
 } from './pipeline-run-report-utils.js';
@@ -773,6 +774,7 @@ async function main() {
   fs.writeFileSync(outputPath, JSON.stringify(output, null, 2));
   const sourceReport = sourceResults.map(({ rows, ...result }) => result);
   const report = {
+    runProvenance: githubRunProvenance(),
     startedAt: startedAt.toISOString(),
     finishedAt: new Date().toISOString(),
     durationMs: Date.now() - startedAt.getTime(),

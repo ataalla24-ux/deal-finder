@@ -7,7 +7,7 @@ import {
   postIdentity, postFingerprint, earlyPostRejection, classifyDiscoveryPost, mergeDiscoveryPending,
 } from './apify-food-discovery-policy.js';
 import { analyzeInstagramMediaItem, detectMediaTools, entryMediaPriority } from './instagram-media-evidence.js';
-import { buildPipelineRunReport, writePipelineRunReport } from './pipeline-run-report-utils.js';
+import { buildPipelineRunReport, writePipelineRunReport, githubRunProvenance } from './pipeline-run-report-utils.js';
 import { realPostTimestamp } from './import-apify-instagram-deals.js';
 
 export const ACTOR_BUILD = '0.0.830';
@@ -293,7 +293,7 @@ export async function main(mode = '--plan') {
       || (validation && (plan.sources.length !== 1 || plan.sources[0].key !== 'hashtag:wienfood'))
       || +now - Date.parse(reservation.at) > 30 * 60_000) throw new Error('missing-or-invalid-committed-reservation');
   const previous = (await read(FILES.pending, { deals: [] })).deals;
-  const report = { generatedAt: now.toISOString(), purpose, limits: LIMITS, budget, selectedSources: plan.sources, status: 'starting' };
+  const report = { generatedAt: now.toISOString(), runProvenance:githubRunProvenance(), purpose, limits: LIMITS, budget, selectedSources: plan.sources, status: 'starting' };
   reservation.status = 'attempted';
   for (const source of plan.sources) state.sources[source.key] = { ...state.sources[source.key], lastAttemptAt: now.toISOString() };
   await write(FILES.state, state);

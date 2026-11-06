@@ -7,6 +7,15 @@ const __dirname = path.dirname(__filename);
 const ROOT = path.join(__dirname, '..');
 const DEFAULT_DOCS_DIR = path.join(ROOT, 'docs');
 
+export function githubRunProvenance(env=process.env) {
+  if(!/^[\w.-]+\/[\w.-]+$/.test(env.GITHUB_REPOSITORY||'') || !/^\d+$/.test(env.GITHUB_RUN_ID||'')
+    || !/^[a-f0-9]{40}$/.test(env.GITHUB_SHA||'')
+    || !['schedule','workflow_dispatch','push','workflow_run'].includes(env.GITHUB_EVENT_NAME))return null;
+  return {repository:env.GITHUB_REPOSITORY,runId:env.GITHUB_RUN_ID,headSha:env.GITHUB_SHA,
+    event:env.GITHUB_EVENT_NAME,runAttempt:/^\d+$/.test(env.GITHUB_RUN_ATTEMPT||'')?env.GITHUB_RUN_ATTEMPT:null,
+    url:`https://github.com/${env.GITHUB_REPOSITORY}/actions/runs/${env.GITHUB_RUN_ID}`};
+}
+
 function cleanText(value, maxLength = 500) {
   return String(value ?? '')
     .replace(/\s+/g, ' ')
@@ -102,6 +111,7 @@ export function buildPipelineRunReport(options = {}) {
 
   return {
     schemaVersion: 1,
+    runProvenance: githubRunProvenance(options.env),
     runId: `${sourceKey}-${finishedAt.toISOString()}`,
     sourceKey,
     sourceLabel: cleanText(options.sourceLabel || sourceKey, 160),
