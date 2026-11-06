@@ -79,7 +79,8 @@ export async function auditServerQuality({root=process.cwd(),now=new Date(),allo
   const pending=read(path.join(root,'docs/deals-pending-all.json'),{}),liveIds=new Set(deals.map(deal=>deal.id));
   const pendingRows=(Array.isArray(pending)?pending:pending.deals||[]).filter(deal=>!liveIds.has(deal.id))
     .map(deal=>inspectSourceBackedQuality(deal,{mapReview:reviewDealMap(deal,context),today}));
-  const report={version:1,checkedAt:now.toISOString(),feedHash:hash(JSON.stringify(deals)),liveCount:deals.length,
+  const report={version:1,checkedAt:now.toISOString(),feedHash:hash(JSON.stringify(deals)),
+    mapContextHash:hash(JSON.stringify(context)),sourceEvidenceHash:hash(JSON.stringify([...evidence])),liveCount:deals.length,
     checks:{sourceCopyDate:true,map:true,websiteImages:true,nativeImages:native.entries.size>0,originalPhotoBindings:true,blogContent:false},
     nativeContracts:nativeContractStatus(deals,read(path.join(root,'reviews/native-contract-observation.json'),null)),
     nativeSelection:{...native,entries:undefined,observedDeals:native.entries.size,recipientUiTest:false,

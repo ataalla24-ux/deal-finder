@@ -4,27 +4,38 @@ import { fileURLToPath } from 'node:url';
 import { createHash } from 'node:crypto';
 import { duplicateDealKey } from '../scraper/deal-evidence-utils.js';
 import { loadAiCreditPolicy, modelForTask } from '../scraper/ai-credit-budget.js';
+import { inspectSourceBackedQuality } from '../scraper/source-backed-quality.js';
+import { loadDealMapReviewContext, reviewDealMap } from './deal-map-review.mjs';
+import { maintenanceEvidenceFor } from './refresh-maintenance-evidence.mjs';
 
 const read = (root, file, fallback) => { try { return JSON.parse(fs.readFileSync(path.join(root, file), 'utf8')); } catch(e) { if(e.code === 'ENOENT') return fallback; throw e; } };
 const hash = data => createHash('sha256').update(JSON.stringify(data)).digest('hex');
 const rows = value => Array.isArray(value) ? value : value?.deals || [];
 const countBy = values => values.reduce((result, key) => ({ ...result, [key]: (result[key] || 0) + 1 }), {});
 
-export function buildRecoveryQueue(live, pending, quality) {
+export function buildRecoveryQueue(live, pending, { mapContext } = {}) {
   const existing = new Set(live.map(duplicateDealKey).filter(Boolean));
-  const ids = new Set(live.map(d => d.id)), seen = new Set(), audits = new Map(quality.map(r => [r.id, r]));
+  const ids = new Set(live.map(d => d.id)), seen = new Set();
+  const idCounts = countBy(pending.map(deal => deal.id));
   return pending.filter(d => !ids.has(d.id)).map(deal => {
-    const key = duplicateDealKey(deal), audit = audits.get(deal.id);
+    // This is a cheap local inspection. Never borrow a prior row by ID: source
+    // queues, dates and venue evidence can change between audit and report.
+    const map = mapContext ? reviewDealMap(deal, mapContext) : null;
+    const audit = inspectSourceBackedQuality(deal, { mapReview: map, today: mapContext?.today || '' });
+    const key = duplicateDealKey(deal);
     const duplicate = key && (existing.has(key) ? 'already-live' : seen.has(key) ? 'same-pending-source' : null);
     if (key) seen.add(key);
-    const issues = audit?.issues.map(i => i.code) || ['audit-missing'];
-    const priority = duplicate ? 'duplicate-review' : !issues.length ? 'human-review-ready'
+    const issues = audit.issues.map(i => i.code);
+    if (!mapContext?.today) issues.push('audit-context-missing');
+    if (idCounts[deal.id] > 1) issues.push('duplicate-pending-id');
+    const priority = duplicate || issues.includes('duplicate-pending-id') ? 'duplicate-review'
+      : issues.includes('audit-context-missing') ? 'audit-needed' : !issues.length ? 'human-review-ready'
       : issues.includes('source-blocked') ? 'blocked-source'
       : issues.includes('evidence-missing') ? 'source-evidence-needed'
       : issues.includes('map-incomplete') ? 'venue-verification-needed' : 'copy-or-period-review';
     return { id: deal.id, title: deal.title, source: deal.originSource || deal.source || 'unknown',
       url: deal.url, duplicateOf: duplicate || null, priority, issues,
-      fingerprint: hash([deal.id, audit?.fingerprint, key, priority]), automaticPublicationAllowed: false };
+      fingerprint: hash([deal, audit.fingerprint, issues, key, priority]), automaticPublicationAllowed: false };
   }).sort((a,b) => Number(b.priority === 'human-review-ready') - Number(a.priority === 'human-review-ready') || a.id.localeCompare(b.id));
 }
 
@@ -107,7 +118,16 @@ function sourceSummary(root, file, now) {
 export async function writeOperationsReport({ root = process.cwd(), now = new Date(), request = fetch, apply = true } = {}) {
   const quality = read(root,'reviews/server-quality-audit.json',{});
   const live = rows(read(root,'docs/deals.json',{})), pending = rows(read(root,'docs/deals-pending-all.json',{}));
-  const queue = buildRecoveryQueue(live,pending,quality.pending?.rows || []);
+  const mapContext = loadDealMapReviewContext({root,now});
+  const queue = buildRecoveryQueue(live,pending,{mapContext});
+  const qualitySnapshot = { checkedAt:quality.checkedAt || null,
+    feedMatches:quality.feedHash === hash(live), mapContextMatches:quality.mapContextHash === hash(mapContext),
+    sourceEvidenceMatches:quality.sourceEvidenceHash === hash([...maintenanceEvidenceFor(live,
+      read(root,'reviews/maintenance-source-evidence.json',{}),now)]) };
+  const age = +now - Date.parse(quality.checkedAt);
+  qualitySnapshot.status = qualitySnapshot.feedMatches && qualitySnapshot.mapContextMatches && qualitySnapshot.sourceEvidenceMatches
+    && Number.isFinite(age) && age >= 0 && age < 86400000 ? 'current' : 'stale-or-missing';
+  const currentQuality = qualitySnapshot.status === 'current' ? quality : {};
   const pilot = updatePublicationPilot(read(root,'reviews/automatic-publication-pilot.json',null),queue,
     {now,event:process.env.GITHUB_EVENT_NAME,runId:process.env.GITHUB_RUN_ID,sha:process.env.GITHUB_SHA});
   const prior = read(root,'reviews/server-operations-report.json',null);
@@ -115,13 +135,16 @@ export async function writeOperationsReport({ root = process.cwd(), now = new Da
   const maintenance = read(root,'docs/automatic-deal-maintenance-report.json',{});
   const report = { version:1, checkedAt:now.toISOString(), liveCount:live.length, liveIds:live.map(d=>d.id),
     addedSincePreviousObservedFeed:added, addedAreNotAttributedToThisJob:true,
-    sourceRecovery:{ total:queue.length, byPriority:countBy(queue.map(r=>r.priority)), bySource:countBy(queue.map(r=>r.source)), rows:queue },
+    qualitySnapshot,
+    sourceRecovery:{ total:queue.length, uniqueIds:new Set(queue.map(row=>row.id)).size, auditMode:'fresh-offline-check',
+      byPriority:countBy(queue.map(r=>r.priority)), bySource:countBy(queue.map(r=>r.source)), rows:queue },
     maintenance:{ checkedAt:maintenance.checkedAt, corrected:maintenance.corrected || [], hidden:maintenance.hidden || [], ai:maintenance.ai || null },
-    missingInformation:quality.live?.filter(r=>r.requiresReview) || [],
-    images:{ shared:quality.sharedWebsiteImages || [], review:quality.live?.filter(r=>r.websitePhoto?.status === 'needs-review').map(r=>r.id) || [],
-      native:quality.nativeContracts||{status:'requires-native-contract-audit'},
-      nativeSelection:quality.nativeSelection||{status:'missing-native-selection-observation',reviewedPlatformImages:0},
-      nativeReview:quality.live?.filter(r=>Object.values(r.nativePhoto?.platforms||{}).some(p=>p.status==='needs-review')
+    missingInformation:currentQuality.live?.filter(r=>r.requiresReview) || [],
+    images:{ status:qualitySnapshot.status, checkedAt:qualitySnapshot.checkedAt,
+      shared:currentQuality.sharedWebsiteImages || [], review:currentQuality.live?.filter(r=>r.websitePhoto?.status === 'needs-review').map(r=>r.id) || [],
+      native:currentQuality.nativeContracts||{status:'requires-native-contract-audit'},
+      nativeSelection:currentQuality.nativeSelection||{status:'missing-current-quality-audit',reviewedPlatformImages:0},
+      nativeReview:currentQuality.live?.filter(r=>Object.values(r.nativePhoto?.platforms||{}).some(p=>p.status==='needs-review')
         || (r.nativePhoto?.originalPhoto && r.nativePhoto.originalPhoto.status!=='visual-match')).map(r=>({id:r.id,review:r.nativePhoto}))||[] },
     publicationPilot:{ status:pilot.status, sampled:pilot.samples.length, independentlyReviewed:pilot.evaluatedCases, regularRuns:pilot.regularRuns.length, automaticPublicationEnabled:false },
     blog:{...read(root,'reviews/server-blog-report.json',{status:'not-run',automaticPublicationEnabled:false,localBlogReplacementReady:false}),
@@ -134,9 +157,12 @@ export async function writeOperationsReport({ root = process.cwd(), now = new Da
   if(apply) {
     for(const [file,value] of [['server-operations-report.json',report],['automatic-publication-pilot.json',pilot]]) fs.writeFileSync(path.join(root,'reviews',file),JSON.stringify(value,null,2)+'\n');
     const native=report.images.nativeSelection;
-    const imageSummary=`\n## Native Bilder\n\n- Auswahlpruefung: ${native.status}; ${native.observedDeals||0} aktuelle Angebote.\n- ${native.reviewedPlatformImages||0} Plattformbilder inhaltlich geprueft (einschliesslich Cache).\n- ${native.lowResolutionDeals?.length||0} Angebote mit zu kleinen Originalbildern; ${native.sharedAssignments?.length||0} mehrfach verwendete Plattformmotive.\n- Kein Nachweis der installierten App-Version oder der Darstellung beim Empfaenger.\n`;
-    fs.writeFileSync(path.join(root,'reviews/server-operations-report.md'),markdown+imageSummary);
-    if(process.env.GITHUB_STEP_SUMMARY)fs.appendFileSync(process.env.GITHUB_STEP_SUMMARY,markdown+imageSummary);
+    const imageSummary=qualitySnapshot.status==='current'
+      ? `\n## Native Bilder\n\n- Auswahlpruefung: ${native.status}; ${native.observedDeals||0} aktuelle Angebote.\n- ${native.reviewedPlatformImages||0} Plattformbilder inhaltlich geprueft (einschliesslich Cache).\n- ${native.lowResolutionDeals?.length||0} Angebote mit zu kleinen Originalbildern; ${native.sharedAssignments?.length||0} mehrfach verwendete Plattformmotive.\n- Kein Nachweis der installierten App-Version oder der Darstellung beim Empfaenger.\n`
+      : '\n## Native Bilder\n\n- Aktueller Pruefstand fehlt; historische Bildzaehler werden nicht als heutiges Ergebnis ausgegeben. Keine Entwarnung oder bestaetigte Bildqualitaet.\n';
+    const freshnessSummary=`\n## Aktualitaet\n\n- Entwurfsregeln frisch und lokal geprueft, ohne Modell- oder Quellenaufruf. ${report.sourceRecovery.uniqueIds} unterschiedliche IDs in ${queue.length} Eintraegen; doppelte IDs bleiben Prueffaelle.\n- Live-/Bildpruefstand: ${qualitySnapshot.status}; letzte Pruefung ${qualitySnapshot.checkedAt || 'unbekannt'}. Bei veraltetem Stand sind leere Hinweisliste und Bildzaehler KEIN Entwarnungsnachweis.\n`;
+    fs.writeFileSync(path.join(root,'reviews/server-operations-report.md'),markdown+imageSummary+freshnessSummary);
+    if(process.env.GITHUB_STEP_SUMMARY)fs.appendFileSync(process.env.GITHUB_STEP_SUMMARY,markdown+imageSummary+freshnessSummary);
   }
   return report;
 }
