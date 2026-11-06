@@ -9,6 +9,7 @@ import { canonicalInstagramPostKey } from '../scraper/deal-evidence-utils.js';
 import { parseExpiryShape } from '../scraper/expiry-utils.js';
 import { maintenanceEvidenceFor } from './refresh-maintenance-evidence.mjs';
 import { isBenefitOnlyTitle } from '../scraper/offer-title-utils.js';
+import {photoSubjectHash} from './deal-photo-contract.mjs';
 export { automaticMaintenanceReviewCandidates } from './automatic-maintenance-review.mjs';
 
 const clean = value => String(value || '').replace(/\s+/g, ' ').trim();
@@ -302,6 +303,15 @@ export async function maintainFeedFile({ cwd = process.cwd(), allowAi = false, a
     }
   }
   result.state.checks = result.state.checks.slice(-2000);
+  for (let index=0;index<result.deals.length;index++) {
+    const deal=result.deals[index];
+    const edit=edits.find(row=>row.dealId===deal.id && row.photoUrl===deal.photoUrl && /^[a-f0-9]{64}$/.test(row.photoSubjectHash||''));
+    if (deal.photoUrl && edit && edit.photoSubjectHash!==photoSubjectHash(deal)) {
+      result.deals[index]={...deal,photoUrl:''};
+      result.report.corrected.push({id:deal.id,fields:['photoUrl'],method:'reviewed-photo-subject-changed'});
+      result.changed=true;
+    }
+  }
   result.report.review = result.report.review.filter(row => row.reason !== 'copy-needs-grounded-review');
   for (const deal of result.deals) {
     const reasons = copyReviewReasons(deal, protectedFields(deal, edits));

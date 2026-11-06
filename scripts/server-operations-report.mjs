@@ -121,7 +121,8 @@ export async function writeOperationsReport({ root = process.cwd(), now = new Da
     images:{ shared:quality.sharedWebsiteImages || [], review:quality.live?.filter(r=>r.websitePhoto?.status === 'needs-review').map(r=>r.id) || [],
       native:quality.nativeContracts||{status:'requires-native-contract-audit'},
       nativeSelection:quality.nativeSelection||{status:'missing-native-selection-observation',reviewedPlatformImages:0},
-      nativeReview:quality.live?.filter(r=>Object.values(r.nativePhoto?.platforms||{}).some(p=>p.status==='needs-review')||r.nativePhoto?.originalPhoto).map(r=>({id:r.id,review:r.nativePhoto}))||[] },
+      nativeReview:quality.live?.filter(r=>Object.values(r.nativePhoto?.platforms||{}).some(p=>p.status==='needs-review')
+        || (r.nativePhoto?.originalPhoto && r.nativePhoto.originalPhoto.status!=='visual-match')).map(r=>({id:r.id,review:r.nativePhoto}))||[] },
     publicationPilot:{ status:pilot.status, sampled:pilot.samples.length, independentlyReviewed:pilot.evaluatedCases, regularRuns:pilot.regularRuns.length, automaticPublicationEnabled:false },
     blog:{...read(root,'reviews/server-blog-report.json',{status:'not-run',automaticPublicationEnabled:false,localBlogReplacementReady:false}),
       lastPublicReceipt:read(root,'reviews/server-blog-public-receipt.json',null)},

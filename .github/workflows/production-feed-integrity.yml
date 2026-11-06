@@ -59,6 +59,11 @@ on:
       - "scripts/test-deal-redemptions.mjs"
       - "reviews/deal-redemptions.json"
       - "scripts/live-deal-edits-lib.mjs"
+      - "scripts/*deal-photo*.mjs"
+      - "docs/assets/approved-deal-photos/**"
+      - "reviews/deal-photos/**"
+      - "package.json"
+      - "package-lock.json"
       - "scripts/test-live-flight-price.mjs"
       - "scripts/test-source-backed-content.mjs"
       - "scripts/apply-reviewed-content.mjs"
@@ -108,6 +113,9 @@ jobs:
           node scripts/test-deal-logo-normalization.mjs
           node scripts/test-live-deal-removal-safety.mjs
           node scripts/test-live-flight-price.mjs
+          node scripts/test-deal-photo-contract.mjs
+          node --test scripts/test-original-deal-photos.mjs
+          node scripts/validate-original-deal-photos.mjs
           node scripts/test-slack-deal-quality.mjs
           node scripts/test-slack-approval-validation.mjs
           node scripts/test-slack-delivery-state.mjs

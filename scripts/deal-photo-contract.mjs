@@ -1,6 +1,10 @@
 import { createHash } from 'node:crypto';
 
 export const photoDigest = value => createHash('sha256').update(value).digest('hex');
+export function photoSubjectHash(deal) {
+  return photoDigest(JSON.stringify(['original-photo-subject-v1',
+    ...['id','title','brand','description','category','url'].map(field=>String(deal?.[field]||'').trim())]));
+}
 export function approvedDealPhotoURL(value, dealId) {
   if (!dealId || typeof value !== 'string') return '';
   const owner = photoDigest(String(dealId)).slice(0, 16);

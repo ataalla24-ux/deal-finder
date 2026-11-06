@@ -597,6 +597,7 @@ async function main() {
   const options = parseArgs(process.argv.slice(2));
   const baseRef = cleanText(gitOutput(['rev-parse', 'HEAD']));
   let mapReadInputs;
+  let photoConsistency;
   const dealsPath = 'docs/deals.json';
   const includesDealsFeed = options.patterns
     .map(normalizeRepoPath)
@@ -613,6 +614,20 @@ async function main() {
     // Stamping also sanitizes deal text; the map must read the final feed.
     const stamped = stampDealsFeedFile(path.join(process.cwd(), dealsPath));
     console.log(`Stamped deals feed ${stamped.feedVersion} (${stamped.totalDeals} deals)`);
+    const photoFeed=JSON.parse(fs.readFileSync(dealsPath,'utf8'));
+    const photoDeals=Array.isArray(photoFeed)?photoFeed:photoFeed.deals;
+    if(photoDeals.some(deal=>deal.photoUrl)) {
+      const {validateOriginalDealPhotos}=await import('./validate-original-deal-photos.mjs');
+      const validation=await validateOriginalDealPhotos(photoDeals);
+      if(validation.errors)throw Error(`Original photo verification failed: ${validation.results.filter(r=>r.status==='invalid').map(r=>`${r.id}:${r.reason}`).join(', ')}`);
+      const inputs=new Set(['docs/deals.json','docs/live-deal-edits.json','scripts/original-deal-photo.mjs','scripts/deal-photo-contract.mjs','scripts/validate-original-deal-photos.mjs']);
+      for(const deal of photoDeals.filter(d=>d.photoUrl)) {
+        const filename=path.basename(new URL(deal.photoUrl).pathname);
+        inputs.add(`docs/assets/approved-deal-photos/${filename}`);
+        inputs.add(`reviews/deal-photos/${filename}.json`);
+      }
+      photoConsistency=[...inputs].map(file=>({path:file,baseHash:contentHash(remoteFileContent(baseRef,file)),hash:localFileHash(file)}));
+    }
     mapReadInputs = captureMapReadInputs();
     const mapSync = spawnSync(process.execPath, ['scripts/enrich-deal-map.mjs'], {
       cwd: process.cwd(), env: process.env, encoding: 'utf8',
@@ -669,6 +684,16 @@ async function main() {
         skipConflicts: options.skipConflicts,
         replaceConflicts: options.replaceConflicts,
       });
+      if(photoConsistency) {
+        const retained=new Map(safeStates.map(state=>[state.path,state]));
+        for(const input of photoConsistency) {
+          const remoteHash=contentHash(remoteFileContent(headRef,input.path));
+          if(remoteHash!==input.baseHash)throw Error(`Original photo consistency failed: remote changed ${input.path}`);
+          const state=retained.get(input.path);
+          const actual=state?contentHash(state.exists?state.content:null):remoteHash;
+          if(actual!==input.hash)throw Error(`Original photo consistency failed: partial batch omits ${input.path}`);
+        }
+      }
       assertMapInputsRetained(mapConsistency, safeStates, mapRemoteHashes);
       assertBlogConsistency(blogConsistency, safeStates, headRef);
       if (safeStates.length === 0) {

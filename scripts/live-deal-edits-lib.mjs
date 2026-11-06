@@ -1,6 +1,6 @@
 import fs from 'fs';
 import path from 'path';
-import { approvedDealPhotoURL } from './deal-photo-contract.mjs';
+import { approvedDealPhotoURL, photoSubjectHash } from './deal-photo-contract.mjs';
 
 export const LIVE_DEAL_EDIT_FIELDS = [
   'url',
@@ -278,6 +278,8 @@ export function normalizeLiveDealEdit(raw = {}, options = {}) {
   }
 
   if (Object.hasOwn(edit, 'photoUrl')) edit.photoUrl = approvedDealPhotoURL(edit.photoUrl, dealId);
+  const photoBinding = /^[a-f0-9]{64}$/.test(String(raw.photoSubjectHash || '')) ? raw.photoSubjectHash : existing.photoSubjectHash;
+  if (/^[a-f0-9]{64}$/.test(String(photoBinding || ''))) edit.photoSubjectHash = photoBinding;
 
   if (edit.expires && !edit.expiresOriginal) edit.expiresOriginal = edit.expires;
   return edit;
@@ -358,7 +360,7 @@ function applyEditToDeal(deal, edit, checkedAt) {
   if (setIfPresent(next, edit, 'category', { normalize: (value) => cleanText(value).toLowerCase() })) changed.push('category');
   if (setIfPresent(next, edit, 'type', { normalize: (value) => cleanText(value).toLowerCase() })) changed.push('type');
   if (setIfPresent(next, edit, 'distance')) changed.push('distance');
-  for (const field of ['location', 'address', 'logo', 'logoUrl', 'photoUrl']) {
+  for (const field of ['location', 'address', 'logo', 'logoUrl']) {
     if (setIfPresent(next, edit, field, { skipEmpty: false })) changed.push(field);
   }
   if (changed.includes('brand')) {
@@ -406,6 +408,11 @@ function applyEditToDeal(deal, edit, checkedAt) {
 
   for (const field of edit.clearFields || []) {
     if (next[field] !== '') { next[field] = ''; changed.push(field); }
+  }
+  // A previously reviewed photograph must not silently follow a changed offer.
+  if (Object.hasOwn(edit, 'photoUrl')) {
+    const photoUrl = edit.photoSubjectHash && edit.photoSubjectHash !== photoSubjectHash(next) ? '' : edit.photoUrl;
+    if (setIfPresent(next,{photoUrl},'photoUrl',{skipEmpty:false})) changed.push('photoUrl');
   }
   if (changed.some(field => ['expires','validOn','validUntil'].includes(field))) {
     next.validity = { ...next.validity, expiryDate: next.validOn || next.validUntil || next.expires || '', expirySource: 'manual' };

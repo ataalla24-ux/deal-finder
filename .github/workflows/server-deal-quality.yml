@@ -18,6 +18,13 @@ on:
       - 'scripts/native-contract-observation.mjs'
       - 'reviews/native-contract-observation.json'
       - 'scripts/native-artwork-review.mjs'
+      - 'scripts/original-deal-photo.mjs'
+      - 'scripts/prepare-deal-photo.mjs'
+      - 'scripts/deal-photo-contract.mjs'
+      - 'scripts/live-deal-edits-lib.mjs'
+      - 'scripts/validate-original-deal-photos.mjs'
+      - 'reviews/deal-photos/**'
+      - 'docs/assets/approved-deal-photos/**'
       - 'reviews/native-artwork-observation.json'
       - 'reviews/native-artwork/**'
       - 'scripts/refresh-maintenance-evidence.mjs'
@@ -58,6 +65,8 @@ jobs:
           node --test scripts/test-ai-credit-budget.mjs scripts/test-automatic-maintenance.mjs scripts/test-server-quality.mjs scripts/test-server-operations.mjs scripts/test-server-blog.mjs scripts/test-lightweight-state-committer.mjs scripts/test-native-artwork-review.mjs scripts/test-server-quality-publication-workflow.mjs
           node scripts/test-pre-publication-title.mjs
           node scripts/test-deal-photo-contract.mjs
+          node --test scripts/test-original-deal-photos.mjs
+          node scripts/validate-original-deal-photos.mjs
           node scripts/test-queue-workflow-safety.mjs
       - name: Refresh conditions from known official offer pages
         if: steps.slot.outputs.run == 'true'

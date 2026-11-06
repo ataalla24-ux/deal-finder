@@ -8,7 +8,7 @@ import { dealPhoto } from './deal-photos.mjs';
 import { freeCreditOpenAiFetch, modelForTask } from '../scraper/ai-credit-budget.js';
 import { maintenanceEvidenceFor } from './refresh-maintenance-evidence.mjs';
 import { nativeContractStatus } from './native-contract-observation.mjs';
-import { nativeArtworkContext, reviewNativeArtwork } from './native-artwork-review.mjs';
+import { nativeArtworkContext, reviewNativeArtwork, reviewBoundOriginalPhoto } from './native-artwork-review.mjs';
 
 const read = (file, fallback) => { try { return JSON.parse(fs.readFileSync(file,'utf8')); } catch(error) { if(error.code === 'ENOENT') return fallback; throw error; } };
 const write = (file, data) => {fs.mkdirSync(path.dirname(file),{recursive:true});fs.writeFileSync(file,JSON.stringify(data,null,2)+'\n');};
@@ -61,10 +61,14 @@ export async function auditServerQuality({root=process.cwd(),now=new Date(),allo
     const map=reviewDealMap(deal,context),quality=inspectSourceBackedQuality(deal,{mapReview:map,today,evidenceTexts:[evidence.get(deal.id)?.officialText]}),photo=dealPhoto(deal);
     if(photo?.src)images.set(photo.src,[...(images.get(photo.src)||[]),deal.id]);
     let imageReview={status:'not-reviewed'},nativePhoto={status:native.status};
+    let originalPhoto=null;
+    try {originalPhoto=await reviewBoundOriginalPhoto(deal,{root,cache:cache.entries,now,allowNew,request:boundedRequest});}
+    catch {photoDeferred++;originalPhoto={status:'deferred',automaticReplacement:false};}
     if(native.entries.has(deal.id)){
       try {nativePhoto=await reviewNativeArtwork(deal,native.entries.get(deal.id),{root,cache:cache.entries,now,allowNew,request:boundedRequest});}
       catch {photoDeferred++;nativePhoto={status:'deferred'};}
     }
+    nativePhoto.originalPhoto=originalPhoto;
     {
       try {imageReview=await reviewPhoto(deal,photo,{root,cache:cache.entries,now,allowNew:allowNew(),request:boundedRequest});}
       catch {photoDeferred++;imageReview={status:'deferred'};}
@@ -76,7 +80,7 @@ export async function auditServerQuality({root=process.cwd(),now=new Date(),allo
   const pendingRows=(Array.isArray(pending)?pending:pending.deals||[]).filter(deal=>!liveIds.has(deal.id))
     .map(deal=>inspectSourceBackedQuality(deal,{mapReview:reviewDealMap(deal,context),today}));
   const report={version:1,checkedAt:now.toISOString(),feedHash:hash(JSON.stringify(deals)),liveCount:deals.length,
-    checks:{sourceCopyDate:true,map:true,websiteImages:true,nativeImages:native.entries.size>0,blogContent:false},
+    checks:{sourceCopyDate:true,map:true,websiteImages:true,nativeImages:native.entries.size>0,originalPhotoBindings:true,blogContent:false},
     nativeContracts:nativeContractStatus(deals,read(path.join(root,'reviews/native-contract-observation.json'),null)),
     nativeSelection:{...native,entries:undefined,observedDeals:native.entries.size,recipientUiTest:false,
       reviewedPlatformImages:rows.reduce((sum,r)=>sum+Object.values(r.nativePhoto.platforms||{}).filter(p=>['symbolic-match','needs-review'].includes(p.semanticStatus)).length,0),
