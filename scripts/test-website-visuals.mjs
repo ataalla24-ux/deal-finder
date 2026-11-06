@@ -81,12 +81,32 @@ for (const [title, brand, key] of [
   ['10 Euro ab 50 Euro', 'Ganesha', 'indian-meal'],
   ['1+1 Hotdog', 'Loving Hut', 'vegan-hotdog'],
   ['1+1 Thunfisch-Wrap', 'NORDSEE', 'tuna-wrap'],
+  ['10 Euro Gutschein: Essen ab 10 Euro', 'IKEA', 'family-lunch'],
+  ['12 Euro auf die erste Bestellung', 'Wolt', 'family-lunch'],
+  ['20 Prozent auf alle Speisen', 'Hitomi', 'restaurant-buffet'],
+  ['1+1 Pizza gratis', 'Only Noodle', null],
+  ['Burger fuer 5 Euro', 'Ganesha', 'burger'],
+  ['20 % auf Nudelboxen + Getränk mit Vorteilsclub', 'Noodle King', 'noodle-box'],
+  ['Vegetarische Nudelbox um 5 Euro', 'Noodle King', 'vegetable-noodles'],
+  ['26 % auf ausgewählte Snacks (Mo–Sa)', 'Bäckerei DerMann', 'bakery-snacks'],
+  ['Doppel-Smashburger für 9,90 €', 'ABBY Restaurant', 'double-smashburger'],
+  ['1+1 Steak-Döner', 'flamm.vie', 'steak-kebab'],
+  ['Cherry Latte gratis mit jö', 'OMV', 'cherry-latte'],
+  ['Ube Coconut Latte gratis mit jö', 'OMV', 'ube-coconut-latte'],
+  ['Caramel Latte gratis mit jö', 'OMV', 'caramel-latte'],
+  ['Balkan-Brunchbuffet für 9,90 € am Sonntag', 'XxXL Grill Restaurant', 'balkan-brunch'],
 ]) {
   const photo = dealPhoto({ title, brand, category: 'essen' });
-  assert.equal(photo.key, key);
+  if (key) assert.equal(photo.key, key);
+  else assert.match(photo.key, /^pizza(?:-alternative)?$/);
   assert.match(photo.src, /\/assets\/blog\/photos\//);
   assert.ok(photo.width >= 600 && photo.height >= 400);
   assert.match(photo.alt, /^Symbolfoto:/);
+}
+for (const brand of ['Wolt', 'Foodora', 'Lieferando', 'Unbekanntes Lokal', 'IKEA']) {
+  const photo = dealPhoto({id:brand,title:'10 Prozent Rabatt',brand,category:'essen'});
+  assert.ok(photo, brand);
+  assert.doesNotMatch(photo.key, /^(restaurant|casual-restaurant|asian-restaurant|indian-restaurant|takeaway|delivery)$/);
 }
 const sources = JSON.parse(read('assets/blog/photos/sources.json')).photos;
 for (const key of ['indian-meal', 'restaurant-buffet', 'family-lunch', 'balkan-brunch']) {

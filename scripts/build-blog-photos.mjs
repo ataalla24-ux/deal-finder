@@ -26,7 +26,13 @@ for (const [key, recipe] of Object.entries(photoRecipes).filter(([key]) => !sele
   } else if (recipe.existing) file = path.join(root, 'docs', recipe.existing);
   else {
     if (!process.env.NATIVE_ASSETS_ROOT) throw new Error('Set NATIVE_ASSETS_ROOT to the existing Assets.xcassets directory.');
-    if (recipe.nativeIndex === 86) file = path.join(process.env.NATIVE_ASSETS_ROOT, 'DealsHomeSpecific86.imageset/deals-home-durum.jpg');
+    if (recipe.nativeIndex >= 84) {
+      const imageSet = path.join(process.env.NATIVE_ASSETS_ROOT, `DealsHomeSpecific${recipe.nativeIndex}.imageset`);
+      const manifest = JSON.parse(await fs.readFile(path.join(imageSet, 'Contents.json'), 'utf8'));
+      const name = manifest.images.find(image => image.filename && image.idiom === 'universal')?.filename;
+      if (!name || path.basename(name) !== name) throw new Error(`Missing native image ${recipe.nativeIndex}`);
+      file = path.join(imageSet, name);
+    }
     else {
       const [atlas, columns, start] = atlases.find(([, count, start]) => recipe.nativeIndex >= start && recipe.nativeIndex < start + count * count);
       file = path.join(process.env.NATIVE_ASSETS_ROOT, atlas);
@@ -39,7 +45,8 @@ for (const [key, recipe] of Object.entries(photoRecipes).filter(([key]) => !sele
   const original = await fs.readFile(file);
   const input = crop ? await sharp(original).extract(crop).toBuffer() : original;
   const position = key === 'furniture' ? 'south' : 'centre';
-  const resized = await sharp(input).resize(1200, 630, { fit: 'cover', position }).png().toBuffer();
+  const height = recipe.outputHeight || 630;
+  const resized = await sharp(input).resize(1200, height, { fit: 'cover', position }).png().toBuffer();
   let jpeg;
   for (const quality of [84, 80, 76, 72, 68, 64, 60]) {
     jpeg = await sharp(resized).jpeg({ quality, mozjpeg: true }).toBuffer();
@@ -66,7 +73,7 @@ for (const [key, recipe] of Object.entries(photoRecipes).filter(([key]) => !sele
     source: recipe.generated || recipe.existing || `native-artwork-index-${recipe.nativeIndex}`,
     sourceSha256: createHash('sha256').update(original).digest('hex'), nativeIndex: recipe.nativeIndex, crop,
     inputWidth: inputMetadata.width, inputHeight: inputMetadata.height,
-    width: 1200, height: 630, bytes: jpeg.length, webpBytes: webp.length, thumbnailWidth: 480, thumbnailBytes: thumbnail.length,
+    width: 1200, height, bytes: jpeg.length, webpBytes: webp.length, thumbnailWidth: 480, thumbnailBytes: thumbnail.length,
     overlays: false };
 }
 await fs.writeFile(path.join(destination, 'sources.json'), JSON.stringify({

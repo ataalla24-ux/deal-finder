@@ -25,6 +25,16 @@ test('publication requires actual bytes for all four public documents; green loc
   assert.equal(stale.checks.filter(row=>row.exact).length,0);
 }));
 
+test('public verification returns failure evidence before the workflow timeout',()=>fixture(async({cwd,put})=>{
+  for(const file of ['deals.json','deal-map-locations.json','deal-of-the-day.json','deal-of-the-week.json'])put(`docs/${file}`,{});
+  let clock=0,calls=0;
+  const result=await verifyPublicQuality({root:cwd,clock:()=>clock,maxDurationMs:25000,
+    request:async()=>{calls++;clock+=10000;throw Error('offline');},wait:async ms=>{clock+=ms;}});
+  assert.equal(result.status,'publication-not-confirmed');
+  assert.equal(calls,3);
+  assert(result.checks.some(row=>row.error==='verification-deadline'));
+}));
+
 test('50-character target never truncates protected or condition-bearing titles', () => {
   const deal = {title:'10 Euro Gutschein: Essen ab 10 Euro und Einkauf ab 50 Euro', description:'Alle Bedingungen vorhanden', expires:'2026-12-31'};
   assert.deepEqual(copyReviewReasons(deal), ['title']);

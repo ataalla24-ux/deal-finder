@@ -18,8 +18,39 @@
   },
   "unchanged": ["Shared API budget", "Credit expiry", "No paid fallback", "DEAL_CARD_EDITOR_ENABLED=0", "Scraper quotas", "Manual edits", "Existing live identities", "Human approval of new deals"],
   "offlineVerification": {"passedTests": 128, "failedTests": 0, "yaml": "passed", "gitDiffCheck": "passed", "realProviderCallsInLocalTests": 0},
-  "cloudVerification": "Awaiting deployed workflow and public readback; see actual GitHub runs and server quality artifacts.",
-  "migrationRule": "Pause only the old local title/map schedules after equivalent server execution succeeds publicly. Do not silently disable other local jobs.",
+  "cloudVerification": {
+    "sourceCommit": "9cf4be785048ee0748338b231bd8c054f7c1bd84",
+    "qualityRun": 42195855960,
+    "qualityConclusion": "success",
+    "generatedCommit": "0ea1e353b5df77c9bfd529d08639e7f37c992179",
+    "publicVerifiedAt": "2026-11-06T09:33:18.122Z",
+    "publicDocumentsByteExact": 4,
+    "liveDeals": 68,
+    "mappedDeals": 44,
+    "onlineOnlyDeals": 24,
+    "mapPoints": 257,
+    "openMapCases": 0,
+    "newGeocodingRequests": 0,
+    "copyCorrections": 0,
+    "expiryHides": 0,
+    "imageCalls": 2,
+    "imageInternalSettledUsd": 0.000958,
+    "costCaveat": "Internal shared-ledger usage, not the provider account balance.",
+    "mediaRuntimeReadOnlyRun": 42196448579,
+    "mediaRuntimeConclusion": "success",
+    "mediaTools": ["ffmpeg", "ffprobe", "pdfimages", "pdfinfo", "pdftotext", "tesseract"]
+  },
+  "localMigration": {
+    "pausedAfterPublicVerification": ["freefinder-deal-titel-t-glich-pr-fen", "freefinder-kartencheck-t-glich"],
+    "otherSchedules": "Preserved; no claim blog, SEO, Threads or authenticated support tasks migrated."
+  },
+  "websiteImageFollowup": {
+    "existingOwnedSubjectsAdded": ["noodle-box", "vegetable-noodles", "steak-kebab", "double-smashburger", "bakery-snacks", "cherry-latte", "ube-coconut-latte", "caramel-latte"],
+    "scope": "Website symbolic image selection only; explicit product before merchant cuisine, no empty table/closed bag fallback.",
+    "visualChecks": "390x844 and 1440x900, actual loaded assets and no horizontal overflow.",
+    "nativeBinaryChanged": false
+  },
+  "migrationRule": "Pause local schedules only after the equivalent server execution succeeds publicly. Keep non-equivalent authenticated tasks separate.",
   "remainingStages": [
     "Native image-selection audit and licensed product-photo ingestion beyond website image checking",
     "Source-backed automatic-publication evaluation before enabling any autonomous approval",

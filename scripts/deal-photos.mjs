@@ -90,16 +90,31 @@ export function photoKey(deal) {
 
 export function dealPhoto(deal) {
   const key = photoKey(deal);
-  const text = normalize(`${deal.title || ''} ${deal.brand || ''}`);
-  const specific = [
-    [/biang|only noodle/, 'biang-noodles'], [/cigkofte/, 'cigkofte-wrap'],
+  const title = normalize(deal.title), brand = normalize(deal.brand);
+  const specificProduct = [
+    [/cherry.*latte|latte.*cherry/, 'cherry-latte'],
+    [/(?:ube|coconut|kokos).*latte|latte.*(?:ube|coconut|kokos)/, 'ube-coconut-latte'],
+    [/(?:caramel|karamell).*latte|latte.*(?:caramel|karamell)/, 'caramel-latte'],
+    [/steak.*(?:doner|doener|kebab|kebap)/, 'steak-kebab'],
+    [/doppel.?smashburger|double.?smashburger/, 'double-smashburger'],
+    [/biang/, 'biang-noodles'], [/cigkofte/, 'cigkofte-wrap'],
+    [/nudelbox|noodle.?box/, /vegan|vegetar/.test(title) ? 'vegetable-noodles' : 'noodle-box'],
     [/krapfen/, 'krapfen'], [/mcnuggets|chicken nuggets/, 'nuggets'],
     [/bubble[ -]?tea/, 'bubble-tea'], [/tiramisu/, 'tiramisu'],
     [/thunfisch.*wrap|tuna.*wrap/, 'tuna-wrap'],
-    [/kindermenu/, 'family-lunch'], [/ganesha/, 'indian-meal'],
-    [/haikky|watertuin/, 'restaurant-buffet'], [/xxxl grill/, 'balkan-brunch'],
-    [/(?:hot.?dog|hut-dog).*loving.?hut|loving.?hut.*(?:hot.?dog|hut-dog)/, 'vegan-hotdog'],
-  ].find(([pattern]) => pattern.test(text))?.[1] || key;
+    [/kindermenu/, 'family-lunch'],
+  ].find(([pattern]) => pattern.test(title))?.[1];
+  const emptyScene = ['restaurant', 'casual-restaurant', 'asian-restaurant', 'indian-restaurant', 'takeaway', 'delivery'].includes(key);
+  // Merchant cuisine is only a fallback; it must not replace an explicit product.
+  let specific = specificProduct || key;
+  if (/(?:hot.?dog|hut-dog)/.test(title) && /loving.?hut/.test(brand)) specific = 'vegan-hotdog';
+  else if (!specificProduct && emptyScene) {
+    if (/snacks?/.test(title) && /dermann|der mann|backerei/.test(brand)) specific = 'bakery-snacks';
+    else if (/ganesha/.test(brand)) specific = 'indian-meal';
+    else if (/xxxl grill/.test(brand) && /brunch/.test(title)) specific = 'balkan-brunch';
+    else if (/haikky|watertuin|hitomi|\bebi\b/.test(brand) || /buffet/.test(title)) specific = 'restaurant-buffet';
+    else specific = 'family-lunch';
+  }
   const photo = editorial[specific];
   if (photo && photo.inputWidth >= 600 && photo.inputHeight >= 400
     && [`${specific}.webp`, `${specific}-480.webp`].every(file => fs.existsSync(path.join(editorialDirectory, file)))) {
@@ -107,6 +122,8 @@ export function dealPhoto(deal) {
       srcset: `/assets/blog/photos/${specific}-480.webp 480w, /assets/blog/photos/${specific}.webp 1200w`,
       width: photo.width, height: photo.height, alt: `Symbolfoto: ${photo.subject}` };
   }
+  // Missing food assets must not silently restore an empty-table or bag image.
+  if (emptyScene) return null;
   const metadata = catalog?.[key];
   if (!metadata || ![metadata.width, metadata.height, metadata.thumbWidth].every(value => Number.isInteger(value) && value > 0)) return null;
   if (![`${key}.webp`, `${key}-160.webp`].every(file => fs.existsSync(path.join(directory, file)))) return null;

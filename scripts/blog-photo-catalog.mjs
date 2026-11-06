@@ -2,6 +2,14 @@ import { photoDefinitions, photoKey } from './deal-photos.mjs';
 
 // Generic editorial photographs, never evidence of a merchant's exact product.
 export const photoRecipes = {
+  'noodle-box': { nativeIndex: 125, outputHeight: 444, subject: 'Nudelbox mit Huhn, Gemüse und Getränk' },
+  'vegetable-noodles': { nativeIndex: 134, outputHeight: 444, subject: 'Nudeln mit Gemüse' },
+  'steak-kebab': { nativeIndex: 126, outputHeight: 444, subject: 'Steak-Döner im Brot' },
+  'double-smashburger': { nativeIndex: 127, outputHeight: 444, subject: 'Doppel-Smashburger' },
+  'bakery-snacks': { nativeIndex: 132, outputHeight: 444, subject: 'Herzhafte belegte Backwaren' },
+  'cherry-latte': { nativeIndex: 120, outputHeight: 444, subject: 'Kirsch-Latte mit Sahne' },
+  'ube-coconut-latte': { nativeIndex: 121, outputHeight: 444, subject: 'Ube-Kokos-Latte' },
+  'caramel-latte': { nativeIndex: 122, outputHeight: 444, subject: 'Karamell-Latte' },
   ...Object.fromEntries(Object.entries(photoDefinitions).map(([key, [nativeIndex, subject]]) => [key, { nativeIndex, subject }])),
   'cafe-breakfast': { nativeIndex: 3, subject: 'Kaffee und Croissant im Café' },
   'auto-parts': { generated: 'auto-parts.png', subject: 'Autoteile' },
