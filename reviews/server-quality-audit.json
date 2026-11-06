@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "checkedAt": "2026-11-06T11:15:05.645Z",
+  "checkedAt": "2026-11-06T11:31:40.832Z",
   "feedHash": "0f38513a0f6ddd45aa1eea7ca17f271101f177ee828e242875c790a308cde995",
   "liveCount": 67,
   "checks": {
@@ -12,10 +12,12 @@
   },
   "nativeContracts": {
     "status": "observed-contracts-pass",
-    "checkedAt": "2026-11-06T11:03:05.364Z",
+    "checkedAt": "2026-11-06T11:18:38.380Z",
     "sourceHashes": {
       "FreeFinderWien/DealsHomeArtwork.swift": "3b900b64d75514defe101658c68a0f4ec1bffc5052d5533f5418563f4a6f60a5",
       "FreeFinderWien/DealsHomeStyle.swift": "0ffa4ca46e45342224c755f21799dbafea115057a1bb3a33386a86660074a440",
+      "FreeFinderWien/ContentView.swift": "d43e3291b2f590e288080b209b5f1a4a69230e7fc4ce9abc95d12e6e7cc2529e",
+      "FreeFinderWien/DealCardText.swift": "91f881fa9d3fb995655821c94ed3f7b36f51f2ea320aa0986aec4085c6f2d60d",
       "FreeFinderWien-Android/app/src/main/java/com/stefanataalla/freefinderwien/DealsHomeArtwork.kt": "0dd081e7afac4e9ab017768e8ff35a72fd64607584d3429a84920445f2193c13",
       "FreeFinderWien-Android/app/src/main/java/com/stefanataalla/freefinderwien/MainActivity.kt": "494db00bea533eec035aa9fc0688d6ebcd83050bf01577be541631050b12edf4",
       "FreeFinderWien-Android/app/src/main/java/com/stefanataalla/freefinderwien/FreeFinderShareSheet.kt": "f9bc59d383cce5d503bdbdfd09d18044e9a5e02791e477dda1553683e587ba4a",
@@ -25,7 +27,8 @@
     },
     "semanticImageReview": false,
     "recipientUiTest": false,
-    "caveat": "Current local native source was tested, not every installed Store version. Native source or library changes require a new observation."
+    "displayTransformationsTested": false,
+    "caveat": "Raw-feed artwork policy parity and asset/share wiring only; display transformations and actual recipient UI are not exercised. Not every installed Store version. Native source or library changes require a new observation."
   },
   "modelCalls": 2,
   "photoDeferred": 0,
@@ -349,7 +352,8 @@
         "status": "needs-review",
         "checkedAt": "2026-11-06T11:15:05.645Z",
         "provesMerchantPhoto": false,
-        "automaticReplacement": false
+        "automaticReplacement": false,
+        "cached": true
       },
       "nativePhoto": "not-inspected-by-this-web-audit"
     },
@@ -392,7 +396,8 @@
         "status": "needs-review",
         "checkedAt": "2026-11-06T11:15:05.645Z",
         "provesMerchantPhoto": false,
-        "automaticReplacement": false
+        "automaticReplacement": false,
+        "cached": true
       },
       "nativePhoto": "not-inspected-by-this-web-audit"
     },
@@ -429,7 +434,13 @@
       "websitePhoto": {
         "src": "/assets/blog/photos/caramel-latte.webp",
         "key": "caramel-latte",
-        "status": "not-reviewed"
+        "matchesProduct": true,
+        "emptyTableOrPackaging": false,
+        "uncertain": true,
+        "status": "needs-review",
+        "checkedAt": "2026-11-06T11:31:40.832Z",
+        "provesMerchantPhoto": false,
+        "automaticReplacement": false
       },
       "nativePhoto": "not-inspected-by-this-web-audit"
     },
@@ -466,7 +477,13 @@
       "websitePhoto": {
         "src": "/assets/blog/photos/ube-coconut-latte.webp",
         "key": "ube-coconut-latte",
-        "status": "not-reviewed"
+        "matchesProduct": true,
+        "emptyTableOrPackaging": false,
+        "uncertain": false,
+        "status": "symbolic-match",
+        "checkedAt": "2026-11-06T11:31:40.832Z",
+        "provesMerchantPhoto": false,
+        "automaticReplacement": false
       },
       "nativePhoto": "not-inspected-by-this-web-audit"
     },
@@ -698,7 +715,7 @@
       "requiresReview": false,
       "publicationMode": "human-approval",
       "automaticPublicationAllowed": false,
-      "fingerprint": "606b10d3a345522d1e26282eb2c29c503d19cb49e86678e2658931c27de01dae",
+      "fingerprint": "c7358d8c207ff43a30189edbe34ccc6dfe542711836db63c3bc2f3417c2046b3",
       "map": {
         "status": "mapped",
         "reason": "verified-address-reuse",
@@ -743,7 +760,7 @@
       "requiresReview": true,
       "publicationMode": "human-approval",
       "automaticPublicationAllowed": false,
-      "fingerprint": "9d05856b0f80dd0632717d184cf95f4cb839c45485ddd203fe8ce597ee20faab",
+      "fingerprint": "4707749b8b3f80416f2dd06e7f96adf45bf7f2a0101ffb19415981335f9a2094",
       "map": {
         "status": "mapped",
         "reason": "verified-address-reuse",
@@ -1735,16 +1752,12 @@
         {
           "code": "period-unconfirmed",
           "label": "Aktionszeitraum oder dauerhafte Gueltigkeit pruefen."
-        },
-        {
-          "code": "evidence-missing",
-          "label": "Kein gespeicherter Originaltext fuer automatische Korrektur."
         }
       ],
       "requiresReview": true,
       "publicationMode": "human-approval",
       "automaticPublicationAllowed": false,
-      "fingerprint": "b610e00b3c0d4153fb19f2e1a75ed8bbe445ea61e5b120d5e04f5f46c2ab689e",
+      "fingerprint": "7c8f9a2c00bd3bc9a5cf625b8ff6c2f44bc17c34e6c53e986221137364a7d7b2",
       "map": {
         "status": "mapped",
         "reason": "verified-address-reuse",
@@ -1798,7 +1811,7 @@
       "requiresReview": true,
       "publicationMode": "human-approval",
       "automaticPublicationAllowed": false,
-      "fingerprint": "51c5f0748008cf6db46dacc204cf888a67286dae0ac7531a3d02d696ea600a7d",
+      "fingerprint": "6a4a74fb542d6ba720016b8dc181249d89181b99b0bc8e8518dcd7ff0ff68183",
       "map": {
         "status": "mapped",
         "reason": "verified-address-reuse",
@@ -7962,6 +7975,10 @@
             "label": "Titel lang; Bedingungen erhalten, nicht abschneiden."
           },
           {
+            "code": "invalid-date",
+            "label": "Datumsfeld ungueltig; nicht automatisch raten."
+          },
+          {
             "code": "map-incomplete",
             "label": "Einloesestandorte sind noch nicht vollstaendig bestaetigt."
           }
@@ -7969,7 +7986,7 @@
         "requiresReview": true,
         "publicationMode": "human-approval",
         "automaticPublicationAllowed": false,
-        "fingerprint": "aa26d9693d4d050de0a2c888c572c7c4706579d2301596df8cbd687093aa4a75"
+        "fingerprint": "c2534ad9e30308684bd52abfa0be654c5c63de0f487abe4e4468e3f45a342aef"
       },
       {
         "id": "social-food-review-vvjevq",
@@ -9286,6 +9303,10 @@
             "label": "Titel lang; Bedingungen erhalten, nicht abschneiden."
           },
           {
+            "code": "invalid-date",
+            "label": "Datumsfeld ungueltig; nicht automatisch raten."
+          },
+          {
             "code": "map-incomplete",
             "label": "Einloesestandorte sind noch nicht vollstaendig bestaetigt."
           }
@@ -9293,7 +9314,7 @@
         "requiresReview": true,
         "publicationMode": "human-approval",
         "automaticPublicationAllowed": false,
-        "fingerprint": "cd95abb73db5d9862b17bf699747091acf095e09ee1eb1c360032ca8b389a8aa"
+        "fingerprint": "7e16a805e7387ad8769c66720f1bdf25f3ec1e784bc35d8d6341bf478c7ca57b"
       },
       {
         "id": "instagram-ai-e7a1d16b248c",
@@ -9316,10 +9337,6 @@
         "id": "meta-ig-17955480147291043",
         "issues": [
           {
-            "code": "invalid-date",
-            "label": "Datumsfeld ungueltig; nicht automatisch raten."
-          },
-          {
             "code": "map-incomplete",
             "label": "Einloesestandorte sind noch nicht vollstaendig bestaetigt."
           }
@@ -9327,7 +9344,7 @@
         "requiresReview": true,
         "publicationMode": "human-approval",
         "automaticPublicationAllowed": false,
-        "fingerprint": "0e79aa95bcb26f42496c707d32bd5078b5461186a9fa784534abe43db4b28f71"
+        "fingerprint": "c940923d1b192eeaebcd436e59228edb24faeaf6571f81058efb655a74fb4e4d"
       },
       {
         "id": "fc4g-1rriueh",
