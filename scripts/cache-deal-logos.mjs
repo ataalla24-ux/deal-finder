@@ -200,6 +200,12 @@ function assertLogoQuality(buffer) {
   }
 }
 
+export function normalizeLogoCacheRecord(rawDeal) {
+  const normalized = normalizeDealRecord(rawDeal);
+  // A logo refresh must not rewrite approved copy, dates, eligibility or type.
+  return { ...rawDeal, logo: normalized.logo, logoUrl: normalized.logoUrl };
+}
+
 async function main() {
   await mkdir(LOGO_DIR, { recursive: true });
 
@@ -212,7 +218,7 @@ async function main() {
 
   const nextDeals = [];
   for (const rawDeal of deals) {
-    const deal = normalizeDealRecord(rawDeal);
+    const deal = normalizeLogoCacheRecord(rawDeal);
     if (JSON.stringify(deal) !== JSON.stringify(rawDeal)) normalizedCount += 1;
 
     const sourceLogoUrl = cleanText(deal.logoUrl || '');

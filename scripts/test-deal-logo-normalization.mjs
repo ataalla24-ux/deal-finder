@@ -5,9 +5,35 @@ import path from 'node:path';
 
 import {
   inferPreferredBrand,
+  inferPreferredType,
   normalizeDealRecord,
 } from '../scraper/deal-normalization-utils.js';
-import { repairCachedLogoReference } from './cache-deal-logos.mjs';
+import { normalizeLogoCacheRecord, repairCachedLogoReference } from './cache-deal-logos.mjs';
+
+for (const title of ['Drei-Kunden: 10–25 % auf 2 Std. Padel je nach Spielzeit',
+  'Bis zu 25 % auf Padel', '10 % weniger auf die Mitgliedschaft', '12,5 % auf Training']) {
+  assert.equal(inferPreferredType({ title, description: 'Sende eine gratis SMS fuer deinen Code.', type: 'gratis' }), 'rabatt');
+}
+for (const title of ['Gratis Kaffee', '100 % kostenlos: Training', '1+1 Pizza gratis']) {
+  assert.notEqual(inferPreferredType({ title, description: '25 % auf weitere Produkte.' }), 'rabatt');
+}
+const fitnessWithFoodAddOns = {
+  id: 'fitness-fixture', brand: 'clever fit', category: 'fitness',
+  title: 'Drei-Kunden: 10 % aufs Fitnessabo fuer Neumitglieder', type: 'rabatt',
+  description: '25 % auf Add-ons wie Proteinshake und Kaffee. Kostenlose SMS mit CLEVER an 5353.',
+  url: 'https://www.drei.at/de/dreiplus/ersparnisse/cleverfit/',
+};
+assert.equal(normalizeDealRecord(fitnessWithFoodAddOns).logo, '💪');
+assert.equal(normalizeDealRecord({ ...fitnessWithFoodAddOns, logo: '🏋️', liveEditedFields: ['logo'] }).logo, '🏋️');
+assert.equal(normalizeDealRecord({ brand: 'Cafe Beispiel', category: 'essen', title: '1+1 Waffel gratis' }).logo, '🥞');
+const protectedCacheInput = {
+  ...fitnessWithFoodAddOns, title: '  Original | title  ', type: 'owner-type',
+  description: 'Original | description', expires: 'Original expiry',
+  votes: 17, custom: { approval: 'preserve', addresses: ['Original address'] },
+};
+const cacheOutput = normalizeLogoCacheRecord(protectedCacheInput);
+assert.deepEqual(Object.fromEntries(Object.entries(cacheOutput).filter(([key]) => !['logo', 'logoUrl'].includes(key))), protectedCacheInput);
+assert.deepEqual(normalizeLogoCacheRecord(cacheOutput), cacheOutput, 'logo refresh must be idempotent');
 
 for (const brand of ['DerMann', 'Der Mann', 'Bäckerei DerMann', 'Bäckerei DerMann']) {
   assert.equal(normalizeDealRecord({brand,title:'26 % auf Snacks',url:'https://www.instagram.com/p/fixture/'}).logoUrl,

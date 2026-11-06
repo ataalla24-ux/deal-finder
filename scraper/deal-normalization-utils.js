@@ -756,6 +756,9 @@ function inferLogo(deal = {}, brand = '') {
   const signal = normalizeAscii(combined);
   const type = cleanUiNoiseText(deal.type || '').toLowerCase();
   const category = cleanUiNoiseText(deal.category || '').toLowerCase();
+  // Food add-ons in the conditions do not change the main fitness benefit.
+  if (category === 'fitness' && hasSignalTerm(normalizeAscii(deal.title || ''),
+    'fitnessabo|fitnessstudio|fitness|mitgliedschaft|mitgliedschaften|training|trainingsabo|padel|tennis')) return '💪';
   if (/(pizza)/.test(signal)) return '🍕';
   if (/(burger)/.test(signal)) return '🍔';
   if (/(kebab|doner|döner|falafel|wrap)/.test(signal)) return '🌯';
@@ -807,6 +810,11 @@ function inferPreferredType(deal = {}) {
   }
 
   if (!titleClaimsFree && /\b\d{1,2}\s*%[^.]{0,50}\b(?:gutschein|coupon|rabatt)\b|\b(?:gutschein|coupon|rabatt)\b[^.]{0,50}\d{1,2}\s*%/i.test(title)) {
+    return 'rabatt';
+  }
+
+  // "10–25 % auf ..." remains a discount even when requesting its code is free.
+  if (!titleClaimsFree && /\b\d{1,2}(?:[,.]\d+)?\s*%\s+(?:auf|weniger|sparen)\b/i.test(title)) {
     return 'rabatt';
   }
 
