@@ -8,6 +8,7 @@ import { dealPhoto } from './deal-photos.mjs';
 import { freeCreditOpenAiFetch, modelForTask } from '../scraper/ai-credit-budget.js';
 import { maintenanceEvidenceFor } from './refresh-maintenance-evidence.mjs';
 import { nativeContractStatus } from './native-contract-observation.mjs';
+import { nativeArtworkContext, reviewNativeArtwork } from './native-artwork-review.mjs';
 
 const read = (file, fallback) => { try { return JSON.parse(fs.readFileSync(file,'utf8')); } catch(error) { if(error.code === 'ENOENT') return fallback; throw error; } };
 const write = (file, data) => {fs.mkdirSync(path.dirname(file),{recursive:true});fs.writeFileSync(file,JSON.stringify(data,null,2)+'\n');};
@@ -52,24 +53,43 @@ export async function auditServerQuality({root=process.cwd(),now=new Date(),allo
   const cachePath=path.join(root,'reviews/server-photo-audit-cache.json'),beforeCache=read(cachePath,{version:1,entries:{}});
   const cache=structuredClone(beforeCache), rows=[],images=new Map();
   const evidence=maintenanceEvidenceFor(deals,read(path.join(root,'reviews/maintenance-source-evidence.json'),{}),now);
+  const native=nativeArtworkContext(deals,read(path.join(root,'reviews/native-artwork-observation.json'),null));
   let modelCalls=0,photoDeferred=0;
+  const allowNew=()=>Boolean(allowAi && apply && process.env.OPENAI_API_KEY && modelCalls<2 && !photoDeferred);
+  const boundedRequest=(...args)=>{modelCalls++;return request(...args);};
   for(const deal of deals){
     const map=reviewDealMap(deal,context),quality=inspectSourceBackedQuality(deal,{mapReview:map,today,evidenceTexts:[evidence.get(deal.id)?.officialText]}),photo=dealPhoto(deal);
     if(photo?.src)images.set(photo.src,[...(images.get(photo.src)||[]),deal.id]);
-    let imageReview={status:'not-reviewed'};
+    let imageReview={status:'not-reviewed'},nativePhoto={status:native.status};
+    if(native.entries.has(deal.id)){
+      try {nativePhoto=await reviewNativeArtwork(deal,native.entries.get(deal.id),{root,cache:cache.entries,now,allowNew,request:boundedRequest});}
+      catch {photoDeferred++;nativePhoto={status:'deferred'};}
+    }
     {
-      try {imageReview=await reviewPhoto(deal,photo,{root,cache:cache.entries,now,allowNew:Boolean(allowAi && apply && process.env.OPENAI_API_KEY && modelCalls<2 && !photoDeferred),request:(...args)=>{modelCalls++;return request(...args);}});}
+      try {imageReview=await reviewPhoto(deal,photo,{root,cache:cache.entries,now,allowNew:allowNew(),request:boundedRequest});}
       catch {photoDeferred++;imageReview={status:'deferred'};}
     }
     rows.push({...quality,map:{status:map.status,reason:map.reason,locationIds:map.locationIds||[]},
-      websitePhoto:{src:photo?.src||null,key:photo?.key||null,...imageReview},nativePhoto:'not-inspected-by-this-web-audit'});
+      websitePhoto:{src:photo?.src||null,key:photo?.key||null,...imageReview},nativePhoto});
   }
   const pending=read(path.join(root,'docs/deals-pending-all.json'),{}),liveIds=new Set(deals.map(deal=>deal.id));
   const pendingRows=(Array.isArray(pending)?pending:pending.deals||[]).filter(deal=>!liveIds.has(deal.id))
     .map(deal=>inspectSourceBackedQuality(deal,{mapReview:reviewDealMap(deal,context),today}));
   const report={version:1,checkedAt:now.toISOString(),feedHash:hash(JSON.stringify(deals)),liveCount:deals.length,
-    checks:{sourceCopyDate:true,map:true,websiteImages:true,nativeImages:false,blogContent:false},
+    checks:{sourceCopyDate:true,map:true,websiteImages:true,nativeImages:native.entries.size>0,blogContent:false},
     nativeContracts:nativeContractStatus(deals,read(path.join(root,'reviews/native-contract-observation.json'),null)),
+    nativeSelection:{...native,entries:undefined,observedDeals:native.entries.size,recipientUiTest:false,
+      reviewedPlatformImages:rows.reduce((sum,r)=>sum+Object.values(r.nativePhoto.platforms||{}).filter(p=>['symbolic-match','needs-review'].includes(p.semanticStatus)).length,0),
+      lowResolutionDeals:rows.filter(r=>Object.values(r.nativePhoto.platforms||{}).some(p=>p.sourceResolution?.requiresHigherResolution)).map(r=>r.id),
+      sharedAssignments:['ios','android'].flatMap(platform=>{
+        const selected=new Map();
+        for(const row of native.entries.values()){
+          const index=row[platform]?.assigned;
+          if(Number.isInteger(index))selected.set(index,[...(selected.get(index)||[]),row.id]);
+        }
+        return [...selected].filter(([,ids])=>ids.length>1).map(([index,ids])=>({platform,index,dealIds:ids}));
+      }),
+      caveat:'Current compiled selection and bounded asset/crop review; changed feeds need a fresh observation. No installed-version or recipient UI certification.'},
     modelCalls,photoDeferred,automaticPublicationEnabled:false,
     live:rows,pending:{count:pendingRows.length,reviewNeeded:pendingRows.filter(r=>r.requiresReview).length,rows:pendingRows},
     sharedWebsiteImages:[...images].filter(([,ids])=>ids.length>1).map(([src,ids])=>({src,dealIds:ids})),

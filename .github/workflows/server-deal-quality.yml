@@ -17,6 +17,9 @@ on:
       - 'scripts/server-blog-draft.mjs'
       - 'scripts/native-contract-observation.mjs'
       - 'reviews/native-contract-observation.json'
+      - 'scripts/native-artwork-review.mjs'
+      - 'reviews/native-artwork-observation.json'
+      - 'reviews/native-artwork/**'
       - 'scripts/refresh-maintenance-evidence.mjs'
       - 'scraper/ai-credit-budget.js'
       - 'scripts/verify-server-quality-public.mjs'
@@ -52,7 +55,7 @@ jobs:
       - name: Verify safe correction and preservation rules
         if: steps.slot.outputs.run == 'true'
         run: |
-          node --test scripts/test-ai-credit-budget.mjs scripts/test-automatic-maintenance.mjs scripts/test-server-quality.mjs scripts/test-server-operations.mjs scripts/test-server-blog.mjs scripts/test-lightweight-state-committer.mjs
+          node --test scripts/test-ai-credit-budget.mjs scripts/test-automatic-maintenance.mjs scripts/test-server-quality.mjs scripts/test-server-operations.mjs scripts/test-server-blog.mjs scripts/test-lightweight-state-committer.mjs scripts/test-native-artwork-review.mjs
           node scripts/test-pre-publication-title.mjs
           node scripts/test-deal-photo-contract.mjs
           node scripts/test-queue-workflow-safety.mjs
@@ -119,5 +122,6 @@ jobs:
             reviews/automatic-publication-pilot.json
             reviews/server-blog-report.json
             reviews/native-contract-observation.json
+            reviews/native-artwork-observation.json
             output/server-quality-public-proof.json
           retention-days: 30

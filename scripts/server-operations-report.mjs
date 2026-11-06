@@ -119,7 +119,9 @@ export async function writeOperationsReport({ root = process.cwd(), now = new Da
     maintenance:{ checkedAt:maintenance.checkedAt, corrected:maintenance.corrected || [], hidden:maintenance.hidden || [], ai:maintenance.ai || null },
     missingInformation:quality.live?.filter(r=>r.requiresReview) || [],
     images:{ shared:quality.sharedWebsiteImages || [], review:quality.live?.filter(r=>r.websitePhoto?.status === 'needs-review').map(r=>r.id) || [],
-      native:quality.nativeContracts||{status:'requires-native-contract-audit'},semanticNativeImageReview:false },
+      native:quality.nativeContracts||{status:'requires-native-contract-audit'},
+      nativeSelection:quality.nativeSelection||{status:'missing-native-selection-observation',reviewedPlatformImages:0},
+      nativeReview:quality.live?.filter(r=>Object.values(r.nativePhoto?.platforms||{}).some(p=>p.status==='needs-review')||r.nativePhoto?.originalPhoto).map(r=>({id:r.id,review:r.nativePhoto}))||[] },
     publicationPilot:{ status:pilot.status, sampled:pilot.samples.length, independentlyReviewed:pilot.evaluatedCases, regularRuns:pilot.regularRuns.length, automaticPublicationEnabled:false },
     blog:{...read(root,'reviews/server-blog-report.json',{status:'not-run',automaticPublicationEnabled:false,localBlogReplacementReady:false}),
       lastPublicReceipt:read(root,'reviews/server-blog-public-receipt.json',null)},
@@ -130,8 +132,10 @@ export async function writeOperationsReport({ root = process.cwd(), now = new Da
   const markdown = `# FreeFinder Betriebsbericht\n\nStand: ${report.checkedAt}\n\n- ${live.length} Live-Angebote; ${queue.length} nicht-live Entwuerfe geprueft.\n- ${added === null ? 'Erste Bestandsaufnahme' : added.length+' neue IDs seit letzter Bestandsaufnahme'}; keine automatische Erfolgszuordnung.\n- ${queue.filter(r=>r.priority==='human-review-ready').length} Entwuerfe ohne formale Pruefluecke, weiterhin menschliche Freigabe.\n- Pilot: ${pilot.samples.length} Faelle gesammelt, ${pilot.evaluatedCases} unabhaengig bewertet, ${pilot.regularRuns.length} regulaere Qualitaetslaeufe beobachtet. Automatische Freigabe AUS.\n- Neue Slack-Zustellungen: hier nicht nachgewiesen.\n- API: ${report.credits.status}; ${report.credits.rollingDayReservedOrSettledUsd ?? 'unbekannt'} USD intern gebucht/reserviert in 24 Stunden. Kein Anbieter-Kontostand.\n\n## Naechste Schritte\n\n${Object.entries(report.sourceRecovery.byPriority).map(([key,n])=>'- '+key+': '+n).join('\n')}\n`;
   if(apply) {
     for(const [file,value] of [['server-operations-report.json',report],['automatic-publication-pilot.json',pilot]]) fs.writeFileSync(path.join(root,'reviews',file),JSON.stringify(value,null,2)+'\n');
-    fs.writeFileSync(path.join(root,'reviews/server-operations-report.md'),markdown);
-    if(process.env.GITHUB_STEP_SUMMARY)fs.appendFileSync(process.env.GITHUB_STEP_SUMMARY,markdown);
+    const native=report.images.nativeSelection;
+    const imageSummary=`\n## Native Bilder\n\n- Auswahlpruefung: ${native.status}; ${native.observedDeals||0} aktuelle Angebote.\n- ${native.reviewedPlatformImages||0} Plattformbilder inhaltlich geprueft (einschliesslich Cache).\n- ${native.lowResolutionDeals?.length||0} Angebote mit zu kleinen Originalbildern; ${native.sharedAssignments?.length||0} mehrfach verwendete Plattformmotive.\n- Kein Nachweis der installierten App-Version oder der Darstellung beim Empfaenger.\n`;
+    fs.writeFileSync(path.join(root,'reviews/server-operations-report.md'),markdown+imageSummary);
+    if(process.env.GITHUB_STEP_SUMMARY)fs.appendFileSync(process.env.GITHUB_STEP_SUMMARY,markdown+imageSummary);
   }
   return report;
 }
