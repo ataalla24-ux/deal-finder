@@ -2,9 +2,96 @@
   "schemaVersion": 1,
   "sourceKey": "food3",
   "sourceLabel": "Firecrawl Key 2 - Food",
-  "updatedAt": "2026-11-05T09:13:17.142Z",
+  "updatedAt": "2026-11-06T09:06:06.577Z",
   "runCount": 90,
   "runs": [
+    {
+      "schemaVersion": 1,
+      "runId": "food3-2026-11-06T09:06:06.577Z",
+      "sourceKey": "food3",
+      "sourceLabel": "Firecrawl Key 2 - Food",
+      "status": "completed-with-errors",
+      "startedAt": "2026-11-06T09:03:55.653Z",
+      "finishedAt": "2026-11-06T09:06:06.577Z",
+      "durationMs": 130924,
+      "outputFile": "docs/deals-pending-food3.json",
+      "counts": {
+        "rawCandidates": 1,
+        "normalizedCandidates": 1,
+        "verifiedCandidates": 1,
+        "previousDeals": 1,
+        "acceptedDeals": 1,
+        "rejectedDeals": 1
+      },
+      "rejectedByReason": {
+        "post-verification-rejected": 1
+      },
+      "rejectedSamples": [
+        {
+          "reason": "post-verification-rejected",
+          "deal": {
+            "id": "food3-svzlw",
+            "title": "Instagram: einfach gutes Essen, ein feines Glas Wein, leckere Cocktails ...",
+            "brand": "Instagram",
+            "url": "https://www.instagram.com/p/DfOxlBIjMa9/",
+            "source": "Firecrawl Food #2",
+            "pubDate": "",
+            "expires": "",
+            "postVerificationStatus": ""
+          }
+        }
+      ],
+      "diagnostics": {
+        "agentStatus": "completed-with-errors",
+        "creditsUsed": 0,
+        "configuredSources": 6,
+        "attemptedSources": 3,
+        "completedSources": 2,
+        "targetsPerRun": 3,
+        "agentTimeoutSeconds": 120,
+        "maxCreditsPerTarget": 300,
+        "sourceStats": [
+          {
+            "url": "https://www.instagram.com/explore/tags/happyhourwien/",
+            "status": "completed-search",
+            "rawCandidates": 1,
+            "searchCandidates": 1,
+            "creditsUsed": 0
+          },
+          {
+            "url": "https://www.instagram.com/explore/tags/lunchdealwien/",
+            "status": "failed",
+            "rawCandidates": 0,
+            "searchCandidates": 0,
+            "creditsUsed": 0,
+            "error": "Die angegebene Instagram-Hashtag-Seite konnte in diesem Durchlauf nicht abgerufen werden (Quellseite wird vom Webzugriff nicht unterstützt). Dadurch lassen sich weder die letzten 7 Tage vollständig prüfen noch direkte Originalposts, exakte Veröffentlichungsdaten, Handles und Angebotsdetails verlässlich verifizieren. Ich gebe deshalb keine unbestätigten Angebote zurück."
+          },
+          {
+            "url": "https://www.instagram.com/explore/tags/neueröffnungwien/",
+            "status": "completed",
+            "rawCandidates": 0,
+            "searchCandidates": 0,
+            "creditsUsed": 0
+          }
+        ],
+        "retainedPreviousDeals": 1,
+        "prunedPreviousDeals": 0,
+        "duplicateCandidatesMerged": 0,
+        "verifier": {
+          "statusCounts": {
+            "verified-meta-graph": 1
+          },
+          "verifiedOriginalPosts": 0,
+          "timestampOnlyPosts": 0,
+          "unavailableOriginalPosts": 0,
+          "registryViennaEvidence": 0
+        }
+      },
+      "constraints": {},
+      "errors": [
+        "https://www.instagram.com/explore/tags/lunchdealwien/: Die angegebene Instagram-Hashtag-Seite konnte in diesem Durchlauf nicht abgerufen werden (Quellseite wird vom Webzugriff nicht unterstützt). Dadurch lassen sich weder die letzten 7 Tage vollständig prüfen noch direkte Originalposts, exakte Veröffentlichungsdaten, Handles und Angebotsdetails verlässlich verifizieren. Ich gebe deshalb keine unbestätigten Angebote zurück."
+      ]
+    },
     {
       "schemaVersion": 1,
       "runId": "food3-2026-11-05T09:13:17.142Z",
@@ -14245,72 +14332,6 @@
         "verifier": {
           "statusCounts": {},
           "verifiedOriginalPosts": 0,
-          "timestampOnlyPosts": 0,
-          "unavailableOriginalPosts": 0,
-          "registryViennaEvidence": 0
-        }
-      },
-      "constraints": {},
-      "errors": []
-    },
-    {
-      "schemaVersion": 1,
-      "runId": "food3-2026-08-07T04:34:30.902Z",
-      "sourceKey": "food3",
-      "sourceLabel": "Firecrawl Key 2 - Food",
-      "status": "completed",
-      "startedAt": "2026-08-07T04:28:14.163Z",
-      "finishedAt": "2026-08-07T04:34:30.902Z",
-      "durationMs": 376739,
-      "outputFile": "docs/deals-pending-food3.json",
-      "counts": {
-        "rawCandidates": 31,
-        "normalizedCandidates": 29,
-        "verifiedCandidates": 29,
-        "previousDeals": 0,
-        "acceptedDeals": 29,
-        "rejectedDeals": 2
-      },
-      "rejectedByReason": {
-        "invalid-original-post-url": 2
-      },
-      "rejectedSamples": [
-        {
-          "reason": "invalid-original-post-url",
-          "deal": {
-            "id": "",
-            "title": "Matcha",
-            "brand": "Catch Coffee Vienna",
-            "url": "https://www.instagram.com/viennafoodguide/?hl=en",
-            "source": "",
-            "pubDate": "",
-            "expires": "",
-            "postVerificationStatus": ""
-          }
-        },
-        {
-          "reason": "invalid-original-post-url",
-          "deal": {
-            "id": "",
-            "title": "All You Can Eat Buffet (Sushi, Noodles, Curries, Grilled Skewers)",
-            "brand": "WOA - World of Asia",
-            "url": "https://www.instagram.com/popular/woa-buffet-restaurant-vienna/",
-            "source": "",
-            "pubDate": "",
-            "expires": "",
-            "postVerificationStatus": ""
-          }
-        }
-      ],
-      "diagnostics": {
-        "agentStatus": "completed",
-        "creditsUsed": 0,
-        "verifier": {
-          "statusCounts": {
-            "timestamp-derived": 21,
-            "verified-original-post": 8
-          },
-          "verifiedOriginalPosts": 8,
           "timestampOnlyPosts": 0,
           "unavailableOriginalPosts": 0,
           "registryViennaEvidence": 0
