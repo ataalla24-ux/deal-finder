@@ -1,8 +1,8 @@
 {
   "version": 1,
-  "checkedAt": "2026-11-06T22:05:14.026Z",
-  "feedHash": "0e061517d132bde9d4956449df7ade82d3b6d112179fbbc5ba41fd9c2079201a",
-  "mapContextHash": "c0f79cdcca368f46eb52af4dd334d5f01b87ffd8e8fe6a0b779880b03dc35863",
+  "checkedAt": "2026-11-06T22:54:20.954Z",
+  "feedHash": "4fb22c79c39e902418f695e4bf13174dfeb264b8cd8fea5218e8ec97a821051e",
+  "mapContextHash": "8ca9ac03c4074518baff630033724061a873f413bfd1143dfe0ff67c7802da7e",
   "sourceEvidenceHash": "3d3edfb976c2d3154ba7b48def2bceef497ace3c40a11400572b3863112aef11",
   "liveCount": 68,
   "checks": {
@@ -15,7 +15,7 @@
   },
   "nativeContracts": {
     "status": "observed-contracts-pass",
-    "checkedAt": "2026-11-06T21:56:56.895Z",
+    "checkedAt": "2026-11-06T22:47:37.276Z",
     "sourceHashes": {
       "FreeFinderWien/DealsHomeArtwork.swift": "3b900b64d75514defe101658c68a0f4ec1bffc5052d5533f5418563f4a6f60a5",
       "FreeFinderWien/DealsHomeStyle.swift": "0ffa4ca46e45342224c755f21799dbafea115057a1bb3a33386a86660074a440",
@@ -35,7 +35,7 @@
   },
   "nativeSelection": {
     "status": "observed-selection-current",
-    "checkedAt": "2026-11-06T21:55:57.223Z",
+    "checkedAt": "2026-11-06T22:46:48.889Z",
     "sourceHashes": {
       "FreeFinderWien/ContentView.swift": "af9fa46baf9cbd7aaca828bbc38f13c738dced774737a0f6c0b3da5ab0ff4383",
       "FreeFinderWien-Android/app/src/main/java/com/stefanataalla/freefinderwien/NativeDealModels.kt": "b710e6b06925d6abfb88653f011b4c8de3d61ace3eb6d3195d6dc317ccd943ff",
@@ -54,7 +54,7 @@
     "recipientUiTest": false,
     "nativeAppLaunched": false,
     "observedDeals": 68,
-    "reviewedPlatformImages": 24,
+    "reviewedPlatformImages": 26,
     "lowResolutionDeals": [
       "power-food-18b3d86d8172",
       "flight-1nqm22i",
@@ -90,20 +90,16 @@
     ],
     "reviewedPrimaryPhotoDeals": [
       "power-food-18b3d86d8172",
-      "g2-awsiz4",
-      "meta-ig-18144789436596678",
-      "meta-ig-18024731315875558",
-      "fc4g-eg5ndc",
-      "power-food-59969e313103",
-      "g2-1gbztrr",
-      "g2-ezkkws"
-    ],
-    "effectiveLowResolutionDeals": [
       "flight-1nqm22i",
       "flight-1n42w4t",
       "benefit-hot-vorteile-cdbe54a8a6ea1656",
       "benefit-drei-plus-1c1f9cab861670a1",
+      "g2-awsiz4",
+      "meta-ig-18144789436596678",
+      "meta-ig-18024731315875558",
+      "fc4g-eg5ndc",
       "g2-1enscad",
+      "power-food-59969e313103",
       "flight-10yozoj",
       "flight-5i0ef4",
       "flight-1b0v2p3",
@@ -111,8 +107,10 @@
       "g2-171hxsm",
       "gs-17514",
       "gs-91769",
+      "g2-1gbztrr",
       "benefit-drei-plus-1g2bha9",
       "benefit-drei-plus-1ivo36q",
+      "g2-ezkkws",
       "benefit-drei-plus-1fwwa4y",
       "g2-1ffpc0f",
       "b1-s5vhj5",
@@ -123,6 +121,7 @@
       "icf-wien-kirche",
       "jesuszentrum-events"
     ],
+    "effectiveLowResolutionDeals": [],
     "sharedAssignments": [],
     "caveat": "Current compiled selection and bounded asset/crop review; changed feeds need a fresh observation. No installed-version or recipient UI certification."
   },
@@ -649,7 +648,8 @@
         "status": "symbolic-match",
         "checkedAt": "2026-11-06T22:05:14.026Z",
         "provesMerchantPhoto": false,
-        "automaticReplacement": false
+        "automaticReplacement": false,
+        "cached": true
       },
       "nativePhoto": {
         "status": "observed-selection-current",
@@ -731,6 +731,7 @@
           "uncertain": false,
           "status": "visual-match",
           "checkedAt": "2026-11-06T22:05:14.026Z",
+          "cached": true,
           "url": "https://freefinder.at/assets/approved-deal-photos/b0d059457d4d8fc7-248e01dec2d3aa801eb5e3a42d81609abede3f08084d36a131006802a7769a63.jpg",
           "permissionStatus": "documented",
           "bindingStatus": "current",
@@ -1396,7 +1397,13 @@
       "websitePhoto": {
         "src": "/assets/blog/photos/family-lunch.webp",
         "key": "family-lunch",
-        "status": "not-reviewed"
+        "matchesProduct": false,
+        "emptyTableOrPackaging": false,
+        "uncertain": false,
+        "status": "needs-review",
+        "checkedAt": "2026-11-06T22:54:20.954Z",
+        "provesMerchantPhoto": false,
+        "automaticReplacement": false
       },
       "nativePhoto": {
         "status": "observed-selection-current",
@@ -1509,8 +1516,16 @@
         "source": "compiled-display-text-and-artwork-policy",
         "platforms": {
           "ios": {
-            "status": "not-reviewed",
-            "semanticStatus": "not-reviewed",
+            "matchesProduct": true,
+            "emptyTableOrPackaging": false,
+            "cropKeepsProduct": true,
+            "visuallyClear": true,
+            "uncertain": false,
+            "status": "symbolic-match",
+            "checkedAt": "2026-11-06T22:54:20.954Z",
+            "provesMerchantPhoto": false,
+            "automaticReplacement": false,
+            "semanticStatus": "symbolic-match",
             "sourceResolution": {
               "width": 1200,
               "height": 444,
@@ -1532,8 +1547,17 @@
             "imageKind": "existing-bundled-symbolic-artwork"
           },
           "android": {
-            "status": "not-reviewed",
-            "semanticStatus": "not-reviewed",
+            "matchesProduct": true,
+            "emptyTableOrPackaging": false,
+            "cropKeepsProduct": true,
+            "visuallyClear": true,
+            "uncertain": false,
+            "status": "symbolic-match",
+            "checkedAt": "2026-11-06T22:54:20.954Z",
+            "provesMerchantPhoto": false,
+            "automaticReplacement": false,
+            "cached": true,
+            "semanticStatus": "symbolic-match",
             "sourceResolution": {
               "width": 1200,
               "height": 444,
@@ -1746,8 +1770,8 @@
         "locationIds": []
       },
       "websitePhoto": {
-        "src": "/assets/blog/photos/gift.webp",
-        "key": "gift",
+        "src": "/assets/approved-deal-photos/0f69cb44fad2c0d1-e0891c1abb24ce2f770032a3668bcfbe1ed5614c80700547f53bdb5d74ef6a78.jpg",
+        "key": "bound-flight-1nqm22i",
         "status": "not-reviewed"
       },
       "nativePhoto": {
@@ -1806,7 +1830,24 @@
             "imageKind": "existing-bundled-symbolic-artwork"
           }
         },
-        "originalPhoto": null
+        "originalPhoto": {
+          "status": "not-reviewed",
+          "url": "https://freefinder.at/assets/approved-deal-photos/0f69cb44fad2c0d1-e0891c1abb24ce2f770032a3668bcfbe1ed5614c80700547f53bdb5d74ef6a78.jpg",
+          "permissionStatus": "documented",
+          "bindingStatus": "current",
+          "imageKind": "editorial-illustration",
+          "fullSha256": "e0891c1abb24ce2f770032a3668bcfbe1ed5614c80700547f53bdb5d74ef6a78",
+          "cardSha256": "d5e00a2f653cbf9d0da1fbf0e94e570a176027d12bea9e09ce1af447b443c26c",
+          "crop": {
+            "left": 0,
+            "top": 0,
+            "width": 2060,
+            "height": 762
+          },
+          "provesMerchantPhoto": false,
+          "automaticReplacement": false,
+          "recipientUiTest": false
+        }
       }
     },
     {
@@ -1831,8 +1872,8 @@
         "locationIds": []
       },
       "websitePhoto": {
-        "src": "/assets/blog/photos/gift.webp",
-        "key": "gift",
+        "src": "/assets/approved-deal-photos/f5ad752679607c55-a735471528fbfde83906786682736e588fbe2d42166c6cb1a2ae05035a33354b.jpg",
+        "key": "bound-flight-1n42w4t",
         "status": "not-reviewed"
       },
       "nativePhoto": {
@@ -1891,7 +1932,24 @@
             "imageKind": "existing-bundled-symbolic-artwork"
           }
         },
-        "originalPhoto": null
+        "originalPhoto": {
+          "status": "not-reviewed",
+          "url": "https://freefinder.at/assets/approved-deal-photos/f5ad752679607c55-a735471528fbfde83906786682736e588fbe2d42166c6cb1a2ae05035a33354b.jpg",
+          "permissionStatus": "documented",
+          "bindingStatus": "current",
+          "imageKind": "editorial-illustration",
+          "fullSha256": "a735471528fbfde83906786682736e588fbe2d42166c6cb1a2ae05035a33354b",
+          "cardSha256": "7b248c0765b71dcb18a1f45640edaee546cd2615cd81153dbf244a51e7bcaa18",
+          "crop": {
+            "left": 0,
+            "top": 0,
+            "width": 2060,
+            "height": 762
+          },
+          "provesMerchantPhoto": false,
+          "automaticReplacement": false,
+          "recipientUiTest": false
+        }
       }
     },
     {
@@ -2082,8 +2140,8 @@
         "locationIds": []
       },
       "websitePhoto": {
-        "src": "/assets/blog/photos/gift.webp",
-        "key": "gift",
+        "src": "/assets/approved-deal-photos/e687a91510509b27-397e7f4ba1c6f755218866afa67fa1a08c36c2e07507758608e242823de7fdc6.jpg",
+        "key": "bound-benefit-hot-vorteile-cdbe54a8a6ea1656",
         "status": "not-reviewed"
       },
       "nativePhoto": {
@@ -2142,7 +2200,24 @@
             "imageKind": "existing-bundled-symbolic-artwork"
           }
         },
-        "originalPhoto": null
+        "originalPhoto": {
+          "status": "not-reviewed",
+          "url": "https://freefinder.at/assets/approved-deal-photos/e687a91510509b27-397e7f4ba1c6f755218866afa67fa1a08c36c2e07507758608e242823de7fdc6.jpg",
+          "permissionStatus": "documented",
+          "bindingStatus": "current",
+          "imageKind": "editorial-illustration",
+          "fullSha256": "397e7f4ba1c6f755218866afa67fa1a08c36c2e07507758608e242823de7fdc6",
+          "cardSha256": "5e7de971378fd2bf22a640cef51310975df019cc5d93066c765b00c2e916c422",
+          "crop": {
+            "left": 0,
+            "top": 134,
+            "width": 1730,
+            "height": 640
+          },
+          "provesMerchantPhoto": false,
+          "automaticReplacement": false,
+          "recipientUiTest": false
+        }
       }
     },
     {
@@ -2340,8 +2415,8 @@
         ]
       },
       "websitePhoto": {
-        "src": "/assets/blog/photos/gift.webp",
-        "key": "gift",
+        "src": "/assets/approved-deal-photos/106949fd8d63f180-113fab3235c428a8604acf024444903e97a19fafb36964b4dcc81dfed7333065.jpg",
+        "key": "bound-benefit-drei-plus-1c1f9cab861670a1",
         "status": "not-reviewed"
       },
       "nativePhoto": {
@@ -2398,7 +2473,24 @@
             "imageKind": "existing-bundled-symbolic-artwork"
           }
         },
-        "originalPhoto": null
+        "originalPhoto": {
+          "status": "not-reviewed",
+          "url": "https://freefinder.at/assets/approved-deal-photos/106949fd8d63f180-113fab3235c428a8604acf024444903e97a19fafb36964b4dcc81dfed7333065.jpg",
+          "permissionStatus": "documented",
+          "bindingStatus": "current",
+          "imageKind": "editorial-illustration",
+          "fullSha256": "113fab3235c428a8604acf024444903e97a19fafb36964b4dcc81dfed7333065",
+          "cardSha256": "531e8656b6455db4f032a1d01b5f0a3947c34513e79915b2d812538ad0308dd7",
+          "crop": {
+            "left": 0,
+            "top": 0,
+            "width": 2060,
+            "height": 762
+          },
+          "provesMerchantPhoto": false,
+          "automaticReplacement": false,
+          "recipientUiTest": false
+        }
       }
     },
     {
@@ -3882,8 +3974,8 @@
         "locationIds": []
       },
       "websitePhoto": {
-        "src": "/assets/blog/photos/family-lunch.webp",
-        "key": "family-lunch",
+        "src": "/assets/approved-deal-photos/94227462306f54a4-ad3d23701c53714c2dde424b9d975f0a6c3b33dcc767111563cd1cc8ea664164.jpg",
+        "key": "bound-g2-1enscad",
         "status": "not-reviewed"
       },
       "nativePhoto": {
@@ -3948,7 +4040,24 @@
             "imageKind": "existing-bundled-symbolic-artwork"
           }
         },
-        "originalPhoto": null
+        "originalPhoto": {
+          "status": "not-reviewed",
+          "url": "https://freefinder.at/assets/approved-deal-photos/94227462306f54a4-ad3d23701c53714c2dde424b9d975f0a6c3b33dcc767111563cd1cc8ea664164.jpg",
+          "permissionStatus": "documented",
+          "bindingStatus": "current",
+          "imageKind": "editorial-illustration",
+          "fullSha256": "ad3d23701c53714c2dde424b9d975f0a6c3b33dcc767111563cd1cc8ea664164",
+          "cardSha256": "264d61a1be5b544e53c6bace7e757311d91a379c0ee44d784d7a263152053ad9",
+          "crop": {
+            "left": 1,
+            "top": 0,
+            "width": 1198,
+            "height": 443
+          },
+          "provesMerchantPhoto": false,
+          "automaticReplacement": false,
+          "recipientUiTest": false
+        }
       }
     },
     {
@@ -4166,8 +4275,8 @@
         "locationIds": []
       },
       "websitePhoto": {
-        "src": "/assets/blog/photos/gift.webp",
-        "key": "gift",
+        "src": "/assets/approved-deal-photos/d869e0ace7a8fbf0-b2777dddcf975f57f294dea7b59492574134e8325eada948e96249e9c07c6a60.jpg",
+        "key": "bound-flight-10yozoj",
         "status": "not-reviewed"
       },
       "nativePhoto": {
@@ -4226,7 +4335,24 @@
             "imageKind": "existing-bundled-symbolic-artwork"
           }
         },
-        "originalPhoto": null
+        "originalPhoto": {
+          "status": "not-reviewed",
+          "url": "https://freefinder.at/assets/approved-deal-photos/d869e0ace7a8fbf0-b2777dddcf975f57f294dea7b59492574134e8325eada948e96249e9c07c6a60.jpg",
+          "permissionStatus": "documented",
+          "bindingStatus": "current",
+          "imageKind": "editorial-illustration",
+          "fullSha256": "b2777dddcf975f57f294dea7b59492574134e8325eada948e96249e9c07c6a60",
+          "cardSha256": "5325e499c560dae1fcb61d72b9f1d150b3a76dafed359634994e6e9086cf7250",
+          "crop": {
+            "left": 0,
+            "top": 0,
+            "width": 2060,
+            "height": 762
+          },
+          "provesMerchantPhoto": false,
+          "automaticReplacement": false,
+          "recipientUiTest": false
+        }
       }
     },
     {
@@ -4247,8 +4373,8 @@
         "locationIds": []
       },
       "websitePhoto": {
-        "src": "/assets/blog/photos/gift.webp",
-        "key": "gift",
+        "src": "/assets/approved-deal-photos/9b2fd92ce4cc34cb-877a3b75f9f9690f5f0ad351af95290043aadfece305b2d7a76b4106605d21b0.jpg",
+        "key": "bound-flight-5i0ef4",
         "status": "not-reviewed"
       },
       "nativePhoto": {
@@ -4307,7 +4433,24 @@
             "imageKind": "existing-bundled-symbolic-artwork"
           }
         },
-        "originalPhoto": null
+        "originalPhoto": {
+          "status": "not-reviewed",
+          "url": "https://freefinder.at/assets/approved-deal-photos/9b2fd92ce4cc34cb-877a3b75f9f9690f5f0ad351af95290043aadfece305b2d7a76b4106605d21b0.jpg",
+          "permissionStatus": "documented",
+          "bindingStatus": "current",
+          "imageKind": "editorial-illustration",
+          "fullSha256": "877a3b75f9f9690f5f0ad351af95290043aadfece305b2d7a76b4106605d21b0",
+          "cardSha256": "92c1efe7cc87529d36e88b3c72999bad17ba79d49dfedea8988b9cf9e63bc948",
+          "crop": {
+            "left": 0,
+            "top": 0,
+            "width": 2060,
+            "height": 762
+          },
+          "provesMerchantPhoto": false,
+          "automaticReplacement": false,
+          "recipientUiTest": false
+        }
       }
     },
     {
@@ -4328,8 +4471,8 @@
         "locationIds": []
       },
       "websitePhoto": {
-        "src": "/assets/blog/photos/gift.webp",
-        "key": "gift",
+        "src": "/assets/approved-deal-photos/67cbd78c7c1da720-334fe063575ccd6bf4786b19e11fa39905d63fb688758592639f0c0b67e2b34d.jpg",
+        "key": "bound-flight-1b0v2p3",
         "status": "not-reviewed"
       },
       "nativePhoto": {
@@ -4388,7 +4531,24 @@
             "imageKind": "existing-bundled-symbolic-artwork"
           }
         },
-        "originalPhoto": null
+        "originalPhoto": {
+          "status": "not-reviewed",
+          "url": "https://freefinder.at/assets/approved-deal-photos/67cbd78c7c1da720-334fe063575ccd6bf4786b19e11fa39905d63fb688758592639f0c0b67e2b34d.jpg",
+          "permissionStatus": "documented",
+          "bindingStatus": "current",
+          "imageKind": "editorial-illustration",
+          "fullSha256": "334fe063575ccd6bf4786b19e11fa39905d63fb688758592639f0c0b67e2b34d",
+          "cardSha256": "d0309a4cb7a26679ea69babb0a71cd47c890e1a5acc6f844a86b88032fdf4058",
+          "crop": {
+            "left": 0,
+            "top": 0,
+            "width": 2060,
+            "height": 762
+          },
+          "provesMerchantPhoto": false,
+          "automaticReplacement": false,
+          "recipientUiTest": false
+        }
       }
     },
     {
@@ -4415,8 +4575,8 @@
         ]
       },
       "websitePhoto": {
-        "src": "/assets/blog/photos/restaurant-buffet.webp",
-        "key": "restaurant-buffet",
+        "src": "/assets/approved-deal-photos/84b9b6dadd552283-6591cbbf0c107376f48f6a51adacdb9c934a23c927667ed1763895a4091fb87a.jpg",
+        "key": "bound-g2-3cen4",
         "status": "not-reviewed"
       },
       "nativePhoto": {
@@ -4475,7 +4635,24 @@
             "imageKind": "existing-bundled-symbolic-artwork"
           }
         },
-        "originalPhoto": null
+        "originalPhoto": {
+          "status": "not-reviewed",
+          "url": "https://freefinder.at/assets/approved-deal-photos/84b9b6dadd552283-6591cbbf0c107376f48f6a51adacdb9c934a23c927667ed1763895a4091fb87a.jpg",
+          "permissionStatus": "documented",
+          "bindingStatus": "current",
+          "imageKind": "editorial-illustration",
+          "fullSha256": "6591cbbf0c107376f48f6a51adacdb9c934a23c927667ed1763895a4091fb87a",
+          "cardSha256": "4d0c47f1961caaeb740915ae078c435e87d961423fbb41e43faa67443aacccb4",
+          "crop": {
+            "left": 0,
+            "top": 178,
+            "width": 1200,
+            "height": 444
+          },
+          "provesMerchantPhoto": false,
+          "automaticReplacement": false,
+          "recipientUiTest": false
+        }
       }
     },
     {
@@ -4682,8 +4859,8 @@
         ]
       },
       "websitePhoto": {
-        "src": "/assets/blog/photos/riesenrad.webp",
-        "key": "riesenrad",
+        "src": "/assets/approved-deal-photos/2377db4d445c602d-1bd646429c24b9bec7dbc4b16c48803bf00c6d51f6d5ad26784c4ea04ca374e8.jpg",
+        "key": "bound-g2-171hxsm",
         "status": "not-reviewed"
       },
       "nativePhoto": {
@@ -4740,7 +4917,24 @@
             "imageKind": "existing-bundled-symbolic-artwork"
           }
         },
-        "originalPhoto": null
+        "originalPhoto": {
+          "status": "not-reviewed",
+          "url": "https://freefinder.at/assets/approved-deal-photos/2377db4d445c602d-1bd646429c24b9bec7dbc4b16c48803bf00c6d51f6d5ad26784c4ea04ca374e8.jpg",
+          "permissionStatus": "documented",
+          "bindingStatus": "current",
+          "imageKind": "editorial-illustration",
+          "fullSha256": "1bd646429c24b9bec7dbc4b16c48803bf00c6d51f6d5ad26784c4ea04ca374e8",
+          "cardSha256": "bb11c1575e634758e1423144efdc3df61d6f7396fae9c8afc46c9fc8c30aa1d7",
+          "crop": {
+            "left": 0,
+            "top": 134,
+            "width": 1730,
+            "height": 640
+          },
+          "provesMerchantPhoto": false,
+          "automaticReplacement": false,
+          "recipientUiTest": false
+        }
       }
     },
     {
@@ -4769,8 +4963,8 @@
         "locationIds": []
       },
       "websitePhoto": {
-        "src": "/assets/blog/photos/mattress.webp",
-        "key": "mattress",
+        "src": "/assets/approved-deal-photos/b4083bc4e811b6cc-cc5ce7afdc85150d516640e7dc549fab5c820825a899d4f943e6e61d84106f51.jpg",
+        "key": "bound-gs-17514",
         "status": "not-reviewed"
       },
       "nativePhoto": {
@@ -4827,7 +5021,24 @@
             "imageKind": "existing-bundled-symbolic-artwork"
           }
         },
-        "originalPhoto": null
+        "originalPhoto": {
+          "status": "not-reviewed",
+          "url": "https://freefinder.at/assets/approved-deal-photos/b4083bc4e811b6cc-cc5ce7afdc85150d516640e7dc549fab5c820825a899d4f943e6e61d84106f51.jpg",
+          "permissionStatus": "documented",
+          "bindingStatus": "current",
+          "imageKind": "editorial-illustration",
+          "fullSha256": "cc5ce7afdc85150d516640e7dc549fab5c820825a899d4f943e6e61d84106f51",
+          "cardSha256": "7046aa8861c9e54c3ae565a900251f6424d23abfb29eac2ca1e124172b918010",
+          "crop": {
+            "left": 0,
+            "top": 134,
+            "width": 1730,
+            "height": 640
+          },
+          "provesMerchantPhoto": false,
+          "automaticReplacement": false,
+          "recipientUiTest": false
+        }
       }
     },
     {
@@ -4948,8 +5159,8 @@
         "locationIds": []
       },
       "websitePhoto": {
-        "src": "/assets/blog/photos/fashion.webp",
-        "key": "fashion",
+        "src": "/assets/approved-deal-photos/de3a4a99777f328b-930ecc315ff764f601ebab2baa6048c7dbf2324f662d1ea2cd46ff81da2975c6.jpg",
+        "key": "bound-gs-91769",
         "status": "not-reviewed"
       },
       "nativePhoto": {
@@ -5010,7 +5221,24 @@
             "imageKind": "existing-bundled-symbolic-artwork"
           }
         },
-        "originalPhoto": null
+        "originalPhoto": {
+          "status": "not-reviewed",
+          "url": "https://freefinder.at/assets/approved-deal-photos/de3a4a99777f328b-930ecc315ff764f601ebab2baa6048c7dbf2324f662d1ea2cd46ff81da2975c6.jpg",
+          "permissionStatus": "documented",
+          "bindingStatus": "current",
+          "imageKind": "editorial-illustration",
+          "fullSha256": "930ecc315ff764f601ebab2baa6048c7dbf2324f662d1ea2cd46ff81da2975c6",
+          "cardSha256": "ae5988c2d51266e5d8710b4a84a4a1f6fc721e23c8e9524e4dd266b939f3c98d",
+          "crop": {
+            "left": 0,
+            "top": 134,
+            "width": 1730,
+            "height": 640
+          },
+          "provesMerchantPhoto": false,
+          "automaticReplacement": false,
+          "recipientUiTest": false
+        }
       }
     },
     {
@@ -5341,8 +5569,8 @@
         ]
       },
       "websitePhoto": {
-        "src": "/assets/blog/photos/cinema.webp",
-        "key": "cinema",
+        "src": "/assets/approved-deal-photos/e4618d193bda901b-aa07d4098519fd1394d2c1721e323f9542bce8c31323653e84a4652cd93d2601.jpg",
+        "key": "bound-benefit-drei-plus-1g2bha9",
         "status": "not-reviewed"
       },
       "nativePhoto": {
@@ -5401,7 +5629,24 @@
             "imageKind": "existing-bundled-symbolic-artwork"
           }
         },
-        "originalPhoto": null
+        "originalPhoto": {
+          "status": "not-reviewed",
+          "url": "https://freefinder.at/assets/approved-deal-photos/e4618d193bda901b-aa07d4098519fd1394d2c1721e323f9542bce8c31323653e84a4652cd93d2601.jpg",
+          "permissionStatus": "documented",
+          "bindingStatus": "current",
+          "imageKind": "editorial-illustration",
+          "fullSha256": "aa07d4098519fd1394d2c1721e323f9542bce8c31323653e84a4652cd93d2601",
+          "cardSha256": "e8c06e231cb2c1bb8cfae3ee4f330cb0db6b811947b70c22f6617ea858f75d46",
+          "crop": {
+            "left": 0,
+            "top": 134,
+            "width": 1731,
+            "height": 641
+          },
+          "provesMerchantPhoto": false,
+          "automaticReplacement": false,
+          "recipientUiTest": false
+        }
       }
     },
     {
@@ -5516,8 +5761,8 @@
         ]
       },
       "websitePhoto": {
-        "src": "/assets/blog/photos/thermal.webp",
-        "key": "thermal",
+        "src": "/assets/approved-deal-photos/d9ec59134657ba6c-8989790ecf034cbfa60dd07f8895f2d8ae3d7b8950db0fca33a8a9f6bb9b5113.jpg",
+        "key": "bound-benefit-drei-plus-1ivo36q",
         "status": "not-reviewed"
       },
       "nativePhoto": {
@@ -5574,7 +5819,24 @@
             "imageKind": "existing-bundled-symbolic-artwork"
           }
         },
-        "originalPhoto": null
+        "originalPhoto": {
+          "status": "not-reviewed",
+          "url": "https://freefinder.at/assets/approved-deal-photos/d9ec59134657ba6c-8989790ecf034cbfa60dd07f8895f2d8ae3d7b8950db0fca33a8a9f6bb9b5113.jpg",
+          "permissionStatus": "documented",
+          "bindingStatus": "current",
+          "imageKind": "editorial-illustration",
+          "fullSha256": "8989790ecf034cbfa60dd07f8895f2d8ae3d7b8950db0fca33a8a9f6bb9b5113",
+          "cardSha256": "6f8c634fade8f3ed7c2aa0dafee988dd9335b43e49861842d4dfe50426acbdd3",
+          "crop": {
+            "left": 0,
+            "top": 134,
+            "width": 1730,
+            "height": 640
+          },
+          "provesMerchantPhoto": false,
+          "automaticReplacement": false,
+          "recipientUiTest": false
+        }
       }
     },
     {
@@ -5703,8 +5965,8 @@
         ]
       },
       "websitePhoto": {
-        "src": "/assets/blog/photos/museum.webp",
-        "key": "museum",
+        "src": "/assets/approved-deal-photos/38c17e0d718229eb-685da112f5e4a5d469186aa3b5e38ea0d060019fa62ffa4a6eaadb59128fd3b1.jpg",
+        "key": "bound-benefit-drei-plus-1fwwa4y",
         "status": "not-reviewed"
       },
       "nativePhoto": {
@@ -5761,7 +6023,24 @@
             "imageKind": "existing-bundled-symbolic-artwork"
           }
         },
-        "originalPhoto": null
+        "originalPhoto": {
+          "status": "not-reviewed",
+          "url": "https://freefinder.at/assets/approved-deal-photos/38c17e0d718229eb-685da112f5e4a5d469186aa3b5e38ea0d060019fa62ffa4a6eaadb59128fd3b1.jpg",
+          "permissionStatus": "documented",
+          "bindingStatus": "current",
+          "imageKind": "editorial-illustration",
+          "fullSha256": "685da112f5e4a5d469186aa3b5e38ea0d060019fa62ffa4a6eaadb59128fd3b1",
+          "cardSha256": "d27115809187fa28fda0b611a3fa7d5e24de8aa55e60aa64227169ee5e346432",
+          "crop": {
+            "left": 1,
+            "top": 0,
+            "width": 2060,
+            "height": 762
+          },
+          "provesMerchantPhoto": false,
+          "automaticReplacement": false,
+          "recipientUiTest": false
+        }
       }
     },
     {
@@ -5799,8 +6078,8 @@
         ]
       },
       "websitePhoto": {
-        "src": "/assets/blog/photos/fish.webp",
-        "key": "fish",
+        "src": "/assets/approved-deal-photos/c87e6576e8627edf-2f2676390a7eec35e038d17bde1943e05c97e51ff71bcb2152dda2e74e134c1f.jpg",
+        "key": "bound-g2-1ffpc0f",
         "status": "not-reviewed"
       },
       "nativePhoto": {
@@ -5859,7 +6138,24 @@
             "imageKind": "existing-bundled-symbolic-artwork"
           }
         },
-        "originalPhoto": null
+        "originalPhoto": {
+          "status": "not-reviewed",
+          "url": "https://freefinder.at/assets/approved-deal-photos/c87e6576e8627edf-2f2676390a7eec35e038d17bde1943e05c97e51ff71bcb2152dda2e74e134c1f.jpg",
+          "permissionStatus": "documented",
+          "bindingStatus": "current",
+          "imageKind": "editorial-illustration",
+          "fullSha256": "2f2676390a7eec35e038d17bde1943e05c97e51ff71bcb2152dda2e74e134c1f",
+          "cardSha256": "33c4712020bd272133c5bca631e0e5e10e95c93e2d61b418febdf670783be18f",
+          "crop": {
+            "left": 1,
+            "top": 0,
+            "width": 1198,
+            "height": 443
+          },
+          "provesMerchantPhoto": false,
+          "automaticReplacement": false,
+          "recipientUiTest": false
+        }
       }
     },
     {
@@ -5887,8 +6183,8 @@
         ]
       },
       "websitePhoto": {
-        "src": "/assets/deal-photos/espresso.webp",
-        "key": "espresso",
+        "src": "/assets/approved-deal-photos/89933f95ccf9ed96-6831c64ec1f6211e95082d82f5664f4ffda5fe1850ff20e1e328612346db3945.jpg",
+        "key": "bound-b1-s5vhj5",
         "status": "not-reviewed"
       },
       "nativePhoto": {
@@ -5945,7 +6241,24 @@
             "imageKind": "existing-bundled-symbolic-artwork"
           }
         },
-        "originalPhoto": null
+        "originalPhoto": {
+          "status": "not-reviewed",
+          "url": "https://freefinder.at/assets/approved-deal-photos/89933f95ccf9ed96-6831c64ec1f6211e95082d82f5664f4ffda5fe1850ff20e1e328612346db3945.jpg",
+          "permissionStatus": "documented",
+          "bindingStatus": "current",
+          "imageKind": "editorial-illustration",
+          "fullSha256": "6831c64ec1f6211e95082d82f5664f4ffda5fe1850ff20e1e328612346db3945",
+          "cardSha256": "71ab1110a8b79f0275ac72ee8c4e7ec60835a8e39ece527c4ca2c4978f6b29c5",
+          "crop": {
+            "left": 1,
+            "top": 0,
+            "width": 1198,
+            "height": 443
+          },
+          "provesMerchantPhoto": false,
+          "automaticReplacement": false,
+          "recipientUiTest": false
+        }
       }
     },
     {
@@ -5986,8 +6299,8 @@
         ]
       },
       "websitePhoto": {
-        "src": "/assets/blog/photos/groceries.webp",
-        "key": "groceries",
+        "src": "/assets/approved-deal-photos/5b23306dc800fdca-8049411b8cbfecf38f1df9a89c22b5dd1f77ae65ad7dd3c709fdea2cbc8b810e.jpg",
+        "key": "bound-top-6",
         "status": "not-reviewed"
       },
       "nativePhoto": {
@@ -6046,7 +6359,24 @@
             "imageKind": "existing-bundled-symbolic-artwork"
           }
         },
-        "originalPhoto": null
+        "originalPhoto": {
+          "status": "not-reviewed",
+          "url": "https://freefinder.at/assets/approved-deal-photos/5b23306dc800fdca-8049411b8cbfecf38f1df9a89c22b5dd1f77ae65ad7dd3c709fdea2cbc8b810e.jpg",
+          "permissionStatus": "documented",
+          "bindingStatus": "current",
+          "imageKind": "editorial-illustration",
+          "fullSha256": "8049411b8cbfecf38f1df9a89c22b5dd1f77ae65ad7dd3c709fdea2cbc8b810e",
+          "cardSha256": "369b366c9dedeb79e431fdb76194da50c1a1954504993f402c9f5ef57635172a",
+          "crop": {
+            "left": 0,
+            "top": 0,
+            "width": 2060,
+            "height": 762
+          },
+          "provesMerchantPhoto": false,
+          "automaticReplacement": false,
+          "recipientUiTest": false
+        }
       }
     },
     {
@@ -6206,8 +6536,8 @@
         ]
       },
       "websitePhoto": {
-        "src": "/assets/blog/photos/carwash.webp",
-        "key": "carwash",
+        "src": "/assets/approved-deal-photos/5e9dfbd60eff64a6-d2f891f957e240c7e2acccde2466d3aeab597cd9f4794c0c1c777808b754fee5.jpg",
+        "key": "bound-joe-omv-xlrh16",
         "status": "not-reviewed"
       },
       "nativePhoto": {
@@ -6264,7 +6594,24 @@
             "imageKind": "existing-bundled-symbolic-artwork"
           }
         },
-        "originalPhoto": null
+        "originalPhoto": {
+          "status": "not-reviewed",
+          "url": "https://freefinder.at/assets/approved-deal-photos/5e9dfbd60eff64a6-d2f891f957e240c7e2acccde2466d3aeab597cd9f4794c0c1c777808b754fee5.jpg",
+          "permissionStatus": "documented",
+          "bindingStatus": "current",
+          "imageKind": "editorial-illustration",
+          "fullSha256": "d2f891f957e240c7e2acccde2466d3aeab597cd9f4794c0c1c777808b754fee5",
+          "cardSha256": "a321887864347bfd318e23da1e10f8c4c0e8caea8bad77a23326a3dafd5de4d1",
+          "crop": {
+            "left": 0,
+            "top": 134,
+            "width": 1730,
+            "height": 640
+          },
+          "provesMerchantPhoto": false,
+          "automaticReplacement": false,
+          "recipientUiTest": false
+        }
       }
     },
     {
@@ -6390,8 +6737,8 @@
         ]
       },
       "websitePhoto": {
-        "src": "/assets/blog/photos/gift.webp",
-        "key": "gift",
+        "src": "/assets/approved-deal-photos/d9de623d4a4487a0-7559e418b9df9bd1d60f534df21acf371809ac9ea76f2b91a1e56f792e315748.jpg",
+        "key": "bound-hillsong-vienna-kirche",
         "status": "not-reviewed"
       },
       "nativePhoto": {
@@ -6462,7 +6809,24 @@
             "imageKind": "existing-bundled-symbolic-artwork"
           }
         },
-        "originalPhoto": null
+        "originalPhoto": {
+          "status": "not-reviewed",
+          "url": "https://freefinder.at/assets/approved-deal-photos/d9de623d4a4487a0-7559e418b9df9bd1d60f534df21acf371809ac9ea76f2b91a1e56f792e315748.jpg",
+          "permissionStatus": "documented",
+          "bindingStatus": "current",
+          "imageKind": "editorial-illustration",
+          "fullSha256": "7559e418b9df9bd1d60f534df21acf371809ac9ea76f2b91a1e56f792e315748",
+          "cardSha256": "b3e7af7b7d31da6941e76eabfa7c60e313220c0b20d688d2c3a3a8184ee8a32e",
+          "crop": {
+            "left": 0,
+            "top": 0,
+            "width": 2060,
+            "height": 762
+          },
+          "provesMerchantPhoto": false,
+          "automaticReplacement": false,
+          "recipientUiTest": false
+        }
       }
     },
     {
@@ -6489,8 +6853,8 @@
         ]
       },
       "websitePhoto": {
-        "src": "/assets/blog/photos/gift.webp",
-        "key": "gift",
+        "src": "/assets/approved-deal-photos/d9d8521cd6fe0de3-df8e0dc59f1f796674979be1dc6515b4ef0194b8e99ba171c708824cac465dfd.jpg",
+        "key": "bound-cig-wien-kirche",
         "status": "not-reviewed"
       },
       "nativePhoto": {
@@ -6561,7 +6925,24 @@
             "imageKind": "existing-bundled-symbolic-artwork"
           }
         },
-        "originalPhoto": null
+        "originalPhoto": {
+          "status": "not-reviewed",
+          "url": "https://freefinder.at/assets/approved-deal-photos/d9d8521cd6fe0de3-df8e0dc59f1f796674979be1dc6515b4ef0194b8e99ba171c708824cac465dfd.jpg",
+          "permissionStatus": "documented",
+          "bindingStatus": "current",
+          "imageKind": "editorial-illustration",
+          "fullSha256": "df8e0dc59f1f796674979be1dc6515b4ef0194b8e99ba171c708824cac465dfd",
+          "cardSha256": "9fab1292b808d1abf959ad4d60833819e1308c6fd5cf6fca4b53cea4e8c9b905",
+          "crop": {
+            "left": 0,
+            "top": 0,
+            "width": 2060,
+            "height": 762
+          },
+          "provesMerchantPhoto": false,
+          "automaticReplacement": false,
+          "recipientUiTest": false
+        }
       }
     },
     {
@@ -6588,8 +6969,8 @@
         ]
       },
       "websitePhoto": {
-        "src": "/assets/blog/photos/gift.webp",
-        "key": "gift",
+        "src": "/assets/approved-deal-photos/207ec104d43686d7-2cfa3f2a6eef039d87340a3abdbf1caffd5316b8486639ce44505122cdb3a015.jpg",
+        "key": "bound-icf-wien-kirche",
         "status": "not-reviewed"
       },
       "nativePhoto": {
@@ -6660,7 +7041,24 @@
             "imageKind": "existing-bundled-symbolic-artwork"
           }
         },
-        "originalPhoto": null
+        "originalPhoto": {
+          "status": "not-reviewed",
+          "url": "https://freefinder.at/assets/approved-deal-photos/207ec104d43686d7-2cfa3f2a6eef039d87340a3abdbf1caffd5316b8486639ce44505122cdb3a015.jpg",
+          "permissionStatus": "documented",
+          "bindingStatus": "current",
+          "imageKind": "editorial-illustration",
+          "fullSha256": "2cfa3f2a6eef039d87340a3abdbf1caffd5316b8486639ce44505122cdb3a015",
+          "cardSha256": "00ca9c6c0699b17735b9686a52a0a6addb6bd22fddaba4b17c4556809d172cd4",
+          "crop": {
+            "left": 0,
+            "top": 0,
+            "width": 2060,
+            "height": 762
+          },
+          "provesMerchantPhoto": false,
+          "automaticReplacement": false,
+          "recipientUiTest": false
+        }
       }
     },
     {
@@ -6687,8 +7085,8 @@
         ]
       },
       "websitePhoto": {
-        "src": "/assets/blog/photos/gift.webp",
-        "key": "gift",
+        "src": "/assets/approved-deal-photos/6712264573d2c8ba-b1f32b5745c165c68d0528e9ce96c5dbb60e78d055d174566b04a711ec6fb936.jpg",
+        "key": "bound-jesuszentrum-events",
         "status": "not-reviewed"
       },
       "nativePhoto": {
@@ -6759,7 +7157,24 @@
             "imageKind": "existing-bundled-symbolic-artwork"
           }
         },
-        "originalPhoto": null
+        "originalPhoto": {
+          "status": "not-reviewed",
+          "url": "https://freefinder.at/assets/approved-deal-photos/6712264573d2c8ba-b1f32b5745c165c68d0528e9ce96c5dbb60e78d055d174566b04a711ec6fb936.jpg",
+          "permissionStatus": "documented",
+          "bindingStatus": "current",
+          "imageKind": "editorial-illustration",
+          "fullSha256": "b1f32b5745c165c68d0528e9ce96c5dbb60e78d055d174566b04a711ec6fb936",
+          "cardSha256": "395cc03fca3929b9bf64f75c6eeba684dd550ccb5795bffb7e3d7120c65ef123",
+          "crop": {
+            "left": 0,
+            "top": 0,
+            "width": 2060,
+            "height": 762
+          },
+          "provesMerchantPhoto": false,
+          "automaticReplacement": false,
+          "recipientUiTest": false
+        }
       }
     }
   ],
@@ -6936,31 +7351,6 @@
         "publicationMode": "human-approval",
         "automaticPublicationAllowed": false,
         "fingerprint": "606f729bb9781fc1bfb5aa21746181e6bbf98281a2f005ef8e2f4af2b4c557eb"
-      },
-      {
-        "id": "meta-ig-18109103129624319",
-        "issues": [
-          {
-            "code": "long-title",
-            "label": "Titel lang; Bedingungen erhalten, nicht abschneiden."
-          },
-          {
-            "code": "period-unconfirmed",
-            "label": "Aktionszeitraum oder dauerhafte Gueltigkeit pruefen."
-          },
-          {
-            "code": "upstream-validity-review",
-            "label": "Vorhandene Validierungshinweise vor Freigabe erneut pruefen."
-          },
-          {
-            "code": "map-incomplete",
-            "label": "Einloesestandorte sind noch nicht vollstaendig bestaetigt."
-          }
-        ],
-        "requiresReview": true,
-        "publicationMode": "human-approval",
-        "automaticPublicationAllowed": false,
-        "fingerprint": "a61d5c4d46ac60ec8a952640fc029104e9002c7fb5077174b8be395b78a5aa1f"
       },
       {
         "id": "meta-ig-17908108599571765",
@@ -12407,64 +12797,6 @@
         "fingerprint": "af0d51c0f364442611dd5de0984eb782570938808a2c195d0c41ebad673d8b85"
       },
       {
-        "id": "g2-1idbka5",
-        "issues": [
-          {
-            "code": "long-title",
-            "label": "Titel lang; Bedingungen erhalten, nicht abschneiden."
-          },
-          {
-            "code": "invalid-date",
-            "label": "Datumsfeld ungueltig; nicht automatisch raten."
-          },
-          {
-            "code": "upstream-validity-review",
-            "label": "Vorhandene Validierungshinweise vor Freigabe erneut pruefen."
-          },
-          {
-            "code": "map-incomplete",
-            "label": "Einloesestandorte sind noch nicht vollstaendig bestaetigt."
-          },
-          {
-            "code": "evidence-missing",
-            "label": "Kein gespeicherter Originaltext fuer automatische Korrektur."
-          }
-        ],
-        "requiresReview": true,
-        "publicationMode": "human-approval",
-        "automaticPublicationAllowed": false,
-        "fingerprint": "e3aa9412ee3316418335a6717c3c9cd03e88f133326a5ebead6b60bb6778edf9"
-      },
-      {
-        "id": "fc4g-1ao3l8l",
-        "issues": [
-          {
-            "code": "long-title",
-            "label": "Titel lang; Bedingungen erhalten, nicht abschneiden."
-          },
-          {
-            "code": "invalid-date",
-            "label": "Datumsfeld ungueltig; nicht automatisch raten."
-          },
-          {
-            "code": "upstream-validity-review",
-            "label": "Vorhandene Validierungshinweise vor Freigabe erneut pruefen."
-          },
-          {
-            "code": "map-incomplete",
-            "label": "Einloesestandorte sind noch nicht vollstaendig bestaetigt."
-          },
-          {
-            "code": "evidence-missing",
-            "label": "Kein gespeicherter Originaltext fuer automatische Korrektur."
-          }
-        ],
-        "requiresReview": true,
-        "publicationMode": "human-approval",
-        "automaticPublicationAllowed": false,
-        "fingerprint": "6bad94b53f392f06a40b98027f01066b9295efd435167fe69a3076e46a347777"
-      },
-      {
         "id": "meta-ig-18099241463393041",
         "issues": [
           {
@@ -12622,10 +12954,6 @@
         "id": "fc4g-15bpzxh",
         "issues": [
           {
-            "code": "invalid-date",
-            "label": "Datumsfeld ungueltig; nicht automatisch raten."
-          },
-          {
             "code": "evidence-missing",
             "label": "Kein gespeicherter Originaltext fuer automatische Korrektur."
           }
@@ -12633,7 +12961,7 @@
         "requiresReview": true,
         "publicationMode": "human-approval",
         "automaticPublicationAllowed": false,
-        "fingerprint": "282cd3666e411ccca8909344ed2140e29c30f4f30c8f5c0260fd857b81b7259a"
+        "fingerprint": "0d8a5cba000e1324310beda1e2624f779cb759640616184bc9952756eae76c1a"
       },
       {
         "id": "gs-580775",
@@ -12742,7 +13070,7 @@
         "requiresReview": true,
         "publicationMode": "human-approval",
         "automaticPublicationAllowed": false,
-        "fingerprint": "c06eecf9f04ad109bfe391a27e360b4bdab9a7ce143025f098d7a209ec157405"
+        "fingerprint": "5875807d83b76d60cc8cd504be6269dc7e0b9e6535766cd0b886fd7f4d8c3940"
       },
       {
         "id": "g2-1vh7rwe",
@@ -13403,6 +13731,10 @@
             "label": "Titel lang; Bedingungen erhalten, nicht abschneiden."
           },
           {
+            "code": "invalid-date",
+            "label": "Datumsfeld ungueltig; nicht automatisch raten."
+          },
+          {
             "code": "upstream-validity-review",
             "label": "Vorhandene Validierungshinweise vor Freigabe erneut pruefen."
           }
@@ -13410,7 +13742,7 @@
         "requiresReview": true,
         "publicationMode": "human-approval",
         "automaticPublicationAllowed": false,
-        "fingerprint": "c84b5ce9ab030c6034af2b03958ba0833a7f99414665fd5e5193e5cd9040ce1d"
+        "fingerprint": "415a5d36c4c5ada9d35cc1864c337f69f8696a3d067a6a07e9cf54a32d8ad0b0"
       },
       {
         "id": "meta-ig-17915834784287954",
@@ -13427,7 +13759,98 @@
         "requiresReview": true,
         "publicationMode": "human-approval",
         "automaticPublicationAllowed": false,
-        "fingerprint": "4b854d1909b4dd220e90bccd163a2bcb42777a554c62b7df006afc28f83e9097"
+        "fingerprint": "80314117293d28ac2d4bb30f89cabcc9f8e380e588a948a2bce3470b75bf9727"
+      },
+      {
+        "id": "fc4g-1ao3l8l",
+        "issues": [
+          {
+            "code": "long-title",
+            "label": "Titel lang; Bedingungen erhalten, nicht abschneiden."
+          },
+          {
+            "code": "invalid-date",
+            "label": "Datumsfeld ungueltig; nicht automatisch raten."
+          },
+          {
+            "code": "source-blocked",
+            "label": "Bestehende Quellensperre bleibt wirksam."
+          },
+          {
+            "code": "upstream-validity-review",
+            "label": "Vorhandene Validierungshinweise vor Freigabe erneut pruefen."
+          },
+          {
+            "code": "map-incomplete",
+            "label": "Einloesestandorte sind noch nicht vollstaendig bestaetigt."
+          },
+          {
+            "code": "evidence-missing",
+            "label": "Kein gespeicherter Originaltext fuer automatische Korrektur."
+          }
+        ],
+        "requiresReview": true,
+        "publicationMode": "human-approval",
+        "automaticPublicationAllowed": false,
+        "fingerprint": "f7517399089582761cb700d7847a2ea17ae390b83866ef2f72c7c82d0b0da64d"
+      },
+      {
+        "id": "g2-1idbka5",
+        "issues": [
+          {
+            "code": "long-title",
+            "label": "Titel lang; Bedingungen erhalten, nicht abschneiden."
+          },
+          {
+            "code": "invalid-date",
+            "label": "Datumsfeld ungueltig; nicht automatisch raten."
+          },
+          {
+            "code": "source-blocked",
+            "label": "Bestehende Quellensperre bleibt wirksam."
+          },
+          {
+            "code": "upstream-validity-review",
+            "label": "Vorhandene Validierungshinweise vor Freigabe erneut pruefen."
+          },
+          {
+            "code": "map-incomplete",
+            "label": "Einloesestandorte sind noch nicht vollstaendig bestaetigt."
+          },
+          {
+            "code": "evidence-missing",
+            "label": "Kein gespeicherter Originaltext fuer automatische Korrektur."
+          }
+        ],
+        "requiresReview": true,
+        "publicationMode": "human-approval",
+        "automaticPublicationAllowed": false,
+        "fingerprint": "e3aa9412ee3316418335a6717c3c9cd03e88f133326a5ebead6b60bb6778edf9"
+      },
+      {
+        "id": "meta-ig-18374465761209202",
+        "issues": [
+          {
+            "code": "long-title",
+            "label": "Titel lang; Bedingungen erhalten, nicht abschneiden."
+          },
+          {
+            "code": "invalid-date",
+            "label": "Datumsfeld ungueltig; nicht automatisch raten."
+          },
+          {
+            "code": "upstream-validity-review",
+            "label": "Vorhandene Validierungshinweise vor Freigabe erneut pruefen."
+          },
+          {
+            "code": "map-incomplete",
+            "label": "Einloesestandorte sind noch nicht vollstaendig bestaetigt."
+          }
+        ],
+        "requiresReview": true,
+        "publicationMode": "human-approval",
+        "automaticPublicationAllowed": false,
+        "fingerprint": "966a1e6a6b959939843c382dae812022ad1ae8d7840796781ad1604c28a3f1cd"
       }
     ]
   },
@@ -13440,7 +13863,6 @@
         "meta-ig-18122257859070013",
         "g2-1hv8enr",
         "g2-mpwntm",
-        "g2-1enscad",
         "g2-1lfynn6",
         "manual-foodora-genuss-20260923"
       ]
@@ -13451,21 +13873,10 @@
         "flight-jnykc6",
         "flight-1jh1qx0",
         "flight-19ftcd9",
-        "flight-1nqm22i",
-        "flight-1n42w4t",
         "flight-1srbhui",
         "gs-574207",
-        "benefit-hot-vorteile-cdbe54a8a6ea1656",
         "benefit-drei-plus-b23e1ae26ce0bac1",
-        "benefit-drei-plus-bc992fd55c290e1f",
-        "benefit-drei-plus-1c1f9cab861670a1",
-        "flight-10yozoj",
-        "flight-5i0ef4",
-        "flight-1b0v2p3",
-        "hillsong-vienna-kirche",
-        "cig-wien-kirche",
-        "icf-wien-kirche",
-        "jesuszentrum-events"
+        "benefit-drei-plus-bc992fd55c290e1f"
       ]
     },
     {
@@ -13473,20 +13884,6 @@
       "dealIds": [
         "fc4g-1qzknpm",
         "fc4g-rw3rck"
-      ]
-    },
-    {
-      "src": "/assets/blog/photos/fish.webp",
-      "dealIds": [
-        "power-food-eca409ce31f3",
-        "g2-1ffpc0f"
-      ]
-    },
-    {
-      "src": "/assets/blog/photos/cinema.webp",
-      "dealIds": [
-        "benefit-magenta-moments-oz9vs",
-        "benefit-drei-plus-1g2bha9"
       ]
     },
     {
