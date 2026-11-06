@@ -1,0 +1,33 @@
+{
+  "version": 1,
+  "scope": "Bounded substantive additions to existing, covered guides using same-day verified official evidence. No new duplicate pages, automatic deal approvals or customer messages.",
+  "schedule": "08:30 Europe/Vienna daily, DST-aware with a four-hour maximum queue delay. Existing 12/20 deal quality job no longer competes for blog attempts.",
+  "models": { "draft": "gpt-6.1-terra", "independentReview": "gpt-6.1-sol", "maximumCallsPerDailyAttempt": 2 },
+  "budgets": "Existing shared key, credit expiry, USD2 rolling-day/USD38 period limits and no-paid-fallback policy unchanged.",
+  "guards": [
+    "Existing daily editorial result prevents a second draft and fresh source requests.",
+    "At most four known official offer pages/five adapter requests; failures retain 24-hour cooldowns.",
+    "Fresh source must support the addition AND the unchanged article's offer-specific conditions.",
+    "No long verbatim source copying, HTML or arbitrary links in generated prose.",
+    "Recheck exact source, feed fingerprint, article bytes and independent review before any article write.",
+    "Atomic commit refuses newer remote source/feed/article/daily editorial changes and partial output batches, even with conflict override flags.",
+    "Original article, FAQ, photos, URLs, canonical, datePublished and other sitemap entries preserved.",
+    "Persistent additions survive complete guide regeneration. Base-copy changes require review instead of silently erasing additions.",
+    "Previous additions retained; maximum three additions per guide before a broader human/editorial revision is needed.",
+    "No public-success claim until actual article and sitemap bytes match, with a stored public receipt."
+  ],
+  "verification": {
+    "offlinePublicationAndDraftTests": 18,
+    "actualGeneratedCommitter": ["complete-batch-pass", "partial-batch-refused", "concurrent-source-refused", "concurrent-daily-article-refused"],
+    "realTopicGenerator": "Two isolated rebuilds retain one existing-guide addition and its sitemap date.",
+    "websitePagesChecked": 107,
+    "visualFixture": "Local-only addition rendered at 390x844 and 1440x1000, no horizontal overflow. No fixture published.",
+    "localProviderCalls": 0,
+    "cloudRun": "pending"
+  },
+  "migration": {
+    "localBlogStillActive": true,
+    "reason": "Today already has a verified editorial article. Do not force a second publication to prove this pipeline. Pause the local fallback only after a real equivalent server publication and receipt.",
+    "limitations": ["Only existing covered guides and the currently reviewed official-source adapter are supported.", "No new-page search-intent selection, Search Console access or full substantive guide rewrite yet.", "No proof yet that a real eligible model-generated blog addition has been publicly published by this new path."]
+  }
+}

@@ -28,7 +28,11 @@ export function maintenanceEvidenceFor(deals, cache, now = new Date()) {
 
 // Refresh only already known offer pages through the existing robots/cooldown
 // aware adapter. This does not crawl listings, approve deals or invent codes.
-export async function refreshMaintenanceEvidence({ root = process.cwd(), now = new Date(), fetchPage, apply = true, offline = false } = {}) {
+export async function refreshMaintenanceEvidence({ root = process.cwd(), now = new Date(), fetchPage, apply = true, offline = false, requireSameDay = false } = {}) {
+  const localDay = date => new Intl.DateTimeFormat('sv-SE', { timeZone: 'Europe/Vienna' }).format(date);
+  if (requireSameDay && fs.existsSync(path.join(root, `reviews/${localDay(now)}-daily-blog.json`))) {
+    return { report: { checkedAt: now.toISOString(), status: 'existing-daily-blog', sourceRequests: 0, offerPageAttempts: 0 } };
+  }
   const feed = read(root, 'docs/deals.json', {}), deals = feed.deals || [];
   const cache = read(root, 'reviews/maintenance-source-evidence.json', { version: 1, entries: {} });
   // Cached readers and lightweight Slack state commits do not install parsers.
@@ -38,11 +42,14 @@ export async function refreshMaintenanceEvidence({ root = process.cwd(), now = n
   const get = fetchPage || client?.fetchPage;
   const missing = deals.filter(d => !clean(d.description));
   const selected = [...new Map(deals.filter(d => supported(d.url)).map(d => [d.url, d])).values()]
-    .sort((a, b) => (Date.parse(cache.entries[a.url]?.checkedAt) || 0) - (Date.parse(cache.entries[b.url]?.checkedAt) || 0));
+    .sort((a, b) => (requireSameDay ? Number(b.category === 'essen') - Number(a.category === 'essen') : 0)
+      || (Date.parse(cache.entries[a.url]?.checkedAt) || 0) - (Date.parse(cache.entries[b.url]?.checkedAt) || 0));
   let requests = 0;
   for (const deal of selected) {
     const previous = cache.entries[deal.url];
-    if (offline || requests >= 4 || previous?.parserVersion === 3 && Date.parse(previous?.nextAttemptAt) > +now) continue;
+    const freshDayNeeded = requireSameDay && previous?.status === 'verified'
+      && Number.isFinite(Date.parse(previous.checkedAt)) && localDay(new Date(previous.checkedAt)) !== localDay(now);
+    if (offline || requests >= 4 || previous?.parserVersion === 3 && Date.parse(previous?.nextAttemptAt) > +now && !freshDayNeeded) continue;
     requests++;
     let next = { url: deal.url, parserVersion: 3, checkedAt: now.toISOString(), nextAttemptAt: new Date(+now + 86400000).toISOString(), status: 'deferred' };
     try {
@@ -73,6 +80,6 @@ export async function refreshMaintenanceEvidence({ root = process.cwd(), now = n
 }
 
 if (process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.meta.url)) {
-  const { report } = await refreshMaintenanceEvidence({ offline: process.argv.includes('--offline'), apply: !process.argv.includes('--read-only') });
+  const { report } = await refreshMaintenanceEvidence({ offline: process.argv.includes('--offline'), apply: !process.argv.includes('--read-only'), requireSameDay: process.argv.includes('--blog-day') });
   console.log(JSON.stringify(report, null, 2));
 }

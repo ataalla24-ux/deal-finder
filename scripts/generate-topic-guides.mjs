@@ -7,6 +7,7 @@ import { polishHtml } from './polish-website.mjs';
 import { backfillGuides } from './blog-backfill-20261018.mjs';
 import { catchupGuides } from './blog-backfill-20261030.mjs';
 import { novemberGuides, heldRecheckGuides } from './blog-backfill-20261105.mjs';
+import { applyBlogPublication, updateBlogSitemap } from './server-blog-content.mjs';
 
 const dailyGuides = [
   {
@@ -982,9 +983,13 @@ const selectedSlugs = process.argv.slice(2);
 const unknownSlugs = selectedSlugs.filter(slug => !guides.some(guide => guide.slug === slug));
 if (unknownSlugs.length) throw new Error(`Unknown guides: ${unknownSlugs.join(', ')}`);
 const selectedGuides = guides.filter(g => selectedSlugs.length === 0 || selectedSlugs.includes(g.slug));
-for (const guide of selectedGuides) {
-  fs.writeFileSync(path.join(BLOG_DIR, `${guide.slug}.html`), polishHtml(renderGuide(guide), `blog/${guide.slug}.html`, now));
-}
+const publicationsFile = path.join(ROOT, 'reviews/server-blog-publications.json');
+const publications = fs.existsSync(publicationsFile) ? JSON.parse(fs.readFileSync(publicationsFile, 'utf8')).entries : {};
+// Validate all persistent additions before writing; changed base copy needs review.
+const renderedGuides = selectedGuides.map(guide => ({ guide,
+  html: applyBlogPublication(polishHtml(renderGuide(guide), `blog/${guide.slug}.html`, now), publications[guide.slug], guide.slug),
+}));
+for (const { guide, html } of renderedGuides) fs.writeFileSync(path.join(BLOG_DIR, `${guide.slug}.html`), html);
 
 const sitemapPath = path.join(ROOT, 'docs', 'sitemap.xml');
 let sitemap = fs.readFileSync(sitemapPath, 'utf8');
@@ -1001,6 +1006,10 @@ for (const guide of selectedGuides.filter((guide) => guide.modified)) {
   } else {
     throw new Error(`Sitemap entry missing for ${guide.slug}`);
   }
+}
+for (const guide of selectedGuides) {
+  const publication = publications[guide.slug];
+  if (publication) sitemap = updateBlogSitemap(sitemap, guide.slug, publication.day);
 }
 fs.writeFileSync(sitemapPath, sitemap);
 

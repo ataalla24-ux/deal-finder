@@ -107,7 +107,7 @@ const tempRoot = path.join(root, 'tmp');
 fs.mkdirSync(tempRoot, { recursive: true });
 const fixture = fs.mkdtempSync(path.join(tempRoot, 'blog-backfill-test-'));
 try {
-  for (const name of ['scripts/generate-topic-guides.mjs', 'scripts/polish-website.mjs', 'scripts/blog-visuals.mjs', 'scripts/blog-photo-catalog.mjs', 'scripts/deal-photos.mjs', 'scripts/blog-backfill-20261018.mjs', 'scripts/blog-backfill-20261030.mjs', 'scripts/blog-backfill-20261105.mjs', 'reviews/deal-guides.json', 'docs/sitemap.xml', 'docs/blog/index.html']) {
+  for (const name of ['scripts/server-blog-content.mjs', 'scripts/generate-topic-guides.mjs', 'scripts/polish-website.mjs', 'scripts/blog-visuals.mjs', 'scripts/blog-photo-catalog.mjs', 'scripts/deal-photos.mjs', 'scripts/blog-backfill-20261018.mjs', 'scripts/blog-backfill-20261030.mjs', 'scripts/blog-backfill-20261105.mjs', 'reviews/deal-guides.json', 'docs/sitemap.xml', 'docs/blog/index.html']) {
     const destination = path.join(fixture, name);
     fs.mkdirSync(path.dirname(destination), { recursive: true });
     fs.copyFileSync(path.join(root, name), destination);

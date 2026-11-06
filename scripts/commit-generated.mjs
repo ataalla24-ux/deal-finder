@@ -290,6 +290,37 @@ function assertMapInputsRetained(guard, states, remoteHashes) {
   }
 }
 
+function captureBlogConsistency(states, baseRef) {
+  if (!states.some(state => state.path === 'reviews/server-blog-publications.json')) return null;
+  const batchPath = 'reviews/server-blog-publication-batch.json';
+  const batch = JSON.parse(fs.readFileSync(batchPath, 'utf8'));
+  if (batch.version !== 1 || !/^[a-z0-9-]+$/.test(batch.slug) || !/^20\d{2}-\d{2}-\d{2}$/.test(batch.day)
+    || !Array.isArray(batch.inputs) || !Array.isArray(batch.outputs)) throw Error('Invalid blog publication batch');
+  const required = [batchPath, 'reviews/server-blog-publications.json', 'reviews/server-blog-state.json',
+    'reviews/server-blog-report.json', `reviews/${batch.day}-daily-blog.json`, `docs/blog/${batch.slug}.html`, 'docs/sitemap.xml'];
+  if (required.some(file => !batch.outputs.includes(file) || !batch.inputs.includes(file))
+    || !batch.inputs.includes('docs/deals.json') || !batch.inputs.includes('reviews/maintenance-source-evidence.json')) throw Error('Incomplete blog publication batch');
+  const paths = [...new Set([...batch.inputs, ...batch.outputs])];
+  if (paths.some(file => typeof file !== 'string' || !/^(docs|reviews|scripts|scraper)\/[a-zA-Z0-9_./-]+$/.test(file) || file.split('/').includes('..'))) throw Error('Invalid blog input path');
+  return {
+    outputs: required,
+    inputs: paths.map(file => ({ path: file, baseHash: contentHash(remoteFileContent(baseRef, file)), hash: localFileHash(file) })),
+  };
+}
+
+function assertBlogConsistency(guard, states, headRef) {
+  if (!guard) return;
+  const retained = new Map(states.map(state => [state.path, state]));
+  for (const input of guard.inputs) {
+    const remoteHash = contentHash(remoteFileContent(headRef, input.path));
+    if (remoteHash !== input.baseHash) throw Error(`Blog input consistency check failed: remote changed ${input.path}`);
+    const state = retained.get(input.path);
+    const retainedHash = state ? contentHash(state.exists ? state.content : null) : remoteHash;
+    if (retainedHash !== input.hash) throw Error(`Blog input consistency check failed: partial batch omits ${input.path}`);
+  }
+  if (guard.outputs.some(file => !fs.existsSync(file))) throw Error('Blog publication output missing');
+}
+
 function latestIso(left, right) {
   const leftTimestamp = Date.parse(cleanText(left));
   const rightTimestamp = Date.parse(cleanText(right));
@@ -623,6 +654,7 @@ async function main() {
 
   const states = captureFiles(changedFiles);
   const mapConsistency = captureMapConsistency(states, baseRef, mapReadInputs);
+  const blogConsistency = captureBlogConsistency(states, baseRef);
   const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), 'commit-generated-'));
   console.log(`Preparing generated commit for ${states.length} file(s): ${states.map((state) => state.path).join(', ')}`);
 
@@ -632,11 +664,13 @@ async function main() {
       const headRef = cleanText(gitOutput(['rev-parse', remoteRef(options.remote, options.branch)]));
       // Always compare with the original checkout, including on push retries.
       const mapRemoteHashes = assertMapRemoteInputs(mapConsistency, headRef);
+      assertBlogConsistency(blogConsistency, states, headRef);
       const safeStates = resolveSameFileRemoteChanges(states, baseRef, headRef, {
         skipConflicts: options.skipConflicts,
         replaceConflicts: options.replaceConflicts,
       });
       assertMapInputsRetained(mapConsistency, safeStates, mapRemoteHashes);
+      assertBlogConsistency(blogConsistency, safeStates, headRef);
       if (safeStates.length === 0) {
         console.log('All generated changes were already superseded on remote main');
         return;
