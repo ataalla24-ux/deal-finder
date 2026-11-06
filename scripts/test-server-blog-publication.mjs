@@ -7,7 +7,7 @@ import { fileURLToPath } from 'node:url';
 import { spawnSync } from 'node:child_process';
 import { load } from 'cheerio';
 import { prepareServerBlog } from './server-blog-draft.mjs';
-import { publishServerBlog } from './server-blog-publish.mjs';
+import { publishServerBlog, unfinishedBlogVerification } from './server-blog-publish.mjs';
 import { blogDigest, applyBlogPublication, articleBaseFingerprint, validateBlogDraft } from './server-blog-content.mjs';
 import { verifyPublicBlog } from './verify-server-blog-public.mjs';
 import { viennaBlogSlot } from './vienna-blog-slot.mjs';
@@ -86,6 +86,18 @@ test('complete reviewed update preserves existing offer, image, FAQ, canonical, 
     assert.throws(() => publishServerBlog({ root: f.root, now, report }), /daily-result-already/);
     const read = async url => ({ ok: true, status: 200, arrayBuffer: async () => Buffer.from(f.read('docs/' + new URL(url).pathname.slice(1))) });
     assert.equal((await verifyPublicBlog({ root: f.root, request: read, attempts: 1 })).published, true);
+    const pending = unfinishedBlogVerification(f.root);
+    assert.equal(pending.modelCalls, 0);
+    assert.equal(pending.resumingPublicVerification, true);
+    f.write('docs/sitemap.xml', f.read('docs/sitemap.xml').replace('2026-09-01', '2026-11-07'));
+    const receipt = await verifyPublicBlog({ root: f.root, request: read, attempts: 1 });
+    assert.equal(receipt.published, true, 'unrelated newer sitemap entry must not invalidate the verified article');
+    assert.equal(receipt.checks.find(row => row.file === 'docs/sitemap.xml').exact, false);
+    assert.equal(receipt.checks.find(row => row.file === 'docs/sitemap.xml').articleEntryVerified, true);
+    f.write('reviews/server-blog-public-receipt.json', receipt);
+    assert.equal(unfinishedBlogVerification(f.root), null);
+    f.write('docs/sitemap.xml', f.read('docs/sitemap.xml').replace('2026-11-07', '2026-11-06'));
+    assert.equal((await verifyPublicBlog({ root: f.root, request: read, attempts: 1 })).published, false, 'own sitemap date must match');
     assert.equal((await verifyPublicBlog({ root: f.root, request: async () => ({ ok: true, status: 200, arrayBuffer: async () => Buffer.from('old') }), attempts: 1 })).published, false);
   } finally { f.close(); }
 });

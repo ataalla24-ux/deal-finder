@@ -11,6 +11,15 @@ const read = (root, file, fallback) => {
 };
 const write = (root, file, value) => fs.writeFileSync(path.join(root, file), JSON.stringify(value, null, 2) + '\n');
 
+export function unfinishedBlogVerification(root) {
+  const report = read(root, 'reviews/server-blog-report.json', {});
+  if (report.status !== 'prepared-for-publication') return null;
+  const receipt = read(root, 'reviews/server-blog-public-receipt.json', {});
+  if (receipt.published && receipt.checks?.some(row => row.file === report.articlePath && row.exact && row.actual === report.articleHash)) return null;
+  return { ...report, modelCalls: 0, publicationModelCalls: report.publicationModelCalls ?? report.modelCalls,
+    resumingPublicVerification: true, note: 'Resume the existing publication receipt before generating another update. No additional model calls.' };
+}
+
 export function publishServerBlog({ root = process.cwd(), now = new Date(), report } = {}) {
   if (report?.status !== 'verified-draft-awaiting-publication-pipeline') return report;
   const draft = report.draft, day = blogDay(now);
@@ -71,7 +80,7 @@ export function publishServerBlog({ root = process.cwd(), now = new Date(), repo
 
 if (process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.meta.url)) {
   const root = process.cwd(), now = new Date();
-  const report = await prepareServerBlog({ root, now, allowAi: !process.argv.includes('--offline') });
+  const report = unfinishedBlogVerification(root) || await prepareServerBlog({ root, now, allowAi: !process.argv.includes('--offline') });
   report.publicationPipelineEnabled = true;
   report.note = 'Existing-guide publication pipeline enabled. No duplicate article or public-success claim without a verified update and HTTP receipt. Local editorial fallback remains active during migration.';
   const result = publishServerBlog({ root, now, report });
