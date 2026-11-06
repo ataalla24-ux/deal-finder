@@ -154,7 +154,6 @@ export const POWER_FOOD_SOURCES = [
   {
     name: "McDonald's",
     url: "https://www.mcdonalds.at/",
-    seeds: ["https://www.mcdonalds.at/mymcdonalds"],
     foodoraFootnote: true,
     selector: ".column_attr:has(h2)",
     category: "essen",
