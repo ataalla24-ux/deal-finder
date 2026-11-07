@@ -1,7 +1,7 @@
 {
-  "generatedAt": "2026-11-07T03:39:25.572Z",
+  "generatedAt": "2026-11-07T04:04:32.346Z",
   "source": "instagram-graph-cross-source-verification",
-  "status": "ok",
+  "status": "failed-preserved",
   "configured": true,
   "scannedFiles": [
     "deals-pending-church-events.json",
@@ -64,7 +64,7 @@
     },
     "deals-pending-firecrawl4.json": {
       "deals": 49,
-      "candidates": 1
+      "candidates": 2
     },
     "deals-pending-firecrawl5.json": {
       "deals": 0,
@@ -80,7 +80,7 @@
     },
     "deals-pending-food3.json": {
       "deals": 1,
-      "candidates": 0
+      "candidates": 1
     },
     "deals-pending-freikirchen.json": {
       "deals": 32,
@@ -108,7 +108,7 @@
     },
     "deals-pending-instagram-ai.json": {
       "deals": 28,
-      "candidates": 1
+      "candidates": 2
     },
     "deals-pending-instagram-apify.json": {
       "deals": 5,
@@ -139,8 +139,8 @@
       "candidates": 0
     },
     "deals-pending-meta-instagram.json": {
-      "deals": 67,
-      "candidates": 3
+      "deals": 68,
+      "candidates": 6
     },
     "deals-pending-power.json": {
       "deals": 37,
@@ -167,10 +167,14 @@
       "candidates": 0
     }
   },
-  "candidatePosts": 8,
-  "candidateAccounts": 8,
+  "candidatePosts": 11,
+  "candidateAccounts": 10,
   "skippedAccountCooldowns": 1,
   "selectedAccounts": [
+    {
+      "username": "ikazerestaurant",
+      "candidates": 2
+    },
     {
       "username": "garnierdeutschland",
       "candidates": 1
@@ -184,22 +188,23 @@
       "candidates": 1
     },
     {
-      "username": "2ndstreetburger",
+      "username": "tuchlauben.eis",
       "candidates": 1
     },
     {
-      "username": "zuckerlwerkstatt",
-      "candidates": 1
-    },
-    {
-      "username": "ario.wien",
+      "username": "freefinder.at",
       "candidates": 1
     }
   ],
-  "fetchedPosts": 144,
-  "exactMatches": 3,
+  "fetchedPosts": 0,
+  "exactMatches": 0,
   "retainedEvidencePosts": 2000,
-  "errors": [],
+  "errors": [
+    {
+      "username": "ikazerestaurant",
+      "message": "Instagram shared quota paused: shared cooldown"
+    }
+  ],
   "accountFailures": {
     "iris.thegoodguides": {
       "count": 3,
@@ -218,21 +223,27 @@
     }
   },
   "sharedQuota": {
-    "limitPerHour": 286,
+    "limitPerHour": 190,
     "usageThreshold": 95,
-    "requests": 6,
-    "reserved": 10,
-    "stopped": false,
-    "reason": "",
-    "highestUsagePercent": 56,
+    "requests": 0,
+    "reserved": 0,
+    "stopped": true,
+    "reason": "Instagram shared quota paused: shared cooldown",
+    "highestUsagePercent": 0,
     "waitedMs": 0,
     "pacingMs": 0,
-    "retryAt": "",
+    "retryAt": "2026-11-07T04:12:34.440Z",
     "adaptiveSafetyCeiling": 190,
     "adaptiveIncreases": 0,
     "storageFailure": null
   },
-  "blockedEvidencePosts": 65,
-  "unmatchedCandidatePosts": 5,
-  "message": "3/8 fresh cross-source Instagram candidates matched exactly via Graph API."
+  "globalError": {
+    "username": "ikazerestaurant",
+    "status": 0,
+    "code": "SCAN_BUDGET",
+    "message": "Instagram shared quota paused: shared cooldown"
+  },
+  "blockedEvidencePosts": 66,
+  "unmatchedCandidatePosts": 11,
+  "message": "0/11 fresh cross-source Instagram candidates matched exactly via Graph API."
 }
