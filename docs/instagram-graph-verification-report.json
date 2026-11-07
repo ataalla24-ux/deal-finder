@@ -1,7 +1,7 @@
 {
-  "generatedAt": "2026-11-07T13:33:54.234Z",
+  "generatedAt": "2026-11-07T13:43:27.674Z",
   "source": "instagram-graph-cross-source-verification",
-  "status": "ok",
+  "status": "failed-preserved",
   "configured": true,
   "scannedFiles": [
     "deals-pending-church-events.json",
@@ -88,7 +88,7 @@
     },
     "deals-pending-gastro2.json": {
       "deals": 120,
-      "candidates": 3
+      "candidates": 4
     },
     "deals-pending-gemeinde.json": {
       "deals": 33,
@@ -139,8 +139,8 @@
       "candidates": 0
     },
     "deals-pending-meta-instagram.json": {
-      "deals": 70,
-      "candidates": 5
+      "deals": 71,
+      "candidates": 6
     },
     "deals-pending-power.json": {
       "deals": 40,
@@ -167,10 +167,14 @@
       "candidates": 0
     }
   },
-  "candidatePosts": 10,
-  "candidateAccounts": 10,
+  "candidatePosts": 12,
+  "candidateAccounts": 11,
   "skippedAccountCooldowns": 1,
   "selectedAccounts": [
+    {
+      "username": "freefinder.at",
+      "candidates": 2
+    },
     {
       "username": "garnierdeutschland",
       "candidates": 1
@@ -184,22 +188,23 @@
       "candidates": 1
     },
     {
+      "username": "restaurant.tcseeblick",
+      "candidates": 1
+    },
+    {
       "username": "tuchlauben.eis",
-      "candidates": 1
-    },
-    {
-      "username": "freefinder.at",
-      "candidates": 1
-    },
-    {
-      "username": "ikazerestaurant",
       "candidates": 1
     }
   ],
-  "fetchedPosts": 130,
-  "exactMatches": 2,
+  "fetchedPosts": 0,
+  "exactMatches": 0,
   "retainedEvidencePosts": 2000,
-  "errors": [],
+  "errors": [
+    {
+      "username": "freefinder.at",
+      "message": "Instagram shared quota paused: shared cooldown"
+    }
+  ],
   "accountFailures": {
     "iris.thegoodguides": {
       "count": 3,
@@ -220,19 +225,25 @@
   "sharedQuota": {
     "limitPerHour": 190,
     "usageThreshold": 95,
-    "requests": 6,
-    "reserved": 10,
-    "stopped": false,
-    "reason": "",
-    "highestUsagePercent": 83,
+    "requests": 0,
+    "reserved": 0,
+    "stopped": true,
+    "reason": "Instagram shared quota paused: shared cooldown",
+    "highestUsagePercent": 0,
     "waitedMs": 0,
     "pacingMs": 0,
-    "retryAt": "",
+    "retryAt": "2026-11-07T13:51:34.423Z",
     "adaptiveSafetyCeiling": 190,
     "adaptiveIncreases": 0,
     "storageFailure": null
   },
-  "blockedEvidencePosts": 64,
-  "unmatchedCandidatePosts": 8,
-  "message": "2/10 fresh cross-source Instagram candidates matched exactly via Graph API."
+  "globalError": {
+    "username": "freefinder.at",
+    "status": 0,
+    "code": "SCAN_BUDGET",
+    "message": "Instagram shared quota paused: shared cooldown"
+  },
+  "blockedEvidencePosts": 63,
+  "unmatchedCandidatePosts": 12,
+  "message": "0/12 fresh cross-source Instagram candidates matched exactly via Graph API."
 }
