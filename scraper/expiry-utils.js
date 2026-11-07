@@ -1,3 +1,4 @@
+import { load } from 'cheerio';
 import { cardEditorialWhen } from './deal-card-editor.js';
 
 const URL_CHECK_UA = 'Mozilla/5.0 (compatible; FreeFinderBot/1.0; +https://freefinder.wien)';
@@ -1311,6 +1312,39 @@ function alignTargetHintWithPublicationYear(targetDateHint, publicationIso) {
   };
 }
 
+export function sparhamsterCouponRoundPath(url) {
+  try {
+    const { protocol, hostname, pathname, username, password, port } = new URL(url);
+    if (protocol === 'https:' && !username && !password && !port
+        && /^(?:www\.)?sparhamster\.at$/.test(hostname)
+        && /^\/(?:mcdonalds|burger-king)-gutscheine-oesterreich\/?$/.test(pathname)) {
+      return pathname.replace(/\/$/, '');
+    }
+  } catch {
+    // A hostname alone cannot identify the reviewed coupon page.
+  }
+  return '';
+}
+
+function extractSparhamsterCouponRound(html, url, now) {
+  const path = sparhamsterCouponRoundPath(url);
+  if (!path) return null;
+  const $ = load(html);
+  const heading = $('main h1');
+  const updated = $('main .sh-deal-detail-post-meta__modified time.sh-deal-detail-post-meta__time');
+  const expectedBrand = path.startsWith('/mcdonalds') ? /^McDonald['’]?s\b/i : /^Burger King\b/i;
+  if (heading.length !== 1 || updated.length !== 1 || !expectedBrand.test(heading.text().trim())) return null;
+  const end = heading.text().match(/\bbis\s+(\d{1,2}\.\s+\p{L}+\s+\d{4})\s*$/iu);
+  if (!end) return null;
+  const { validUntil } = parseExpiryShape(`bis ${end[1]}`, { now });
+  const timestamp = updated.attr('datetime') || '';
+  if (!/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:Z|[+-]\d{2}:\d{2})$/.test(timestamp)) return null;
+  const modified = Date.parse(timestamp);
+  if (!validUntil || !Number.isFinite(modified) || modified > now.getTime()
+      || new Date(modified).toISOString().slice(0, 10) > validUntil) return null;
+  return { updatedAt: new Date(modified).toISOString(), validUntil };
+}
+
 export function extractTargetPageDateHints(html, options = {}) {
   if (!html) return {};
   const now = options.now instanceof Date ? options.now : new Date();
@@ -1413,9 +1447,11 @@ export function extractTargetPageDateHints(html, options = {}) {
     targetDateHint = alignTargetHintWithPublicationYear(targetDateHint, cleanText(publication?.iso || ''));
   }
 
+  const couponRound = extractSparhamsterCouponRound(html, options.sourceUrl, now);
   return {
     publicationDate: cleanText(publication?.iso || ''),
     publicationDateSource: cleanText(publication?.source || ''),
+    ...(couponRound ? { couponRound } : {}),
     ...(targetDateHint || {}),
   };
 }
@@ -1581,7 +1617,7 @@ export async function inspectDealUrlHealth(url, options = {}) {
     }
 
     const contentHints = extractDealPageHints(html);
-    const dateHints = extractTargetPageDateHints(html, { ...options, hostname });
+    const dateHints = extractTargetPageDateHints(html, { ...options, hostname, sourceUrl: finalUrl });
 
     return {
       invalid: false,

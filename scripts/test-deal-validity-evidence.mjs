@@ -1,6 +1,49 @@
 import assert from 'node:assert/strict';
 
 import { validateDealsForSlack } from '../scraper/deal-validity-agent.js';
+import { extractTargetPageDateHints } from '../scraper/expiry-utils.js';
+
+const couponNow = new Date('2026-11-07T12:00:00Z');
+for (const [slug, brand, endLabel, validUntil, updatedAt] of [
+  ['mcdonalds', "McDonald's", '15. November 2026', '2026-11-15', '2026-10-27T10:00:18Z'],
+  ['burger-king', 'Burger King', '6. Dezember 2026', '2026-12-06', '2026-11-03T10:00:40Z'],
+]) {
+  const url = `https://www.sparhamster.at/${slug}-gutscheine-oesterreich/`;
+  const old = '2016-09-12T20:15:48Z';
+  const html = `<meta property="article:published_time" content="${old}">
+    <main><h1>${brand} Gutscheine Österreich – bis ${endLabel}</h1>
+    <div class="sh-deal-detail-post-meta__modified">
+    <time class="sh-deal-detail-post-meta__time" datetime="${updatedAt}">Aktualisiert</time>
+    </div><time datetime="2026-11-07T11:59:59Z">Kommentar</time></main>`;
+  const hints = extractTargetPageDateHints(html, { sourceUrl: url, now: couponNow });
+  assert.equal(hints.publicationDate, new Date(old).toISOString());
+  assert.deepEqual(hints.couponRound, { updatedAt: new Date(updatedAt).toISOString(), validUntil });
+  assert.equal(extractTargetPageDateHints(html, { sourceUrl: 'https://example.com', now: couponNow }).couponRound, undefined);
+  assert.equal(extractTargetPageDateHints(html.replace(updatedAt, '2026-11-08T08:00:00Z'),
+    { sourceUrl: url, now: couponNow }).couponRound, undefined);
+  assert.equal(extractTargetPageDateHints(html.replace('__modified', '__published'),
+    { sourceUrl: url, now: couponNow }).couponRound, undefined);
+
+  const deal = { id: slug, brand, url, title: 'App-Coupons: Cheeseburger 1+1 gratis',
+    description: 'Zweiter Cheeseburger gratis mit Coupon in der App bei teilnehmenden Filialen in Wien.',
+    category: 'essen', type: 'bogo', source: 'Slack Digest', originSource: 'Firecrawl Gastro #2',
+    distance: 'Teilnehmende Filialen in Wien', pubDate: old, sourcePublishedAt: old,
+    sourcePublishedAtSource: 'url.publicationDate', validUntil, expiryKind: 'end' };
+  const validateRound = async (candidate, dateHints = hints, finalUrl = url, now = couponNow) =>
+    (await validateDealsForSlack([candidate], {
+      now, inspectDealUrlHealth: async () => ({status: 200, finalUrl, dateHints, contentHints: {}}),
+    })).results[0];
+
+  const accepted = await validateRound(deal);
+  assert.equal(accepted.decision.allowed, true, accepted.decision.reasons.join('; '));
+  assert.equal(accepted.decision.sourceDateSource, 'url.couponRoundUpdatedAt');
+  assert.equal(accepted.deal.sourcePublishedAt, old);
+  const mismatch = await validateRound({...deal, validUntil: '2026-11-12'});
+  assert.equal(mismatch.decision.allowed, false);
+  assert.match(mismatch.decision.reasons.join(' '), /passt nicht zur aktuellen Couponrunde/);
+  assert.equal((await validateRound(deal, hints, 'https://example.com')).decision.allowed, false);
+  assert.equal((await validateRound(deal, hints, url, new Date('2026-12-07T12:00:00Z'))).decision.allowed, false);
+}
 
 const now = new Date('2026-07-17T12:00:00.000Z');
 

@@ -10,7 +10,7 @@ import { discoveryRejection } from './deal-discovery-policy.js';
 import { normalizeDealFacts, locationConflictReason } from './deal-factual-guards.js';
 import { inspectDealContentQuality } from './deal-content-quality-utils.js';
 
-import { inspectDealUrlHealth, parseExpiryShape } from './expiry-utils.js';
+import { inspectDealUrlHealth, parseExpiryShape, sparhamsterCouponRoundPath } from './expiry-utils.js';
 import { isHumanReviewedCommunity } from './community-review-utils.js';
 import {
   decodeInstagramShortcodeDate,
@@ -1104,6 +1104,18 @@ async function validateDeal(deal, context) {
     ignoreUrlPublicationDate: sharedBenefitPageDeal || officialFood?.current === true,
     socialPost: socialPostDeal,
   });
+  const couponPath = sparhamsterCouponRoundPath(url);
+  const couponRound = !socialPostDeal && couponPath && couponPath === sparhamsterCouponRoundPath(health?.finalUrl)
+    ? reliableDateHints(health).couponRound : null;
+  const roundDate = toDate(couponRound?.updatedAt);
+  const roundMatchesDeal = Boolean(couponRound?.validUntil
+    && expiry.candidate?.validUntil === couponRound.validUntil
+    && expiryCandidates.some(candidate => candidate.source.startsWith('deal.')
+      && candidate.validUntil === couponRound.validUntil));
+  if (roundDate && roundMatchesDeal) {
+    // The original article date stays intact; only the matching round is fresh.
+    publicationCandidates.push({ source: 'url.couponRoundUpdatedAt', date: roundDate, iso: roundDate.toISOString(), rank: 110 });
+  }
   const freshnessMaxAgeDays = socialPostDeal
     ? Math.min(context.maxAgeDays, MAX_SOCIAL_POST_AGE_DAYS)
     : context.maxAgeDays;
@@ -1129,6 +1141,7 @@ async function validateDeal(deal, context) {
   let offer = getConcreteOfferDecision(deal, health);
   if (officialFood?.ok && offer.reason === 'kein konkretes Angebot erkennbar') offer = { concrete: true };
   const reasons = [];
+  if (couponRound && !roundMatchesDeal) reasons.push('Ablaufdatum passt nicht zur aktuellen Couponrunde der Quelle');
   const discoveryPolicy = discoveryRejection(deal);
   if (discoveryPolicy) reasons.push(`Entdeckungsfilter (${discoveryPolicy})`);
   const locationConflict = locationConflictReason(deal);
@@ -1234,7 +1247,7 @@ async function validateDeal(deal, context) {
     ...(officialFood?.ok ? { officialFoodReverifiedAt: now.toISOString() } : {}),
   };
 
-  if (selectedDate?.iso && (
+  if (selectedDate?.iso && selectedDate.source !== 'url.couponRoundUpdatedAt' && (
     !deal.pubDate
     || selectedDate.source.startsWith('url.')
     || !isTrustedPublicationSource(deal.pubDateSource)
