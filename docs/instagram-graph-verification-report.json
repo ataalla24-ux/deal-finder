@@ -1,7 +1,7 @@
 {
-  "generatedAt": "2026-11-07T16:21:01.563Z",
+  "generatedAt": "2026-11-07T16:34:48.848Z",
   "source": "instagram-graph-cross-source-verification",
-  "status": "ok",
+  "status": "failed-preserved",
   "configured": true,
   "scannedFiles": [
     "deals-pending-church-events.json",
@@ -139,7 +139,7 @@
       "candidates": 0
     },
     "deals-pending-meta-instagram.json": {
-      "deals": 70,
+      "deals": 72,
       "candidates": 5
     },
     "deals-pending-power.json": {
@@ -196,10 +196,15 @@
       "candidates": 1
     }
   ],
-  "fetchedPosts": 121,
-  "exactMatches": 3,
+  "fetchedPosts": 0,
+  "exactMatches": 0,
   "retainedEvidencePosts": 2000,
-  "errors": [],
+  "errors": [
+    {
+      "username": "food1offers",
+      "message": "Instagram shared quota paused: shared cooldown"
+    }
+  ],
   "accountFailures": {
     "iris.thegoodguides": {
       "count": 3,
@@ -218,21 +223,27 @@
     }
   },
   "sharedQuota": {
-    "limitPerHour": 296,
+    "limitPerHour": 190,
     "usageThreshold": 95,
-    "requests": 6,
-    "reserved": 10,
-    "stopped": false,
-    "reason": "",
-    "highestUsagePercent": 22,
+    "requests": 0,
+    "reserved": 0,
+    "stopped": true,
+    "reason": "Instagram shared quota paused: shared cooldown",
+    "highestUsagePercent": 0,
     "waitedMs": 0,
     "pacingMs": 0,
-    "retryAt": "",
+    "retryAt": "2026-11-07T16:42:51.045Z",
     "adaptiveSafetyCeiling": 190,
     "adaptiveIncreases": 0,
     "storageFailure": null
   },
+  "globalError": {
+    "username": "food1offers",
+    "status": 0,
+    "code": "SCAN_BUDGET",
+    "message": "Instagram shared quota paused: shared cooldown"
+  },
   "blockedEvidencePosts": 66,
-  "unmatchedCandidatePosts": 9,
-  "message": "3/12 fresh cross-source Instagram candidates matched exactly via Graph API."
+  "unmatchedCandidatePosts": 12,
+  "message": "0/12 fresh cross-source Instagram candidates matched exactly via Graph API."
 }
