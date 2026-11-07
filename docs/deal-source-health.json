@@ -1,10 +1,10 @@
 {
-  "generatedAt": "2026-11-07T22:09:57.287Z",
+  "generatedAt": "2026-11-07T22:18:29.705Z",
   "summary": {
     "filesConsidered": 32,
-    "totalCandidates": 681,
-    "uniqueCandidates": 667,
-    "distinctCandidates": 674,
+    "totalCandidates": 679,
+    "uniqueCandidates": 665,
+    "distinctCandidates": 672,
     "duplicateClusters": 7,
     "topHealthySources": [
       {
@@ -60,8 +60,8 @@
       {
         "sourceKey": "instagram-apify",
         "sourceLabel": "Apify Instagram",
-        "missionFitScore": 52,
-        "totalDeals": 5
+        "missionFitScore": 55,
+        "totalDeals": 3
       },
       {
         "sourceKey": "meta-instagram",
@@ -231,11 +231,12 @@
     ],
     "pipelineRuns": {
       "reportedSources": 9,
-      "failedSources": [],
+      "failedSources": [
+        "wien-combined"
+      ],
       "completedWithErrors": [
         "joe",
-        "power",
-        "wien-combined"
+        "power"
       ]
     }
   },
@@ -631,52 +632,52 @@
       "sourceKey": "instagram-apify",
       "file": "deals-pending-instagram-apify.json",
       "sourceLabel": "Apify Instagram",
-      "totalDeals": 5,
-      "uniqueDeals": 5,
+      "totalDeals": 3,
+      "uniqueDeals": 3,
       "duplicateDeals": 0,
       "duplicateAcrossSources": 0,
       "fresh1dCount": 0,
       "fresh7dCount": 3,
       "viennaCount": 0,
-      "foodDrinkCount": 5,
-      "promoCount": 3,
+      "foodDrinkCount": 3,
+      "promoCount": 2,
       "missingUrlCount": 0,
       "sampleTitles": [
         "Mehr Genuss. Weniger zahlen. 🍔☕ Gratisangebote & Food-Deals in Wien mit FreeFinder entdecken! ☕ : Kaffee für",
-        "Süßes oder Saures? Bei uns gab’s Döner aufs Haus. 🌯🎃 Andere reden von wilden Halloween Aktionen. Wir verteil",
-        "🍕 + 🍔 Pizza nach Wunsch (25 cm) + Crispy Chicken Burger GRATIS, ab 13,50 € 🔗 Direkt zum Deal: (Bereich „Ang"
+        "Wo isst du heute günstig? 🍝 Die besten Deals aus deiner Nähe, alle an einem Ort. 🔥 Aktueller Deal: Pizza nac",
+        "📚 Wien hat jetzt ein Manga-Café! 🇯🇵🍡 Und eine Stunde Mangas lesen inklusive Getränk gibt’s hier für nur 8"
       ],
       "lastRun": null,
       "uniqueRate": 1,
       "duplicateRate": 0,
       "fresh1dRate": 0,
-      "fresh7dRate": 0.6,
+      "fresh7dRate": 1,
       "viennaRate": 0,
       "foodDrinkRate": 1,
-      "promoRate": 0.6,
+      "promoRate": 0.7,
       "missingUrlRate": 0,
-      "averageQualityScore": 90.2,
+      "averageQualityScore": 91,
       "topCategories": [
         {
           "value": "kaffee",
-          "count": 3
+          "count": 2
         },
         {
           "value": "essen",
-          "count": 2
+          "count": 1
         }
       ],
       "topTypes": [
         {
+          "value": "bogo",
+          "count": 1
+        },
+        {
           "value": "gratis",
-          "count": 2
+          "count": 1
         },
         {
           "value": "rabatt",
-          "count": 2
-        },
-        {
-          "value": "bogo",
           "count": 1
         }
       ],
@@ -684,11 +685,11 @@
         "wenige Deals sind frischer als 1 Tag",
         "Wien-Signal ist zu schwach"
       ],
-      "healthScore": 58,
-      "missionFitScore": 52,
-      "coverageScore": 11,
-      "precisionScore": 51,
-      "sourceWeightScore": 45
+      "healthScore": 59,
+      "missionFitScore": 55,
+      "coverageScore": 10,
+      "precisionScore": 53,
+      "sourceWeightScore": 47
     },
     {
       "sourceKey": "power",
@@ -2154,27 +2155,21 @@
       "missingUrlCount": 0,
       "sampleTitles": [],
       "lastRun": {
-        "status": "completed-with-errors",
-        "startedAt": "2026-11-07T13:28:30.703Z",
-        "finishedAt": "2026-11-07T13:30:17.448Z",
-        "durationMs": 106745,
+        "status": "failed",
+        "startedAt": "2026-11-07T22:14:55.711Z",
+        "finishedAt": "2026-11-07T22:14:59.464Z",
+        "durationMs": 3753,
         "counts": {
-          "rawCandidates": 34,
+          "rawCandidates": 0,
           "normalizedCandidates": 0,
           "verifiedCandidates": 0,
           "previousDeals": 0,
           "acceptedDeals": 0,
-          "rejectedDeals": 32
+          "rejectedDeals": 0
         },
-        "rejectedByReason": {
-          "alcohol-offer": 4,
-          "missing-vienna-evidence": 1,
-          "no-concrete-offer": 24,
-          "missing-text": 1,
-          "general-recommendation": 2
-        },
+        "rejectedByReason": {},
         "errors": [
-          "#wienfoodie: Instagram scan paused: request-budget"
+          "No Graph hashtag source completed successfully; last-good output was preserved. #essenwien: Instagram scan paused: api-usage"
         ],
         "reportFile": "deal-pipeline-last-run-wien-combined.json"
       },
@@ -2190,7 +2185,7 @@
       "topCategories": [],
       "topTypes": [],
       "issues": [
-        "letzter Lauf fand Kandidaten, aber akzeptierte keinen Deal",
+        "letzter Pipeline-Lauf ist fehlgeschlagen",
         "liefert aktuell 0 Deals"
       ],
       "healthScore": 0,
