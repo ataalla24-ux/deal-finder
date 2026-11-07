@@ -1,7 +1,7 @@
 {
-  "generatedAt": "2026-11-07T07:50:56.306Z",
+  "generatedAt": "2026-11-07T08:24:38.695Z",
   "source": "instagram-graph-cross-source-verification",
-  "status": "ok",
+  "status": "degraded",
   "configured": true,
   "scannedFiles": [
     "deals-pending-church-events.json",
@@ -169,7 +169,7 @@
   },
   "candidatePosts": 11,
   "candidateAccounts": 10,
-  "skippedAccountCooldowns": 1,
+  "skippedAccountCooldowns": 0,
   "selectedAccounts": [
     {
       "username": "ikazerestaurant",
@@ -188,18 +188,23 @@
       "candidates": 1
     },
     {
-      "username": "tuchlauben.eis",
+      "username": "natascha_rapid",
       "candidates": 1
     },
     {
-      "username": "freefinder.at",
+      "username": "tuchlauben.eis",
       "candidates": 1
     }
   ],
-  "fetchedPosts": 129,
+  "fetchedPosts": 104,
   "exactMatches": 3,
   "retainedEvidencePosts": 2000,
-  "errors": [],
+  "errors": [
+    {
+      "username": "natascha_rapid",
+      "message": "Meta API 400: Invalid user id for https://graph.facebook.com/v26.0/17841438552673858?fields=business_discovery.username%28natascha_rapid%29%7Busername%2Cname%2Cmedia.limit%2825%29%7Bid%2Ccaption%2Cmedia_type%2Cpermalink%2Ctimestamp%2Clike_count%2Ccomments_count%2Cmedia_product_type%2Cmedia_url%2Cthumbnail_url%2Cchildren%7Bmedia_type%2Cmedia_url%2Cthumbnail_url%7D%7D%7D&access_token=[redacted]"
+    }
+  ],
   "accountFailures": {
     "iris.thegoodguides": {
       "count": 3,
@@ -212,9 +217,9 @@
       "cooldownUntil": "2026-10-27T20:24:42.781Z"
     },
     "natascha_rapid": {
-      "count": 1,
-      "lastAt": "2026-11-06T08:06:18.597Z",
-      "cooldownUntil": "2026-11-07T08:06:18.597Z"
+      "count": 2,
+      "lastAt": "2026-11-07T08:24:38.695Z",
+      "cooldownUntil": "2026-11-08T08:24:38.695Z"
     }
   },
   "sharedQuota": {
@@ -224,7 +229,7 @@
     "reserved": 10,
     "stopped": false,
     "reason": "",
-    "highestUsagePercent": 47,
+    "highestUsagePercent": 40,
     "waitedMs": 0,
     "pacingMs": 0,
     "retryAt": "",
