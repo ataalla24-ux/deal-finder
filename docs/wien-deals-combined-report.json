@@ -1,21 +1,21 @@
 {
-  "generatedAt": "2026-11-06T19:40:22.646Z",
+  "generatedAt": "2026-11-07T06:29:09.965Z",
   "status": "degraded",
-  "message": "1 fresh, evidence-checked Graph hashtag deal(s) found; 0 recovered from media.",
+  "message": "0 fresh, evidence-checked Graph hashtag deal(s) found; 0 recovered from media.",
   "hashtags": [
-    "wienfoodie",
-    "viennaeats",
-    "wienisst",
-    "essenwien",
-    "wienfood",
-    "viennafood",
     "viennarestaurants",
     "wienkaffee",
-    "wienergastro"
+    "wienisst",
+    "wienergastro",
+    "wienfood",
+    "wienfoodie",
+    "viennaeats",
+    "essenwien",
+    "viennafood"
   ],
-  "fetchedPosts": 46,
-  "uniquePosts": 45,
-  "totalDeals": 1,
+  "fetchedPosts": 37,
+  "uniquePosts": 37,
+  "totalDeals": 0,
   "rescueEligible": 0,
   "rescuedDeals": 0,
   "mediaEvidence": {
@@ -38,19 +38,19 @@
   "requestBudget": {
     "requests": 30,
     "maxRequests": 30,
-    "highestUsagePercent": 16,
+    "highestUsagePercent": 74,
     "stopped": true,
     "reason": "request-budget"
   },
   "budgetDeferred": true,
   "sharedQuota": {
-    "limitPerHour": 286,
+    "limitPerHour": 190,
     "usageThreshold": 95,
     "requests": 30,
     "reserved": 30,
     "stopped": false,
     "reason": "",
-    "highestUsagePercent": 16,
+    "highestUsagePercent": 74,
     "waitedMs": 0,
     "pacingMs": 0,
     "retryAt": "",
@@ -60,34 +60,34 @@
   },
   "sources": [
     {
-      "hashtag": "wienfoodie",
+      "hashtag": "viennarestaurants",
+      "status": "ok",
+      "coverage": {
+        "pages": 3,
+        "uniquePosts": 10,
+        "newPosts": 3,
+        "stopReason": "exhausted",
+        "incomplete": false,
+        "resumed": false
+      },
+      "fetched": 10,
+      "accepted": 0,
+      "mediaFieldMode": "full-media-with-owner",
+      "mediaLimit": 25
+    },
+    {
+      "hashtag": "wienkaffee",
       "status": "ok",
       "coverage": {
         "pages": 1,
-        "uniquePosts": 2,
+        "uniquePosts": 0,
         "newPosts": 0,
         "stopReason": "exhausted",
         "incomplete": false,
         "resumed": false
       },
-      "fetched": 2,
+      "fetched": 0,
       "accepted": 0,
-      "mediaFieldMode": "basic",
-      "mediaLimit": 25
-    },
-    {
-      "hashtag": "viennaeats",
-      "status": "ok",
-      "coverage": {
-        "pages": 3,
-        "uniquePosts": 15,
-        "newPosts": 11,
-        "stopReason": "page-limit",
-        "incomplete": true,
-        "resumed": false
-      },
-      "fetched": 15,
-      "accepted": 1,
       "mediaFieldMode": "full-media-with-owner",
       "mediaLimit": 25
     },
@@ -97,7 +97,7 @@
       "coverage": {
         "pages": 3,
         "uniquePosts": 9,
-        "newPosts": 7,
+        "newPosts": 0,
         "stopReason": "exhausted",
         "incomplete": false,
         "resumed": true
@@ -108,39 +108,55 @@
       "mediaLimit": 25
     },
     {
-      "hashtag": "essenwien",
+      "hashtag": "wienergastro",
       "status": "ok",
       "coverage": {
         "pages": 1,
-        "uniquePosts": 2,
-        "newPosts": 1,
+        "uniquePosts": 0,
+        "newPosts": 0,
         "stopReason": "exhausted",
         "incomplete": false,
         "resumed": false
       },
-      "fetched": 2,
+      "fetched": 0,
       "accepted": 0,
-      "mediaFieldMode": "basic",
+      "mediaFieldMode": "full-media-with-owner",
       "mediaLimit": 25
     },
     {
       "hashtag": "wienfood",
       "status": "ok",
       "coverage": {
-        "pages": 2,
-        "uniquePosts": 18,
-        "newPosts": 3,
-        "stopReason": "exhausted",
-        "incomplete": false,
-        "resumed": true
+        "pages": 3,
+        "uniquePosts": 17,
+        "newPosts": 1,
+        "stopReason": "page-limit",
+        "incomplete": true,
+        "resumed": false
       },
-      "fetched": 18,
+      "fetched": 17,
       "accepted": 0,
       "mediaFieldMode": "full-media-with-owner",
       "mediaLimit": 25
     },
     {
-      "hashtag": "viennafood",
+      "hashtag": "wienfoodie",
+      "status": "ok",
+      "coverage": {
+        "pages": 1,
+        "uniquePosts": 1,
+        "newPosts": 0,
+        "stopReason": "exhausted",
+        "incomplete": false,
+        "resumed": false
+      },
+      "fetched": 1,
+      "accepted": 0,
+      "mediaFieldMode": "basic",
+      "mediaLimit": 25
+    },
+    {
+      "hashtag": "viennaeats",
       "status": "deferred",
       "fetched": 0,
       "accepted": 0,
@@ -148,13 +164,97 @@
     }
   ],
   "rejectionReasons": {
-    "alcohol-offer": 2,
-    "no-concrete-offer": 37,
-    "excluded-promotion-type": 2,
-    "general-recommendation": 2,
-    "missing-vienna-evidence": 1
+    "no-concrete-offer": 28,
+    "alcohol-offer": 4,
+    "general-recommendation": 3,
+    "missing-vienna-evidence": 1,
+    "missing-text": 1
   },
   "candidateAudit": [
+    {
+      "id": "17902344591387834",
+      "status": "rejected",
+      "url": "https://www.instagram.com/reel/DfbY9WxPEA8/",
+      "title": "#hotelsacher #restaurantrotebar #redroom #vienna #wienfood",
+      "text": "#hotelsacher #restaurantrotebar #redroom #vienna #wienfood",
+      "ownerUsername": "",
+      "ownerRole": "",
+      "scoutUsername": "",
+      "merchantUsername": "",
+      "pubDate": "2026-11-07T05:09:53+0000",
+      "rejectionReason": "missing-text",
+      "qualityScore": 0,
+      "viennaVerified": false,
+      "mediaEvidence": {
+        "analyzedAt": "",
+        "ocrText": "",
+        "assetCount": 0,
+        "imageCount": 0,
+        "videoFrameCount": 0,
+        "downloadRetries": 0,
+        "errors": [],
+        "ai": null
+      },
+      "hashtags": [
+        "wienfood"
+      ]
+    },
+    {
+      "id": "18141656329536565",
+      "status": "rejected",
+      "url": "https://www.instagram.com/p/DfajH86jX3m/",
+      "title": "un poco loco #vienna #viennaspots #wien #viennarestaurants",
+      "text": "un poco loco #vienna #viennaspots #wien #viennarestaurants",
+      "ownerUsername": "",
+      "ownerRole": "",
+      "scoutUsername": "",
+      "merchantUsername": "",
+      "pubDate": "2026-11-06T21:15:05+0000",
+      "rejectionReason": "no-concrete-offer",
+      "qualityScore": 0,
+      "viennaVerified": false,
+      "mediaEvidence": {
+        "analyzedAt": "",
+        "ocrText": "",
+        "assetCount": 0,
+        "imageCount": 0,
+        "videoFrameCount": 0,
+        "downloadRetries": 0,
+        "errors": [],
+        "ai": null
+      },
+      "hashtags": [
+        "viennarestaurants"
+      ]
+    },
+    {
+      "id": "18358673677174553",
+      "status": "rejected",
+      "url": "https://www.instagram.com/reel/DfaStmZofXp/",
+      "title": "And proud of it 💖 #laspigavienna #vienna1070 #viennacalling #wienbusiness #viennarestaurants",
+      "text": "And proud of it 💖 #laspigavienna #vienna1070 #viennacalling #wienbusiness #viennarestaurants",
+      "ownerUsername": "",
+      "ownerRole": "",
+      "scoutUsername": "",
+      "merchantUsername": "",
+      "pubDate": "2026-11-06T18:53:38+0000",
+      "rejectionReason": "no-concrete-offer",
+      "qualityScore": 0,
+      "viennaVerified": false,
+      "mediaEvidence": {
+        "analyzedAt": "",
+        "ocrText": "",
+        "assetCount": 0,
+        "imageCount": 0,
+        "videoFrameCount": 0,
+        "downloadRetries": 0,
+        "errors": [],
+        "ai": null
+      },
+      "hashtags": [
+        "viennarestaurants"
+      ]
+    },
     {
       "id": "18454576597122207",
       "status": "rejected",
@@ -184,34 +284,6 @@
       ]
     },
     {
-      "id": "17921881215240830",
-      "status": "rejected",
-      "url": "https://www.instagram.com/reel/DfaQSo3orV2/",
-      "title": "POV: Dein Tisch bei Paolo ist reserviert. 🍷 Seit 20 Jahren mitten in Wien: italienische und dalmatinische Küche im 3. Bezirk. Frischer Fisch und Fleisch vom Holzkohlegrill, hausge",
-      "text": "POV: Dein Tisch bei Paolo ist reserviert. 🍷 Seit 20 Jahren mitten in Wien: italienische und dalmatinische Küche im 3. Bezirk. Frischer Fisch und Fleisch vom Holzkohlegrill, hausgemachte Pasta, Weine aus Italien, Kroatien und Österreich – und eine Atmosphäre, in der man gerne länger bleibt. Für ein Dinner zu zweit, einen Abend mit Freunden oder eure nächste Feier. Schick das der Person, mit der du hier essen gehen würdest. 👀 Tisch reservieren: 📞 +43 1 713 42 73 📍 Paulusgasse 8, 1030 Wien #restaurantwien #italienischesrestaurantwien #wien1030 #essenwien",
-      "ownerUsername": "",
-      "ownerRole": "",
-      "scoutUsername": "",
-      "merchantUsername": "",
-      "pubDate": "2026-11-06T18:31:02+0000",
-      "rejectionReason": "alcohol-offer",
-      "qualityScore": 0,
-      "viennaVerified": false,
-      "mediaEvidence": {
-        "analyzedAt": "",
-        "ocrText": "",
-        "assetCount": 0,
-        "imageCount": 0,
-        "videoFrameCount": 0,
-        "downloadRetries": 0,
-        "errors": [],
-        "ai": null
-      },
-      "hashtags": [
-        "essenwien"
-      ]
-    },
-    {
       "id": "18487899490116653",
       "status": "rejected",
       "url": "https://www.instagram.com/reel/DfaPJRVMf7M/",
@@ -237,6 +309,34 @@
       },
       "hashtags": [
         "wienisst"
+      ]
+    },
+    {
+      "id": "18117878948026532",
+      "status": "rejected",
+      "url": "https://www.instagram.com/reel/DfaOQJyqh9m/",
+      "title": "A little taste of old Vienna… 🤎 Did you know that one of Vienna’s most iconic culinary spots dates back to 1618? Welcome to Zum Schwarzen Kameel — a Viennese institution in the he",
+      "text": "A little taste of old Vienna… 🤎 Did you know that one of Vienna’s most iconic culinary spots dates back to 1618? Welcome to Zum Schwarzen Kameel — a Viennese institution in the heart of the 1st district, where history, delicious food and timeless elegance come together. What makes this place special? ✨ Over 400 years of history 🥪 Legendary open sandwiches and delicacies 🍷 A charming bar, café and brasserie 🏛️ Beautiful historic interiors with Art Nouveau details Whether you stop by for a quick bite, a glass of wine or a proper Viennese dining experience, this is one address worth knowing. 📍 Zum Schwarzen Kameel | zumschwarzenkameel Bognergasse 5, 1010 Vienna Save this spot for your next visit to Vienna and follow miracles_alice for more hidden gems, cafés and beautiful places around the city 🤍 #Vienna #ViennaFood #ViennaRestaurants #ViennaGuide #ViennaAustria ViennaHiddenGems FoodieVienna VisitVienna",
+      "ownerUsername": "",
+      "ownerRole": "",
+      "scoutUsername": "",
+      "merchantUsername": "",
+      "pubDate": "2026-11-06T18:14:09+0000",
+      "rejectionReason": "alcohol-offer",
+      "qualityScore": 0,
+      "viennaVerified": false,
+      "mediaEvidence": {
+        "analyzedAt": "",
+        "ocrText": "",
+        "assetCount": 0,
+        "imageCount": 0,
+        "videoFrameCount": 0,
+        "downloadRetries": 0,
+        "errors": [],
+        "ai": null
+      },
+      "hashtags": [
+        "viennarestaurants"
       ]
     },
     {
@@ -324,6 +424,34 @@
       ]
     },
     {
+      "id": "17923928037448903",
+      "status": "rejected",
+      "url": "https://www.instagram.com/reel/DfaIsQ5tPFX/",
+      "title": "Best ramen in Vienna? 🍜👀 We’ve tried plenty of ramen spots, but Mochi Ramen Bar is still one of our absolute favorites! ❤️ There’s almost always a queue, but trust us, it’s worth",
+      "text": "Best ramen in Vienna? 🍜👀 We’ve tried plenty of ramen spots, but Mochi Ramen Bar is still one of our absolute favorites! ❤️ There’s almost always a queue, but trust us, it’s worth the wait. And usually, you won’t have to wait longer than 20–30 minutes! Our favorites: 🍜 Spicy Tantan Ramen €17,90 🍜 Wonton Ramen €17,70 🍤 Crispy calamari with Ikapiri sauce €9,90 📍 Mochi Ramen Bar Vorgartenmarkt, 1020 Vienna Save this spot and try this ramen! 🫶 #vienna #wien #viennafood #ramen #viennarestaurants",
+      "ownerUsername": "",
+      "ownerRole": "",
+      "scoutUsername": "",
+      "merchantUsername": "",
+      "pubDate": "2026-11-06T17:26:57+0000",
+      "rejectionReason": "general-recommendation",
+      "qualityScore": 0,
+      "viennaVerified": false,
+      "mediaEvidence": {
+        "analyzedAt": "",
+        "ocrText": "",
+        "assetCount": 0,
+        "imageCount": 0,
+        "videoFrameCount": 0,
+        "downloadRetries": 0,
+        "errors": [],
+        "ai": null
+      },
+      "hashtags": [
+        "viennarestaurants"
+      ]
+    },
+    {
       "id": "18066218723637493",
       "status": "rejected",
       "url": "https://www.instagram.com/reel/DfaGHR1kr5s/",
@@ -349,6 +477,62 @@
       },
       "hashtags": [
         "wienfood"
+      ]
+    },
+    {
+      "id": "18143330599723730",
+      "status": "rejected",
+      "url": "https://www.instagram.com/p/DfaGLh1F3RH/",
+      "title": "Don’t miss our Pad Thai with lobster tail and salmon caviar, alongside our incredible skewers finished with fermented egg yolk. Bold flavours, delicate textures, and a true highlig",
+      "text": "Don’t miss our Pad Thai with lobster tail and salmon caviar, alongside our incredible skewers finished with fermented egg yolk. Bold flavours, delicate textures, and a true highlight of the DARA experience. #DARACuisine #ThaiCuisine #LuxuryDining #FoodieVienna #TasteOfThailand #ViennaRestaurants #DaraVienna",
+      "ownerUsername": "",
+      "ownerRole": "",
+      "scoutUsername": "",
+      "merchantUsername": "",
+      "pubDate": "2026-11-06T17:02:15+0000",
+      "rejectionReason": "no-concrete-offer",
+      "qualityScore": 0,
+      "viennaVerified": false,
+      "mediaEvidence": {
+        "analyzedAt": "",
+        "ocrText": "",
+        "assetCount": 0,
+        "imageCount": 0,
+        "videoFrameCount": 0,
+        "downloadRetries": 0,
+        "errors": [],
+        "ai": null
+      },
+      "hashtags": [
+        "viennarestaurants"
+      ]
+    },
+    {
+      "id": "17910430146583464",
+      "status": "rejected",
+      "url": "https://www.instagram.com/reel/DfaGD78EWwT/",
+      "title": "From morning coffee to evening cocktails, Theo's welcomes you throughout the day with effortless elegance, exceptional flavours and an atmosphere made for meaningful moments. This ",
+      "text": "From morning coffee to evening cocktails, Theo's welcomes you throughout the day with effortless elegance, exceptional flavours and an atmosphere made for meaningful moments. This is where Vienna gathers. Discover Theo's Lounge & Bar and plan your next visit. #TheosLoungeAndBar #TheSocialHeartOfThePalais #ViennaLifestyle #LuxuryTravel #ViennaRestaurants #ViennaBars #FoodAndDrink #VisitVienna #GatherAtThePalais #AnantaraPalaisHansenVienna",
+      "ownerUsername": "",
+      "ownerRole": "",
+      "scoutUsername": "",
+      "merchantUsername": "",
+      "pubDate": "2026-11-06T17:01:35+0000",
+      "rejectionReason": "alcohol-offer",
+      "qualityScore": 0,
+      "viennaVerified": false,
+      "mediaEvidence": {
+        "analyzedAt": "",
+        "ocrText": "",
+        "assetCount": 0,
+        "imageCount": 0,
+        "videoFrameCount": 0,
+        "downloadRetries": 0,
+        "errors": [],
+        "ai": null
+      },
+      "hashtags": [
+        "viennarestaurants"
       ]
     },
     {
@@ -432,7 +616,7 @@
         "ai": null
       },
       "hashtags": [
-        "viennaeats"
+        "viennarestaurants"
       ]
     },
     {
@@ -464,6 +648,34 @@
       ]
     },
     {
+      "id": "18119156363109586",
+      "status": "rejected",
+      "url": "https://www.instagram.com/reel/DfZ4OSiOC-p/",
+      "title": "🍽️ VIENNA’S NEW MEDITERRANEAN HOTSPOT – WITH AN OTTOLENGHI CONNECTION! 👀✨ Looking for one of Vienna’s coolest new restaurants? Meet BOCA Vienna, a stylish Mediterranean restauran",
+      "text": "🍽️ VIENNA’S NEW MEDITERRANEAN HOTSPOT – WITH AN OTTOLENGHI CONNECTION! 👀✨ Looking for one of Vienna’s coolest new restaurants? Meet BOCA Vienna, a stylish Mediterranean restaurant inside the boutique hotel The Companion, just steps from Westbahnhof! The kitchen is led by New Zealand-born chef Lauryn Therin, who previously worked with celebrity chef Yotam Ottolenghi in London! 👩‍🍳 Expect creative Mediterranean sharing plates inspired by Spain, France, Italy and the Levant – combining bold flavors, seasonal ingredients and a modern twist. And BOCA has already earned 1 Gault&Millau toque! 🏆 ✨ WHAT MAKES BOCA SPECIAL: 🍽️ Creative Mediterranean sharing plates 👩‍🍳 Former Ottolenghi chef Lauryn Therin 🐙 Aubergine “Octopus” – crispy eggplant with lemon yoghurt & mojo rojo 🥩 Slow-cooked beef short ribs with brown butter cauliflower purée 🥖 BOCA Pintxo with mussel escabeche & ajo blanco 🏆 1 Gault&Millau toque (12/20 points) 🪩 Stylish 1970s-inspired interior with historic Viennese details 🌿 Beautiful courtyard for outdoor dining 🍸 Calypso cocktail bar right next door 🥐 BONUS: SATURDAY BRUNCH CLUB! Every Saturday from 12–3 PM, BOCA serves an all-you-can-eat Mediterranean brunch buffet with unlimited hot beverages for €49 per person. 📍 BOCA – THE COMPANION VIENNA Mariahilfer Straße 127a, 1150 Vienna, Austria 💡 Reservations recommended. ➕ Follow us for Vienna’s coolest new restaurants, hidden gems & unforgettable experiences! #TasteAndTheCity #BocaVienna #ViennaRestaurants #ViennaFoodGuide #thingstodoinvienna",
+      "ownerUsername": "",
+      "ownerRole": "",
+      "scoutUsername": "",
+      "merchantUsername": "",
+      "pubDate": "2026-11-06T15:01:38+0000",
+      "rejectionReason": "alcohol-offer",
+      "qualityScore": 0,
+      "viennaVerified": false,
+      "mediaEvidence": {
+        "analyzedAt": "",
+        "ocrText": "",
+        "assetCount": 0,
+        "imageCount": 0,
+        "videoFrameCount": 0,
+        "downloadRetries": 0,
+        "errors": [],
+        "ai": null
+      },
+      "hashtags": [
+        "viennarestaurants"
+      ]
+    },
+    {
       "id": "17909811312580177",
       "status": "rejected",
       "url": "https://www.instagram.com/p/DfZ0x0lDzfo/",
@@ -488,8 +700,7 @@
         "ai": null
       },
       "hashtags": [
-        "wienisst",
-        "essenwien"
+        "wienisst"
       ]
     },
     {
@@ -605,90 +816,6 @@
       ]
     },
     {
-      "id": "17924015577450019",
-      "status": "rejected",
-      "url": "https://www.instagram.com/p/DfZufVkonVs/",
-      "title": "GIVEAWAY TIME! 🐽 Brunch tastes better with friends. And this one’s on us! We’re giving away a SCHWEIN brunch for you + 3 of your favorite people. How to enter: 🐽 Follow schwein_w",
-      "text": "GIVEAWAY TIME! 🐽 Brunch tastes better with friends. And this one’s on us! We’re giving away a SCHWEIN brunch for you + 3 of your favorite people. How to enter: 🐽 Follow schwein_wien 🐽 Like this post 🐽 Tag the 3 people you’d bring 🤍 Share this post to your story for an extra chance to win! Good luck! 🤍 - #giveaway #gewinnspiel #wien #viennaeats #brunchwien This giveaway is not affiliated with, sponsored or endorsed by Instagram.",
-      "ownerUsername": "",
-      "ownerRole": "",
-      "scoutUsername": "",
-      "merchantUsername": "",
-      "pubDate": "2026-11-06T13:37:34+0000",
-      "rejectionReason": "excluded-promotion-type",
-      "qualityScore": 0,
-      "viennaVerified": false,
-      "mediaEvidence": {
-        "analyzedAt": "",
-        "ocrText": "",
-        "assetCount": 0,
-        "imageCount": 0,
-        "videoFrameCount": 0,
-        "downloadRetries": 0,
-        "errors": [],
-        "ai": null
-      },
-      "hashtags": [
-        "viennaeats"
-      ]
-    },
-    {
-      "id": "18021571814940959",
-      "status": "collector-accepted",
-      "url": "https://www.instagram.com/p/DfZsOuVDTn0/",
-      "title": "Mittagsteller um 10,80 € von Montag bis Freitag",
-      "text": "Von Montag bis Freitag servieren wir Ihnen im Restaurant ROTH unseren abwechslungsreichen Mittagsteller für nur €10,80 – frisch, schnell und vor allem köstlich🍴 👉 Täglich von 11:30 bis 15:00 Uhr – ideal für Ihre Mittagspause Kommen Sie vorbei, gönnen Sie sich Genuss zum kleinen Preis und lassen Sie sich von uns verwöhnen❤️ Restaurant ROTH 📍Währinger Straße 1, 1090 Wien – wir freuen uns auf Ihren Besuch. Alle Speisen auch zum Mitnehmen ——————————————— From Monday to Friday we serve you our varied lunch special at Restaurant ROTH for only €10.80 – fresh, fast and above all delicious🍴 👉 Daily from 11:30 am to 3:00 pm – perfect for your lunch break Stop by, enjoy great taste at a small price and let us spoil you ❤️ Restaurant ROTH 📍Währinger Straße 1, 1090 Vienna – we look forward to welcoming you All dishes also for take-away! #LunchBreak #Lunchtime #RestaurantROTH #LunchSpecial #ViennaEats FoodMoments",
-      "ownerUsername": "",
-      "ownerRole": "unknown",
-      "scoutUsername": "",
-      "merchantUsername": "restaurant",
-      "pubDate": "2026-11-06T13:15:01+0000",
-      "rejectionReason": "",
-      "qualityScore": 88,
-      "viennaVerified": true,
-      "mediaEvidence": {
-        "analyzedAt": "",
-        "ocrText": "",
-        "assetCount": 0,
-        "imageCount": 0,
-        "videoFrameCount": 0,
-        "downloadRetries": 0,
-        "errors": [],
-        "ai": null
-      },
-      "hashtags": [
-        "viennaeats"
-      ]
-    },
-    {
-      "id": "18097555970555298",
-      "status": "rejected",
-      "url": "https://www.instagram.com/p/DfZqfCckTIC/",
-      "title": "Warning: This burger might become your new obsession. 👀🍔 Juicy, full of flavour and seriously hard to resist. Our Mae Smash Burger at Salzgries is a must-try! Have you tried it y",
-      "text": "Warning: This burger might become your new obsession. 👀🍔 Juicy, full of flavour and seriously hard to resist. Our Mae Smash Burger at Salzgries is a must-try! Have you tried it yet? Photos: wynnflorante #smashburger #viennaeats #salzgries #viennafood #burgerlove",
-      "ownerUsername": "",
-      "ownerRole": "",
-      "scoutUsername": "",
-      "merchantUsername": "",
-      "pubDate": "2026-11-06T13:00:10+0000",
-      "rejectionReason": "no-concrete-offer",
-      "qualityScore": 0,
-      "viennaVerified": false,
-      "mediaEvidence": {
-        "analyzedAt": "",
-        "ocrText": "",
-        "assetCount": 0,
-        "imageCount": 0,
-        "videoFrameCount": 0,
-        "downloadRetries": 0,
-        "errors": [],
-        "ai": null
-      },
-      "hashtags": [
-        "viennaeats"
-      ]
-    },
-    {
       "id": "18352665841266537",
       "status": "rejected",
       "url": "https://www.instagram.com/p/DfZopISCm_U/",
@@ -745,34 +872,6 @@
       ]
     },
     {
-      "id": "18169131907466008",
-      "status": "rejected",
-      "url": "https://www.instagram.com/reel/DfZkdintgUr/",
-      "title": "Seafood boil in Wien und dann noch zu diesen Preisen?! 🦞 shut up & take my money 💸 Die Meeresfrüchte sind hier wirklich ausgezeichnet, eine Portion gibts ab 35€ 🦐 📍lebaron.wien",
-      "text": "Seafood boil in Wien und dann noch zu diesen Preisen?! 🦞 shut up & take my money 💸 Die Meeresfrüchte sind hier wirklich ausgezeichnet, eine Portion gibts ab 35€ 🦐 📍lebaron.wien - Stockholmer Platz 16, 1100 Wien #seafoodboil #seafood #viennaeats #lobster #wien",
-      "ownerUsername": "",
-      "ownerRole": "",
-      "scoutUsername": "",
-      "merchantUsername": "",
-      "pubDate": "2026-11-06T12:10:36+0000",
-      "rejectionReason": "no-concrete-offer",
-      "qualityScore": 0,
-      "viennaVerified": false,
-      "mediaEvidence": {
-        "analyzedAt": "",
-        "ocrText": "",
-        "assetCount": 0,
-        "imageCount": 0,
-        "videoFrameCount": 0,
-        "downloadRetries": 0,
-        "errors": [],
-        "ai": null
-      },
-      "hashtags": [
-        "viennaeats"
-      ]
-    },
-    {
       "id": "18643315678049169",
       "status": "rejected",
       "url": "https://www.instagram.com/reel/DfZgzXIstZj/",
@@ -798,34 +897,6 @@
       },
       "hashtags": [
         "wienfood"
-      ]
-    },
-    {
-      "id": "17972204690960556",
-      "status": "rejected",
-      "url": "https://www.instagram.com/reel/DfZgU98j76l/",
-      "title": "in welcher straße eröffnet Randale 1070? guess it, win it! 🍕 4 pizzen + 4 drinks 💬 straße in die kommentare, & die Personen die mitkommen bis 13.11, 23:59 uhr gewinner wird per d",
-      "text": "in welcher straße eröffnet Randale 1070? guess it, win it! 🍕 4 pizzen + 4 drinks 💬 straße in die kommentare, & die Personen die mitkommen bis 13.11, 23:59 uhr gewinner wird per dm nur von pizzarandale benachrichtigt. einlösung vor ort. das gewinnspiel steht in keiner verbindung zu instagram. keine barablöse möglich. ... #pizzarandale #giveaway #randale1070 #pizzavienna #viennaeats",
-      "ownerUsername": "",
-      "ownerRole": "",
-      "scoutUsername": "",
-      "merchantUsername": "",
-      "pubDate": "2026-11-06T11:31:49+0000",
-      "rejectionReason": "excluded-promotion-type",
-      "qualityScore": 0,
-      "viennaVerified": false,
-      "mediaEvidence": {
-        "analyzedAt": "",
-        "ocrText": "",
-        "assetCount": 0,
-        "imageCount": 0,
-        "videoFrameCount": 0,
-        "downloadRetries": 0,
-        "errors": [],
-        "ai": null
-      },
-      "hashtags": [
-        "viennaeats"
       ]
     },
     {
@@ -857,34 +928,6 @@
       ]
     },
     {
-      "id": "17955413076269437",
-      "status": "rejected",
-      "url": "https://www.instagram.com/reel/DfZcwNSDnlI/",
-      "title": "Good food, good mood. 🥢🙂🙃 Von herzhaften Ramen 🍜 bis hin zu leckerem Bubbletea 🧋- bei uns findest du die passende Stärkung für jede Gelegenheit. 😍 #RamenRedPeppery #Bubbletea",
-      "text": "Good food, good mood. 🥢🙂🙃 Von herzhaften Ramen 🍜 bis hin zu leckerem Bubbletea 🧋- bei uns findest du die passende Stärkung für jede Gelegenheit. 😍 #RamenRedPeppery #Bubbletea #RamenWien #viennaeats #asianfood",
-      "ownerUsername": "",
-      "ownerRole": "",
-      "scoutUsername": "",
-      "merchantUsername": "",
-      "pubDate": "2026-11-06T11:02:05+0000",
-      "rejectionReason": "no-concrete-offer",
-      "qualityScore": 0,
-      "viennaVerified": false,
-      "mediaEvidence": {
-        "analyzedAt": "",
-        "ocrText": "",
-        "assetCount": 0,
-        "imageCount": 0,
-        "videoFrameCount": 0,
-        "downloadRetries": 0,
-        "errors": [],
-        "ai": null
-      },
-      "hashtags": [
-        "viennaeats"
-      ]
-    },
-    {
       "id": "17944216434379430",
       "status": "rejected",
       "url": "https://www.instagram.com/reel/DfZb9aYqG20/",
@@ -913,6 +956,34 @@
       ]
     },
     {
+      "id": "18116055995134997",
+      "status": "rejected",
+      "url": "https://www.instagram.com/p/DfZbEgJl53i/",
+      "title": "Dining is always better with company 🥂 From fresh oysters to exquisite dishes and perfectly poured drinks, CHEZ BERNARD sets the scene for memorable evenings, good conversations a",
+      "text": "Dining is always better with company 🥂 From fresh oysters to exquisite dishes and perfectly poured drinks, CHEZ BERNARD sets the scene for memorable evenings, good conversations and a touch of indulgence.⁠ ⁠ Gather your favourite people and let the evening unfold!⁠ ⁠ #chezbernardvienna #finedining #viennarestaurants ⁠ ⁠ (c) hebn",
+      "ownerUsername": "",
+      "ownerRole": "",
+      "scoutUsername": "",
+      "merchantUsername": "",
+      "pubDate": "2026-11-06T10:45:51+0000",
+      "rejectionReason": "general-recommendation",
+      "qualityScore": 0,
+      "viennaVerified": false,
+      "mediaEvidence": {
+        "analyzedAt": "",
+        "ocrText": "",
+        "assetCount": 0,
+        "imageCount": 0,
+        "videoFrameCount": 0,
+        "downloadRetries": 0,
+        "errors": [],
+        "ai": null
+      },
+      "hashtags": [
+        "viennarestaurants"
+      ]
+    },
+    {
       "id": "17898356247414540",
       "status": "rejected",
       "url": "https://www.instagram.com/p/DfZZV-SFecC/",
@@ -938,62 +1009,6 @@
       },
       "hashtags": [
         "wienisst"
-      ]
-    },
-    {
-      "id": "18027515441868513",
-      "status": "rejected",
-      "url": "https://www.instagram.com/reel/DfZW2FcRM8Z/",
-      "title": "SCHNITZEL MEETS CURRY 🍛 📍MILO SUN ASIAN KITCHEN | Barbenbergerstraße 5 This Weeks Special: Chicken Katsu Chicken Schnitzel on saisonal veggies with yellow curry 🍛 Come visit us!",
-      "text": "SCHNITZEL MEETS CURRY 🍛 📍MILO SUN ASIAN KITCHEN | Barbenbergerstraße 5 This Weeks Special: Chicken Katsu Chicken Schnitzel on saisonal veggies with yellow curry 🍛 Come visit us!! #asianfusion #viennaeats #katsu #katsucurry #vienna",
-      "ownerUsername": "",
-      "ownerRole": "",
-      "scoutUsername": "",
-      "merchantUsername": "",
-      "pubDate": "2026-11-06T10:11:25+0000",
-      "rejectionReason": "no-concrete-offer",
-      "qualityScore": 0,
-      "viennaVerified": false,
-      "mediaEvidence": {
-        "analyzedAt": "",
-        "ocrText": "",
-        "assetCount": 0,
-        "imageCount": 0,
-        "videoFrameCount": 0,
-        "downloadRetries": 0,
-        "errors": [],
-        "ai": null
-      },
-      "hashtags": [
-        "viennaeats"
-      ]
-    },
-    {
-      "id": "17989646609881616",
-      "status": "rejected",
-      "url": "https://www.instagram.com/p/DfZVbitITfl/",
-      "title": "Thin, golden and shatteringly crisp: this is Vienna's most famous plate 🇦🇹🍋 Wiener Schnitzel is a veal escalope pounded thin, breaded and fried until it puffs and crackles. A Nu",
-      "text": "Thin, golden and shatteringly crisp: this is Vienna's most famous plate 🇦🇹🍋 Wiener Schnitzel is a veal escalope pounded thin, breaded and fried until it puffs and crackles. A Nuremberg cookbook of 1691 already mentions breaded meat, and the Viennese name was locked in by the 1800s. Proper Wiener Schnitzel is always veal; pork or chicken versions are delicious but go by other names. It's traditionally served with a lemon wedge, and sometimes (as here) with anchovy and capers in the Holstein style. 🍴 What's in it: veal escalopes, flour, egg, fine breadcrumbs and plenty of clarified butter or lard for frying. Serve with lemon, parsley potatoes or potato salad, and a spoon of lingonberry jam if you like. 💾 Save this for your next schnitzel night and tag the friend who always steals the crispiest corner. Follow for a new dish from somewhere in the world every day, and find The Food Bible at the link in bio. 📷 \"12.DineOut.CafeBerlin.NE.WDC.9mar06\" by Elvert Barnes, CC BY 2.0, via Wikimedia Commons (flickr.com/photos/elvertbarnes). Cropped, with text added. #WienerSchnitzel #Schnitzel #AustrianFood #Vienna #Wien #Austria #VienneseFood #Veal #ComfortFood #EuropeanFood #FoodPhotography #TheFoodBible #WorldsGreatestFoods #FoodHistory #WorldCuisine #FoodieAustralia #ViennaEats #SydneyEats",
-      "ownerUsername": "",
-      "ownerRole": "",
-      "scoutUsername": "",
-      "merchantUsername": "",
-      "pubDate": "2026-11-06T09:56:18+0000",
-      "rejectionReason": "general-recommendation",
-      "qualityScore": 0,
-      "viennaVerified": false,
-      "mediaEvidence": {
-        "analyzedAt": "",
-        "ocrText": "",
-        "assetCount": 0,
-        "imageCount": 0,
-        "videoFrameCount": 0,
-        "downloadRetries": 0,
-        "errors": [],
-        "ai": null
-      },
-      "hashtags": [
-        "viennaeats"
       ]
     },
     {
@@ -1053,16 +1068,16 @@
       ]
     },
     {
-      "id": "18099824714536174",
+      "id": "18060054125803215",
       "status": "rejected",
-      "url": "https://www.instagram.com/p/DfZRod0khJz/",
-      "title": "🥢 Mittagshunger? Dann ab zu NARA! 😋 Frisch zubereitet, köstlich angerichtet und einfach zum Genießen! 🍱🥗 Gönnt euch eine feine Mittagspause und lasst euch von unserem Mittagsme",
-      "text": "🥢 Mittagshunger? Dann ab zu NARA! 😋 Frisch zubereitet, köstlich angerichtet und einfach zum Genießen! 🍱🥗 Gönnt euch eine feine Mittagspause und lasst euch von unserem Mittagsmenü verwöhnen. ❤️ Wir freuen uns auf euch! 🥢 Feeling peckish? Lunch at NARA it is! 😋 Freshly prepared, beautifully presented and absolutely delicious! 🍱🥗 Take a proper lunch break and treat yourself to something tasty from our lunch menu. ❤️ We’d love to see you! #NaraVienna #LunchTime #LunchBreak #AsianFood #ViennaEats",
+      "url": "https://www.instagram.com/reel/DfZPDGZub7T/",
+      "title": "New on the menu and made for colder days. Our mushroom & braised pork bao is soft, warm, savoury, and very easy to order “just one more” of. 📍Red Bowl · Vienna #ViennaFood #WienEs",
+      "text": "New on the menu and made for colder days. Our mushroom & braised pork bao is soft, warm, savoury, and very easy to order “just one more” of. 📍Red Bowl · Vienna #ViennaFood #WienEssen #Bao #ChineseFoodVienna #ViennaRestaurants",
       "ownerUsername": "",
       "ownerRole": "",
       "scoutUsername": "",
       "merchantUsername": "",
-      "pubDate": "2026-11-06T09:23:01+0000",
+      "pubDate": "2026-11-06T09:01:26+0000",
       "rejectionReason": "no-concrete-offer",
       "qualityScore": 0,
       "viennaVerified": false,
@@ -1077,7 +1092,7 @@
         "ai": null
       },
       "hashtags": [
-        "viennaeats"
+        "viennarestaurants"
       ]
     },
     {
@@ -1106,34 +1121,6 @@
       },
       "hashtags": [
         "wienfood"
-      ]
-    },
-    {
-      "id": "18105724838010695",
-      "status": "rejected",
-      "url": "https://www.instagram.com/reel/DfZFpsTRpoF/",
-      "title": "Consider this your official invitation 😌⁠ Tag the person who should invite you for a Pistachio TIRAMI.⁠ ⁠ 📍 ALTO Pop-Up · Hoher Markt 4, 1010 Vienna ⁠ ⁠ #pistachio #vienna #tiram",
-      "text": "Consider this your official invitation 😌⁠ Tag the person who should invite you for a Pistachio TIRAMI.⁠ ⁠ 📍 ALTO Pop-Up · Hoher Markt 4, 1010 Vienna ⁠ ⁠ #pistachio #vienna #tiramisu #wien #viennaeats",
-      "ownerUsername": "",
-      "ownerRole": "",
-      "scoutUsername": "",
-      "merchantUsername": "",
-      "pubDate": "2026-11-06T07:38:34+0000",
-      "rejectionReason": "no-concrete-offer",
-      "qualityScore": 0,
-      "viennaVerified": false,
-      "mediaEvidence": {
-        "analyzedAt": "",
-        "ocrText": "",
-        "assetCount": 0,
-        "imageCount": 0,
-        "videoFrameCount": 0,
-        "downloadRetries": 0,
-        "errors": [],
-        "ai": null
-      },
-      "hashtags": [
-        "viennaeats"
       ]
     },
     {
@@ -1218,202 +1205,6 @@
       },
       "hashtags": [
         "wienfood"
-      ]
-    },
-    {
-      "id": "18095974901168354",
-      "status": "rejected",
-      "url": "https://www.instagram.com/reel/DfY4Rb5MjCu/",
-      "title": "Reznicek im 9. Bezirk ist eines meiner absoluten Lieblingslokale in Wien. Und gerade gibt's dort die Chimäre: ein Cordon bleu aus Ente und Hühnchen, gefüllt mit Schinken und Käse, ",
-      "text": "Reznicek im 9. Bezirk ist eines meiner absoluten Lieblingslokale in Wien. Und gerade gibt's dort die Chimäre: ein Cordon bleu aus Ente und Hühnchen, gefüllt mit Schinken und Käse, und darüber direkt am Tisch Wintertrüffel gehobelt 🔥 👉 Amuse-Bouche: knuspriger Maiscracker mit Rindertatar 👉 Eiernockerl, schlotzig, mit Trüffel 👉 Die Chimäre mit Petersilkartoffeln, Gurkensalat und grünem Salat 👉 Mohnnudeln und Vanilleeis zum Abschluss 🤤 Das sieht nicht nur illegal aus, das ist auch krank 😮‍💨 Für mich gehört der Laden auf jede Wien-Liste ganz nach oben, wenn ihr die österreichische Küche richtig kennenlernen wollt 💯 Hättet ihr euch an die Chimäre getraut? 👇 📍 Reznicek, Reznicekgasse 7, 1090 Wien Einfach lecker, ziemlich giftig 🧪 #reznicek #wienfood #cordonbleu #trüffel #einfachleckerziemlichgiftig",
-      "ownerUsername": "",
-      "ownerRole": "",
-      "scoutUsername": "",
-      "merchantUsername": "",
-      "pubDate": "2026-11-06T05:44:25+0000",
-      "rejectionReason": "no-concrete-offer",
-      "qualityScore": 0,
-      "viennaVerified": false,
-      "mediaEvidence": {
-        "analyzedAt": "",
-        "ocrText": "",
-        "assetCount": 0,
-        "imageCount": 0,
-        "videoFrameCount": 0,
-        "downloadRetries": 0,
-        "errors": [],
-        "ai": null
-      },
-      "hashtags": [
-        "wienfood"
-      ]
-    },
-    {
-      "id": "18651001912019028",
-      "status": "rejected",
-      "url": "https://www.instagram.com/reel/DfYoV5VOxM5/",
-      "title": "Breakfast fit for royalty 👸",
-      "text": "Breakfast fit for royalty 👸",
-      "ownerUsername": "",
-      "ownerRole": "",
-      "scoutUsername": "",
-      "merchantUsername": "",
-      "pubDate": "2026-11-06T03:22:39+0000",
-      "rejectionReason": "no-concrete-offer",
-      "qualityScore": 0,
-      "viennaVerified": false,
-      "mediaEvidence": {
-        "analyzedAt": "",
-        "ocrText": "",
-        "assetCount": 0,
-        "imageCount": 0,
-        "videoFrameCount": 0,
-        "downloadRetries": 0,
-        "errors": [],
-        "ai": null
-      },
-      "hashtags": [
-        "viennaeats"
-      ]
-    },
-    {
-      "id": "17966336880233499",
-      "status": "rejected",
-      "url": "https://www.instagram.com/p/DfYIQKoqGeD/",
-      "title": "Ein Geschenk, das bleibt, auch wenn die letzte Praline genossen ist. Unsere Maggiore Dosen in Bordeaux, Navy, Pastellrosa und Pastellblau sind gefüllt mit unseren feinsten Lebkuche",
-      "text": "Ein Geschenk, das bleibt, auch wenn die letzte Praline genossen ist. Unsere Maggiore Dosen in Bordeaux, Navy, Pastellrosa und Pastellblau sind gefüllt mit unseren feinsten Lebkuchen-Pralinen und tragen unser traditionelles Metzger & Söhne Wappen. Danach werden sie zum Aufbewahrungsort für Schmuck, Briefe oder kleine Schätze. Ob als Mitbringsel zum Abendessen, zum Geburtstag, als herzliches Dankeschön oder einfach so: Wählt die Farbe, die am besten passt. - A gift that stays long after the last praline. Our Maggiore tins, in Bordeaux, Navy, Pastel Pink and Pastel Blue, are filled with our finest Lebkuchen pralines and adorned with our heritage Metzger & Söhne crest. Once enjoyed, they become a keepsake for jewellery, letters or little treasures. For a dinner invitation, a birthday, a heartfelt thank-you or simply because: choose the colour that suits them best. https://metzgersoehne.com/collections/lebkuchen-dosen 📍 Herrengasse 6-8, Wien | Marktplatz 18, Perchtoldsdorf #LebkuchenPralinen #Geschenkidee #Mitbringsel #wienfoodie #igersvienna Handwerkskunst | PremiumChocolate | AustrianTradition | Heritage | Handgemacht | Metzgerlebkuchen1685 | Geschenkdose | Pralinen | Vienna travel | Vienna travel hotspots | Vienna hidden gems | Vienna | Austria | Lebkuchen",
-      "ownerUsername": "",
-      "ownerRole": "",
-      "scoutUsername": "",
-      "merchantUsername": "",
-      "pubDate": "2026-11-05T22:42:05+0000",
-      "rejectionReason": "no-concrete-offer",
-      "qualityScore": 0,
-      "viennaVerified": false,
-      "mediaEvidence": {
-        "analyzedAt": "",
-        "ocrText": "",
-        "assetCount": 0,
-        "imageCount": 0,
-        "videoFrameCount": 0,
-        "downloadRetries": 0,
-        "errors": [],
-        "ai": null
-      },
-      "hashtags": [
-        "wienfoodie"
-      ]
-    },
-    {
-      "id": "17976267234161006",
-      "status": "rejected",
-      "url": "https://www.instagram.com/reel/DfYHTGpKmRm/",
-      "title": "Deine Freitagspläne haben gerade ein Upgrade bekommen. 🍊🍸 Wen nimmst du auf einen Sarti mit? 👀👇 #vienna #wien #viennaeats #friday #coctail",
-      "text": "Deine Freitagspläne haben gerade ein Upgrade bekommen. 🍊🍸 Wen nimmst du auf einen Sarti mit? 👀👇 #vienna #wien #viennaeats #friday #coctail",
-      "ownerUsername": "",
-      "ownerRole": "",
-      "scoutUsername": "",
-      "merchantUsername": "",
-      "pubDate": "2026-11-05T22:35:04+0000",
-      "rejectionReason": "no-concrete-offer",
-      "qualityScore": 0,
-      "viennaVerified": false,
-      "mediaEvidence": {
-        "analyzedAt": "",
-        "ocrText": "",
-        "assetCount": 0,
-        "imageCount": 0,
-        "videoFrameCount": 0,
-        "downloadRetries": 0,
-        "errors": [],
-        "ai": null
-      },
-      "hashtags": [
-        "viennaeats"
-      ]
-    },
-    {
-      "id": "18057961256581480",
-      "status": "rejected",
-      "url": "https://www.instagram.com/p/DfYC7PuNUGu/",
-      "title": "A fresh and delicious steak salad with tender steak, crisp vegetables, fresh herbs and crunchy roasted almonds. The refreshing lemon-mustard dressing adds the perfect finishing tou",
-      "text": "A fresh and delicious steak salad with tender steak, crisp vegetables, fresh herbs and crunchy roasted almonds. The refreshing lemon-mustard dressing adds the perfect finishing touch. A light yet satisfying dish! #steak #salad #viennafood #viennaeats #lunch",
-      "ownerUsername": "",
-      "ownerRole": "",
-      "scoutUsername": "",
-      "merchantUsername": "",
-      "pubDate": "2026-11-05T21:57:22+0000",
-      "rejectionReason": "no-concrete-offer",
-      "qualityScore": 0,
-      "viennaVerified": false,
-      "mediaEvidence": {
-        "analyzedAt": "",
-        "ocrText": "",
-        "assetCount": 0,
-        "imageCount": 0,
-        "videoFrameCount": 0,
-        "downloadRetries": 0,
-        "errors": [],
-        "ai": null
-      },
-      "hashtags": [
-        "viennaeats"
-      ]
-    },
-    {
-      "id": "18116552255160225",
-      "status": "rejected",
-      "url": "https://www.instagram.com/reel/DfX_cTsxAOj/",
-      "title": "🔥 Guter Geschmack braucht keine Worte! 🥩🤤 Saftiges Fleisch, frisch vom Grill, und jede Menge Genuss! 🍽️🔥 📍 Elite Restaurant Café Wer würde sich jetzt auch so einen Teller gön",
-      "text": "🔥 Guter Geschmack braucht keine Worte! 🥩🤤 Saftiges Fleisch, frisch vom Grill, und jede Menge Genuss! 🍽️🔥 📍 Elite Restaurant Café Wer würde sich jetzt auch so einen Teller gönnen? 😍👇 #EliteRestaurantCafe #FoodLovers #GrillLovers #WienFood #MeatLovers FoodReels LeckerEssen FoodieVienna GutenAppetit",
-      "ownerUsername": "",
-      "ownerRole": "",
-      "scoutUsername": "",
-      "merchantUsername": "",
-      "pubDate": "2026-11-05T21:25:46+0000",
-      "rejectionReason": "no-concrete-offer",
-      "qualityScore": 0,
-      "viennaVerified": false,
-      "mediaEvidence": {
-        "analyzedAt": "",
-        "ocrText": "",
-        "assetCount": 0,
-        "imageCount": 0,
-        "videoFrameCount": 0,
-        "downloadRetries": 0,
-        "errors": [],
-        "ai": null
-      },
-      "hashtags": [
-        "wienfood"
-      ]
-    },
-    {
-      "id": "17997080925047807",
-      "status": "rejected",
-      "url": "https://www.instagram.com/reel/DfX205is07N/",
-      "title": "Pizzaabend geplant, aber keine Lust auszugehen? 🍕🇮🇹 Mit Biotto Takeaway holt ihr euch authentische Pizza Napoletana direkt nach Hause! Frisch zubereitet, mit hochwertigen Zutate",
-      "text": "Pizzaabend geplant, aber keine Lust auszugehen? 🍕🇮🇹 Mit Biotto Takeaway holt ihr euch authentische Pizza Napoletana direkt nach Hause! Frisch zubereitet, mit hochwertigen Zutaten und ganz viel italienischer Leidenschaft. ❤️ Ob gemütlicher Abend auf der Couch, Dinner zu zweit oder Pizza mit Freunden – ein Stück Neapel schmeckt auch in den eigenen vier Wänden. ✨ Einfach anrufen, eure Lieblingspizza abholen und zu Hause genießen. Buon appetito! 🥰 #BiottoWien #PizzaNapoletana #PizzaTakeaway #viennaeats #viennafood",
-      "ownerUsername": "",
-      "ownerRole": "",
-      "scoutUsername": "",
-      "merchantUsername": "",
-      "pubDate": "2026-11-05T20:10:35+0000",
-      "rejectionReason": "no-concrete-offer",
-      "qualityScore": 0,
-      "viennaVerified": false,
-      "mediaEvidence": {
-        "analyzedAt": "",
-        "ocrText": "",
-        "assetCount": 0,
-        "imageCount": 0,
-        "videoFrameCount": 0,
-        "downloadRetries": 0,
-        "errors": [],
-        "ai": null
-      },
-      "hashtags": [
-        "viennaeats"
       ]
     }
   ]
