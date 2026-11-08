@@ -1,7 +1,7 @@
 {
-  "generatedAt": "2026-11-08T00:39:32.505Z",
+  "generatedAt": "2026-11-08T00:41:39.134Z",
   "source": "instagram-graph-cross-source-verification",
-  "status": "ok",
+  "status": "failed-preserved",
   "configured": true,
   "scannedFiles": [
     "deals-pending-church-events.json",
@@ -108,7 +108,7 @@
     },
     "deals-pending-instagram-ai.json": {
       "deals": 22,
-      "candidates": 1
+      "candidates": 2
     },
     "deals-pending-instagram-apify.json": {
       "deals": 3,
@@ -139,7 +139,7 @@
       "candidates": 0
     },
     "deals-pending-meta-instagram.json": {
-      "deals": 70,
+      "deals": 57,
       "candidates": 6
     },
     "deals-pending-power.json": {
@@ -188,18 +188,23 @@
       "candidates": 1
     },
     {
-      "username": "lercherlvonhernals",
+      "username": "boca.vienna",
       "candidates": 1
     },
     {
-      "username": "ballroom_damn.good.dumplings",
+      "username": "lercherlvonhernals",
       "candidates": 1
     }
   ],
-  "fetchedPosts": 144,
-  "exactMatches": 2,
+  "fetchedPosts": 0,
+  "exactMatches": 0,
   "retainedEvidencePosts": 2000,
-  "errors": [],
+  "errors": [
+    {
+      "username": "freefinder.at",
+      "message": "Instagram shared quota paused: shared cooldown"
+    }
+  ],
   "accountFailures": {
     "iris.thegoodguides": {
       "count": 3,
@@ -218,21 +223,27 @@
     }
   },
   "sharedQuota": {
-    "limitPerHour": 320,
+    "limitPerHour": 190,
     "usageThreshold": 95,
-    "requests": 6,
-    "reserved": 10,
-    "stopped": false,
-    "reason": "",
-    "highestUsagePercent": 93,
+    "requests": 0,
+    "reserved": 0,
+    "stopped": true,
+    "reason": "Instagram shared quota paused: shared cooldown",
+    "highestUsagePercent": 0,
     "waitedMs": 0,
     "pacingMs": 0,
-    "retryAt": "",
+    "retryAt": "2026-11-08T00:50:21.878Z",
     "adaptiveSafetyCeiling": 190,
     "adaptiveIncreases": 0,
     "storageFailure": null
   },
-  "blockedEvidencePosts": 61,
-  "unmatchedCandidatePosts": 11,
-  "message": "2/13 fresh cross-source Instagram candidates matched exactly via Graph API."
+  "globalError": {
+    "username": "freefinder.at",
+    "status": 0,
+    "code": "SCAN_BUDGET",
+    "message": "Instagram shared quota paused: shared cooldown"
+  },
+  "blockedEvidencePosts": 58,
+  "unmatchedCandidatePosts": 13,
+  "message": "0/13 fresh cross-source Instagram candidates matched exactly via Graph API."
 }
