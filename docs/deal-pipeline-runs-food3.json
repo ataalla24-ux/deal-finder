@@ -2,9 +2,115 @@
   "schemaVersion": 1,
   "sourceKey": "food3",
   "sourceLabel": "Firecrawl Key 2 - Food",
-  "updatedAt": "2026-11-07T08:33:03.814Z",
+  "updatedAt": "2026-11-08T08:45:54.742Z",
   "runCount": 90,
   "runs": [
+    {
+      "schemaVersion": 1,
+      "runProvenance": {
+        "repository": "ataalla24-ux/deal-finder",
+        "runId": "42464262158",
+        "headSha": "b616890afb170fe9661015979ca8d652d06d58a1",
+        "event": "schedule",
+        "runAttempt": "1",
+        "url": "https://github.com/ataalla24-ux/deal-finder/actions/runs/42464262158"
+      },
+      "runId": "food3-2026-11-08T08:45:54.742Z",
+      "sourceKey": "food3",
+      "sourceLabel": "Firecrawl Key 2 - Food",
+      "status": "completed",
+      "startedAt": "2026-11-08T08:45:31.983Z",
+      "finishedAt": "2026-11-08T08:45:54.742Z",
+      "durationMs": 22759,
+      "outputFile": "docs/deals-pending-food3.json",
+      "counts": {
+        "rawCandidates": 2,
+        "normalizedCandidates": 2,
+        "verifiedCandidates": 2,
+        "previousDeals": 2,
+        "acceptedDeals": 2,
+        "rejectedDeals": 2
+      },
+      "rejectedByReason": {
+        "post-verification-rejected": 2
+      },
+      "rejectedSamples": [
+        {
+          "reason": "post-verification-rejected",
+          "deal": {
+            "id": "food3-svzlw",
+            "title": "Instagram: einfach gutes Essen, ein feines Glas Wein, leckere Cocktails ...",
+            "brand": "Instagram",
+            "url": "https://www.instagram.com/p/DfOxlBIjMa9/",
+            "source": "Firecrawl Food #2",
+            "pubDate": "",
+            "expires": "",
+            "postVerificationStatus": ""
+          }
+        },
+        {
+          "reason": "post-verification-rejected",
+          "deal": {
+            "id": "food3-1yspgbm",
+            "title": "Instagram: Eröffnung Keramundo Flagship-Store in Wien. - Instagram",
+            "brand": "Instagram",
+            "url": "https://www.instagram.com/p/DfXmhoOCDij/",
+            "source": "Firecrawl Food #2",
+            "pubDate": "",
+            "expires": "",
+            "postVerificationStatus": ""
+          }
+        }
+      ],
+      "diagnostics": {
+        "agentStatus": "completed",
+        "creditsUsed": 0,
+        "configuredSources": 6,
+        "attemptedSources": 3,
+        "completedSources": 3,
+        "targetsPerRun": 3,
+        "agentTimeoutSeconds": 120,
+        "maxCreditsPerTarget": 300,
+        "sourceStats": [
+          {
+            "url": "https://www.instagram.com/explore/tags/happyhourwien/",
+            "status": "completed-search",
+            "rawCandidates": 1,
+            "searchCandidates": 1,
+            "creditsUsed": 0
+          },
+          {
+            "url": "https://www.instagram.com/explore/tags/lunchdealwien/",
+            "status": "completed",
+            "rawCandidates": 0,
+            "searchCandidates": 0,
+            "creditsUsed": 0
+          },
+          {
+            "url": "https://www.instagram.com/explore/tags/neueröffnungwien/",
+            "status": "completed-search",
+            "rawCandidates": 1,
+            "searchCandidates": 1,
+            "creditsUsed": 0
+          }
+        ],
+        "retainedPreviousDeals": 2,
+        "prunedPreviousDeals": 0,
+        "duplicateCandidatesMerged": 0,
+        "verifier": {
+          "statusCounts": {
+            "verified-original-post": 1,
+            "verified-meta-graph": 1
+          },
+          "verifiedOriginalPosts": 1,
+          "timestampOnlyPosts": 0,
+          "unavailableOriginalPosts": 0,
+          "registryViennaEvidence": 0
+        }
+      },
+      "constraints": {},
+      "errors": []
+    },
     {
       "schemaVersion": 1,
       "runProvenance": {
@@ -14481,72 +14587,6 @@
         "verifier": {
           "statusCounts": {},
           "verifiedOriginalPosts": 0,
-          "timestampOnlyPosts": 0,
-          "unavailableOriginalPosts": 0,
-          "registryViennaEvidence": 0
-        }
-      },
-      "constraints": {},
-      "errors": []
-    },
-    {
-      "schemaVersion": 1,
-      "runId": "food3-2026-08-09T03:51:48.211Z",
-      "sourceKey": "food3",
-      "sourceLabel": "Firecrawl Key 2 - Food",
-      "status": "completed",
-      "startedAt": "2026-08-09T03:46:18.235Z",
-      "finishedAt": "2026-08-09T03:51:48.211Z",
-      "durationMs": 329976,
-      "outputFile": "docs/deals-pending-food3.json",
-      "counts": {
-        "rawCandidates": 33,
-        "normalizedCandidates": 31,
-        "verifiedCandidates": 31,
-        "previousDeals": 0,
-        "acceptedDeals": 31,
-        "rejectedDeals": 2
-      },
-      "rejectedByReason": {
-        "invalid-original-post-url": 2
-      },
-      "rejectedSamples": [
-        {
-          "reason": "invalid-original-post-url",
-          "deal": {
-            "id": "",
-            "title": "2-for-1 drinks, cocktails, mocktails",
-            "brand": "THEO'S Lounge & Bar Vienna",
-            "url": "https://www.instagram.com/theosvienna/",
-            "source": "",
-            "pubDate": "",
-            "expires": "",
-            "postVerificationStatus": ""
-          }
-        },
-        {
-          "reason": "invalid-original-post-url",
-          "deal": {
-            "id": "",
-            "title": "Drinks and food",
-            "brand": "Billabong Australian Pub",
-            "url": "https://www.instagram.com/billabong.pub/",
-            "source": "",
-            "pubDate": "",
-            "expires": "",
-            "postVerificationStatus": ""
-          }
-        }
-      ],
-      "diagnostics": {
-        "agentStatus": "completed",
-        "creditsUsed": 0,
-        "verifier": {
-          "statusCounts": {
-            "verified-original-post": 11,
-            "timestamp-derived": 20
-          },
-          "verifiedOriginalPosts": 11,
           "timestampOnlyPosts": 0,
           "unavailableOriginalPosts": 0,
           "registryViennaEvidence": 0
