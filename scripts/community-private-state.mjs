@@ -1,8 +1,9 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { isCommunitySubmission } from '../scraper/community-review-utils.js';
 import { activeCommunityRecord } from '../referrals-worker/src/community-review-state.js';
+import { privateCommunityRow } from './community-public-boundary.mjs';
+export { privateCommunityRow };
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const dir = path.join(root, '.community-internal');
@@ -16,11 +17,6 @@ function write(file, value) {
   const temporary = `${file}.${process.pid}.tmp`;
   fs.writeFileSync(temporary, JSON.stringify(value, null, 2) + '\n', { mode: 0o600 });
   fs.renameSync(temporary, file);
-}
-
-export function privateCommunityRow(row) {
-  return isCommunitySubmission(row) || /^community:/i.test(String(row?.id || row?.dealId || ''))
-    || row?.originSource === 'community-submission' || Boolean(row?.submittedContent || row?.communityExtraction);
 }
 
 export function reviewDiff(before, after, now = Date.now()) {

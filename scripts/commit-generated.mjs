@@ -6,8 +6,7 @@ import { spawnSync } from 'child_process';
 
 import { stampDealsFeedFile } from './deals-feed-contract.mjs';
 import { mergeSourceOutbox } from './generated-source-merge.mjs';
-import { maintainFeedFile } from './automatic-deal-maintenance.mjs';
-import { privateCommunityRow } from './community-private-state.mjs';
+import { privateCommunityRow } from './community-public-boundary.mjs';
 
 const DEFAULT_REMOTE = process.env.GIT_GENERATED_REMOTE || 'origin';
 const DEFAULT_BRANCH = process.env.GIT_GENERATED_BRANCH || process.env.GITHUB_REF_NAME || 'main';
@@ -619,6 +618,7 @@ async function main() {
     .map(normalizeRepoPath)
     .includes(dealsPath);
   if (includesDealsFeed && statusChanged(dealsPath)) {
+    const { maintainFeedFile } = await import('./automatic-deal-maintenance.mjs');
     const maintenance = await maintainFeedFile({ allowAi: false, apply: true });
     if (maintenance.changed) console.log(`Source-backed maintenance: ${maintenance.report.hidden.length} expired, ${maintenance.report.corrected.length} corrected`);
     options.patterns.push('reviews/automatic-deal-maintenance-state.json');

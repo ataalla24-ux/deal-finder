@@ -54,7 +54,7 @@ test('production delivery drops the OpenAI secret and disables title editing onl
   assert.match(delivery, /DEAL_CARD_EDITOR_ENABLED: ['"]0['"]/);
   assert.doesNotMatch(delivery, /OPENAI_API_KEY/);
   assert.match(delivery, /SLACK_BOT_TOKEN/);
-  assert.match(delivery, /run: node scraper\/slack-notify\.js/);
+  assert.match(delivery, /run: \|\s+node scripts\/community-private-state\.mjs hydrate[\s\S]*?node scraper\/slack-notify\.js/);
   const source = fs.readFileSync(new URL('../scraper/slack-notify.js', import.meta.url), 'utf8');
   assert.match(source, /const editorialEnabled = process\.env\.DEAL_CARD_EDITOR_ENABLED === '1'/);
   assert.equal((source.match(/enabled: editorialEnabled/g) || []).length, 2);
