@@ -1,11 +1,11 @@
 {
-  "generatedAt": "2026-11-09T06:31:55.325Z",
+  "generatedAt": "2026-11-09T07:07:52.149Z",
   "summary": {
     "filesConsidered": 32,
-    "totalCandidates": 684,
-    "uniqueCandidates": 662,
+    "totalCandidates": 682,
+    "uniqueCandidates": 664,
     "distinctCandidates": 673,
-    "duplicateClusters": 11,
+    "duplicateClusters": 9,
     "topHealthySources": [
       {
         "sourceKey": "member-benefits",
@@ -32,10 +32,10 @@
         "totalDeals": 6
       },
       {
-        "sourceKey": "wien-combined",
-        "sourceLabel": "Wien Deals Combined Graph",
-        "healthScore": 60,
-        "totalDeals": 2
+        "sourceKey": "power",
+        "sourceLabel": "Power Scraper",
+        "healthScore": 57,
+        "totalDeals": 40
       }
     ],
     "topMissionSources": [
@@ -44,12 +44,6 @@
         "sourceLabel": "jö Bonus Club",
         "missionFitScore": 73,
         "totalDeals": 9
-      },
-      {
-        "sourceKey": "wien-combined",
-        "sourceLabel": "Wien Deals Combined Graph",
-        "missionFitScore": 69,
-        "totalDeals": 2
       },
       {
         "sourceKey": "member-benefits",
@@ -68,6 +62,12 @@
         "sourceLabel": "Meta Instagram Graph",
         "missionFitScore": 56,
         "totalDeals": 55
+      },
+      {
+        "sourceKey": "gastro2",
+        "sourceLabel": "Firecrawl Key 1 - Gastro",
+        "missionFitScore": 49,
+        "totalDeals": 148
       }
     ],
     "topCoverageSources": [
@@ -88,7 +88,7 @@
       {
         "sourceKey": "meta-instagram",
         "sourceLabel": "Meta Instagram Graph",
-        "coverageScore": 37,
+        "coverageScore": 38,
         "totalDeals": 55,
         "fresh1dCount": 6
       },
@@ -121,12 +121,6 @@
         "totalDeals": 55
       },
       {
-        "sourceKey": "wien-combined",
-        "sourceLabel": "Wien Deals Combined Graph",
-        "precisionScore": 69,
-        "totalDeals": 2
-      },
-      {
         "sourceKey": "joe",
         "sourceLabel": "jö Bonus Club",
         "precisionScore": 64,
@@ -137,6 +131,12 @@
         "sourceLabel": "Apify Instagram",
         "precisionScore": 60,
         "totalDeals": 4
+      },
+      {
+        "sourceKey": "instagram-verified",
+        "sourceLabel": "Instagram",
+        "precisionScore": 56,
+        "totalDeals": 6
       }
     ],
     "topWeightedSources": [
@@ -153,12 +153,6 @@
         "totalDeals": 55
       },
       {
-        "sourceKey": "wien-combined",
-        "sourceLabel": "Wien Deals Combined Graph",
-        "sourceWeightScore": 55,
-        "totalDeals": 2
-      },
-      {
         "sourceKey": "gastro2",
         "sourceLabel": "Firecrawl Key 1 - Gastro",
         "sourceWeightScore": 55,
@@ -169,6 +163,12 @@
         "sourceLabel": "jö Bonus Club",
         "sourceWeightScore": 54,
         "totalDeals": 9
+      },
+      {
+        "sourceKey": "instagram-apify",
+        "sourceLabel": "Apify Instagram",
+        "sourceWeightScore": 52,
+        "totalDeals": 4
       }
     ],
     "topSourcesToFix": [
@@ -332,9 +332,9 @@
       "file": "deals-pending-meta-instagram.json",
       "sourceLabel": "Meta Instagram Graph",
       "totalDeals": 55,
-      "uniqueDeals": 48,
-      "duplicateDeals": 7,
-      "duplicateAcrossSources": 7,
+      "uniqueDeals": 50,
+      "duplicateDeals": 5,
+      "duplicateAcrossSources": 5,
       "fresh1dCount": 6,
       "fresh7dCount": 53,
       "viennaCount": 55,
@@ -405,7 +405,7 @@
       ],
       "healthScore": 71,
       "missionFitScore": 56,
-      "coverageScore": 37,
+      "coverageScore": 38,
       "precisionScore": 70,
       "sourceWeightScore": 59
     },
@@ -530,86 +530,6 @@
       "coverageScore": 11,
       "precisionScore": 56,
       "sourceWeightScore": 45
-    },
-    {
-      "sourceKey": "wien-combined",
-      "file": "deals-pending-wien-combined.json",
-      "sourceLabel": "Wien Deals Combined Graph",
-      "totalDeals": 2,
-      "uniqueDeals": 0,
-      "duplicateDeals": 2,
-      "duplicateAcrossSources": 2,
-      "fresh1dCount": 2,
-      "fresh7dCount": 2,
-      "viennaCount": 2,
-      "foodDrinkCount": 1,
-      "promoCount": 1,
-      "missingUrlCount": 0,
-      "sampleTitles": [
-        "🍢 INTERPOL GRILL × INTERPOLBURGER 🍔 🚗 Lieferung im 21. & 22. Bezirk 🕛 Täglich von 12:00–22:00 Uhr 🎁 Ab 25 € GRATIS LIEFERUNG!",
-        "Hummus, Tzaziki und Mutabbal machen wir jeden Tag frisch, und jede davon kostet bei uns nur 5,90 €"
-      ],
-      "lastRun": {
-        "status": "completed-with-errors",
-        "startedAt": "2026-11-08T22:23:58.632Z",
-        "finishedAt": "2026-11-08T22:25:40.016Z",
-        "durationMs": 101384,
-        "counts": {
-          "rawCandidates": 38,
-          "normalizedCandidates": 2,
-          "verifiedCandidates": 2,
-          "previousDeals": 0,
-          "acceptedDeals": 2,
-          "rejectedDeals": 34
-        },
-        "rejectedByReason": {
-          "no-concrete-offer": 27,
-          "alcohol-offer": 2,
-          "general-recommendation": 4,
-          "missing-vienna-evidence": 1
-        },
-        "errors": [
-          "#viennafood: Instagram scan paused: request-budget"
-        ],
-        "reportFile": "deal-pipeline-last-run-wien-combined.json"
-      },
-      "uniqueRate": 0,
-      "duplicateRate": 1,
-      "fresh1dRate": 1,
-      "fresh7dRate": 1,
-      "viennaRate": 1,
-      "foodDrinkRate": 0.5,
-      "promoRate": 0.5,
-      "missingUrlRate": 0,
-      "averageQualityScore": 83,
-      "topCategories": [
-        {
-          "value": "essen",
-          "count": 1
-        },
-        {
-          "value": "technik",
-          "count": 1
-        }
-      ],
-      "topTypes": [
-        {
-          "value": "gratis",
-          "count": 1
-        },
-        {
-          "value": "rabatt",
-          "count": 1
-        }
-      ],
-      "issues": [
-        "hohe Überschneidung mit anderen Quellen"
-      ],
-      "healthScore": 60,
-      "missionFitScore": 69,
-      "coverageScore": 12,
-      "precisionScore": 69,
-      "sourceWeightScore": 55
     },
     {
       "sourceKey": "power",
@@ -2167,6 +2087,66 @@
       "topCategories": [],
       "topTypes": [],
       "issues": [
+        "liefert aktuell 0 Deals"
+      ],
+      "healthScore": 0,
+      "missionFitScore": 0,
+      "coverageScore": 0,
+      "precisionScore": 0,
+      "sourceWeightScore": 0
+    },
+    {
+      "sourceKey": "wien-combined",
+      "file": "deals-pending-wien-combined.json",
+      "sourceLabel": "Wien Deals Combined Graph",
+      "totalDeals": 0,
+      "uniqueDeals": 0,
+      "duplicateDeals": 0,
+      "duplicateAcrossSources": 0,
+      "fresh1dCount": 0,
+      "fresh7dCount": 0,
+      "viennaCount": 0,
+      "foodDrinkCount": 0,
+      "promoCount": 0,
+      "missingUrlCount": 0,
+      "sampleTitles": [],
+      "lastRun": {
+        "status": "completed-with-errors",
+        "startedAt": "2026-11-09T07:04:50.578Z",
+        "finishedAt": "2026-11-09T07:06:48.268Z",
+        "durationMs": 117690,
+        "counts": {
+          "rawCandidates": 27,
+          "normalizedCandidates": 0,
+          "verifiedCandidates": 0,
+          "previousDeals": 0,
+          "acceptedDeals": 0,
+          "rejectedDeals": 25
+        },
+        "rejectedByReason": {
+          "no-concrete-offer": 17,
+          "alcohol-offer": 3,
+          "missing-vienna-evidence": 1,
+          "general-recommendation": 4
+        },
+        "errors": [
+          "#essenwien: Instagram scan paused: request-budget"
+        ],
+        "reportFile": "deal-pipeline-last-run-wien-combined.json"
+      },
+      "uniqueRate": 0,
+      "duplicateRate": 0,
+      "fresh1dRate": 0,
+      "fresh7dRate": 0,
+      "viennaRate": 0,
+      "foodDrinkRate": 0,
+      "promoRate": 0,
+      "missingUrlRate": 0,
+      "averageQualityScore": 0,
+      "topCategories": [],
+      "topTypes": [],
+      "issues": [
+        "letzter Lauf fand Kandidaten, aber akzeptierte keinen Deal",
         "liefert aktuell 0 Deals"
       ],
       "healthScore": 0,
