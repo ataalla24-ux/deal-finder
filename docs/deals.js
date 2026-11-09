@@ -10,6 +10,9 @@
   const empty = document.getElementById('dealEmpty');
   const reset = form.querySelector('[type="reset"]');
   const buttons = [...form.querySelectorAll('[data-deal-type]')];
+  const viennaDay = new Intl.DateTimeFormat('en', {
+    timeZone: 'Europe/Vienna', year: 'numeric', month: '2-digit', day: '2-digit',
+  });
   const normalize = value => value.toLocaleLowerCase('de-AT').replace(/ß/g, 'ss')
     .replace(/ae/g, 'a').replace(/oe/g, 'o').replace(/ue/g, 'u').normalize('NFKD').replace(/[\u0300-\u036f]/g, '');
   const searchable = new Map(cards.map(card => [card, normalize(card.textContent)]));
@@ -17,9 +20,18 @@
 
   function update() {
     const terms = normalize(search.value.trim()).split(/\s+/).filter(Boolean);
+    const now = Date.now();
+    const parts = Object.fromEntries(viennaDay.formatToParts(now).map(({ type, value }) => [type, value]));
+    const today = `${parts.year}-${parts.month}-${parts.day}`;
+    const available = { all: 0 };
     let visible = 0;
     for (const card of cards) {
-      const matches = (type === 'all' || card.dataset.type === type)
+      const active = card.dataset.expiryDay ? card.dataset.expiryDay >= today : Number(card.dataset.expiry) >= now;
+      if (active) {
+        available.all++;
+        available[card.dataset.type] = (available[card.dataset.type] || 0) + 1;
+      }
+      const matches = active && (type === 'all' || card.dataset.type === type)
         && (district.value === 'all' || card.dataset.districts.split(' ').includes(district.value))
         && terms.every(term => searchable.get(card).includes(term));
       card.hidden = !matches;
@@ -34,7 +46,12 @@
     count.textContent = `${visible} ${visible === 1 ? 'Deal' : 'Deals'}`;
     empty.hidden = visible !== 0 || cards.length === 0;
     reset.hidden = !search.value && district.value === 'all' && type === 'all' && sort.value === 'recommended';
-    for (const button of buttons) button.setAttribute('aria-pressed', String(button.dataset.dealType === type));
+    for (const button of buttons) {
+      const buttonType = button.dataset.dealType;
+      button.querySelector('span').textContent = available[buttonType] || 0;
+      button.disabled = buttonType !== 'all' && !available[buttonType];
+      button.setAttribute('aria-pressed', String(buttonType === type));
+    }
   }
 
   form.addEventListener('submit', event => event.preventDefault());
@@ -54,6 +71,8 @@
     form.reset();
     search.focus();
   });
+  window.addEventListener('pageshow', event => { if (event.persisted) update(); });
+  document.addEventListener('visibilitychange', () => { if (!document.hidden) update(); });
   form.hidden = false;
   update();
 })();

@@ -78,9 +78,19 @@ try {
   fs.symlinkSync(path.join(root, 'node_modules'), path.join(fixture, 'node_modules'), 'dir');
   fs.writeFileSync(path.join(fixture, 'docs/deals.json'), 'unchanged-feed-sentinel');
   const slugs = [...novemberGuides.map(g => g.slug), ...updated];
+  const comparisonTime = Math.max(...slugs.map(slug => {
+    const expiry = load(read(`docs/blog/${slug}.html`))('main').attr('data-deal-expires');
+    return expiry ? Date.parse(expiry) : Date.parse('2026-11-05T22:00:00+01:00');
+  })) + 1000;
+  assert.ok(Number.isFinite(comparisonTime), 'Curated guide dates must be valid');
+  const env = { ...process.env, SEO_NOW: new Date(comparisonTime).toISOString() };
   for (let pass = 0; pass < 2; pass++) {
-    execFileSync(process.execPath, [path.join(fixture, 'scripts/generate-topic-guides.mjs'), ...slugs], { env: { ...process.env, SEO_NOW: '2026-11-05T22:00:00+01:00' } });
-    for (const slug of slugs) assert.equal(fs.readFileSync(path.join(fixture, 'docs/blog', `${slug}.html`), 'utf8'), read(`docs/blog/${slug}.html`));
+    execFileSync(process.execPath, [path.join(fixture, 'scripts/generate-topic-guides.mjs'), ...slugs], { env });
+    for (const slug of slugs) {
+      const file = `blog/${slug}.html`;
+      assert.equal(fs.readFileSync(path.join(fixture, 'docs', file), 'utf8'),
+        polishHtml(read(`docs/${file}`), file, comparisonTime), file);
+    }
     assert.equal(fs.readFileSync(path.join(fixture, 'docs/deals.json'), 'utf8'), 'unchanged-feed-sentinel');
     assert.equal(fs.readFileSync(path.join(fixture, 'reviews/deal-guides.json'), 'utf8'), read('reviews/deal-guides.json'));
   }

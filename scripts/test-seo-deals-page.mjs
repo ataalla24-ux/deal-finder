@@ -115,6 +115,15 @@ try {
     'A validated calendar start becomes eligible at Vienna midnight');
   assert.deepEqual(generate([validatedStarts[1]], '2026-10-22T10:00:00Z').ids, ['validated-opening-day']);
   assert.deepEqual(generate([validatedStarts[1]], '2026-10-22T22:00:00Z').ids, []);
+  const expiryEvidence = generate([
+    deal('unproven-url-timestamp', { expiryKind: 'unknown', expirySource: 'url' }),
+    deal('no-reviewed-expiry', { validity: { warnings: ['kein Ablaufdatum gefunden'] } }),
+    deal('explicit-date-after-review', { validUntil: '2026-10-07', validity: { warnings: ['kein Ablaufdatum gefunden'] } }),
+    deal('legacy-timestamp'),
+  ]);
+  assert.deepEqual(expiryEvidence.ids, ['explicit-date-after-review', 'legacy-timestamp']);
+  assert.equal(expiryEvidence.$('#deal-explicit-date-after-review').attr('data-expiry-day'), '2026-10-07');
+  assert.equal(expiryEvidence.$('#deal-legacy-timestamp').attr('data-expiry-day'), undefined);
 
   const caption = 'Wohlfühl-Paket für 64 €: gültig bis 02.11.2026. <script>alert(1)</script>';
   const descriptions = generate([

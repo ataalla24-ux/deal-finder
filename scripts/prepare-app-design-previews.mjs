@@ -20,11 +20,21 @@ for (const image of manifest.images) {
   const sha256 = createHash('sha256').update(fs.readFileSync(input)).digest('hex');
   if (sha256 !== image.sha256) throw new Error(`Approved source changed: ${image.name}`);
   const variants = [];
-  for (const width of [360, 720]) {
+  // Keep the existing source sizes and derive smaller display variants from them.
+  const widthSources = [
+    [360, input],
+    [720, input],
+    [480, path.join(destination, `${image.name}-720.webp`)],
+  ];
+  if (['01-deals', '02-fuer-dich', '05-favoriten'].includes(image.name)) {
+    widthSources.push([220, path.join(destination, `${image.name}-360.webp`)]);
+  }
+  for (const [width, variantInput] of widthSources) {
     const file = `${image.name}-${width}.webp`;
-    execFileSync('cwebp', ['-quiet', '-q', '90', '-m', '6', '-resize', String(width), '0', input, '-o', path.join(destination, file)]);
+    execFileSync('cwebp', ['-quiet', '-q', '90', '-m', '6', '-resize', String(width), '0', variantInput, '-o', path.join(destination, file)]);
     variants.push({ file, width, bytes: fs.statSync(path.join(destination, file)).size });
   }
+  variants.sort((a, b) => a.width - b.width);
   images.push({ name: image.name, sourceSha256: sha256, inputWidth: image.width, inputHeight: image.height, variants });
 }
 fs.writeFileSync(path.join(destination, 'sources.json'), JSON.stringify({
@@ -35,4 +45,4 @@ fs.writeFileSync(path.join(destination, 'sources.json'), JSON.stringify({
   processing: 'Proportional WebP conversion only; no new generation or content edits',
   images,
 }, null, 2) + '\n');
-console.log(`Prepared ${images.length} approved design previews and 12 responsive WebP assets`);
+console.log(`Prepared ${images.length} approved design previews and ${images.reduce((sum, image) => sum + image.variants.length, 0)} responsive WebP assets`);

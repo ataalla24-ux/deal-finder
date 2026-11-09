@@ -132,15 +132,17 @@ export function polishHtml(source, filename, now = Date.now()) {
     return `<aside${before}class="article-aside"${after}><details class="article-contents"><summary>In diesem Guide</summary>${inner.replace(/<h2\b[^>]*>[\s\S]*?<\/h2>/, '')}</details></aside>`;
   });
   const expiry = main.attr('data-deal-expires');
+  let archiveTitle;
   if (expiry && Number.isFinite(Date.parse(expiry)) && Date.parse(expiry) < now) {
-    let base = compact($('title').text()).replace(/\s*\|\s*FreeFinder\s*$/, '').replace(/\s*\(Archiv\)$/, '');
-    if (base.length > 51) base = base.slice(0, 52).replace(/\s+\S*$/, '');
-    const title = `${base} (Archiv) | FreeFinder`;
+    const base = compact($('title').text()).replace(/\s*\|\s*FreeFinder\s*$/, '').replace(/\s*\(Archiv\)$/, '');
+    archiveTitle = `${base} (Archiv)`;
+    const brandedTitle = `${archiveTitle} | FreeFinder`;
+    const title = brandedTitle.length <= 75 ? brandedTitle : archiveTitle;
     const date = new Intl.DateTimeFormat('de-AT', { dateStyle: 'medium', timeZone: 'Europe/Vienna' }).format(new Date(expiry));
     const description = `${base}: Aktion beendet am ${date}. Bedingungen im Archiv; aktuelle Wiener Deals in unserer Übersicht.`;
     html = html.replace(/<title>[\s\S]*?<\/title>/, `<title>${escape(title)}</title>`);
     html = html.replace(/(<meta\s+(?:name|property)="(?:description|og:description|twitter:description)"\s+content=")[^"]*/g, `$1${escape(description)}`);
-    html = html.replace(/(<meta\s+(?:name|property)="(?:og:title|twitter:title)"\s+content=")[^"]*/g, `$1${escape(title.replace(' | FreeFinder', ''))}`);
+    html = html.replace(/(<meta\s+(?:name|property)="(?:og:title|twitter:title)"\s+content=")[^"]*/g, `$1${escape(archiveTitle)}`);
     html = html.replace(/<body\b([^>]*)>/, (whole, attrs) => {
       if (/deal-is-expired/.test(attrs)) return whole;
       return attrs.includes('class="') ? whole.replace('class="', 'class="deal-is-expired ') : `<body${attrs} class="deal-is-expired">`;
@@ -178,7 +180,7 @@ export function polishHtml(source, filename, now = Date.now()) {
   });
   if (!/noindex/i.test($('meta[name="robots"]').attr('content') || '')) {
     const metadata = {
-      'og:title': $('title').text(), 'og:description': $('meta[name="description"]').attr('content'),
+      'og:title': archiveTitle ?? $('title').text(), 'og:description': $('meta[name="description"]').attr('content'),
       'og:url': $('link[rel="canonical"]').attr('href'), 'og:image': 'https://freefinder.at/og-home-20261007.jpg', 'og:type': 'website',
     };
     const additions = Object.entries(metadata).filter(([name, value]) => value && !$(`meta[property="${name}"]`).length).map(([name, value]) => `  <meta property="${name}" content="${escape(value)}">`);

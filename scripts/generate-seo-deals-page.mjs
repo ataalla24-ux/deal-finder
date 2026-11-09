@@ -99,15 +99,18 @@ function currentValidity(deal, now) {
   }
   if (validOn) {
     if (validOn !== today) return null;
-    return { expiryDate: parseDate(`${validOn}T12:00:00Z`), expiryRaw: validOn, expiryLabel: 'Gültig am' };
+    return { expiryDate: parseDate(`${validOn}T12:00:00Z`), expiryRaw: validOn, expiryDay: validOn, expiryLabel: 'Gültig am' };
   }
   if (validUntil) {
     if (validUntil < today || (validFrom && validFrom > validUntil)) return null;
-    return { expiryDate: parseDate(`${validUntil}T12:00:00Z`), expiryRaw: validUntil, expiryLabel: 'Gültig bis' };
+    return { expiryDate: parseDate(`${validUntil}T12:00:00Z`), expiryRaw: validUntil, expiryDay: validUntil, expiryLabel: 'Gültig bis' };
   }
+  // A legacy timestamp can survive a review that explicitly found no deadline.
+  if (deal.expiryKind === 'unknown' || (Array.isArray(deal.validity?.warnings)
+      && deal.validity.warnings.includes('kein Ablaufdatum gefunden'))) return null;
   const expiryDate = parseDate(deal.expires);
   if (!expiryDate || expiryDate.getTime() < now.getTime()) return null;
-  return { expiryDate, expiryRaw: String(deal.expires || ''), expiryLabel: 'Gültig bis' };
+  return { expiryDate, expiryRaw: String(deal.expires || ''), expiryDay: '', expiryLabel: 'Gültig bis' };
 }
 
 function isFlightDeal(deal) {
@@ -227,7 +230,7 @@ function renderDealCard(deal, index) {
   const description = displayDescription(deal);
   const location = /^(?:k\.?\s?a\.?|n\/a|unknown)$/i.test(deal.displayLocation) ? 'Standort beim Anbieter prüfen' : deal.displayLocation;
   return `
-        <article class="live-deal-card" id="${escapeHtml(id)}" data-type="${type}" data-districts="${districtCodes(deal).join(' ')}" data-order="${index}" data-expiry="${deal.expiryDate.getTime()}">
+        <article class="live-deal-card" id="${escapeHtml(id)}" data-type="${type}" data-districts="${districtCodes(deal).join(' ')}" data-order="${index}" data-expiry="${deal.expiryDate.getTime()}"${deal.expiryDay ? ` data-expiry-day="${deal.expiryDay}"` : ''}>
           <div class="deal-card-top${photo ? ' has-photo' : ''}">
             ${photo ? `<picture class="deal-photo"><img src="${photo.src}" srcset="${photo.srcset}" sizes="(max-width: 680px) calc(100vw - 40px), (max-width: 950px) calc((100vw - 66px) / 2), 360px" alt="${escapeHtml(photo.alt)}" width="${photo.width}" height="${photo.height}" loading="lazy" decoding="async"></picture>` : `<span class="deal-brand-image" aria-hidden="true">${logo ? `<img src="${escapeHtml(logo)}" alt="" width="52" height="52" loading="lazy">` : `<span>${escapeHtml(initials)}</span>`}</span>`}
             <div class="deal-card-heading">
@@ -316,7 +319,7 @@ function renderPage(feed, deals, now) {
   <link rel="stylesheet" href="/consent.css?v=5">
   <link rel="stylesheet" href="/blog/blog.css">
   <link rel="stylesheet" href="/deals.css?v=3">
-  <script defer src="/deals.js?v=1"></script>
+  <script defer src="/deals.js?v=2"></script>
   <script defer src="/analytics-config.js"></script>
   <script defer src="/consent.js?v=7"></script>
   <script type="application/ld+json">${JSON.stringify(structuredData)}</script>

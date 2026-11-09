@@ -69,10 +69,17 @@ try {
   fs.symlinkSync(path.join(root, 'node_modules'), path.join(fixture, 'node_modules'), 'dir');
   fs.writeFileSync(path.join(fixture, 'docs/deals.json'), 'unchanged-feed-sentinel');
   const args = [path.join(fixture, 'scripts/generate-topic-guides.mjs'), ...catchupGuides.map(g => g.slug)];
-  const env = { ...process.env, SEO_NOW: '2026-10-30T12:00:00+01:00' };
+  const comparisonTime = Math.max(...catchupGuides.flatMap(guide =>
+    [guide.published, guide.modified, guide.expires].filter(Boolean).map(value => Date.parse(value)))) + 1000;
+  assert.ok(Number.isFinite(comparisonTime), 'Curated guide dates must be valid');
+  const env = { ...process.env, SEO_NOW: new Date(comparisonTime).toISOString() };
   for (let pass = 0; pass < 2; pass++) {
     execFileSync(process.execPath, args, { env });
-    for (const guide of catchupGuides) assert.equal(fs.readFileSync(path.join(fixture, 'docs/blog', `${guide.slug}.html`), 'utf8'), read(`docs/blog/${guide.slug}.html`));
+    for (const guide of catchupGuides) {
+      const file = `blog/${guide.slug}.html`;
+      assert.equal(fs.readFileSync(path.join(fixture, 'docs', file), 'utf8'),
+        polishHtml(read(`docs/${file}`), file, comparisonTime), file);
+    }
     assert.equal(fs.readFileSync(path.join(fixture, 'docs/deals.json'), 'utf8'), 'unchanged-feed-sentinel');
   }
 } finally { fs.rmSync(fixture, { recursive: true, force: true }); }
