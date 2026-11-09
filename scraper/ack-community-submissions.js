@@ -10,7 +10,7 @@ const ROOT = path.join(__dirname, '..');
 const DOCS_DIR = path.join(ROOT, 'docs');
 const ENV_PATH = path.join(ROOT, '.env');
 const PUSH_CONFIG_PATH = path.join(DOCS_DIR, 'push-config.json');
-const PENDING_ALL_PATH = path.join(DOCS_DIR, 'deals-pending-all.json');
+const PENDING_ALL_PATH = process.env.COMMUNITY_QUEUE_PATH || path.join(DOCS_DIR, 'deals-pending-all.json');
 
 function loadEnvFile() {
   if (!fs.existsSync(ENV_PATH)) return;

@@ -5,7 +5,9 @@ import worker from '../src/index.js';
 function fixture() {
   const values = new Map();
   const env = { COMMUNITY_SYNC_TOKEN: 'offline-community-test', REFERRAL_KV: {
-    get: async (key, type) => type === 'json' ? JSON.parse(values.get(key) || 'null') : values.get(key) || null,
+    get: async (key, type) => Array.isArray(key)
+      ? new Map(key.map(id => [id, JSON.parse(values.get(id) || 'null')]))
+      : type === 'json' ? JSON.parse(values.get(key) || 'null') : values.get(key) || null,
     put: async (key, value) => values.set(key, value),
     list: async ({ prefix = '' } = {}) => ({ keys: [...values.keys()]
       .filter(name => name.startsWith(prefix)).map(name => ({ name })), list_complete: true }),
@@ -45,6 +47,19 @@ test('social link-only import still reaches enrichment, no link alone cannot', a
   const { call } = fixture();
   assert.equal((await call({ url: 'https://www.instagram.com/p/test/', submittedFrom: 'ios-share-extension' })).status, 201);
   assert.equal((await call({ url: '', submittedFrom: 'ios-share-extension' })).status, 400);
+});
+
+test('a repeat URL does not reveal the earlier private draft', async () => {
+  const { call } = fixture();
+  const url = 'https://www.instagram.com/p/test/';
+  assert.equal((await call({ ...draft, url })).status, 201);
+  for (const endpoint of ['/api/deals/submissions', '/api/deals/submit']) {
+    const response = await call({ ...draft, url }, endpoint);
+    const body = await response.json();
+    assert.equal(body.alreadyQueued, true);
+    assert.equal(body.submission, undefined);
+    assert.doesNotMatch(JSON.stringify(body), /Testgasse|Nur vor Ort/);
+  }
 });
 
 test('observed repeated placeholder combinations never write or dispatch, including legacy route', async () => {

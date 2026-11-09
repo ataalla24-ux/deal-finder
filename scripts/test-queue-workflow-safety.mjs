@@ -82,7 +82,7 @@ assert.match(
 
 const collectors = new Map([
   ['apify-instagram-daily.yml', 'apify-instagram-scan'],
-  ['community-submissions.yml', 'community-intake'],
+  ['community-submissions.yml', 'deal-state-writer'],
   ['flights-vienna.yml', 'flights-vienna-scan'],
   ['instagram-ai-agent.yml', 'instagram-ai-scan'],
   ['meta-instagram-deals.yml', 'meta-instagram-scan'],

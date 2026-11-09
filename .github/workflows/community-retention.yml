@@ -1,0 +1,27 @@
+name: Community review retention
+on:
+  schedule:
+    - cron: '46 8 * * *'
+concurrency:
+  group: deal-state-writer
+  cancel-in-progress: false
+  queue: max
+permissions:
+  contents: read
+jobs:
+  cleanup:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Delete expired bot messages from the review channel
+        env:
+          COMMUNITY_SYNC_TOKEN: ${{ secrets.COMMUNITY_SYNC_TOKEN }}
+          SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
+          SLACK_CHANNEL_ID: ${{ secrets.SLACK_CHANNEL_ID }}
+        run: node scripts/community-private-state.mjs prune-slack

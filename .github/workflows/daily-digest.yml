@@ -102,6 +102,9 @@ jobs:
 
       - name: Deliver validated new deals to Slack
         env:
+          COMMUNITY_SYNC_TOKEN: ${{ secrets.COMMUNITY_SYNC_TOKEN }}
+          COMMUNITY_QUEUE_PATH: .community-internal/queue.json
+          SENTRY_DISABLED: '1'
           DEAL_CARD_EDITOR_ENABLED: '0'
           SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
           DEAL_REMOVE_LINK_SECRET: ${{ secrets.DEAL_REMOVE_LINK_SECRET }}
@@ -116,11 +119,18 @@ jobs:
           SOCIAL_FOOD_REVIEW_SEND_ALL: "1"
           SOCIAL_FOOD_REVIEW_MAX_PER_DAY: "16"
           SOCIAL_FOOD_REVIEW_ARTIFACT_MAX_AGE_HOURS: "12"
-        run: node scraper/slack-notify.js
+        run: |
+          node scripts/community-private-state.mjs hydrate
+          result=0
+          node scraper/slack-notify.js || result=$?
+          node scripts/community-private-state.mjs persist
+          exit "$result"
 
       - name: Mark posted community submissions as queued
         env:
           COMMUNITY_SYNC_TOKEN: ${{ secrets.COMMUNITY_SYNC_TOKEN }}
+          COMMUNITY_QUEUE_PATH: .community-internal/queue.json
+          SENTRY_DISABLED: '1'
         run: node scraper/ack-community-submissions.js
 
       - name: Commit dispatch state

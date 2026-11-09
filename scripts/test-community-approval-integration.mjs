@@ -61,7 +61,7 @@ try {
   assert.equal(read('deals-pending-all.json').deals.length, 1, 'blocked deal stays editable');
   assert.ok(read('deals-pending-all.json').deals[0].approvalBlock);
   assert.equal(notices.length, 1);
-  assert.equal(read('deal-review-feedback.json').events[0].publicationStatus, 'validator-blocked');
+  assert.equal(fs.existsSync(path.join(temp, 'docs/deal-review-feedback.json')), false, 'no public community review feedback');
   await main();
   assert.equal(notices.length, 1, 'retries do not repeat identical notices');
 
@@ -84,12 +84,13 @@ try {
   assert.equal(read('deals.json').deals.length, 1, 'a corrected blocked approval can publish');
   assert.equal(read('deals-pending-all.json').deals.length, 0);
   assert.equal(read('deals.json').deals[0].approvalBlock, undefined);
-  assert.equal(read('deal-review-feedback.json').events[0].publicationStatus, 'published');
+  assert.equal(fs.existsSync(path.join(temp, 'docs/deal-review-feedback.json')), false);
   assert.match(notices.at(-1).text, /Prüfung bestanden/, 'resolved failures must not leave a stale blocking notice');
 
-  // Reconstruct a previously lost queue entry from our own stored Slack message
-  // and community source record, then run the same validation/approval path.
+  // A deleted/expired private queue entry must not be recovered from Slack.
   const recoverable = { ...source, expires: nextMonth, validUntil: nextMonth, expiresOriginal: nextMonth };
+  write('deal-review-feedback.json', { events: [{ dealId: source.id, slackTs: source.slackTs,
+    slackThreadTs: source.slackThreadTs, originSource: source.originSource }] });
   write('deals.json', { deals: [], totalDeals: 0 });
   write('deals-pending-community.json', { deals: [recoverable] });
   message.text = '*Community-Einreichung – noch nicht geprüft*\n' + buildSlackMessage(recoverable, 1);
@@ -97,9 +98,7 @@ try {
   message.text = message.text.replace(/\n/g, ' ');
   repliesAllowed = false;
   await main();
-  assert.equal(read('deals.json').deals.length, 1, 'lost queue entry can be recovered');
-  assert.equal(read('deals.json').deals[0].title, source.title);
-  assert.equal(read('deals.json').deals[0].type, 'bogo');
+  assert.equal(read('deals.json').deals.length, 0, 'private queue entry is required');
   const published = read('deals.json');
   await main();
   assert.deepEqual(read('deals.json'), published, 'repeated approval must not duplicate or refresh the live deal');

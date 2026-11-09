@@ -7,6 +7,7 @@ import { spawnSync } from 'child_process';
 import { stampDealsFeedFile } from './deals-feed-contract.mjs';
 import { mergeSourceOutbox } from './generated-source-merge.mjs';
 import { maintainFeedFile } from './automatic-deal-maintenance.mjs';
+import { privateCommunityRow } from './community-private-state.mjs';
 
 const DEFAULT_REMOTE = process.env.GIT_GENERATED_REMOTE || 'origin';
 const DEFAULT_BRANCH = process.env.GIT_GENERATED_BRANCH || process.env.GITHUB_REF_NAME || 'main';
@@ -180,6 +181,20 @@ function captureFile(filePath) {
     mode: modeMatch?.[1] || (stat.mode & 0o111 ? '100755' : '100644'),
     content: fs.readFileSync(absolutePath),
   };
+}
+
+function assertNoPrivateCommunityOutput(states) {
+  for (const state of states) {
+    if (!state.exists) continue;
+    if (state.path.startsWith('.community-internal/') || state.path === 'docs/deals-pending-community.json') {
+      throw new Error('Refusing to publish a private community state file');
+    }
+    if (!['docs/deals-pending-all.json', 'docs/deal-review-feedback.json'].includes(state.path)) continue;
+    const value = JSON.parse(state.content.toString('utf8'));
+    if ([...(value.deals || []), ...(value.events || [])].some(privateCommunityRow)) {
+      throw new Error('Refusing to publish a private community record');
+    }
+  }
 }
 
 function captureFiles(files) {
@@ -669,6 +684,7 @@ async function main() {
   }
 
   const states = captureFiles(changedFiles);
+  assertNoPrivateCommunityOutput(states);
   const mapConsistency = captureMapConsistency(states, baseRef, mapReadInputs);
   const blogConsistency = captureBlogConsistency(states, baseRef);
   const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), 'commit-generated-'));
@@ -685,6 +701,7 @@ async function main() {
         skipConflicts: options.skipConflicts,
         replaceConflicts: options.replaceConflicts,
       });
+      assertNoPrivateCommunityOutput(safeStates);
       if(photoConsistency) {
         const retained=new Map(safeStates.map(state=>[state.path,state]));
         for(const input of photoConsistency) {

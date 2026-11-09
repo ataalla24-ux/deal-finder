@@ -12,7 +12,7 @@ const ROOT = path.join(__dirname, '..');
 const DOCS_DIR = path.join(ROOT, 'docs');
 const ENV_PATH = path.join(ROOT, '.env');
 const PUSH_CONFIG_PATH = path.join(DOCS_DIR, 'push-config.json');
-const OUTPUT_PATH = path.join(DOCS_DIR, 'deals-pending-community.json');
+const OUTPUT_PATH = path.join(ROOT, '.community-internal/intake.json');
 
 function loadEnvFile() {
   if (!fs.existsSync(ENV_PATH)) return;

@@ -120,7 +120,8 @@ test('form escapes all values, never truncates existing text or enables scripts'
 
 test('signed route dispatches full new period to draft workflow only; invalid requests never dispatch', async () => {
   const env = { DEAL_REMOVE_LINK_SECRET: 'offline-secret', GITHUB_WORKFLOW_TOKEN: 'offline-token' };
-  const payload = Buffer.from(JSON.stringify({ dealId: base.dealId, scope: 'pending-edit' })).toString('base64url');
+  const id = 'public-source-draft-test';
+  const payload = Buffer.from(JSON.stringify({ dealId: id, scope: 'pending-edit' })).toString('base64url');
   const sig = createHmac('sha256', env.DEAL_REMOVE_LINK_SECRET).update(payload).digest('hex');
   const previousFetch = globalThis.fetch;
   const dispatches = [];
@@ -129,7 +130,7 @@ test('signed route dispatches full new period to draft workflow only; invalid re
       dispatches.push({ url: String(url), body: JSON.parse(init.body) });
       return new Response(null, { status: 204 });
     }
-    return Response.json({ deals: [{ ...base, id: base.dealId, expires: '', validityText: undefined,
+    return Response.json({ deals: [{ ...base, id, expires: '', validityText: undefined,
       expiresOriginal: '07.11.2026, 12:00 bis 07.11.2026, 21:00 Uhr' }] });
   };
   const endpoint = 'https://test/api/deals/admin/pending-edit';
@@ -161,4 +162,23 @@ test('signed route dispatches full new period to draft workflow only; invalid re
     assert.equal(bad.status, 401);
     assert.equal(dispatches.length, 1);
   } finally { globalThis.fetch = previousFetch; }
+});
+
+test('community edit is private, signed, and keeps the original expiry of the review record', async () => {
+  const submittedAt = new Date(Date.now() - 3600000).toISOString();
+  const values = new Map([['community:review:queue:test', { ...base, id: base.dealId, submittedAt }]]);
+  const env = { DEAL_REMOVE_LINK_SECRET: 'offline-secret', REFERRAL_KV: {
+    get: async key => values.get(key) || null,
+    put: async (key, value, options) => { values.set(key, JSON.parse(value)); assert.equal(options.expiration, Math.floor((Date.parse(submittedAt) + 14 * 86400000) / 1000)); },
+  } };
+  const endpoint = 'https://test/api/deals/admin/pending-edit';
+  const payload = Buffer.from(JSON.stringify({ dealId: base.dealId, scope: 'pending-edit' })).toString('base64url');
+  const sig = createHmac('sha256', env.DEAL_REMOVE_LINK_SECRET).update(payload).digest('hex');
+  const response = await worker.fetch(new Request(endpoint, { method: 'POST',
+    body: new URLSearchParams({ ...picker, payload, sig }) }), env);
+  assert.equal(response.status, 200);
+  assert.equal(values.get('community:review:edit:test').validUntil, '2026-11-07');
+  assert.equal(values.get('community:review:edit:test').submittedAt, submittedAt);
+  values.delete('community:review:queue:test');
+  assert.equal((await worker.fetch(new Request(`${endpoint}?payload=${payload}&sig=${sig}`), env)).status, 409);
 });

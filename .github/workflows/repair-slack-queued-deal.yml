@@ -56,13 +56,18 @@ jobs:
 
       - name: Repair exact queued deal
         env:
+          COMMUNITY_SYNC_TOKEN: ${{ secrets.COMMUNITY_SYNC_TOKEN }}
+          SLACK_QUEUE_REPAIR_QUEUE_PATH: .community-internal/queue.json
           SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
           SLACK_CHANNEL_ID: ${{ secrets.SLACK_CHANNEL_ID }}
           SLACK_QUEUE_REPAIR_ACTION: ${{ inputs.action }}
           SLACK_QUEUE_REPAIR_URL: ${{ inputs.deal_url }}
           SLACK_QUEUE_REPAIR_DEAL_ID: ${{ inputs.deal_id }}
           SLACK_QUEUE_REPAIR_SOURCE_PATH: ${{ inputs.source_file }}
-        run: node scripts/repair-slack-queued-deal.mjs
+        run: |
+          node scripts/community-private-state.mjs hydrate
+          node scripts/repair-slack-queued-deal.mjs
+          node scripts/community-private-state.mjs persist
 
       - name: Commit repaired queue
         run: node scripts/commit-generated.mjs --message "Repair queued Slack deal" --files docs/deals-pending-all.json

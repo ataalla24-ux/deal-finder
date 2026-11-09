@@ -16,6 +16,49 @@ function calendarDay(value) {
   return value;
 }
 
+export function applyPendingEdit(document, edit) {
+  const deal = document.deals.find(item => item.id === edit.dealId);
+  if (!deal) throw new Error('Deal is no longer pending; no live data changed');
+  const normalized = normalizePendingEdit(edit);
+  const hasPeriod = typeof normalized.validityText === 'string';
+  const periodChanged = hasPeriod && pendingEditorValues(deal).validityText !== normalized.validityText;
+  const fields = ['title', 'brand', 'description', 'distance', 'url'];
+  const expiryChanged = !hasPeriod && String(deal.expires || '').slice(0, 10) !== normalized.expires;
+  for (const field of fields) deal[field] = normalized[field];
+  // The form's address is also structured evidence, not just card display text.
+  deal.address = normalized.distance;
+  fields.push('address');
+  if (hasPeriod) {
+    deal.validityText = normalized.validityText;
+    fields.push('validityText', ...periodFields);
+    if (periodChanged) {
+      for (const field of periodFields) {
+        delete deal[field];
+        if (normalized[field] !== undefined) deal[field] = normalized[field];
+      }
+      deal.expirySource = 'slack.human-review';
+      deal.expiresSource = 'slack.human-review';
+    }
+  } else {
+    deal.expires = normalized.expires;
+    fields.push('expires');
+  }
+  // An explicit date correction must not leave competing inferred dates behind.
+  if (expiryChanged) {
+    for (const field of ['validOn', 'validFrom', 'validUntil', 'expiresOriginal', 'expiryKind', 'expiryDisplayText']) delete deal[field];
+    deal.validUntil = normalized.expires;
+    deal.expiresOriginal = normalized.expires;
+    deal.expirySource = 'slack.human-review';
+    deal.expiresSource = 'slack.human-review';
+  }
+  deal.editedInSlack = true;
+  deal.slackEditedAt = new Date().toISOString();
+  deal.slackFormEditTs = String(Date.now() / 1000);
+  deal.slackEditedFields = [...new Set([...(deal.slackEditedFields || []), ...fields])];
+  return deal;
+}
+
+
 function clock(value) {
   if (!/^(?:[01]\d|2[0-3]):[0-5]\d$/.test(value)) throw new Error('Bitte gültige Start- und Endzeiten eingeben.');
   return value;

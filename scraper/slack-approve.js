@@ -29,7 +29,7 @@ const __dirname = path.dirname(__filename);
 const ROOT = path.join(__dirname, '..');
 const DOCS_DIR = path.join(ROOT, 'docs');
 const DEALS_JSON_PATH = path.join(DOCS_DIR, 'deals.json');
-const PENDING_ALL_PATH = path.join(DOCS_DIR, 'deals-pending-all.json');
+const PENDING_ALL_PATH = process.env.COMMUNITY_QUEUE_PATH || path.join(DOCS_DIR, 'deals-pending-all.json');
 const REVIEW_FEEDBACK_PATH = path.join(DOCS_DIR, 'deal-review-feedback.json');
 const ENV_PATH = path.join(ROOT, '.env');
 
@@ -743,6 +743,12 @@ function normalizePendingDeal(raw) {
   };
 }
 
+function redactPublishedCommunityDraft(deal) {
+  if (!isCommunitySubmission(deal)) return deal;
+  const { submittedContent, communityExtraction, ...published } = deal;
+  return published;
+}
+
 async function validateApprovalCandidates(deals, options = {}) {
   const now = options.now instanceof Date ? options.now : new Date();
   const existingDeals = options.existingDeals ?? loadExistingApprovedDeals();
@@ -851,6 +857,7 @@ function formatApprovalValidationReasons(validation) {
   return ensureArray(validation?.results)
     .filter((result) => !result?.decision?.allowed)
     .map((result) => {
+      if (isCommunitySubmission(result?.deal)) return 'Community-Entwurf: Prüfung fehlgeschlagen (Details nur in Slack)';
       const label = cleanText(result?.deal?.title || result?.deal?.id || result?.deal?.url) || 'Deal';
       const reasons = ensureArray(result?.decision?.reasons).map(cleanText).filter(Boolean).join('; ');
       return `${label}: ${reasons || 'Gültigkeitsprüfung fehlgeschlagen'}`;
@@ -1045,6 +1052,7 @@ async function getReactions(messageTs, channelId = SLACK_CHANNEL_ID) {
 }
 
 function persistReviewDecision(store, deal, decision, options = {}) {
+  if (isCommunitySubmission(deal)) return store;
   const next = upsertReviewFeedback(store, deal, {
     decision,
     user: options.user,
@@ -1164,20 +1172,6 @@ async function runTargetedApproval({ moderation, botUserId }) {
       console.log('Targeted Slack deal is already published; no changes');
       return true;
     }
-    if (event?.originSource === 'community-submission' && event.slackThreadTs) {
-      // reactions.get includes the exact message and works with bot tokens
-      // whose scopes do not permit reading a channel's full reply history.
-      const reactionData = await slackApi(`https://slack.com/api/reactions.get?channel=${encodeURIComponent(targetChannel)}&timestamp=${encodeURIComponent(APPROVE_SLACK_MESSAGE_TS)}`);
-      const message = reactionData.ok ? reactionData.message : null;
-      const recovered = recoverTargetedCommunityDeal(message, event,
-        ensureArray(loadJson(path.join(DOCS_DIR, 'deals-pending-community.json'), {}).deals), botUserId);
-      if (recovered) {
-        targetDeal = filterModeratedDeals([recovered], moderation).deals[0];
-        if (targetDeal) queuedDeals.push(targetDeal);
-      } else {
-        console.warn(`Community queue recovery could not match the recorded bot message: ${reactionData.error || 'message_or_source_mismatch'}`);
-      }
-    }
   }
   if (!targetDeal) {
     console.log('ℹ️ Targeted Slack message is not in the pending queue anymore');
@@ -1224,7 +1218,7 @@ async function runTargetedApproval({ moderation, botUserId }) {
       at: decisionAt,
     });
     savePendingRemaining(remainingPending);
-    console.log(`❌ Slack-Kandidat manuell abgelehnt: ${rejectedDeal.title || rejectedDeal.url}`);
+    console.log('❌ Slack-Kandidat manuell abgelehnt');
     return true;
   }
 
@@ -1248,7 +1242,7 @@ async function runTargetedApproval({ moderation, botUserId }) {
       validationReasons: reasons,
       at: decisionAt,
     });
-    console.log(`🚫 blocked expired/invalid Slack deal: ${manuallyApprovedDeal.title || manuallyApprovedDeal.url}`);
+    console.log('🚫 blocked expired/invalid Slack deal');
     savePendingRemaining([...remainingPending, await retainBlockedApproval(manuallyApprovedDeal, reasons)]);
     return true;
   }
@@ -1263,7 +1257,7 @@ async function runTargetedApproval({ moderation, botUserId }) {
       validationReasons: reasons,
       at: decisionAt,
     });
-    console.log(`🚫 Slack-Approval durch aktuelle Gültigkeitsprüfung blockiert: ${reasons.join(' | ')}`);
+    console.log('🚫 Slack-Approval durch aktuelle Gültigkeitsprüfung blockiert');
     savePendingRemaining([...remainingPending, await retainBlockedApproval(
       approvalValidation.blockedDeals[0] || manuallyApprovedDeal, reasons)]);
     return true;
@@ -1302,7 +1296,7 @@ async function runTargetedApproval({ moderation, botUserId }) {
   const existingApprovedDeals = loadExistingApprovedDealsForMerge(moderation);
   const publishedAt = new Date();
   const publishedDeals = approvedModeration.deals.map((deal) => (
-    advanceDealLifecycle(deal, 'published', { at: publishedAt })
+    redactPublishedCommunityDraft(advanceDealLifecycle(deal, 'published', { at: publishedAt }))
   ));
   const mergedApproved = mergeApprovedDeals(existingApprovedDeals, publishedDeals);
   saveDealsJson(mergedApproved);
@@ -1371,7 +1365,6 @@ async function main() {
     console.log(`🧭 using recent digest discovery fallback: ${threadCandidates.length} thread(s)`);
   }
 
-  const threadMessagesByThread = new Map();
   const messageByTs = new Map();
   const pendingDeals = [];
   let appliedEditCount = 0;
@@ -1379,15 +1372,17 @@ async function main() {
 
   for (const threadTs of threadCandidates) {
     const threadMessages = await getThreadMessages(threadTs);
-    threadMessagesByThread.set(threadTs, threadMessages);
     console.log(`🧵 loaded digest thread ${threadTs}: ${threadMessages.length} messages`);
 
     for (const msg of threadMessages) {
       if (msg?.ts) messageByTs.set(String(msg.ts), msg);
     }
 
-    const parsedDeals = extractDealsFromThreadMessages(threadMessages);
     const queueDealsForThread = queuedDeals.filter((deal) => cleanText(deal.slackThreadTs) === threadTs);
+    const parsedDeals = extractDealsFromThreadMessages(threadMessages).filter(deal => (
+      !String(deal.id || '').startsWith('community:')
+      || queueDealsForThread.some(row => row.id === deal.id && row.slackTs === deal.slackTs)
+    ));
     const basePendingDeals = mergeParsedDealsWithQueue(parsedDeals, queueDealsForThread);
     const editResult = applySlackEdits(basePendingDeals, threadMessages);
     pendingDeals.push(...editResult.deals);
@@ -1435,17 +1430,10 @@ async function main() {
   }
   console.log(`✏️ Slack edits applied: ${appliedEditCount}`);
   if (unresolvedEditTargets.length > 0) {
-    console.log(`⚠️ Unresolved edit targets: ${[...new Set(unresolvedEditTargets)].join(', ')}`);
+    console.log(`⚠️ Unresolved edit targets: ${new Set(unresolvedEditTargets).size}`);
   }
 
   if (approvalCheckDeals.length === 0) {
-    const sampleThread = threadMessagesByThread.get(threadCandidates[0]) || [];
-    const sample = sampleThread.find((msg) => cleanText(msg?.ts) !== threadCandidates[0]);
-    if (sample) {
-      console.log('🧪 sample digest message text:', JSON.stringify(extractSlackMessageText(sample).slice(0, 1000)));
-      console.log('🧪 sample digest message keys:', Object.keys(sample).slice(0, 20).join(','));
-      console.log('🧪 sample digest has blocks:', Array.isArray(sample.blocks), 'blockCount:', Array.isArray(sample.blocks) ? sample.blocks.length : 0);
-    }
     console.log('✅ Keine offenen Slack-Deals zum Prüfen');
     savePendingRemaining(uniqueDealsByApprovalKey([...queuedDeals, ...deferredPendingDeals]));
     return;
@@ -1498,13 +1486,13 @@ async function main() {
           validationReasons: reasons,
           at: decisionAt,
         });
-        console.log(`  🚫 blocked expired/invalid Slack deal: ${approvedDeal.title || approvedDeal.url}`);
+        console.log('  🚫 blocked expired/invalid Slack deal');
         unapproved.push(await retainBlockedApproval(approvedDeal, reasons));
       } else {
         approved.push({ ...approvedDeal, approvedAt: decisionAt.toISOString() });
       }
     } else if (isBlockedApprovalDeal(deal)) {
-      console.log(`  🚫 blocked expired/invalid Slack deal: ${deal.title || deal.url}`);
+      console.log('  🚫 blocked expired/invalid Slack deal');
     } else {
       unapproved.push(deal);
     }
@@ -1583,7 +1571,7 @@ async function main() {
 
   const publishedAt = new Date();
   const publishedDeals = approvedModeration.deals.map((deal) => (
-    advanceDealLifecycle(deal, 'published', { at: publishedAt })
+    redactPublishedCommunityDraft(advanceDealLifecycle(deal, 'published', { at: publishedAt }))
   ));
   const mergedApproved = mergeApprovedDeals(existingApprovedDeals, publishedDeals);
 

@@ -2,6 +2,9 @@ import { isFoodOrDrinkDeal } from '../../scraper/native-weekly-utils.js';
 import { readPublicDealRecords, invalidatePublicDealRecords } from './public-deal-state-cache.js';
 import { DailyPushService } from './daily-push.js';
 import * as pendingDealEditor from './pending-deal-editor.js';
+import { acknowledgeCommunitySlackCleanup, activeCommunityRecord, communityExpiry, dueCommunitySlackReceipts,
+  getCommunityReview, listCommunityKeys, purgeExpiredCommunitySubmissions, putCommunityReview,
+  readCommunityKeys, readCommunityReviewScope, updateCommunityReviewScope } from './community-review-state.js';
 
 const JSON_HEADERS = {
   'content-type': 'application/json; charset=utf-8',
@@ -492,13 +495,11 @@ async function listCommunitySubmissions(env, options = {}) {
       .map(normalizeSubmissionStatus)
       .filter(Boolean)
   );
-  const listed = await env.REFERRAL_KV.list({ prefix: 'deal:submission:', limit });
-  const keys = Array.isArray(listed?.keys) ? listed.keys : [];
+  const keys = await listCommunityKeys(env.REFERRAL_KV, 'deal:submission:');
   const records = [];
 
-  for (const entry of keys) {
-    const record = await getJsonKV(env, entry.name);
-    if (!record || !record.id) continue;
+  for (const record of await readCommunityKeys(env.REFERRAL_KV, keys.map(entry => entry.name))) {
+    if (!record?.id || !activeCommunityRecord(record)) continue;
     if (statuses.size > 0 && !statuses.has(normalizeSubmissionStatus(record.status))) continue;
     records.push(record);
   }
@@ -516,7 +517,7 @@ async function findExistingSubmissionByUrl(env, targetUrl) {
 
   for (const entry of keys) {
     const record = await getJsonKV(env, entry.name);
-    if (!record || !record.id) continue;
+    if (!record?.id || !activeCommunityRecord(record)) continue;
     if (normalizeSubmissionUrl(record.url) !== normalizedUrl) continue;
     const status = normalizeSubmissionStatus(record.status);
     if (status === 'pending' || status === 'queued') return record;
@@ -2467,7 +2468,11 @@ async function handlePendingDealEdit(request, env) {
   const signed = await readSignedDealEditRequest(request, env, 'pending-edit');
   if (signed.error) return dealRemovalHtml('Bearbeiten nicht moeglich', signed.error, signed.status);
   let deal;
+  const internalCommunity = signed.base.dealId.startsWith('community:');
   try {
+    if (internalCommunity) {
+      deal = await loadPrivateCommunityQueueDeal(env.REFERRAL_KV, signed.base.dealId);
+    } else {
     const owner = envString(env, 'GITHUB_OWNER') || 'ataalla24-ux';
     const repo = envString(env, 'GITHUB_REPO') || 'deal-finder';
     const response = await fetch(`https://api.github.com/repos/${encodeURIComponent(owner)}/${encodeURIComponent(repo)}/contents/docs/deals-pending-all.json?ref=main`, { headers: {
@@ -2476,6 +2481,7 @@ async function handlePendingDealEdit(request, env) {
     } });
     if (!response.ok) throw new Error('Unavailable');
     deal = (await response.json()).deals?.find(item => item.id === signed.base.dealId);
+    }
   } catch { return dealRemovalHtml('Bitte erneut versuchen', 'Entwurf konnte nicht geladen werden.', 502); }
   if (!deal) return dealRemovalHtml('Nicht mehr in der Warteschlange', 'Dieser Deal ist nicht mehr zur Freigabe vorgemerkt.', 409);
   if (request.method === 'POST') {
@@ -2488,11 +2494,25 @@ async function handlePendingDealEdit(request, env) {
           includeTime: signed.fields.includeTime || '' }, error: error.message }, 400);
     }
     try {
+      if (internalCommunity) {
+        const updated = pendingDealEditor.applyPendingEdit({ deals: [deal] }, edit);
+        if (!await putCommunityReview(env.REFERRAL_KV, 'edit', updated)) {
+          return dealRemovalHtml('Nicht gespeichert', 'Die Prueffrist fuer diesen Entwurf ist abgelaufen.', 409);
+        }
+        return dealRemovalHtml('Entwurf gespeichert', 'Die Aenderung ist intern gespeichert. Die urspruengliche Slack-Nachricht kann separat freigegeben werden. Es wird nichts automatisch veroeffentlicht.');
+      }
       await triggerDealEditWorkflow(env, edit, true);
       return dealRemovalHtml('Aenderung beauftragt', 'Der Entwurf wird aktualisiert. Warte auf die Bestaetigung im Slack-Thread, bevor du ihn freigibst. Es wird nichts automatisch veroeffentlicht.');
     } catch { return dealRemovalHtml('Nicht gespeichert', 'Der Auftrag konnte nicht gestartet werden. Bitte erneut versuchen.', 502); }
   }
   return pendingDealEditor.renderPendingEditor({ deal, payload: signed.payload, sig: signed.sig });
+}
+
+async function loadPrivateCommunityQueueDeal(kv, id, stored) {
+  const row = stored || await getCommunityReview(kv, 'queue', id);
+  if (!row) return null;
+  const edited = await getCommunityReview(kv, 'edit', id);
+  return edited && Number(edited.slackFormEditTs) > Number(row.slackFormEditTs || 0) ? edited : row;
 }
 
 async function handleSignedDealEditLink(request, env) {
@@ -4223,10 +4243,14 @@ function dailyPushStub(env) {
 }
 
 export default {
-  async scheduled(_controller, env) {
+  async scheduled(controller, env) {
     if (env.DAILY_DEAL_PUSH && (env.DAILY_PUSH_ENABLED === '1' || env.MARKETING_PUSH_ENABLED === '1')) {
       try { await dailyPushStub(env).fetch('https://push.internal/tick', { method: 'POST' }); }
       catch { console.warn('daily_push_schedule_failed'); }
+    }
+    if (controller?.cron === '0 7,8 * * *' && new Date(controller.scheduledTime).getUTCHours() === 8) {
+      try { await purgeExpiredCommunitySubmissions(env.REFERRAL_KV); }
+      catch { console.warn('community_retention_cleanup_failed'); }
     }
     const { runDiscoveryWatchdog } = await import('./discovery-watchdog.js');
     try {
@@ -4621,11 +4645,10 @@ export default {
           slackDeliveryPending: normalizeSubmissionStatus(existing.status) === 'pending',
           intakeTriggered: Boolean(intakeWorkflow?.ok),
           intakeWorkflow,
-          submission: sanitizePublicCommunitySubmission(existing),
         });
       }
 
-      await putJsonKV(env, dealSubmissionKey(submission.id), submission);
+      await putJsonKV(env, dealSubmissionKey(submission.id), submission, { expiration: Math.floor(communityExpiry(submission) / 1000) });
       const intakeWorkflow = await triggerCommunityIntakeSafely(env);
       return json({
         ok: true,
@@ -4654,11 +4677,10 @@ export default {
           slackDeliveryPending: normalizeSubmissionStatus(existing.status) === 'pending',
           intakeTriggered: Boolean(intakeWorkflow?.ok),
           intakeWorkflow,
-          submission: sanitizePublicCommunitySubmission(existing),
         });
       }
 
-      await putJsonKV(env, dealSubmissionKey(submission.id), submission);
+      await putJsonKV(env, dealSubmissionKey(submission.id), submission, { expiration: Math.floor(communityExpiry(submission) / 1000) });
       const intakeWorkflow = await triggerCommunityIntakeSafely(env);
       return json({
         ok: true,
@@ -4669,6 +4691,33 @@ export default {
         intakeWorkflow,
         submission: sanitizePublicCommunitySubmission(submission),
       }, 201);
+    }
+
+    if (path === '/api/deals/submissions/admin/review-state' && ['GET', 'POST'].includes(request.method)) {
+      if (!requireCommunitySync(request, env) && !requireAdmin(request, env)) return invalid('Unauthorized', 401);
+      const scope = url.searchParams.get('scope');
+      if (scope === 'receipts') {
+        if (request.method === 'GET') return json({ ok: true, timestamps: await dueCommunitySlackReceipts(env.REFERRAL_KV) });
+        try { await acknowledgeCommunitySlackCleanup(env.REFERRAL_KV, (await readBody(request))?.timestamps); }
+        catch { return invalid('Invalid Slack cleanup receipts', 422); }
+        return json({ ok: true });
+      }
+      if (!['intake', 'queue'].includes(scope)) return invalid('Invalid review scope');
+      if (request.method === 'GET') {
+        const rows = await readCommunityReviewScope(env.REFERRAL_KV, scope);
+        const edits = scope === 'queue' ? await readCommunityReviewScope(env.REFERRAL_KV, 'edit') : [];
+        const byId = new Map(edits.map(row => [row.id, row]));
+        const deals = rows.map(row => {
+          const edit = byId.get(row.id);
+          return edit && Number(edit.slackFormEditTs) > Number(row.slackFormEditTs || 0) ? edit : row;
+        });
+        return json({ ok: true, deals });
+      }
+      const input = await readBody(request);
+      try {
+        const updated = await updateCommunityReviewScope(env.REFERRAL_KV, scope, input);
+        return json({ ok: true, updated });
+      } catch { return invalid('Community review update failed', 422); }
     }
 
     if (path === '/api/deals/submissions/admin/pending' && request.method === 'GET') {
@@ -4704,7 +4753,9 @@ export default {
       let updated = 0;
       for (const id of ids) {
         const existing = await getJsonKV(env, dealSubmissionKey(id));
-        if (!existing || !existing.id) continue;
+        if (!existing?.id || !activeCommunityRecord(existing)) continue;
+        const expiry = communityExpiry(existing);
+        if (expiry <= Date.now() + 60000) continue;
         if (normalizeSubmissionStatus(existing.status) !== 'pending') continue;
         const next = {
           ...existing,
@@ -4712,7 +4763,7 @@ export default {
           postedAt: existing.postedAt || Date.now(),
           updatedAt: Date.now(),
         };
-        await putJsonKV(env, dealSubmissionKey(id), next);
+        await putJsonKV(env, dealSubmissionKey(id), next, { expiration: Math.floor(expiry / 1000) });
         updated += 1;
       }
 

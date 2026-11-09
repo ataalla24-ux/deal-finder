@@ -60,7 +60,7 @@ const __dirname = path.dirname(__filename);
 const ROOT = path.join(__dirname, '..');
 const DOCS_DIR = path.join(ROOT, 'docs');
 const LIVE_DEALS_PATH = path.join(DOCS_DIR, 'deals.json');
-const PENDING_ALL_PATH = path.join(DOCS_DIR, 'deals-pending-all.json');
+const PENDING_ALL_PATH = process.env.COMMUNITY_QUEUE_PATH || path.join(DOCS_DIR, 'deals-pending-all.json');
 const SLACK_SEEN_CACHE_PATH = path.join(DOCS_DIR, 'slack-seen-posts.json');
 const KEY4_REVIEW_PATH = path.join(DOCS_DIR, 'deals-review-firecrawl4.json');
 const SOCIAL_FOOD_REVIEW_PATH = path.join(DOCS_DIR, 'deals-review-social-food.json');
@@ -479,6 +479,7 @@ function normalizeDealWithGraphEvidence(rawDeal, sourceKey, graphEvidence) {
 function getPendingFiles() {
   const allPendingFiles = fs.readdirSync(DOCS_DIR).filter((file) => {
     if (!file.startsWith('deals-pending-') || !file.endsWith('.json')) return false;
+    if (file === 'deals-pending-community.json') return false;
     return !EXCLUDED_PENDING_FILES.has(file);
   });
   if (!cleanText(PENDING_FILE_NAMES)) {
@@ -496,9 +497,10 @@ function loadPendingDeals(files, graphEvidence = new Map()) {
   const deals = [];
   console.log(`📂 Found ${files.length} pending deal files`);
 
-  for (const file of files) {
+  for (const file of [...files, ...(process.env.COMMUNITY_QUEUE_PATH ? ['deals-pending-community.json'] : [])]) {
     const sourceKey = file.replace(/^deals-pending-/, '').replace(/\.json$/, '');
-    const filePath = path.join(DOCS_DIR, file);
+    const filePath = file === 'deals-pending-community.json' && process.env.COMMUNITY_QUEUE_PATH
+      ? path.join(ROOT, '.community-internal/intake.json') : path.join(DOCS_DIR, file);
     try {
       const parsed = JSON.parse(fs.readFileSync(filePath, 'utf-8'));
       const items = ensureArray(parsed.deals || parsed);
@@ -2018,12 +2020,11 @@ async function main() {
       markDealSlackSent(deal, ts, headerTs, sentAt);
       deal.order = i + 1;
       postedDeals.push(deal);
-      reviewFeedback = upsertReviewFeedback(reviewFeedback, deal, {
-        slackSentAt: sentAt,
-        at: sentAt,
-      });
-      writeReviewFeedback(REVIEW_FEEDBACK_PATH, reviewFeedback);
-      if (addSeenDealsFromThread(seenPostKeys, [deal]) > 0) {
+      if (!isCommunitySubmission(deal)) {
+        reviewFeedback = upsertReviewFeedback(reviewFeedback, deal, { slackSentAt: sentAt, at: sentAt });
+        writeReviewFeedback(REVIEW_FEEDBACK_PATH, reviewFeedback);
+      }
+      if (!isCommunitySubmission(deal) && addSeenDealsFromThread(seenPostKeys, [deal]) > 0) {
         writeSeenPostCache(seenPostKeys);
       }
 

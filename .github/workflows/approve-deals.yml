@@ -63,6 +63,9 @@ jobs:
       - name: ✅ Read Slack ✅ Reactions & Approve
         id: approval
         env:
+          COMMUNITY_SYNC_TOKEN: ${{ secrets.COMMUNITY_SYNC_TOKEN }}
+          COMMUNITY_QUEUE_PATH: .community-internal/queue.json
+          SENTRY_DISABLED: '1'
           SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
           SLACK_CHANNEL_ID: ${{ secrets.SLACK_CHANNEL_ID }}
           APPROVE_SLACK_CHANNEL_ID: ${{ github.event.inputs.slack_channel }}
@@ -76,7 +79,9 @@ jobs:
           APPROVAL_REQUIRE_MAP: '1'
           APPROVAL_MAP_GEOCODE_REQUESTS: '8'
         run: |
+          node scripts/community-private-state.mjs hydrate
           node scraper/slack-approve.js
+          node scripts/community-private-state.mjs stage-public
           if git diff --quiet -- docs/deals.json; then
             echo "feed_changed=false" >> "$GITHUB_OUTPUT"
           else
@@ -114,3 +119,8 @@ jobs:
           DEAL_COUNT=$(cat docs/deals.json | python3 -c "import sys, json; print(json.load(sys.stdin)['totalDeals'])" 2>/dev/null || echo "?")
           TIMESTAMP=$(date -u +"%H:%M")
           node scripts/commit-generated.mjs --message "✅ ${TIMESTAMP} - Genehmigte Deals (${DEAL_COUNT} total)" --files docs/deals.json docs/deals-pending-all.json docs/deal-review-feedback.json docs/instagram-merchant-registry.json docs/live-deal-validation-report.json docs/live-deal-review-candidates.json docs/live-deal-edit-report.json docs/assets/brand-logos docs/vienna-food-benefit-pause.json docs/carrier-benefit-pause.json docs/deal-map-locations.json reviews/map-location-catalog.json reviews/map-geocode-cache.json reviews/approval-map-readiness.json
+
+      - name: Persist private review changes after successful publication
+        env:
+          COMMUNITY_SYNC_TOKEN: ${{ secrets.COMMUNITY_SYNC_TOKEN }}
+        run: node scripts/community-private-state.mjs save-queue

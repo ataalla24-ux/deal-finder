@@ -6,18 +6,21 @@ on:
   workflow_dispatch:
 
 concurrency:
-  group: community-intake
+  group: deal-state-writer
   cancel-in-progress: false
+  queue: max
 
 jobs:
   intake:
     runs-on: ubuntu-latest
     permissions:
-      contents: write
+      contents: read
 
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v4
+        with:
+          ref: main
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
@@ -34,15 +37,14 @@ jobs:
           node scripts/test-community-review.mjs
           SENTRY_DISABLED=1 node --test scripts/test-community-card-enrichment.mjs
 
-      - name: Fetch community submissions
+      - name: Process submissions in private storage
         env:
           COMMUNITY_SYNC_TOKEN: ${{ secrets.COMMUNITY_SYNC_TOKEN }}
           OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
           GH_TOKEN: ${{ github.token }}
           FIRECRAWL_API_KEY: ${{ secrets.FIRECRAWL_API_KEY }}
-        run: node scraper/fetch-community-submissions.js
-
-      - name: Commit intake state
-        if: always()
+          SENTRY_DISABLED: '1'
         run: |
-          node scripts/commit-generated.mjs --skip-conflicts --message "Community intake state $(date +%Y-%m-%d-%H%M)" --files docs/deals-pending-community.json
+          node scripts/community-private-state.mjs load-intake
+          node scraper/fetch-community-submissions.js
+          node scripts/community-private-state.mjs save-intake
