@@ -2,6 +2,7 @@ name: Community review retention
 on:
   schedule:
     - cron: '46 8 * * *'
+  workflow_dispatch:
 concurrency:
   group: deal-state-writer
   cancel-in-progress: false
@@ -19,7 +20,13 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
+      - name: Verify private access without writes
+        if: github.event_name == 'workflow_dispatch'
+        env:
+          COMMUNITY_SYNC_TOKEN: ${{ secrets.COMMUNITY_SYNC_TOKEN }}
+        run: node scripts/community-private-state.mjs verify
       - name: Delete expired bot messages from the review channel
+        if: github.event_name == 'schedule'
         env:
           COMMUNITY_SYNC_TOKEN: ${{ secrets.COMMUNITY_SYNC_TOKEN }}
           SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}

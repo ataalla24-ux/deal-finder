@@ -67,7 +67,11 @@ async function save(scope, changes) {
 
 async function main(action) {
   fs.mkdirSync(dir, { recursive: true, mode: 0o700 });
-  if (action === 'load-intake') {
+  if (action === 'verify') {
+    const [queue, intake, receipts] = await Promise.all([get('queue'), get('intake'), request('receipts')]);
+    if (!Array.isArray(receipts.timestamps)) throw new Error('Invalid retention response');
+    console.log(`Authorized private read: ${queue.length} queue records, ${intake.length} intake records, ${receipts.timestamps.length} cleanup receipts due.`);
+  } else if (action === 'load-intake') {
     write(privateIntake, { deals: await get('intake') });
   } else if (action === 'save-intake') {
     const before = await get('intake');
