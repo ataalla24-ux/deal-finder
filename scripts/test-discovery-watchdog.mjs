@@ -57,10 +57,11 @@ assert.equal(lost, 2, 'no immediate duplicate dispatch after ambiguous network o
 const kv = new MemoryKV();
 const workerEnv = { REFERRAL_KV: kv, COMMUNITY_SYNC_TOKEN: 'test-sync' };
 const ids = Array.from({ length: 34 }, (_, i) => `submission${i}`);
-for (const id of ids) await kv.put(`deal:submission:${id}`, JSON.stringify({ id, status: 'pending' }));
-await kv.put('deal:submission:submission0', JSON.stringify({ id: ids[0], status: 'approved', postedAt: 123 }));
-await kv.put('deal:submission:submission1', JSON.stringify({ id: ids[1], status: 'rejected', postedAt: 123 }));
-await kv.put('deal:submission:submission2', JSON.stringify({ id: ids[2], status: 'queued', postedAt: 123 }));
+const submittedAt = Date.now();
+for (const id of ids) await kv.put(`deal:submission:${id}`, JSON.stringify({ id, status: 'pending', submittedAt }));
+await kv.put('deal:submission:submission0', JSON.stringify({ id: ids[0], status: 'approved', postedAt: 123, submittedAt }));
+await kv.put('deal:submission:submission1', JSON.stringify({ id: ids[1], status: 'rejected', postedAt: 123, submittedAt }));
+await kv.put('deal:submission:submission2', JSON.stringify({ id: ids[2], status: 'queued', postedAt: 123, submittedAt }));
 let calls = 0; const sizes = [];
 const fetchWorker = async (url, init) => {
   calls += 1; sizes.push(JSON.parse(init.body).ids.length);
