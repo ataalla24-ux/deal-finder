@@ -4,6 +4,7 @@ export function automaticMaintenanceReviewCandidates(report, now = new Date()) {
   const reasons = {
     'copy-needs-grounded-review': 'Titel oder vollständige Bedingungen brauchen einen eindeutigen Quellenbeleg',
     'source-year-or-end-not-confirmed': 'Aktionsende oder Jahr nicht eindeutig belegt; bleibt sichtbar',
+    'original-post-date-needs-manual-review': 'Originalpost oder Aktionsdatum nicht eindeutig; bleibt sichtbar',
     'ongoing-extended-or-uncertain': 'Dauerangebot oder mögliche Verlängerung; bleibt sichtbar',
     'newer-manual-period-correction': 'Neuere manuelle Datumsänderung bleibt maßgeblich',
   };
