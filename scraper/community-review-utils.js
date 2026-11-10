@@ -1,16 +1,6 @@
 import { parseExpiryShape } from './expiry-utils.js';
-
-export function isCommunitySubmission(deal) {
-  return String(deal?.id || '').startsWith('community:')
-    && Boolean(String(deal?.submissionId || '').trim())
-    && deal?.originSource === 'community-submission';
-}
-
-export function isHumanReviewedCommunity(deal) {
-  const review = deal?.pipelineLifecycle;
-  return isCommunitySubmission(deal) && review?.manualDecision === 'approved'
-    && Boolean(review.manualDecisionUser) && Number.isFinite(Date.parse(review.manualDecisionAt));
-}
+import { isCommunitySubmission, isHumanReviewedCommunity } from './community-identity-utils.js';
+export { isCommunitySubmission, isHumanReviewedCommunity } from './community-identity-utils.js';
 
 function calendarDate(year, month, day) {
   const date = new Date(Date.UTC(year, month - 1, day));

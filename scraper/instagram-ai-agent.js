@@ -13,11 +13,13 @@ import {
 } from './deal-moderation-utils.js';
 import { normalizeCategoryForScraper } from './category-utils.js';
 import { discoveryRejection } from './deal-discovery-policy.js';
-import { sourceHttpError } from './source-http-policy.js';
 import { requestOpenAi } from './instagram-media-evidence.js';
 import { modelForTask } from './ai-credit-budget.js';
 import { createInstagramWebAccess } from './instagram-web-access-policy.js';
 import { runInstagramSearchQueries } from './instagram-search-discovery.js';
+import { readPublicSearchResponse } from './public-search-response.js';
+import { planInstagramQueries } from './instagram-query-plan.js';
+import { selectInstagramFoodAccounts } from './instagram-food-source-policy.js';
 import { canonicalInstagramPostKey } from './deal-evidence-utils.js';
 import { advanceDealLifecycle } from './deal-lifecycle.js';
 import { parseExpiryShape } from './expiry-utils.js';
@@ -679,17 +681,13 @@ async function searchDuckDuckGo(query) {
       'accept-language': 'de-AT,de;q=0.9,en;q=0.8',
     },
   });
-  if (!response.ok) {
-    await response.body?.cancel();
-    throw sourceHttpError(response.status, response.headers.get('retry-after'));
-  }
-  const html = await response.text();
+  const html = await readPublicSearchResponse(response);
   return parseDuckDuckGoResults(html, query);
 }
 
-function loadWatchlist() {
-  const parsed = readJson(WATCHLIST_PATH, {});
-  const registry = readJson(MERCHANT_REGISTRY_PATH, {});
+export function loadWatchlist(options = {}) {
+  const parsed = options.watchlist || readJson(WATCHLIST_PATH, {});
+  const registry = options.registry || readJson(MERCHANT_REGISTRY_PATH, {});
   const envAccounts = splitEnvList(process.env.INSTAGRAM_AI_PROFILE_ACCOUNTS).map((username) => ({
     username,
     priority: 90,
@@ -698,6 +696,7 @@ function loadWatchlist() {
   }));
   const registryAccounts = Array.isArray(registry.accounts)
     ? registry.accounts.map((account) => ({
+      ...account,
       username: account.username,
       priority: Number(account.priorityScore) || 50,
       category: 'registry',
@@ -706,17 +705,24 @@ function loadWatchlist() {
       viennaVerified: account.viennaVerified === true,
     }))
     : [];
-  const baseAccounts = Array.isArray(parsed.accounts) ? parsed.accounts : [];
+  const baseAccounts = Array.isArray(parsed.accounts) ? parsed.accounts.map(account => ({
+    ...account, origins: [...new Set([...(account.origins || []), 'watchlist'])],
+  })) : [];
   const byUsername = new Map();
   for (const account of [...baseAccounts, ...CORE_PROFILE_ACCOUNTS, ...registryAccounts, ...envAccounts]) {
     const username = cleanText(account.username, 80).toLowerCase();
     if (!username) continue;
     const existing = byUsername.get(username);
-    if (!existing || (Number(account.priority) || 0) > (Number(existing.priority) || 0)) {
-      byUsername.set(username, { ...account, username });
-    }
+    const preferred = !existing || (Number(account.priority) || 0) > (Number(existing.priority) || 0) ? account : existing;
+    byUsername.set(username, {
+      ...existing, ...preferred, username,
+      origins: [...new Set([...(existing?.origins || []), ...(account.origins || [])])],
+      category: existing?.origins?.includes('watchlist') ? existing.category : preferred.category,
+      blockedByModeration: existing?.blockedByModeration === true || account.blockedByModeration === true,
+    });
   }
-  return [...byUsername.values()].sort((left, right) => (Number(right.priority) || 0) - (Number(left.priority) || 0));
+  return selectInstagramFoodAccounts([...byUsername.values()]).accounts
+    .sort((left, right) => (Number(right.priority) || 0) - (Number(left.priority) || 0));
 }
 
 function normalizeInstagramUsername(value = '') {
@@ -1003,31 +1009,15 @@ function selectRotatingAccounts(accounts, limit) {
   return selected;
 }
 
-function buildWatchlistQueries(accounts) {
-  const selected = selectRotatingAccounts(accounts, 16);
-
-  const queries = [];
-  for (const account of selected) {
-    const username = cleanText(account.username, 80);
-    if (!username) continue;
-    queries.push(`site:instagram.com/${username} wien gratis`);
-    queries.push(`site:instagram.com/${username} vienna deal`);
-  }
-  return queries;
-}
-
 function buildSearchQueries(accounts) {
   const seedFile = loadSeedFile();
-  return [
-    ...splitEnvList(process.env.INSTAGRAM_AI_QUERIES),
-    ...seedFile.queries,
-    ...BASE_SEARCH_QUERIES,
-    ...buildWatchlistQueries(accounts),
-  ]
-    .map((query) => cleanText(query, 300))
-    .filter(Boolean)
-    .filter((query, index, arr) => arr.indexOf(query) === index)
-    .slice(0, CONFIG.maxSearchQueries);
+  return planInstagramQueries({
+    general: BASE_SEARCH_QUERIES,
+    accounts: selectRotatingAccounts(accounts, 16),
+    configured: [...splitEnvList(process.env.INSTAGRAM_AI_QUERIES), ...seedFile.queries],
+    limit: CONFIG.maxSearchQueries,
+    bucket: instagramRunBucket(),
+  });
 }
 
 function addSeedCandidates(map) {
@@ -2458,6 +2448,7 @@ async function discoverCandidates(accounts) {
   stats.searchSchedule = {
     attemptedQueries: searched.attemptedQueries, stoppedReason: searched.stoppedReason,
     nextRetryAt: searched.nextRetryAt, lastAttemptAt: searched.lastAttemptAt,
+    nextQueryIndex: searched.nextQueryIndex,
   };
   return { candidates: rankCandidatesForScan([...map.values()]).slice(0, CONFIG.maxCandidates), stats };
 }

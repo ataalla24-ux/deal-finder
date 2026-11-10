@@ -29,6 +29,9 @@ on:
       - 'scripts/test-source-access-oct30.mjs'
       - 'scripts/test-instagram-food-sources.mjs'
       - 'scripts/test-tiktok-deal-scanner.mjs'
+      - 'scripts/test-social-search-reliability.mjs'
+      - 'scripts/test-lightweight-state-committer.mjs'
+      - 'scripts/test-instagram-search-discovery.mjs'
       - 'scripts/test-review-clarity.mjs'
       - 'scripts/test-instagram-media-budget.mjs'
       - 'scripts/test-instagram-max-coverage.mjs'
@@ -124,6 +127,9 @@ jobs:
           node --test scripts/test-source-access-oct30.mjs
           node --test scripts/test-instagram-food-sources.mjs
           node scripts/test-tiktok-deal-scanner.mjs
+          node --test scripts/test-social-search-reliability.mjs scripts/test-lightweight-state-committer.mjs
+          node scripts/test-instagram-search-discovery.mjs
+          node scripts/test-instagram-ai-agent.mjs
           node scripts/test-review-clarity.mjs
           node scripts/test-deal-evidence.mjs
           node scripts/test-slack-deal-quality.mjs

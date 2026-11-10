@@ -1,0 +1,30 @@
+name: Social Discovery Read-only Diagnostics
+on:
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  diagnose:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    env:
+      SENTRY_DISABLED: '1'
+      PLAYWRIGHT_BROWSERS_PATH: '0'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+      - run: npm ci --no-audit --no-fund
+      - run: npx playwright install --with-deps chromium
+      - name: Verify dependency isolation and search contracts offline
+        run: node --test scripts/test-lightweight-state-committer.mjs scripts/test-social-search-reliability.mjs
+      - name: Probe at most one TikTok API search and one public search, without secrets
+        run: node scripts/check-social-discovery.mjs
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: social-discovery-diagnostics
+          path: output/social-discovery/probe.json
+          retention-days: 7

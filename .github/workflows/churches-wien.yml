@@ -29,6 +29,10 @@ jobs:
         working-directory: deal-finder
         run: python3 wien_deals/church_scraper.py
 
+      - name: Test dependency-free source persistence
+        working-directory: deal-finder
+        run: node --test scripts/test-lightweight-state-committer.mjs
+
       - name: Commit deals
         working-directory: deal-finder
         run: |

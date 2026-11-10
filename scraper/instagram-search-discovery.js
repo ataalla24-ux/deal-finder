@@ -11,13 +11,18 @@ export async function runInstagramSearchQueries(queries, { search, previousRepor
   const result = {
     candidates: [], errors: [], attemptedQueries: 0, stoppedReason: '',
     nextRetryAt: '', lastAttemptAt: previous.lastAttemptAt || '',
+    nextQueryIndex: Math.max(0, Math.floor(Number(previous.nextQueryIndex) || 0)),
   };
   if (deadline > +now) {
     return { ...result, stoppedReason: 'search-cooldown', nextRetryAt: new Date(deadline).toISOString() };
   }
-  for (const query of queries) {
+  const start = queries.length ? result.nextQueryIndex % queries.length : 0;
+  for (let offset = 0; offset < queries.length; offset++) {
+    const index = (start + offset) % queries.length;
+    const query = queries[index];
     result.attemptedQueries++;
     result.lastAttemptAt = now.toISOString();
+    result.nextQueryIndex = (index + 1) % queries.length;
     try {
       result.candidates.push(...await search(query));
     } catch (error) {

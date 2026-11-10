@@ -5,6 +5,9 @@ import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import { chromium } from 'playwright';
+import { runTikTokApiDiscovery, tikTokDiscoveryHealth } from './tiktok-search-discovery.js';
+import { runInstagramSearchQueries } from './instagram-search-discovery.js';
+import { readPublicSearchResponse } from './public-search-response.js';
 
 import { normalizeCategoryForScraper } from './category-utils.js';
 import { discoveryRejection } from './deal-discovery-policy.js';
@@ -48,7 +51,13 @@ const CONFIG = {
   maxApiCandidates: Number(process.env.TIKTOK_MAX_API_CANDIDATES || 1200),
 };
 
-const SEARCH_QUERIES = [
+const SEARCH_QUERIES = [...new Set([
+  'site:tiktok.com wien gratis kaffee',
+  'site:tiktok.com wien gratis kebab',
+  'site:tiktok.com wien 1 euro doener',
+  'site:tiktok.com wien pizza 1+1',
+  'site:tiktok.com wien gratis essen neueröffnung',
+  'site:tiktok.com vienna free food',
   'site:tiktok.com/@ wien gratis heute',
   'site:tiktok.com/@ wien nur heute gratis',
   'site:tiktok.com/@ wien gratis essen',
@@ -74,7 +83,7 @@ const SEARCH_QUERIES = [
   'site:tiktok.com/@ wien gratis goodie bag',
   'site:tiktok.com/@ wien kostenlos aktion',
   'site:tiktok.com/@ tiktok wien gratis',
-];
+].map(query => query.replace('site:tiktok.com/@', 'site:tiktok.com')))].slice(0, 25);
 
 const CORE_TIKTOK_API_KEYWORDS = [
   'wien gratis heute',
@@ -178,7 +187,11 @@ export function buildTikTokApiKeywords(now = new Date()) {
     `vienna deals ${nextEnglishMonth} ${nextYear}`,
     'wien dieses wochenende gratis',
   ];
-  return [...new Set([...currentQueries, ...CORE_TIKTOK_API_KEYWORDS, ...TIKTOK_SEED_ACCOUNT_KEYWORDS])];
+  return [...new Set([
+    'wien gratis kaffee', 'wien gratis kebab', 'wien 1 euro döner',
+    'wien pizza 1+1', 'wien gratis essen', 'vienna free food',
+    ...currentQueries, ...CORE_TIKTOK_API_KEYWORDS, ...TIKTOK_SEED_ACCOUNT_KEYWORDS,
+  ])].slice(0, new Set([...currentQueries, ...CORE_TIKTOK_API_KEYWORDS, ...TIKTOK_SEED_ACCOUNT_KEYWORDS]).size);
 }
 
 const TIKTOK_API_KEYWORDS = buildTikTokApiKeywords();
@@ -935,11 +948,12 @@ async function prepareTikTokSession(context) {
   return page;
 }
 
-function normalizeTikTokApiItem(raw) {
-  const item = raw?.item || raw?.item_info?.item_struct || raw?.aweme_info || raw;
-  if (!item?.id || !item?.author?.uniqueId) return null;
-  const accountHandle = item.author.uniqueId;
-  const url = `https://www.tiktok.com/@${accountHandle}/video/${item.id}`;
+export function normalizeTikTokApiItem(raw) {
+  const item = raw?.item || raw?.item_info?.item_struct || raw?.aweme_info || raw?.itemStruct || raw;
+  const id = item?.id || item?.aweme_id;
+  const accountHandle = item?.author?.uniqueId || item?.author?.unique_id;
+  if (!/^\d+$/.test(String(id || '')) || !/^[\w.]{1,40}$/.test(accountHandle || '')) return null;
+  const url = `https://www.tiktok.com/@${accountHandle}/video/${id}`;
   const createTime = Number(item.createTime || item.create_time || 0);
   const video = item.video && typeof item.video === 'object' ? item.video : {};
   const thumbnailUrl = cleanText(video.originCover || video.cover || video.dynamicCover, 1600);
@@ -965,75 +979,55 @@ function normalizeTikTokApiItem(raw) {
   };
 }
 
-async function fetchTikTokApiCandidates(page) {
-  const rows = [];
-  const errors = [];
-  const seenUrls = new Set();
-  for (const keyword of TIKTOK_API_KEYWORDS) {
-    for (let pageIndex = 0; pageIndex < CONFIG.apiSearchPages; pageIndex += 1) {
-      const offset = pageIndex * CONFIG.apiSearchCount;
+export async function fetchTikTokApiCandidates(page, options = {}) {
+  return runTikTokApiDiscovery({
+    keywords: TIKTOK_API_KEYWORDS, normalize: normalizeTikTokApiItem,
+    pages: CONFIG.apiSearchPages, count: CONFIG.apiSearchCount, maxCandidates: CONFIG.maxApiCandidates,
+    wait: ms => page.waitForTimeout(ms), ...options,
+    request: options.request || (params => page.evaluate(async ({ keyword, offset, count }) => {
+      const url = `/api/search/general/full/?keyword=${encodeURIComponent(keyword)}&offset=${offset}&count=${count}`;
+      const response = await fetch(url, {
+        headers: { accept: 'application/json,text/plain,*/*' },
+        signal: AbortSignal.timeout(12000),
+      });
+      const text = await response.text();
+      if (!response.ok) return { ok: false, status: response.status, retryAfter: response.headers.get('retry-after') };
+      if (!text) return { ok: false, status: response.status };
       try {
-        const result = await page.evaluate(async ({ keyword, offset, count }) => {
-          const url = `/api/search/general/full/?keyword=${encodeURIComponent(keyword)}&offset=${offset}&count=${count}`;
-          const response = await fetch(url, {
-            headers: { accept: 'application/json,text/plain,*/*' },
-          });
-          const text = await response.text();
-          if (!response.ok) return { ok: false, status: response.status, text: text.slice(0, 200) };
-          if (!text) return { ok: false, status: response.status, text: '' };
-          try {
-            return { ok: true, status: response.status, body: JSON.parse(text) };
-          } catch {
-            return { ok: false, status: response.status, text: text.slice(0, 200) };
-          }
-        }, { keyword, offset, count: CONFIG.apiSearchCount });
-
-        if (!result.ok) {
-          errors.push({ keyword, offset, status: result.status, error: result.text || 'empty response' });
-          continue;
-        }
-        const batch = result.body?.data || [];
-        for (const row of batch) {
-          const normalized = normalizeTikTokApiItem(row);
-          if (!normalized || seenUrls.has(normalized.url)) continue;
-          seenUrls.add(normalized.url);
-          rows.push({ keyword, offset, data: normalized });
-          if (rows.length >= CONFIG.maxApiCandidates) return { rows, errors };
-        }
-        if (batch.length === 0) break;
-      } catch (error) {
-        errors.push({ keyword, offset, error: error.message });
+        return { ok: true, status: response.status, body: JSON.parse(text) };
+      } catch {
+        return { ok: false, status: response.status };
       }
-      await page.waitForTimeout(350);
-    }
-  }
-  return { rows, errors };
+    }, params)),
+  });
 }
 
-async function discoverTikTokLinksViaDuckDuckGo() {
+export async function discoverTikTokLinksViaDuckDuckGo(options = {}) {
   const links = new Set();
-  const errors = [];
-  for (const query of SEARCH_QUERIES) {
-    try {
+  const result = await runInstagramSearchQueries(options.queries || SEARCH_QUERIES, {
+    sleep: ms => new Promise(resolve => setTimeout(resolve, ms)), ...options,
+    search: async query => {
       const url = `https://html.duckduckgo.com/html/?q=${encodeURIComponent(query)}`;
-      const response = await fetch(url, {
+      const response = await (options.fetcher || fetch)(url, {
+        signal: AbortSignal.timeout(12000),
         headers: {
           'user-agent': 'Mozilla/5.0 (compatible; FreeFinderTikTokScanner/1.0; +https://freefinder.app)',
           'accept-language': 'de-AT,de;q=0.9,en;q=0.8',
         },
       });
-      if (!response.ok) throw new Error(`HTTP ${response.status}`);
-      const html = await response.text();
+      const html = await readPublicSearchResponse(response, options.now);
+      const found = [];
       const hrefMatches = [...html.matchAll(/href=["']([^"']+)["']/gi)];
       for (const match of hrefMatches) {
         const normalized = normalizeTikTokVideoUrl(match[1]);
-        if (normalized) links.add(normalized);
+        if (normalized) found.push(normalized);
       }
-    } catch (error) {
-      errors.push({ query, error: error.message });
-    }
-  }
-  return { links: [...links], errors };
+      return found;
+    },
+  });
+  for (const url of result.candidates) links.add(url);
+  const { candidates, ...schedule } = result;
+  return { ...schedule, links: [...links] };
 }
 
 async function extractTikTokPostData(page, url) {
@@ -1622,6 +1616,8 @@ export function dedupeTikTokDeals(deals) {
 
 async function main() {
   const scannerStartedAt = Date.now();
+  let previousReport = {};
+  try { previousReport = JSON.parse(fs.readFileSync(REPORT_PATH, 'utf8')); } catch {}
   const timings = {
     apiDiscoveryMs: 0,
     searchDiscoveryMs: 0,
@@ -1649,8 +1645,15 @@ async function main() {
   let apiDiscovery = { rows: [], errors: [] };
   try {
     const apiDiscoveryStartedAt = Date.now();
-    const apiPage = await prepareTikTokSession(context);
-    apiDiscovery = await fetchTikTokApiCandidates(apiPage);
+    let apiPage;
+    try {
+      apiPage = Date.parse(previousReport.apiDiscovery?.nextRetryAt) > Date.now()
+        ? await context.newPage() : await prepareTikTokSession(context);
+      apiDiscovery = await fetchTikTokApiCandidates(apiPage, { previous: previousReport.apiDiscovery });
+    } catch {
+      apiDiscovery = { rows: [], errors: [{ error: 'TikTok session unavailable', code: 'session-unavailable' }],
+        stoppedReason: 'session-unavailable', nextRetryAt: new Date(Date.now() + DAY_MS).toISOString() };
+    }
     timings.apiDiscoveryMs = Date.now() - apiDiscoveryStartedAt;
     console.log(`🔎 TikTok API candidates: ${apiDiscovery.rows.length}`);
     for (const item of apiDiscovery.rows) {
@@ -1665,9 +1668,14 @@ async function main() {
     }
 
     const searchDiscoveryStartedAt = Date.now();
-    discovery = await discoverTikTokLinksViaDuckDuckGo();
+    discovery = await discoverTikTokLinksViaDuckDuckGo({ previousReport: {
+      lastUpdated: previousReport.lastUpdated,
+      search: previousReport.searchDiscovery || { errors: previousReport.discoveryErrors || [] },
+    } });
     const knownUrls = new Set(apiDiscovery.rows.map((item) => item.data.url));
-    const urls = discovery.links.filter((url) => !knownUrls.has(url)).slice(0, CONFIG.maxPostsToVisit);
+    const availableUrls = discovery.links.filter((url) => !knownUrls.has(url)).slice(0, CONFIG.maxPostsToVisit);
+    const urls = apiDiscovery.nextRetryAt ? [] : availableUrls;
+    discovery.deferredPostVisits = availableUrls.length - urls.length;
     console.log(`🔎 search-engine videos: ${discovery.links.length}, visiting fallback: ${urls.length}`);
     const page = apiPage;
     for (const url of urls) {
@@ -1739,11 +1747,14 @@ async function main() {
   };
   const report = {
     lastUpdated: payload.lastUpdated,
+    ...tikTokDiscoveryHealth(apiDiscovery, discovery, finalDeals.length),
     config: CONFIG,
     searchQueries: SEARCH_QUERIES,
     apiKeywords: TIKTOK_API_KEYWORDS,
     discovered: discovery.links.length,
     apiCandidates: apiDiscovery.rows.length,
+    apiDiscovery: Object.fromEntries(Object.entries(apiDiscovery).filter(([key]) => key !== 'rows')),
+    searchDiscovery: Object.fromEntries(Object.entries(discovery).filter(([key]) => key !== 'links')),
     accepted: finalDeals.length,
     initialRejected: rejected.length,
     finalRejected: finalRejected.length,
@@ -1769,14 +1780,15 @@ async function main() {
     rejected: finalRejected.slice(0, 250),
   };
 
-  writeJsonAtomic(OUTPUT_PATH, payload);
+  if (!report.outputPreserved) writeJsonAtomic(OUTPUT_PATH, payload);
   writeJsonAtomic(REPORT_PATH, report);
   writeJsonAtomic(MEDIA_CACHE_PATH, {
     version: 1,
     updatedAt: payload.lastUpdated,
     mediaEvidence: mediaRescue.cache,
   });
-  console.log(`💾 ${finalDeals.length} Deals → ${OUTPUT_PATH}`);
+  console.log(`Discovery ${report.status}: API ${apiDiscovery.attemptedRequests || 0} requests (${apiDiscovery.stoppedReason || 'completed'}), search ${discovery.attemptedQueries || 0} queries (${discovery.stoppedReason || 'completed'})`);
+  console.log(report.outputPreserved ? 'Previous TikTok outbox preserved; discovery unavailable' : `💾 ${finalDeals.length} Deals → ${OUTPUT_PATH}`);
 }
 
 if (process.argv[1] && path.resolve(process.argv[1]) === __filename) {

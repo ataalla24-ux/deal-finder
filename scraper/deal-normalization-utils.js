@@ -3,7 +3,7 @@ import { explicitFoodMerchant, isDirectMessageInstruction } from './deal-factual
 import { sanitizePublicDealText } from './public-deal-text.js';
 import { cardEditorialWhen } from './deal-card-editor.js';
 import { concreteFoodOfferTitle, isPromotionalIntro, polishOfferTitle, stripSlackEmojiCodes } from './offer-title-utils.js';
-import { isCommunitySubmission } from './community-review-utils.js';
+import { isCommunitySubmission } from './community-identity-utils.js';
 
 const PUBLIC_BRAND_LOGO_BASE_URL = 'https://freefinder.at/assets/brand-logos';
 
