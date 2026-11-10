@@ -59,7 +59,7 @@ for (const [i, slug] of updated.entries()) {
   const q = load(read(`docs/blog/${slug}.html`));
   const article = JSON.parse(q('script[type="application/ld+json"]').text())['@graph'].find(e => e['@type'] === 'Article');
   assert.equal(article.datePublished, published[i]);
-  assert.equal(article.dateModified, '2026-11-05');
+  assert.equal(article.dateModified, slug === updated[0] ? '2026-11-10' : '2026-11-05');
   assert.equal(index(`.post-card h2 a[href="${slug}.html"]`).length, 1);
 }
 assert.match(body(updated[0]), /3. bis 30. November/);

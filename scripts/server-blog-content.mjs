@@ -49,6 +49,8 @@ export function inspectBlogRevision(html, slug, validUntil = '') {
   const reason = inspectBlogArticle(html, slug);
   if (reason) return reason;
   const $ = load(html);
+  // A full rewrite must not erase or contradict a manually sourced summary.
+  if ($('article.article-body > .deal-facts').length) return 'curated-deal-summary-needs-review';
   const single = ['main', '.article-hero h1', '.hero-copy', '.article-hero .eyebrow',
     'article.article-body > picture', 'article.article-body > .related-links', '.article-aside',
     'title', 'meta[name="description"]', 'meta[property="og:title"]', 'meta[property="og:description"]'];

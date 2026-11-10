@@ -359,12 +359,22 @@ const guides = [...editorialGuides, ...timelyGuides, ...recentDealGuides, ...[
   {
     slug: 'dahab-doener-1plus1-wien',
     refreshCard: true,
+    dealSummary: {
+      price: 'Drei Döner zum Preis von zwei. Kein fixer Euro-Endpreis veröffentlicht.',
+      branches: [
+        ['Dahab Döner Floridsdorf', 'Rußbergstraße 9, 1210 Wien'],
+        ['Dahab Döner Donaustadt', 'Wagramer Straße 126, 1220 Wien'],
+      ],
+      conditions: 'Angekündigt für alle Dönersorten vom 3. bis 30. November 2026. Bei unterschiedlich teuren Sorten vor der Bestellung nachfragen, welcher Döner gratis ist.',
+      checkedOn: '2026-11-05',
+      sourceUrl: 'https://www.instagram.com/reel/DfSGYE1OLt_/',
+    },
     title: 'Dahab Döner Wien: 3 für 2 im November',
     meta: 'Dahab Döner: 3 zum Preis von 2 vom 3. bis 30. November 2026. Alle Dönersorten, Rußbergstraße 9 und Wagramer Straße 126; Bedingungen vor Ort prüfen.',
     eyebrow: 'Drei Döner zum Preis von zwei · Wien',
     headline: 'Dahab Döner Wien: drei Döner zum Preis von zwei im November',
     intro: 'Dahab kündigt eine neue Novemberaktion an: Beim Kauf von zwei Dönern gibt es einen dritten gratis. Der Originalbeitrag nennt alle Dönersorten und zwei Wiener Standorte. Diese neue Aktion ersetzt im Artikel die bereits beendete Septemberankündigung.',
-    published: '2026-09-23', publishedLabel: '23. September 2026', modified: '2026-11-05', modifiedLabel: '5. November 2026',
+    published: '2026-09-23', publishedLabel: '23. September 2026', modified: '2026-11-10', modifiedLabel: '10. November 2026',
     dealPage: true, topic: 'essen', expires: '2026-11-30T23:59:59+01:00',
     image: '/assets/current-ios/deals-home.jpg', imageAvif: '/assets/current-ios/deals-home-400.avif 400w, /assets/current-ios/deals-home-736.avif 736w', imageWidth: 736, imageHeight: 414,
     imageAlt: 'FreeFinder App mit 1+1-Döner-Angeboten in Wien',
@@ -891,6 +901,26 @@ function escapeHtml(value) {
   return String(value).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#39;');
 }
 
+function renderDealSummary(summary) {
+  const dateLabel = new Intl.DateTimeFormat('de-AT', { dateStyle: 'long', timeZone: 'UTC' })
+    .format(new Date(summary.checkedOn));
+  const branches = summary.branches.map(([name, address]) => {
+    const maps = new URL('https://www.google.com/maps/search/');
+    maps.searchParams.set('api', '1');
+    maps.searchParams.set('query', `${name}, ${address}`);
+    return `<li>${escapeHtml(name)}, ${escapeHtml(address)}<br><a href="${escapeHtml(maps.href)}" rel="noopener" aria-label="Bewertungen auf Google Maps ansehen: ${escapeHtml(name)}">Bewertungen auf Google Maps ansehen</a></li>`;
+  }).join('');
+  return `<section class="article-note deal-facts" aria-labelledby="deal-facts-title">
+    <h2 id="deal-facts-title">Deal auf einen Blick</h2>
+    <dl>
+      <dt>Preis</dt><dd>${escapeHtml(summary.price)}</dd>
+      <dt>${summary.branches.length > 1 ? 'Filialen' : 'Standort'}</dt><dd><ul>${branches}</ul></dd>
+      <dt>Bedingungen</dt><dd>${escapeHtml(summary.conditions)}</dd>
+      <dt>Quelle geprüft</dt><dd><time datetime="${escapeHtml(summary.checkedOn)}">${escapeHtml(dateLabel)}</time> · <a href="${escapeHtml(summary.sourceUrl)}" rel="noopener">Originalangebot</a></dd>
+    </dl>
+  </section>`;
+}
+
 function renderGuide(guide, renderNow = now) {
   const canonical = `https://freefinder.at/blog/${guide.slug}.html`;
   const published = guide.published || PUBLISHED;
@@ -927,7 +957,7 @@ function renderGuide(guide, renderNow = now) {
   const aside = guide.sections.map(([id, title]) => `<a href="#${id}">${escapeHtml(title)}</a>`).join('');
   const related = guide.related.map(([label, href]) => `<a href="${href}">${escapeHtml(label)}</a>`).join(' · ');
   const faqs = guide.faqs.map(([question, answer]) => `<h3>${escapeHtml(question)}</h3><p>${escapeHtml(answer)}</p>`).join('\n        ');
-  const quickDealBlock = quickDeal(guide);
+  const quickDealBlock = guide.dealSummary ? renderDealSummary(guide.dealSummary) : quickDeal(guide);
   return `<!DOCTYPE html>
 <html lang="de-AT">
 <head>
