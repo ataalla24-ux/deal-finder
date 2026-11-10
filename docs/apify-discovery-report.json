@@ -1,39 +1,10 @@
 {
-  "generatedAt": "2026-11-10T13:40:53.196Z",
-  "runProvenance": {
-    "repository": "ataalla24-ux/deal-finder",
-    "runId": "42826507936",
-    "headSha": "81921981a2894e91e1553ce770acd761d692aa0f",
-    "event": "schedule",
-    "runAttempt": "1",
-    "url": "https://github.com/ataalla24-ux/deal-finder/actions/runs/42826507936"
-  },
+  "allowed": false,
+  "reason": "daily-budget-reserved",
+  "generatedAt": "2026-11-10T22:26:49.200Z",
+  "runKey": "42914586364",
   "purpose": "scan",
-  "limits": {
-    "profiles": 22,
-    "hashtags": 4,
-    "perSource": 1,
-    "posts": 26,
-    "ocrPosts": 8,
-    "dailyUsd": 0.15,
-    "cycleUsd": 4.65
-  },
-  "budget": {
-    "allowed": true,
-    "reason": "",
-    "plan": "FREE",
-    "includedCreditUsd": 5,
-    "accountUsageUsd": 1.9338405965182521,
-    "accountLimitUsd": 5,
-    "cycle": {
-      "startAt": "2026-10-15T00:00:00.000Z",
-      "endAt": "2026-11-14T23:59:59.999Z"
-    },
-    "runCapUsd": 0.075,
-    "creditReserveUsd": 0.35,
-    "pricingModel": "PAY_PER_EVENT"
-  },
-  "selectedSources": [
+  "sources": [
     {
       "key": "hashtag:esseninwien",
       "kind": "hashtag",
@@ -59,97 +30,30 @@
       "priority": 0
     }
   ],
-  "status": "succeeded",
-  "fetchedRecords": 4,
-  "freshAcceptedDeals": 0,
-  "pendingDeals": 0,
-  "unchangedPosts": 1,
-  "duplicatePosts": 0,
-  "providerErrors": 0,
-  "emptySourceRecords": 0,
-  "ocrCalls": 3,
-  "candidateAudit": [
-    {
-      "key": "instagram:DfjsiOwigIV",
-      "url": "https://www.instagram.com/p/DfjsiOwigIV/",
-      "ownerUsername": "restaurant.donaudelta",
-      "status": "rejected",
-      "reason": "no-consumer-food-benefit",
-      "ocrUsed": true,
-      "ocrDeferred": false,
-      "ocrErrors": 0
+  "budget": {
+    "allowed": true,
+    "reason": "",
+    "plan": "FREE",
+    "includedCreditUsd": 5,
+    "accountUsageUsd": 1.9442948596833132,
+    "accountLimitUsd": 5,
+    "cycle": {
+      "startAt": "2026-10-15T00:00:00.000Z",
+      "endAt": "2026-11-14T23:59:59.999Z"
     },
-    {
-      "key": "instagram:DfjxpCyiBeM",
-      "url": "https://www.instagram.com/p/DfjxpCyiBeM/",
-      "ownerUsername": "in__dish",
-      "status": "rejected",
-      "reason": "non-food-ad",
-      "ocrUsed": true,
-      "ocrDeferred": false,
-      "ocrErrors": 0
-    },
-    {
-      "key": "instagram:DfjfLJUlk80",
-      "url": "https://www.instagram.com/p/DfjfLJUlk80/",
-      "ownerUsername": "westpol_cafe_restaurant_bar",
-      "status": "rejected",
-      "reason": "no-consumer-food-benefit",
-      "ocrUsed": true,
-      "ocrDeferred": false,
-      "ocrErrors": 0
-    }
-  ],
-  "actorRuns": [
-    {
-      "id": "PhZnX2xkbwdieV9mf",
-      "actorId": "apify~instagram-hashtag-scraper",
-      "reportedChargeUsd": 0.0104
-    }
-  ],
-  "batchErrors": [],
-  "reportedChargeUsd": 0.0104,
-  "tools": {
-    "tesseract": true,
-    "ffmpeg": false,
-    "ffprobe": false
+    "runCapUsd": 0.075,
+    "creditReserveUsd": 0.35,
+    "pricingModel": "PAY_PER_EVENT"
   },
-  "sources": [
-    {
-      "key": "hashtag:esseninwien",
-      "lastAttemptAt": "2026-11-10T13:40:53.196Z",
-      "status": "posts-returned",
-      "postsReturned": 1,
-      "consecutiveFailures": 0,
-      "consecutiveEmpty": 0,
-      "retryAt": ""
-    },
-    {
-      "key": "hashtag:viennafood",
-      "lastAttemptAt": "2026-11-10T13:40:53.196Z",
-      "postsReturned": 1,
-      "status": "posts-returned",
-      "consecutiveFailures": 0,
-      "retryAt": "",
-      "consecutiveEmpty": 0
-    },
-    {
-      "key": "hashtag:wienfood",
-      "lastAttemptAt": "2026-11-10T13:40:53.196Z",
-      "postsReturned": 1,
-      "status": "posts-returned",
-      "consecutiveFailures": 0,
-      "retryAt": "",
-      "consecutiveEmpty": 0
-    },
-    {
-      "key": "hashtag:wienisst",
-      "lastAttemptAt": "2026-11-10T13:40:53.196Z",
-      "postsReturned": 1,
-      "status": "posts-returned",
-      "consecutiveFailures": 0,
-      "retryAt": "",
-      "consecutiveEmpty": 0
-    }
-  ]
+  "limits": {
+    "profiles": 22,
+    "hashtags": 4,
+    "perSource": 1,
+    "posts": 26,
+    "ocrPosts": 8,
+    "dailyUsd": 0.15,
+    "cycleUsd": 4.65
+  },
+  "status": "deferred",
+  "freshAcceptedDeals": 0
 }
