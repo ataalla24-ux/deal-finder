@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-11-10T19:39:36.614Z",
+  "generatedAt": "2026-11-10T19:59:25.494Z",
   "summary": {
     "filesConsidered": 31,
     "totalCandidates": 641,
@@ -102,9 +102,9 @@
       {
         "sourceKey": "meta-instagram",
         "sourceLabel": "Meta Instagram Graph",
-        "coverageScore": 36,
+        "coverageScore": 35,
         "totalDeals": 48,
-        "fresh1dCount": 5
+        "fresh1dCount": 4
       }
     ],
     "topPrecisionSources": [
@@ -231,14 +231,13 @@
     ],
     "pipelineRuns": {
       "reportedSources": 9,
-      "failedSources": [
-        "wien-combined"
-      ],
+      "failedSources": [],
       "completedWithErrors": [
         "food3",
         "gastro2",
         "joe",
-        "power"
+        "power",
+        "wien-combined"
       ]
     }
   },
@@ -409,7 +408,7 @@
       "uniqueDeals": 39,
       "duplicateDeals": 9,
       "duplicateAcrossSources": 9,
-      "fresh1dCount": 5,
+      "fresh1dCount": 4,
       "fresh7dCount": 46,
       "viennaCount": 48,
       "foodDrinkCount": 32,
@@ -479,7 +478,7 @@
       ],
       "healthScore": 69,
       "missionFitScore": 56,
-      "coverageScore": 36,
+      "coverageScore": 35,
       "precisionScore": 69,
       "sourceWeightScore": 58
     },
@@ -2067,21 +2066,26 @@
       "missingUrlCount": 0,
       "sampleTitles": [],
       "lastRun": {
-        "status": "failed",
-        "startedAt": "2026-11-10T07:40:56.773Z",
-        "finishedAt": "2026-11-10T07:40:57.640Z",
-        "durationMs": 867,
+        "status": "completed-with-errors",
+        "startedAt": "2026-11-10T19:57:31.695Z",
+        "finishedAt": "2026-11-10T19:58:34.041Z",
+        "durationMs": 62346,
         "counts": {
-          "rawCandidates": 0,
+          "rawCandidates": 24,
           "normalizedCandidates": 0,
           "verifiedCandidates": 0,
           "previousDeals": 0,
           "acceptedDeals": 0,
-          "rejectedDeals": 0
+          "rejectedDeals": 24
         },
-        "rejectedByReason": {},
+        "rejectedByReason": {
+          "no-concrete-offer": 19,
+          "alcohol-offer": 3,
+          "missing-vienna-evidence": 1,
+          "excluded-promotion-type": 1
+        },
         "errors": [
-          "No Graph hashtag source completed successfully; last-good output was preserved. #viennarestaurants: Instagram shared quota paused: rolling-hour budget exhausted"
+          "#wienfoodie: Instagram scan paused: request-budget"
         ],
         "reportFile": "deal-pipeline-last-run-wien-combined.json"
       },
@@ -2097,7 +2101,7 @@
       "topCategories": [],
       "topTypes": [],
       "issues": [
-        "letzter Pipeline-Lauf ist fehlgeschlagen",
+        "letzter Lauf fand Kandidaten, aber akzeptierte keinen Deal",
         "liefert aktuell 0 Deals"
       ],
       "healthScore": 0,
