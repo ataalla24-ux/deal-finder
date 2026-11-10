@@ -1,7 +1,7 @@
 {
-  "generatedAt": "2026-11-10T03:46:27.125Z",
+  "generatedAt": "2026-11-10T04:05:11.361Z",
   "source": "instagram-graph-cross-source-verification",
-  "status": "ok",
+  "status": "failed-preserved",
   "configured": true,
   "scannedFiles": [
     "deals-pending-church-events.json",
@@ -134,8 +134,8 @@
       "candidates": 0
     },
     "deals-pending-meta-instagram.json": {
-      "deals": 54,
-      "candidates": 4
+      "deals": 55,
+      "candidates": 5
     },
     "deals-pending-power.json": {
       "deals": 36,
@@ -162,12 +162,16 @@
       "candidates": 0
     }
   },
-  "candidatePosts": 6,
-  "candidateAccounts": 6,
+  "candidatePosts": 7,
+  "candidateAccounts": 7,
   "skippedAccountCooldowns": 0,
   "selectedAccounts": [
     {
       "username": "diechillerei1220",
+      "candidates": 1
+    },
+    {
+      "username": "abby.am.rochusmarkt",
       "candidates": 1
     },
     {
@@ -185,16 +189,17 @@
     {
       "username": "food1offers",
       "candidates": 1
-    },
-    {
-      "username": "stroeckfeierabend",
-      "candidates": 1
     }
   ],
-  "fetchedPosts": 123,
-  "exactMatches": 5,
+  "fetchedPosts": 0,
+  "exactMatches": 0,
   "retainedEvidencePosts": 2000,
-  "errors": [],
+  "errors": [
+    {
+      "username": "diechillerei1220",
+      "message": "Instagram shared quota paused: shared cooldown"
+    }
+  ],
   "accountFailures": {
     "iris.thegoodguides": {
       "count": 3,
@@ -208,21 +213,27 @@
     }
   },
   "sharedQuota": {
-    "limitPerHour": 296,
+    "limitPerHour": 190,
     "usageThreshold": 95,
-    "requests": 6,
-    "reserved": 10,
-    "stopped": false,
-    "reason": "",
-    "highestUsagePercent": 14,
+    "requests": 0,
+    "reserved": 0,
+    "stopped": true,
+    "reason": "Instagram shared quota paused: shared cooldown",
+    "highestUsagePercent": 0,
     "waitedMs": 0,
     "pacingMs": 0,
-    "retryAt": "",
+    "retryAt": "2026-11-10T04:11:36.404Z",
     "adaptiveSafetyCeiling": 190,
     "adaptiveIncreases": 0,
     "storageFailure": null
   },
+  "globalError": {
+    "username": "diechillerei1220",
+    "status": 0,
+    "code": "SCAN_BUDGET",
+    "message": "Instagram shared quota paused: shared cooldown"
+  },
   "blockedEvidencePosts": 49,
-  "unmatchedCandidatePosts": 1,
-  "message": "5/6 fresh cross-source Instagram candidates matched exactly via Graph API."
+  "unmatchedCandidatePosts": 7,
+  "message": "0/7 fresh cross-source Instagram candidates matched exactly via Graph API."
 }
