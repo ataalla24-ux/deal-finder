@@ -1,7 +1,7 @@
 {
-  "generatedAt": "2026-11-10T21:25:08.330Z",
+  "generatedAt": "2026-11-10T21:30:49.794Z",
   "source": "instagram-graph-cross-source-verification",
-  "status": "ok",
+  "status": "failed-preserved",
   "configured": true,
   "scannedFiles": [
     "deals-pending-church-events.json",
@@ -187,10 +187,15 @@
       "candidates": 1
     }
   ],
-  "fetchedPosts": 119,
-  "exactMatches": 3,
+  "fetchedPosts": 0,
+  "exactMatches": 0,
   "retainedEvidencePosts": 2000,
-  "errors": [],
+  "errors": [
+    {
+      "username": "wolf_baeckerei",
+      "message": "Instagram shared quota paused: shared cooldown"
+    }
+  ],
   "accountFailures": {
     "natascha_rapid": {
       "count": 3,
@@ -206,19 +211,25 @@
   "sharedQuota": {
     "limitPerHour": 190,
     "usageThreshold": 95,
-    "requests": 5,
-    "reserved": 5,
-    "stopped": false,
-    "reason": "",
-    "highestUsagePercent": 28,
+    "requests": 0,
+    "reserved": 0,
+    "stopped": true,
+    "reason": "Instagram shared quota paused: shared cooldown",
+    "highestUsagePercent": 0,
     "waitedMs": 0,
     "pacingMs": 0,
-    "retryAt": "",
+    "retryAt": "2026-11-10T21:38:55.220Z",
     "adaptiveSafetyCeiling": 190,
     "adaptiveIncreases": 0,
     "storageFailure": null
   },
+  "globalError": {
+    "username": "wolf_baeckerei",
+    "status": 0,
+    "code": "SCAN_BUDGET",
+    "message": "Instagram shared quota paused: shared cooldown"
+  },
   "blockedEvidencePosts": 51,
-  "unmatchedCandidatePosts": 3,
-  "message": "3/6 fresh cross-source Instagram candidates matched exactly via Graph API."
+  "unmatchedCandidatePosts": 6,
+  "message": "0/6 fresh cross-source Instagram candidates matched exactly via Graph API."
 }
