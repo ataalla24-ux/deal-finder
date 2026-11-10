@@ -2,9 +2,60 @@
   "schemaVersion": 1,
   "sourceKey": "power",
   "sourceLabel": "Power Scraper",
-  "updatedAt": "2026-11-09T14:09:13.345Z",
+  "updatedAt": "2026-11-10T13:42:48.732Z",
   "runCount": 90,
   "runs": [
+    {
+      "schemaVersion": 1,
+      "runProvenance": {
+        "repository": "ataalla24-ux/deal-finder",
+        "runId": "42826454599",
+        "headSha": "81921981a2894e91e1553ce770acd761d692aa0f",
+        "event": "schedule",
+        "runAttempt": "1",
+        "url": "https://github.com/ataalla24-ux/deal-finder/actions/runs/42826454599"
+      },
+      "runId": "power-2026-11-10T13:42:48.732Z",
+      "sourceKey": "power",
+      "sourceLabel": "Power Scraper",
+      "status": "completed-with-errors",
+      "startedAt": "2026-11-10T13:42:27.397Z",
+      "finishedAt": "2026-11-10T13:42:48.732Z",
+      "durationMs": 21335,
+      "outputFile": "docs/deals-pending-power.json",
+      "counts": {
+        "rawCandidates": 32,
+        "normalizedCandidates": 32,
+        "verifiedCandidates": 0,
+        "previousDeals": 0,
+        "acceptedDeals": 32,
+        "rejectedDeals": 0
+      },
+      "rejectedByReason": {},
+      "rejectedSamples": [],
+      "diagnostics": {
+        "healthySources": 46,
+        "failedSources": 12,
+        "sourceCount": 58,
+        "concurrency": 4,
+        "timeoutMs": 8000
+      },
+      "constraints": {},
+      "errors": [
+        "Too Good To Go: deferred until 2026-11-11T13:09:08.553Z",
+        "MediaMarkt: deferred until 2026-11-12T13:23:38.046Z",
+        "Saturn: deferred until 2026-11-13T13:06:44.863Z",
+        "Spar: deferred until 2026-11-13T13:06:46.721Z",
+        "Müller: HTTP 403",
+        "Conrad: deferred until 2026-11-12T13:23:40.770Z",
+        "Decathlon: deferred until 2026-11-12T13:23:40.913Z",
+        "XXXLutz: deferred until 2026-11-12T13:23:42.127Z",
+        "Möbelix: deferred until 2026-11-12T13:23:42.274Z",
+        "Lego Store: deferred until 2026-11-12T13:23:42.412Z",
+        "Thalia: deferred until 2026-11-12T13:23:42.458Z",
+        "Libro: HTTP 403"
+      ]
+    },
     {
       "schemaVersion": 1,
       "runProvenance": {
@@ -3801,46 +3852,6 @@
         "Decathlon: Browser HTTP 403",
         "XXXLutz: Browser HTTP 403",
         "Lego Store: Browser HTTP 403",
-        "Thalia: Browser HTTP 403",
-        "Libro: Browser HTTP 403",
-        "NORDSEE: Not HTML",
-        "BackWerk: fetch failed"
-      ]
-    },
-    {
-      "schemaVersion": 1,
-      "runId": "power-2026-09-25T18:00:59.467Z",
-      "sourceKey": "power",
-      "sourceLabel": "Power Scraper",
-      "status": "completed-with-errors",
-      "startedAt": "2026-09-25T18:00:33.925Z",
-      "finishedAt": "2026-09-25T18:00:59.467Z",
-      "durationMs": 25542,
-      "outputFile": "docs/deals-pending-power.json",
-      "counts": {
-        "rawCandidates": 44,
-        "normalizedCandidates": 40,
-        "verifiedCandidates": 0,
-        "previousDeals": 0,
-        "acceptedDeals": 40,
-        "rejectedDeals": 0
-      },
-      "rejectedByReason": {},
-      "rejectedSamples": [],
-      "diagnostics": {
-        "healthySources": 43,
-        "failedSources": 9,
-        "sourceCount": 51,
-        "concurrency": 4,
-        "timeoutMs": 8000
-      },
-      "constraints": {},
-      "errors": [
-        "Too Good To Go: HTTP 429",
-        "MediaMarkt: HTTP 404",
-        "Decathlon: Browser HTTP 403",
-        "XXXLutz: Browser HTTP 403",
-        "Möbelix: Browser HTTP 403",
         "Thalia: Browser HTTP 403",
         "Libro: Browser HTTP 403",
         "NORDSEE: Not HTML",
