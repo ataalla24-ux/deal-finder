@@ -82,6 +82,88 @@ test('a manually saved full single day corroborates original yearless OCR, but c
   assert.equal(check({ ...record, description: 'Ausschließlich am 7. November.' }).eligible, false);
 });
 
+function originalPost(timestamp, caption, fields = {}) {
+  const alphabet = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-_';
+  let mediaId = (BigInt(Date.parse(timestamp)) - 1314220021300n) << 23n;
+  let shortcode = '';
+  while (mediaId > 0n) {
+    shortcode = alphabet[Number(mediaId & 63n)] + shortcode;
+    mediaId >>= 6n;
+  }
+  return { id: `post-${shortcode}`, url: `https://www.instagram.com/reel/${shortcode}/`, title: '1+1 Steak-Döner',
+    description: 'Ein Steak-Döner gratis beim Kauf eines weiteren.', caption, sourcePublishedAt: timestamp,
+    sourcePublishedAtSource: 'url.instagramShortcode', ...fields };
+}
+
+test('exact original Instagram publication proves a nearby yearless single day, including original Reel OCR', () => {
+  const record = originalPost('2026-11-04T17:34:23Z', '', { url: 'https://www.instagram.com/reel/DfVARy_I2AK/',
+    validOn: '2026-11-06', expiryKind: 'single', evidence: { mediaEvidence: { ocrText: 'AKTION IN WIEN Nurjam 06.11. Thaliastraße 25/7' } } });
+  assert.equal(assess(record).eligible, false);
+  const after = new Date('2026-11-08T12:00:00Z');
+  const result = assess(record, after);
+  assert.equal(result.eligible, true);
+  assert.equal(result.validUntil, '2026-11-06');
+  assert.equal(result.reason, 'year-inferred-from-original-post');
+  assert.equal(result.originalPostPublishedAt, '2026-11-04T17:34:23.666Z');
+  const { deals, state } = maintainDeals([record], { policy, now: after });
+  assert.equal(deals.length, 0);
+  assert.deepEqual(state.hidden[0].originalDeal, record);
+});
+
+test('year rollover uses Vienna days, not run year, even without a structured end', () => {
+  for (const [posted, caption, end] of [
+    ['2026-12-29T10:00:00Z', 'Angebot gültig bis einschließlich 3. Jänner.', '2027-01-03'],
+    ['2026-12-31T23:30:00Z', 'Nur am 01.01.', '2027-01-01'],
+    ['2026-12-29T10:00:00Z', 'Nur am 31. Dezember.', '2026-12-31'],
+    ['2028-02-27T13:00:00Z', 'Nur am 29. Februar.', '2028-02-29'],
+  ]) {
+    const record = originalPost(posted, caption);
+    assert.equal(assess(record, new Date(`${end}T23:00:00Z`)).eligible, false, caption);
+    assert.equal(assess(record, new Date(Date.parse(end) + 36 * 3600000)).validUntil, end, caption);
+  }
+});
+
+test('reposts, stale capture, uncertain clauses and contradictory dates stay in manual review', () => {
+  const after = new Date('2027-01-09T12:00:00Z');
+  const record = originalPost('2026-12-29T10:00:00Z', 'Nur am 3. Jänner.');
+  const other = originalPost('2025-12-29T10:00:00Z', 'Nur am 3. Jänner.');
+  for (const change of [
+    { caption: 'Repost: Nur am 3. Jänner.' }, { isReshare: true },
+    { evidence: { originalPost: { url: other.url } } }, { caption: `Nur am 3. Jänner. ${other.url}` },
+    { discoveredAt: '2027-01-15T00:00:00Z' }, { sourcePublishedAt: '2025-12-29T10:00:00Z' },
+    { sourcePublishedAtSource: 'createdAt' }, { caption: 'Nur am 28. Dezember.' },
+    { caption: 'Nur am 20. Jänner.' }, { caption: 'Nur am 30. Februar.' },
+    { caption: 'Nur am 03.01.26.' }, { caption: 'Nur am 3. oder 4. Jänner. Nur am 3. Jänner.' },
+    { caption: 'Nur am 03.01. und 04.01.' }, { caption: 'Nur am 3. Jänner. Nur am 4. Jänner.' },
+    { caption: 'Gültig vom 30 Dezember bis 3. Jänner.' }, { caption: 'Nicht nur am 3. Jänner.' },
+    { description: 'Aktion am 7. Jänner.' }, { validOn: '2026-01-03' },
+    { evidence: { offerDateSignal: 'Nur am 2026-01-03.' } },
+    { expires: '2026-01-03T23:59:59.999Z' }, { validFrom: '2026-12-31' },
+    { caption: 'Teilnahmeschluss bis 3. Jänner.' },
+  ]) {
+    assert.equal(assess({ ...record, ...change }, after).reason, 'original-post-date-needs-manual-review', JSON.stringify(change));
+  }
+  const result = maintainDeals([{ ...record, isRepost: true }], { policy, now: after });
+  assert.equal(result.deals.length, 1);
+  assert(result.report.review.some(entry => entry.id === record.id && entry.reason === 'original-post-date-needs-manual-review'));
+});
+
+test('latest Graph evidence and owner edits can veto inferred expiry', () => {
+  const record = originalPost('2026-11-04T10:00:00Z', 'Nur am 06.11.');
+  const after = new Date('2026-11-09T12:00:00Z');
+  const latest = { url: record.url, graphAccepted: true, mediaId: '123', caption: 'Nur am 6. November.',
+    sourcePublishedAt: record.sourcePublishedAt, sourcePublishedAtSource: 'instagram-graph-timestamp' };
+  const check = (latestEvidence, edits = []) => assessAutomaticExpiry(record, { policy, now: after, latestEvidence, edits });
+  assert.equal(check(latest).eligible, true);
+  for (const change of [{ blockingReason: 'post-too-old' }, { caption: 'Aktion verlängert.' }, { graphAccepted: false },
+    { caption: 'Kein Datum mehr.' }, { url: 'https://www.instagram.com/reel/Other/' }, { sourcePublishedAt: '2026-11-03T10:00:00Z' }]) {
+    assert.equal(check({ ...latest, ...change }).eligible, false, JSON.stringify(change));
+  }
+  for (const edit of [{ forceKeep: true }, { clearFields: ['validOn'] }, { restoreDeal: record }, { validOn: '2026-11-07' }]) {
+    assert.equal(check(latest, [{ dealId: record.id, ...edit }]).eligible, false, JSON.stringify(edit));
+  }
+});
+
 test('permanent, birthday, extended and uncertain offers are retained; a finite recurring campaign may expire', () => {
   for (const description of ['Dauerhaft gratis.', 'Gratis zum Geburtstag.', 'Bis auf weiteres.', 'Die Aktion wurde verlaengert.', 'Voraussichtlich bis 4.11.']) {
     assert.equal(assess({ ...deal, description }).eligible, false, description);

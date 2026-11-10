@@ -5,7 +5,7 @@ import { createHash } from 'node:crypto';
 import { preparePublicationTitle } from '../scraper/pre-publication-title.js';
 import { titleClaimGuard } from '../scraper/deal-card-editor.js';
 import { freeCreditOpenAiFetch, modelForTask } from '../scraper/ai-credit-budget.js';
-import { canonicalInstagramPostKey } from '../scraper/deal-evidence-utils.js';
+import { canonicalInstagramPostKey, decodeInstagramShortcodeDate } from '../scraper/deal-evidence-utils.js';
 import { parseExpiryShape } from '../scraper/expiry-utils.js';
 import { maintenanceEvidenceFor } from './refresh-maintenance-evidence.mjs';
 import { isBenefitOnlyTitle } from '../scraper/offer-title-utils.js';
@@ -44,8 +44,9 @@ const months = { januar: 1, janner: 1, jaenner: 1, january: 1, jan: 1, februar: 
   marz: 3, maerz: 3, march: 3, mar: 3, april: 4, apr: 4, mai: 5, may: 5, juni: 6, june: 6, jun: 6,
   juli: 7, july: 7, jul: 7, august: 8, aug: 8, september: 9, sept: 9, sep: 9,
   oktober: 10, october: 10, okt: 10, oct: 10, november: 11, nov: 11, dezember: 12, december: 12, dez: 12, dec: 12 };
+const normalizedDateText = value => clean(value).normalize('NFKD').replace(/[\u0300-\u036f]/g, '').replace(/ß/g, 'ss').toLowerCase();
 function literalSourceEnds(value, kind, confirmedDay = '') {
-  const text = clean(value).normalize('NFKD').replace(/[\u0300-\u036f]/g, '').replace(/ß/g, 'ss').toLowerCase();
+  const text = normalizedDateText(value);
   const date = `(?:20\\d{2}-\\d{2}-\\d{2}|\\d{1,2}[./]\\d{1,2}(?:[./]20\\d{2})?|\\d{1,2}\\.?\\s+(?:${Object.keys(months).join('|')})\\.?(?:\\s+20\\d{2})?)`;
   const marker = kind === 'single' ? 'bis|until|ends(?: on)?|nur am|ausschliesslich am|only on|gultig am|gueltig am' : 'bis|until|ends(?: on)?';
   const regex = new RegExp(`\\b(?:${marker})(?:\\s+(?:einschliesslich|inklusive|zum))?\\s*:?\\s*(${date})\\b`, 'g');
@@ -77,6 +78,97 @@ const protectedDeal = (deal, edits, policy) => Boolean(deal.forceKeep || deal.ca
   || (policy.protectedMerchants || []).some(brand => clean(deal.brand).toLowerCase() === brand.toLowerCase()));
 const dateFields = ['validFrom', 'validOn', 'validUntil', 'expires', 'expiryKind', 'expiresOriginal',
   'expiryDisplayText', 'dateConfidence', 'expirySource', 'expiresSource'];
+const dayMs = 86400000;
+const viennaDate = new Intl.DateTimeFormat('sv-SE', { timeZone: 'Europe/Vienna', dateStyle: 'short' });
+const uncertainExpiry = /geburtstag|birthday|dauerhaft|unbefristet|bis auf weiteres|verl[aä]ngert|verlaengert|extended|voraussichtlich|ungef[aä]hr|circa/i;
+const reuseOrUnclearTiming = /\b(?:repost\w*|regram\w*|reshar\w*|throwback|ruckblick|rueckblick|archivaufnahme|flashback|letztes jahr|last year|erneut geteilt|wieder hochgeladen|jede[nmrs]?|every|wochentlich|weekly|maybe|probably|vermutlich|eventuell|geplant|planned|tentative|teilnahmeschluss|einsendeschluss|gewinnspiel|giveaway|offnungszeiten|oeffnungszeiten)\b|#tbt\b|(?:\bnicht|\bnot)\s+(?:mehr\s+)?(?:nur|only|gultig|gueltig|valid)\b/;
+const originalDateMarker = 'nur am|ausschliesslich am|only on|gultig am|gueltig am|bis|until|ends(?: on)?';
+const dateParts = `(\\d{1,2})(?:[./](\\d{1,2})(?:[./](\\d{2,4}))?|\\.?\\s+(${Object.keys(months).join('|')})\\b\\.?(?:\\s+(\\d{2,4})(?![:.\\d]))?)(?!\\d)`;
+const originalDatePattern = new RegExp(`\\b(${originalDateMarker})(?:\\s+(?:einschliesslich|inklusive|zum))?\\s*:?\\s*${dateParts}`, 'g');
+const bareDatePattern = new RegExp(`\\b(am|on)\\s+${dateParts}`, 'g');
+const periodStartPattern = new RegExp(`\\b(?:vom|von|ab|from)\\s+(?:${dateParts}|\\d{1,2}\\.?\\s+(?:bis|until|to)\\b)`);
+
+function originalDateClauses(value, pattern = originalDatePattern) {
+  const text = normalizedDateText(value);
+  return [...text.matchAll(pattern)].map(match => {
+    const [raw, marker, day, numericMonth, numericYear, monthName, namedYear] = match;
+    const tail = text.slice(match.index + raw.length);
+    const ambiguous = /^[./]\d|^\.?\s*(?:und\b|oder\b|and\b|or\b|[-\u2013\u2014/&,+])\s*(?:am\s+)?\d|^\s*\.\s*\d{2,4}\b/.test(tail);
+    return { kind: /\bam$|^only on$/.test(marker) ? 'single' : 'end',
+      monthDay: `${String(numericMonth || months[monthName]).padStart(2, '0')}-${day.padStart(2, '0')}`,
+      year: numericYear || namedYear || '', ambiguous };
+  });
+}
+
+function inferOriginalPostExpiry(deal, latest, now, texts) {
+  const url = deal.evidencePostUrl || deal.url;
+  const key = canonicalInstagramPostKey(url);
+  const decoded = decodeInstagramShortcodeDate(url);
+  const original = deal.evidence?.originalPost;
+  const knownUrls = [deal.url, original?.url, original?.postUrl, original?.permalink,
+    deal.postVerification?.originalPostUrl, latest?.url].filter(Boolean);
+  const originalCaption = original?.url && /^verified-original-post/.test(original.status || '') ? deal.postCaption : '';
+  const direct = (latest ? [latest.caption, latest.ocrText] : [deal.caption, deal.metaGraphCaption, originalCaption,
+    deal.metaGraphOcrText, deal.evidence?.media?.ocr?.footer, deal.evidence?.mediaEvidence?.ocrText])
+    .map(clean).filter(Boolean).map(value => ({ value, clauses: originalDateClauses(value.replace(/\bnurjam\s+/gi, 'nur am ')) }));
+  const clauses = direct.flatMap(entry => entry.clauses);
+  if (!key || !clauses.some(clause => !/^20\d{2}$/.test(clause.year))) return {};
+  const manual = { review: true };
+  if (!decoded || +decoded > +now || knownUrls.some(value => canonicalInstagramPostKey(value) !== key)
+    || latest && (!latest.url || latest.graphAccepted !== true || latest.blockingReason || !latest.mediaId)
+    || deal.metaGraphBlockingReason) return manual;
+
+  const recordClock = ['url.instagramShortcode', 'instagram-graph-timestamp'].includes(deal.sourcePublishedAtSource)
+    ? deal.sourcePublishedAt : '';
+  const graphClock = latest?.sourcePublishedAtSource === 'instagram-graph-timestamp' ? latest.sourcePublishedAt : '';
+  const clocks = [recordClock, graphClock].filter(Boolean).map(value => new Date(value));
+  if ((latest && !graphClock) || !clocks.length || clocks.some(clock => !Number.isFinite(+clock) || +clock > +now
+    || Math.abs(+clock - +decoded) > 60000 || viennaDate.format(clock) !== viennaDate.format(decoded))) return manual;
+  const discovered = Date.parse(deal.discoveredAt);
+  if (Number.isFinite(discovered) && discovered - +decoded > 14 * dayMs) return manual;
+
+  const reuseFlags = [deal, deal.evidence, original, latest].some(value => value && (value.isRepost || value.isReshare
+    || value.repost || value.reshare || value.repostedFrom || value.resharedFrom || value.isOriginal === false
+    || /story|repost|reshare/i.test(value.mediaProductType || '')));
+  const context = [deal.title, deal.description, deal.expiryDisplayText, ...direct.map(entry => entry.value), ...texts];
+  if (reuseFlags || context.some(value => {
+    const normalized = normalizedDateText(value);
+    const linkedPosts = clean(value).match(/(?:https?:\/\/)?(?:www\.)?instagram\.com\/[^\s<>]+/gi) || [];
+    return uncertainExpiry.test(clean(value)) || reuseOrUnclearTiming.test(normalized)
+      || periodStartPattern.test(normalized)
+      || /\b(?:am|on)\s+\d{1,2}\.?\s*(?:und\b|oder\b|and\b|or\b|[-\u2013\u2014])\s*\d{1,2}\b/.test(normalized)
+      || linkedPosts.some(link => {
+        const other = canonicalInstagramPostKey(link.startsWith('http') ? link : `https://${link}`);
+        return other && other !== key;
+      });
+  })) return manual;
+
+  const publishedDay = viennaDate.format(decoded);
+  const publishedYear = Number(publishedDay.slice(0, 4));
+  const dates = new Set();
+  const kinds = new Set(clauses.map(clause => clause.kind));
+  if (kinds.size !== 1) return manual;
+  const [kind] = kinds;
+  if (deal.expiryKind && deal.expiryKind !== kind) return manual;
+  for (const { monthDay, year, ambiguous } of clauses) {
+    if (ambiguous || (year && !/^20\d{2}$/.test(year))) return manual;
+    const candidates = (year ? [year] : [publishedYear, publishedYear + 1]).map(candidate => exactDay(`${candidate}-${monthDay}`))
+      .filter(day => day && day >= publishedDay && (Date.parse(day) - Date.parse(publishedDay)) / dayMs <= 14);
+    if (candidates.length !== 1) return manual;
+    dates.add(candidates[0]);
+  }
+  if (dates.size !== 1) return manual;
+  const [end] = dates;
+  // The original proves the date; other captured or editor text may veto it, not supply it.
+  const corroboration = [...context.flatMap(value => originalDateClauses(value)),
+    ...[deal.title, deal.description].flatMap(value => originalDateClauses(value, bareDatePattern))];
+  if (corroboration.some(clause => clause.ambiguous || clause.monthDay !== end.slice(5)
+    || (clause.year && clause.year !== end.slice(0, 4)))) return manual;
+  if (context.some(value => literalSourceEnds(value, 'single').some(day => day && day !== end))) return manual;
+  if ([deal.validUntil, deal.validOn].some(value => value && value !== end)
+    || (deal.validFrom && (kind === 'single' ? deal.validFrom !== end : !exactDay(deal.validFrom) || deal.validFrom > end))) return manual;
+  return { end, evidence: direct.filter(entry => entry.clauses.length).map(entry => entry.value), originalPostPublishedAt: decoded.toISOString() };
+}
 export const maintenanceFingerprint = deal => hash(['id', 'url', 'brand', 'title', 'description', ...dateFields,
   'address', 'distance', 'category', 'evidence', 'metaGraphCaption', 'metaGraphOcrText', 'metaGraphBlockingReason',
   'approvedAt', 'forceKeep', 'liveEditedFields', 'slackEditedFields'].map(key => [key, deal[key] ?? null]));
@@ -112,9 +204,8 @@ export function assessAutomaticExpiry(deal, { now = new Date(), edits = [], poli
   const hold = reason => ({ eligible: false, reason });
   if (protectedDeal(deal, edits, policy)) return hold('protected-or-explicit-owner-keep');
   const ends = [deal.validUntil, deal.validOn].filter(Boolean);
-  if (!ends.length || ends.some(value => !exactDay(value)) || new Set(ends).size !== 1
-    || !['end', 'range', 'single'].includes(deal.expiryKind)) return hold('missing-or-conflicting-explicit-end');
-  const end = ends[0];
+  if (ends.some(value => !exactDay(value)) || new Set(ends).size > 1) return hold('missing-or-conflicting-explicit-end');
+  let end = ends[0];
   const matchedEdits = matchingEdits(deal, edits);
   for (const edit of matchedEdits) {
     if ((edit.clearFields || []).some(field => /valid|expir|ablauf/i.test(field))) return hold('manual-period-cleared');
@@ -122,19 +213,16 @@ export function assessAutomaticExpiry(deal, { now = new Date(), edits = [], poli
       if (Object.hasOwn(edit, field) && clean(edit[field]).slice(0, 10) !== clean(deal[field]).slice(0, 10)) return hold('newer-manual-period-correction');
     }
   }
-  if (deal.validFrom && (!exactDay(deal.validFrom) || deal.validFrom > end)) return hold('invalid-or-future-period');
-  if (deal.expires && (!Number.isFinite(Date.parse(deal.expires)) || String(deal.expires).slice(0, 10) !== end)) return hold('conflicting-stored-end');
   const texts = sourceTexts(deal, latestEvidence);
   const text = clean([deal.description, deal.expiryDisplayText, ...texts].join(' '));
-  if (/geburtstag|birthday|dauerhaft|unbefristet|bis auf weiteres|verl[aä]ngert|verlaengert|extended|voraussichtlich|ungef[aä]hr|circa/i.test(text)) return hold('ongoing-extended-or-uncertain');
-  // A structured date alone can be a guessed TTL. Require literal source wording
-  // with an explicit year and an offer end/single-day marker, never a post age.
-  let evidence = texts.filter(value => literalSourceEnds(value, deal.expiryKind).length > 0);
+  if (uncertainExpiry.test(text)) return hold('ongoing-extended-or-uncertain');
+  // A structured date alone can be a guessed TTL. Require literal offer wording.
+  const hasExplicitEnd = end && ['end', 'range', 'single'].includes(deal.expiryKind);
+  let evidence = hasExplicitEnd ? texts.filter(value => literalSourceEnds(value, deal.expiryKind).length > 0) : [];
   let sourceEnds = evidence.flatMap(value => literalSourceEnds(value, deal.expiryKind));
   let reason = 'literal-source-end-with-year';
-  // A yearless single-day caption can use the full date explicitly saved by
-  // an editor, but never a year inferred from a post timestamp or a scraper.
-  if ((!sourceEnds.length || sourceEnds.includes('')) && sourceEnds.every(value => !value || value === end)) {
+  let originalPostPublishedAt;
+  if (hasExplicitEnd && (!sourceEnds.length || sourceEnds.includes('')) && sourceEnds.every(value => !value || value === end)) {
     const confirmed = deal.expiryKind === 'single' && deal.validOn === end
       && (!deal.validFrom || deal.validFrom === end)
       && matchedEdits.some(edit => edit.dealId === deal.id && edit.validOn === end && !edit.restoreDeal)
@@ -154,10 +242,26 @@ export function assessAutomaticExpiry(deal, { now = new Date(), edits = [], poli
       }
     }
   }
-  if (!sourceEnds.length || sourceEnds.some(value => value !== end)) return hold('source-year-or-end-not-confirmed');
+  if (!sourceEnds.length || sourceEnds.some(value => value !== end)) {
+    const inferred = inferOriginalPostExpiry(deal, latestEvidence, now, texts);
+    if (inferred.end && !matchedEdits.some(edit => edit.restoreDeal)) {
+      end = inferred.end;
+      evidence = inferred.evidence;
+      originalPostPublishedAt = inferred.originalPostPublishedAt;
+      reason = 'year-inferred-from-original-post';
+    } else if (inferred.review) {
+      return hold('original-post-date-needs-manual-review');
+    } else {
+      return hold(hasExplicitEnd ? 'source-year-or-end-not-confirmed' : 'missing-or-conflicting-explicit-end');
+    }
+  }
+  if (deal.validFrom && (!exactDay(deal.validFrom) || deal.validFrom > end)) return hold('invalid-or-future-period');
+  if (deal.expires && (!Number.isFinite(Date.parse(deal.expires)) || String(deal.expires).slice(0, 10) !== end))
+    return hold(originalPostPublishedAt ? 'original-post-date-needs-manual-review' : 'conflicting-stored-end');
   const grace = Math.max(12, Number(policy.expiryGraceHours) || 12) * 3600000;
   if (+now < Date.parse(`${end}T23:59:59.999Z`) + grace) return hold('not-expired-or-safety-grace');
   return { eligible: true, reason, validUntil: end,
+    ...(originalPostPublishedAt ? { originalPostPublishedAt } : {}),
     evidenceHash: hash(evidence), evidence: evidence.map(value => value.slice(0, 1600)) };
 }
 
@@ -215,8 +319,9 @@ export function maintainDeals(deals, { policy = {}, state = {}, edits = [], now 
       }
     }
     if (copyReviewReasons(deal, fields).length) review.push({ id: deal.id, reason: 'copy-needs-grounded-review', fields: copyReviewReasons(deal, fields) });
-    if (exactDay(deal.validUntil || deal.validOn) && (deal.validUntil || deal.validOn) < now.toISOString().slice(0, 10)
-      && !expiry.eligible) review.push({ id: deal.id, reason: expiry.reason });
+    if (expiry.reason === 'original-post-date-needs-manual-review'
+      || (exactDay(deal.validUntil || deal.validOn) && (deal.validUntil || deal.validOn) < now.toISOString().slice(0, 10)
+        && !expiry.eligible)) review.push({ id: deal.id, reason: expiry.reason });
     result.push(deal);
   }
   return { deals: result, state: nextState, changed: JSON.stringify(result) !== JSON.stringify(deals),
