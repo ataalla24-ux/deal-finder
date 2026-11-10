@@ -1,7 +1,7 @@
 {
-  "generatedAt": "2026-11-10T13:42:47.164Z",
+  "generatedAt": "2026-11-10T13:44:36.187Z",
   "source": "instagram-graph-cross-source-verification",
-  "status": "ok",
+  "status": "degraded",
   "configured": true,
   "scannedFiles": [
     "deals-pending-church-events.json",
@@ -138,7 +138,7 @@
       "candidates": 5
     },
     "deals-pending-power.json": {
-      "deals": 36,
+      "deals": 32,
       "candidates": 0
     },
     "deals-pending-telegram.json": {
@@ -191,10 +191,15 @@
       "candidates": 1
     }
   ],
-  "fetchedPosts": 144,
-  "exactMatches": 5,
+  "fetchedPosts": 94,
+  "exactMatches": 3,
   "retainedEvidencePosts": 2000,
-  "errors": [],
+  "errors": [
+    {
+      "username": "vorteilsclub.wien",
+      "message": "Instagram shared quota paused: Meta usage headroom"
+    }
+  ],
   "accountFailures": {
     "iris.thegoodguides": {
       "count": 3,
@@ -215,19 +220,25 @@
   "sharedQuota": {
     "limitPerHour": 370,
     "usageThreshold": 95,
-    "requests": 6,
-    "reserved": 10,
-    "stopped": false,
-    "reason": "",
-    "highestUsagePercent": 92,
+    "requests": 4,
+    "reserved": 5,
+    "stopped": true,
+    "reason": "Instagram shared quota paused: Meta usage headroom",
+    "highestUsagePercent": 95,
     "waitedMs": 0,
     "pacingMs": 0,
-    "retryAt": "",
+    "retryAt": "2026-11-10T13:54:44.809Z",
     "adaptiveSafetyCeiling": 190,
     "adaptiveIncreases": 0,
     "storageFailure": null
   },
+  "globalError": {
+    "username": "vorteilsclub.wien",
+    "status": 0,
+    "code": "SCAN_BUDGET",
+    "message": "Instagram shared quota paused: Meta usage headroom"
+  },
   "blockedEvidencePosts": 52,
-  "unmatchedCandidatePosts": 2,
-  "message": "5/7 fresh cross-source Instagram candidates matched exactly via Graph API."
+  "unmatchedCandidatePosts": 4,
+  "message": "3/7 fresh cross-source Instagram candidates matched exactly via Graph API."
 }
