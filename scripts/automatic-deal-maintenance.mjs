@@ -44,10 +44,10 @@ const months = { januar: 1, janner: 1, jaenner: 1, january: 1, jan: 1, februar: 
   marz: 3, maerz: 3, march: 3, mar: 3, april: 4, apr: 4, mai: 5, may: 5, juni: 6, june: 6, jun: 6,
   juli: 7, july: 7, jul: 7, august: 8, aug: 8, september: 9, sept: 9, sep: 9,
   oktober: 10, october: 10, okt: 10, oct: 10, november: 11, nov: 11, dezember: 12, december: 12, dez: 12, dec: 12 };
-function literalSourceEnds(value, kind) {
+function literalSourceEnds(value, kind, confirmedDay = '') {
   const text = clean(value).normalize('NFKD').replace(/[\u0300-\u036f]/g, '').replace(/ß/g, 'ss').toLowerCase();
   const date = `(?:20\\d{2}-\\d{2}-\\d{2}|\\d{1,2}[./]\\d{1,2}(?:[./]20\\d{2})?|\\d{1,2}\\.?\\s+(?:${Object.keys(months).join('|')})\\.?(?:\\s+20\\d{2})?)`;
-  const marker = kind === 'single' ? 'bis|until|ends(?: on)?|nur am|only on|gultig am|gueltig am' : 'bis|until|ends(?: on)?';
+  const marker = kind === 'single' ? 'bis|until|ends(?: on)?|nur am|ausschliesslich am|only on|gultig am|gueltig am' : 'bis|until|ends(?: on)?';
   const regex = new RegExp(`\\b(?:${marker})(?:\\s+(?:einschliesslich|inklusive|zum))?\\s*:?\\s*(${date})\\b`, 'g');
   return [...text.matchAll(regex)].map(match => {
     let value = match[1];
@@ -55,6 +55,16 @@ function literalSourceEnds(value, kind) {
     const named = value.match(/^(\d{1,2})\.?\s+([a-z]+)\.?\s+(20\d{2})$/);
     if (numeric) value = `${numeric[3]}-${numeric[2].padStart(2, '0')}-${numeric[1].padStart(2, '0')}`;
     if (named) value = `${named[3]}-${String(months[named[2]]).padStart(2, '0')}-${named[1].padStart(2, '0')}`;
+    if (confirmedDay && !numeric && !named && !/\b20\d{2}\b/.test(value)) {
+      const shortNumeric = value.match(/^(\d{1,2})[./](\d{1,2})$/);
+      const shortNamed = value.match(/^(\d{1,2})\.?\s+([a-z]+)$/);
+      if (shortNumeric || shortNamed) {
+        const [, d, m] = shortNumeric || shortNamed;
+        const month = shortNumeric ? m : months[m];
+        const resolved = `${confirmedDay.slice(0, 4)}-${String(month).padStart(2, '0')}-${d.padStart(2, '0')}`;
+        return resolved === confirmedDay ? resolved : '';
+      }
+    }
     return exactDay(value);
   });
 }
@@ -105,7 +115,8 @@ export function assessAutomaticExpiry(deal, { now = new Date(), edits = [], poli
   if (!ends.length || ends.some(value => !exactDay(value)) || new Set(ends).size !== 1
     || !['end', 'range', 'single'].includes(deal.expiryKind)) return hold('missing-or-conflicting-explicit-end');
   const end = ends[0];
-  for (const edit of matchingEdits(deal, edits)) {
+  const matchedEdits = matchingEdits(deal, edits);
+  for (const edit of matchedEdits) {
     if ((edit.clearFields || []).some(field => /valid|expir|ablauf/i.test(field))) return hold('manual-period-cleared');
     for (const field of ['validUntil', 'validOn', 'validFrom', 'expires']) {
       if (Object.hasOwn(edit, field) && clean(edit[field]).slice(0, 10) !== clean(deal[field]).slice(0, 10)) return hold('newer-manual-period-correction');
@@ -118,12 +129,35 @@ export function assessAutomaticExpiry(deal, { now = new Date(), edits = [], poli
   if (/geburtstag|birthday|dauerhaft|unbefristet|bis auf weiteres|verl[aä]ngert|verlaengert|extended|voraussichtlich|ungef[aä]hr|circa/i.test(text)) return hold('ongoing-extended-or-uncertain');
   // A structured date alone can be a guessed TTL. Require literal source wording
   // with an explicit year and an offer end/single-day marker, never a post age.
-  const evidence = texts.filter(value => literalSourceEnds(value, deal.expiryKind).length > 0);
-  const sourceEnds = evidence.flatMap(value => literalSourceEnds(value, deal.expiryKind));
+  let evidence = texts.filter(value => literalSourceEnds(value, deal.expiryKind).length > 0);
+  let sourceEnds = evidence.flatMap(value => literalSourceEnds(value, deal.expiryKind));
+  let reason = 'literal-source-end-with-year';
+  // A yearless single-day caption can use the full date explicitly saved by
+  // an editor, but never a year inferred from a post timestamp or a scraper.
+  if ((!sourceEnds.length || sourceEnds.includes('')) && sourceEnds.every(value => !value || value === end)) {
+    const confirmed = deal.expiryKind === 'single' && deal.validOn === end
+      && (!deal.validFrom || deal.validFrom === end)
+      && matchedEdits.some(edit => edit.dealId === deal.id && edit.validOn === end && !edit.restoreDeal)
+      && !latestEvidence?.blockingReason && latestEvidence?.graphAccepted !== false && !deal.metaGraphBlockingReason;
+    if (confirmed) {
+      const legacyOCR = !latestEvidence && canonicalInstagramPostKey(deal.evidencePostUrl || deal.url)
+        ? clean(deal.evidence?.mediaEvidence?.ocrText).replace(/\bnurj?am\s+/gi, 'nur am ') : '';
+      const dated = [...texts, legacyOCR].filter(value => literalSourceEnds(value, 'single', end).length > 0);
+      const dates = dated.flatMap(value => literalSourceEnds(value, 'single', end));
+      const editDates = literalSourceEnds(deal.description, 'single', end);
+      if (dates.length && dates.every(value => value === end)
+        && editDates.every(value => value === end)
+        && !/geburtstag|birthday|dauerhaft|unbefristet|verl[aä]ngert|verlaengert|extended|voraussichtlich|bis auf weiteres/i.test(legacyOCR)) {
+        evidence = dated;
+        sourceEnds = dates;
+        reason = 'editor-confirmed-single-day';
+      }
+    }
+  }
   if (!sourceEnds.length || sourceEnds.some(value => value !== end)) return hold('source-year-or-end-not-confirmed');
   const grace = Math.max(12, Number(policy.expiryGraceHours) || 12) * 3600000;
   if (+now < Date.parse(`${end}T23:59:59.999Z`) + grace) return hold('not-expired-or-safety-grace');
-  return { eligible: true, reason: 'literal-source-end-with-year', validUntil: end,
+  return { eligible: true, reason, validUntil: end,
     evidenceHash: hash(evidence), evidence: evidence.map(value => value.slice(0, 1600)) };
 }
 

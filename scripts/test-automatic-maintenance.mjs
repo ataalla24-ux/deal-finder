@@ -52,6 +52,36 @@ test('newer exact-post Graph captions override old expiry snapshots, including r
   assert.equal(maintainDeals([original], { policy, now, sourceEvidence: unrelated }).deals.length, 0);
 });
 
+test('a manually saved full single day corroborates original yearless OCR, but copy edits and timestamps do not', () => {
+  const record = { id: 'flamm-example', brand: 'flamm.vie', title: '1+1 Steak-Döner am 6.11.',
+    description: 'Aktion ausschließlich am 6. November.', expiryKind: 'single', validOn: '2026-11-06',
+    expires: '2026-11-06T23:59:59.999Z', sourcePublishedAt: '2026-11-04T17:34:23.000Z',
+    url: 'https://www.instagram.com/reel/DfVARy_I2AK/',
+    evidence: { mediaEvidence: { ocrText: 'AKTION IN WIEN Nurjam 06.11. Thaliastraße 25/7' } } };
+  const after = new Date('2026-11-09T19:03:02Z');
+  const copyOnly = { dealId: record.id, title: record.title, description: record.description };
+  const confirmed = { ...copyOnly, validOn: record.validOn };
+  const check = (input = record, edits = [confirmed], latestEvidence, date = after) =>
+    assessAutomaticExpiry(input, { policy, edits, latestEvidence, now: date });
+  assert.equal(check(record, [copyOnly]).eligible, false);
+  assert.equal(check(record, []).eligible, false);
+  assert.equal(check().reason, 'editor-confirmed-single-day');
+  assert.equal(check(record, [confirmed], undefined, new Date('2026-11-06T21:00:00Z')).eligible, false);
+  assert.equal(maintainDeals([record], { policy, edits: [confirmed], now: after }).deals.length, 0);
+  for (const edit of [{ ...confirmed, validOn: '2026-11-08' }, { ...confirmed, forceKeep: true },
+    { ...confirmed, hidden: true }, { ...confirmed, clearFields: ['validOn'] }, { ...confirmed, restoreDeal: record }]) {
+    assert.equal(check(record, [edit]).eligible, false);
+  }
+  for (const latest of [{ caption: 'Kein konkretes Datum mehr.' }, { caption: 'Nur am 8. November.' },
+    { caption: 'Nur am 6. November 2025.' }, { caption: 'Verlängert bis 30. November.' },
+    { caption: 'Nur am 6. November.', blockingReason: 'source blocked' }]) {
+    assert.equal(check(record, [confirmed], latest).eligible, false, latest.caption);
+  }
+  assert.equal(check(record, [confirmed], { caption: 'Nur am 6. November.' }).eligible, true);
+  assert.equal(check({ ...record, metaGraphCaption: 'Nur am 6. November. Nur am 7. November.' }).eligible, false);
+  assert.equal(check({ ...record, description: 'Ausschließlich am 7. November.' }).eligible, false);
+});
+
 test('permanent, birthday, extended and uncertain offers are retained; a finite recurring campaign may expire', () => {
   for (const description of ['Dauerhaft gratis.', 'Gratis zum Geburtstag.', 'Bis auf weiteres.', 'Die Aktion wurde verlaengert.', 'Voraussichtlich bis 4.11.']) {
     assert.equal(assess({ ...deal, description }).eligible, false, description);
