@@ -1,10 +1,10 @@
 {
-  "generatedAt": "2026-11-10T14:52:07.626Z",
+  "generatedAt": "2026-11-10T15:10:19.333Z",
   "summary": {
     "maxAgeDays": 7,
-    "total": 234,
-    "allowed": 0,
-    "blocked": 234,
+    "total": 242,
+    "allowed": 2,
+    "blocked": 240,
     "warnings": 0,
     "reasonCounts": {
       "kein konkretes Angebot erkennbar": 181,
@@ -16,7 +16,7 @@
       "älter als 7 Tage (2017-04-20)": 1,
       "älter als 7 Tage (2026-10-26)": 1,
       "älter als 7 Tage (2025-07-30)": 1,
-      "URL ungültig (HTTP 404)": 12,
+      "URL ungültig (HTTP 404)": 15,
       "kostenlose Buchung/Kontaktaufnahme statt kostenloser Leistung": 1,
       "selbst syndizierter FreeFinder-Post": 8,
       "älter als 7 Tage (2025-11-09)": 1,
@@ -37,7 +37,6 @@
       "älter als 7 Tage (2009-05-01)": 1,
       "älter als 7 Tage (2014-06-07)": 1,
       "älter als 7 Tage (2025-12-30)": 1,
-      "abgelaufen (2026-11-09)": 2,
       "redaktioneller Mehrfach-Roundup statt eindeutigem Einzelangebot": 2,
       "älter als 7 Tage (2026-10-30)": 2,
       "kein verlässliches Quell-/Post-Datum gefunden": 65,
@@ -47,10 +46,10 @@
       "kein konkreter Deal": 181,
       "Gottesdienste außerhalb Wochenlauf": 36,
       "älter als 7 Tage": 136,
-      "ungültige URL": 18,
+      "ungültige URL": 21,
       "sonstiges": 6,
       "selbst syndiziert": 8,
-      "abgelaufen": 3,
+      "abgelaufen": 1,
       "Post-Datum in Zukunft": 3,
       "nicht Wien": 4,
       "kein echtes Post-Datum": 65,
@@ -107,7 +106,7 @@
           "kein konkreter Deal": 33,
           "Gottesdienste außerhalb Wochenlauf": 35,
           "älter als 7 Tage": 34,
-          "ungültige URL": 2,
+          "ungültige URL": 1,
           "Post-Datum in Zukunft": 1,
           "sonstiges": 1
         }
@@ -125,13 +124,12 @@
         }
       },
       "Gutscheine.at": {
-        "total": 4,
-        "allowed": 0,
-        "blocked": 4,
+        "total": 12,
+        "allowed": 2,
+        "blocked": 10,
         "warnings": 0,
         "reasonCategoryCounts": {
-          "ungültige URL": 4,
-          "abgelaufen": 2
+          "ungültige URL": 10
         }
       },
       "instagram-ai-agent": {
@@ -153,7 +151,7 @@
         "reasonCategoryCounts": {
           "kein konkreter Deal": 92,
           "älter als 7 Tage": 93,
-          "ungültige URL": 7,
+          "ungültige URL": 5,
           "Gottesdienste außerhalb Wochenlauf": 1,
           "sonstiges": 2,
           "Post-Datum in Zukunft": 2,
@@ -201,7 +199,38 @@
       }
     }
   },
-  "allowed": [],
+  "allowed": [
+    {
+      "id": "gs-585385",
+      "title": "Slow Shopping Wochen: bis zu 12% Staffelrabatt",
+      "brand": "allnatura",
+      "source": "Gutscheine.at",
+      "url": "https://www.gutscheine.at/allnatura",
+      "reasons": [],
+      "warnings": [],
+      "sourceDate": "2026-11-10T15:08:41.368Z",
+      "sourceDateSource": "deal.pubDate",
+      "sourceAgeDays": 0,
+      "expiryDate": "2026-11-30",
+      "expirySource": "deal.expires",
+      "urlStatus": "HTTP 200"
+    },
+    {
+      "id": "gs-584778",
+      "title": "11% Gutschein für alles bei MissPompadour",
+      "brand": "MissPompadour",
+      "source": "Gutscheine.at",
+      "url": "https://www.gutscheine.at/misspompadour",
+      "reasons": [],
+      "warnings": [],
+      "sourceDate": "2026-11-10T15:08:42.285Z",
+      "sourceDateSource": "deal.pubDate",
+      "sourceAgeDays": 0,
+      "expiryDate": "2026-11-10",
+      "expirySource": "deal.expires",
+      "urlStatus": "HTTP 200"
+    }
+  ],
   "blocked": [
     {
       "id": "jesuszentrum-events-20261102",
@@ -846,7 +875,7 @@
       "warnings": [
         "kein Ablaufdatum gefunden"
       ],
-      "sourceDate": "2026-11-10T14:50:30.868Z",
+      "sourceDate": "2026-11-10T15:08:14.400Z",
       "sourceDateSource": "url.publicationDate",
       "sourceAgeDays": 0,
       "expiryDate": "",
@@ -1157,18 +1186,19 @@
       "source": "Freikirchen Wien",
       "url": "https://www.baptisten.at/wien",
       "reasons": [
-        "URL ungültig (HTTP 404)",
         "kein konkretes Angebot erkennbar",
         "Gottesdienste nur im Wochenlauf",
         "älter als 7 Tage (2026-04-19)"
       ],
-      "warnings": [],
+      "warnings": [
+        "URL nicht eindeutig prüfbar (temporärer Fehler)"
+      ],
       "sourceDate": "2026-04-19T08:59:47.145Z",
       "sourceDateSource": "deal.pubDate",
       "sourceAgeDays": 205,
       "expiryDate": "",
       "expirySource": "deal.expires",
-      "urlStatus": "ungültig: HTTP 404"
+      "urlStatus": "unklar: temporärer URL-Fehler"
     },
     {
       "id": "freikirche-7-20260419",
@@ -2006,17 +2036,18 @@
       "source": "Kirchen Verzeichnis",
       "url": "https://www.baptisten.at/wien",
       "reasons": [
-        "URL ungültig (HTTP 404)",
         "kein konkretes Angebot erkennbar",
         "älter als 7 Tage (2026-02-22)"
       ],
-      "warnings": [],
+      "warnings": [
+        "URL nicht eindeutig prüfbar (temporärer Fehler)"
+      ],
       "sourceDate": "2026-02-22T21:12:35.964Z",
       "sourceDateSource": "deal.pubDate",
       "sourceAgeDays": 261,
       "expiryDate": "",
       "expirySource": "deal.expires",
-      "urlStatus": "ungültig: HTTP 404"
+      "urlStatus": "unklar: temporärer URL-Fehler"
     },
     {
       "id": "gemeinde-9-20260222",
@@ -2804,17 +2835,18 @@
       "source": "Kirchen Verzeichnis",
       "url": "https://www.baptisten.at/wien",
       "reasons": [
-        "URL ungültig (HTTP 404)",
         "kein konkretes Angebot erkennbar",
         "älter als 7 Tage (2026-02-22)"
       ],
-      "warnings": [],
+      "warnings": [
+        "URL nicht eindeutig prüfbar (temporärer Fehler)"
+      ],
       "sourceDate": "2026-02-22T21:12:35.964Z",
       "sourceDateSource": "deal.pubDate",
       "sourceAgeDays": 261,
       "expiryDate": "",
       "expirySource": "deal.expires",
-      "urlStatus": "ungültig: HTTP 404"
+      "urlStatus": "unklar: temporärer URL-Fehler"
     },
     {
       "id": "gottesdienste-17-20260222",
@@ -3063,20 +3095,36 @@
       "urlStatus": "HTTP 200"
     },
     {
-      "id": "gs-583435",
-      "title": "25€ Gutschein für alles bei babymarkt",
-      "brand": "babymarkt",
+      "id": "gs-585076",
+      "title": "50€ Gutschein für Shark PowerLite Akku-Staubsauger BU1624EU",
+      "brand": "SharkNinja",
       "source": "Gutscheine.at",
-      "url": "https://www.gutscheine.at/babymarkt",
+      "url": "https://www.gutscheine.at/sharkninja",
       "reasons": [
-        "URL ungültig (HTTP 404)",
-        "abgelaufen (2026-11-09)"
+        "URL ungültig (HTTP 404)"
       ],
       "warnings": [],
-      "sourceDate": "2026-11-09T16:45:26.307Z",
+      "sourceDate": "2026-11-10T15:08:42.285Z",
       "sourceDateSource": "deal.pubDate",
-      "sourceAgeDays": 1,
-      "expiryDate": "2026-11-09",
+      "sourceAgeDays": 0,
+      "expiryDate": "2026-11-30",
+      "expirySource": "deal.expires",
+      "urlStatus": "ungültig: HTTP 404"
+    },
+    {
+      "id": "gs-585010",
+      "title": "Black Month: Abonnieren & 20€ Rabatt erhalten",
+      "brand": "BÄR Schuhe",
+      "source": "Gutscheine.at",
+      "url": "https://www.gutscheine.at/bar-schuhe",
+      "reasons": [
+        "URL ungültig (HTTP 404)"
+      ],
+      "warnings": [],
+      "sourceDate": "2026-11-10T15:08:41.368Z",
+      "sourceDateSource": "deal.pubDate",
+      "sourceAgeDays": 0,
+      "expiryDate": "2026-11-15",
       "expirySource": "deal.expires",
       "urlStatus": "ungültig: HTTP 404"
     },
@@ -3090,28 +3138,112 @@
         "URL ungültig (HTTP 404)"
       ],
       "warnings": [],
-      "sourceDate": "2026-11-09T16:45:26.307Z",
+      "sourceDate": "2026-11-10T15:08:42.285Z",
       "sourceDateSource": "deal.pubDate",
-      "sourceAgeDays": 1,
+      "sourceAgeDays": 0,
       "expiryDate": "",
       "expirySource": "deal.expires",
       "urlStatus": "ungültig: HTTP 404"
     },
     {
-      "id": "gs-583376",
-      "title": "10€ Gutschein für alles bei babymarkt",
-      "brand": "babymarkt",
+      "id": "gs-585043",
+      "title": "30% Rabatt auf Wanderschuhe",
+      "brand": "BÄR Schuhe",
       "source": "Gutscheine.at",
-      "url": "https://www.gutscheine.at/babymarkt",
+      "url": "https://www.gutscheine.at/bar-schuhe",
       "reasons": [
-        "URL ungültig (HTTP 404)",
-        "abgelaufen (2026-11-09)"
+        "URL ungültig (HTTP 404)"
       ],
       "warnings": [],
-      "sourceDate": "2026-11-09T16:45:26.307Z",
+      "sourceDate": "2026-11-10T15:08:41.368Z",
       "sourceDateSource": "deal.pubDate",
-      "sourceAgeDays": 1,
-      "expiryDate": "2026-11-09",
+      "sourceAgeDays": 0,
+      "expiryDate": "2026-11-15",
+      "expirySource": "deal.expires",
+      "urlStatus": "ungültig: HTTP 404"
+    },
+    {
+      "id": "gs-584992",
+      "title": "30% Rabatt auf schwarze Damenschuhe",
+      "brand": "BÄR Schuhe",
+      "source": "Gutscheine.at",
+      "url": "https://www.gutscheine.at/bar-schuhe",
+      "reasons": [
+        "URL ungültig (HTTP 404)"
+      ],
+      "warnings": [],
+      "sourceDate": "2026-11-10T15:08:41.368Z",
+      "sourceDateSource": "deal.pubDate",
+      "sourceAgeDays": 0,
+      "expiryDate": "2026-11-15",
+      "expirySource": "deal.expires",
+      "urlStatus": "ungültig: HTTP 404"
+    },
+    {
+      "id": "gs-584991",
+      "title": "30% Rabatt auf Schuhe in Bordeaux und Rot",
+      "brand": "BÄR Schuhe",
+      "source": "Gutscheine.at",
+      "url": "https://www.gutscheine.at/bar-schuhe",
+      "reasons": [
+        "URL ungültig (HTTP 404)"
+      ],
+      "warnings": [],
+      "sourceDate": "2026-11-10T15:08:41.368Z",
+      "sourceDateSource": "deal.pubDate",
+      "sourceAgeDays": 0,
+      "expiryDate": "2026-11-15",
+      "expirySource": "deal.expires",
+      "urlStatus": "ungültig: HTTP 404"
+    },
+    {
+      "id": "gs-584962",
+      "title": "30% Rabatt auf schwarze Herrenschuhe",
+      "brand": "BÄR Schuhe",
+      "source": "Gutscheine.at",
+      "url": "https://www.gutscheine.at/bar-schuhe",
+      "reasons": [
+        "URL ungültig (HTTP 404)"
+      ],
+      "warnings": [],
+      "sourceDate": "2026-11-10T15:08:41.368Z",
+      "sourceDateSource": "deal.pubDate",
+      "sourceAgeDays": 0,
+      "expiryDate": "2026-11-15",
+      "expirySource": "deal.expires",
+      "urlStatus": "ungültig: HTTP 404"
+    },
+    {
+      "id": "gs-584104",
+      "title": "Shark PowerDetect UV Reveal 2-in-1 Saug- und Wischroboter kaufen und Akku-Handstaubsauger gratis dazu erhalten",
+      "brand": "SharkNinja",
+      "source": "Gutscheine.at",
+      "url": "https://www.gutscheine.at/sharkninja",
+      "reasons": [
+        "URL ungültig (HTTP 404)"
+      ],
+      "warnings": [],
+      "sourceDate": "2026-11-10T15:08:42.285Z",
+      "sourceDateSource": "deal.pubDate",
+      "sourceAgeDays": 0,
+      "expiryDate": "2026-11-12",
+      "expirySource": "deal.expires",
+      "urlStatus": "ungültig: HTTP 404"
+    },
+    {
+      "id": "gs-584608",
+      "title": "15% Gutschein für alles bei babywalz",
+      "brand": "baby walz",
+      "source": "Gutscheine.at",
+      "url": "https://www.gutscheine.at/baby-walz",
+      "reasons": [
+        "URL ungültig (HTTP 404)"
+      ],
+      "warnings": [],
+      "sourceDate": "2026-11-10T15:08:42.285Z",
+      "sourceDateSource": "deal.pubDate",
+      "sourceAgeDays": 0,
+      "expiryDate": "2026-11-10",
       "expirySource": "deal.expires",
       "urlStatus": "ungültig: HTTP 404"
     },
@@ -3125,9 +3257,9 @@
         "URL ungültig (HTTP 404)"
       ],
       "warnings": [],
-      "sourceDate": "2026-11-09T16:45:26.307Z",
+      "sourceDate": "2026-11-10T15:08:43.107Z",
       "sourceDateSource": "deal.pubDate",
-      "sourceAgeDays": 1,
+      "sourceAgeDays": 0,
       "expiryDate": "2026-11-22",
       "expirySource": "deal.expires",
       "urlStatus": "ungültig: HTTP 404"
