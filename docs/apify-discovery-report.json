@@ -1,12 +1,12 @@
 {
-  "generatedAt": "2026-11-10T00:47:12.521Z",
+  "generatedAt": "2026-11-10T13:40:53.196Z",
   "runProvenance": {
     "repository": "ataalla24-ux/deal-finder",
-    "runId": "42730891698",
-    "headSha": "a422004f406b2bb2f2e62edff1e99cfd6f0637a6",
+    "runId": "42826507936",
+    "headSha": "81921981a2894e91e1553ce770acd761d692aa0f",
     "event": "schedule",
     "runAttempt": "1",
-    "url": "https://github.com/ataalla24-ux/deal-finder/actions/runs/42730891698"
+    "url": "https://github.com/ataalla24-ux/deal-finder/actions/runs/42826507936"
   },
   "purpose": "scan",
   "limits": {
@@ -23,7 +23,7 @@
     "reason": "",
     "plan": "FREE",
     "includedCreditUsd": 5,
-    "accountUsageUsd": 1.9233635607140784,
+    "accountUsageUsd": 1.9338405965182521,
     "accountLimitUsd": 5,
     "cycle": {
       "startAt": "2026-10-15T00:00:00.000Z",
@@ -34,12 +34,6 @@
     "pricingModel": "PAY_PER_EVENT"
   },
   "selectedSources": [
-    {
-      "key": "hashtag:wienisst",
-      "kind": "hashtag",
-      "url": "https://www.instagram.com/explore/tags/wienisst/",
-      "priority": 0
-    },
     {
       "key": "hashtag:esseninwien",
       "kind": "hashtag",
@@ -57,6 +51,12 @@
       "kind": "hashtag",
       "url": "https://www.instagram.com/explore/tags/wienfood/",
       "priority": 0
+    },
+    {
+      "key": "hashtag:wienisst",
+      "kind": "hashtag",
+      "url": "https://www.instagram.com/explore/tags/wienisst/",
+      "priority": 0
     }
   ],
   "status": "succeeded",
@@ -70,9 +70,9 @@
   "ocrCalls": 3,
   "candidateAudit": [
     {
-      "key": "instagram:DfiJMB8karD",
-      "url": "https://www.instagram.com/p/DfiJMB8karD/",
-      "ownerUsername": "spacebowls_vienna",
+      "key": "instagram:DfjsiOwigIV",
+      "url": "https://www.instagram.com/p/DfjsiOwigIV/",
+      "ownerUsername": "restaurant.donaudelta",
       "status": "rejected",
       "reason": "no-consumer-food-benefit",
       "ocrUsed": true,
@@ -80,21 +80,21 @@
       "ocrErrors": 0
     },
     {
-      "key": "instagram:DfiDh26O13_",
-      "url": "https://www.instagram.com/p/DfiDh26O13_/",
-      "ownerUsername": "hansenrestaurant",
+      "key": "instagram:DfjxpCyiBeM",
+      "url": "https://www.instagram.com/p/DfjxpCyiBeM/",
+      "ownerUsername": "in__dish",
       "status": "rejected",
-      "reason": "no-consumer-food-benefit",
+      "reason": "non-food-ad",
       "ocrUsed": true,
       "ocrDeferred": false,
       "ocrErrors": 0
     },
     {
-      "key": "instagram:DfhZJr5F_wV",
-      "url": "https://www.instagram.com/p/DfhZJr5F_wV/",
-      "ownerUsername": "gourmetfleischereigissinger",
+      "key": "instagram:DfjfLJUlk80",
+      "url": "https://www.instagram.com/p/DfjfLJUlk80/",
+      "ownerUsername": "westpol_cafe_restaurant_bar",
       "status": "rejected",
-      "reason": "alcohol-offer",
+      "reason": "no-consumer-food-benefit",
       "ocrUsed": true,
       "ocrDeferred": false,
       "ocrErrors": 0
@@ -102,13 +102,13 @@
   ],
   "actorRuns": [
     {
-      "id": "Xq1yVEiREYaQ6Xhk2",
+      "id": "PhZnX2xkbwdieV9mf",
       "actorId": "apify~instagram-hashtag-scraper",
-      "reportedChargeUsd": 0.0052
+      "reportedChargeUsd": 0.0104
     }
   ],
   "batchErrors": [],
-  "reportedChargeUsd": 0.0052,
+  "reportedChargeUsd": 0.0104,
   "tools": {
     "tesseract": true,
     "ffmpeg": false,
@@ -116,17 +116,8 @@
   },
   "sources": [
     {
-      "key": "hashtag:wienisst",
-      "lastAttemptAt": "2026-11-10T00:47:12.521Z",
-      "postsReturned": 1,
-      "status": "posts-returned",
-      "consecutiveFailures": 0,
-      "retryAt": "",
-      "consecutiveEmpty": 0
-    },
-    {
       "key": "hashtag:esseninwien",
-      "lastAttemptAt": "2026-11-10T00:47:12.521Z",
+      "lastAttemptAt": "2026-11-10T13:40:53.196Z",
       "status": "posts-returned",
       "postsReturned": 1,
       "consecutiveFailures": 0,
@@ -135,7 +126,7 @@
     },
     {
       "key": "hashtag:viennafood",
-      "lastAttemptAt": "2026-11-10T00:47:12.521Z",
+      "lastAttemptAt": "2026-11-10T13:40:53.196Z",
       "postsReturned": 1,
       "status": "posts-returned",
       "consecutiveFailures": 0,
@@ -144,7 +135,16 @@
     },
     {
       "key": "hashtag:wienfood",
-      "lastAttemptAt": "2026-11-10T00:47:12.521Z",
+      "lastAttemptAt": "2026-11-10T13:40:53.196Z",
+      "postsReturned": 1,
+      "status": "posts-returned",
+      "consecutiveFailures": 0,
+      "retryAt": "",
+      "consecutiveEmpty": 0
+    },
+    {
+      "key": "hashtag:wienisst",
+      "lastAttemptAt": "2026-11-10T13:40:53.196Z",
       "postsReturned": 1,
       "status": "posts-returned",
       "consecutiveFailures": 0,

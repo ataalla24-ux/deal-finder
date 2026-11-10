@@ -2,9 +2,136 @@
   "schemaVersion": 1,
   "sourceKey": "instagram-apify2",
   "sourceLabel": "Apify 2 Vienna Food Discovery",
-  "updatedAt": "2026-11-10T00:47:33.993Z",
-  "runCount": 37,
+  "updatedAt": "2026-11-10T13:41:13.747Z",
+  "runCount": 38,
   "runs": [
+    {
+      "schemaVersion": 1,
+      "runProvenance": {
+        "repository": "ataalla24-ux/deal-finder",
+        "runId": "42826507936",
+        "headSha": "81921981a2894e91e1553ce770acd761d692aa0f",
+        "event": "schedule",
+        "runAttempt": "1",
+        "url": "https://github.com/ataalla24-ux/deal-finder/actions/runs/42826507936"
+      },
+      "runId": "instagram-apify2-2026-11-10T13:41:13.747Z",
+      "sourceKey": "instagram-apify2",
+      "sourceLabel": "Apify 2 Vienna Food Discovery",
+      "status": "completed",
+      "startedAt": "2026-11-10T13:40:53.196Z",
+      "finishedAt": "2026-11-10T13:41:13.747Z",
+      "durationMs": 20551,
+      "outputFile": "docs/deals-pending-instagram-apify2.json",
+      "counts": {
+        "rawCandidates": 4,
+        "normalizedCandidates": 3,
+        "verifiedCandidates": 0,
+        "previousDeals": 0,
+        "acceptedDeals": 0,
+        "rejectedDeals": 3
+      },
+      "rejectedByReason": {
+        "no-consumer-food-benefit": 2,
+        "non-food-ad": 1
+      },
+      "rejectedSamples": [
+        {
+          "reason": "no-consumer-food-benefit",
+          "deal": {
+            "id": "",
+            "title": "",
+            "brand": "",
+            "url": "https://www.instagram.com/p/DfjsiOwigIV/",
+            "source": "",
+            "pubDate": "",
+            "expires": "",
+            "postVerificationStatus": ""
+          }
+        },
+        {
+          "reason": "non-food-ad",
+          "deal": {
+            "id": "",
+            "title": "",
+            "brand": "",
+            "url": "https://www.instagram.com/p/DfjxpCyiBeM/",
+            "source": "",
+            "pubDate": "",
+            "expires": "",
+            "postVerificationStatus": ""
+          }
+        },
+        {
+          "reason": "no-consumer-food-benefit",
+          "deal": {
+            "id": "",
+            "title": "",
+            "brand": "",
+            "url": "https://www.instagram.com/p/DfjfLJUlk80/",
+            "source": "",
+            "pubDate": "",
+            "expires": "",
+            "postVerificationStatus": ""
+          }
+        }
+      ],
+      "diagnostics": {
+        "pendingDeals": 0,
+        "unchangedPosts": 1,
+        "providerErrors": 0,
+        "emptySourceRecords": 0,
+        "ocrCalls": 3,
+        "sources": [
+          {
+            "key": "hashtag:esseninwien",
+            "lastAttemptAt": "2026-11-10T13:40:53.196Z",
+            "status": "posts-returned",
+            "postsReturned": 1,
+            "consecutiveFailures": 0,
+            "consecutiveEmpty": 0,
+            "retryAt": ""
+          },
+          {
+            "key": "hashtag:viennafood",
+            "lastAttemptAt": "2026-11-10T13:40:53.196Z",
+            "postsReturned": 1,
+            "status": "posts-returned",
+            "consecutiveFailures": 0,
+            "retryAt": "",
+            "consecutiveEmpty": 0
+          },
+          {
+            "key": "hashtag:wienfood",
+            "lastAttemptAt": "2026-11-10T13:40:53.196Z",
+            "postsReturned": 1,
+            "status": "posts-returned",
+            "consecutiveFailures": 0,
+            "retryAt": "",
+            "consecutiveEmpty": 0
+          },
+          {
+            "key": "hashtag:wienisst",
+            "lastAttemptAt": "2026-11-10T13:40:53.196Z",
+            "postsReturned": 1,
+            "status": "posts-returned",
+            "consecutiveFailures": 0,
+            "retryAt": "",
+            "consecutiveEmpty": 0
+          }
+        ]
+      },
+      "constraints": {
+        "profiles": 22,
+        "hashtags": 4,
+        "perSource": 1,
+        "posts": 26,
+        "ocrPosts": 8,
+        "dailyUsd": 0.15,
+        "cycleUsd": 4.65
+      },
+      "errors": []
+    },
     {
       "schemaVersion": 1,
       "runProvenance": {
