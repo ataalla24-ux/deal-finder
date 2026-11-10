@@ -69,11 +69,20 @@ const mcdSlug = 'mcdonalds-chicken-mcnuggets-1plus1-oesterreich';
 const mcd = load(read(`docs/blog/${mcdSlug}.html`));
 const article = JSON.parse(mcd('script[type="application/ld+json"]').text())['@graph'].find(e => e['@type'] === 'Article');
 assert.equal(article.datePublished, '2026-10-30');
-assert.equal(article.dateModified, '2026-11-09');
-assert.equal(sitemap('loc').filter((_, node) => sitemap(node).text() === `https://freefinder.at/blog/${mcdSlug}.html`).next('lastmod').text(), '2026-11-09');
-assert.match(mcd('.hero-copy').text(), /lokalen Gutscheine.*endeten am 8\. November 2026/);
+assert.equal(article.dateModified, '2026-11-10');
+assert.equal(sitemap('loc').filter((_, node) => sitemap(node).text() === `https://freefinder.at/blog/${mcdSlug}.html`).next('lastmod').text(), '2026-11-10');
+assert.match(mcd('.hero-copy').text(), /Papiergutscheine.*endeten am 8\. November 2026/);
 assert.match(mcd('.article-body').text(), /aktuelle Verfügbarkeit lässt sich nur im eigenen App-Konto prüfen/);
 for (const term of ['Donaustadtstraße 49', 'Rautenweg 2', 'Ausstellungsstraße 44a', '8. November 2026', '9. November 2026', '30. November 2026']) assert.ok(mcd('.article-body').text().includes(term));
+const offerRows = mcd('#angebot').next().find('tbody tr').toArray().map(row => mcd(row).text());
+assert.equal(offerRows.length, 3);
+assert.match(offerRows[0], /Hashbrowns.*Nougatburger.*McMuffin Fresh Chicken.*30\. November 2026.*10:30 Uhr/);
+assert.match(offerRows[1], /Filet-o-Fish.*Big Mac.*Crispy Veggie Burger.*McChicken.*McPops.*30\. November 2026/);
+assert.doesNotMatch(offerRows[1], /10:30|Nuggets|Royal TS/);
+assert.match(offerRows[2], /6er-Chicken-McNuggets.*15\. November 2026.*Couponfrist/);
+assert.equal(mcd('main[data-deal-page]').attr('data-deal-expires'), '2026-11-30T23:59:59+01:00');
+assert.equal(mcd('script[src="deal-status.js"]').length, 1);
+assert.equal(mcd('[data-deal-status-banner][hidden]').length, 1);
 assert.equal(index(`.post-card h2 a[href="${mcdSlug}.html"]`).length, 1);
 assert.equal(review.decisions.find(e => e.id === 'fc4g-rw3rck').slug, mcdSlug);
 
@@ -87,7 +96,7 @@ try {
   fs.writeFileSync(path.join(fixture, 'docs/deals.json'), 'unchanged-feed-sentinel');
   const slugs = [...heldRecheckGuides.map(g => g.slug), mcdSlug];
   for (let pass = 0; pass < 2; pass++) {
-    execFileSync(process.execPath, [path.join(fixture, 'scripts/generate-topic-guides.mjs'), ...slugs], { env: { ...process.env, SEO_NOW: '2026-11-09T13:00:00+01:00' } });
+    execFileSync(process.execPath, [path.join(fixture, 'scripts/generate-topic-guides.mjs'), ...slugs], { env: { ...process.env, SEO_NOW: '2026-11-10T13:00:00+01:00' } });
     for (const slug of slugs) assert.equal(fs.readFileSync(path.join(fixture, 'docs/blog', `${slug}.html`), 'utf8'), read(`docs/blog/${slug}.html`));
     assert.equal(fs.readFileSync(path.join(fixture, 'docs/deals.json'), 'utf8'), 'unchanged-feed-sentinel');
     assert.equal(fs.readFileSync(path.join(fixture, 'reviews/deal-guides.json'), 'utf8'), read('reviews/deal-guides.json'));
