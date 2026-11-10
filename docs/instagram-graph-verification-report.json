@@ -1,7 +1,7 @@
 {
-  "generatedAt": "2026-11-10T06:10:14.158Z",
+  "generatedAt": "2026-11-10T06:54:44.496Z",
   "source": "instagram-graph-cross-source-verification",
-  "status": "ok",
+  "status": "degraded",
   "configured": true,
   "scannedFiles": [
     "deals-pending-church-events.json",
@@ -191,10 +191,15 @@
       "candidates": 1
     }
   ],
-  "fetchedPosts": 123,
-  "exactMatches": 5,
+  "fetchedPosts": 44,
+  "exactMatches": 1,
   "retainedEvidencePosts": 2000,
-  "errors": [],
+  "errors": [
+    {
+      "username": "vorteilsclub.wien",
+      "message": "Instagram shared quota paused: rolling-hour budget exhausted"
+    }
+  ],
   "accountFailures": {
     "iris.thegoodguides": {
       "count": 3,
@@ -210,19 +215,25 @@
   "sharedQuota": {
     "limitPerHour": 237,
     "usageThreshold": 95,
-    "requests": 6,
-    "reserved": 10,
-    "stopped": false,
-    "reason": "",
-    "highestUsagePercent": 44,
+    "requests": 2,
+    "reserved": 2,
+    "stopped": true,
+    "reason": "Instagram shared quota paused: rolling-hour budget exhausted",
+    "highestUsagePercent": 53,
     "waitedMs": 0,
     "pacingMs": 0,
-    "retryAt": "",
+    "retryAt": "2026-11-10T07:15:14.721Z",
     "adaptiveSafetyCeiling": 190,
     "adaptiveIncreases": 0,
     "storageFailure": null
   },
-  "blockedEvidencePosts": 49,
-  "unmatchedCandidatePosts": 2,
-  "message": "5/7 fresh cross-source Instagram candidates matched exactly via Graph API."
+  "globalError": {
+    "username": "vorteilsclub.wien",
+    "status": 0,
+    "code": "SCAN_BUDGET",
+    "message": "Instagram shared quota paused: rolling-hour budget exhausted"
+  },
+  "blockedEvidencePosts": 51,
+  "unmatchedCandidatePosts": 6,
+  "message": "1/7 fresh cross-source Instagram candidates matched exactly via Graph API."
 }
