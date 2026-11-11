@@ -13,12 +13,36 @@ import {
   resolveViennaEvidence,
   selectRotatingAccounts,
   isTerminalRejection,
+  classifyWithOpenAi,
+  knownInstagramPosts,
+  filterKnownInstagramCandidates,
 } from '../scraper/instagram-ai-agent.js';
 
 const HOUR_MS = 60 * 60 * 1000;
 const DAY_MS = 24 * HOUR_MS;
 
 assert.equal(isTerminalRejection('LLM hat Kandidat abgelehnt'), false, 'LLM judgment is retryable when better evidence appears');
+
+const nowForKnown = new Date('2026-11-11T09:00:00Z');
+const post = (shortcode, type = 'p') => ({url:`https://www.instagram.com/${type}/${shortcode}/?igsh=fixture`});
+const realSlackTs = `${Math.floor((+nowForKnown - 3600000) / 1000)}.000001`;
+const knownPosts = knownInstagramPosts({
+  live: [post('ExactLive')],
+  pending: [{...post('ExactQueue'),slackTs:realSlackTs}, post('NewPending'),
+    {...post('BadReceipt'),slackTs:'mock'}, {...post('OldReceipt'),slackTs:'1000000000.000000'},
+    {...post('CommunityPost'),id:'community:fixture',submissionId:'fixture',originSource:'community-submission',slackTs:realSlackTs}],
+  seen: {generatedAt:'2026-11-11T08:00:00Z',suppressionDays:30,
+    seenPostKeys:['instagram:reel:ExactSeen','instagram:OldSeen','instagram:p:FutureSeen','instagram:tv:NewKey'],
+    seenAtByKey:{'instagram:OldSeen':'2026-10-01T00:00:00Z','instagram:p:FutureSeen':'2026-11-12T00:00:00Z'}},
+},nowForKnown);
+const alreadyKnown = [post('ExactLive','reel'),post('ExactQueue'),post('ExactSeen','p'),post('NewKey','reels')];
+const stillNeedsReview = ['exactLive','NewPending','BadReceipt','OldReceipt','OldSeen','FutureSeen','FreshPost','CommunityPost'].map(id=>post(id));
+const filtered = filterKnownInstagramCandidates([...alreadyKnown,...stillNeedsReview],knownPosts);
+assert.deepEqual(filtered.remaining,stillNeedsReview);
+assert.deepEqual(filtered.skipped,{'already-live':1,'already-queued-in-slack':1,'seen-in-slack':2});
+const emptyBatch = filterKnownInstagramCandidates(alreadyKnown,knownPosts).remaining;
+assert.deepEqual((await classifyWithOpenAi(emptyBatch,{request:()=>assert.fail('known posts must cost no model requests')})).usage,
+  {inputTokens:0,outputTokens:0,totalTokens:0});
 
 const weightedProfileSelection = selectRotatingAccounts([
   ...Array.from({ length: 8 }, (_, index) => ({ username: `merchant${index}.cafe`, accountType: 'merchant', priority: 100 - index })),

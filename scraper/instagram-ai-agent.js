@@ -21,6 +21,7 @@ import { readPublicSearchResponse } from './public-search-response.js';
 import { planInstagramQueries } from './instagram-query-plan.js';
 import { selectInstagramFoodAccounts } from './instagram-food-source-policy.js';
 import { canonicalInstagramPostKey } from './deal-evidence-utils.js';
+import { isCommunitySubmission } from './community-identity-utils.js';
 import { advanceDealLifecycle } from './deal-lifecycle.js';
 import { parseExpiryShape } from './expiry-utils.js';
 import {
@@ -2416,7 +2417,44 @@ function rankCandidatesForScan(candidates) {
   });
 }
 
-async function discoverCandidates(accounts) {
+export function knownInstagramPosts({ live = [], pending = [], seen = {} } = {}, now = new Date()) {
+  const known = new Map();
+  const recent = at => Number.isFinite(at) && at <= +now && +now - at <= 30 * DAY_MS;
+  const add = (url, reason) => {
+    const key = canonicalInstagramPostKey(url);
+    if (key && !known.has(key)) known.set(key, reason);
+  };
+  for (const row of Array.isArray(live) ? live : []) add(row?.url, 'already-live');
+  for (const row of Array.isArray(pending) ? pending : []) {
+    // A raw community submission can still need independent offer enrichment.
+    if (!row || isCommunitySubmission(row)) continue;
+    const ts = typeof row.slackTs === 'string' && /^\d{10}\.\d{6}$/.test(row.slackTs) ? Number(row.slackTs) * 1000 : NaN;
+    if (recent(ts)) add(row.url, 'already-queued-in-slack');
+  }
+  const generatedAt = Date.parse(seen?.generatedAt);
+  if (recent(generatedAt) && seen.suppressionDays === 30 && Array.isArray(seen.seenPostKeys)) {
+    for (const stored of seen.seenPostKeys.slice(0, 5000)) {
+      const match = typeof stored === 'string' && /^instagram:(?:(?:p|reel|tv):)?([A-Za-z0-9_-]{5,20})$/.exec(stored);
+      const recordedAt = seen.seenAtByKey?.[stored];
+      const at = recordedAt === undefined ? generatedAt : Date.parse(recordedAt);
+      if (match && recent(at)) add(`https://www.instagram.com/p/${match[1]}/`, 'seen-in-slack');
+    }
+  }
+  return known;
+}
+
+export function filterKnownInstagramCandidates(candidates, known) {
+  const skipped = {};
+  const remaining = candidates.filter(candidate => {
+    const reason = known.get(canonicalInstagramPostKey(candidate.url));
+    if (!reason) return true;
+    skipped[reason] = (skipped[reason] || 0) + 1;
+    return false;
+  });
+  return { remaining, skipped };
+}
+
+async function discoverCandidates(accounts, knownPosts) {
   const map = new Map();
   const stats = {
     seedUrls: addSeedCandidates(map),
@@ -2432,10 +2470,17 @@ async function discoverCandidates(accounts) {
     searchErrors: [],
     searchDiscovered: 0,
   };
+  const finish = () => {
+    // Do not spend preview or model slots on exact posts already delivered or live.
+    const { remaining, skipped } = filterKnownInstagramCandidates([...map.values()], knownPosts);
+    stats.knownPostsSkipped = skipped;
+    stats.discoveredCandidates = map.size;
+    return { candidates: rankCandidatesForScan(remaining).slice(0, CONFIG.maxCandidates), stats };
+  };
   stats.existingCandidates = collectExistingCandidates(map);
   stats.profileDiscovery = await discoverProfileCandidates(accounts, map);
 
-  if (!CONFIG.searchEnabled) return { candidates: rankCandidatesForScan([...map.values()]).slice(0, CONFIG.maxCandidates), stats };
+  if (!CONFIG.searchEnabled) return finish();
 
   const queries = buildSearchQueries(accounts);
   stats.searchQueries = queries;
@@ -2450,7 +2495,7 @@ async function discoverCandidates(accounts) {
     nextRetryAt: searched.nextRetryAt, lastAttemptAt: searched.lastAttemptAt,
     nextQueryIndex: searched.nextQueryIndex,
   };
-  return { candidates: rankCandidatesForScan([...map.values()]).slice(0, CONFIG.maxCandidates), stats };
+  return finish();
 }
 
 export function hasStructuredPostEvidence(candidate, now = new Date()) {
@@ -2588,7 +2633,12 @@ async function main() {
 
   const accounts = loadWatchlist();
   instagramRoleIndexCache = buildInstagramRoleIndex(accounts);
-  const { candidates, stats } = await discoverCandidates(accounts);
+  const known = knownInstagramPosts({
+    live: readJson(path.join(DOCS_DIR, 'deals.json'), {})?.deals,
+    pending: readJson(path.join(DOCS_DIR, 'deals-pending-all.json'), {})?.deals,
+    seen: readJson(path.join(DOCS_DIR, 'slack-seen-posts.json'), {}),
+  });
+  const { candidates, stats } = await discoverCandidates(accounts, known);
   console.log(`Candidates: ${candidates.length} (${stats.existingCandidates} existing, ${stats.searchDiscovered} search hits)`);
 
   const previewErrors = await enrichPreviews(candidates);
@@ -2628,6 +2678,8 @@ async function main() {
     instagramAuth: instagramRuntimeAuthSummary(),
     watchlistAccounts: accounts.length,
     discoveredCandidates: candidates.length,
+    beforeKnownPostFilter: stats.discoveredCandidates,
+    knownPostsSkipped: stats.knownPostsSkipped,
     acceptedDeals: finalDeals.length,
     acceptedBeforeModeration: preModerationDeals.length,
     heuristicAccepted: heuristicDeals.length,

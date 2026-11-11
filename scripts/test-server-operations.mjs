@@ -148,6 +148,12 @@ test('operations rechecks current drafts, withholds stale live/image audits and 
     assert.equal(fs.existsSync(path.join(root,'reviews/server-operations-report.json')),false);
     assert.equal(fs.existsSync(path.join(root,'reviews/automatic-publication-pilot.json')),false);
     assert.equal(fs.readFileSync(path.join(root,'reviews/server-quality-audit.json'),'utf8'),JSON.stringify(quality));
+    const scheduledSlot = '2026-11-06T12:13';
+    assert.equal((await report({event:'push',scheduledSlot})).lastScheduledQualitySlot,'');
+    const complete = await report({event:'schedule',scheduledSlot});
+    assert.equal(complete.lastScheduledQualitySlot,scheduledSlot);
+    put('reviews/server-operations-report.json',complete);
+    assert.equal((await report({event:'push'})).lastScheduledQualitySlot,scheduledSlot);
   } finally {fs.rmSync(root,{recursive:true,force:true});}
 });
 test('pilot needs independent labels and real scheduled runs; replays and manual green audits never count',()=>{

@@ -6,7 +6,7 @@ import path from 'node:path';
 import { copyReviewReasons, groundedDatePatch, groundedMaintenanceDescription, maintainFeedFile, maintainDeals } from './automatic-deal-maintenance.mjs';
 import { verifyOfficialFoodDeal } from '../scraper/power-food-verification.js';
 import { extractCouponMediaOffers } from '../scraper/official-coupon-media.js';
-import { viennaQualitySlot } from './vienna-quality-slot.mjs';
+import { qualitySlotReceipt, viennaQualitySlot } from './vienna-quality-slot.mjs';
 import { inspectSourceBackedQuality } from '../scraper/source-backed-quality.js';
 import { reviewPhoto } from './server-quality-audit.mjs';
 import { sourceTexts } from './automatic-deal-maintenance.mjs';
@@ -152,15 +152,25 @@ test('missing OCR tools defer only coupon media with zero source requests and ne
   } finally {if(old===undefined)delete process.env.COUPON_TOOLS_AVAILABLE;else process.env.COUPON_TOOLS_AVAILABLE=old;}
 });
 
-test('12/20 Vienna schedule selects exactly two slots across DST and never assumes punctual delivery',()=>{
-  for(const [date,expected] of [['2026-11-06',[11,19]],['2027-07-06',[10,18]]]) {
-    const selected=[];
-    for(const hour of [10,11,18,19])if(viennaQualitySlot({event:'schedule',schedule:`0 ${hour} * * *`,now:new Date(`${date}T${String(hour).padStart(2,'0')}:15:00Z`)}).run)selected.push(hour);
-    assert.deepEqual(selected,expected);
+test('Vienna schedule recovers a late or missing trigger only once per due slot, including across midnight and DST',()=>{
+  const scheduled = (iso, lastCompleted) => viennaQualitySlot({event:'schedule', now:new Date(iso), lastCompleted});
+  for (const [date, noonUtc] of [['2026-11-06','11'], ['2027-07-06','10']]) {
+    const noon = `${date}T12:13`;
+    const first = scheduled(`${date}T${noonUtc}:14:00Z`);
+    assert.deepEqual(first,{run:true,slot:noon,reason:'due'});
+    const backup = new Date(Date.parse(`${date}T${noonUtc}:14:00Z`) + 3 * 3600000).toISOString();
+    assert.equal(scheduled(backup).slot,noon);
+    assert.deepEqual(scheduled(backup,noon),{run:false,slot:noon,reason:'already-completed'});
   }
-  assert.equal(viennaQualitySlot({event:'schedule',schedule:'0 11 * * *',now:new Date('2026-11-06T13:00:00Z')}).run,true);
-  assert.equal(viennaQualitySlot({event:'schedule',schedule:'0 11 * * *',now:new Date('2026-11-06T15:00:00Z')}).run,false);
-  assert.equal(viennaQualitySlot({event:'push',now}).run,true);
+  const afterMidnight = '2026-11-10T23:55:26Z';
+  const evening = '2026-11-10T20:13';
+  assert.deepEqual(scheduled(afterMidnight,'2026-11-10T12:13'),{run:true,slot:evening,reason:'due'});
+  assert.equal(scheduled(afterMidnight,evening).run,false);
+  assert.equal(scheduled('2026-11-11T11:14:00Z','2026-11-10T12:13').slot,'2026-11-11T12:13');
+  assert.equal(qualitySlotReceipt(evening,'',new Date(afterMidnight)),evening);
+  assert.equal(qualitySlotReceipt(evening,'2026-11-10T12:13',new Date(afterMidnight)),evening);
+  assert.equal(qualitySlotReceipt('', '2099-11-10T12:13',new Date(afterMidnight)),'');
+  assert.deepEqual(viennaQualitySlot({event:'push',now}),{run:true,slot:'',reason:'on-change-or-manual'});
 });
 
 test('quality checks are advisory and never grant approval based on model or map success',()=>{

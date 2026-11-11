@@ -8,6 +8,7 @@ import { inspectSourceBackedQuality } from '../scraper/source-backed-quality.js'
 import { loadDealMapReviewContext, reviewDealMap } from './deal-map-review.mjs';
 import { maintenanceEvidenceFor } from './refresh-maintenance-evidence.mjs';
 import { applyDealRedemptions } from './deal-redemptions.mjs';
+import { qualitySlotReceipt } from './vienna-quality-slot.mjs';
 
 const read = (root, file, fallback) => { try { return JSON.parse(fs.readFileSync(path.join(root, file), 'utf8')); } catch(e) { if(e.code === 'ENOENT') return fallback; throw e; } };
 const hash = data => createHash('sha256').update(JSON.stringify(data)).digest('hex');
@@ -190,7 +191,8 @@ export function summarizeSourceReport(report, {file='',now=new Date()}={}) {
     caveat: 'Collector counts and retained outbox are not unique new deals or Slack delivery receipts. Branch counts overlap and must not be added. Rejection counts cover the recorded audit rows only; absent run provenance does not prove a scheduled run.' };
 }
 
-export async function writeOperationsReport({ root = process.cwd(), now = new Date(), request = fetch, apply = true } = {}) {
+export async function writeOperationsReport({ root = process.cwd(), now = new Date(), request = fetch, apply = true,
+  event = process.env.GITHUB_EVENT_NAME, scheduledSlot = process.env.QUALITY_SLOT } = {}) {
   const quality = read(root,'reviews/server-quality-audit.json',{});
   const live = rows(read(root,'docs/deals.json',{})), pending = rows(read(root,'docs/deals-pending-all.json',{}));
   const mapContext = loadDealMapReviewContext({root,now});
@@ -204,13 +206,15 @@ export async function writeOperationsReport({ root = process.cwd(), now = new Da
     && Number.isFinite(age) && age >= 0 && age < 86400000 ? 'current' : 'stale-or-missing';
   const currentQuality = qualitySnapshot.status === 'current' ? quality : {};
   const pilot = updatePublicationPilot(read(root,'reviews/automatic-publication-pilot.json',null),queue,
-    {now,event:process.env.GITHUB_EVENT_NAME,runId:process.env.GITHUB_RUN_ID,sha:process.env.GITHUB_SHA});
+    {now,event,runId:process.env.GITHUB_RUN_ID,sha:process.env.GITHUB_SHA});
   const prior = read(root,'reviews/server-operations-report.json',null);
   const added = prior?.liveIds ? live.filter(d => !prior.liveIds.includes(d.id)).map(d => d.id) : null;
   const maintenance = read(root,'docs/automatic-deal-maintenance-report.json',{});
   const reviewPack=buildPublicationReviewPack(live,pending,queue,{now});
   const mapRows=live.map(deal=>({id:deal.id,...reviewDealMap(deal,mapContext)}));
-  const report = { version:1, checkedAt:now.toISOString(), liveCount:live.length, liveIds:live.map(d=>d.id),
+  const lastScheduledQualitySlot = qualitySlotReceipt(prior?.lastScheduledQualitySlot,
+    event === 'schedule' ? scheduledSlot : '', now);
+  const report = { version:1, checkedAt:now.toISOString(), lastScheduledQualitySlot, liveCount:live.length, liveIds:live.map(d=>d.id),
     addedSincePreviousObservedFeed:added, addedAreNotAttributedToThisJob:true,
     qualitySnapshot,
     sourceRecovery:{ total:queue.length, uniqueIds:new Set(queue.map(row=>row.id)).size, auditMode:'fresh-offline-check',

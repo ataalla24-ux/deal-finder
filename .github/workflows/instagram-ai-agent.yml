@@ -5,8 +5,6 @@ on:
     branches:
       - main
     paths:
-      - '.github/workflows/instagram-ai-agent.yml'
-      - 'scraper/instagram-ai-agent.js'
       - 'scraper/instagram-auth-utils.js'
       - 'docs/instagram-watchlist.json'
       - 'docs/instagram-ai-seeds.json'
@@ -30,6 +28,8 @@ jobs:
       TZ: Europe/Vienna
     steps:
       - uses: actions/checkout@v4
+        with:
+          ref: main
 
       - uses: actions/setup-node@v4
         with:
