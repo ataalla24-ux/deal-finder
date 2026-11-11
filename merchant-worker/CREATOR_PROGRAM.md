@@ -194,6 +194,18 @@ kein Billing-/Tarifwechsel. Ein abgelaufener Google-Testzeitraum darf nicht
 automatisch auf kostenpflichtige Abrechnung umgestellt werden. Zustellung muss
 trotz erfolgreich angelegter Ressourcen tatsächlich bewiesen werden.
 
+Ergebnis am 11.11.2026: Google-Testnachricht wurde vom Produktionsworker nach
+OIDC-Prüfung empfangen (`paymentRecorded: false`). Thema und Push-Abo sind
+eingerichtet; das Thema ist in Play Console gespeichert, der laufende RTDN-
+Versand bleibt vor Verkaufsfreigabe aus. Kein Billing-Upgrade vorgenommen.
+Apples Produktions-URL ist gespeichert, Sandbox unverändert leer. Der erste
+Apple-Testaufruf scheiterte; ein Testempfang ist nicht nachgewiesen.
+App Store Connect zeigt unter Integration > In-App-Kauf **Aktiv (0)**.
+Ein eigener In-App-Kauf-Schlüssel ist deshalb vor dem Apple-Start einzurichten;
+keinen vorhandenen allgemeinen Connect-Schlüssel blind ersetzen. Separate
+Eigentümerfreigabe und sichere serverseitige Hinterlegung sind noch offen.
+Alle fünf Partner bleiben inaktiv, alle drei fachlichen Freigaben bleiben falsch.
+
 Eine Abrechnungsanfrage enthält `partnerId`, `month` (abgeschlossener Kalendermonat),
 `reconciledFinancialReports: true`, `storeFundsReceived: true`, `evidenceRef`.
 `record-transfer` benötigt die unveränderte `statementId`, den exakten
