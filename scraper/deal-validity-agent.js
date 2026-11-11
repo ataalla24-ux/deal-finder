@@ -479,7 +479,7 @@ function getOfferText(deal, health = null) {
   const description = cleanText(deal.description);
   const syntheticDescription = /\b(?:apify|meta instagram business discovery)\b/i.test(source)
     && /^(?:1\s*\+\s*1|gratis|rabatt|aktuell(?:es|er)?)[-\s]+angebot\s+bei\b/i.test(description);
-  return [
+  const blocks = [
     usableTitle,
     syntheticDescription ? '' : description,
     deal.metaGraphCaption,
@@ -491,7 +491,19 @@ function getOfferText(deal, health = null) {
     deal.evidence?.mediaEvidence?.ai?.offerText,
     contentHints.title,
     contentHints.description,
-  ].map(cleanText).filter(Boolean).join(' ');
+  ].map(cleanText).filter(Boolean);
+  // Graph and URL previews can repeat the exact caption with different author
+  // wrappers. Keep every distinct word, but do not count copies as new lists.
+  // Repetition inside one original block and short shared conditions stay intact.
+  const unique = [...new Set(blocks)];
+  return unique.map((block, index) => {
+    const previous = unique.slice(0, index);
+    if (block.length >= 80 && previous.some(value => value.includes(block))) return '';
+    for (const value of previous.filter(value => value.length >= 80).sort((a,b) => b.length-a.length)) {
+      block = block.split(value).join(' ');
+    }
+    return block;
+  }).filter(Boolean).join(' ');
 }
 
 function hasLowProductPrice(value) {

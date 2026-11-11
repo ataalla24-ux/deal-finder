@@ -19,7 +19,7 @@ jobs:
       - run: npm ci --no-audit --no-fund
       - run: npx playwright install --with-deps chromium
       - name: Verify dependency isolation and search contracts offline
-        run: node --test scripts/test-lightweight-state-committer.mjs scripts/test-social-search-reliability.mjs
+        run: node --test scripts/test-lightweight-state-committer.mjs scripts/test-social-search-reliability.mjs scripts/test-tiktok-browser-search.mjs scripts/test-instagram-delivery-audit.mjs
       - name: Probe at most one TikTok API search and one public search, without secrets
         run: node scripts/check-social-discovery.mjs
       - uses: actions/upload-artifact@v4

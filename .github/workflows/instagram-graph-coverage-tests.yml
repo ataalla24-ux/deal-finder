@@ -30,6 +30,8 @@ on:
       - 'scripts/test-instagram-food-sources.mjs'
       - 'scripts/test-tiktok-deal-scanner.mjs'
       - 'scripts/test-social-search-reliability.mjs'
+      - 'scripts/test-instagram-delivery-audit.mjs'
+      - 'scripts/test-tiktok-browser-search.mjs'
       - 'scripts/test-lightweight-state-committer.mjs'
       - 'scripts/test-instagram-search-discovery.mjs'
       - 'scripts/test-review-clarity.mjs'
@@ -49,6 +51,8 @@ on:
       - '.github/workflows/daily-digest.yml'
   pull_request:
     paths:
+      - 'scripts/test-instagram-delivery-audit.mjs'
+      - 'scripts/test-tiktok-browser-search.mjs'
       - 'scripts/test-instagram-food-sources.mjs'
       - 'scripts/test-source-access-oct30.mjs'
       - 'scripts/test-food-quality-oct30.mjs'
@@ -128,6 +132,7 @@ jobs:
           node --test scripts/test-instagram-food-sources.mjs
           node scripts/test-tiktok-deal-scanner.mjs
           node --test scripts/test-social-search-reliability.mjs scripts/test-lightweight-state-committer.mjs
+          node --test scripts/test-instagram-delivery-audit.mjs
           node scripts/test-instagram-search-discovery.mjs
           node scripts/test-instagram-ai-agent.mjs
           node scripts/test-review-clarity.mjs
@@ -156,6 +161,23 @@ jobs:
           node scripts/test-meta-instagram-deals.mjs
           npm run test:wien-deals-combined
           npm run test:instagram-graph-refresh
+
+  browser-search-contracts:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    env:
+      SENTRY_DISABLED: '1'
+      PLAYWRIGHT_BROWSERS_PATH: '0'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+      - run: npm ci --no-audit --no-fund
+      - run: npx playwright install --with-deps chromium
+      - name: Test browser search with local responses only
+        run: node --test scripts/test-tiktok-browser-search.mjs
 
   quota-storage:
     if: github.event_name == 'workflow_dispatch'

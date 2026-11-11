@@ -6,6 +6,7 @@ import path from 'path';
 import { fileURLToPath } from 'url';
 import { chromium } from 'playwright';
 import { runTikTokApiDiscovery, tikTokDiscoveryHealth } from './tiktok-search-discovery.js';
+import { createTikTokBrowserSearch } from './tiktok-browser-search.js';
 import { runInstagramSearchQueries } from './instagram-search-discovery.js';
 import { readPublicSearchResponse } from './public-search-response.js';
 
@@ -941,13 +942,6 @@ function extractExpiryText(text) {
   return 'Kurzfristig / siehe TikTok';
 }
 
-async function prepareTikTokSession(context) {
-  const page = await context.newPage();
-  await page.goto('https://www.tiktok.com/', { waitUntil: 'domcontentloaded', timeout: 30000 });
-  await page.waitForTimeout(2200);
-  return page;
-}
-
 export function normalizeTikTokApiItem(raw) {
   const item = raw?.item || raw?.item_info?.item_struct || raw?.aweme_info || raw?.itemStruct || raw;
   const id = item?.id || item?.aweme_id;
@@ -955,6 +949,8 @@ export function normalizeTikTokApiItem(raw) {
   if (!/^\d+$/.test(String(id || '')) || !/^[\w.]{1,40}$/.test(accountHandle || '')) return null;
   const url = `https://www.tiktok.com/@${accountHandle}/video/${id}`;
   const createTime = Number(item.createTime || item.create_time || 0);
+  const created = new Date(createTime * 1000);
+  const validCreation = createTime > 0 && Number.isFinite(created.getTime());
   const video = item.video && typeof item.video === 'object' ? item.video : {};
   const thumbnailUrl = cleanText(video.originCover || video.cover || video.dynamicCover, 1600);
   const mediaUrl = cleanText(video.playAddr || video.downloadAddr || video.play_addr?.url_list?.[0], 1600);
@@ -968,10 +964,10 @@ export function normalizeTikTokApiItem(raw) {
       item.desc,
       item.author?.nickname,
       item.author?.signature,
-      ...(item.textExtra || []).map((entry) => entry.hashtagName || ''),
+      ...(Array.isArray(item.textExtra) ? item.textExtra : []).map((entry) => entry?.hashtagName || ''),
     ].filter(Boolean).join(' '),
-    timeDateTime: createTime > 0 ? new Date(createTime * 1000).toISOString() : '',
-    createTimes: createTime > 0 ? [String(createTime)] : [],
+    timeDateTime: validCreation ? created.toISOString() : '',
+    createTimes: validCreation ? [String(createTime)] : [],
     stats: item.stats || {},
     mediaType: mediaUrl ? 'VIDEO' : (thumbnailUrl ? 'IMAGE' : ''),
     mediaUrl,
@@ -980,26 +976,20 @@ export function normalizeTikTokApiItem(raw) {
 }
 
 export async function fetchTikTokApiCandidates(page, options = {}) {
-  return runTikTokApiDiscovery({
+  const args = {
     keywords: TIKTOK_API_KEYWORDS, normalize: normalizeTikTokApiItem,
     pages: CONFIG.apiSearchPages, count: CONFIG.apiSearchCount, maxCandidates: CONFIG.maxApiCandidates,
     wait: ms => page.waitForTimeout(ms), ...options,
-    request: options.request || (params => page.evaluate(async ({ keyword, offset, count }) => {
-      const url = `/api/search/general/full/?keyword=${encodeURIComponent(keyword)}&offset=${offset}&count=${count}`;
-      const response = await fetch(url, {
-        headers: { accept: 'application/json,text/plain,*/*' },
-        signal: AbortSignal.timeout(12000),
-      });
-      const text = await response.text();
-      if (!response.ok) return { ok: false, status: response.status, retryAfter: response.headers.get('retry-after') };
-      if (!text) return { ok: false, status: response.status };
-      try {
-        return { ok: true, status: response.status, body: JSON.parse(text) };
-      } catch {
-        return { ok: false, status: response.status };
-      }
-    }, params)),
-  });
+  };
+  // A saved refusal applies to every transport, including a newly deployed one.
+  if (options.request || Date.parse(args.previous?.nextRetryAt) > +(args.now || new Date())) {
+    return runTikTokApiDiscovery(args);
+  }
+  const transport = await createTikTokBrowserSearch(page, args);
+  try {
+    const result = await runTikTokApiDiscovery({ ...args, request: transport.request });
+    return { ...result, ...transport.stats };
+  } finally { await transport.close(); }
 }
 
 export async function discoverTikTokLinksViaDuckDuckGo(options = {}) {
@@ -1631,7 +1621,6 @@ async function main() {
   const browser = await chromium.launch({ headless: true });
   const context = await browser.newContext({
     viewport: { width: 1366, height: 900 },
-    userAgent: 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36',
     locale: 'de-AT',
     timezoneId: 'Europe/Vienna',
   });
@@ -1647,8 +1636,7 @@ async function main() {
     const apiDiscoveryStartedAt = Date.now();
     let apiPage;
     try {
-      apiPage = Date.parse(previousReport.apiDiscovery?.nextRetryAt) > Date.now()
-        ? await context.newPage() : await prepareTikTokSession(context);
+      apiPage = await context.newPage();
       apiDiscovery = await fetchTikTokApiCandidates(apiPage, { previous: previousReport.apiDiscovery });
     } catch {
       apiDiscovery = { rows: [], errors: [{ error: 'TikTok session unavailable', code: 'session-unavailable' }],

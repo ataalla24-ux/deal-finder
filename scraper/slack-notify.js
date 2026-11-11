@@ -9,6 +9,7 @@ import { isCommunitySubmission } from './community-review-utils.js';
 import { enrichCommunityCard, refreshQueuedCommunityCards, untouchedCommunityThread } from './community-card-enrichment.js';
 import { createCardEditor } from './deal-card-editor.js';
 import { retryQueuedEditorial } from './card-editor-retry.js';
+import { buildInstagramDeliveryAudit } from './instagram-delivery-audit.js';
 import { loadDealMapReviewContext, reviewDealMap } from '../scripts/deal-map-review.mjs';
 import fs from 'fs';
 import { sourceQualitySlackText } from './source-backed-quality.js';
@@ -1880,7 +1881,6 @@ async function main() {
   ) && deal.socialFoodReview !== true);
   const validatedRun = await validateAndDedupeDealsForSlack(regularPendingDeals, { urlCache: validityUrlCache });
   const validation = validatedRun.validation;
-  writeDealValidityReport(validation.report);
   const freshDeals = validatedRun.allowedDeals.map((deal) => (
     advanceDealLifecycle(deal, 'validator-passed', { at: runNow })
   ));
@@ -1924,6 +1924,23 @@ async function main() {
     { maxPerDay: SOCIAL_FOOD_REVIEW_MAX_PER_DAY, sendAll: SOCIAL_FOOD_REVIEW_SEND_ALL, now: runNow },
   );
   const socialFoodReviewDeals = socialFoodReviewSelection.deals;
+
+  const writeDeliveryAudit = (delivered = []) => {
+    validation.report.instagramDelivery = buildInstagramDeliveryAudit({
+      candidates: loadedPendingDeals,
+      stages: [
+        { reason: 'moderated', deals: pendingDeals },
+        { reason: 'discovery-excluded', deals: discoveryFilter.deals },
+        { reason: 'already-seen-post', deals: preSlackSeenFilter.deals },
+        { reason: 'already-live', deals: preSlackLiveFilter.deals },
+        { reason: 'already-queued', deals: preSlackQueueFilter.deals },
+      ],
+      validation, selected: freshDeals, delivered,
+    });
+    writeDealValidityReport(validation.report);
+  };
+  writeDeliveryAudit();
+  console.log(`Instagram AI delivery: ${JSON.stringify(validation.report.instagramDelivery.counts)}`);
 
   console.log(
     `🧪 Deal validity agent: ${validation.summary.allowed}/${validation.summary.total} allowed, ` +
@@ -2032,6 +2049,7 @@ async function main() {
       // times out, the always-run workflow commit still has a durable queue
       // checkpoint and the next scan will not repost these rows.
       writePendingAll(mergePendingQueue(existingQueue, postedDeals));
+      writeDeliveryAudit(postedDeals);
 
       if ((i + 1) % 10 === 0) {
         console.log(`  ✅ posted ${i + 1}/${freshDeals.length}`);

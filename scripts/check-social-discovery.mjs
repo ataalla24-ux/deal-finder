@@ -10,12 +10,8 @@ try { previous = JSON.parse(fs.readFileSync('docs/tiktok-scanner-report.json','u
 const report = { checkedAt: new Date().toISOString(), readOnly: true, maxApiSearchRequests: 1, maxWebSearchRequests: 1 };
 const browser = await chromium.launch({headless:true});
 try {
-  const context = await browser.newContext({locale:'de-AT',timezoneId:'Europe/Vienna',
-    userAgent:'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36'});
+  const context = await browser.newContext({locale:'de-AT',timezoneId:'Europe/Vienna'});
   const page = await context.newPage();
-  if (!(Date.parse(previous.apiDiscovery?.nextRetryAt) > Date.now())) {
-    await page.goto('https://www.tiktok.com/',{waitUntil:'domcontentloaded',timeout:30000});
-  }
   const api = await fetchTikTokApiCandidates(page,{
     keywords:['wien gratis kaffee'],pages:1,maxCandidates:3,previous:previous.apiDiscovery,
   });

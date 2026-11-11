@@ -47,6 +47,8 @@ test('known TikTok envelopes normalize only actual post identities and real time
   assert.equal(normalizeTikTokApiItem({id:'bad',author:{uniqueId:'vienna.cafe'}}),null);
   assert.equal(normalizeTikTokApiItem({user_info:{uniqueId:'vienna.cafe'}}),null);
   assert.equal(normalizeTikTokApiItem({...item,createTime:undefined}).timeDateTime,'');
+  assert.equal(normalizeTikTokApiItem({...item,createTime:1e99,textExtra:{}}).timeDateTime,'');
+  assert.equal(normalizeTikTokApiItem({...item,textExtra:[null]}).url,`https://www.tiktok.com/@vienna.cafe/video/${item.id}`);
 });
 
 test('TikTok stops on refusal, keeps previous discoveries, and honors Retry-After across runs', async () => {
