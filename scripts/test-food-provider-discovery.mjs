@@ -172,6 +172,27 @@ test('source cooldowns remain shared across every provider and rotation favors o
   const firstPerSource = plan.tasks.filter((t, i, all) => all.findIndex(other => other.source === t.source) === i);
   assert.equal(firstPerSource.at(-1).source, 'IKEA Food');
 });
+test('PDF-only restaurant sources never consume HTML provider allocations or replay old reservations', async () => {
+  const restaurant = POWER_FOOD_SOURCES.find(s => s.name === 'Mömax Restaurant');
+  const report = power();
+  assert.equal(restaurant.mediaOnly, true);
+  assert.equal(sourceAvailable(restaurant, report, empty(), now), false);
+  assert(!scanTargets(empty(), report, now).some(t => t.source === restaurant.name));
+  const state = empty();
+  const tasks = ['scrapingbee', 'zyte', 'scraperapi'].map(provider => ({
+    provider, source: restaurant.name, url: restaurant.url, cap: CAPS[provider],
+  }));
+  state.reservations.push({ runId: '123', mode: 'scan', at: now.toISOString(), tasks });
+  assert.doesNotThrow(() => validateLedger(state));
+  const unexpected = () => { throw new Error('No fetch, provider or verifier allowed for media-only source'); };
+  const output = await collectPlan({ runId: '123', mode: 'scan', tasks }, state, report, {
+    now, fetchPage: unexpected, clientFor: unexpected, verify: unexpected,
+  });
+  assert.deepEqual(output.results.map(r => r.status), ['source-paused', 'source-paused', 'source-paused']);
+  assert.equal(output.candidates.length, 0);
+  assert.deepEqual(state.reservations[0].tasks, tasks);
+  assert.deepEqual(state.reservations[0].unspent, [0, 1, 2]);
+});
 test('known cooldown, failed source or stale Power report never triggers a proxy', () => {
   const report = power();
   report.sources.find(s => s.source === source.name).status = 'deferred';
