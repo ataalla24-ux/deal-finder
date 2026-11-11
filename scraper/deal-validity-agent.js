@@ -11,7 +11,8 @@ import { discoveryRejection } from './deal-discovery-policy.js';
 import { normalizeDealFacts, locationConflictReason } from './deal-factual-guards.js';
 import { inspectDealContentQuality } from './deal-content-quality-utils.js';
 
-import { inspectDealUrlHealth, parseExpiryShape, sparhamsterCouponRoundPath } from './expiry-utils.js';
+import { inspectDealUrlHealth, parseExpiryShape, parseExplicitOfferPeriod, sparhamsterCouponRoundPath } from './expiry-utils.js';
+import { hasReviewedOfferPeriod } from './offer-period-fields.js';
 import { isHumanReviewedCommunity } from './community-review-utils.js';
 import {
   decodeInstagramShortcodeDate,
@@ -100,7 +101,7 @@ function isBeforeToday(isoDate, now) {
   const text = cleanText(isoDate);
   const dateOnly = text.match(/^(\d{4}-\d{2}-\d{2})(?:$|T)/)?.[1];
   if (!dateOnly) return false;
-  return dateOnly < toIsoDate(startOfUtcDay(now));
+  return dateOnly < new Intl.DateTimeFormat('sv-SE', { timeZone: 'Europe/Vienna' }).format(now);
 }
 
 function ageDays(date, now) {
@@ -662,6 +663,7 @@ function shouldAllowChurchThisRun(now, options = {}) {
 
 function collectExpiryCandidates(deal, health, now) {
   const candidates = [];
+  const reviewedPeriod = hasReviewedOfferPeriod(deal);
   const add = (source, raw, shape = null, rank = 50) => {
     const text = cleanText(raw);
     const offerWindow = !shape && text ? extractActiveOfferWindow(text, { now }) : null;
@@ -685,6 +687,7 @@ function collectExpiryCandidates(deal, health, now) {
       validUntil: cleanText(parsedShape.validUntil),
       confidence: cleanText(parsedShape.confidence),
       evidenceSource: cleanText(parsedShape.evidenceSource),
+      expires: cleanText(parsedShape.expires),
       rank,
     });
   };
@@ -693,6 +696,14 @@ function collectExpiryCandidates(deal, health, now) {
   const weakReviewTtl = /(?:short[-_\s]?review[-_\s]?ttl|review[-_\s]?ttl)/i.test(rawExpiryProvenance)
     && confidenceRank(deal.dateConfidence) <= 1;
   const rawDealExpiry = deal.expires || deal.expiresOriginal || deal.end_date || deal.validity_date || '';
+  const literal = cleanText(deal.expiresOriginal || deal.expiryDisplayText);
+  const literalShape = parseExpiryShape(literal, { now });
+  const explicitLiteralYear = /\b20\d{2}\b/.test(literal);
+  if (reviewedPeriod && literal && literalShape.kind !== 'unknown'
+      && (explicitLiteralYear || literalShape.kind === 'recurring')
+      && (!deal.communityDateReview || parseExplicitOfferPeriod(literal) || literalShape.kind === 'recurring')) {
+    add('deal.reviewed-period', literal, literalShape, 105);
+  }
   const flightDepartureAsExpiry = isViennaOriginFlight(deal)
     && /^\s*(?:abflug|departure|hinflug)\b/i.test(cleanText(rawDealExpiry));
   if (!flightDepartureAsExpiry) {
@@ -760,7 +771,7 @@ function collectExpiryCandidates(deal, health, now) {
       validFrom: toIsoDate(captionWindow.startDate), validUntil: toIsoDate(captionWindow.endDate), confidence: 'high',
     }, 94);
   }
-  if (isSocialPostDeal(deal) && cleanText(contentHints.title)) {
+  if (isSocialPostDeal(deal) && !manualPeriod && cleanText(contentHints.title)) {
     const contentWindow = extractActiveOfferWindow(contentHints.title, {
       now,
       pubDate: deal.sourcePublishedAt || deal.pubDate || deal.postTimestamp,
@@ -806,7 +817,7 @@ function confidenceRank(value) {
 function isAfterToday(isoDate, now) {
   const text = cleanText(isoDate);
   const dateOnly = text.match(/^(\d{4}-\d{2}-\d{2})(?:$|T)/)?.[1];
-  if (dateOnly) return dateOnly > toIsoDate(startOfUtcDay(now));
+  if (dateOnly) return dateOnly > new Intl.DateTimeFormat('sv-SE', { timeZone: 'Europe/Vienna' }).format(now);
   const timestamp = Date.parse(text);
   return Number.isFinite(timestamp) && timestamp > now.getTime();
 }
@@ -824,7 +835,8 @@ function getExpiryDecision(expiryCandidates, now) {
   const selected = ranked[0] || null;
   if (!selected) return { blocked: false, candidate: null };
 
-  const expired = (selected.validOn && isBeforeToday(selected.validOn, now))
+  const expired = (selected.expires && Date.parse(selected.expires) <= now.getTime())
+    || (selected.validOn && isBeforeToday(selected.validOn, now))
     || (selected.validUntil && isBeforeToday(selected.validUntil, now));
   if (expired) {
     return {
@@ -1229,6 +1241,18 @@ async function validateDeal(deal, context) {
     warnings.push('kein Ablaufdatum gefunden');
   }
 
+  const explicitPeriod = parseExplicitOfferPeriod(deal.expiresOriginal || deal.expiryDisplayText || '');
+  if (explicitPeriod?.error) reasons.push(explicitPeriod.error);
+  const reviewedCandidate = expiryCandidates.find(candidate => candidate.source === 'deal.reviewed-period');
+  const sourceCandidate = expiryCandidates.find(candidate => candidate.source === 'url.dateHints');
+  if (reviewedCandidate && sourceCandidate && (
+    ((reviewedCandidate.validUntil || reviewedCandidate.validOn) && (sourceCandidate.validUntil || sourceCandidate.validOn)
+      && (reviewedCandidate.validUntil || reviewedCandidate.validOn) !== (sourceCandidate.validUntil || sourceCandidate.validOn))
+    || (reviewedCandidate.kind === 'recurring' && !reviewedCandidate.validUntil && (sourceCandidate.validUntil || sourceCandidate.validOn))
+    || (reviewedCandidate.validFrom && sourceCandidate.validFrom && reviewedCandidate.validFrom !== sourceCandidate.validFrom))) {
+    reasons.push('Aktionszeitraum widersprüchlich: geprüfter Zeitraum und Angebotsquelle stimmen nicht überein');
+  }
+
   if (relativeOffer.blocked) {
     reasons.push(relativeOffer.reason);
   }
@@ -1277,14 +1301,15 @@ async function validateDeal(deal, context) {
     nextDeal.sourcePublishedAtSource = selectedDate.source;
   }
 
-  if (selectedExpiry?.validOn || selectedExpiry?.validFrom || selectedExpiry?.validUntil) {
+  if (selectedExpiry?.validOn || selectedExpiry?.validFrom || selectedExpiry?.validUntil || selectedExpiry?.kind === 'recurring') {
     nextDeal.expiryKind = selectedExpiry.kind || nextDeal.expiryKind;
     nextDeal.expiryDisplayText = selectedExpiry.raw || nextDeal.expiryDisplayText;
     nextDeal.dateConfidence = selectedExpiry.confidence || nextDeal.dateConfidence;
-    if (selectedExpiry.validOn) nextDeal.validOn = selectedExpiry.validOn;
-    if (selectedExpiry.validFrom) nextDeal.validFrom = selectedExpiry.validFrom;
-    if (selectedExpiry.validUntil) nextDeal.validUntil = selectedExpiry.validUntil;
-    nextDeal.expires = selectedExpiry.validUntil || selectedExpiry.validOn || nextDeal.expires;
+    for (const field of ['validOn', 'validFrom', 'validUntil']) {
+      delete nextDeal[field];
+      if (selectedExpiry[field]) nextDeal[field] = selectedExpiry[field];
+    }
+    nextDeal.expires = selectedExpiry.validUntil || selectedExpiry.validOn || '';
     nextDeal.expiresSource = selectedExpiry.evidenceSource || selectedExpiry.source;
     nextDeal.expirySource = selectedExpiry.evidenceSource || selectedExpiry.source;
   }

@@ -1,4 +1,6 @@
 import { locationConflictReason, normalizeDealFacts } from './deal-factual-guards.js';
+import { parseExpiryShape } from './expiry-utils.js';
+import { copyOfferPeriod, hasReviewedOfferPeriod } from './offer-period-fields.js';
 
 const VIENNA_POSTCODE_PATTERN = /(?:^|\D)(1(?:0[1-9]|1\d|2[0-3])0)(?!\d)/;
 const VIENNA_CITY_PATTERN = /\b(?:wien|vienna)\b/i;
@@ -674,7 +676,13 @@ export function mergeDealEvidence(left = {}, right = {}, options = {}) {
     .sort((a, b) => b.evidence.rank - a.evidence.rank
       || Number(b.evidence.future) - Number(a.evidence.future)
       || b.evidence.timestampMs - a.evidence.timestampMs);
-  if (expiryCandidates[0]) {
+  const reviewedPeriod = [left, right].filter(hasReviewedOfferPeriod).sort((a, b) =>
+    (Date.parse(b.liveEditedAt || b.slackEditedAt || b.communityDateReview?.at) || 0)
+    - (Date.parse(a.liveEditedAt || a.slackEditedAt || a.communityDateReview?.at) || 0))[0];
+  if (reviewedPeriod) {
+    // An explicit removal of an inferred end date is meaningful too.
+    copyOfferPeriod(merged, reviewedPeriod);
+  } else if (expiryCandidates[0]) {
     const expiryDeal = expiryCandidates[0].deal;
     const selectedExpiry = expiryCandidates[0].evidence;
     const expiryFields = ['expires', 'expiresOriginal', 'expiresSource', 'expirySource', 'expiryKind', 'expiryDisplayText', 'validOn', 'validFrom', 'validUntil', 'end_date', 'validity_date', 'dateConfidence'];
@@ -694,6 +702,17 @@ export function mergeDealEvidence(left = {}, right = {}, options = {}) {
     merged.expirySource = selectedExpirySource || selectedExpiry.field;
     if (toIsoTimestamp(expiryDeal.expiresOriginal) === selectedExpiry.timestamp) {
       merged.expiresOriginal = expiryDeal.expiresOriginal;
+    }
+    const literal = cleanText(expiryDeal.expiresOriginal || expiryDeal.expiryDisplayText);
+    const shape = parseExpiryShape(literal, { now: new Date(nowMs) });
+    const terminal = shape.validUntil || shape.validOn;
+    if (terminal && terminal === selectedExpiry.timestamp.slice(0, 10)) {
+      // Preserve the complete consistent window, not just its ranked terminal field.
+      merged.expiresOriginal = literal;
+      for (const field of ['validOn', 'validUntil', 'validFrom', 'expiryDisplayText', 'expiryKind']) {
+        if (expiryDeal[field]) merged[field] = expiryDeal[field];
+      }
+      if (toIsoTimestamp(expiryDeal.expires)?.slice(0, 10) === terminal) merged.expires = expiryDeal.expires;
     }
   }
 

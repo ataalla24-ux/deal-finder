@@ -1,0 +1,40 @@
+{
+  "reviewDate": "2026-11-12",
+  "scope": "Preserve coherent reviewed offer periods through pending edits, Slack serialization, deduplication, approval and live normalization.",
+  "rootCauses": [
+    "Evidence merging retained the ranked terminal date but discarded the full reviewed period.",
+    "Native date-picker periods were not parsed as complete windows, and ISO timestamps were extended to end of day.",
+    "Bounded weekly schedules could become single-day offers, and stale structured date fields survived validation.",
+    "Partial social-page headlines could override a human-reviewed period."
+  ],
+  "changes": [
+    "Copy reviewed period fields atomically, including an explicitly removed inferred end date.",
+    "Parse explicit full-year date-picker windows and Vienna clock times, including cross-year periods and daylight-saving offsets.",
+    "Retain ISO expiry instants, consistent structured ranges, recurring schedules and stock-limited offers without invented deadlines.",
+    "Hold invalid, reversed, incomplete-clock, DST-ambiguous and source-conflicting periods for review.",
+    "Run the new offline pipeline regression in production integrity CI and the regular approval guard stage."
+  ],
+  "localVerification": {
+    "suites": 18,
+    "runnerTests": 35,
+    "failures": 0,
+    "newPipelineCases": "Seven positive period shapes across three round trips, full isolated live normalization twice, exact-clock expiry, invalid dates/times, year change, DST, conflicts and community approval.",
+    "integration": "Existing complete isolated Slack approval test extended to assert the published literal, start/end dates and exact Vienna closing time.",
+    "liveImpact": "Readonly replay of all 75 live records changes no expiry instant or calendar bounds. One existing daily schedule is classified recurring instead of end. No live data files are edited.",
+    "productionFeed": "75 records, zero errors; nine pre-existing copy warnings remain unrelated.",
+    "map": "281 locations and 49 explicit deal links pass the existing validator.",
+    "diffCheck": "passed"
+  },
+  "publicationStatus": "Local verification complete before source commit. Actual GitHub execution and public readback are recorded separately under output/slack-date-pipeline-20261112; a future human approval is not claimed here.",
+  "preservation": [
+    "Existing persistent MAMPF, AIDA, IKEA and Villa Vida edits remain unchanged.",
+    "Human approval, source evidence checks, map readiness and removal grace remain enforced.",
+    "Concurrent collector/approval state is preserved by non-forced integration."
+  ],
+  "constraints": [
+    "No manual collector, Actor, provider or model calls.",
+    "No new approval, manual Slack dispatch, test post or customer message.",
+    "No native build, Store, key, budget, schedule or tariff changes.",
+    "No additional paid service; existing regular automation remains unchanged."
+  ]
+}

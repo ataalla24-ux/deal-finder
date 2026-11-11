@@ -72,7 +72,8 @@ try {
   const edited = read('deals-pending-all.json').deals[0];
   edited.expires = nextMonth;
   edited.validUntil = nextMonth;
-  edited.expiresOriginal = nextMonth;
+  const literalDay = nextMonth.split('-').reverse().join('.');
+  edited.expiresOriginal = `${literalDay}, 12:00 bis ${literalDay}, 15:00 Uhr`;
   edited.expirySource = 'slack.human-review';
   write('deals-pending-all.json', { deals: [edited] });
   process.env.APPROVAL_REQUIRE_MAP = '1';
@@ -87,6 +88,13 @@ try {
   assert.equal(read('deals.json').deals.length, 1, 'a corrected blocked approval can publish');
   assert.equal(read('deals-pending-all.json').deals.length, 0);
   assert.equal(read('deals.json').deals[0].approvalBlock, undefined);
+  const livePeriod = read('deals.json').deals[0];
+  assert.equal(livePeriod.expiryKind, 'single');
+  assert.equal(livePeriod.validOn, nextMonth);
+  assert.equal(livePeriod.validFrom, nextMonth);
+  assert.equal(livePeriod.validUntil, nextMonth);
+  assert.equal(livePeriod.expiresOriginal, edited.expiresOriginal);
+  assert.equal(new Intl.DateTimeFormat('en-GB', { timeZone: 'Europe/Vienna', hour: '2-digit', minute: '2-digit' }).format(new Date(livePeriod.expires)), '15:00');
   assert.equal(fs.existsSync(path.join(temp, 'docs/deal-review-feedback.json')), false);
   assert.match(notices.at(-1).text, /Prüfung bestanden/, 'resolved failures must not leave a stale blocking notice');
 

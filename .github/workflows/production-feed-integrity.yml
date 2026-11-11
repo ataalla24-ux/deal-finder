@@ -25,6 +25,10 @@ on:
       - "scripts/test-deal-logo-normalization.mjs"
       - "scraper/deal-content-quality-utils.js"
       - "scraper/deal-validity-agent.js"
+      - "scraper/expiry-utils.js"
+      - "scraper/deal-evidence-utils.js"
+      - "scraper/offer-period-fields.js"
+      - "scripts/test-slack-date-pipeline.mjs"
       - "scraper/normalize-live-deals.js"
       - "scraper/slack-digest-utils.js"
       - "scraper/slack-notify.js"
@@ -118,6 +122,9 @@ jobs:
           node scripts/validate-original-deal-photos.mjs
           node scripts/test-slack-deal-quality.mjs
           node scripts/test-slack-approval-validation.mjs
+          node scripts/test-slack-date-pipeline.mjs
+          node scripts/test-expiry-normalization.mjs
+          node scripts/test-deal-validity-evidence.mjs
           node scripts/test-slack-delivery-state.mjs
           node scripts/test-discovery-non-consumer-offers.mjs
           node scripts/test-map-location-classification.mjs

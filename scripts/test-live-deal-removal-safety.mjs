@@ -298,10 +298,13 @@ try {
   const validationReport = JSON.parse(fs.readFileSync(path.join(normalizationDir, 'live-deal-validation-report.json'), 'utf8'));
   assert.equal(validationReport.removedCount, 1);
   assert.equal(validationReport.heuristicReviewCandidates, 1);
-  assert.equal(validationReport.expiredReviewCandidates, 2);
+  // Exact clock expiries are no longer extended to midnight. The recent event
+  // is correctly recognized as ended, but the existing grace still retains it.
+  assert.equal(normalizedBundle.deals.find(deal => deal.id === 'strong-expiry-inside-grace').expires, recentStrongExpiry);
+  assert.equal(validationReport.expiredReviewCandidates, 3);
   assert.equal(validationReport.socialPostAgeReviewCandidates, 1);
   assert.equal(validationReport.socialPostDateRemovals, 0);
-  assert.equal(validationReport.reviewCandidateCount, 4);
+  assert.equal(validationReport.reviewCandidateCount, 5);
 } finally {
   fs.rmSync(normalizationDir, { recursive: true, force: true });
 }

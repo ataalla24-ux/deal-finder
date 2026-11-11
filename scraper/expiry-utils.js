@@ -1,5 +1,6 @@
 import { load } from 'cheerio';
 import { cardEditorialWhen } from './deal-card-editor.js';
+import { hasReviewedOfferPeriod } from './offer-period-fields.js';
 
 const URL_CHECK_UA = 'Mozilla/5.0 (compatible; FreeFinderBot/1.0; +https://freefinder.wien)';
 const DAY_MS = 24 * 60 * 60 * 1000;
@@ -259,6 +260,12 @@ export function shouldVerifyExpiryAgainstUrl(deal = {}, options = {}) {
 }
 
 function parseIsoLike(text) {
+  if (/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}(?::\d{2}(?:\.\d+)?)?(?:Z|[+-]\d{2}:\d{2})$/i.test(text)) {
+    const [year, month, day] = text.slice(0, 10).split('-').map(Number);
+    if (!Number.isFinite(+endOfUtcDay(year, month - 1, day))) return null;
+    const stamp = Date.parse(text);
+    if (Number.isFinite(stamp)) return { date: new Date(stamp), precision: 'day', source: 'text' };
+  }
   const delimitedYmd = text.match(/^\s*(\d{4})[./](\d{1,2})[./](\d{1,2})(?:\s|$)/);
   if (delimitedYmd) {
     const year = Number(delimitedYmd[1]);
@@ -495,6 +502,11 @@ export function parseExpiryDetails(value, options = {}) {
   const text = cleanText(value);
   if (!text) return null;
 
+  const explicit = parseExplicitOfferPeriod(text);
+  if (explicit) return explicit.error ? null : {
+    date: new Date(explicit.expires), precision: 'day', source: 'text',
+  };
+
   if (isVagueExpiry(text)) return null;
 
   const withoutPrefixes = isolateLeadingExpiryToken(
@@ -515,6 +527,13 @@ export function parseExpiryDetails(value, options = {}) {
   )) || null;
 }
 
+function hasExplicitOfferSchedule(raw) {
+  if (/\b(?:jeden|jede|jeweils|täglich|taeglich|wöchentlich|woechentlich|werktags)\b|\b(?:montags|dienstags|mittwochs|donnerstags|freitags|samstags|sonntags)\b/i.test(raw)) return true;
+  const weekday = '(?:montag|dienstag|mittwoch|donnerstag|freitag|samstag|sonntag|mo|di|mi|do|fr|sa|so)';
+  return new RegExp(`\\b${weekday}\\s*(?:und|&|bis|[-–])\\s*${weekday}\\b`, 'i').test(raw)
+    && /\bbis\s+(?:\d{1,2}[./]\d{1,2}[./]20\d{2}|20\d{2}-\d{2}-\d{2})\b/i.test(raw);
+}
+
 export function parseExpiryShape(value, options = {}) {
   const now = options.now instanceof Date ? options.now : new Date();
   const referenceDate = options.referenceDate instanceof Date
@@ -523,6 +542,9 @@ export function parseExpiryShape(value, options = {}) {
   const dateInferenceNow = Number.isNaN(referenceDate.getTime()) ? now : referenceDate;
   const raw = cleanText(value);
   if (!raw) return { kind: 'unknown', raw: '' };
+  const explicit = parseExplicitOfferPeriod(raw);
+  if (explicit) return explicit.error ? { kind: 'unknown', raw, confidence: 'low', error: explicit.error }
+    : { ...explicit, raw, confidence: 'high' };
 
   const contextText = cleanText(options.contextText || '');
   const text = raw.toLowerCase();
@@ -567,6 +589,15 @@ export function parseExpiryShape(value, options = {}) {
       return { year: referenceDate.getUTCFullYear(), month: referenceDate.getUTCMonth() + 1, day: referenceDate.getUTCDate() };
     }
   })();
+
+  // A bounded weekly schedule is not an event on its final calendar day.
+  const recurring = hasExplicitOfferSchedule(raw);
+  if (recurring) {
+    const end = raw.match(/\bbis\s+(\d{1,2}[./]\d{1,2}[./](?:20\d{2})|20\d{2}-\d{2}-\d{2})\b/i);
+    const parsedEnd = end && parseExpiryDetails(end[1], { now: dateInferenceNow });
+    if (parsedEnd?.date) return { kind: 'recurring', raw, validUntil: parsedEnd.date.toISOString().slice(0, 10), confidence: 'high' };
+    if (uniqueExplicitDates.size === 0) return { kind: 'recurring', raw, confidence: 'low' };
+  }
 
   if (referenceParts && /\b(?:nur heute|today only|heute only)\b/.test(text)) {
     return {
@@ -770,6 +801,7 @@ export function parseExpiryShape(value, options = {}) {
 }
 
 function applyStructuredExpiryFields(deal, value, options = {}) {
+  const previous = { kind: deal.expiryKind, validOn: deal.validOn, validFrom: deal.validFrom, validUntil: deal.validUntil };
   clearStructuredExpiryFields(deal);
   const contextText = [
     options.contextText,
@@ -779,12 +811,64 @@ function applyStructuredExpiryFields(deal, value, options = {}) {
     deal?.type,
   ].filter(Boolean).join(' ');
   const shape = parseExpiryShape(value, { ...options, contextText });
+  const terminal = shape.validUntil || shape.validOn;
+  if (/^\d{4}-\d{2}-\d{2}(?:T.*)?$/.test(cleanText(value)) && terminal) {
+    const day = v => /^\d{4}-\d{2}-\d{2}$/.test(v || '') && parseExpiryDetails(v)?.date.toISOString().slice(0, 10) === v;
+    if (previous.validOn === terminal) Object.assign(shape, { kind: 'single', validOn: terminal });
+    if (previous.validUntil === terminal && day(previous.validFrom) && previous.validFrom <= terminal) {
+      Object.assign(shape, { kind: previous.validFrom === terminal ? 'single' : 'range', validFrom: previous.validFrom, validUntil: terminal });
+      if (previous.validFrom === terminal) shape.validOn = terminal;
+    }
+    if (previous.kind === 'recurring' && previous.validUntil === terminal) {
+      Object.assign(shape, { kind: 'recurring', validUntil: terminal });
+      delete shape.validOn;
+    }
+  }
   deal.expiryKind = shape.kind || 'unknown';
   deal.expiryDisplayText = shape.raw || cleanText(value);
   if (shape.validOn) deal.validOn = shape.validOn;
   if (shape.validFrom) deal.validFrom = shape.validFrom;
   if (shape.validUntil) deal.validUntil = shape.validUntil;
   if (shape.confidence) deal.dateConfidence = shape.confidence;
+}
+
+// Interpret only the explicit date-picker grammar, never a publication date or
+// yearless caption. Intl supplies Vienna's DST offsets; ambiguous clocks fail closed.
+function viennaInstant(day, time) {
+  const formatter = new Intl.DateTimeFormat('sv-SE', { timeZone: 'Europe/Vienna',
+    year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit', hourCycle: 'h23' });
+  const wall = Date.parse(`${day}T${time}:00Z`);
+  const stamps = new Set();
+  for (const delta of [-DAY_MS, 0, DAY_MS]) {
+    const sample = wall + delta;
+    const parts = Object.fromEntries(formatter.formatToParts(new Date(sample)).map(p => [p.type, p.value]));
+    const displayed = `${parts.year}-${parts.month}-${parts.day}T${parts.hour}:${parts.minute}`;
+    const offset = Date.parse(`${displayed}:00Z`) - sample;
+    const candidate = wall - offset;
+    const actual = Object.fromEntries(formatter.formatToParts(new Date(candidate)).map(p => [p.type, p.value]));
+    if (`${actual.year}-${actual.month}-${actual.day}T${actual.hour}:${actual.minute}` === `${day}T${time}`) stamps.add(candidate);
+  }
+  return stamps.size === 1 ? new Date([...stamps][0]).toISOString() : '';
+}
+
+export function parseExplicitOfferPeriod(raw) {
+  const match = cleanText(raw).match(/^(\d{1,2})\.(\d{1,2})\.(20\d{2})(?:,\s*(\d{2}:\d{2}))?(?:\s+bis\s+(\d{1,2})\.(\d{1,2})\.(20\d{2})(?:,\s*(\d{2}:\d{2}))?)?(?:\s+Uhr)?$/);
+  if (!match) return null;
+  const [, d, m, y, startTime, ed, em, ey, endTime] = match;
+  // A bare date retains its existing end-date semantics.
+  if (!ed && !startTime) return null;
+  const start = endOfUtcDay(+y, +m - 1, +d);
+  const end = ed ? endOfUtcDay(+ey, +em - 1, +ed) : start;
+  const error = { error: 'Aktionszeitraum ungültig oder Uhrzeit nicht eindeutig (Europe/Vienna)' };
+  if (!Number.isFinite(+start) || !Number.isFinite(+end) || start > end
+      || Boolean(startTime) !== Boolean(ed ? endTime : startTime)
+      || [startTime, endTime].filter(Boolean).some(t => !/^(?:[01]\d|2[0-3]):[0-5]\d$/.test(t))) return error;
+  const first = start.toISOString().slice(0, 10), last = end.toISOString().slice(0, 10);
+  const startsAt = startTime ? viennaInstant(first, startTime) : '';
+  const expires = startTime ? viennaInstant(last, ed ? endTime : startTime) : end.toISOString();
+  if (!expires || (startTime && (!startsAt || startsAt > expires))) return error;
+  return { kind: first === last ? 'single' : 'range', validFrom: first, validUntil: last,
+    ...(first === last ? { validOn: first } : {}), expires };
 }
 
 function repairImplausiblePastExpiry(parsed, raw, deal, now) {
@@ -1638,12 +1722,27 @@ export async function inspectDealUrlHealth(url, options = {}) {
 }
 
 export async function normalizeDealExpiry(deal, options = {}) {
-  // A reviewed community window must not be replaced by a profile-page date
-  // or by parsing just the first day of a literal such as "09.10 und 10.10".
+  const now = options.now instanceof Date ? options.now : new Date();
+  const literal = cleanText(deal.expiresOriginal || deal.expiryDisplayText || '');
+  const literalShape = parseExpiryShape(literal, { now });
+  const explicit = parseExplicitOfferPeriod(literal);
+  if (explicit?.error) return deal;
+  const explicitSchedule = hasExplicitOfferSchedule(literal) || /\bsolange\b/i.test(literal);
+  if (explicit || (literalShape.kind === 'recurring' && explicitSchedule
+      && (literalShape.validUntil || hasReviewedOfferPeriod(deal) || !deal.expires))) {
+    // Keep a complete offer period atomic across dedupe, validation and live replay.
+    applyStructuredExpiryFields(deal, literal, { now });
+    const closingTime = literal.match(/\bbis\s+((?:[01]?\d|2[0-3]):[0-5]\d)\s*(?:Uhr)?/i)?.[1];
+    const terminal = literalShape.validUntil;
+    deal.expires = explicit?.expires || (terminal
+      ? (closingTime ? viennaInstant(terminal, closingTime.padStart(5, '0')) : `${terminal}T23:59:59.999Z`) : '');
+    deal.expiresPrecision = deal.expires ? 'day' : '';
+    if (hasReviewedOfferPeriod(deal) || options.allowUrlLookup === false) return deal;
+  }
+  // Non-continuous community days retain their separately reviewed structure.
   if (deal.communityDateReview && deal.pipelineLifecycle?.manualDecision === 'approved'
       && deal.expiresSource === 'slack.community-human-review'
       && /^\d{4}-\d{2}-\d{2}$/.test(deal.validUntil || deal.validOn || '')) return deal;
-  const now = options.now instanceof Date ? options.now : new Date();
   const allowUrlLookup = options.allowUrlLookup !== false;
   const forceUrlLookup = options.forceUrlLookup === true;
   const originalExpiryText = cleanText(deal.expiresOriginal || '');

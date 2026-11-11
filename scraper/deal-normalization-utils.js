@@ -4,6 +4,7 @@ import { sanitizePublicDealText } from './public-deal-text.js';
 import { cardEditorialWhen } from './deal-card-editor.js';
 import { concreteFoodOfferTitle, isPromotionalIntro, polishOfferTitle, stripSlackEmojiCodes } from './offer-title-utils.js';
 import { isCommunitySubmission } from './community-identity-utils.js';
+import { hasReviewedOfferPeriod } from './offer-period-fields.js';
 
 const PUBLIC_BRAND_LOGO_BASE_URL = 'https://freefinder.at/assets/brand-logos';
 
@@ -1229,6 +1230,11 @@ function normalizeDealRecord(deal = {}) {
     if (editedFields.has(field) && Object.hasOwn(deal, field)) normalized[field] = deal[field];
   }
   if (editedFields.has('logo') && deal.logo) normalized.logo = deal.logo;
+  if (hasReviewedOfferPeriod(deal)) {
+    for (const field of ['expiresOriginal', 'expiryDisplayText']) {
+      if (Object.hasOwn(deal, field)) normalized[field] = cleanUiNoiseText(deal[field]);
+    }
+  }
   return sanitizePublicDealText(normalized);
 }
 
