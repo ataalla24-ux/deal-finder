@@ -1,14 +1,14 @@
 {
-  "lastUpdated": "2026-11-11T12:42:48.805Z",
+  "lastUpdated": "2026-11-11T23:28:17.613Z",
   "runProvenance": {
     "repository": "ataalla24-ux/deal-finder",
-    "runId": "43022561238",
-    "headSha": "9d584619dd44fb287d7ddc9e0d8d38a4a5848790",
-    "checkoutSha": "9d584619dd44fb287d7ddc9e0d8d38a4a5848790",
+    "runId": "43119903129",
+    "headSha": "f186555fa2a2f555ee70c5c5355e33b8994ac942",
+    "checkoutSha": "f186555fa2a2f555ee70c5c5355e33b8994ac942",
     "triggeringRun": null,
     "event": "schedule",
     "runAttempt": "1",
-    "url": "https://github.com/ataalla24-ux/deal-finder/actions/runs/43022561238"
+    "url": "https://github.com/ataalla24-ux/deal-finder/actions/runs/43119903129"
   },
   "status": "discovery-degraded",
   "outputPreserved": true,
@@ -55,8 +55,8 @@
     "wien pizza 1+1",
     "wien gratis essen",
     "vienna free food",
-    "wien gratis 11 november 2026",
-    "wien deal 11 november 2026",
+    "wien gratis 12 november 2026",
+    "wien deal 12 november 2026",
     "wien gratis november 2026",
     "wien aktion november 2026",
     "wien rabatt november 2026",
@@ -122,23 +122,42 @@
   "discovered": 0,
   "apiCandidates": 0,
   "apiDiscovery": {
-    "errors": [],
-    "attemptedRequests": 0,
+    "errors": [
+      {
+        "keyword": "wien gratis kebab",
+        "offset": 0,
+        "status": 0,
+        "error": "Empty or non-JSON TikTok response",
+        "code": "transport-unavailable"
+      }
+    ],
+    "attemptedRequests": 1,
     "emptyResponses": 0,
     "rawItems": 0,
     "normalizedItems": 0,
     "ignoredItems": 0,
-    "stoppedReason": "api-cooldown",
-    "nextRetryAt": "2026-11-11T22:22:04.465Z",
-    "nextKeywordIndex": 1
+    "stoppedReason": "transport-unavailable",
+    "nextRetryAt": "2026-11-12T23:28:03.418Z",
+    "nextKeywordIndex": 2,
+    "transport": "public-browser-search",
+    "navigations": 1,
+    "searchRequests": 0,
+    "blockedExtraRequests": 2
   },
   "searchDiscovery": {
-    "errors": [],
-    "attemptedQueries": 0,
-    "stoppedReason": "search-cooldown",
-    "nextRetryAt": "2026-11-11T22:22:04.852Z",
-    "lastAttemptAt": "2026-11-10T22:22:04.852Z",
-    "nextQueryIndex": 4,
+    "errors": [
+      {
+        "query": "site:tiktok.com vienna free food",
+        "error": "Search challenge; no bypass attempted",
+        "httpStatus": 403,
+        "retryAt": ""
+      }
+    ],
+    "attemptedQueries": 2,
+    "stoppedReason": "search-unavailable",
+    "nextRetryAt": "2026-11-12T23:28:15.471Z",
+    "lastAttemptAt": "2026-11-11T23:28:15.471Z",
+    "nextQueryIndex": 6,
     "deferredPostVisits": 0
   },
   "accepted": 0,
@@ -221,12 +240,27 @@
     "aiAcceptedUnusable": 0
   },
   "timings": {
-    "apiDiscoveryMs": 34,
-    "searchDiscoveryMs": 1,
-    "mediaRescueMs": 176,
-    "totalScannerMs": 1400
+    "apiDiscoveryMs": 12095,
+    "searchDiscoveryMs": 1577,
+    "mediaRescueMs": 526,
+    "totalScannerMs": 16000
   },
-  "discoveryErrors": [],
-  "apiErrors": [],
+  "discoveryErrors": [
+    {
+      "query": "site:tiktok.com vienna free food",
+      "error": "Search challenge; no bypass attempted",
+      "httpStatus": 403,
+      "retryAt": ""
+    }
+  ],
+  "apiErrors": [
+    {
+      "keyword": "wien gratis kebab",
+      "offset": 0,
+      "status": 0,
+      "error": "Empty or non-JSON TikTok response",
+      "code": "transport-unavailable"
+    }
+  ],
   "rejected": []
 }
