@@ -5,7 +5,7 @@ import { discoveryRejection } from './deal-discovery-policy.js';
 
 const DAY = 86400000;
 const OFFER_PATH = /(?:^|[\/\s_.-])(?:aktionen?|aktionsbon|angebote?|specials?|rabatt|deals?)(?=$|[\/\s_.-])|happy[-_\s]?hour|coupon|mittagsaktion|studentenangebot|geburtstagsangebot/i;
-const EXCLUDED_PATH = /job|karriere|career|stellen|bewerb|catering|business|b2b|corporate|franchise|presse|press|login|account|warenkorb|checkout|veranstaltung|reservierung|accessoires|running[-_]club|tee-gastronomie|\/ch\/|\/barcelona\/|\/teams\/|\/kultur\/|(?:^|\/)bier[-_]/i;
+const EXCLUDED_PATH = /(?:^|[\/_.-])(?:jobs?|jobangebote|karriere|careers?|stellen(?:angebote)?|bewerbung|catering|business|b2b|corporate|franchise|presse?|login|account|warenkorb|checkout|veranstaltungen?|reservierung|accessoires|running[-_]club|tee-gastronomie|ch|barcelona|teams|kultur|bier)(?=$|[\/_.-])/i;
 
 export function canonicalOfferUrl(value, website) {
   try {

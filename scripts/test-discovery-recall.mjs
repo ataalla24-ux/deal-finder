@@ -15,6 +15,7 @@ const merchant = { name: 'Test Cafe', website, address: 'Testgasse 1, 1070 Wien'
   sourceUrl: 'https://www.openstreetmap.org/node/1', observedAt: now.toISOString() };
 const task = { url: `${website}angebote`, merchant };
 assert.equal(canonicalOfferUrl(`${task.url}?utm_source=ig#coffee`, website), task.url);
+for (const name of ['espresso-special/', 'angebote/bestellen']) assert.equal(canonicalOfferUrl(website + name, website), website + name);
 for (const value of ['/jobangebote', '/catering-angebote', '/angebote/login', '/speisekarte', '/B2B-Angebote',
   '/redaktionelle-grundsatze', '/attraktionen/', '/ch/aktionen/', '/Specials.pdf', '/angebot.jpg', '/veranstaltungen/special-guest']) {
   assert.equal(canonicalOfferUrl(new URL(value, website).href, website), '');
