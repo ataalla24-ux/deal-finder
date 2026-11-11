@@ -1,11 +1,11 @@
 {
-  "generatedAt": "2026-11-11T07:45:59.358Z",
+  "generatedAt": "2026-11-11T07:48:39.854Z",
   "summary": {
     "maxAgeDays": 7,
-    "total": 239,
-    "allowed": 0,
-    "blocked": 239,
-    "warnings": 0,
+    "total": 242,
+    "allowed": 1,
+    "blocked": 241,
+    "warnings": 1,
     "reasonCounts": {
       "kein konkretes Angebot erkennbar": 181,
       "Gottesdienste nur im Wochenlauf": 36,
@@ -16,7 +16,7 @@
       "älter als 7 Tage (2017-04-20)": 1,
       "älter als 7 Tage (2026-10-26)": 1,
       "älter als 7 Tage (2025-07-30)": 1,
-      "URL ungültig (HTTP 404)": 18,
+      "URL ungültig (HTTP 404)": 16,
       "älter als 7 Tage (2026-08-05)": 1,
       "abgelaufen (2026-07-01)": 1,
       "kostenlose Buchung/Kontaktaufnahme statt kostenloser Leistung": 1,
@@ -29,6 +29,8 @@
       "Quell-/Post-Datum liegt in der Zukunft (2026-11-11)": 3,
       "kostenlose Infrastruktur statt Deal": 3,
       "älter als 7 Tage (2024-03-18)": 3,
+      "selbst syndizierter FreeFinder-Post": 6,
+      "kein echtes Social-Post-Datum gefunden": 1,
       "älter als 7 Tage (2026-06-03)": 2,
       "älter als 7 Tage (2026-05-06)": 2,
       "URL ungültig (Inhalt nicht mehr verfügbar)": 4,
@@ -41,7 +43,6 @@
       "abgelaufen (2026-11-10)": 1,
       "älter als 7 Tage (2026-10-30)": 3,
       "redaktioneller Mehrfach-Roundup statt eindeutigem Einzelangebot": 2,
-      "selbst syndizierter FreeFinder-Post": 5,
       "kein verlässliches Quell-/Post-Datum gefunden": 65,
       "ausgeschlossene Quelle (gastro.news)": 10
     },
@@ -49,13 +50,13 @@
       "kein konkreter Deal": 181,
       "Gottesdienste außerhalb Wochenlauf": 36,
       "älter als 7 Tage": 138,
-      "ungültige URL": 24,
+      "ungültige URL": 22,
       "abgelaufen": 3,
       "sonstiges": 6,
       "Post-Datum in Zukunft": 3,
+      "selbst syndiziert": 6,
+      "kein echtes Post-Datum": 66,
       "nicht Wien": 4,
-      "selbst syndiziert": 5,
-      "kein echtes Post-Datum": 65,
       "ausgeschlossene Quelle": 10
     },
     "sourceCounts": {
@@ -70,15 +71,24 @@
         }
       },
       "Firecrawl Gastro #2": {
-        "total": 9,
+        "total": 11,
         "allowed": 0,
-        "blocked": 9,
+        "blocked": 11,
         "warnings": 0,
         "reasonCategoryCounts": {
+          "selbst syndiziert": 1,
+          "kein echtes Post-Datum": 1,
           "kein konkreter Deal": 3,
           "älter als 7 Tage": 5,
           "ungültige URL": 4
         }
+      },
+      "Firecrawl Gastro #2 Search": {
+        "total": 1,
+        "allowed": 1,
+        "blocked": 0,
+        "warnings": 1,
+        "reasonCategoryCounts": {}
       },
       "Firecrawl Gastro #4": {
         "total": 4,
@@ -109,7 +119,7 @@
           "kein konkreter Deal": 33,
           "Gottesdienste außerhalb Wochenlauf": 35,
           "älter als 7 Tage": 34,
-          "ungültige URL": 2,
+          "ungültige URL": 1,
           "Post-Datum in Zukunft": 1,
           "sonstiges": 1
         }
@@ -155,7 +165,7 @@
         "reasonCategoryCounts": {
           "kein konkreter Deal": 92,
           "älter als 7 Tage": 93,
-          "ungültige URL": 7,
+          "ungültige URL": 6,
           "Gottesdienste außerhalb Wochenlauf": 1,
           "sonstiges": 2,
           "Post-Datum in Zukunft": 2,
@@ -203,7 +213,26 @@
       }
     }
   },
-  "allowed": [],
+  "allowed": [
+    {
+      "id": "g2-16c8z0e",
+      "title": "kubbeviyana: 🌱 Wie jedes Jahr haben wir auch heuer als Kubbe Çocuk ...",
+      "brand": "kubbeviyana",
+      "source": "Firecrawl Gastro #2 Search",
+      "url": "https://www.instagram.com/p/DfhVf9cDm-_/",
+      "reasons": [],
+      "warnings": [
+        "Inhalt prüfen: Text wirkt abgeschnitten; vollständige Quelle prüfen; Nur Stadt/Region angegeben; Filiale oder teilnehmende Standorte prüfen; Gültigkeitszeitraum nicht belegt; nicht als unbegrenzt gültig behandeln",
+        "kein Ablaufdatum gefunden"
+      ],
+      "sourceDate": "2026-11-09T12:30:42.000Z",
+      "sourceDateSource": "url.instagramShortcode",
+      "sourceAgeDays": 2,
+      "expiryDate": "",
+      "expirySource": "",
+      "urlStatus": "HTTP 200"
+    }
+  ],
   "blocked": [
     {
       "id": "jesuszentrum-events-20261102",
@@ -848,7 +877,7 @@
       "warnings": [
         "kein Ablaufdatum gefunden"
       ],
-      "sourceDate": "2026-11-11T07:44:42.440Z",
+      "sourceDate": "2026-11-11T07:46:23.045Z",
       "sourceDateSource": "url.publicationDate",
       "sourceAgeDays": 0,
       "expiryDate": "",
@@ -1158,18 +1187,19 @@
       "source": "Freikirchen Wien",
       "url": "https://www.baptisten.at/wien",
       "reasons": [
-        "URL ungültig (HTTP 404)",
         "kein konkretes Angebot erkennbar",
         "Gottesdienste nur im Wochenlauf",
         "älter als 7 Tage (2026-04-19)"
       ],
-      "warnings": [],
+      "warnings": [
+        "URL nicht eindeutig prüfbar (temporärer Fehler)"
+      ],
       "sourceDate": "2026-04-19T08:59:47.145Z",
       "sourceDateSource": "deal.pubDate",
       "sourceAgeDays": 206,
       "expiryDate": "",
       "expirySource": "deal.expires",
-      "urlStatus": "ungültig: HTTP 404"
+      "urlStatus": "unklar: temporärer URL-Fehler"
     },
     {
       "id": "freikirche-7-20260419",
@@ -1699,6 +1729,42 @@
       "expiryDate": "",
       "expirySource": "deal.expires",
       "urlStatus": "unklar: temporärer URL-Fehler"
+    },
+    {
+      "id": "g2-1uq7gih",
+      "title": "Zwei Schnitzelportionen zum Preis von einer (1+1 gratis) mit dem Gutschein.at-Originalgutschein.",
+      "brand": "Wiener Laziz Food",
+      "source": "Firecrawl Gastro #2",
+      "url": "https://www.instagram.com/reel/Dfc4gCLD0bS/",
+      "reasons": [
+        "selbst syndizierter FreeFinder-Post"
+      ],
+      "warnings": [
+        "Inhalt prüfen: Caption-Reste oder Emoji-Codes im sichtbaren Text"
+      ],
+      "sourceDate": "2026-11-07T19:00:21.000Z",
+      "sourceDateSource": "url.instagramShortcode",
+      "sourceAgeDays": 4,
+      "expiryDate": "2026-12-31",
+      "expirySource": "url.dateHints",
+      "urlStatus": "HTTP 200"
+    },
+    {
+      "id": "g2-dt6o9i",
+      "title": "1+1 gratis auf ausgewählte Burger-King-Favoriten bei Bestellung über Lieferando",
+      "brand": "Burger King",
+      "source": "Firecrawl Gastro #2",
+      "url": "https://www.facebook.com/Lieferando.at/videos/burger-king-11-gratis/1844397636761734/",
+      "reasons": [
+        "kein echtes Social-Post-Datum gefunden"
+      ],
+      "warnings": [],
+      "sourceDate": "",
+      "sourceDateSource": "",
+      "sourceAgeDays": null,
+      "expiryDate": "2026-11-30",
+      "expirySource": "url.contentHints.title",
+      "urlStatus": "HTTP 200"
     },
     {
       "id": "g2-1pybrzv",
@@ -2805,17 +2871,18 @@
       "source": "Kirchen Verzeichnis",
       "url": "https://www.baptisten.at/wien",
       "reasons": [
-        "URL ungültig (HTTP 404)",
         "kein konkretes Angebot erkennbar",
         "älter als 7 Tage (2026-02-22)"
       ],
-      "warnings": [],
+      "warnings": [
+        "URL nicht eindeutig prüfbar (temporärer Fehler)"
+      ],
       "sourceDate": "2026-02-22T21:12:35.964Z",
       "sourceDateSource": "deal.pubDate",
       "sourceAgeDays": 262,
       "expiryDate": "",
       "expirySource": "deal.expires",
-      "urlStatus": "ungültig: HTTP 404"
+      "urlStatus": "unklar: temporärer URL-Fehler"
     },
     {
       "id": "gottesdienste-17-20260222",
