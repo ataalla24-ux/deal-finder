@@ -1,9 +1,9 @@
 {
-  "generatedAt": "2026-11-11T12:50:19.981Z",
+  "generatedAt": "2026-11-11T12:57:06.537Z",
   "summary": {
     "maxAgeDays": 7,
-    "total": 247,
-    "allowed": 0,
+    "total": 248,
+    "allowed": 1,
     "blocked": 247,
     "warnings": 0,
     "reasonCounts": {
@@ -11,7 +11,7 @@
       "Gottesdienste nur im Wochenlauf": 36,
       "älter als 7 Tage (2026-11-02)": 2,
       "älter als 7 Tage (2020-04-25)": 1,
-      "älter als 7 Tage (2026-02-22)": 81,
+      "älter als 7 Tage (2026-02-22)": 80,
       "URL ungültig (fehlende Ziel-URL)": 2,
       "älter als 7 Tage (2017-04-20)": 1,
       "älter als 7 Tage (2026-10-26)": 1,
@@ -40,6 +40,7 @@
       "nicht eindeutig in Wien": 7,
       "älter als 7 Tage (2009-05-01)": 1,
       "älter als 7 Tage (2014-06-07)": 1,
+      "älter als 7 Tage (2025-12-30)": 1,
       "abgelaufen (2026-11-10)": 1,
       "kein verlässliches Quell-/Post-Datum gefunden": 64,
       "ausgeschlossene Quelle (gastro.news)": 10,
@@ -161,6 +162,13 @@
           "kein konkreter Deal": 2
         }
       },
+      "Intersport": {
+        "total": 1,
+        "allowed": 1,
+        "blocked": 0,
+        "warnings": 0,
+        "reasonCategoryCounts": {}
+      },
       "Kirchen Verzeichnis": {
         "total": 97,
         "allowed": 0,
@@ -228,7 +236,23 @@
       }
     }
   },
-  "allowed": [],
+  "allowed": [
+    {
+      "id": "power-3e12a7259e25",
+      "title": "Aktion gültig am 11. November 2026 Hole dir mit dem Rabattcode SINGLE15 15 % Rab",
+      "brand": "Intersport",
+      "source": "Intersport",
+      "url": "https://www.intersport.at/app/",
+      "reasons": [],
+      "warnings": [],
+      "sourceDate": "2026-11-11T12:52:21.466Z",
+      "sourceDateSource": "deal.discoveredAt",
+      "sourceAgeDays": 0,
+      "expiryDate": "2026-11-15",
+      "expirySource": "url.dateHints",
+      "urlStatus": "HTTP 200"
+    }
+  ],
   "blocked": [
     {
       "id": "jesuszentrum-events-20261102",
@@ -873,7 +897,7 @@
       "warnings": [
         "kein Ablaufdatum gefunden"
       ],
-      "sourceDate": "2026-11-11T12:49:25.417Z",
+      "sourceDate": "2026-11-11T12:55:27.172Z",
       "sourceDateSource": "url.publicationDate",
       "sourceAgeDays": 0,
       "expiryDate": "",
@@ -3018,17 +3042,15 @@
       "url": "https://www.orthodoxie.at",
       "reasons": [
         "kein konkretes Angebot erkennbar",
-        "älter als 7 Tage (2026-02-22)"
+        "älter als 7 Tage (2025-12-30)"
       ],
-      "warnings": [
-        "URL nicht eindeutig prüfbar (temporärer Fehler)"
-      ],
-      "sourceDate": "2026-02-22T21:12:35.964Z",
-      "sourceDateSource": "deal.pubDate",
-      "sourceAgeDays": 262,
+      "warnings": [],
+      "sourceDate": "2025-12-30T14:00:40.000Z",
+      "sourceDateSource": "url.publicationDate",
+      "sourceAgeDays": 316,
       "expiryDate": "",
       "expirySource": "deal.expires",
-      "urlStatus": "unklar: temporärer URL-Fehler"
+      "urlStatus": "HTTP 200"
     },
     {
       "id": "gottesdienste-24-20260222",
@@ -3717,9 +3739,9 @@
         "Aktueller Angebotsblock auf offizieller Anbieterseite erneut bestätigt; Abrufdatum ist kein Veröffentlichungsdatum",
         "URL nicht eindeutig prüfbar (www.mcdonalds.at)"
       ],
-      "sourceDate": "2026-11-10T13:42:33.599Z",
+      "sourceDate": "2026-11-11T12:52:07.946Z",
       "sourceDateSource": "deal.discoveredAt",
-      "sourceAgeDays": 1,
+      "sourceAgeDays": 0,
       "expiryDate": "",
       "expirySource": "deal.evidence.offerTiming",
       "urlStatus": "unklar: www.mcdonalds.at"
@@ -5054,23 +5076,23 @@
   ],
   "runProvenance": {
     "repository": "ataalla24-ux/deal-finder",
-    "runId": "43023519481",
-    "headSha": "e9235ce82c04c68d3520aaa129e96e3d5f0ac571",
-    "checkoutSha": "e9235ce82c04c68d3520aaa129e96e3d5f0ac571",
+    "runId": "43024129378",
+    "headSha": "c9ee594b140eb22a3b9685abc96656cae9cd9ebe",
+    "checkoutSha": "a7d29f09ed3a5190e4eb1c455bd87d2f49edb76d",
     "triggeringRun": {
-      "runId": "43023247841",
-      "headSha": "4fb32df9173d8b7ff5d652d2d19d0be768f849d7",
+      "runId": "43023931573",
+      "headSha": "5a74301b22dc95a4068b6a827cf409b211cd1b08",
       "event": "schedule",
-      "name": "Firecrawl Daily Sync",
-      "startedAt": "2026-11-11T12:46:30.000Z",
-      "url": "https://github.com/ataalla24-ux/deal-finder/actions/runs/43023247841"
+      "name": "Power Scraper",
+      "startedAt": "2026-11-11T12:51:14.000Z",
+      "url": "https://github.com/ataalla24-ux/deal-finder/actions/runs/43023931573"
     },
     "event": "workflow_run",
     "runAttempt": "1",
-    "url": "https://github.com/ataalla24-ux/deal-finder/actions/runs/43023519481"
+    "url": "https://github.com/ataalla24-ux/deal-finder/actions/runs/43024129378"
   },
   "instagramDelivery": {
-    "checkedAt": "2026-11-11T12:50:19.993Z",
+    "checkedAt": "2026-11-11T12:57:06.778Z",
     "scope": "instagram-ai-agent/standard-slack-lane",
     "extractedCandidates": 17,
     "counts": {
@@ -5308,7 +5330,7 @@
     ]
   },
   "tiktokDelivery": {
-    "checkedAt": "2026-11-11T12:50:19.994Z",
+    "checkedAt": "2026-11-11T12:57:06.780Z",
     "scope": "tiktok-deals-scanner/standard-slack-lane",
     "extractedCandidates": 0,
     "counts": {},
