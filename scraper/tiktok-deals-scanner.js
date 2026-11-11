@@ -2,6 +2,7 @@ import '../sentry/instrument.mjs';
 import { modelForTask } from './ai-credit-budget.js';
 
 import fs from 'fs';
+import { githubRunProvenance } from './pipeline-run-report-utils.js';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import { chromium } from 'playwright';
@@ -1735,6 +1736,7 @@ async function main() {
   };
   const report = {
     lastUpdated: payload.lastUpdated,
+    runProvenance: githubRunProvenance(),
     ...tikTokDiscoveryHealth(apiDiscovery, discovery, finalDeals.length),
     config: CONFIG,
     searchQueries: SEARCH_QUERIES,

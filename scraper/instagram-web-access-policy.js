@@ -24,12 +24,12 @@ export function createInstagramWebAccess({ previousReport = {}, healthReport = {
   const previousTime = time(previousReport.lastUpdated);
   if (previousTime) {
     const legacyReason = previousReport.previewFetch?.stoppedReason || '';
-    if (previousReport.instagramAuth?.rateLimitedDuringRun || /^http-(401|403|429)$/.test(legacyReason)) {
+    if (!state.all && (previousReport.instagramAuth?.rateLimitedDuringRun || /^http-(401|403|429)$/.test(legacyReason))) {
       const status = Number(legacyReason.slice(5)) || 429;
       retain('all', { nextRetryAt: new Date(previousTime + (status === 429 ? 6 : 24) * HOUR).toISOString(),
         lastAttemptAt: previousReport.lastUpdated, reason: `http-${status}` });
     }
-    if (previousReport.profileDiscovery?.stoppedReason === 'three-consecutive-profile-blocks') {
+    if (!state.profiles && previousReport.profileDiscovery?.stoppedReason === 'three-consecutive-profile-blocks') {
       retain('profiles', { nextRetryAt: new Date(previousTime + 6 * HOUR).toISOString(),
         lastAttemptAt: previousReport.lastUpdated, reason: 'profile-unavailable' });
     }

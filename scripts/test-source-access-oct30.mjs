@@ -70,6 +70,33 @@ test('repeated denials back off; successful recovery clears an expired pause', (
   assert.deepEqual(recovered.snapshot(), {});
 });
 
+test('explicit Instagram deadlines are not extended by legacy summaries or report timestamps', () => {
+  const first = createInstagramWebAccess({ now });
+  first.failure('all', { status: 429 });
+  first.failure('profiles', { reason: 'profile-unavailable' });
+  const next = createInstagramWebAccess({ now: clock(7), previousReport: {
+    webAccess: first.snapshot(), lastUpdated: clock(5).toISOString(),
+    instagramAuth: { rateLimitedDuringRun: true },
+    profileDiscovery: { stoppedReason: 'three-consecutive-profile-blocks' },
+  } });
+  assert.deepEqual(next.snapshot(), first.snapshot());
+  assert.equal(next.pause('profiles'), null);
+});
+
+test('a real recovered profile resets the expired failure counter, not just an empty page', async () => {
+  const first = createInstagramWebAccess({ now });
+  first.failure('profiles', { reason: 'profile-unavailable' });
+  const access = createInstagramWebAccess({ now: clock(7), previousReport: { webAccess: first.snapshot() } });
+  const fake = browser();
+  fake.page.evaluate = async () => ({ title: 'Cafe', text: 'Cafe in Wien', html: '<a href="/p/RealPost123/">Post</a>' });
+  const result = await discoverProfileCandidates([{ username: 'merchant' }], new Map(), {
+    enabled: true, access, browserType: fake.browserType,
+  });
+  assert.equal(result.discovered, 1);
+  assert.deepEqual(access.snapshot(), {});
+  assert.equal(access.failure('profiles', { reason: 'profile-unavailable' }).consecutiveFailures, 1);
+});
+
 test('healthcheck429 pauses every website transport without disabling cached evidence or Graph', async () => {
   const access = createInstagramWebAccess({ now, healthReport: { status: 'rate-limited', updatedAt: now.toISOString(), nextRetryAt: clock(8).toISOString() } });
   const fake = browser();

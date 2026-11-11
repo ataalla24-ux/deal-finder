@@ -2,6 +2,7 @@ import assert from 'node:assert/strict';
 import { canonicalOfferUrl, selectMerchantOfferPages, extractMerchantOfferCandidates, currentMerchantCandidates, isMerchantWebsiteReview } from '../scraper/merchant-offer-discovery.js';
 import { currentOriginalOffer, graphOriginalRecord } from '../scraper/current-original-offer.js';
 import { discoveryAvailability } from '../scraper/discovery-availability.js';
+import { discoveryRejection } from '../scraper/deal-discovery-policy.js';
 import { buildConfig, normalizeGraphMediaItem, retainMetaOutbox } from '../scraper/meta-instagram-deals.js';
 import { graphPostEvidenceFromEntry, buildInstagramGraphEvidencePayload, enrichDealWithInstagramGraphEvidence } from '../scraper/instagram-graph-evidence.js';
 import { validateDealsForSlack } from '../scraper/deal-validity-agent.js';
@@ -51,6 +52,29 @@ assert.equal(currentMerchantCandidates({ x: { status: 'ok', checkedAt: '2026-12-
 for (const body of ['<h2>Pizza 12 Euro</h2>', '<h2>1+1 Bier gratis</h2>', '<h2>20 % Rabatt auf Pizza</h2><p>Nur in Graz bis 30.11.2026</p>', '<h2>Pizza gratis bis 01.11.2026 in Wien</h2>']) {
   assert.equal(extractMerchantOfferCandidates(body, task, now).length, 0, body);
 }
+// Actual first scheduled website run: a restaurant's directory homepage may
+// belong to a mall or hotel group. Food category and Vienna lead are not proof.
+for (const [title, description] of [
+  ['Lieblingsshampoo XXL um 37,90 statt 63,10 Euro', 'Aktionen fuer Ihr Haar: Beratung, Schnitt, Pflege.'],
+  ['Winter Prague: 20% off', 'Your stay includes a daily buffet breakfast, free Wi-Fi and gym.'],
+  ['25% off connecting rooms', 'Explore Prague with family, daily breakfast for all.'],
+  ['Fruehstueck und Ticket ab 160 Euro', '1 Nacht inkl. Fruehstueck und Ticket in Wien.'],
+  ['Kaffee Pass 5+1 Gratis', 'Vom 01.11.2026 bis 28.02.2027 in den Sportsbars in NÖ, BGLD, STMK, KTN, OÖ und SBG.'],
+]) {
+  const rejected = { ...deals[0], title, description };
+  assert.ok(discoveryRejection(rejected), title);
+  assert.equal(isMerchantWebsiteReview(rejected, now), false, title);
+  assert.equal(currentMerchantCandidates({ x: { status: 'ok', checkedAt: now.toISOString(), deals: [rejected] } }, now).length, 0);
+  const validation = await validateDealsForSlack([rejected], { now, inspectDealUrlHealth: async url => ({ status: 200, finalUrl: url, dateHints: {} }) });
+  assert.equal(validation.allowedDeals.length, 0, title);
+  assert.equal(selectFirecrawlReviewDeals(validation.results, { now }).deals.length, 0, title);
+}
+assert.equal(canonicalOfferUrl('https://hotel.example/praguex/special-offers/', 'https://hotel.example/vienna/cafe'), '');
+assert.equal(extractMerchantOfferCandidates('<article><h2>Shampoo zum Preis von 37,90 statt 63,10 Euro</h2><p>Gültig in Wien bis 30.11.2026.</p></article>', task, now).length, 0);
+assert.equal(discoveryRejection({ ...deals[0], title: 'Fruehstueck im Hotelrestaurant: 1+1 gratis', description: 'Auch fuer externe Gaeste in Wien.' }), '');
+const genericOffers = extractMerchantOfferCandidates('<article><p>Bei jedem Burger mit Beilage erhalten Sie einen Stempel. Bei voller Karte 18,80 Euro Rabatt.</p></article><article><p>Mit jeder Bowl und Beilage eine Limonade gratis.</p></article>', task, now);
+assert.equal(genericOffers.length, 2);
+assert.equal(new Set(genericOffers.map(d => d.id)).size, 2, 'generic titles must not collapse different benefits');
 const unresolved = extractMerchantOfferCandidates('<article><h2>20 % Rabatt auf Pizza</h2><p>Nur Abholung.</p></article>', task, now)[0];
 assert.ok(unresolved);
 assert.notEqual(unresolved.distance, merchant.address, 'directory address is not campaign evidence');

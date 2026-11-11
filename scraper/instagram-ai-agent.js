@@ -16,6 +16,7 @@ import { discoveryRejection } from './deal-discovery-policy.js';
 import { requestOpenAi } from './instagram-media-evidence.js';
 import { modelForTask } from './ai-credit-budget.js';
 import { createInstagramWebAccess } from './instagram-web-access-policy.js';
+import { githubRunProvenance } from './pipeline-run-report-utils.js';
 import { runInstagramSearchQueries } from './instagram-search-discovery.js';
 import { readPublicSearchResponse } from './public-search-response.js';
 import { planInstagramQueries } from './instagram-query-plan.js';
@@ -1110,6 +1111,7 @@ export async function discoverProfileCandidates(accounts, map, options = {}) {
           }
         } else {
           consecutiveUnavailable = 0;
+          if (!stopProfileScan && urls.length > 0) access.success('profiles');
         }
 
         for (const url of urls) {
@@ -2670,6 +2672,7 @@ async function main() {
   };
   const report = {
     lastUpdated,
+    runProvenance: githubRunProvenance(),
     config: {
       ...CONFIG,
       aiEnabled: Boolean(CONFIG.aiEnabled && process.env.OPENAI_API_KEY),

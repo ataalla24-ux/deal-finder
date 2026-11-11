@@ -97,6 +97,14 @@ export function consumerFoodExclusion(value) {
 
 export function discoveryRejection(value) {
   const text = offerText(value);
+  if (value?.originSource === 'vienna-merchant-website') {
+    // A restaurant directory can link to a mall or an international hotel site.
+    // Its category/address must not turn unrelated offers into Vienna food deals.
+    if (!foodDiscoveryPriority({ title: value.title, description: value.description })) return 'non-food-merchant-offer';
+    if (/\b(?:connecting rooms|your stay|hotelaufenthalt|uebernachtung\w*|\d+\s+(?:nacht|naechte|nights?))\b/.test(text)) return 'hotel-package-not-food-offer';
+    if (/\b(?:prague|prag|alcron)\b/.test(text) && !/\b(?:wien|vienna)\b/.test(text)) return 'non-vienna-merchant-offer';
+    if (/\bsportsbars in noe, bgld, stmk, ktn, ooe und sbg\b/.test(text) && !/\bwien\b/.test(text)) return 'non-vienna-merchant-offer';
+  }
   const alcoholText = withoutAlcoholFreeProducts(text);
   if (ALCOHOL_PATTERN.test(alcoholText)) return 'alcohol-offer';
   const nonConsumerOffer = getNonConsumerOfferRejection(value);

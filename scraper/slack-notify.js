@@ -10,7 +10,8 @@ import { isCommunitySubmission } from './community-review-utils.js';
 import { enrichCommunityCard, refreshQueuedCommunityCards, untouchedCommunityThread } from './community-card-enrichment.js';
 import { createCardEditor } from './deal-card-editor.js';
 import { retryQueuedEditorial } from './card-editor-retry.js';
-import { buildInstagramDeliveryAudit } from './instagram-delivery-audit.js';
+import { buildInstagramDeliveryAudit, buildTikTokDeliveryAudit } from './instagram-delivery-audit.js';
+import { githubRunProvenance } from './pipeline-run-report-utils.js';
 import { loadDealMapReviewContext, reviewDealMap } from '../scripts/deal-map-review.mjs';
 import fs from 'fs';
 import { sourceQualitySlackText } from './source-backed-quality.js';
@@ -1933,7 +1934,7 @@ async function main() {
   const socialFoodReviewDeals = socialFoodReviewSelection.deals;
 
   const writeDeliveryAudit = (delivered = []) => {
-    validation.report.instagramDelivery = buildInstagramDeliveryAudit({
+    const auditInput = {
       candidates: loadedPendingDeals,
       stages: [
         { reason: 'moderated', deals: pendingDeals },
@@ -1943,11 +1944,15 @@ async function main() {
         { reason: 'already-queued', deals: preSlackQueueFilter.deals },
       ],
       validation, selected: freshDeals, delivered,
-    });
+    };
+    validation.report.runProvenance = githubRunProvenance();
+    validation.report.instagramDelivery = buildInstagramDeliveryAudit(auditInput);
+    validation.report.tiktokDelivery = buildTikTokDeliveryAudit(auditInput);
     writeDealValidityReport(validation.report);
   };
   writeDeliveryAudit();
   console.log(`Instagram AI delivery: ${JSON.stringify(validation.report.instagramDelivery.counts)}`);
+  console.log(`TikTok delivery: ${JSON.stringify(validation.report.tiktokDelivery.counts)}`);
 
   console.log(
     `🧪 Deal validity agent: ${validation.summary.allowed}/${validation.summary.total} allowed, ` +

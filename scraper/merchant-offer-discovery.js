@@ -5,7 +5,7 @@ import { discoveryRejection } from './deal-discovery-policy.js';
 
 const DAY = 86400000;
 const OFFER_PATH = /(?:^|[\/\s_.-])(?:aktionen?|aktionsbon|angebote?|specials?|rabatt|deals?)(?=$|[\/\s_.-])|happy[-_\s]?hour|coupon|mittagsaktion|studentenangebot|geburtstagsangebot/i;
-const EXCLUDED_PATH = /(?:^|[\/_.-])(?:jobs?|jobangebote|karriere|careers?|stellen(?:angebote)?|bewerbung|catering|business|b2b|corporate|franchise|presse?|login|account|warenkorb|checkout|veranstaltungen?|reservierung|accessoires|running[-_]club|tee-gastronomie|ch|barcelona|teams|kultur|bier)(?=$|[\/_.-])/i;
+const EXCLUDED_PATH = /(?:^|[\/_.-])(?:jobs?|jobangebote|karriere|careers?|stellen(?:angebote)?|bewerbung|catering|business|b2b|corporate|franchise|presse?|login|account|warenkorb|checkout|veranstaltungen?|reservierung|accessoires|running[-_]club|tee-gastronomie|ch|barcelona|praguex?|teams|kultur|bier)(?=$|[\/_.-])/i;
 
 export function canonicalOfferUrl(value, website) {
   try {
@@ -80,9 +80,9 @@ export function selectMerchantOfferPages(directory, websiteState, offerState, no
 export function extractMerchantOfferCandidates(html, task, now) {
   const source = { name: `merchant-website:${new URL(task.url).hostname}`, brand: task.merchant.name,
     url: task.url, allowedHosts: [new URL(task.url).hostname], category: 'Essen & Trinken' };
-  return extractFoodOffers(html, source, { now, pageUrl: task.url }).deals.filter(deal => !discoveryRejection(deal)).map(deal => ({
+  return extractFoodOffers(html, source, { now, pageUrl: task.url }).deals.filter(deal => !discoveryRejection({ ...deal, originSource: 'vienna-merchant-website' })).map(deal => ({
     ...deal,
-    id: `merchant-web-${createHash('sha256').update(`${task.url}|${deal.title}`).digest('hex').slice(0, 20)}`,
+    id: `merchant-web-${createHash('sha256').update(`${task.url}|${deal.title}${/Angebot.*Details ansehen/.test(deal.title) ? `|${deal.evidence.contentHash}` : ''}`).digest('hex').slice(0, 20)}`,
     source: 'Offizielle Lokal-Website', originSource: 'vienna-merchant-website',
     // A Vienna directory address is a lead, not proof of coupon participation.
     evidence: { ...deal.evidence, directoryLead: { name: task.merchant.name,
@@ -96,6 +96,7 @@ export function currentMerchantCandidates(state, now) {
   return Object.values(state).filter(row => row.status === 'ok'
     && Date.parse(row.checkedAt) >= +now - 8 * DAY && Date.parse(row.checkedAt) <= +now)
     .flatMap(row => row.deals || [])
+    .filter(deal => !discoveryRejection(deal))
     .filter(deal => /^\d{4}-\d{2}-\d{2}$/.test(deal.validUntil || '')
       ? deal.validUntil >= today
       : !Number.isFinite(Date.parse(deal.validUntil)) || Date.parse(deal.validUntil) >= +now);

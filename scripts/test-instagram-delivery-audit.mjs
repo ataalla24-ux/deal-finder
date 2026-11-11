@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { buildInstagramDeliveryAudit } from '../scraper/instagram-delivery-audit.js';
+import { buildInstagramDeliveryAudit, buildTikTokDeliveryAudit } from '../scraper/instagram-delivery-audit.js';
 import { validateDealsForSlack } from '../scraper/deal-validity-agent.js';
 import { getEditorialRoundupPromotionReason } from '../scraper/promotion-quality-utils.js';
 
@@ -28,6 +28,22 @@ test('collector acceptance and URL matches from another source are not delivery 
   const args = { candidates:[deal], stages:[], validation:{results:[]}, selected:[deal], now };
   assert.equal(buildInstagramDeliveryAudit({...args,delivered:[{...deal,id:'meta-x',slackTs:'123'}]}).counts['slack-confirmed'],undefined);
   assert.equal(buildInstagramDeliveryAudit({...args,selected:[]}).rows[0].status,'not-in-standard-lane');
+});
+
+test('TikTok delivery keeps confirmed message identities separate from retained and other-platform rows', () => {
+  const fresh = { id: 'tiktok-new', url: 'https://www.tiktok.com/@cafe/video/123456789', originSource: 'tiktok-deals-scanner' };
+  const retained = { ...fresh, id: 'tiktok-retained', slackTs: '1.5' };
+  const foreign = candidate('instagram-new');
+  const result = buildTikTokDeliveryAudit({ candidates: [fresh, retained, foreign],
+    stages: [{ reason: 'already-queued', deals: [fresh, foreign] }],
+    validation: { results: [{ deal: fresh, decision: { allowed: true } }] }, selected: [fresh],
+    delivered: [{ ...fresh, slackTs: '2.3', slackThreadTs: '2.1' }], now });
+  assert.equal(result.extractedCandidates, 2);
+  assert.equal(result.counts['slack-confirmed'], 1);
+  assert.equal(result.counts['already-queued'], 1);
+  assert.equal(result.rows[0].slackTs, '2.3');
+  assert.equal(result.rows[0].slackThreadTs, '2.1');
+  assert.equal(result.rows[1].slackTs, '', 'old receipt is not a new send');
 });
 
 // Same structure as the real Mahrischer Spatz caption: a dated weekly menu,
