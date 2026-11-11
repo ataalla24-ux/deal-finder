@@ -78,7 +78,13 @@ export class CreatorProgram extends CreatorProgramLedger {
       method: 'POST', headers: { authorization: `Bearer ${await appStoreServerToken(credentials)}` },
       signal: AbortSignal.timeout(9000), redirect: 'manual',
     });
-    if (!response.ok) throw Error('Store test unavailable');
+    if (!response.ok) {
+      const details = await response.json().catch(() => null);
+      const code = Number.isSafeInteger(details?.errorCode) ? `, Code ${details.errorCode}` : '';
+      // Only bounded status metadata is safe for this admin-only diagnostic.
+      throw Object.assign(Error(`Apple-Testanforderung abgelehnt (HTTP ${response.status}${code}).`),
+        { status: 503, creatorPublic: true });
+    }
     const result = await response.json();
     if (typeof result.testNotificationToken !== 'string' || !result.testNotificationToken.length ||
         result.testNotificationToken.length > 256) throw Error('Store test response incomplete');

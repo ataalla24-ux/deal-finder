@@ -41,7 +41,7 @@ test('creator transport trusts only authenticated Store HTTP evidence, including
           }
           return Response.json({ok:true,evidence:await ledger.verify(body.request,body.partners,body.chain || null)});
         }
-        catch { return Response.json({ok:false},{status:503}); }
+        catch (error) { return Response.json({ok:false,diagnostic:error.creatorPublic === true ? error.message : null},{status:503}); }
       }};
     ` }, { type: 'ESModule', path: 'worker.js', contents: bundle.outputFiles[0].text }],
     bindings: {
@@ -61,6 +61,8 @@ test('creator transport trusts only authenticated Store HTTP evidence, including
         if (url.pathname === '/inApps/v1/notifications/test') {
           assert.equal(request.method, 'POST');
           assert.equal(await request.text(), '');
+          if (mode === 'test-error') return Response.json({ errorCode: 4040007,
+            errorMessage: 'private upstream data must not appear' }, { status: 404 });
           return Response.json({ testNotificationToken: mode === 'bad-test-response' ? null : 'fixture-only-test-token' });
         }
         if (url.pathname.includes('/history/')) return Response.json({ environment: 'Production', bundleId: APP,
@@ -95,6 +97,11 @@ test('creator transport trusts only authenticated Store HTTP evidence, including
     assert.deepEqual(calls, [{ host: 'api.storekit.itunes.apple.com', path: '/inApps/v1/notifications/test' }]);
     mode = 'bad-test-response';
     assert.equal((await verify({ testNotification: true })).status, 503);
+    mode = 'test-error';
+    const failure = await verify({ testNotification: true });
+    assert.equal(failure.status, 503);
+    assert.equal(failure.body.diagnostic, 'Apple-Testanforderung abgelehnt (HTTP 404, Code 4040007).');
+    assert.equal(JSON.stringify(failure).includes('private upstream'), false);
     mode = 'apple'; redirect = 'api.storekit.itunes.apple.com';
     assert.equal((await verify({ testNotification: true })).status, 503);
     assert.ok(calls.every(c => c.host === 'api.storekit.itunes.apple.com'));
