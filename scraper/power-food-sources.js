@@ -234,6 +234,7 @@ export const POWER_FOOD_SOURCES = [
     category: "trinken",
     allowedHosts: ["mabels.at"],
     linkPattern: /happy|cocktail/i,
+    nonAlcoholicHappyHour: "mabels",
   },
 ];
 

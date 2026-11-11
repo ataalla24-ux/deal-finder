@@ -47,6 +47,35 @@ function titleKey(v) {
     .replace(/[^\p{L}\p{N}]+/gu, "");
 }
 
+function extractMabelsMocktailOffer($, source, pageUrl) {
+  if (source.nonAlcoholicHappyHour !== "mabels"
+      || new URL(pageUrl).hostname !== "mabels.at"
+      || new URL(pageUrl).pathname !== "/") return null;
+  const headings = $("#karte-highlights .highlight-row-heading")
+    .filter((i, el) => foodText($(el).find("h3").text()) === "Aus unserer Bar");
+  if (headings.length !== 1) return null;
+  const block = headings.clone();
+  block.find(".highlight-controls").remove();
+  const sourceText = textOf($, block);
+  // Only this reviewed independent discount can be separated. Additional
+  // conditions or changed layouts must not be silently discarded.
+  const match = sourceText.match(/^Aus unserer Bar Tägliche Happy Hour von (\d{1,2})[–-](\d{1,2}) Uhr: Cocktails (\d{1,2}(?:[,.]\d{1,2})?) € und Mocktails (\d{1,2}(?:[,.]\d{1,2})?) € billiger\.$/);
+  if (!match || +match[1] > 23 || +match[2] > 24 || +match[1] >= +match[2]
+      || Number(match[4].replace(",", ".")) <= 0) return null;
+  if ($(".location-card").length !== 1) return null;
+  const location = $(".location-card > p").filter((i, el) =>
+    /^Laxenburger Straße 90\s+1100 Wien · Ecke Troststraße$/.test(textOf($, el)));
+  if (location.length !== 1) return null;
+  const address = "Laxenburger Straße 90, 1100 Wien";
+  return {
+    title: `${match[4]} € Rabatt auf Mocktails (${match[1]}–${match[2]} Uhr)`,
+    text: `Tägliche Happy Hour von ${match[1]}–${match[2]} Uhr: Mocktails ${match[4]} € billiger.`,
+    sourceText,
+    address,
+    method: "official-nonalcoholic-happy-hour",
+  };
+}
+
 export function discoverFoodLinks(
   html,
   source,
@@ -146,6 +175,8 @@ export function extractFoodOffers(html, source, options = {}) {
   }
   const blocks = [];
   const rejected = [];
+  const mocktailOffer = extractMabelsMocktailOffer($, source, pageUrl);
+  if (mocktailOffer) blocks.push(mocktailOffer);
   // This official campaign puts its binding product/date conditions in a
   // separate footnote. Keep both periods separate; never use the longer one
   // for the shorter-lived products or borrow terms from another campaign.
@@ -297,7 +328,8 @@ export function extractFoodOffers(html, source, options = {}) {
     }
     // An address in a site's footer alone does not establish campaign scope.
     const inText = VIENNA.test(t);
-    const registered = source.address && source.locationEvidenceUrl;
+    const registeredAddress = b.address || (source.address && source.locationEvidenceUrl ? source.address : "");
+    const registered = Boolean(registeredAddress);
     const nationwide =
       /in allen.{0,65}(?:österreich|oesterreich)|österreichweit|in ganz österreich/i.test(
         t,
@@ -382,13 +414,13 @@ export function extractFoodOffers(html, source, options = {}) {
       hot: false,
       isNew: true,
       distance: registered
-        ? source.address
+        ? registeredAddress
         : scope === "austria-wide"
           ? "Teilnehmende Filialen in Österreich – Wiener Filiale prüfen"
           : inText || merchantAll
             ? "Wien – Filiale laut Angebot"
             : "Ort prüfen",
-      ...(registered ? { address: source.address, city: "Wien" } : {}),
+      ...(registered ? { address: registeredAddress, city: "Wien" } : {}),
       ...(dates.validUntil ? { validUntil: dates.validUntil } : {}),
       ...(dates.validFrom ? { validFrom: dates.validFrom } : {}),
       ...(dates.validOn ? { validOn: dates.validOn } : {}),
@@ -414,10 +446,11 @@ export function extractFoodOffers(html, source, options = {}) {
         sourceUrl: url,
         checkedAt: now.toISOString(),
         textSample: t,
+        ...(b.sourceText ? { originalOfferText: b.sourceText } : {}),
         extractionMethod: b.method,
         contentHash: crypto.createHash("sha256").update(t).digest("hex"),
         locationScope: scope,
-        locationEvidenceUrl: registered ? source.locationEvidenceUrl : url,
+        locationEvidenceUrl: registered && !b.address ? source.locationEvidenceUrl : url,
       },
       reviewRequired: true,
     };
