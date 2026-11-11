@@ -11,7 +11,7 @@ import { discoveryRejection } from './deal-discovery-policy.js';
 import { normalizeDealFacts, locationConflictReason } from './deal-factual-guards.js';
 import { inspectDealContentQuality } from './deal-content-quality-utils.js';
 
-import { inspectDealUrlHealth, parseExpiryShape, parseExplicitOfferPeriod, sparhamsterCouponRoundPath } from './expiry-utils.js';
+import { inspectDealUrlHealth, isVagueExpiry, parseExpiryShape, parseExplicitOfferPeriod, sparhamsterCouponRoundPath } from './expiry-utils.js';
 import { hasReviewedOfferPeriod } from './offer-period-fields.js';
 import { isHumanReviewedCommunity } from './community-review-utils.js';
 import {
@@ -1309,7 +1309,8 @@ async function validateDeal(deal, context) {
       delete nextDeal[field];
       if (selectedExpiry[field]) nextDeal[field] = selectedExpiry[field];
     }
-    nextDeal.expires = selectedExpiry.validUntil || selectedExpiry.validOn || '';
+    nextDeal.expires = selectedExpiry.validUntil || selectedExpiry.validOn
+      || (isVagueExpiry(nextDeal.expires) ? (nextDeal.expires || '') : '');
     nextDeal.expiresSource = selectedExpiry.evidenceSource || selectedExpiry.source;
     nextDeal.expirySource = selectedExpiry.evidenceSource || selectedExpiry.source;
   }

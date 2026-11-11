@@ -13,14 +13,15 @@ try {
   fs.mkdirSync(path.join(temp, 'scripts'));
   fs.mkdirSync(path.join(temp, 'docs'));
   write('package.json', { type: 'module' });
+  // Match the approval integration fixture: include transitive scraper imports,
+  // while all writable data remains isolated in the disposable directory.
+  for (const dir of ['scraper', 'sentry']) fs.cpSync(path.join(root, dir), path.join(temp, dir), { recursive: true });
+  fs.symlinkSync(path.join(root, 'node_modules'), path.join(temp, 'node_modules'), 'dir');
   for (const name of [
     'scripts/validate-production-feed.mjs', 'scripts/deals-feed-contract.mjs', 'scripts/deal-redemptions.mjs',
     'scripts/add-deal-moderation-entry.mjs', 'scripts/apply-deal-moderation.mjs',
     'scripts/sync-deal-map-references.mjs', 'scripts/sync-featured-deal-references.mjs',
-    'scripts/stamp-deals-feed.mjs', 'scraper/public-deal-text.js',
-    'scraper/deal-moderation-utils.js', 'scraper/deal-evidence-utils.js', 'scraper/deal-factual-guards.js',
-    'scraper/native-weekly-utils.js', 'scraper/daily-featured-policy.js', 'scraper/featured-selection-history.js',
-    'scraper/deal-discovery-policy.js', 'scraper/promotion-quality-utils.js', 'scraper/category-utils.js',
+    'scripts/stamp-deals-feed.mjs',
   ]) {
     fs.mkdirSync(path.dirname(path.join(temp, name)), { recursive: true });
     fs.copyFileSync(path.join(root, name), path.join(temp, name));
@@ -92,7 +93,8 @@ try {
   // Exercise the real workflow commands, but only against disposable fixtures.
   const read = (name) => JSON.parse(fs.readFileSync(path.join(temp, name), 'utf8'));
   const cli = (name, env = {}) => {
-    const result = spawnSync(process.execPath, [path.join(temp, 'scripts', name)], {
+    const noNetwork = `globalThis.fetch=async()=>{throw new Error('No network in isolated moderation test')};`;
+    const result = spawnSync(process.execPath, ['--import', `data:text/javascript,${encodeURIComponent(noNetwork)}`, path.join(temp, 'scripts', name)], {
       cwd: temp,
       encoding: 'utf8',
       env: {
