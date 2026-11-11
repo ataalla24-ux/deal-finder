@@ -1,21 +1,21 @@
 {
-  "generatedAt": "2026-11-11T20:06:01.517Z",
+  "generatedAt": "2026-11-11T20:11:43.447Z",
   "discoveryAvailability": {
     "note": "Transport evidence, not deal yield. Retry eligibility is not recovery. Candidate counts are not Slack deliveries. No extra runs or quota resets.",
     "lanes": [
       {
         "name": "instagram-search",
-        "observedAt": "2026-11-11T07:44:38.096Z",
+        "observedAt": "2026-11-11T20:10:31.373Z",
         "status": "paused",
-        "reason": "search-unavailable",
+        "reason": "search-cooldown",
         "retryAt": "2026-11-12T07:43:15.929Z",
-        "attempted": 1,
+        "attempted": 0,
         "discovered": 0,
         "deliveredToSlack": null
       },
       {
         "name": "instagram-profiles",
-        "observedAt": "2026-11-11T07:44:38.096Z",
+        "observedAt": "2026-11-11T20:10:31.373Z",
         "status": "paused",
         "reason": "web-access-cooldown",
         "retryAt": "2026-11-14T08:22:38.697Z",
@@ -24,11 +24,11 @@
       },
       {
         "name": "instagram-previews",
-        "observedAt": "2026-11-11T07:44:38.096Z",
-        "status": "recovery-not-yet-proven",
-        "reason": "web-access-cooldown",
-        "retryAt": "2026-11-11T16:22:44.184Z",
-        "attempted": 0,
+        "observedAt": "2026-11-11T20:10:31.373Z",
+        "status": "no-block-reported",
+        "reason": "",
+        "retryAt": "",
+        "attempted": 2,
         "deliveredToSlack": null
       },
       {
@@ -54,10 +54,10 @@
   },
   "summary": {
     "filesConsidered": 32,
-    "totalCandidates": 674,
-    "uniqueCandidates": 649,
-    "distinctCandidates": 661,
-    "duplicateClusters": 12,
+    "totalCandidates": 660,
+    "uniqueCandidates": 645,
+    "distinctCandidates": 652,
+    "duplicateClusters": 7,
     "topHealthySources": [
       {
         "sourceKey": "wien-combined",
@@ -80,7 +80,7 @@
       {
         "sourceKey": "meta-instagram",
         "sourceLabel": "Meta Instagram Graph",
-        "healthScore": 71,
+        "healthScore": 73,
         "totalDeals": 61
       },
       {
@@ -140,7 +140,7 @@
       {
         "sourceKey": "meta-instagram",
         "sourceLabel": "Meta Instagram Graph",
-        "coverageScore": 43,
+        "coverageScore": 44,
         "totalDeals": 61,
         "fresh1dCount": 6
       },
@@ -187,7 +187,7 @@
       {
         "sourceKey": "meta-instagram",
         "sourceLabel": "Meta Instagram Graph",
-        "precisionScore": 70,
+        "precisionScore": 71,
         "totalDeals": 61
       }
     ],
@@ -219,7 +219,7 @@
       {
         "sourceKey": "meta-instagram",
         "sourceLabel": "Meta Instagram Graph",
-        "sourceWeightScore": 60,
+        "sourceWeightScore": 61,
         "totalDeals": 61
       }
     ],
@@ -510,9 +510,9 @@
       "file": "deals-pending-meta-instagram.json",
       "sourceLabel": "Meta Instagram Graph",
       "totalDeals": 61,
-      "uniqueDeals": 53,
-      "duplicateDeals": 8,
-      "duplicateAcrossSources": 8,
+      "uniqueDeals": 58,
+      "duplicateDeals": 3,
+      "duplicateAcrossSources": 3,
       "fresh1dCount": 6,
       "fresh7dCount": 49,
       "viennaCount": 61,
@@ -525,8 +525,8 @@
         "🍔 DOPPEL SMASHBURGER FÜR NUR 9,90 €!"
       ],
       "lastRun": null,
-      "uniqueRate": 0.9,
-      "duplicateRate": 0.1,
+      "uniqueRate": 1,
+      "duplicateRate": 0,
       "fresh1dRate": 0.1,
       "fresh7dRate": 0.8,
       "viennaRate": 1,
@@ -581,11 +581,11 @@
       "issues": [
         "wenige Deals sind frischer als 1 Tag"
       ],
-      "healthScore": 71,
+      "healthScore": 73,
       "missionFitScore": 56,
-      "coverageScore": 43,
-      "precisionScore": 70,
-      "sourceWeightScore": 60
+      "coverageScore": 44,
+      "precisionScore": 71,
+      "sourceWeightScore": 61
     },
     {
       "sourceKey": "firecrawl5",
@@ -993,57 +993,41 @@
       "sourceKey": "instagram-ai",
       "file": "deals-pending-instagram-ai.json",
       "sourceLabel": "Instagram AI Agent",
-      "totalDeals": 17,
-      "uniqueDeals": 10,
-      "duplicateDeals": 7,
-      "duplicateAcrossSources": 7,
-      "fresh1dCount": 1,
-      "fresh7dCount": 17,
-      "viennaCount": 17,
-      "foodDrinkCount": 5,
-      "promoCount": 6,
+      "totalDeals": 3,
+      "uniqueDeals": 1,
+      "duplicateDeals": 2,
+      "duplicateAcrossSources": 2,
+      "fresh1dCount": 0,
+      "fresh7dCount": 3,
+      "viennaCount": 3,
+      "foodDrinkCount": 2,
+      "promoCount": 1,
       "missingUrlCount": 0,
       "sampleTitles": [
-        "Eine Pepsi gratis zu jeder telefonischen Bestellung",
-        "Mittagsteller für 10,80 € im Restaurant ROTH",
-        "Gratis-Verkostung und sonntägliche Fleischaktionen"
+        "Gratis Pepsi zu jeder direkten telefonischen Bestellung",
+        "6 Krapfen für 9 € oder 10 Krapfen für 13 €",
+        "Mittagsmenü mit Salat oder Suppe für 9,99 € in Hietzing"
       ],
       "lastRun": null,
-      "uniqueRate": 0.6,
-      "duplicateRate": 0.4,
-      "fresh1dRate": 0.1,
+      "uniqueRate": 0.3,
+      "duplicateRate": 0.7,
+      "fresh1dRate": 0,
       "fresh7dRate": 1,
       "viennaRate": 1,
-      "foodDrinkRate": 0.3,
-      "promoRate": 0.4,
+      "foodDrinkRate": 0.7,
+      "promoRate": 0.3,
       "missingUrlRate": 0,
-      "averageQualityScore": 97,
+      "averageQualityScore": 98.3,
       "topCategories": [
         {
           "value": "essen & trinken",
-          "count": 14
-        },
-        {
-          "value": "freizeit",
-          "count": 1
-        },
-        {
-          "value": "veranstaltungen & gastronomie",
-          "count": 1
-        },
-        {
-          "value": "wohnen & einrichtung",
-          "count": 1
+          "count": 3
         }
       ],
       "topTypes": [
         {
           "value": "rabatt",
-          "count": 12
-        },
-        {
-          "value": "gratis",
-          "count": 4
+          "count": 2
         },
         {
           "value": "freebie",
@@ -1052,14 +1036,14 @@
       ],
       "issues": [
         "wenige Deals sind frischer als 1 Tag",
-        "geringe Food-/Drink-Relevanz",
+        "wenige klare Gratis-/Promo-Signale",
         "hohe Überschneidung mit anderen Quellen"
       ],
-      "healthScore": 55,
-      "missionFitScore": 39,
-      "coverageScore": 16,
-      "precisionScore": 56,
-      "sourceWeightScore": 42
+      "healthScore": 53,
+      "missionFitScore": 48,
+      "coverageScore": 11,
+      "precisionScore": 60,
+      "sourceWeightScore": 44
     },
     {
       "sourceKey": "firecrawl4",
