@@ -21,6 +21,8 @@ on:
       - 'scraper/public-deal-text.js'
       - 'scraper/deal-moderation-utils.js'
       - 'scraper/deal-evidence-utils.js'
+      - 'scraper/expiry-utils.js'
+      - 'scraper/offer-period-fields.js'
       - 'scraper/native-weekly-utils.js'
 
 permissions:
@@ -34,6 +36,9 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
+          cache: npm
+      - name: Install existing dependencies
+        run: npm ci
       - name: Validate isolated removal pipeline without live changes
         run: node scripts/test-moderation-feed-validation.mjs
       - name: Check generated-state concurrency safeguards
