@@ -1,11 +1,63 @@
 {
-  "generatedAt": "2026-11-11T10:30:58.163Z",
+  "generatedAt": "2026-11-11T10:51:19.479Z",
+  "discoveryAvailability": {
+    "note": "Transport evidence, not deal yield. Retry eligibility is not recovery. Candidate counts are not Slack deliveries. No extra runs or quota resets.",
+    "lanes": [
+      {
+        "name": "instagram-search",
+        "observedAt": "2026-11-11T07:44:38.096Z",
+        "status": "paused",
+        "reason": "search-unavailable",
+        "retryAt": "2026-11-12T07:43:15.929Z",
+        "attempted": 1,
+        "discovered": 0,
+        "deliveredToSlack": null
+      },
+      {
+        "name": "instagram-profiles",
+        "observedAt": "2026-11-11T07:44:38.096Z",
+        "status": "paused",
+        "reason": "web-access-cooldown",
+        "retryAt": "2026-11-14T08:22:38.697Z",
+        "attempted": 0,
+        "deliveredToSlack": null
+      },
+      {
+        "name": "instagram-previews",
+        "observedAt": "2026-11-11T07:44:38.096Z",
+        "status": "paused",
+        "reason": "web-access-cooldown",
+        "retryAt": "2026-11-11T16:22:44.184Z",
+        "attempted": 0,
+        "deliveredToSlack": null
+      },
+      {
+        "name": "tiktok-public-search",
+        "observedAt": "2026-11-10T22:22:09.699Z",
+        "status": "paused",
+        "reason": "provider-error",
+        "retryAt": "2026-11-11T22:22:04.465Z",
+        "attempted": 1,
+        "rawItems": 0,
+        "deliveredToSlack": null
+      },
+      {
+        "name": "tiktok-web-search",
+        "observedAt": "2026-11-10T22:22:09.699Z",
+        "status": "paused",
+        "reason": "search-unavailable",
+        "retryAt": "2026-11-11T22:22:04.852Z",
+        "attempted": 4,
+        "deliveredToSlack": null
+      }
+    ]
+  },
   "summary": {
-    "filesConsidered": 31,
-    "totalCandidates": 642,
-    "uniqueCandidates": 615,
-    "distinctCandidates": 628,
-    "duplicateClusters": 13,
+    "filesConsidered": 32,
+    "totalCandidates": 654,
+    "uniqueCandidates": 625,
+    "distinctCandidates": 639,
+    "duplicateClusters": 14,
     "topHealthySources": [
       {
         "sourceKey": "food3",
@@ -93,18 +145,18 @@
         "fresh1dCount": 35
       },
       {
-        "sourceKey": "vienna-promo-radar",
-        "sourceLabel": "Vienna Promo Radar",
-        "coverageScore": 36,
-        "totalDeals": 66,
-        "fresh1dCount": 2
-      },
-      {
         "sourceKey": "meta-instagram",
         "sourceLabel": "Meta Instagram Graph",
         "coverageScore": 36,
         "totalDeals": 50,
         "fresh1dCount": 4
+      },
+      {
+        "sourceKey": "vienna-promo-radar",
+        "sourceLabel": "Vienna Promo Radar",
+        "coverageScore": 35,
+        "totalDeals": 66,
+        "fresh1dCount": 0
       }
     ],
     "topPrecisionSources": [
@@ -1521,6 +1573,69 @@
       "sourceWeightScore": 32
     },
     {
+      "sourceKey": "vienna-websites",
+      "file": "deals-pending-vienna-websites.json",
+      "sourceLabel": "Wiener Lokal-Angebotsseiten",
+      "totalDeals": 12,
+      "uniqueDeals": 10,
+      "duplicateDeals": 2,
+      "duplicateAcrossSources": 0,
+      "fresh1dCount": 0,
+      "fresh7dCount": 0,
+      "viennaCount": 0,
+      "foodDrinkCount": 6,
+      "promoCount": 6,
+      "missingUrlCount": 0,
+      "sampleTitles": [
+        "Gutschein und Aktionsbon – Konditionen",
+        "Ihr Lieblingsshampoo jetzt in XXL zum Preis von € 37,90,- anstatt € 63,10,-!",
+        "Jeden Sonntag gibt es unser Kindermenü für nur 5,90 statt 10,90 – für gemeinsame Genussmomente mit der ganzen Familie!"
+      ],
+      "lastRun": null,
+      "uniqueRate": 0.8,
+      "duplicateRate": 0,
+      "fresh1dRate": 0,
+      "fresh7dRate": 0,
+      "viennaRate": 0,
+      "foodDrinkRate": 0.5,
+      "promoRate": 0.5,
+      "missingUrlRate": 0,
+      "averageQualityScore": 50.5,
+      "topCategories": [
+        {
+          "value": "essen & trinken",
+          "count": 11
+        },
+        {
+          "value": "trinken",
+          "count": 1
+        }
+      ],
+      "topTypes": [
+        {
+          "value": "rabatt",
+          "count": 8
+        },
+        {
+          "value": "gratis",
+          "count": 3
+        },
+        {
+          "value": "freebie",
+          "count": 1
+        }
+      ],
+      "issues": [
+        "wenige Deals sind frischer als 1 Tag",
+        "Wien-Signal ist zu schwach"
+      ],
+      "healthScore": 42,
+      "missionFitScore": 32,
+      "coverageScore": 10,
+      "precisionScore": 37,
+      "sourceWeightScore": 31
+    },
+    {
       "sourceKey": "vienna-promo-radar",
       "file": "deals-pending-vienna-promo-radar.json",
       "sourceLabel": "Vienna Promo Radar",
@@ -1528,7 +1643,7 @@
       "uniqueDeals": 66,
       "duplicateDeals": 0,
       "duplicateAcrossSources": 0,
-      "fresh1dCount": 2,
+      "fresh1dCount": 0,
       "fresh7dCount": 3,
       "viennaCount": 0,
       "foodDrinkCount": 28,
@@ -1597,7 +1712,7 @@
       ],
       "healthScore": 41,
       "missionFitScore": 22,
-      "coverageScore": 36,
+      "coverageScore": 35,
       "precisionScore": 30,
       "sourceWeightScore": 32
     },
