@@ -61,7 +61,7 @@ const stable = syncFeaturedDealSnapshots(
 );
 assert.equal(stable.changed, false, 'a second sync must be idempotent');
 
-const coffee = deals[1];
+const coffee = { ...deals[1], dateConfidence: 'high', expiryKind: 'end', validUntil: '2026-08-31' };
 for (const period of [
   { expires: '2020-01-01' },
   { validUntil: '2020-01-01' },
@@ -69,12 +69,19 @@ for (const period of [
   { validity: { status: 'invalid' } },
   { validFrom: '2030-01-01' },
 ]) {
-  const ineligible = { ...coffee, id: 'ineligible', ...period };
+  const ineligible = { ...deals[1], id: 'ineligible', ...period };
   const repaired = syncFeaturedDealSnapshots({ deals: [ineligible, coffee] },
     { ...ineligible, dealId: ineligible.id }, { ...ineligible, dealId: ineligible.id }, { now });
   assert.equal(repaired.daily.payload.dealId, coffee.id, 'Daily replacement must be currently valid');
   assert.equal(repaired.weekly.payload.dealId, coffee.id, 'Weekly replacement must be currently valid');
-  assert.deepEqual(ineligible, { ...coffee, id: 'ineligible', ...period }, 'Source record is not deleted or changed');
+  assert.deepEqual(ineligible, { ...deals[1], id: 'ineligible', ...period }, 'Source record is not deleted or changed');
 }
+
+const absent = syncFeaturedDealSnapshots({ deals: [deals[1]] }, { dealId: 'no-longer-live' }, {}, { now });
+assert.equal(absent.daily.payload.dealId, '');
+assert.equal(absent.daily.payload.selectionReason, 'no-verified-daily-deal');
+const repairedBest = syncFeaturedDealSnapshots({ deals: [coffee, { ...coffee, id: 'free-pizza', title: 'Pizza gratis' }] },
+  absent.daily.payload, {}, { now });
+assert.equal(repairedBest.daily.payload.dealId, 'free-pizza');
 
 console.log('featured deal reference sync tests passed');

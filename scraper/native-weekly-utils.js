@@ -1,3 +1,6 @@
+import { dailyAvailabilityReason, rankDailyFeaturedDeals } from './daily-featured-policy.js';
+import { featuredSelectionHistory, recentFeaturedDealIds } from './featured-selection-history.js';
+
 const VIENNA_DAY_FORMATTER = new Intl.DateTimeFormat('en-CA', {
   timeZone: 'Europe/Vienna',
   year: 'numeric',
@@ -190,8 +193,11 @@ function featuredIdentityKey(deal = {}) {
   return brand && title ? `${brand}|${title}` : '';
 }
 
-function featuredFallbackDeal(deals, kind, now, dailyDeal = null) {
-  if (kind === 'daily') return selectNativeDailyDeal(deals, now) || deals[0] || null;
+function featuredFallbackDeal(deals, kind, now, dailyDeal = null, previous = {}) {
+  if (kind === 'daily') {
+    const recentDealIds = recentFeaturedDealIds(previous, VIENNA_DAY_FORMATTER.format(now));
+    return rankDailyFeaturedDeals(deals.filter(isFoodOrDrinkDeal), now, { recentDealIds })[0]?.deal || null;
+  }
   const source = weeklySource(deals, cleanText(dailyDeal?.id));
   if (source.length === 0) return null;
   return source[getViennaWeekOfYear(now) % source.length] || source[0];
@@ -203,6 +209,7 @@ function syncFeaturedDealReference(deals = [], pick = {}, options = {}) {
   // Old records may remain for manual review; never promote them as the
   // replacement when a moderator removes the current featured deal.
   deals = deals.filter((deal) => {
+    if (kind === 'daily') return !dailyAvailabilityReason(deal, now);
     if (deal.validity?.status === 'invalid') return false;
     if (kind === 'weekly' && !isFoodOrDrinkDeal(deal)) return false;
     const start = Date.parse(cleanText(deal.validFrom || deal.validity?.startDate));
@@ -227,8 +234,14 @@ function syncFeaturedDealReference(deals = [], pick = {}, options = {}) {
   }
 
   if (!target) {
-    target = featuredFallbackDeal(deals, kind, now, options.dailyDeal);
+    target = featuredFallbackDeal(deals, kind, now, options.dailyDeal, pick);
     reason = target ? 'automatic_fallback' : 'no_live_candidate';
+  }
+  if (!target && kind === 'daily' && (targetId || pick?.selectionReason !== 'no-verified-daily-deal')) {
+    const date = VIENNA_DAY_FORMATTER.format(now);
+    const payload = { date, dealId: '', manualPick: false, selectionReason: 'no-verified-daily-deal',
+      selectionHistory: featuredSelectionHistory(pick, {}, date) };
+    return { changed: true, payload, report: { kind, reason, previousId: targetId, targetId: '' } };
   }
   if (!target) return { changed: false, payload: pick, report: { kind, reason, targetId } };
 
@@ -244,7 +257,12 @@ function syncFeaturedDealReference(deals = [], pick = {}, options = {}) {
   }
   if (reason === 'automatic_fallback') {
     payload.manualPick = false;
-    payload.selectionReason = 'automatic-live-reference-repair';
+    payload.selectionReason = kind === 'daily' ? 'automatic-strongest-verified' : 'automatic-live-reference-repair';
+    if (kind === 'daily') {
+      payload.date = VIENNA_DAY_FORMATTER.format(now);
+      payload.pickedAt = now.toISOString();
+      payload.selectionHistory = featuredSelectionHistory(pick, payload, payload.date);
+    }
   }
 
   const changed = JSON.stringify(payload) !== JSON.stringify(pick);

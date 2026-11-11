@@ -19,13 +19,15 @@ try {
     'scripts/sync-deal-map-references.mjs', 'scripts/sync-featured-deal-references.mjs',
     'scripts/stamp-deals-feed.mjs', 'scraper/public-deal-text.js',
     'scraper/deal-moderation-utils.js', 'scraper/deal-evidence-utils.js', 'scraper/deal-factual-guards.js',
-    'scraper/native-weekly-utils.js',
+    'scraper/native-weekly-utils.js', 'scraper/daily-featured-policy.js', 'scraper/featured-selection-history.js',
+    'scraper/deal-discovery-policy.js', 'scraper/promotion-quality-utils.js', 'scraper/category-utils.js',
   ]) {
     fs.mkdirSync(path.dirname(path.join(temp, name)), { recursive: true });
     fs.copyFileSync(path.join(root, name), path.join(temp, name));
   }
   const good = { id: 'keep', brand: 'Cafe Test', title: 'Gratis Kaffee', description: '',
-    url: 'https://example.com/coffee', category: 'kaffee', type: 'gratis', distance: 'Wien', logo: 'C', logoUrl: '' };
+    url: 'https://example.com/coffee', category: 'kaffee', type: 'gratis', distance: 'Wien', logo: 'C', logoUrl: '',
+    validUntil: '2099-12-31', expiryKind: 'end', dateConfidence: 'high' };
   const old = { ...good, id: 'old', category: 'service', expires: '2020-01-01' };
   const removed = { ...good, id: 'remove' };
   const baseline = [good, old, removed];
@@ -57,6 +59,10 @@ try {
   reset();
   write('docs/deal-of-the-day.json', { ...removed, dealId: removed.id });
   assert.notEqual(run().status, 0, 'Removed featured references must fail');
+  write('docs/deal-of-the-day.json', { date: '2026-11-11', dealId: '', manualPick: false });
+  assert.notEqual(run().status, 0, 'An unexplained empty selection is invalid');
+  write('docs/deal-of-the-day.json', { date: '2026-11-11', dealId: '', manualPick: false, selectionReason: 'no-verified-daily-deal' });
+  assert.equal(run().status, 0, 'An explicitly withheld automatic pick is allowed');
   reset();
   write('docs/deal-map-locations.json', { locations: [{ dealIds: [removed.id] }] });
   assert.notEqual(run().status, 0, 'Removed map references must fail');
