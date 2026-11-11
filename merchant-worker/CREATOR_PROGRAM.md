@@ -199,11 +199,14 @@ OIDC-Prüfung empfangen (`paymentRecorded: false`). Thema und Push-Abo sind
 eingerichtet; das Thema ist in Play Console gespeichert, der laufende RTDN-
 Versand bleibt vor Verkaufsfreigabe aus. Kein Billing-Upgrade vorgenommen.
 Apples Produktions-URL ist gespeichert, Sandbox unverändert leer. Der erste
-Apple-Testaufruf scheiterte; ein Testempfang ist nicht nachgewiesen.
-App Store Connect zeigt unter Integration > In-App-Kauf **Aktiv (0)**.
-Ein eigener In-App-Kauf-Schlüssel ist deshalb vor dem Apple-Start einzurichten;
-keinen vorhandenen allgemeinen Connect-Schlüssel blind ersetzen. Separate
-Eigentümerfreigabe und sichere serverseitige Hinterlegung sind noch offen.
+Apple-Testaufruf scheiterte ohne genauen Providerstatus. Nach der vorhandenen
+Zehn-Minuten-Sperre wurde der zweite Aufruf mit den UNVERÄNDERTEN vorhandenen
+Zugangsdaten angenommen und die echte Apple-TEST-Nachricht am 11.11.2026 um
+16:20:26 UTC kryptographisch verifiziert empfangen. Keine Zahlung gebucht.
+Die anfangs aus Integration > In-App-Kauf **Aktiv (0)** abgeleitete Annahme,
+ein neuer Schlüssel sei zwingend nötig, ist damit für diesen Transport widerlegt.
+Keinen neuen Schlüssel erstellen oder vorhandene ersetzen. Die kurz gestellte
+Rückfrage zur Schlüsselvorbereitung wurde ausdrücklich zurückgenommen.
 Alle fünf Partner bleiben inaktiv, alle drei fachlichen Freigaben bleiben falsch.
 
 Eine Abrechnungsanfrage enthält `partnerId`, `month` (abgeschlossener Kalendermonat),
