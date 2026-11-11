@@ -53,7 +53,8 @@ export function selectMerchantOfferPages(directory, websiteState, offerState, no
   for (const merchant of directory.merchants || []) {
     const site = websiteState[merchant.website];
     if (!(Date.parse(merchant.observedAt) >= +now - 45 * DAY)
-      || site?.status !== 'ok' || !(Date.parse(site.checkedAt) >= +now - 45 * DAY)) continue;
+      || Date.parse(merchant.observedAt) > +now || site?.status !== 'ok'
+      || !(Date.parse(site.checkedAt) >= +now - 45 * DAY) || Date.parse(site.checkedAt) > +now) continue;
     for (const raw of site.offerUrls || []) {
       const url = canonicalOfferUrl(raw, merchant.website);
       if (!url || byUrl.has(url) || coveredUrls.has(url)
@@ -91,9 +92,13 @@ export function extractMerchantOfferCandidates(html, task, now) {
 }
 
 export function currentMerchantCandidates(state, now) {
-  return Object.values(state).filter(row => row.status === 'ok' && Date.parse(row.checkedAt) >= +now - 8 * DAY)
+  const today = new Intl.DateTimeFormat('sv-SE', { timeZone: 'Europe/Vienna' }).format(now);
+  return Object.values(state).filter(row => row.status === 'ok'
+    && Date.parse(row.checkedAt) >= +now - 8 * DAY && Date.parse(row.checkedAt) <= +now)
     .flatMap(row => row.deals || [])
-    .filter(deal => !Number.isFinite(Date.parse(deal.validUntil)) || Date.parse(deal.validUntil) >= +now);
+    .filter(deal => /^\d{4}-\d{2}-\d{2}$/.test(deal.validUntil || '')
+      ? deal.validUntil >= today
+      : !Number.isFinite(Date.parse(deal.validUntil)) || Date.parse(deal.validUntil) >= +now);
 }
 
 export function isMerchantWebsiteReview(deal, now = new Date()) {

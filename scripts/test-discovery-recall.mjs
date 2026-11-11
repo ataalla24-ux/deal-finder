@@ -43,6 +43,10 @@ assert.ok(deals.every(d => isMerchantWebsiteReview(d, now)));
 assert.ok(deals[0].description.includes('Abholung'));
 assert.equal(currentMerchantCandidates({ [task.url]: { status: 'ok', checkedAt: now.toISOString(), deals } }, now).length, 2);
 assert.equal(currentMerchantCandidates({ x: { status: 'deferred', checkedAt: now.toISOString(), deals } }, now).length, 0);
+const endDayState = { x: { status: 'ok', checkedAt: '2026-11-30T10:00:00Z', deals } };
+assert.equal(currentMerchantCandidates(endDayState, new Date('2026-11-30T22:59:00Z')).length, 2, 'date-only offer lasts through its Vienna end day');
+assert.equal(currentMerchantCandidates(endDayState, new Date('2026-11-30T23:00:00Z')).length, 0);
+assert.equal(currentMerchantCandidates({ x: { status: 'ok', checkedAt: '2026-12-01', deals } }, now).length, 0);
 for (const body of ['<h2>Pizza 12 Euro</h2>', '<h2>1+1 Bier gratis</h2>', '<h2>20 % Rabatt auf Pizza</h2><p>Nur in Graz bis 30.11.2026</p>', '<h2>Pizza gratis bis 01.11.2026 in Wien</h2>']) {
   assert.equal(extractMerchantOfferCandidates(body, task, now).length, 0, body);
 }
@@ -122,6 +126,16 @@ const vision = await enrichInstagramGraphMedia([{ item: { ...mediaItem }, contex
   classifyOcr: async () => { throw new Error('no evidence'); } });
 assert.equal(analyses, 1, 'enabling vision must not reuse incomplete OCR-only input');
 assert.equal(vision.report.ocrReused, 0);
+const deferred = await enrichInstagramGraphMedia([{ item: { ...mediaItem }, context }], {
+  ...buildConfig({ OPENAI_API_KEY: 'offline-fixture', META_INSTAGRAM_MEDIA_VISION_ENABLED: '1' }, now),
+  mediaLlmMaxCallsPerRun: 0,
+}, now, { tools: { tesseract: true }, cache: { [mediaItem.id]: { ...saved, visionImageCount: 1 } },
+  analyzeItem: async () => { throw new Error('no repeated OCR while AI budget is exhausted'); },
+  classifyOcr: async () => { throw new Error('no paid call'); } });
+assert.equal(deferred.report.aiRetryBudgetDeferred, 1);
+assert.equal(deferred.report.analyzed, 0);
+assert.equal(deferred.report.aiCalls, 0);
+assert.equal(deferred.cache[mediaItem.id].analyzedAt, saved.analyzedAt);
 const availability = discoveryAvailability({ lastUpdated: now.toISOString(), search: { stoppedReason: 'search-unavailable', nextRetryAt: '2026-11-12' } }, {}, now);
 assert.equal(availability.lanes[0].status, 'paused');
 assert.equal(availability.lanes[3].status, 'unknown-stale-report');

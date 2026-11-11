@@ -730,6 +730,7 @@ export async function enrichInstagramGraphMedia(entries, config, now = new Date(
     downloadRetries: 0,
     retryableFailures: 0,
     retriedCacheEntries: 0,
+    aiRetryBudgetDeferred: 0,
     duplicateEntries: 0,
     skippedResolved: 0,
     aiSkippedCircuitOpen: 0,
@@ -779,8 +780,10 @@ export async function enrichInstagramGraphMedia(entries, config, now = new Date(
   for (const entry of uniqueEntries.values()) {
     const id = mediaId(entry?.item);
     const cached = id ? cache[id] : null;
-    const aiRetryDue = (cached?.aiError || cached?.aiPending) && !circuit
+    const aiRetryReady = (cached?.aiError || cached?.aiPending) && !circuit
       && now.getTime() >= (finiteDateMs(cached.aiFailure?.retryAt) || finiteDateMs(cached.analyzedAt) + 30 * 60 * 1000);
+    const aiRetryDue = aiRetryReady && llmConfigured && config.mediaLlmMaxCallsPerRun > 0;
+    if (aiRetryReady && !aiRetryDue) report.aiRetryBudgetDeferred += 1;
     const ocrRetryDue = cached && !cached.ai?.isDeal && (cached.warnings || []).some((warning) => /tesseract timeout/i.test(warning))
       && now.getTime() - finiteDateMs(cached.analyzedAt) >= 6 * 60 * 60 * 1000;
     if (cached && (retryableMediaEvidence(cached) || aiRetryDue || ocrRetryDue)) {
