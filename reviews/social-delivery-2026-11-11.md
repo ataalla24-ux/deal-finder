@@ -29,7 +29,8 @@ Replaying this exact current HTTP evidence and saved candidate with the old
 validator blocks it; the new validator accepts it with no warnings, retaining
 the November 13 expiry. This is validation proof, NOT a Slack receipt.
 
-Only exact repeated long evidence passages across fields are collapsed; distinct
+Only the roundup check collapses exact repeated long evidence passages across
+fields; every other offer/date check receives the original joined text. Distinct
 conditions, captions and real dated roundups are retained. No fuzzy rewriting,
 offer facts, quality patterns, age rules or thresholds changed. The source
 records and original evidence remain untouched.

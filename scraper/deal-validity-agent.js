@@ -467,7 +467,7 @@ function getEditorialPriceListingReason(deal, health = null) {
     : 'redaktioneller Preis-/Restauranttipp statt zeitlich belegter Aktion';
 }
 
-function getOfferText(deal, health = null) {
+function getOfferText(deal, health = null, { distinctEvidence = false } = {}) {
   const contentHints = reliableContentHints(health);
   const title = cleanText(deal.title);
   const source = [deal.source, deal.originSource].map(cleanText).join(' ');
@@ -492,6 +492,7 @@ function getOfferText(deal, health = null) {
     contentHints.title,
     contentHints.description,
   ].map(cleanText).filter(Boolean);
+  if (!distinctEvidence) return blocks.join(' ');
   // Graph and URL previews can repeat the exact caption with different author
   // wrappers. Keep every distinct word, but do not count copies as new lists.
   // Repetition inside one original block and short shared conditions stay intact.
@@ -546,7 +547,7 @@ function getConcreteOfferDecision(deal, health = null) {
   if (nonGuaranteedPromotionReason) return { concrete: false, reason: nonGuaranteedPromotionReason };
   const infrastructurePromotionReason = getInfrastructureOnlyPromotionReason(offerText);
   if (infrastructurePromotionReason) return { concrete: false, reason: infrastructurePromotionReason };
-  const editorialRoundupPromotionReason = getEditorialRoundupPromotionReason(offerText);
+  const editorialRoundupPromotionReason = getEditorialRoundupPromotionReason(getOfferText(deal, health, { distinctEvidence: true }));
   if (editorialRoundupPromotionReason) return { concrete: false, reason: editorialRoundupPromotionReason };
   const inboundTravelPromotionReason = getInboundForeignTravelPromotionReason(offerText);
   if (inboundTravelPromotionReason) return { concrete: false, reason: inboundTravelPromotionReason };
