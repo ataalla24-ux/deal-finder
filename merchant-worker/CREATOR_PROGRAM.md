@@ -93,7 +93,14 @@ Die bestehenden Viertelstunden-Crons bleiben unverändert. Nach Freigabe werden
 höchstens zwei fällige bekannte Abos je Lauf nachgeprüft, pro Abo frühestens nach
 24 Stunden. Damit werden Verlängerungen auch bei geschlossener App erkannt.
 Apple-Historie enthält auch Widerrufe; Google prüft zusätzlich gespeicherte
-Originalorders erneut. Maximal 500 Store-Prüfungen je rollierendem Tag, zwölf
+Originalorders erneut. Google lädt außerdem die lückenlose dokumentierte
+Order-ID-Folge vom Erstkauf bis zur neuesten bekannten oder gemeldeten Bestellung
+über `orders:batchGet`. Die abgeleitete ID allein ist kein Zahlungsbeleg: Jede
+Position muss durch Googles Antwort mit exakt passendem Token, Produkt, Konto,
+Preis und nicht überlappendem Leistungszeitraum bestätigt sein. Fehlende,
+doppelte oder fremde Antworten verhindern eine vollständige Freigabe.
+Maximal 200 Bestellungen pro Kette; größere Historien bleiben zur Prüfung offen.
+Maximal 500 Store-Prüfungen je rollierendem Tag, zwölf
 Client-Bestätigungen pro Konto/Tag. Erreichte Grenzen werden nicht umgangen.
 
 ## Store-Servereingänge
@@ -113,6 +120,14 @@ Implementiert; Einrichtung und Zustellnachweise getrennt vom Verkaufsstart prüf
   Eingangs; `CREATOR_GOOGLE_PUSH_EMAIL` ist der ausdrücklich freigegebene
   Pub/Sub-Service-Account. Eine RTDN ist nur ein Abrufanlass:
   Zahlungsbeträge werden weiterhin bei Google Publisher/Orders geprüft.
+- Signierte Google-Meldungen zu ungültigen Käufen lösen die Prüfung genau der
+  genannten Bestellung aus. Einmalprodukte werden als nicht zum Creator-Abo
+  gehörig quittiert. Bereits gebuchte Abo-Bestellungen können nach Ablauf des
+  Purchase-Tokens anhand ihrer gespeicherten Zuordnung und einer frischen
+  Orders-Antwort auf Erstattungen geprüft werden. Die Meldung allein enthält
+  keinen vertrauenswürdigen Betrag. Fehlende oder noch ausstehende Erstattungen
+  werden nicht als erledigt verbucht. Eine gemeldete Vollerstattung benötigt
+  auch einen vollständigen Erstattungsnachweis.
 - Event-IDs und Zahlungsbelege verhindern Doppelbuchungen. Testmeldungen werden
   nie als Zahlung gebucht. Google-Purchase-Tokens oder Auth-Header erscheinen
   nicht in öffentlichen Antworten/Übersichten.
@@ -208,6 +223,23 @@ ein neuer Schlüssel sei zwingend nötig, ist damit für diesen Transport widerl
 Keinen neuen Schlüssel erstellen oder vorhandene ersetzen. Die kurz gestellte
 Rückfrage zur Schlüsselvorbereitung wurde ausdrücklich zurückgenommen.
 Alle fünf Partner bleiben inaktiv, alle drei fachlichen Freigaben bleiben falsch.
+
+Nachkontrolle 11.11.2026: Vollständige Google-Zahlungshistorie, nachgeholte
+Perioden, konkrete Erstattungsbestellungen und Mehrfachmeldungen sind lokal
+und im tatsächlichen Linux-Worker-Testlauf geprüft (618 Tests insgesamt).
+Keine Testzahlung wird in das Produktionsledger übernommen. Für Foodiewien
+wurden lediglich zehn Sandbox-Codes mit Ablauf 13.11.2026 erstellt, weiterhin
+null Produktionscodes. Die iPhone-Angebotsanzeige des Eigentümers bestätigt
+3,99 EUR für zwölf Monate und danach 4,99 EUR; sie zeigt noch keinen Gratismonat.
+Damit sind weder Neukunden-Testphase noch Kauf, Verlängerung oder Store-Erstattung
+Ende-zu-Ende nachgewiesen. Der Eigentümer bestätigt, dass die iPhone-Anzeige
+funktioniert. Die frühere Sandbox-Kaufhistorie ausschließlich dieses Testkontos
+wurde danach mit ausdrücklicher Freigabe zurückgesetzt; nach erneutem Laden ist
+"Letzter Kauf" leer. Ein neuer Screenshot für die Neukunden-Testphase steht aus.
+Google-Lizenztestkonto ist vorhanden; der Eigentümer verzichtet ausdrücklich auf
+den echten Android-Kauftest. Der Emulator ist beendet, der Android-Store-Ablauf
+bleibt ungetestet. Native Logiktests (114 Swift-Prüfungen, 19 Android-Tests) ersetzen
+keine echten Store-Testkäufe. Startfreigaben bleiben unverändert.
 
 Eine Abrechnungsanfrage enthält `partnerId`, `month` (abgeschlossener Kalendermonat),
 `reconciledFinancialReports: true`, `storeFundsReceived: true`, `evidenceRef`.
