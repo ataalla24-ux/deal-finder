@@ -1,4 +1,4 @@
-import { dailyAvailabilityReason, rankDailyFeaturedDeals } from './daily-featured-policy.js';
+import { dailyAvailabilityReason, rankDailyFeaturedDeals, rankWeeklyFeaturedDeals, weeklyRedeemableDays } from './daily-featured-policy.js';
 import { featuredSelectionHistory, recentFeaturedDealIds } from './featured-selection-history.js';
 
 const VIENNA_DAY_FORMATTER = new Intl.DateTimeFormat('en-CA', {
@@ -198,9 +198,8 @@ function featuredFallbackDeal(deals, kind, now, dailyDeal = null, previous = {})
     const recentDealIds = recentFeaturedDealIds(previous, VIENNA_DAY_FORMATTER.format(now));
     return rankDailyFeaturedDeals(deals.filter(isFoodOrDrinkDeal), now, { recentDealIds })[0]?.deal || null;
   }
-  const source = weeklySource(deals, cleanText(dailyDeal?.id));
-  if (source.length === 0) return null;
-  return source[getViennaWeekOfYear(now) % source.length] || source[0];
+  const excludedIds = new Set(dailyDeal?.id ? [dailyDeal.id] : []);
+  return rankWeeklyFeaturedDeals(deals, now, { excludedIds })[0]?.deal || null;
 }
 
 function syncFeaturedDealReference(deals = [], pick = {}, options = {}) {
@@ -210,13 +209,8 @@ function syncFeaturedDealReference(deals = [], pick = {}, options = {}) {
   // replacement when a moderator removes the current featured deal.
   deals = deals.filter((deal) => {
     if (kind === 'daily') return !dailyAvailabilityReason(deal, now);
-    if (deal.validity?.status === 'invalid') return false;
-    if (kind === 'weekly' && !isFoodOrDrinkDeal(deal)) return false;
-    const start = Date.parse(cleanText(deal.validFrom || deal.validity?.startDate));
-    if (Number.isFinite(start) && start > now.getTime()) return false;
-    const expiry = [deal.expires, deal.validUntil, deal.validity?.expiryDate]
-      .map((value) => Date.parse(cleanText(value))).find(Number.isFinite);
-    return !Number.isFinite(expiry) || expiry >= now.getTime();
+    return isFoodOrDrinkDeal(deal) && weeklyRedeemableDays(deal, now).length > 0
+      && (pick?.manualPick || deal.id !== options.dailyDeal?.id);
   });
   const targetId = cleanText(pick?.dealId || pick?.id);
   let target = deals.find((deal) => cleanText(deal.id) === targetId) || null;
@@ -243,6 +237,10 @@ function syncFeaturedDealReference(deals = [], pick = {}, options = {}) {
       selectionHistory: featuredSelectionHistory(pick, {}, date) };
     return { changed: true, payload, report: { kind, reason, previousId: targetId, targetId: '' } };
   }
+  if (!target && kind === 'weekly' && (targetId || pick?.selectionReason !== 'no-verified-weekly-deal')) {
+    const payload = { week: getViennaWeekKey(now), dealId: '', manualPick: false, selectionReason: 'no-verified-weekly-deal' };
+    return { changed: true, payload, report: { kind, reason, previousId: targetId, targetId: '' } };
+  }
   if (!target) return { changed: false, payload: pick, report: { kind, reason, targetId } };
 
   const payload = {
@@ -257,11 +255,15 @@ function syncFeaturedDealReference(deals = [], pick = {}, options = {}) {
   }
   if (reason === 'automatic_fallback') {
     payload.manualPick = false;
-    payload.selectionReason = kind === 'daily' ? 'automatic-strongest-verified' : 'automatic-live-reference-repair';
+    payload.selectionReason = 'automatic-strongest-verified';
     if (kind === 'daily') {
       payload.date = VIENNA_DAY_FORMATTER.format(now);
       payload.pickedAt = now.toISOString();
       payload.selectionHistory = featuredSelectionHistory(pick, payload, payload.date);
+    } else {
+      payload.week = getViennaWeekKey(now);
+      payload.pickedAt = now.toISOString();
+      payload.eligibility = { eligible: true, reason: 'weekly_verified_value' };
     }
   }
 
@@ -282,7 +284,8 @@ function syncFeaturedDealSnapshots(bundle, dailyPick = {}, weeklyPick = {}, opti
   const deals = dealArrayFromBundle(bundle) || [];
   const now = options.now instanceof Date ? options.now : new Date(options.now || Date.now());
   const daily = syncFeaturedDealReference(deals, dailyPick, { kind: 'daily', now });
-  const dailyDeal = deals.find((deal) => cleanText(deal.id) === cleanText(daily.payload?.dealId)) || null;
+  const dailyDeal = daily.payload?.date === VIENNA_DAY_FORMATTER.format(now)
+    ? deals.find((deal) => cleanText(deal.id) === cleanText(daily.payload?.dealId)) || null : null;
   const weekly = syncFeaturedDealReference(deals, weeklyPick, { kind: 'weekly', now, dailyDeal });
   return {
     changed: daily.changed || weekly.changed,

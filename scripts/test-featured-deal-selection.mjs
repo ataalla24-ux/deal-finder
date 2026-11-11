@@ -4,10 +4,12 @@ import {
   getFeaturedDealEligibility,
   isFoodDrinkDeal,
   normalizeFeaturedDeal,
+  resolveWeeklyFeaturedSelection,
   selectAutomaticFeaturedDeal,
   shouldPreserveManualPick,
   getViennaWeekKey,
 } from '../scraper/set-daily-deal.js';
+import { weeklyRedeemableDays } from '../scraper/daily-featured-policy.js';
 
 const now = new Date('2026-06-29T12:00:00.000Z');
 
@@ -144,6 +146,9 @@ const selectedWeekly = await selectAutomaticFeaturedDeal([
     description: 'Gratis Kaffee in Wien',
     category: 'kaffee',
     type: 'gratis',
+    dateConfidence: 'high',
+    expiryKind: 'end',
+    validUntil: '2026-07-05',
     pubDate: '2026-06-28T09:00:00.000Z',
     url: 'https://example.com/coffee',
   },
@@ -165,5 +170,36 @@ const noWeekly = await selectAutomaticFeaturedDeal([
 ], { kind: 'weekly', now, llmEnabled: false });
 
 assert.equal(noWeekly, null, 'weekly fallback must not pick non-food when no food/drink candidate exists');
+
+const weekNow = new Date('2026-11-11T10:00:00Z');
+const offer = (id, title, fields = {}) => ({ id, title, brand: 'Pizza Wien', category: 'essen',
+  type: 'rabatt', description: 'Vor Ort in Wien.', url: 'https://example.com/pizza', dateConfidence: 'high',
+  expiryKind: 'end', validUntil: '2026-11-16', ...fields });
+const strongest = offer('strongest', 'Pizza für 5 € statt 15 €');
+const weaker = offer('weaker', '25 % Rabatt auf Pizza', { pubDate: weekNow.toISOString(), votes: 500, hot: true });
+const daily = { date: '2026-11-11', dealId: strongest.id };
+const weekly = { week: '2026-11-09', dealId: weaker.id, manualPick: false };
+assert.equal((await resolveWeeklyFeaturedSelection([weaker, strongest], weekly, null, weekNow)).deal.id, strongest.id);
+assert.equal((await resolveWeeklyFeaturedSelection([weaker, strongest], weekly, daily, weekNow)).deal.id, weaker.id);
+assert.equal((await resolveWeeklyFeaturedSelection([weaker, strongest], weekly, { ...daily, date: '2026-11-10' }, weekNow)).deal.id, strongest.id);
+assert.equal(await resolveWeeklyFeaturedSelection([strongest], null, daily, weekNow), null, 'do not duplicate today in the weekly card');
+assert.equal((await resolveWeeklyFeaturedSelection([weaker, strongest], { ...weekly, manualPick: true }, null, weekNow)).deal.id, weaker.id);
+assert.equal((await resolveWeeklyFeaturedSelection([{ ...weaker, validUntil: '2026-11-10' }, strongest],
+  { ...weekly, manualPick: true }, null, weekNow)).deal.id, strongest.id);
+assert.deepEqual(weeklyRedeemableDays(offer('breakfast', '1+1 Pizza', { description: 'Aktion bis 10:30 Uhr.' }), weekNow,
+  { verified: true }), ['2026-11-12', '2026-11-13', '2026-11-14', '2026-11-15']);
+assert.deepEqual(weeklyRedeemableDays(offer('friday', '1+1 Pizza freitags'), weekNow, { verified: true }), ['2026-11-13']);
+assert.deepEqual(weeklyRedeemableDays(offer('next', '1+1 Pizza montags'), weekNow, { verified: true }), []);
+assert.deepEqual(weeklyRedeemableDays(offer('sunday', '1+1 Pizza sonntags'), new Date('2026-11-15T23:01:00Z'), { verified: true }), []);
+assert.deepEqual(weeklyRedeemableDays(offer('sunday', '1+1 Pizza sonntags'), new Date('2026-11-15T22:59:00Z'), { verified: true }), ['2026-11-15']);
+assert.deepEqual(weeklyRedeemableDays(offer('dst', '1+1 Pizza sonntags', { validUntil: '2026-10-25' }),
+  new Date('2026-10-24T20:00:00Z'), { verified: true }), ['2026-10-25']);
+const sameValue = offer('equal', strongest.title, { validUntil: '2026-11-12' });
+assert.equal((await resolveWeeklyFeaturedSelection([sameValue, strongest], { ...weekly, dealId: 'equal' }, null, weekNow)).deal.id,
+  strongest.id, 'more redeemable days win ties');
+for (const candidate of [offer('private', '1+1 Pizza', { description: 'Personalisierter Code.' }),
+  offer('no-date', '1+1 Pizza', { dateConfidence: 'low' }), offer('next', '1+1 Pizza montags')]) {
+  assert.equal(await resolveWeeklyFeaturedSelection([candidate], null, null, weekNow), null, candidate.id);
+}
 
 console.log('Featured deal selection checks passed.');

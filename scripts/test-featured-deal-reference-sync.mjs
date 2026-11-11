@@ -62,6 +62,7 @@ const stable = syncFeaturedDealSnapshots(
 assert.equal(stable.changed, false, 'a second sync must be idempotent');
 
 const coffee = { ...deals[1], dateConfidence: 'high', expiryKind: 'end', validUntil: '2026-08-31' };
+const second = { ...coffee, id: 'weekly-tea', title: '20 % Rabatt auf Tee' };
 for (const period of [
   { expires: '2020-01-01' },
   { validUntil: '2020-01-01' },
@@ -70,10 +71,10 @@ for (const period of [
   { validFrom: '2030-01-01' },
 ]) {
   const ineligible = { ...deals[1], id: 'ineligible', ...period };
-  const repaired = syncFeaturedDealSnapshots({ deals: [ineligible, coffee] },
-    { ...ineligible, dealId: ineligible.id }, { ...ineligible, dealId: ineligible.id }, { now });
+  const repaired = syncFeaturedDealSnapshots({ deals: [ineligible, coffee, second] },
+    { ...ineligible, date: '2026-08-26', dealId: ineligible.id }, { ...ineligible, dealId: ineligible.id }, { now });
   assert.equal(repaired.daily.payload.dealId, coffee.id, 'Daily replacement must be currently valid');
-  assert.equal(repaired.weekly.payload.dealId, coffee.id, 'Weekly replacement must be currently valid');
+  assert.equal(repaired.weekly.payload.dealId, second.id, 'Weekly replacement must be valid and distinct from today');
   assert.deepEqual(ineligible, { ...deals[1], id: 'ineligible', ...period }, 'Source record is not deleted or changed');
 }
 
@@ -83,5 +84,9 @@ assert.equal(absent.daily.payload.selectionReason, 'no-verified-daily-deal');
 const repairedBest = syncFeaturedDealSnapshots({ deals: [coffee, { ...coffee, id: 'free-pizza', title: 'Pizza gratis' }] },
   absent.daily.payload, {}, { now });
 assert.equal(repairedBest.daily.payload.dealId, 'free-pizza');
+assert.equal(repairedBest.weekly.payload.dealId, coffee.id);
+const noWeekly = syncFeaturedDealSnapshots({ deals: [coffee] }, { date: '2026-08-26', dealId: coffee.id }, {}, { now });
+assert.equal(noWeekly.weekly.payload.selectionReason, 'no-verified-weekly-deal');
+assert.equal(noWeekly.weekly.payload.dealId, '');
 
 console.log('featured deal reference sync tests passed');

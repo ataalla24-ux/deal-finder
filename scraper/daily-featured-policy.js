@@ -108,3 +108,28 @@ export function rankDailyFeaturedDeals(deals, now, { recentDealIds = new Set(), 
     || Number(recentDealIds.has(a.deal.id)) - Number(recentDealIds.has(b.deal.id))
     || a.deal.id.localeCompare(b.deal.id));
 }
+
+export function weeklyRedeemableDays(deal, now, { verified = false } = {}) {
+  const { day, weekday } = viennaTime(now);
+  const todayReason = dailyAvailabilityReason(deal, now, { verified });
+  if (todayReason && !['wrong_weekday', 'ended_today'].includes(todayReason)) return [];
+  const days = todayReason ? [] : [day];
+  const remaining = (7 - weekday) % 7;
+  for (let offset = 1; offset <= remaining; offset++) {
+    const midnightUtc = Date.parse(day) + offset * 86400000;
+    // The offset at UTC midnight is also the offset at local midnight in Vienna.
+    const localStart = new Date(midnightUtc - viennaTime(new Date(midnightUtc)).minute * 60000);
+    if (!dailyAvailabilityReason(deal, localStart, { verified })) days.push(viennaTime(localStart).day);
+  }
+  return days;
+}
+
+export function rankWeeklyFeaturedDeals(deals, now, { excludedIds = new Set(), currentId = '' } = {}) {
+  return deals.flatMap(deal => {
+    if (excludedIds.has(deal.id)) return [];
+    const value = dailyFeaturedValue(deal);
+    const days = value > 0 ? weeklyRedeemableDays(deal, now, { verified: true }) : [];
+    return days.length ? [{ deal, value, days }] : [];
+  }).sort((a, b) => b.value - a.value || b.days.length - a.days.length
+    || Number(b.deal.id === currentId) - Number(a.deal.id === currentId) || a.deal.id.localeCompare(b.deal.id));
+}

@@ -12,9 +12,8 @@ import { cleanText, extractDealsFromThreadMessages, extractSlackMessageText } fr
 import { normalizeDealRecord } from './deal-normalization-utils.js';
 import { freeCreditOpenAiFetch, modelForTask } from './ai-credit-budget.js';
 import { inspectDealUrlHealth } from './expiry-utils.js';
-import { discoveryRejection, foodDiscoveryPriority } from './deal-discovery-policy.js';
 import { featuredSelectionHistory, recentFeaturedDealIds } from './featured-selection-history.js';
-import { dailyAvailabilityReason, rankDailyFeaturedDeals } from './daily-featured-policy.js';
+import { dailyAvailabilityReason, rankDailyFeaturedDeals, rankWeeklyFeaturedDeals, weeklyRedeemableDays } from './daily-featured-policy.js';
 import { cachedSourceReview, loadSourceReviewCache, rememberSourceReview, reviewClockContext,
     reviewFingerprint, saveSourceReviewCache } from './source-review-cache.js';
 
@@ -382,11 +381,6 @@ function mergePickedDealWithApproved(approvedDeal, pickedDeal) {
     };
 }
 
-function parseTime(value) {
-    const parsed = Date.parse(cleanText(value || ''));
-    return Number.isNaN(parsed) ? 0 : parsed;
-}
-
 function clipText(value, maxLength = 1000) {
     return cleanText(value || '').slice(0, maxLength);
 }
@@ -436,16 +430,6 @@ function isFoodDrinkDeal(deal = {}) {
 
     if (category === 'supermarkt') return FOOD_DRINK_SIGNAL_PATTERN.test(signal);
     return FOOD_DRINK_SIGNAL_PATTERN.test(signal);
-}
-
-function isFeaturedDealStillLive(deal, now = new Date()) {
-    if (!deal || typeof deal !== 'object') return false;
-    if (!cleanText(deal.id || deal.url || '')) return false;
-
-    const expiresAt = parseTime(deal.expires || deal.validUntil || deal.end_date || deal.validity_date || '');
-    if (expiresAt && expiresAt < now.getTime()) return false;
-
-    return true;
 }
 
 async function reviewWeeklyDealActiveWithLLM(deal, options = {}) {
@@ -626,8 +610,8 @@ async function getFeaturedDealEligibility(deal, kind = 'daily', options = {}) {
         return { eligible: !reason, reason: reason || 'daily_live', llmActiveCheck: null };
     }
 
-    if (!isFeaturedDealStillLive(normalized, now)) {
-        return { eligible: false, reason: 'not_live_or_expired', llmActiveCheck: null };
+    if (!cleanText(normalized.id || normalized.url) || !weeklyRedeemableDays(deal || {}, now).length) {
+        return { eligible: false, reason: 'weekly_no_remaining_redemption_day', llmActiveCheck: null };
     }
 
     if (!isFoodDrinkDeal(normalized)) {
@@ -739,34 +723,6 @@ async function isExistingFeaturedDealCurrent(kind, approvedDeals) {
     return eligibility.eligible;
 }
 
-function automaticCategoryScore(category) {
-    const value = cleanText(category || '').toLowerCase();
-    const scores = new Map([
-        ['essen', 22],
-        ['kaffee', 20],
-        ['supermarkt', 16],
-        ['shopping', 12],
-        ['beauty', 10],
-        ['fitness', 10],
-        ['reisen', 8],
-        ['kultur', 6],
-        ['events', 6],
-        ['kirche', -20],
-        ['gottesdienste', -20],
-        ['gemeinde', -18],
-    ]);
-    return scores.get(value) || 0;
-}
-
-function automaticTypeScore(type) {
-    const value = cleanText(type || '').toLowerCase();
-    if (value === 'gratis') return 30;
-    if (value === 'bogo') return 24;
-    if (value === 'rabatt') return 18;
-    if (value === 'gutschein') return 14;
-    return 0;
-}
-
 function isWeakAutomaticBrand(value) {
     const text = cleanText(value || '').toLowerCase();
     if (!text) return true;
@@ -786,65 +742,26 @@ function isAutomaticFeaturedPresentationReady(deal) {
     return true;
 }
 
-function scoreAutomaticFeaturedDeal(deal, kind, now = new Date()) {
-    const normalized = normalizeDealRecord(deal);
-    const brand = cleanText(normalized.brand || '');
-    const title = cleanText(normalized.title || '');
-    const description = cleanText(normalized.description || '');
-    const weakBrand = isWeakAutomaticBrand(brand);
-    let score = automaticTypeScore(normalized.type) + automaticCategoryScore(normalized.category);
-
-    if (brand && !weakBrand) score += 12;
-    if (weakBrand) score -= 18;
-    if (title.length >= 14) score += 8;
-    if (description.length >= 28) score += 6;
-    if (/^https?:\/\//i.test(cleanText(normalized.url || ''))) score += 6;
-    if (cleanText(normalized.logoUrl || '')) score += 2;
-    if (kind === 'weekly') score += Math.min(description.length, 160) / 24;
-
-    const pubDate = parseTime(normalized.pubDate || normalized.approvedAt || '');
-    if (pubDate) {
-        const ageDays = Math.max(0, (now.getTime() - pubDate) / (24 * 60 * 60 * 1000));
-        score += Math.max(0, 18 - ageDays);
-    }
-
-    return score;
-}
-
 async function selectAutomaticFeaturedDeal(approvedDeals, options = {}) {
     const kind = options.kind || 'daily';
     const now = options.now instanceof Date ? options.now : new Date();
     const excludedIds = options.excludedIds instanceof Set ? options.excludedIds : new Set();
-    const recentIds = options.recentDealIds instanceof Set ? options.recentDealIds : new Set();
+    const candidates = approvedDeals.filter(deal => isAutomaticFeaturedPresentationReady(deal) && isFoodDrinkDeal(deal));
     if (kind === 'daily') {
-        const candidates = approvedDeals.filter(deal => !excludedIds.has(deal.id)
-            && isAutomaticFeaturedPresentationReady(deal) && isFoodDrinkDeal(deal));
-        const [best] = rankDailyFeaturedDeals(candidates, now, { recentDealIds: recentIds, currentId: options.currentId });
+        const recentIds = options.recentDealIds instanceof Set ? options.recentDealIds : new Set();
+        const [best] = rankDailyFeaturedDeals(candidates.filter(deal => !excludedIds.has(deal.id)), now,
+            { recentDealIds: recentIds, currentId: options.currentId });
         return best ? { deal: best.deal, eligibility: { eligible: true, reason: 'daily_verified_value' }, value: best.value } : null;
     }
-    const liveDeals = approvedDeals
-        .filter((deal) => isFeaturedDealStillLive(deal, now))
-        .filter(isAutomaticFeaturedPresentationReady)
-        .filter((deal) => !excludedIds.has(cleanText(deal.id || '')));
-
-    if (liveDeals.length === 0) return null;
-
-    const candidates = liveDeals.filter((deal) => isFoodDrinkDeal(deal) && foodDiscoveryPriority(deal) && !discoveryRejection(deal));
-    if (candidates.length === 0) return null;
-
-    const sortedCandidates = [...candidates].sort((a, b) => {
-        const scoreDelta = scoreAutomaticFeaturedDeal(b, kind, now) - scoreAutomaticFeaturedDeal(a, kind, now);
-        if (scoreDelta !== 0) return scoreDelta;
-        return parseTime(b.pubDate || b.approvedAt || '') - parseTime(a.pubDate || a.approvedAt || '');
-    });
-
-    for (const deal of sortedCandidates) {
-        const eligibility = await getFeaturedDealEligibility(deal, kind, {
-            now,
-            llmEnabled: options.llmEnabled,
-        });
-        if (eligibility.eligible) return { deal, eligibility };
-        console.log(`Automatic ${kind} candidate skipped: ${deal.brand} - ${deal.title} (${eligibility.reason})`);
+    const ranked = rankWeeklyFeaturedDeals(candidates, now, { excludedIds, currentId: options.currentId });
+    for (const candidate of ranked) {
+        const { deal } = candidate;
+        if (!FEATURED_WEEKLY_LLM_REQUIRED) {
+            return { ...candidate, eligibility: { eligible: true, reason: 'weekly_verified_value' } };
+        }
+        const eligibility = await getFeaturedDealEligibility(deal, 'weekly', { ...options, now, llmEnabled: true });
+        if (eligibility.eligible) return { ...candidate, eligibility };
+        console.log(`Automatic weekly candidate skipped: ${deal.brand} - ${deal.title} (${eligibility.reason})`);
     }
 
     return null;
@@ -887,7 +804,8 @@ function saveDealOfTheDay(deal, options = {}) {
 
 function saveDealOfTheWeek(deal, options = {}) {
     const outputPath = path.join(__dirname, '..', 'docs', 'deal-of-the-week.json');
-    const week = getViennaWeekKey();
+    const now = options.now || new Date();
+    const week = getViennaWeekKey(now);
     const normalized = normalizeFeaturedDeal(deal);
     const manualPick = options.manualPick !== false;
 
@@ -904,9 +822,9 @@ function saveDealOfTheWeek(deal, options = {}) {
         category: normalized.category || 'wien',
         distance: normalized.distance || 'Wien',
         manualPick,
-        selectionReason: manualPick ? 'slack-pick' : 'automatic-approved-fallback',
+        selectionReason: manualPick ? 'slack-pick' : 'automatic-strongest-verified',
         eligibility: options.eligibility || null,
-        pickedAt: new Date().toISOString()
+        pickedAt: now.toISOString()
     };
 
     fs.writeFileSync(outputPath, JSON.stringify(output, null, 2));
@@ -952,6 +870,11 @@ async function main() {
   if (process.argv.includes('--daily-only')) {
     if (!approvedDeals.length) throw new Error('No approved feed for daily-only selection');
     await refreshAutomaticDailyDeal(approvedDeals);
+    return;
+  }
+  if (process.argv.includes('--weekly-only')) {
+    if (!approvedDeals.length) throw new Error('No approved feed for weekly-only selection');
+    await refreshAutomaticWeeklyDeal(approvedDeals);
     return;
   }
   let threadTs = null;
@@ -1016,32 +939,12 @@ async function main() {
   let savedDaily = await maybePersistPick('daily', picks.daily);
   let savedWeekly = await maybePersistPick('weekly', picks.weekly);
 
-  const automaticExcludedIds = new Set();
-  if (savedDaily && picks.daily) {
-    const pickedDaily = findPickedDeal(deals, picks.daily);
-    if (pickedDaily?.id) automaticExcludedIds.add(cleanText(pickedDaily.id));
-  }
-
   if (!savedDaily) {
-    const selected = await refreshAutomaticDailyDeal(approvedDeals);
-    savedDaily = Boolean(selected);
-    if (selected) automaticExcludedIds.add(selected);
+    savedDaily = Boolean(await refreshAutomaticDailyDeal(approvedDeals));
   }
 
-  if (!savedWeekly && !(await isExistingFeaturedDealCurrent('weekly', approvedDeals))) {
-    const fallbackWeekly = await selectAutomaticFeaturedDeal(approvedDeals, {
-      kind: 'weekly',
-      excludedIds: automaticExcludedIds,
-    });
-    if (fallbackWeekly) {
-      console.log(`Automatic weekly fallback: ${fallbackWeekly.deal.brand} - ${fallbackWeekly.deal.title}`);
-      saveDealOfTheWeek(fallbackWeekly.deal, { manualPick: false, eligibility: fallbackWeekly.eligibility });
-      savedWeekly = true;
-    } else {
-      console.log('No approved live deal available for automatic weekly fallback');
-    }
-  } else if (!savedWeekly) {
-    console.log('Existing weekly featured deal is current and approved');
+  if (!savedWeekly) {
+    savedWeekly = Boolean(await refreshAutomaticWeeklyDeal(approvedDeals));
   }
 
   if (!savedDaily && !savedWeekly) {
@@ -1087,6 +990,40 @@ async function refreshAutomaticDailyDeal(approvedDeals) {
     return selected.deal.id;
 }
 
+async function resolveWeeklyFeaturedSelection(approvedDeals, existing, daily, now = new Date()) {
+    const currentId = existing?.week === getViennaWeekKey(now) ? existing.dealId : '';
+    const current = currentId && approvedDeals.find(deal => deal.id === currentId);
+    if (existing?.manualPick && current) {
+        const eligibility = await getFeaturedDealEligibility(current, 'weekly', { now, llmEnabled: false });
+        if (eligibility.eligible) return { deal: current, preserve: true, eligibility };
+    }
+    const excludedIds = new Set(daily?.date === getViennaDayKey(now) && daily.dealId ? [daily.dealId] : []);
+    const strongest = await selectAutomaticFeaturedDeal(approvedDeals, { kind: 'weekly', now, currentId, excludedIds });
+    return strongest && { ...strongest, preserve: !existing?.manualPick && strongest.deal.id === currentId
+        && existing?.selectionReason === 'automatic-strongest-verified' };
+}
+
+async function refreshAutomaticWeeklyDeal(approvedDeals) {
+    const existing = loadExistingFeaturedDeal('weekly');
+    const now = new Date();
+    const selected = await resolveWeeklyFeaturedSelection(approvedDeals, existing, loadExistingFeaturedDeal('daily'), now);
+    if (!selected) {
+        const week = getViennaWeekKey(now);
+        if (existing?.week !== week || existing?.dealId || existing?.selectionReason !== 'no-verified-weekly-deal') {
+            const output = { week, dealId: '', manualPick: false, selectionReason: 'no-verified-weekly-deal' };
+            fs.writeFileSync(path.join(__dirname, '..', 'docs', 'deal-of-the-week.json'), JSON.stringify(output, null, 2));
+        }
+        console.log('No verified live deal available for automatic weekly selection');
+        return '';
+    }
+    if (selected.preserve) syncExistingFeaturedDeal('weekly', existing, selected.deal, selected.eligibility);
+    else {
+        console.log(`Strongest verified weekly deal (${selected.value}; ${selected.days.length} remaining days): ${selected.deal.brand} - ${selected.deal.title}`);
+        saveDealOfTheWeek(selected.deal, { manualPick: false, now, eligibility: selected.eligibility });
+    }
+    return selected.deal.id;
+}
+
 // Replayed digest replies must not replace a newer manual selection.
 function shouldPreserveManualPick(current, incomingPickedAt) {
     if (!current?.manualPick) return false;
@@ -1100,10 +1037,10 @@ export {
     getFeaturedDealEligibility,
     getViennaDayKey,
     getViennaWeekKey,
-    isFeaturedDealStillLive,
     isFoodDrinkDeal,
     normalizeFeaturedDeal,
     resolveDailyFeaturedSelection,
+    resolveWeeklyFeaturedSelection,
     selectAutomaticFeaturedDeal,
 };
 

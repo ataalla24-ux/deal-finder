@@ -116,6 +116,8 @@ try {
   write('docs/deals-pending-test.json', { deals: [good, removed] });
   write('docs/deal-map-locations.json', { locations: [{ id: 'fixture-map', dealIds: ['keep', 'remove'] }] });
   for (const kind of ['day', 'week']) write(`docs/deal-of-the-${kind}.json`, { ...removed, dealId: removed.id });
+  write('docs/deal-of-the-day.json', { ...removed, dealId: removed.id,
+    date: new Intl.DateTimeFormat('sv-SE', { timeZone: 'Europe/Vienna', dateStyle: 'short' }).format(new Date()) });
   cli('add-deal-moderation-entry.mjs', { DEAL_MODERATION_ID: removed.id });
   const beforeRemoval = read('docs/deals.json');
   const gates = { DEAL_MODERATION_APPLY: '1', LIVE_DEAL_REMOVALS_ENABLED: '1', LIVE_DEAL_MANUAL_ACTION: '1' };
@@ -131,7 +133,9 @@ try {
   cli('sync-featured-deal-references.mjs');
   cli('stamp-deals-feed.mjs');
   assert.deepEqual(read('docs/deal-map-locations.json').locations[0].dealIds, [good.id]);
-  for (const kind of ['day', 'week']) assert.equal(read(`docs/deal-of-the-${kind}.json`).dealId, good.id);
+  assert.equal(read('docs/deal-of-the-day.json').dealId, good.id);
+  assert.equal(read('docs/deal-of-the-week.json').selectionReason, 'no-verified-weekly-deal');
+  assert.equal(read('docs/deal-of-the-week.json').dealId, '');
   assert.equal(run().status, 0, 'Complete removal pipeline must pass validation');
   cli('apply-deal-moderation.mjs', gates);
   assert.equal(read('docs/deal-moderation-report.json').removedCount, 0, 'Retry must be idempotent');

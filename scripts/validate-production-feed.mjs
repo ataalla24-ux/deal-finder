@@ -203,6 +203,8 @@ function validateFeatured(payload, kind) {
   const id = clean(payload.dealId || payload.id);
   if (kind === 'daily' && !id && payload.manualPick === false && payload.selectionReason === 'no-verified-daily-deal'
     && /^\d{4}-\d{2}-\d{2}$/.test(payload.date || '')) return;
+  if (kind === 'weekly' && !id && payload.manualPick === false && payload.selectionReason === 'no-verified-weekly-deal'
+    && /^\d{4}-\d{2}-\d{2}$/.test(payload.week || '')) return;
   const deal = deals.find((candidate) => clean(candidate.id) === id);
   if (!deal) {
     errors.push(`${kind} deal references missing live deal: ${id || '(empty)'}`);
