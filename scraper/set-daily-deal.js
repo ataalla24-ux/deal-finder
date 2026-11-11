@@ -14,7 +14,7 @@ import { freeCreditOpenAiFetch, modelForTask } from './ai-credit-budget.js';
 import { inspectDealUrlHealth } from './expiry-utils.js';
 import { discoveryRejection, foodDiscoveryPriority } from './deal-discovery-policy.js';
 import { featuredSelectionHistory, recentFeaturedDealIds } from './featured-selection-history.js';
-import { pushDealExclusionReason } from '../referrals-worker/src/daily-push-policy.js';
+import { dailyAvailabilityReason, rankDailyFeaturedDeals } from './daily-featured-policy.js';
 import { cachedSourceReview, loadSourceReviewCache, rememberSourceReview, reviewClockContext,
     reviewFingerprint, saveSourceReviewCache } from './source-review-cache.js';
 
@@ -355,10 +355,10 @@ function loadApprovedDeals() {
 
 function findApprovedDealMatch(approvedDeals, deal) {
     if (!deal) return null;
-    return approvedDeals.find((candidate) =>
-        (candidate?.id && deal.id && candidate.id === deal.id) ||
-        (candidate?.url && deal.url && candidate.url === deal.url)
-    ) || null;
+    const exact = deal.id && approvedDeals.find(candidate => candidate.id === deal.id);
+    if (exact) return exact;
+    const byUrl = deal.url ? approvedDeals.filter(candidate => candidate.url === deal.url) : [];
+    return byUrl.length === 1 ? byUrl[0] : null;
 }
 
 function mergePickedDealWithApproved(approvedDeal, pickedDeal) {
@@ -621,12 +621,13 @@ async function getFeaturedDealEligibility(deal, kind = 'daily', options = {}) {
     const now = options.now instanceof Date ? options.now : new Date();
     const normalized = normalizeDealRecord(deal || {});
 
-    if (!isFeaturedDealStillLive(normalized, now)) {
-        return { eligible: false, reason: 'not_live_or_expired', llmActiveCheck: null };
+    if (kind !== 'weekly') {
+        const reason = !cleanText(normalized.id || normalized.url) ? 'not_live' : dailyAvailabilityReason(deal || {}, now);
+        return { eligible: !reason, reason: reason || 'daily_live', llmActiveCheck: null };
     }
 
-    if (kind !== 'weekly') {
-        return { eligible: true, reason: 'daily_live', llmActiveCheck: null };
+    if (!isFeaturedDealStillLive(normalized, now)) {
+        return { eligible: false, reason: 'not_live_or_expired', llmActiveCheck: null };
     }
 
     if (!isFoodDrinkDeal(normalized)) {
@@ -815,11 +816,16 @@ async function selectAutomaticFeaturedDeal(approvedDeals, options = {}) {
     const now = options.now instanceof Date ? options.now : new Date();
     const excludedIds = options.excludedIds instanceof Set ? options.excludedIds : new Set();
     const recentIds = options.recentDealIds instanceof Set ? options.recentDealIds : new Set();
+    if (kind === 'daily') {
+        const candidates = approvedDeals.filter(deal => !excludedIds.has(deal.id)
+            && isAutomaticFeaturedPresentationReady(deal) && isFoodDrinkDeal(deal));
+        const [best] = rankDailyFeaturedDeals(candidates, now, { recentDealIds: recentIds, currentId: options.currentId });
+        return best ? { deal: best.deal, eligibility: { eligible: true, reason: 'daily_verified_value' }, value: best.value } : null;
+    }
     const liveDeals = approvedDeals
         .filter((deal) => isFeaturedDealStillLive(deal, now))
         .filter(isAutomaticFeaturedPresentationReady)
-        .filter((deal) => !excludedIds.has(cleanText(deal.id || '')))
-        .filter((deal) => kind !== 'daily' || !recentIds.has(cleanText(deal.id || '')));
+        .filter((deal) => !excludedIds.has(cleanText(deal.id || '')));
 
     if (liveDeals.length === 0) return null;
 
@@ -827,10 +833,6 @@ async function selectAutomaticFeaturedDeal(approvedDeals, options = {}) {
     if (candidates.length === 0) return null;
 
     const sortedCandidates = [...candidates].sort((a, b) => {
-        if (kind === 'daily') {
-            const pushReadyDelta = Number(!pushDealExclusionReason(b, now.getTime())) - Number(!pushDealExclusionReason(a, now.getTime()));
-            if (pushReadyDelta !== 0) return pushReadyDelta;
-        }
         const scoreDelta = scoreAutomaticFeaturedDeal(b, kind, now) - scoreAutomaticFeaturedDeal(a, kind, now);
         if (scoreDelta !== 0) return scoreDelta;
         return parseTime(b.pubDate || b.approvedAt || '') - parseTime(a.pubDate || a.approvedAt || '');
@@ -851,11 +853,9 @@ async function selectAutomaticFeaturedDeal(approvedDeals, options = {}) {
 // ============================================
 // Step 4: Write featured deal files
 // ============================================
-function saveDealOfTheDay(deal, options = {}) {
-    const outputPath = path.join(__dirname, '..', 'docs', 'deal-of-the-day.json');
-    const today = getViennaDayKey();
+function buildDailyFeaturedSnapshot(deal, { manualPick = true, now = new Date(), existing = null } = {}) {
+    const today = getViennaDayKey(now);
     const normalized = normalizeFeaturedDeal(deal);
-    const manualPick = options.manualPick !== false;
 
   const output = {
         date: today,
@@ -870,12 +870,17 @@ function saveDealOfTheDay(deal, options = {}) {
         category: normalized.category || 'wien',
         distance: normalized.distance || 'Wien',
         manualPick,
-        selectionReason: manualPick ? 'slack-pick' : 'automatic-approved-fallback',
-        pickedAt: new Date().toISOString()
+        selectionReason: manualPick ? 'slack-pick' : 'automatic-strongest-verified',
+        pickedAt: now.toISOString()
   };
 
-  output.selectionHistory = featuredSelectionHistory(loadExistingFeaturedDeal('daily'), output, today);
+  output.selectionHistory = featuredSelectionHistory(existing, output, today);
+  return output;
+}
 
+function saveDealOfTheDay(deal, options = {}) {
+    const outputPath = path.join(__dirname, '..', 'docs', 'deal-of-the-day.json');
+    const output = buildDailyFeaturedSnapshot(deal, { ...options, existing: loadExistingFeaturedDeal('daily') });
   fs.writeFileSync(outputPath, JSON.stringify(output, null, 2));
     console.log('Saved deal-of-the-day.json:', deal.brand, '-', deal.title);
 }
@@ -944,6 +949,11 @@ async function main() {
   }
 
   const approvedDeals = loadApprovedDeals();
+  if (process.argv.includes('--daily-only')) {
+    if (!approvedDeals.length) throw new Error('No approved feed for daily-only selection');
+    await refreshAutomaticDailyDeal(approvedDeals);
+    return;
+  }
   let threadTs = null;
   let picks = { daily: null, weekly: null };
   let threadMessages = [];
@@ -1012,22 +1022,10 @@ async function main() {
     if (pickedDaily?.id) automaticExcludedIds.add(cleanText(pickedDaily.id));
   }
 
-  if (!savedDaily && !(await isExistingFeaturedDealCurrent('daily', approvedDeals))) {
-    const fallbackDaily = await selectAutomaticFeaturedDeal(approvedDeals, {
-      kind: 'daily',
-      excludedIds: automaticExcludedIds,
-      recentDealIds: recentFeaturedDealIds(loadExistingFeaturedDeal('daily'), getViennaDayKey()),
-    });
-    if (fallbackDaily) {
-      console.log(`Automatic daily fallback: ${fallbackDaily.deal.brand} - ${fallbackDaily.deal.title}`);
-      saveDealOfTheDay(fallbackDaily.deal, { manualPick: false });
-      savedDaily = true;
-      if (fallbackDaily.deal.id) automaticExcludedIds.add(cleanText(fallbackDaily.deal.id));
-    } else {
-      console.log('No approved live deal available for automatic daily fallback');
-    }
-  } else if (!savedDaily) {
-    console.log('Existing daily featured deal is current and approved');
+  if (!savedDaily) {
+    const selected = await refreshAutomaticDailyDeal(approvedDeals);
+    savedDaily = Boolean(selected);
+    if (selected) automaticExcludedIds.add(selected);
   }
 
   if (!savedWeekly && !(await isExistingFeaturedDealCurrent('weekly', approvedDeals))) {
@@ -1054,6 +1052,41 @@ async function main() {
   console.log('Done!');
 }
 
+async function resolveDailyFeaturedSelection(approvedDeals, existing, now = new Date()) {
+    const today = getViennaDayKey(now);
+    const currentId = existing?.date === today ? existing.dealId : '';
+    const current = currentId && approvedDeals.find(deal => deal.id === currentId);
+    if (existing?.manualPick && current && (await getFeaturedDealEligibility(current, 'daily', { now })).eligible) {
+        return { deal: current, preserve: true };
+    }
+    const strongest = await selectAutomaticFeaturedDeal(approvedDeals, {
+        kind: 'daily', now, currentId, recentDealIds: recentFeaturedDealIds(existing, today),
+    });
+    return strongest && { ...strongest, preserve: !existing?.manualPick && strongest.deal.id === currentId
+        && existing?.selectionReason === 'automatic-strongest-verified' };
+}
+
+async function refreshAutomaticDailyDeal(approvedDeals) {
+    const existing = loadExistingFeaturedDeal('daily');
+    const now = new Date();
+    const selected = await resolveDailyFeaturedSelection(approvedDeals, existing, now);
+    if (!selected) {
+        if (existing?.date === getViennaDayKey(now) && existing.dealId) {
+            const output = { date: existing.date, dealId: '', manualPick: false, selectionReason: 'no-verified-daily-deal',
+                selectionHistory: featuredSelectionHistory(existing, {}, existing.date) };
+            fs.writeFileSync(path.join(__dirname, '..', 'docs', 'deal-of-the-day.json'), JSON.stringify(output, null, 2));
+        }
+        console.log('No verified live deal available for automatic daily selection');
+        return '';
+    }
+    if (selected.preserve) syncExistingFeaturedDeal('daily', existing, selected.deal);
+    else {
+        console.log(`Strongest verified daily deal (${selected.value}): ${selected.deal.brand} - ${selected.deal.title}`);
+        saveDealOfTheDay(selected.deal, { manualPick: false, now });
+    }
+    return selected.deal.id;
+}
+
 // Replayed digest replies must not replace a newer manual selection.
 function shouldPreserveManualPick(current, incomingPickedAt) {
     if (!current?.manualPick) return false;
@@ -1070,6 +1103,7 @@ export {
     isFeaturedDealStillLive,
     isFoodDrinkDeal,
     normalizeFeaturedDeal,
+    resolveDailyFeaturedSelection,
     selectAutomaticFeaturedDeal,
 };
 
