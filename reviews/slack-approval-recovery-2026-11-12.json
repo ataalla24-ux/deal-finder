@@ -1,0 +1,53 @@
+{
+  "reviewDate": "2026-11-12",
+  "scope": "Repair existing human-approved Slack drafts; approval remains mandatory.",
+  "testRepair": "Copy the required reviewed restaurant coupon catalogue into the isolated approval test. All existing assertions remain unchanged.",
+  "edits": [
+    {
+      "dealId": "meta-ig-18109832677961158",
+      "title": "Gratis Semmel-Döner für Follower am 14.11.",
+      "brand": "MAMPF",
+      "description": "Am 14. November 2026 von 12:00 bis 15:00 Uhr gibt es bei MAMPF einen Semmel-Döner gratis. Voraussetzung: Auf Instagram sowohl @mampfwien als auch @robert_erobert folgen. Adresse: Hellwagstraße 7, 1200 Wien.",
+      "distance": "Hellwagstraße 7, 1200 Wien",
+      "url": "https://www.instagram.com/reel/DfjnFpnIN5i/",
+      "validityText": "14.11.2026, 12:00 bis 14.11.2026, 15:00 Uhr"
+    },
+    {
+      "dealId": "meta-ig-17871407427661669",
+      "title": "Konditorkrapfen: 4+1 gratis",
+      "brand": "AIDA",
+      "description": "Beim Kauf von 4 Konditorkrapfen gibt es 1 Krapfen gratis; beim Kauf von 8 gibt es 2 gratis und beim Kauf von 16 gibt es 4 gratis. Täglich frisch aus der Wiener Konditorei und nur solange der Vorrat reicht. Größere Mengen bitte vorbestellen. Der offizielle Beitrag vom 11.11.2026 kündigt den Faschingsbeginn an, nennt aber kein Enddatum der Krapfenaktion. In den Wiener AIDA-Filialen, unter anderem Singerstraße 1, 1010 Wien.",
+      "distance": "Wiener AIDA-Filialen",
+      "url": "https://www.instagram.com/p/DfmOdD-MGGT/",
+      "validityText": "Täglich, solange der Vorrat reicht; kein Enddatum angegeben"
+    },
+    {
+      "dealId": "fc4g-vqsqje",
+      "title": "Frühstück für 1 € (Fr–Sa bis 10:30 Uhr)",
+      "brand": "IKEA Wien Nord",
+      "description": "Frühstück für 1 € statt 2,99 € im Restaurant von IKEA Wien Nord. Jeden Freitag und Samstag von Restaurantöffnung bis 10:30 Uhr, verlängert bis 02.01.2027. Nur solange der Vorrat reicht und nicht mit anderen Aktionen kombinierbar. Adresse: Sverigestraße 1A, 1220 Wien. Abweichende Feiertagsöffnungszeiten beachten.",
+      "distance": "Sverigestraße 1A, 1220 Wien",
+      "url": "https://www.ikea.com/at/de/stores/wien-nord/",
+      "expires": "2027-01-02"
+    },
+    {
+      "dealId": "meta-ig-17977851744156986",
+      "title": "Gratis Kaffee-Tasting mit Reservierung",
+      "brand": "Villa Vida Café",
+      "description": "Women & Coffee: Am Samstag, 21.11.2026, von 11:00 bis 13:00 Uhr sechs Spezialitätenkaffees gemeinsam mit Stefanny Ariza von Not Regular Coffee verkosten. Keine Vorkenntnisse nötig. Kostenlos, begrenzte Plätze; bitte vorab unter https://villavida.at/reserve reservieren. Villa Vida Café, Linke Wienzeile 102, 1060 Wien.",
+      "distance": "Linke Wienzeile 102, 1060 Wien",
+      "url": "https://www.instagram.com/p/DfmtMyGuGVB/",
+      "validityText": "21.11.2026, 11:00 bis 21.11.2026, 13:00 Uhr"
+    }
+  ],
+  "sources": [
+    {"url":"https://www.instagram.com/reel/DfjnFpnIN5i/","observed":"Original reel coauthored by robert_erobert and mampfwien, location MAMPF Cafe-Restaurant; exact 14.11.2026 12:00-15:00 and both-follow requirement."},
+    {"url":"https://www.instagram.com/mampfwien/","observed":"Merchant profile states Hellwagstraße 7, 1200 Wien and displays the same collaboration reel."},
+    {"url":"https://www.instagram.com/p/DfmOdD-MGGT/","observed":"Original AIDA artwork visually checked: daily fresh Konditorkrapfen, 4+1 / 8+2 / 16+4, only while stocks last. No expiry date. Caption date 11.11.2026 denotes Faschingsauftakt, not end of offer."},
+    {"url":"https://aida.at/location/","observed":"Official branch locator; public get_locations endpoint supplies addresses and coordinates. Exclude airport and non-Vienna branches."},
+    {"url":"https://www.ikea.com/at/de/stores/wien-nord/","observed":"Current exact breakfast block confirms 1 EUR instead of 2.99, Fri/Sat until 10:30, extended until 02.01.2027, stocks and combination exclusions; official address Sverigestraße 1A."},
+    {"url":"https://www.instagram.com/p/DfmtMyGuGVB/","observed":"Current original merchant caption and saved Graph evidence: six specialty coffees, 21 November 2026 11:00-13:00, free, reservation, Linke Wienzeile 102."},
+    {"url":"https://www.gutscheine.at/converse","observed":"Live source still lists approved Singles Day 40% selected styles, valid to 02.12.2026. Existing candidate left unchanged."}
+  ],
+  "constraints": ["No new approval reactions", "No paid scraper, model or provider calls", "No native app changes", "No source evidence deletion", "Only these existing drafts are edited"]
+}
