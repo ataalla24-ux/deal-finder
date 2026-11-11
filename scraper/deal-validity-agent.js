@@ -2,6 +2,7 @@ import { verifyOfficialFoodDeal } from './power-food-verification.js';
 import { verifyViennaFoodBenefit } from './vienna-food-benefits.js';
 import { verifyCarrierBenefit } from './carrier-benefits.js';
 import { hasFreshActiveAdEvidence } from './meta-ad-library-coverage.js';
+import { currentOriginalOffer } from './current-original-offer.js';
 import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
@@ -1112,6 +1113,7 @@ async function validateDeal(deal, context) {
   const recurring = hasRecurringSchedule(deal, expiryCandidates);
   const activeValidity = hasActiveExplicitValidity(deal, expiry, now);
   const freshlyActiveAd = hasFreshActiveAdEvidence(deal, now);
+  const currentOriginal = currentOriginalOffer(deal, now);
   const publicationCandidates = getPublicationCandidates(deal, health, {
     freshnessSensitive,
     ignoreUrlPublicationDate: sharedBenefitPageDeal || officialFood?.current === true,
@@ -1135,16 +1137,16 @@ async function validateDeal(deal, context) {
   const freshness = getFreshnessDecision(publicationCandidates, freshnessMaxAgeDays, now, {
     // Crawler run timestamps are ignored, but an official non-social offer
     // page may legitimately have no publication date. Scraped social posts
-    // still need a recent platform timestamp.
+    // still need a real platform timestamp, with a narrow current-original exception.
     requireDate: socialPostDeal || newsAggregatorDeal,
     socialPost: socialPostDeal,
     // A human-reviewed community offer with a concrete calendar window does
     // not need a platform post timestamp. Old dated social posts stay blocked.
     activeValidity: socialPostDeal
-      ? freshlyActiveAd || reviewedCommunity && !publicationCandidates.length && activeValidity
+      ? freshlyActiveAd || Boolean(currentOriginal) || reviewedCommunity && !publicationCandidates.length && activeValidity
       : activeValidity,
     recurring: socialPostDeal ? false : recurring,
-    extendedMaxAgeDays: freshlyActiveAd ? 365 : context.extendedMaxAgeDays,
+    extendedMaxAgeDays: freshlyActiveAd ? 365 : currentOriginal ? 90 : context.extendedMaxAgeDays,
   });
   const relativeOffer = getRelativeOfferDecision(deal, freshness.selected, now, {
     activeValidity,
@@ -1154,6 +1156,9 @@ async function validateDeal(deal, context) {
   let offer = getConcreteOfferDecision(deal, health);
   if (officialFood?.ok && offer.reason === 'kein konkretes Angebot erkennbar') offer = { concrete: true };
   const reasons = [];
+  if (deal.originSource === 'vienna-merchant-website' && !expiryCandidates.length && !recurring) {
+    reasons.push('Aktionszeitraum auf Lokal-Website unklar');
+  }
   if (couponRound && !roundMatchesDeal) reasons.push('Ablaufdatum passt nicht zur aktuellen Couponrunde der Quelle');
   const discoveryPolicy = discoveryRejection(deal);
   if (discoveryPolicy) reasons.push(`Entdeckungsfilter (${discoveryPolicy})`);
@@ -1164,6 +1169,7 @@ async function validateDeal(deal, context) {
     if (metaNonOffer) reasons.push(`Kein konkreter Meta-Deal (${metaNonOffer})`);
   }
   const warnings = [];
+  if (currentOriginal && currentOriginal.ageDays > 7) warnings.push('Älterer Originalpost: konkretes Aktionsende mit Jahr frisch über Graph bestätigt; keine automatische Freigabe');
   if (freshlyActiveAd) warnings.push('Aktive Meta-Anzeige frisch durch Meta bestätigt; Kampagnenstart bleibt unverändert, Ablauf und relative Aktionsdaten werden separat geprüft');
   if (reviewedCommunity && deal.communityApprovalIssue) reasons.push(deal.communityApprovalIssue);
   if (officialFood && !officialFood.ok) reasons.push(`Offizielle Aktion nicht erneut bestätigt (${officialFood.reason})`);
@@ -1171,7 +1177,7 @@ async function validateDeal(deal, context) {
   if (officialFood?.ok && deal.evidence?.media) warnings.push('Lokale Coupon-OCR: Produkt, Mengen, Bedingungen und Wiener Filialteilnahme am verlinkten Original vor Freigabe prüfen; kein garantierter OCR-Preis');
 
   const graphBlockingReason = cleanText(deal.metaGraphBlockingReason);
-  if (graphBlockingReason) {
+  if (graphBlockingReason && !(graphBlockingReason === 'post-too-old' && currentOriginal)) {
     reasons.push(`Meta-Graph-Widerspruch (${graphBlockingReason})`);
   }
 

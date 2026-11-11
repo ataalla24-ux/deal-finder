@@ -1,5 +1,6 @@
 import fs from 'node:fs';
 import path from 'node:path';
+import { currentOriginalOffer, graphOriginalRecord } from './current-original-offer.js';
 
 import {
   canonicalInstagramPostKey,
@@ -114,7 +115,7 @@ export function graphPostEvidenceFromEntry(entry, outcome = {}, now = new Date()
   const rejection = cleanText(outcome?.rejection, 100);
   const ageMs = now.getTime() - Date.parse(sourcePublishedAt);
   const blockingReason = HARD_BLOCKING_REASONS.has(rejection)
-    && (rejection !== 'post-too-old' || ageMs > 7 * DAY_MS)
+    && (rejection !== 'post-too-old' || ageMs > 7 * DAY_MS && !currentOriginalOffer(graphOriginalRecord(item, entry?.context, now), now))
       ? rejection
       : '';
   const sourceType = cleanText(entry?.context?.sourceType, 40);
@@ -127,6 +128,8 @@ export function graphPostEvidenceFromEntry(entry, outcome = {}, now = new Date()
     url,
     mediaId: cleanText(item.id, 160),
     ownerUsername: username,
+    sourceAccountType: account.accountType || '',
+    isRepost: item.is_repost === true,
     sourcePublishedAt,
     sourcePublishedAtSource: 'instagram-graph-timestamp',
     mediaType: cleanText(item.media_type, 40),
@@ -151,7 +154,7 @@ function mergePostEvidence(previous, next) {
     ...older,
     ...newest,
     ownerUsername: newest.ownerUsername || older.ownerUsername,
-    caption: newest.caption || older.caption,
+    caption: newest.caption,
     ocrText: newest.ocrText || older.ocrText,
     sourceTypes: [...new Set([...(older.sourceTypes || []), ...(newest.sourceTypes || [])])],
     sourceNames: [...new Set([...(older.sourceNames || []), ...(newest.sourceNames || [])])],
@@ -164,10 +167,13 @@ export function buildInstagramGraphEvidencePayload(entries = [], options = {}) {
   const cutoff = now.getTime() - retentionDays * DAY_MS;
   const previousPosts = Array.isArray(options.previous?.posts) ? options.previous.posts : [];
   const byKey = new Map();
+  const freshWithdrawal = post => post?.blockingReason === 'current-original-offer-unconfirmed'
+    && Date.parse(post.verifiedAt) >= +now - 36 * 3600000 && Date.parse(post.verifiedAt) <= +now;
 
   for (const post of previousPosts) {
     const timestamp = Date.parse(post?.sourcePublishedAt || '');
-    if (!post?.postKey || !Number.isFinite(timestamp) || timestamp < cutoff) continue;
+    if (!post?.postKey || !Number.isFinite(timestamp)
+      || timestamp < cutoff && !currentOriginalOffer(originalFromPost(post), now) && !freshWithdrawal(post)) continue;
     byKey.set(post.postKey, post);
   }
 
@@ -177,7 +183,14 @@ export function buildInstagramGraphEvidencePayload(entries = [], options = {}) {
       : graphPostEvidenceFromEntry(value?.entry || value, value?.outcome || {}, now);
     if (!post?.postKey) continue;
     const timestamp = Date.parse(post.sourcePublishedAt || '');
-    if (!Number.isFinite(timestamp) || timestamp < cutoff || timestamp > now.getTime() + 10 * 60 * 1000) continue;
+    if (!Number.isFinite(timestamp) || timestamp > now.getTime() + 10 * 60 * 1000) continue;
+    if (timestamp < cutoff && !currentOriginalOffer(originalFromPost(post), now)) {
+      const previous = byKey.get(post.postKey);
+      if (previous && Date.parse(post.verifiedAt) >= Date.parse(previous.verifiedAt)) {
+        byKey.set(post.postKey, { ...post, blockingReason: 'current-original-offer-unconfirmed' });
+      }
+      continue;
+    }
     byKey.set(post.postKey, mergePostEvidence(byKey.get(post.postKey), post));
   }
 
@@ -201,6 +214,13 @@ export function loadInstagramGraphEvidence(filePath = DEFAULT_EVIDENCE_PATH) {
     payload,
     byKey: new Map(posts.filter((post) => post?.postKey).map((post) => [post.postKey, post])),
   };
+}
+
+function originalFromPost(post) {
+  return { url: post.url, sourcePublishedAt: post.sourcePublishedAt,
+    sourcePublishedAtSource: post.sourcePublishedAtSource, metaGraphVerified: true,
+    metaGraphVerifiedAt: post.verifiedAt, metaGraphMediaId: post.mediaId,
+    metaGraphCaption: post.caption, sourceAccountType: post.sourceAccountType, isRepost: post.isRepost };
 }
 
 export function writeInstagramGraphEvidence(payload, filePath = DEFAULT_EVIDENCE_PATH) {
@@ -245,11 +265,14 @@ export function enrichDealWithInstagramGraphEvidence(deal = {}, evidenceIndex, o
   enriched.metaGraphAccepted = post.graphAccepted;
   enriched.metaGraphRejection = post.graphRejection;
   enriched.metaGraphBlockingReason = post.blockingReason;
+  enriched.sourceAccountType = post.sourceAccountType || enriched.sourceAccountType;
+  enriched.metaGraphIsRepost = post.isRepost === true;
+  if (post.blockingReason === 'post-too-old' && currentOriginalOffer(enriched, options.now || new Date())) enriched.metaGraphBlockingReason = '';
   enriched.evidenceSources = [...new Set([
     ...(Array.isArray(enriched.evidenceSources) ? enriched.evidenceSources : []),
     'Meta Instagram Graph Evidence',
   ])];
-  return { deal: enriched, matched: true, blocked: Boolean(post.blockingReason), evidence: post };
+  return { deal: enriched, matched: true, blocked: Boolean(enriched.metaGraphBlockingReason), evidence: post };
 }
 
 export function candidateIsFreshForGraph(deal, now = new Date(), maxAgeDays = 7) {

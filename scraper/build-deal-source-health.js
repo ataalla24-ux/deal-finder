@@ -1,4 +1,5 @@
 import '../sentry/instrument.mjs';
+import { discoveryAvailability } from './discovery-availability.js';
 import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
@@ -54,6 +55,7 @@ const SOURCE_LABEL_OVERRIDES = {
   power: 'Power Scraper',
   tiktok: 'TikTok Scanner',
   'vienna-promo-radar': 'Vienna Promo Radar',
+  'vienna-websites': 'Wiener Lokal-Angebotsseiten',
   'wien-combined': 'Wien Deals Combined Graph',
 };
 
@@ -561,6 +563,9 @@ async function main() {
 
   const healthReport = {
     generatedAt: new Date(now).toISOString(),
+    discoveryAvailability: discoveryAvailability(
+      readJson(path.join(DOCS_DIR, 'instagram-ai-report.json'), {}) || {},
+      readJson(path.join(DOCS_DIR, 'tiktok-scanner-report.json'), {}) || {}, new Date(now)),
     summary: {
       filesConsidered: allPendingFiles.length,
       totalCandidates: candidates.length,

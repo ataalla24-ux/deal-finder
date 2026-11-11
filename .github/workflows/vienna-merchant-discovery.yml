@@ -21,7 +21,9 @@ jobs:
       - name: Test directory isolation and source safety
         env:
           SENTRY_DISABLED: '1'
-        run: node scripts/test-vienna-merchant-discovery.mjs
+        run: |
+          node scripts/test-vienna-merchant-discovery.mjs
+          node scripts/test-discovery-recall.mjs
       - name: Refresh directory and rotate website discovery
         env:
           VIENNA_WEBSITE_BUDGET: '200'
@@ -33,4 +35,6 @@ jobs:
           --files reviews/vienna-merchant-directory.json
           reviews/vienna-merchant-website-state.json
           reviews/vienna-merchant-discovery-report.json
+          reviews/vienna-merchant-offer-state.json
+          docs/deals-pending-vienna-websites.json
           docs/vienna-discovery-accounts.json

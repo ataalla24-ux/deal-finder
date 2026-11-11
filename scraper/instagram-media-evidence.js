@@ -3,6 +3,7 @@ import fs from 'node:fs/promises';
 import os from 'node:os';
 import path from 'node:path';
 import { promisify } from 'node:util';
+import { createHash } from 'node:crypto';
 import { extractLowFoodPrice, isFoodDrinkSource } from './food-discovery-utils.js';
 import { mergeMediaBacklog, saveMediaBacklog } from './instagram-media-backlog.js';
 import { extractActiveOfferWindow } from './instagram-ai-validity-utils.js';
@@ -654,6 +655,19 @@ export function entryMediaPriority(entry, now) {
   return score;
 }
 
+export function mediaContentKey(item) {
+  const assets = extractInstagramMediaAssets(item).map(asset => asset.url);
+  return createHash('sha256').update(JSON.stringify([item.id, item.timestamp, item.caption, assets])).digest('hex');
+}
+
+export function reusableOcrEvidence(cached, item, now) {
+  const capturedAt = finiteDateMs(cached?.ocrAnalyzedAt || cached?.analyzedAt);
+  return cached?.contentKey === mediaContentKey(item)
+    && Number(cached.visionImageCount || 0) === 0
+    && Boolean(cleanText(cached.ocrText)) && !(cached.errors || []).length && !(cached.warnings || []).length
+    && capturedAt >= +now - DAY_MS && capturedAt <= +now;
+}
+
 function pruneMediaCache(cache, now, ttlDays) {
   const cutoff = now.getTime() - ttlDays * DAY_MS;
   return Object.fromEntries(Object.entries(cache || {})
@@ -749,6 +763,8 @@ export async function enrichInstagramGraphMedia(entries, config, now = new Date(
 
   const maxAgeMs = config.maxOrganicAgeWithExpiryDays * DAY_MS;
   const uncached = [];
+  const reusableOcr = new Map();
+  report.ocrReused = 0;
   const uniqueEntries = new Map();
   for (const entry of safeEntries) {
     const id = mediaId(entry?.item);
@@ -768,6 +784,7 @@ export async function enrichInstagramGraphMedia(entries, config, now = new Date(
     const ocrRetryDue = cached && !cached.ai?.isDeal && (cached.warnings || []).some((warning) => /tesseract timeout/i.test(warning))
       && now.getTime() - finiteDateMs(cached.analyzedAt) >= 6 * 60 * 60 * 1000;
     if (cached && (retryableMediaEvidence(cached) || aiRetryDue || ocrRetryDue)) {
+      if (!visionConfigured && aiRetryDue && !ocrRetryDue && reusableOcrEvidence(cached, entry.item, now)) reusableOcr.set(id, cached);
       delete cache[id];
       report.retriedCacheEntries += 1;
     } else if (cached) {
@@ -802,6 +819,12 @@ export async function enrichInstagramGraphMedia(entries, config, now = new Date(
     if (Date.now() >= deadline) { report.runtimeDeferred += 1; return null; }
     const itemStartedAt = Date.now();
     try {
+      const savedOcr = reusableOcr.get(mediaId(entry.item));
+      if (savedOcr) {
+        report.ocrReused += 1;
+        return { ...savedOcr, ocrAnalyzedAt: savedOcr.ocrAnalyzedAt || savedOcr.analyzedAt,
+          visionImages: [], downloadAttempts: 0, downloadRetries: 0 };
+      }
       const analyze = () => analyzeItem(entry.item, { ...config, mediaVisionEnabled: visionConfigured }, {
         tools,
         fetchImpl: options.mediaFetchImpl,
@@ -851,6 +874,8 @@ export async function enrichInstagramGraphMedia(entries, config, now = new Date(
       .slice(0, config.mediaVisionMaxImagesPerPost || 3);
     const evidence = {
       analyzedAt: now.toISOString(),
+      ocrAnalyzedAt: result.ocrAnalyzedAt || now.toISOString(),
+      contentKey: mediaContentKey(entry.item),
       ocrText: cleanText(result.ocrText, config.mediaOcrMaxTextChars),
       visionImageCount: visionImages.length,
       assetCount: Number(result.assetCount || 0),

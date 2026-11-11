@@ -26,8 +26,10 @@ Suche gezielt nach:
 - Kostenlose Freebies
 - Neueröffnungen mit Gratis-Aktionen
 - Starke Rabatte allgemein
+- Auch kleinere belegte Vorteile: z.B. 10–30 % Rabatt, 1+1, ermäßigte Mittagsmenüs, Kombiaktionen und Kundenkarten-Angebote mit konkreter Ersparnis. 50 % und 3 € sind Prioritäten, KEINE Mindestschwellen.
+- Ältere Originalangebote mit ausdrücklich belegter, heute noch gültiger Aktion; Postdatum unverändert lassen. Reposts, bloß vermutete Verlängerungen und abgelaufene Aktionen nicht als aktuell melden.
 
-Suche primär auf Instagram nach den ersten 50-100 Deals und ergänze diese durch Funde aus dem restlichen Web, insbesondere Gutschein.at, Preisjaeger.at, Marktguru, Sparhamster, Wolt, Lieferando sowie direkte Restaurant- und Markenwebseiten.
+Suche innerhalb des vorhandenen Abrufkontingents auf Instagram und auf direkten Restaurant- und Marken-Angebotsseiten; ergänze belegte Funde aus Gutschein.at, Preisjaeger.at, Marktguru, Sparhamster, Wolt und Lieferando. Keine normale Speisekarte ohne Aktionsvorteil, Alkoholangebote oder Geschäftskundenwerbung. Liefere nur tatsächlich belegte Treffer, keine Zielanzahl auffüllen.
 
 Erfasse für jeden Deal:
 - Den genauen Namen des Restaurants/Geschäfts/Unternehmens (brand_or_store - NICHT die Website-Domain!)

@@ -1,4 +1,5 @@
 import { officialFoodOfferKey } from './power-food-sources.js';
+import { isMerchantWebsiteReview } from './merchant-offer-discovery.js';
 import { polishOfferTitle } from './offer-title-utils.js';
 import { carrierBenefitPostKey } from './carrier-benefits.js';
 import { normalizeCategoryForScraper } from './category-utils.js';
@@ -919,7 +920,7 @@ function buildSlackMessage(deal, index, mapContext = loadDealMapReviewContext())
 }
 
 function buildFirecrawlReviewMessage(deal, index, mapContext) {
-  return buildSlackMessage(deal, index, mapContext).replace(
+  return '*Prüfkandidat – Angaben noch unvollständig, nicht live*\n' + buildSlackMessage(deal, index, mapContext).replace(
     '_Mit ✅ freigeben_',
     '_Review: Link prüfen. Wenn der Deal aktuell ist, Datum/Ablauf/Ort mit `edit` belegen und erst danach ✅ setzen._',
   );
@@ -1440,11 +1441,16 @@ function selectFirecrawlReviewDeals(results, options = {}) {
   const candidates = [];
 
   for (const result of ensureArray(results)) {
-    if (result?.decision?.allowed || !isFirecrawlReviewSource(result?.deal)) continue;
+    const websiteReview = isMerchantWebsiteReview(result?.deal, options.now || new Date());
+    if (result?.decision?.allowed || !isFirecrawlReviewSource(result?.deal) && !websiteReview) continue;
     const reasons = ensureArray(result?.decision?.reasons).map(cleanText).filter(Boolean);
     if (reasons.length === 0) continue;
-    if (reasons.some((reason) => FIRECRAWL_REVIEW_HARD_REASON_PATTERN.test(reason))) continue;
-    if (reasons.some((reason) => !FIRECRAWL_REVIEW_SOFT_REASON_PATTERN.test(reason))) continue;
+    if (websiteReview) {
+      if (reasons.some(reason => !/^(?:nicht eindeutig in Wien|Aktionszeitraum auf Lokal-Website unklar)$/i.test(reason))) continue;
+    } else {
+      if (reasons.some((reason) => FIRECRAWL_REVIEW_HARD_REASON_PATTERN.test(reason))) continue;
+      if (reasons.some((reason) => !FIRECRAWL_REVIEW_SOFT_REASON_PATTERN.test(reason))) continue;
+    }
 
     const sourceAgeRaw = result?.decision?.sourceAgeDays;
     const sourceAgeDays = sourceAgeRaw === null || sourceAgeRaw === undefined || sourceAgeRaw === ''
@@ -1891,6 +1897,7 @@ async function main() {
   const blockedSummary = formatReasonCategoryCounts(validation.summary.reasonCategoryCounts);
   const validityFirecrawlReview = FIRECRAWL_REVIEW_ENABLED
     ? selectFirecrawlReviewDeals(validation.results, {
+        now: runNow,
         maxPerSource: FIRECRAWL_REVIEW_MAX_PER_SOURCE,
         maxTotal: FIRECRAWL_REVIEW_MAX_TOTAL,
         maxAgeDays: FIRECRAWL_REVIEW_MAX_AGE_DAYS,
@@ -2015,7 +2022,7 @@ async function main() {
     const headerTs = await postSlackMessage(
       `🎯 *FreeFinder Wien* — Versand laeuft (${freshDeals.length} Deals vorgesehen)\n` +
       `🆓 ${freeCount} gratis | 💰 ${freshDeals.length - freeCount} rabatt/test\n` +
-      `🧪 Gültigkeitscheck: ${validation.summary.allowed}/${validation.summary.total} freigegeben | ${validation.summary.blocked} blockiert (max. ${validation.summary.maxAgeDays} Tage)\n` +
+      `🧪 Gültigkeitscheck: ${validation.summary.allowed}/${validation.summary.total} prüfbar | ${validation.summary.blocked} blockiert; ältere Originalaktionen nur mit frischem Gültigkeitsbeleg\n` +
       `Manuelle Community-Einreichungen: ${communityReviewDeals.length} (ungeprüft; Quelle, Angebot, Ort und Datum prüfen)\n` +
       (blockedSummary ? `🚫 Blockiert: ${blockedSummary}\n` : '') +
       `_Jeden Deal mit ✅ bestätigen oder mit ❌ ablehnen. Nur ✅ kann ihn in die iOS-App bringen._\n` +
@@ -2065,9 +2072,9 @@ async function main() {
       .map(([source, count]) => `${source.replace(/^Firecrawl\s*/i, '')}: ${count}`)
       .join(' | ');
     const reviewHeaderTs = await postSlackMessage(
-      `🔎 *FreeFinder Wien – Firecrawl Review* — Versand laeuft (${firecrawlReviewDeals.length} Kandidaten vorgesehen)\n` +
+      `🔎 *FreeFinder Wien – Quellenprüfung* — Versand laeuft (${firecrawlReviewDeals.length} Kandidaten vorgesehen)\n` +
       `📦 ${reviewSources || 'Firecrawl'}\n` +
-      `🛡️ Key4-markierte Reviews sowie weiche Zweifelsfälle: Originalbeleg, Wien-Nachweis, Datum oder Dealtext prüfen.\n` +
+      `🛡️ Noch nicht freigabefertig: Originalbeleg, Wien-Nachweis, Datum oder Dealtext prüfen. Lokal-Websites können einen Wiener Verzeichniseintrag haben, aber noch keinen belegten Einlösestandort.\n` +
       `_Eindeutig abgelaufene, Nicht-Wien-, Gewinnspiel-, ungültige und ausgeschlossene Quellen bleiben blockiert._\n` +
       `_Link prüfen; bei aktuellem Deal zuerst Datum/Ablauf/Ort mit \`edit\` belegen und danach ✅ setzen._`,
     );

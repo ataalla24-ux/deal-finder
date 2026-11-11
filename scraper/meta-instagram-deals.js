@@ -1,4 +1,5 @@
 import { sharedInstagramFetch } from './instagram-shared-quota.js';
+import { currentOriginalOffer, graphOriginalRecord } from './current-original-offer.js';
 import { modelForTask } from './ai-credit-budget.js';
 import { scanAdLibraryCoverage, hasFreshActiveAdEvidence, isAdPayloadTooLarge, smallerAdPageSize } from './meta-ad-library-coverage.js';
 import { selectDiscoveryAccounts } from './vienna-merchant-discovery.js';
@@ -1182,7 +1183,9 @@ export function normalizeGraphMediaItem(raw, context, config, now = new Date()) 
   const expiry = expiryFromText(contentText, now, '', config.unknownExpiryTtlHours, sourcePublishedAt);
   const expiryRejection = explicitExpiryRejection(expiry, now);
   if (expiryRejection) return { deal: null, rejection: expiryRejection };
-  if (!isOrganicFresh(sourcePublishedAt, expiry, now, config)) return { deal: null, rejection: 'post-too-old' };
+  const originalRecord = graphOriginalRecord(raw, context, now);
+  if (!isOrganicFresh(sourcePublishedAt, expiry, now, config)
+    && !currentOriginalOffer({ ...originalRecord, validUntil: expiry.validUntil }, now)) return { deal: null, rejection: 'post-too-old' };
 
   const url = cleanText(raw?.permalink, 1000);
   if (!/^https?:\/\/(?:www\.)?instagram\.com\/(?:p|reel|tv)\//i.test(url)) {
@@ -1254,6 +1257,7 @@ export function normalizeGraphMediaItem(raw, context, config, now = new Date()) 
     },
   });
   deal.promotionEvidence = promotion.evidence;
+  if (+now - Date.parse(sourcePublishedAt) > 7 * DAY_MS) Object.assign(deal, originalRecord);
   if (promotion.lowPrice) { deal.offerKind = promotion.offerKind; deal.priceEvidence = promotion.lowPrice; }
   if (username) deal.ownerUsername = username;
   deal.sourceAccountType = entities.ownerRole;
@@ -2109,7 +2113,7 @@ export function retainMetaOutbox(current, previous, now = new Date(), rejectedId
     if (deal.originSource === 'Meta Ad Library API') return hasFreshActiveAdEvidence(deal, now) && !getAdFoodBenefitRejection(text);
     const published = Date.parse(deal.sourcePublishedAt || deal.pubDate || '');
     return /^meta-ig-/.test(deal.id) && Number.isFinite(published)
-      && published <= +now && +now - published <= 7 * DAY_MS;
+      && published <= +now && (+now - published <= 7 * DAY_MS || Boolean(currentOriginalOffer(deal, now)));
   });
   // New evidence wins. The dispatcher still validates every row and records
   // successful delivery separately; merely reading a post is not delivery.

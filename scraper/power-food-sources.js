@@ -257,6 +257,18 @@ export function isAllowedFoodUrl(value, source) {
 // Multi-offer merchant pages need offer-level keys throughout the queue.
 // Social-post and legacy collector deduplication remain unchanged.
 export function officialFoodOfferKey(deal) {
+  if (deal?.originSource === 'vienna-merchant-website'
+    && /^merchant-web-[a-f0-9]{20}$/.test(deal.id || '')
+    && deal.evidence?.source === 'official-merchant-page'
+    && deal.evidence?.sourceUrl === deal.url) {
+    try {
+      const url = new URL(deal.url);
+      const website = new URL(deal.evidence.directoryLead.website);
+      if (url.protocol === 'https:' && url.origin === website.origin && !url.username && !url.password && !url.port) {
+        return `official-food:merchant-website:${url.hostname}|${deal.id}`;
+      }
+    } catch { return ''; }
+  }
   if (
     deal?.originSource !== "power-official-food" ||
     !/^power-food-[a-f0-9]{12}$/.test(deal.id || "")

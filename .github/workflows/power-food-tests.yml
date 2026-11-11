@@ -2,6 +2,13 @@ name: Power Food Discovery Tests
 on:
   pull_request:
     paths:
+      - "scraper/*discovery*.js"
+      - "scraper/current-original-offer.js"
+      - "scraper/instagram-graph-evidence.js"
+      - "scraper/instagram-media-evidence.js"
+      - "scripts/discover-vienna-merchants.mjs"
+      - "scripts/test-discovery-recall.mjs"
+      - ".github/workflows/vienna-merchant-discovery.yml"
       - "scraper/vienna-food-benefits.js"
       - "scraper/member-benefits-scraper.js"
       - "scripts/test-vienna-food-benefits.mjs"
@@ -40,6 +47,13 @@ on:
   push:
     branches: [main]
     paths:
+      - "scraper/*discovery*.js"
+      - "scraper/current-original-offer.js"
+      - "scraper/instagram-graph-evidence.js"
+      - "scraper/instagram-media-evidence.js"
+      - "scripts/discover-vienna-merchants.mjs"
+      - "scripts/test-discovery-recall.mjs"
+      - ".github/workflows/vienna-merchant-discovery.yml"
       - "scraper/vienna-food-benefits.js"
       - "scraper/member-benefits-scraper.js"
       - "scripts/test-vienna-food-benefits.mjs"
@@ -90,6 +104,8 @@ jobs:
           node-version: "22"
       - run: npm ci
       - run: |
+          node scripts/test-discovery-recall.mjs
+          node scripts/test-vienna-merchant-discovery.mjs
           node --test scripts/test-vienna-food-benefits.mjs
           node --test scripts/test-carrier-benefits.mjs
           node scripts/test-generated-state-merge.mjs
