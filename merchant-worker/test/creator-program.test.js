@@ -267,7 +267,7 @@ test('Google processed partial refunds sum actual cents and full refunds take pr
 });
 
 function apiRequest(action, body = {}, options = {}) {
-  const method = options.method || (['config', 'admin/partners', 'admin/summary'].includes(action) ? 'GET' : 'POST');
+  const method = options.method || (['config', 'admin/partners', 'admin/summary', 'admin/readiness'].includes(action) ? 'GET' : 'POST');
   return new Request('https://fixture.invalid/api/creators/' + action, {
     method, headers: { 'content-type': 'application/json', ...options.headers },
     ...(method === 'GET' ? {} : { body: options.raw ?? JSON.stringify(body) }),
@@ -322,7 +322,7 @@ test('real auth rejects absent bearer and malformed JWT without forwarding to a 
   }
 });
 test('admin routes require exact admin bearer, never account JWT or body principal', async () => {
-  const actions = ['admin/partners', 'admin/summary', 'admin/seed', 'admin/settings', 'admin/partner',
+  const actions = ['admin/partners', 'admin/summary', 'admin/readiness', 'admin/test-apple-notification', 'admin/seed', 'admin/settings', 'admin/partner',
     'admin/reconcile', 'admin/statement', 'admin/paid', 'admin/adjust-refund'];
   for (const action of actions) {
     for (const authorization of ['', 'Bearer fixture-account-jwt', 'Bearer ' + ADMIN + '-suffix']) {
@@ -385,6 +385,17 @@ async function runtime() {
           handleCreatorProgram } from './src/creator-program.js';
         export class FixtureLedger extends CreatorProgramLedger {
           constructor(ctx, env) { super(ctx, {...env}); }
+          async requestAppleTestNotification() {
+            await this.storage.put('fixture:apple-test-requested', true);
+          }
+          async verifyGoogleNotification(body) {
+            const trusted = await this.storage.get('fixture:google-proof');
+            if (!trusted) return super.verifyGoogleNotification(body);
+            if (body.transportAuthorization !== 'Bearer fixture-google-notification') {
+              throw Object.assign(Error('Unverified fixture Google notification'), {status:401});
+            }
+            return trusted;
+          }
           async verifyAppleNotification(body) {
             await this.storage.transaction(async tx => {
               await tx.put('fixture:apple-proof-checks', (await tx.get('fixture:apple-proof-checks') || 0) + 1);
@@ -471,7 +482,7 @@ async function runtime() {
       compatibilityFlags: ['nodejs_compat'], modules: true, script: bundled.outputFiles[0].text,
       durableObjects: { CREATOR_PROGRAM: { className: 'FixtureLedger', useSQLite: true } },
       bindings: { CREATOR_PROGRAM_ENABLED: '1', CREATOR_RECONCILIATION_ENABLED: '1',
-        CREATOR_APPLE_NOTIFICATIONS_ENABLED: '1', MERCHANT_PROMO_ADMIN_SECRET: ADMIN },
+        CREATOR_APPLE_NOTIFICATIONS_ENABLED: '1', CREATOR_GOOGLE_NOTIFICATIONS_ENABLED: '1', MERCHANT_PROMO_ADMIN_SECRET: ADMIN },
       log: new Log(LogLevel.NONE), outboundService: async request => {
         outbound.push(new URL(request.url).host);
         return new Response('External network forbidden by creator-program tests', { status: 599 });
@@ -501,7 +512,7 @@ async function ledger() {
     return data;
   }
   const api = (action, body = {}, expected = 200, options = {}) => request('/api/creators/' + action, body, expected,
-    { method: ['config', 'admin/partners', 'admin/summary'].includes(action) ? 'GET' : 'POST', ...options });
+    { method: ['config', 'admin/partners', 'admin/summary', 'admin/readiness'].includes(action) ? 'GET' : 'POST', ...options });
   const fixture = (op, values = {}, expected = 200) => request('/__fixture', { op, ...values }, expected);
   const call = async (op, args = [], expected = 200) => (await fixture(op, { args }, expected)).result;
   const inspect = () => fixture('inspect');
@@ -1132,12 +1143,12 @@ test('Apple callback handler forwards only signed payload, never client proof, a
   assert.equal(forwarded[0].path, '/apple-notifications');
   assert.deepEqual(forwarded[0].body, { signedPayload: 'fixture-notification-payload' });
 });
-test('readiness requires exact Apple-notification enablement in addition to every financial approval', async () => {
+for (const flag of ['CREATOR_PROGRAM_ENABLED', 'CREATOR_APPLE_NOTIFICATIONS_ENABLED',
+  'CREATOR_GOOGLE_NOTIFICATIONS_ENABLED', 'CREATOR_RECONCILIATION_ENABLED']) {
+test(`readiness requires exact ${flag} enablement in addition to every financial approval`, async () => {
   const l = await ledger(); await l.seed();
   assert.equal(await l.call('ready'), true);
-  for (const patch of [{ unset: ['CREATOR_APPLE_NOTIFICATIONS_ENABLED'] },
-    { values: { CREATOR_APPLE_NOTIFICATIONS_ENABLED: '0' } },
-    { values: { CREATOR_APPLE_NOTIFICATIONS_ENABLED: true } }]) {
+  for (const patch of [{ unset: [flag] }, { values: { [flag]: '0' } }, { values: { [flag]: true } }]) {
     await l.fixture('env', patch);
     assert.equal(await l.call('ready'), false);
     assert.equal((await l.api('config')).enabled, false);
@@ -1145,13 +1156,36 @@ test('readiness requires exact Apple-notification enablement in addition to ever
     await l.api('confirm', { platform: 'ios', transactionId: '100000001' }, 503);
     assert.equal((await l.call('reconcile', [NOW])).checked, 0);
   }
-  await l.fixture('env', { values: { CREATOR_APPLE_NOTIFICATIONS_ENABLED: '1' } });
+  await l.fixture('env', { values: { [flag]: '1' } });
   assert.equal(await l.call('ready'), true);
   assert.equal((await l.api('config')).enabled, true);
   assert.deepEqual((await l.api('admin/partners')).settings, approvals);
   const state = await l.inspect();
   assert.equal(state['fixture:verify-count'], undefined);
   assert.equal(state['fixture:apple-proof-checks'], undefined);
+});
+}
+test('launch report is read-only, secret-free and distinguishes missing partner and global approvals', async () => {
+  const l = await ledger();
+  await l.api('admin/seed');
+  const before = await l.inspect(), report = await l.api('admin/readiness');
+  assert.equal(report.ready, false);
+  assert.deepEqual(report.blockers, ['termsApproved', 'transportReady', 'releasesVerified']);
+  assert.equal(report.partners.length, 5);
+  assert.equal(report.partners.every(p => !p.redeemable), true);
+  assert.ok(report.partners[0].blockers.includes('storeVerified'));
+  assert.ok(report.partners[0].blockers.includes('contractRef'));
+  assert.deepEqual(await l.inspect(), before);
+  assert.equal(report.terms.exampleCommissionCents, 120);
+  assert.equal(report.terms.commissionBasis, 'customer_payment_after_discount_and_refunds');
+  assert.equal(JSON.stringify(report).includes(ADMIN), false);
+  await l.seed();
+  assert.equal((await l.api('admin/readiness')).ready, true);
+  await l.fixture('env', { values: { CREATOR_GOOGLE_NOTIFICATIONS_ENABLED: '0' } });
+  const blocked = await l.api('admin/readiness');
+  assert.equal(blocked.ready, false);
+  assert.deepEqual(blocked.blockers, ['CREATOR_GOOGLE_NOTIFICATIONS_ENABLED']);
+  assert.equal(blocked.partners.every(p => !p.redeemable), true);
 });
 test('unconfigured Apple and Google proof verifiers remain fail-closed with callbacks enabled', async () => {
   const l = await ledger(); await l.seed();
@@ -1217,13 +1251,60 @@ test('disabled Apple callback refuses even a stored trusted proof before verific
 test('verified Apple test notification never creates an ownerless payment or attribution', async () => {
   const l = await ledger();
   await l.fixture('put', { values: { 'fixture:apple-proof': {
-    signedPayload: 'fixture-test-notification', proof: { test: true },
+    signedPayload: 'fixture-test-notification', proof: { test: true, notificationId: 'fixture-test-id' },
   } } });
   const result = await l.api('apple-notifications', { signedPayload: 'fixture-test-notification' }, 200,
     { headers: { authorization: '' } });
   assert.deepEqual(result, { ok: true, test: true, recorded: false });
+  const receipt = (await l.api('admin/readiness')).transportTests.apple;
+  assert.equal(receipt.paymentRecorded, false);
+  assert.equal(receipt.eventHash, await creatorHash('fixture-test-id'));
+  assert.ok(receipt.verifiedAt > 0);
   const state = await l.inspect();
   assert.equal(Object.keys(state).filter(k => k.startsWith('payment:') || k.startsWith('chain:') || k.startsWith('event:')).length, 0);
+});
+test('paused commerce acknowledges unrelated Apple subscriptions but never loses creator events', async () => {
+  const l = await ledger(); await l.seed();
+  await l.fixture('env', { values: { CREATOR_PROGRAM_ENABLED: '0' } });
+  for (const patch of [{ productId: 'unrelated.annual' }, { offerIdentifier: 'normal-monthly' }]) {
+    const trusted = appleNotificationFixture(patch);
+    await l.fixture('put', { values: { 'fixture:apple-proof': trusted } });
+    assert.deepEqual(await l.api('apple-notifications', { signedPayload: trusted.signedPayload }), { ok: true, ignored: true });
+  }
+  const creator = appleNotificationFixture();
+  await l.fixture('put', { values: { 'fixture:apple-proof': creator } });
+  await l.api('apple-notifications', { signedPayload: creator.signedPayload }, 503);
+  const state = await l.inspect();
+  assert.equal(Object.keys(state).filter(k => /^(payment:|chain:|event:|notification-review:)/.test(k)).length, 0);
+});
+test('verified Google test records only one hashed receipt while all commerce remains disabled', async () => {
+  const l = await ledger();
+  await l.fixture('env', { values: { CREATOR_PROGRAM_ENABLED: '0' } });
+  await l.fixture('put', { values: { 'fixture:google-proof': { test: true, messageId: '12345678901' } } });
+  const response = await l.api('google-notifications', { message: { data: 'fixture' } }, 200,
+    { headers: { authorization: 'Bearer fixture-google-notification' } });
+  assert.deepEqual(response, { ok: true, test: true, recorded: false });
+  const report = await l.api('admin/readiness');
+  assert.equal(report.ready, false);
+  assert.equal(report.transportTests.google.eventHash, await creatorHash('12345678901'));
+  await l.api('google-notifications', { message: { data: 'fixture' } }, 401,
+    { headers: { authorization: 'Bearer forged-notification' } });
+  assert.deepEqual((await l.api('admin/readiness')).transportTests, report.transportTests);
+  const state = await l.inspect();
+  assert.equal(Object.keys(state).filter(k => /^(payment:|chain:|event:)/.test(k)).length, 0);
+});
+test('Apple transport probe is admin-only, requires callback flag and is bounded independently of sales', async () => {
+  const l = await ledger();
+  await l.api('admin/test-apple-notification', {}, 401, { headers: { authorization: '' } });
+  await l.fixture('env', { values: { CREATOR_APPLE_NOTIFICATIONS_ENABLED: '0' } });
+  await l.api('admin/test-apple-notification', {}, 503);
+  assert.equal((await l.inspect())['transport-test-request:apple'], undefined);
+  await l.fixture('env', { values: { CREATOR_APPLE_NOTIFICATIONS_ENABLED: '1', CREATOR_PROGRAM_ENABLED: '0' } });
+  assert.deepEqual(await l.api('admin/test-apple-notification'), { ok: true, requested: true, delivered: false });
+  await l.api('admin/test-apple-notification', {}, 429);
+  const report = await l.api('admin/readiness');
+  assert.equal(report.transportTests.apple, null);
+  assert.equal(report.ready, false);
 });
 test('trusted ownerless renewal without an offer ID keeps its original partner after new intake pauses', async () => {
   const l = await ledger(); const p = await l.seed(); const now = Date.now();

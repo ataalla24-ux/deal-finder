@@ -71,6 +71,18 @@ export class CreatorProgram extends CreatorProgramLedger {
   playRequest(...args) { return ReferralMonths.prototype.playRequest.apply(this, args); }
   verifyAppleNotification(body) { return verifyAppleCreatorNotification(body.signedPayload); }
   verifyGoogleNotification(body) { return verifyGoogleCreatorNotification(body.transportAuthorization, body, this.env); }
+  async requestAppleTestNotification() {
+    const credentials = appStoreCredentials(this.env);
+    if (!credentials.ok) throw Error('Store unavailable');
+    const response = await fetch('https://api.storekit.itunes.apple.com/inApps/v1/notifications/test', {
+      method: 'POST', headers: { authorization: `Bearer ${await appStoreServerToken(credentials)}` },
+      signal: AbortSignal.timeout(9000), redirect: 'manual',
+    });
+    if (!response.ok) throw Error('Store test unavailable');
+    const result = await response.json();
+    if (typeof result.testNotificationToken !== 'string' || !result.testNotificationToken.length ||
+        result.testNotificationToken.length > 256) throw Error('Store test response incomplete');
+  }
   async appleRead(kind, transactionId) {
     if (!/^\d{5,30}$/.test(transactionId || '')) throw Error('Invalid transaction');
     const credentials = appStoreCredentials(this.env);

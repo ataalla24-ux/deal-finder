@@ -34,7 +34,13 @@ test('creator transport trusts only authenticated Store HTTP evidence, including
       export default { async fetch(request, env) {
         const body = await request.json();
         const ledger = new CreatorProgram({storage:{async get(){return body.storedChain || null}}}, env);
-        try { return Response.json({ok:true,evidence:await ledger.verify(body.request,body.partners,body.chain || null)}); }
+        try {
+          if (body.request.testNotification === true) {
+            await ledger.requestAppleTestNotification();
+            return Response.json({ok:true,requested:true});
+          }
+          return Response.json({ok:true,evidence:await ledger.verify(body.request,body.partners,body.chain || null)});
+        }
         catch { return Response.json({ok:false},{status:503}); }
       }};
     ` }, { type: 'ESModule', path: 'worker.js', contents: bundle.outputFiles[0].text }],
@@ -52,6 +58,11 @@ test('creator transport trusts only authenticated Store HTTP evidence, including
       if (url.host === 'api.storekit.itunes.apple.com') {
         const jwt = request.headers.get('authorization')?.slice(7);
         await jwtVerify(jwt, appleKey.publicKey, { issuer: OWNER, audience: 'appstoreconnect-v1', algorithms: ['ES256'] });
+        if (url.pathname === '/inApps/v1/notifications/test') {
+          assert.equal(request.method, 'POST');
+          assert.equal(await request.text(), '');
+          return Response.json({ testNotificationToken: mode === 'bad-test-response' ? null : 'fixture-only-test-token' });
+        }
         if (url.pathname.includes('/history/')) return Response.json({ environment: 'Production', bundleId: APP,
           hasMore: historyMore, signedTransactions: [jws(apple({ transactionId: '100000002', price: 4990, offerIdentifier: undefined })),
             jws(apple({ revocationDate: now - DAY }))] });
@@ -79,6 +90,16 @@ test('creator transport trusts only authenticated Store HTTP evidence, including
     const response = await mf.dispatchFetch('https://test/verify', { method: 'POST', body: JSON.stringify({ request, partners: [p], ...extra }) });
     return { status: response.status, body: await response.json() };
   }
+  await t.test('Apple test request uses only fixed authenticated production test endpoint and rejects malformed responses', async () => {
+    assert.equal((await verify({ testNotification: true })).status, 200);
+    assert.deepEqual(calls, [{ host: 'api.storekit.itunes.apple.com', path: '/inApps/v1/notifications/test' }]);
+    mode = 'bad-test-response';
+    assert.equal((await verify({ testNotification: true })).status, 503);
+    mode = 'apple'; redirect = 'api.storekit.itunes.apple.com';
+    assert.equal((await verify({ testNotification: true })).status, 503);
+    assert.ok(calls.every(c => c.host === 'api.storekit.itunes.apple.com'));
+    redirect = null; calls = [];
+  });
   await t.test('Apple uses authenticated production API, ignores client amount and signed payload', async () => {
     const result = await verify({ platform: 'ios', transactionId: '100000001', price: 1, signedTransactionInfo: jws(apple({ price: 1 })) });
     assert.equal(result.status, 200); assert.equal(result.body.evidence.grossCents, 399);

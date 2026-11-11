@@ -1,7 +1,8 @@
 # Creator-Pilot
 
-Status: technische Vorbereitung, standardmäßig aus. Kein Code ist allein durch
-die Aufnahme in diese Dateien im App Store oder in Google Play eingerichtet.
+Status: technische Vorbereitung, standardmäßig aus. Die beiden Store-Angebote
+für Foodiewien und Tastyfood wurden am 11.11.2026 angelegt (Details unten).
+Ein gespeicherter Entwurf ist noch kein einlösbarer oder vollständig getesteter Code.
 
 ## Vereinbarte Eckdaten
 
@@ -25,8 +26,10 @@ die Aufnahme in diese Dateien im App Store oder in Google Play eingerichtet.
 
 ## Startfreigaben
 
-Alle vier `CREATOR_*_ENABLED`-Flags bleiben standardmäßig aus,
-bis alle folgenden Nachweise vorhanden sind:
+Alle vier `CREATOR_*_ENABLED`-Flags sind standardmäßig aus.
+Nur die beiden Notification-Eingänge dürfen für authentifizierte Transporttests
+vorab freigegeben werden. Programm und Zahlungsabgleich bleiben aus, bis alle
+folgenden Nachweise vorhanden sind:
 
 1. Bestätigte Tätigkeit/Vertragsfähigkeit des Betreibers, Creator-Vertrag,
    Laufzeit, Brutto-Provisionsdefinition, Rechnungs-/Gutschriftverfahren,
@@ -39,9 +42,11 @@ bis alle folgenden Nachweise vorhanden sind:
    unterscheiden könnte. Bestehende Empfehlungsangebote nicht überschreiben.
 3. Apple: tatsächliche freie Angebotsslots prüfen (höchstens zehn aktive
    Angebote je Abo), NEW-Berechtigung, AT-Preis, Laufzeit, Intro-Testphase und
-   benutzerdefinierte Codes prüfen. Google: Developer-Determined-Angebot mit
-   echter monatlicher Phase, ggf. Testphase, zwölf Rabattzyklen und regulärem
-   Anschluss. Google-Promocodes sind kein Ersatz für einen 20-Prozent-Rabatt.
+   benutzerdefinierte Codes prüfen. Google: Neukundenangebot mit durch Google
+   geprüfter Berechtigung (noch kein Abo in dieser App), echter monatlicher Phase,
+   ggf. Testphase, zwölf Rabattzyklen und regulärem Anschluss. Die App wählt nur
+   die zum geprüften Creator-Code gehörige Angebots-ID. Google-Promocodes sind
+   kein Ersatz für einen 20-Prozent-Rabatt.
 4. Beide nativen Code-Abläufe mit echten Store-Testkonten prüfen: neues Abo,
    Gratisphase, erste Zahlung, Verlängerung, Kündigung, Erstattung und falsches
    Konto/Angebot. Kein Wechsel auf den Normalpreis als Fehler-Fallback.
@@ -49,7 +54,8 @@ bis alle folgenden Nachweise vorhanden sind:
    vorhandenen Release-Dateien bleiben unverändert.
 6. `termsApproved`, `transportReady`, `releasesVerified` bestätigen, Partner
    einzeln aktivieren und erst anschließend benötigte Umgebungsflags freischalten.
-   Der Apple-Servereingang ist eine zusätzliche technische Startvoraussetzung.
+   Apple-Servereingang, Google-Servereingang und regelmäßiger Zahlungsabgleich
+   sind zusätzlich zum Programmflag zwingende technische Startvoraussetzungen.
    Technische Tests mit Fixtures ersetzen diese echten Freigaben nicht.
 
 Beim Beenden neuer Einlösungen zusätzlich die Store-Angebote deaktivieren.
@@ -92,7 +98,7 @@ Client-Bestätigungen pro Konto/Tag. Erreichte Grenzen werden nicht umgangen.
 
 ## Store-Servereingänge
 
-Implementiert, aber noch nicht in den Stores eingerichtet oder live aktiviert:
+Implementiert; Einrichtung und Zustellnachweise getrennt vom Verkaufsstart prüfen:
 
 - Apple V2: `/api/creators/apple-notifications`, gesperrt durch
   `CREATOR_APPLE_NOTIFICATIONS_ENABLED=0`. Die offizielle Apple-Serverbibliothek
@@ -105,11 +111,21 @@ Implementiert, aber noch nicht in den Stores eingerichtet oder live aktiviert:
   und bestätigte Service-Account-E-Mail werden geprüft. Erforderliche Werte:
   `CREATOR_GOOGLE_PUSH_AUDIENCE` ist die vollständige feste Backend-URL dieses
   Eingangs; `CREATOR_GOOGLE_PUSH_EMAIL` ist der ausdrücklich freigegebene
-  vorhandene Pub/Sub-Service-Account. Eine RTDN ist nur ein Abrufanlass:
+  Pub/Sub-Service-Account. Eine RTDN ist nur ein Abrufanlass:
   Zahlungsbeträge werden weiterhin bei Google Publisher/Orders geprüft.
 - Event-IDs und Zahlungsbelege verhindern Doppelbuchungen. Testmeldungen werden
   nie als Zahlung gebucht. Google-Purchase-Tokens oder Auth-Header erscheinen
   nicht in öffentlichen Antworten/Übersichten.
+- `admin/readiness` zeigt den letzten kryptographisch geprüften Testempfang pro
+  Plattform mit Zeitpunkt und gehashter Ereignis-ID, ohne Zahlungsbuchung.
+  `test-apple-notification` fordert über den vorhandenen Store-Server-Zugang
+  höchstens einmal je zehn Minuten einen Apple-Produktionstest an. Die Anfrage
+  selbst ist kein Zustellnachweis. Tests funktionieren bei gesperrtem Programm.
+- Nicht zum Creator-Programm gehörige Apple-Ereignisse werden nach Signaturprüfung
+  auch während der Vorbereitung quittiert. Echte Creator-Ereignisse bleiben bei
+  pausiertem Programm wiederholbar, sie werden nicht als erledigt verworfen.
+  Google-RTDN darf bis zum abgeschlossenen Verkaufsstart deaktiviert bleiben;
+  einzelne Play-Console-Testnachrichten prüfen den vorbereiteten Zustellweg.
 
 Vor Konfiguration bestehende Store-Notification-URLs prüfen und nicht blind
 ersetzen. Google-Pub/Sub nur innerhalb eines nachgewiesenen kostenlosen Setups
@@ -134,6 +150,49 @@ nicht mit geratenen Beträgen weiterrechnen.
 lokal, `seed` legt ausschließlich inaktive Entwürfe an. Die übrigen Befehle sind
 geschützt und nutzen den bestehenden Admin-Zugang aus Umgebung oder Schlüsselbund.
 Keine Schlüssel, Bankdaten oder tatsächlichen Käuferbelege in Git committen.
+
+`node scripts/creators.mjs readiness` prüft ausschließlich lesend die vier
+exakten `"1"`-Flags, drei globalen Freigaben und jeden Partner. Der Bericht
+nennt fehlende Store-IDs, Verträge, Store-Tests oder Aktivierungen; er setzt
+keine davon selbst. Ein positives Ergebnis ist eine Prüfung der gespeicherten
+Freigaben, kein Ersatz für echte Store-Belege oder einen Zustelltest.
+
+## Store-Vorbereitung vom 11.11.2026
+
+| Partner | Vorgesehener Code | Apple-Angebotsreferenz / Google-Angebots-ID |
+| --- | --- | --- |
+| Foodiewien | FOODIEWIEN20 | creator-foodiewien-20-2026 |
+| Tastyfood | TASTYFOOD20 | creator-tastyfood-20-2026 |
+
+Apple-Produkt: `com.stefanataalla.freefinderwien.premium.monthly`.
+Google-Produkt: `freefinder.pro.monthly`, Basis-Abo `monthly`.
+Beide österreichischen Angebote: zwölf monatliche Zahlungen zu 3,99 EUR,
+danach regulär 4,99 EUR. Berechtigte Neukunden erhalten zuvor einen kostenlosen
+Monat; keine Provision für diesen Monat. Google-Angebote bleiben Entwürfe,
+Apple-Angebote haben noch keine ausgegebenen Produktionscodes. Die drei
+Reservepartner bleiben unbenannt und ohne Store-Angebotszuordnung.
+
+Die Angebotsreferenz ist bei Apple der fachliche `offerIdentifier`, nicht die
+interne App-Store-Connect-Ressourcen-UUID. Die Backend-Partner bleiben `draft`,
+`storeVerified: false`, `acceptsNew: false` und ohne Vertrag. Alle bisherigen
+normalen Abo-/Empfehlungsangebote bleiben unberührt. Programm und Abgleich sind
+weiter gesperrt; separate Transportflags erlauben ausschließlich die vorher
+authentifizierte Verarbeitung. Sandbox-Belege bleiben vom Produktionsledger
+ausgeschlossen. Es gibt damit noch keinen Nachweis einer echten Einlösung,
+Zahlung, Verlängerung, Erstattung oder Creator-Auszahlung.
+
+Freigegebene Google-Vorbereitung: Projekt `freefinder-485721`, Thema
+`freefinder-creator-rtdn`, Push-Abo `freefinder-creator-rtdn-push`.
+Nur `google-play-developer-notifications@system.gserviceaccount.com` erhält
+Publisher-Recht auf genau dieses Thema. Der Zustellaccount
+`freefinder-creator-rtdn-push@freefinder-485721.iam.gserviceaccount.com` hat keine
+Projekt-, Finanz- oder Verwaltungsrollen und keine ausgegebenen Schlüssel.
+OIDC-Audience und Ziel sind beide exakt
+`https://freefinder-merchant-backend.freefinder-stefan.workers.dev/api/creators/google-notifications`.
+Ein Tag Nachrichtenaufbewahrung, keine Exportabos, keine Dead-Letter-Ressourcen,
+kein Billing-/Tarifwechsel. Ein abgelaufener Google-Testzeitraum darf nicht
+automatisch auf kostenpflichtige Abrechnung umgestellt werden. Zustellung muss
+trotz erfolgreich angelegter Ressourcen tatsächlich bewiesen werden.
 
 Eine Abrechnungsanfrage enthält `partnerId`, `month` (abgeschlossener Kalendermonat),
 `reconciledFinancialReports: true`, `storeFundsReceived: true`, `evidenceRef`.

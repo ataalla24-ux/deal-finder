@@ -7,13 +7,16 @@ const { values, positionals } = parseArgs({ allowPositionals: true, options: {
   file: { type: 'string' }, out: { type: 'string' }, help: { type: 'boolean', short: 'h' },
 } });
 const [command] = positionals;
-const routes = { list: ['GET', 'partners'], summary: ['GET', 'summary'], seed: ['POST', 'seed'],
+const routes = { list: ['GET', 'partners'], summary: ['GET', 'summary'], readiness: ['GET', 'readiness'], seed: ['POST', 'seed'],
   configure: ['POST', 'partner'], settings: ['POST', 'settings'], reconcile: ['POST', 'reconcile'],
+  'test-apple-notification': ['POST', 'test-apple-notification'],
   statement: ['POST', 'statement'], 'record-transfer': ['POST', 'paid'], 'adjust-refund': ['POST', 'adjust-refund'] };
 const help = `Creator-Pilot: fünf Partner, standardmäßig inaktiv. Keine Überweisung wird ausgelöst.
   node scripts/creators.mjs drafts --out /absoluter/pfad/partner-entwuerfe.json
   node scripts/creators.mjs seed
   node scripts/creators.mjs list
+  node scripts/creators.mjs readiness
+  node scripts/creators.mjs test-apple-notification
   node scripts/creators.mjs configure --file partner.json
   node scripts/creators.mjs settings --file freigaben.json
   node scripts/creators.mjs summary --out /absoluter/pfad/uebersicht.json
@@ -24,7 +27,8 @@ const help = `Creator-Pilot: fünf Partner, standardmäßig inaktiv. Keine Über
 Admin-Zugang: bestehender MERCHANT_PROMO_ADMIN_SECRET oder macOS-Schlüsselbund
 (freefinder-merchant-promo-admin). Niemals Schlüssel in Dateien/Argumente schreiben.
 Vor echtem Start: Vertragsfreigabe, Store-Konfiguration, echte Einlösetests und
-App-Updates; alle vier CREATOR_*_ENABLED-Flags bleiben bis dahin 0.`;
+App-Updates. Programm und Abgleich bleiben bis dahin 0; die getrennten
+Servereingänge dürfen für authentifizierte Transporttests eingeschaltet werden.`;
 try {
   if (values.help || !command) { console.log(help); process.exit(0); }
   if (command === 'drafts') {

@@ -151,6 +151,8 @@ export function creatorPlayEvidence(purchase, order, tokenHash, partners, now = 
     currency: 'EUR', terms: p, originAt: Date.parse(purchase.startTime) };
 }
 const defaults = { termsApproved: false, transportReady: false, releasesVerified: false, maxPartners: 5, holdDays: 30 };
+const launchFlags = ['CREATOR_PROGRAM_ENABLED', 'CREATOR_APPLE_NOTIFICATIONS_ENABLED',
+  'CREATOR_GOOGLE_NOTIFICATIONS_ENABLED', 'CREATOR_RECONCILIATION_ENABLED'];
 const safeChain = c => ({ key: c.key, partnerId: c.partnerId, platform: c.platform, firstPaidAt: c.firstPaidAt,
   checkedAt: c.checkedAt, nextCheckAt: c.nextCheckAt, reviewRequired: c.reviewRequired === true });
 
@@ -160,12 +162,40 @@ export class CreatorProgramLedger {
   async settings() { return await this.storage.get('settings') || defaults; }
   async ready() {
     const s = await this.settings();
-    return this.env.CREATOR_PROGRAM_ENABLED === '1' && this.env.CREATOR_APPLE_NOTIFICATIONS_ENABLED === '1' &&
+    return launchFlags.every(key => this.env[key] === '1') &&
       s.termsApproved === true && s.transportReady === true && s.releasesVerified === true;
+  }
+  async readiness(now) {
+    const settings = await this.settings(), partners = await this.partners();
+    const blockers = launchFlags.filter(key => this.env[key] !== '1');
+    for (const key of ['termsApproved', 'transportReady', 'releasesVerified']) {
+      if (settings[key] !== true) blockers.push(key);
+    }
+    const rows = partners.map(p => {
+      const missing = [];
+      if (!p.code) missing.push('code');
+      if (!p.appleOfferId) missing.push('appleOfferId');
+      if (!p.playOfferId || !p.playBasePlanId) missing.push('playOffer');
+      if (!clean(p.contractRef, 200)) missing.push('contractRef');
+      if (p.storeVerified !== true) missing.push('storeVerified');
+      if (!active(p, now)) missing.push('partnerNotActive');
+      return { id: p.id, name: p.name, code: p.code, state: p.state, blockers: missing,
+        redeemable: blockers.length === 0 && missing.length === 0 };
+    });
+    return { ok: true, checkedAt: now, ready: blockers.length === 0 && rows.some(p => p.redeemable),
+      blockers, partners: rows, transportTests: {
+        apple: await this.storage.get('transport-test:apple') || null,
+        google: await this.storage.get('transport-test:google') || null,
+      }, terms: { currency: 'EUR', region: 'AT', discountBps: 2000,
+        regularCents: 499, discountedCents: 399, paidMonths: 12, commissionBps: 3000,
+        commissionMonths: 12, commissionVat: 'inclusive',
+        commissionBasis: 'customer_payment_after_discount_and_refunds',
+        exampleCommissionCents: creatorCommission(399) } };
   }
   async verify() { fail('Store-Transport noch nicht eingerichtet.', 503); }
   async verifyAppleNotification() { fail('Apple-Servereingang noch nicht eingerichtet.', 503); }
   async verifyGoogleNotification() { fail('Google-Servereingang noch nicht eingerichtet.', 503); }
+  async requestAppleTestNotification() { fail('Apple-Testtransport nicht eingerichtet.', 503); }
   async fetch(request) {
     try {
       const path = new URL(request.url).pathname;
@@ -173,8 +203,19 @@ export class CreatorProgramLedger {
       if (path === '/config') return json({ ok: true, enabled: await this.ready() && (await this.partners()).some(p => active(p, now)) });
       if (path === '/admin/partners' && request.method === 'GET') return json({ ok: true, settings: await this.settings(), partners: await this.partners() });
       if (path === '/admin/summary' && request.method === 'GET') return json(await this.summary());
+      if (path === '/admin/readiness' && request.method === 'GET') return json(await this.readiness(now));
       const body = await boundedJSON(request, ['/apple-notifications', '/google-notifications'].includes(path) ? 65536 : 16000);
       if (path === '/apple-notifications' || path === '/google-notifications') return json(await this.notification(path, body, now));
+      if (path === '/admin/test-apple-notification') {
+        if (this.env.CREATOR_APPLE_NOTIFICATIONS_ENABLED !== '1') fail('Servereingang noch nicht freigeschaltet.', 503);
+        await this.storage.transaction(async tx => {
+          const last = await tx.get('transport-test-request:apple');
+          if (last && now - last < 10 * 60000) fail('Test bereits angefordert. Bitte zehn Minuten warten.', 429);
+          await tx.put('transport-test-request:apple', now);
+        });
+        await this.requestAppleTestNotification();
+        return json({ ok: true, requested: true, delivered: false });
+      }
       if (path === '/admin/seed') {
         for (const p of creatorDrafts()) if (!await this.storage.get('partner:' + p.id)) await this.storage.put('partner:' + p.id, p);
         return json({ ok: true, partners: await this.partners() });
@@ -240,8 +281,15 @@ export class CreatorProgramLedger {
     const apple = path === '/apple-notifications';
     if (this.env[apple ? 'CREATOR_APPLE_NOTIFICATIONS_ENABLED' : 'CREATOR_GOOGLE_NOTIFICATIONS_ENABLED'] !== '1') fail('Servereingang noch nicht freigeschaltet.', 503);
     const proof = apple ? await this.verifyAppleNotification(body) : await this.verifyGoogleNotification(body);
-    if (proof.test === true) return { ok: true, test: true, recorded: false };
-    if (!await this.ready()) fail('Creator-Abrechnung noch nicht freigeschaltet.', 503);
+    if (proof.test === true) {
+      const eventId = apple ? proof.notificationId : proof.messageId;
+      if (!clean(eventId, 160)) fail('Test-Ereignis unvollständig.');
+      // Keep only the latest verified transport receipt, never a token or payment.
+      await this.storage.put('transport-test:' + (apple ? 'apple' : 'google'), {
+        verifiedAt: now, eventHash: await creatorHash(eventId), paymentRecorded: false,
+      });
+      return { ok: true, test: true, recorded: false };
+    }
     const eventId = apple ? proof.notificationId : proof.messageId;
     if (!clean(eventId, 160)) fail('Server-Ereignis unvollständig.');
     const eventKey = 'event:' + (apple ? 'apple:' : 'google:') + await creatorHash(eventId);
@@ -253,6 +301,7 @@ export class CreatorProgramLedger {
     if (apple && !known && !partners.some(p => p.appleOfferId && [proof.rawTransaction.offerIdentifier, proof.renewalInfo?.offerIdentifier].includes(p.appleOfferId))) {
       return { ok: true, ignored: true };
     }
+    if (!await this.ready()) fail('Creator-Abrechnung noch nicht freigeschaltet.', 503);
     await this.throttle('notifications', now);
     try {
       const evidence = apple ? creatorAppleEvidence(proof.rawTransaction, partners, now, known, proof.renewalInfo) :
@@ -453,9 +502,9 @@ export async function handleCreatorProgram(request, env, authenticate = authenti
   const action = new URL(request.url).pathname.slice(PREFIX.length);
   const admin = action.startsWith('admin/');
   const notification = ['apple-notifications', 'google-notifications'].includes(action);
-  if (!['config', 'quote', 'confirm', 'admin/partners', 'admin/summary', 'admin/seed', 'admin/settings',
+  if (!['config', 'quote', 'confirm', 'admin/partners', 'admin/summary', 'admin/readiness', 'admin/test-apple-notification', 'admin/seed', 'admin/settings',
     'admin/partner', 'admin/reconcile', 'admin/statement', 'admin/paid', 'admin/adjust-refund', 'apple-notifications', 'google-notifications'].includes(action)) return json({ ok: false }, 404);
-  const get = ['config', 'admin/partners', 'admin/summary'].includes(action);
+  const get = ['config', 'admin/partners', 'admin/summary', 'admin/readiness'].includes(action);
   if (request.method !== (get ? 'GET' : 'POST')) return json({ ok: false }, 405);
   try {
     if (admin) {
