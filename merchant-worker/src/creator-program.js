@@ -125,6 +125,36 @@ function moneyCents(money) {
       (money.nanos ?? 0) % 10000000 !== 0) fail('Google-Betrag nicht bestätigt.', 409);
   return paidAmount(Number(money.units ?? 0) * 100 + (money.nanos ?? 0) / 10000000);
 }
+// Google documents an unsuffixed initial order, then ..0, ..1, etc. Every
+// candidate ID still needs a real Orders API receipt; never infer a payment.
+export function creatorPlayOrderIds(latest, paymentKeys = [], triggeredOrder = null) {
+  const parse = value => typeof value === 'string' && /^(GPA\.\d{4}-\d{4}-\d{4}-\d{5})(?:\.\.(0|[1-9]\d{0,5}))?$/.exec(value);
+  const current = parse(latest);
+  if (!current || !Array.isArray(paymentKeys) || paymentKeys.length > 200) fail('Google-Historie nicht eindeutig.', 409);
+  let last = current[2] === undefined ? -1 : Number(current[2]);
+  for (const value of [...paymentKeys.map(key => typeof key === 'string' && key.startsWith('payment:android:') ? key.slice(16) : null),
+    ...(triggeredOrder == null ? [] : [triggeredOrder])]) {
+    const row = parse(value);
+    if (!row || row[1] !== current[1]) fail('Widersprüchliche Google-Bestellkette.', 409);
+    last = Math.max(last, row[2] === undefined ? -1 : Number(row[2]));
+  }
+  if (last > 198) fail('Google-Historie benötigt paginierte Prüfung.', 409);
+  return [current[1], ...Array.from({ length: last + 1 }, (_, i) => `${current[1]}..${i}`)];
+}
+
+export function creatorPlayRefundEvidence(order, tokenHash, partners, now, existing) {
+  if (!existing || existing.key !== 'android:' + tokenHash || !Number.isFinite(existing.originAt) ||
+      !uuid(existing.accountId) || !existing.terms ||
+      !existing.paymentKeys?.includes('payment:android:' + order?.orderId)) fail('Erstattung ohne bestätigte Zuordnung.', 409);
+  // A purchase token expires after an ended subscription. An already booked
+  // order can still be rechecked using its stored identity and a fresh order.
+  const evidence = creatorPlayEvidence({ regionCode: existing.terms.region,
+    startTime: new Date(existing.originAt).toISOString(),
+    externalAccountIdentifiers: { obfuscatedExternalAccountId: existing.accountId },
+    lineItems: [{ productId: MONTHLY.android }] }, order, tokenHash, partners, now, existing);
+  if (evidence.refundedCents <= 0) fail('Erstattung bei Google noch nicht bestätigt.', 503);
+  return evidence;
+}
 export function creatorPlayEvidence(purchase, order, tokenHash, partners, now = Date.now(), existing = null) {
   const item = purchase?.lineItems?.[0], line = order?.lineItems?.[0], details = line?.subscriptionDetails;
   if (!purchase || purchase.testPurchase || purchase.regionCode !== 'AT' || purchase.lineItems?.length !== 1 ||
@@ -145,6 +175,7 @@ export function creatorPlayEvidence(purchase, order, tokenHash, partners, now = 
   const partialCents = partials.filter(x => x.state === 'PROCESSED_SUCCESSFULLY').reduce((sum, x) => sum + moneyCents(x.refundDetails?.total), 0);
   if (partialCents > grossCents || partials.some(x => x.state === 'PENDING')) fail('Erstattung noch nicht abgeschlossen.', 409);
   const refunded = order.state === 'REFUNDED' || order.orderHistory?.refundEvent != null;
+  if (order.state === 'PARTIALLY_REFUNDED' && partialCents === 0 && !refunded) fail('Erstattungsbetrag fehlt.', 409);
   return { platform: 'android', key: `android:${tokenHash}`, receiptId: order.orderId,
     partnerId: p.id, accountId: purchase.externalAccountIdentifiers.obfuscatedExternalAccountId,
     grossCents, purchasedAt, periodEnd, refundedCents: refunded ? grossCents : partialCents,
@@ -196,6 +227,7 @@ export class CreatorProgramLedger {
   async verifyAppleNotification() { fail('Apple-Servereingang noch nicht eingerichtet.', 503); }
   async verifyGoogleNotification() { fail('Google-Servereingang noch nicht eingerichtet.', 503); }
   async requestAppleTestNotification() { fail('Apple-Testtransport nicht eingerichtet.', 503); }
+  async verifyGoogleRefund() { fail('Google-Erstattungsprüfung nicht eingerichtet.', 503); }
   async fetch(request) {
     try {
       const path = new URL(request.url).pathname;
@@ -245,8 +277,13 @@ export class CreatorProgramLedger {
         if (!['ios', 'android'].includes(body.platform) || !uuid(body.principal?.id)) fail('Konto erforderlich.', 401);
         await this.throttle(body.principal.id, now);
         const evidence = await this.verify(body, await this.partners());
-        if (evidence.accountId !== body.principal.id) fail('Für diesen Beleg fehlt die bestätigte Kontozuordnung.', 403);
-        await this.book(evidence, body.platform === 'android' ? body.purchaseToken : null, now);
+        const entries = Array.isArray(evidence) ? evidence : [evidence];
+        if (!entries.length || entries.some(e => e.accountId !== body.principal.id || e.key !== entries[0].key)) {
+          fail('Für diesen Beleg fehlt die bestätigte Kontozuordnung.', 403);
+        }
+        try {
+          for (const entry of entries) await this.book(entry, body.platform === 'android' ? body.purchaseToken : null, now);
+        } catch (error) { await this.hold(entries[0].key, now); throw error; }
         return json({ ok: true, recorded: true });
       }
       if (path === '/admin/reconcile') return json(await this.reconcile(now));
@@ -292,6 +329,7 @@ export class CreatorProgramLedger {
     }
     const eventId = apple ? proof.notificationId : proof.messageId;
     if (!clean(eventId, 160)) fail('Server-Ereignis unvollständig.');
+    if (!apple && proof.voided && proof.productType === 2) return { ok: true, ignored: true };
     const eventKey = 'event:' + (apple ? 'apple:' : 'google:') + await creatorHash(eventId);
     if (await this.storage.get(eventKey)) return { ok: true, duplicate: true };
     const partners = await this.partners();
@@ -305,6 +343,7 @@ export class CreatorProgramLedger {
     await this.throttle('notifications', now);
     try {
       const evidence = apple ? creatorAppleEvidence(proof.rawTransaction, partners, now, known, proof.renewalInfo) :
+        proof.voided ? await this.verifyGoogleRefund(proof, partners, known) :
         await this.verify({ platform: 'android', purchaseToken: proof.purchaseToken }, partners, known);
       for (const item of Array.isArray(evidence) ? evidence : [evidence]) {
         await this.book(item, apple ? null : proof.purchaseToken, now);
@@ -346,6 +385,8 @@ export class CreatorProgramLedger {
       chain ||= { key: e.key, partnerId: p.id, platform: e.platform, accountId: e.accountId, terms: p, firstPaidAt: null,
         latestReceipt: e.receiptId, privateToken: privateToken || null, createdAt: now };
       if (!Number.isFinite(e.originAt) || e.originAt < p.activatedAt - 60000) fail('Kein neues Creator-Abo.', 409);
+      if (chain.originAt != null && chain.originAt !== e.originAt) fail('Widersprüchlicher Abo-Beginn.', 409);
+      chain.originAt = e.originAt;
       if (e.grossCents > 0) chain.firstPaidAt = Math.min(chain.firstPaidAt ?? e.purchasedAt, e.purchasedAt);
       const commissionCents = creatorCommission(e.grossCents);
       const refundedCents = Math.max(previous?.refundedCents || 0, e.refundedCents);

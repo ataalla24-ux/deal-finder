@@ -11,7 +11,7 @@ import { appleRewardClaims } from './apple-reward-claim.js';
 import { invitationPushLedger, handleInvitationPushAdmin } from './invitation-push.js';
 import { HotDataStorage } from './hot-data-storage.js';
 import { measureStorage, storageIdentity, StorageQuotaError } from './storage-usage.js';
-import { CreatorProgramLedger, creatorAppleEvidence, creatorPlayEvidence, creatorHash,
+import { CreatorProgramLedger, creatorAppleEvidence, creatorPlayEvidence, creatorPlayOrderIds, creatorPlayRefundEvidence, creatorHash,
   handleCreatorProgram, scheduledCreatorProgram } from './creator-program.js';
 import { verifyAppleCreatorNotification, verifyGoogleCreatorNotification } from './creator-store-notifications.js';
 export { MerchantPromoLedger } from './merchant-promos.js';
@@ -102,7 +102,41 @@ export class CreatorProgram extends CreatorProgramLedger {
     if (!response.ok) throw Error('Store unavailable');
     return response.json();
   }
-  async verify(body, partners, knownChain = null) {
+  async playOrders(ids) {
+    if (!Array.isArray(ids) || !ids.length || ids.length > 200 || new Set(ids).size !== ids.length ||
+        ids.some(id => !/^GPA\.\d{4}-\d{4}-\d{4}-\d{5}(?:\.\.(?:0|[1-9]\d{0,5}))?$/.test(id))) throw Error('Invalid order history');
+    const signal = AbortSignal.timeout(9000), auth = await googlePlayAccessToken(this.env, signal);
+    if (!auth.ok) throw Error('Store unavailable');
+    const query = new URLSearchParams();
+    for (const id of ids) query.append('orderIds', id);
+    const response = await fetch(`https://androidpublisher.googleapis.com/androidpublisher/v3/applications/com.stefanataalla.freefinderwien/orders:batchGet?${query}`, {
+      headers: { authorization: `Bearer ${auth.token}` }, signal, redirect: 'manual',
+    });
+    if (!response.ok) throw Error('Store unavailable');
+    const result = await response.json();
+    if (!Array.isArray(result.orders) || result.orders.length !== ids.length ||
+        new Set(result.orders.map(o => o?.orderId)).size !== ids.length ||
+        result.orders.some(o => !ids.includes(o?.orderId))) throw Error('Incomplete order history');
+    const byId = new Map(result.orders.map(o => [o.orderId, o]));
+    return ids.map(id => byId.get(id));
+  }
+  async verifyGoogleRefund(proof, partners, knownChain) {
+    if (proof.productType !== 1 || ![1, 2].includes(proof.refundType)) throw Error('Unsupported refund');
+    const hash = await creatorHash(proof.purchaseToken);
+    let evidence;
+    if (knownChain?.paymentKeys?.includes('payment:android:' + proof.orderId)) {
+      const [order] = await this.playOrders([proof.orderId]);
+      if (order.purchaseToken !== proof.purchaseToken) throw Error('Order mismatch');
+      evidence = [creatorPlayRefundEvidence(order, hash, partners, Date.now(), knownChain)];
+    } else {
+      evidence = await this.verify({ platform: 'android', purchaseToken: proof.purchaseToken }, partners, knownChain, proof.orderId);
+    }
+    const refunded = evidence.find(e => e.receiptId === proof.orderId);
+    if (!refunded || refunded.refundedCents <= 0 ||
+        proof.refundType === 1 && refunded.refundedCents !== refunded.grossCents) throw Error('Refund not yet confirmed');
+    return evidence;
+  }
+  async verify(body, partners, knownChain = null, triggeredOrder = null) {
     const now = Date.now();
     if (body.platform === 'ios') {
       const decode = signed => {
@@ -137,22 +171,22 @@ export class CreatorProgram extends CreatorProgramLedger {
     if (body.platform !== 'android' || typeof body.purchaseToken !== 'string' ||
         !/^[A-Za-z0-9._-]{10,4096}$/.test(body.purchaseToken)) throw Error('Invalid purchase token');
     const hash = await creatorHash(body.purchaseToken);
-    const chain = knownChain || await this.storage.get('chain:android:' + hash);
+    let chain = knownChain || await this.storage.get('chain:android:' + hash);
     const purchase = await ReferralMonths.prototype.playPurchase.call(this, body.purchaseToken);
     const orderId = purchase.lineItems?.[0]?.latestSuccessfulOrderId || purchase.latestOrderId;
-    if (!/^GPA\.[A-Za-z0-9.-]{5,150}$/.test(orderId || '')) throw Error('Order missing');
-    const ids = new Set([orderId]);
-    if (knownChain) for (const key of knownChain.paymentKeys || []) {
-      ids.add(key.slice('payment:android:'.length));
-    }
-    if (ids.size > 15) throw Error('Order history requires review');
+    const ids = creatorPlayOrderIds(orderId, chain?.paymentKeys || [], triggeredOrder);
+    const orders = await this.playOrders(ids);
     const evidence = [];
-    for (const orderId of ids) {
-      const order = await ReferralMonths.prototype.playOrder.call(this, orderId);
-      if (order.purchaseToken !== body.purchaseToken || order.orderId !== orderId) throw Error('Order mismatch');
-      evidence.push(creatorPlayEvidence(purchase, order, hash, partners, now, chain));
+    for (const order of orders) {
+      if (order.purchaseToken !== body.purchaseToken) throw Error('Order mismatch');
+      const entry = creatorPlayEvidence(purchase, order, hash, partners, now, chain);
+      if (!evidence.length && Math.abs(entry.purchasedAt - entry.originAt) > 60000) throw Error('Initial period missing');
+      if (evidence.length && entry.purchasedAt < evidence.at(-1).periodEnd) throw Error('Overlapping order history');
+      evidence.push(entry);
+      // Once the initial order proves the creator, renewals retain that identity.
+      chain ||= { key: entry.key, partnerId: entry.partnerId, terms: entry.terms };
     }
-    return knownChain ? evidence : evidence[0];
+    return evidence;
   }
 }
 

@@ -407,6 +407,9 @@ async function runtime() {
             }
             return trusted.proof;
           }
+          async verifyGoogleRefund(proof, partners, existing) {
+            return this.verify({platform:'android',purchaseToken:proof.purchaseToken}, partners, existing);
+          }
           async verify(body, partners, existing) {
             await this.storage.transaction(async tx => {
               await tx.put('fixture:verify-count', (await tx.get('fixture:verify-count') || 0) + 1);
@@ -1292,6 +1295,56 @@ test('verified Google test records only one hashed receipt while all commerce re
   assert.deepEqual((await l.api('admin/readiness')).transportTests, report.transportTests);
   const state = await l.inspect();
   assert.equal(Object.keys(state).filter(k => /^(payment:|chain:|event:)/.test(k)).length, 0);
+});
+test('Google confirmation books complete history once and refund callbacks reverse only their order', async () => {
+  const l = await ledger(); await l.seed();
+  const first = google(), second = structuredClone(first);
+  second.order.orderId += '..0';
+  second.order.lineItems[0].subscriptionDetails.servicePeriodStartTime = new Date(NOW + 29 * DAY).toISOString();
+  second.order.lineItems[0].subscriptionDetails.servicePeriodEndTime = new Date(NOW + 59 * DAY).toISOString();
+  const source = { entries: [first, second], now: NOW + 30 * DAY };
+  await l.fixture('put', { values: { ['fixture:receipt:' + TOKEN]: source } });
+  const body = { platform: 'android', purchaseToken: TOKEN };
+  await l.api('confirm', body);
+  await l.api('confirm', body);
+  let state = await l.inspect();
+  const key = 'android:' + await creatorHash(TOKEN);
+  assert.equal(state['chain:' + key].paymentKeys.length, 2);
+  assert.equal(state['chain:' + key].originAt, NOW - DAY);
+  assert.equal(foodie(await l.call('summary')).commissionCents, 240);
+  first.order.state = 'REFUNDED';
+  await l.fixture('put', { values: {
+    ['fixture:receipt:' + TOKEN]: source,
+    'fixture:google-proof': { messageId: 'refund-order-one', purchaseToken: TOKEN,
+      voided: true, productType: 1, refundType: 1, orderId: first.order.orderId },
+  } });
+  const opts = { headers: { authorization: 'Bearer fixture-google-notification' } };
+  assert.equal((await l.api('google-notifications', {}, 200, opts)).recorded, true);
+  assert.equal((await l.api('google-notifications', {}, 200, opts)).duplicate, true);
+  state = await l.inspect();
+  assert.equal(state['payment:android:' + first.order.orderId].reversedCents, 120);
+  assert.equal(state['payment:android:' + second.order.orderId].reversedCents, 0);
+  assert.equal(foodie(await l.call('summary')).commissionCents, 120);
+  assert.equal(Object.keys(state).filter(k => k.startsWith('payment:')).length, 2);
+});
+test('mixed-owner confirmation history cannot partially book payments', async () => {
+  const l = await ledger(); await l.seed();
+  const first = google(), second = structuredClone(first);
+  second.order.orderId += '..0';
+  second.purchase.externalAccountIdentifiers.obfuscatedExternalAccountId = OTHER;
+  await l.fixture('put', { values: { ['fixture:receipt:' + TOKEN]: { entries: [first, second], now: NOW } } });
+  await l.api('confirm', { platform: 'android', purchaseToken: TOKEN }, 403);
+  assert.equal(Object.keys(await l.inspect()).filter(k => /^(chain:|payment:)/.test(k)).length, 0);
+});
+test('authenticated voided one-time products are ignored without enabling creator commerce', async () => {
+  const l = await ledger();
+  await l.fixture('env', { values: { CREATOR_PROGRAM_ENABLED: '0' } });
+  await l.fixture('put', { values: { 'fixture:google-proof': {
+    messageId: 'unrelated-one-time', purchaseToken: TOKEN, voided: true, productType: 2, refundType: 1,
+  } } });
+  assert.deepEqual(await l.api('google-notifications', {}, 200,
+    { headers: { authorization: 'Bearer fixture-google-notification' } }), { ok: true, ignored: true });
+  assert.equal(Object.keys(await l.inspect()).filter(k => /^(chain:|payment:|event:)/.test(k)).length, 0);
 });
 test('Apple transport probe is admin-only, requires callback flag and is bounded independently of sales', async () => {
   const l = await ledger();

@@ -114,10 +114,18 @@ function googleMessage(body) {
       !Number.isSafeInteger(Number(notification.eventTimeMillis)) || Number(notification.eventTimeMillis) <= 0) throw problem(400);
   const kinds = ['subscriptionNotification', 'testNotification', 'oneTimeProductNotification',
     'voidedPurchaseNotification', 'pendingRefundReviewNotification'].filter(key => Object.hasOwn(notification, key));
-  if (kinds.length !== 1 || !['subscriptionNotification', 'testNotification'].includes(kinds[0])) throw problem(400);
+  if (kinds.length !== 1 || !['subscriptionNotification', 'testNotification', 'voidedPurchaseNotification'].includes(kinds[0])) throw problem(400);
   if (kinds[0] === 'testNotification') {
     if (!object(notification.testNotification) || notification.testNotification.version !== '1.0') throw problem(400);
     return { messageId: message.messageId, purchaseToken: null, test: true };
+  }
+  if (kinds[0] === 'voidedPurchaseNotification') {
+    const voided = notification.voidedPurchaseNotification;
+    if (!object(voided) || ![1, 2].includes(voided.productType) || ![1, 2].includes(voided.refundType) ||
+        typeof voided.purchaseToken !== 'string' || !/^[A-Za-z0-9._-]{10,4096}$/.test(voided.purchaseToken) ||
+        typeof voided.orderId !== 'string' || !/^GPA\.\d{4}-\d{4}-\d{4}-\d{5}(?:\.\.(?:0|[1-9]\d{0,5}))?$/.test(voided.orderId)) throw problem(400);
+    return { messageId: message.messageId, purchaseToken: voided.purchaseToken, test: false,
+      voided: true, orderId: voided.orderId, productType: voided.productType, refundType: voided.refundType };
   }
   const subscription = notification.subscriptionNotification;
   if (!object(subscription) || subscription.version !== '1.0' ||

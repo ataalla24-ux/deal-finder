@@ -19,7 +19,7 @@ test('creator transport trusts only authenticated Store HTTP evidence, including
   const appleKey = await generateKeyPair('ES256', { extractable: true });
   const googleKey = await generateKeyPair('RS256', { extractable: true });
   const bundle = await build({ ...workerBundleOptions, entryPoints: [fileURLToPath(new URL('../src/index.js', import.meta.url))] });
-  let mode = 'apple', redirect = null, overrides = {}, historyMore = false, calls = [];
+  let mode = 'apple', redirect = null, overrides = {}, historyMore = false, calls = [], batchMode = '', purchaseUnavailable = false;
   const apple = patch => ({ environment: 'Production', bundleId: APP, productId: APP + '.premium.monthly',
     transactionId: '100000001', originalTransactionId: '100000001', currency: 'EUR', storefront: 'AUT',
     inAppOwnershipType: 'PURCHASED', price: 3990, purchaseDate: start, originalPurchaseDate: start,
@@ -27,7 +27,8 @@ test('creator transport trusts only authenticated Store HTTP evidence, including
   const order = (orderId, patch = {}) => ({ orderId, purchaseToken: TOKEN, state: 'PROCESSED',
     buyerAddress: { buyerCountry: 'AT' }, total: money(399),
     lineItems: [{ productId: 'freefinder.pro.monthly', subscriptionDetails: { basePlanId: 'monthly', offerId: p.playOfferId,
-      servicePeriodStartTime: new Date(start).toISOString(), servicePeriodEndTime: new Date(start + 30 * DAY).toISOString() } }], ...patch });
+      servicePeriodStartTime: new Date(start + (orderId.includes('..') ? Number(orderId.split('..')[1]) + 1 : 0) * 5 * DAY).toISOString(),
+      servicePeriodEndTime: new Date(start + (orderId.includes('..') ? Number(orderId.split('..')[1]) + 2 : 1) * 5 * DAY).toISOString() } }], ...patch });
   const mf = new Miniflare(convertV4MiniflareOptions({ compatibilityDate: '2026-03-09', compatibilityFlags: ['nodejs_compat'],
     modules: [{ type: 'ESModule', path: 'entry.js', contents: `
       import { CreatorProgram } from './worker.js';
@@ -39,6 +40,7 @@ test('creator transport trusts only authenticated Store HTTP evidence, including
             await ledger.requestAppleTestNotification();
             return Response.json({ok:true,requested:true});
           }
+          if (body.request.voided === true) return Response.json({ok:true,evidence:await ledger.verifyGoogleRefund(body.request,body.partners,body.chain || null)});
           return Response.json({ok:true,evidence:await ledger.verify(body.request,body.partners,body.chain || null)});
         }
         catch (error) { return Response.json({ok:false,diagnostic:error.creatorPublic === true ? error.message : null},{status:503}); }
@@ -76,13 +78,27 @@ test('creator transport trusts only authenticated Store HTTP evidence, including
       }
       assert.equal(url.host, 'androidpublisher.googleapis.com', 'Unexpected outbound requests must never reach the network');
       assert.equal(request.headers.get('authorization'), 'Bearer fixture-google-access');
+      if (url.pathname.endsWith('/orders:batchGet')) {
+        assert.equal(request.method, 'GET');
+        assert.equal(await request.text(), '');
+        let orders = url.searchParams.getAll('orderIds').map(id => order(id, mode === 'google-refund' ? {
+          state: 'PARTIALLY_REFUNDED', orderHistory: { partialRefundEvents: [{ state: 'PROCESSED_SUCCESSFULLY', refundDetails: { total: money(1) } }] },
+        } : mode === 'google-full-refund' ? {state:'REFUNDED'} : overrides));
+        if (batchMode === 'missing') orders.pop();
+        if (batchMode === 'duplicate') orders[1] = orders[0];
+        if (batchMode === 'foreign') orders[0] = {...orders[0], orderId:'GPA.9999-9999-9999-99999'};
+        if (batchMode === 'overlap') orders[1] = {...orders[1], lineItems:orders[0].lineItems};
+        if (batchMode === 'reverse') orders.reverse();
+        return Response.json({orders});
+      }
       if (url.pathname.includes('/orders/')) {
         const orderId = decodeURIComponent(url.pathname.split('/orders/')[1]);
         return Response.json(order(orderId, mode === 'google-refund' ? {
           state: 'PARTIALLY_REFUNDED', orderHistory: { partialRefundEvents: [{ state: 'PROCESSED_SUCCESSFULLY', refundDetails: { total: money(1) } }] },
         } : overrides));
       }
-      return Response.json({ regionCode: 'AT', startTime: new Date(start).toISOString(),
+      if (purchaseUnavailable) return new Response(null, {status:410});
+      return Response.json({ regionCode: 'AT', ...(mode === 'google-test' ? {testPurchase:{}} : {}), startTime: new Date(start).toISOString(),
         externalAccountIdentifiers: { obfuscatedExternalAccountId: OWNER },
         lineItems: [{ productId: 'freefinder.pro.monthly', latestSuccessfulOrderId: 'GPA.1111-2222-3333-44444..1' }] });
     },
@@ -138,8 +154,9 @@ test('creator transport trusts only authenticated Store HTTP evidence, including
   await t.test('Google checks real order price and token after authenticated subscription lookup', async () => {
     mode = 'google'; calls = [];
     const result = await verify({ platform: 'android', purchaseToken: TOKEN, grossCents: 99999 });
-    assert.equal(result.status, 200); assert.equal(result.body.evidence.grossCents, 399);
-    assert.equal(result.body.evidence.key, 'android:' + await creatorHash(TOKEN));
+    assert.equal(result.status, 200); assert.equal(result.body.evidence.length, 3);
+    assert.equal(result.body.evidence[0].grossCents, 399);
+    assert.equal(result.body.evidence[0].key, 'android:' + await creatorHash(TOKEN));
     overrides = { purchaseToken: TOKEN + '-other' };
     assert.equal((await verify({ platform: 'android', purchaseToken: TOKEN })).status, 503);
     overrides = {};
@@ -150,9 +167,38 @@ test('creator transport trusts only authenticated Store HTTP evidence, including
       key: 'android:' + await creatorHash(TOKEN), partnerId: p.id, terms: p,
       paymentKeys: ['payment:android:GPA.1111-2222-3333-44444..0'],
     } });
-    assert.equal(result.status, 200); assert.equal(result.body.evidence.length, 2);
+    assert.equal(result.status, 200); assert.equal(result.body.evidence.length, 3);
     assert.equal(result.body.evidence[1].refundedCents, 1);
-    assert.equal(calls.filter(x => x.path.includes('/orders/')).length, 2);
+    assert.equal(calls.filter(x => x.path.endsWith('/orders:batchGet')).length, 1);
+  });
+  await t.test('Google full history rejects missing, duplicate, foreign and overlapping orders before booking', async () => {
+    mode = 'google';
+    for (batchMode of ['missing','duplicate','foreign','overlap']) {
+      assert.equal((await verify({platform:'android',purchaseToken:TOKEN})).status,503,batchMode);
+    }
+    batchMode = 'reverse';
+    const r = await verify({platform:'android',purchaseToken:TOKEN});
+    assert.equal(r.status,200);
+    assert.deepEqual(r.body.evidence.map(x=>x.receiptId), ['GPA.1111-2222-3333-44444','GPA.1111-2222-3333-44444..0','GPA.1111-2222-3333-44444..1']);
+    batchMode = '';
+  });
+  await t.test('Google expired subscription token does not block a confirmed refund of an already booked order', async () => {
+    const id='GPA.1111-2222-3333-44444..0';
+    const chain={key:'android:'+await creatorHash(TOKEN),partnerId:p.id,terms:p,accountId:OWNER,originAt:start,paymentKeys:['payment:android:'+id]};
+    purchaseUnavailable=true;mode='google-full-refund';calls=[];
+    const r=await verify({voided:true,productType:1,refundType:1,orderId:id,purchaseToken:TOKEN},{chain});
+    assert.equal(r.status,200);assert.equal(r.body.evidence[0].refundedCents,399);
+    assert.ok(calls.every(c=>!c.path.includes('/subscriptionsv2/')));
+    mode='google';
+    assert.equal((await verify({voided:true,productType:1,refundType:1,orderId:id,purchaseToken:TOKEN},{chain})).status,503,'RTDN alone cannot invent a refund');
+    mode='google-refund';
+    assert.equal((await verify({voided:true,productType:1,refundType:1,orderId:id,purchaseToken:TOKEN},{chain})).status,503,'full event must await matching full order refund');
+    purchaseUnavailable=false;
+  });
+  await t.test('Google test purchases cannot enter the production ledger even with correct product and price',async()=>{
+    mode='google-test';
+    assert.equal((await verify({platform:'android',purchaseToken:TOKEN})).status,503);
+    mode='google';
   });
   for (const host of ['oauth2.googleapis.com', 'androidpublisher.googleapis.com', 'api.storekit.itunes.apple.com']) {
     await t.test('credentials cannot follow redirects from ' + host, async () => {

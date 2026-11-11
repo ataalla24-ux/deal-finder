@@ -312,6 +312,21 @@ test('Google authenticated test messages return no receipt; unknown subscription
   });
 });
 
+test('Google signed voided purchase identifies an exact order but never supplies money or entitlement', async () => {
+  const notification=rtdn();delete notification.subscriptionNotification;
+  notification.voidedPurchaseNotification={purchaseToken:'fixture-private-purchase-token',orderId:'GPA.1111-2222-3333-44444..2',productType:1,refundType:1};
+  const f=googleFixture(), auth=await authorization();
+  assert.deepEqual(await f.verify(auth,envelope(notification)), {
+    messageId:'12345678901',purchaseToken:'fixture-private-purchase-token',test:false,
+    voided:true,orderId:'GPA.1111-2222-3333-44444..2',productType:1,refundType:1,
+  });
+  for(const patch of [{productType:3},{productType:'1'},{refundType:0},{refundType:'1'},
+    {orderId:'../other'},{purchaseToken:'bad/token'}]) {
+    await assert.rejects(f.verify(auth,envelope({...notification,voidedPurchaseNotification:{...notification.voidedPurchaseNotification,...patch}})),status(400));
+  }
+  await assert.rejects(f.verify('Bearer invalid',envelope(notification)),status(401));
+});
+
 test('Google cannot use body authorization/principal to override the actual transport header', async () => {
   const f = googleFixture(), body = { ...envelope(), transportAuthorization: await authorization(),
     authorization: await authorization(), principal: { id: ID } };
