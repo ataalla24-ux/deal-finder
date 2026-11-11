@@ -1,7 +1,7 @@
 {
-  "generatedAt": "2026-11-11T07:36:36.251Z",
+  "generatedAt": "2026-11-11T07:45:03.196Z",
   "source": "instagram-graph-cross-source-verification",
-  "status": "ok",
+  "status": "degraded",
   "configured": true,
   "scannedFiles": [
     "deals-pending-church-events.json",
@@ -102,8 +102,8 @@
       "candidates": 0
     },
     "deals-pending-instagram-ai.json": {
-      "deals": 18,
-      "candidates": 1
+      "deals": 17,
+      "candidates": 0
     },
     "deals-pending-instagram-apify.json": {
       "deals": 3,
@@ -187,10 +187,15 @@
       "candidates": 1
     }
   ],
-  "fetchedPosts": 119,
-  "exactMatches": 3,
+  "fetchedPosts": 44,
+  "exactMatches": 0,
   "retainedEvidencePosts": 2000,
-  "errors": [],
+  "errors": [
+    {
+      "username": "freefinder.at",
+      "message": "Instagram shared quota paused: rolling-hour budget exhausted"
+    }
+  ],
   "accountFailures": {
     "natascha_rapid": {
       "count": 3,
@@ -206,19 +211,25 @@
   "sharedQuota": {
     "limitPerHour": 237,
     "usageThreshold": 95,
-    "requests": 5,
-    "reserved": 5,
-    "stopped": false,
-    "reason": "",
-    "highestUsagePercent": 59,
+    "requests": 2,
+    "reserved": 2,
+    "stopped": true,
+    "reason": "Instagram shared quota paused: rolling-hour budget exhausted",
+    "highestUsagePercent": 51,
     "waitedMs": 0,
     "pacingMs": 0,
-    "retryAt": "",
+    "retryAt": "2026-11-11T08:05:16.290Z",
     "adaptiveSafetyCeiling": 190,
     "adaptiveIncreases": 0,
     "storageFailure": null
   },
+  "globalError": {
+    "username": "freefinder.at",
+    "status": 0,
+    "code": "SCAN_BUDGET",
+    "message": "Instagram shared quota paused: rolling-hour budget exhausted"
+  },
   "blockedEvidencePosts": 52,
-  "unmatchedCandidatePosts": 3,
-  "message": "3/6 fresh cross-source Instagram candidates matched exactly via Graph API."
+  "unmatchedCandidatePosts": 6,
+  "message": "0/6 fresh cross-source Instagram candidates matched exactly via Graph API."
 }
