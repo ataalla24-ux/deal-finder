@@ -72,6 +72,9 @@ for (const [title, description] of [
 assert.equal(canonicalOfferUrl('https://hotel.example/praguex/special-offers/', 'https://hotel.example/vienna/cafe'), '');
 assert.equal(extractMerchantOfferCandidates('<article><h2>Shampoo zum Preis von 37,90 statt 63,10 Euro</h2><p>Gültig in Wien bis 30.11.2026.</p></article>', task, now).length, 0);
 assert.equal(discoveryRejection({ ...deals[0], title: 'Fruehstueck im Hotelrestaurant: 1+1 gratis', description: 'Auch fuer externe Gaeste in Wien.' }), '');
+for (const title of ['Kindermenü am Sonntag 5,90 statt 10,90 Euro', '2 Baguettes zum Preis von einem', 'Chicken Nuggets: 1+1 gratis']) {
+  assert.equal(discoveryRejection({ ...deals[0], title, description: title }), '', title);
+}
 const genericOffers = extractMerchantOfferCandidates('<article><p>Bei jedem Burger mit Beilage erhalten Sie einen Stempel. Bei voller Karte 18,80 Euro Rabatt.</p></article><article><p>Mit jeder Bowl und Beilage eine Limonade gratis.</p></article>', task, now);
 assert.equal(genericOffers.length, 2);
 assert.equal(new Set(genericOffers.map(d => d.id)).size, 2, 'generic titles must not collapse different benefits');
