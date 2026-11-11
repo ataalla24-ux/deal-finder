@@ -58,7 +58,8 @@ jobs:
         run: node scripts/vienna-quality-slot.mjs
       - name: Report a duplicate scheduled trigger
         if: steps.slot.outputs.run == 'false'
-        run: echo 'Kein neuer Qualitaetslauf: dieses Wiener Zeitfenster ist bereits abgeschlossen.' >> "$GITHUB_STEP_SUMMARY"
+        run: |
+          echo 'Kein neuer Qualitaetslauf: dieses Wiener Zeitfenster ist bereits abgeschlossen.' >> "$GITHUB_STEP_SUMMARY"
       - if: steps.slot.outputs.run == 'true'
         run: npm ci
       - name: Verify safe correction and preservation rules
