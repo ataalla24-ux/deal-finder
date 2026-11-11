@@ -1,6 +1,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { execFileSync } from 'node:child_process';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -11,7 +12,31 @@ export function githubRunProvenance(env=process.env) {
   if(!/^[\w.-]+\/[\w.-]+$/.test(env.GITHUB_REPOSITORY||'') || !/^\d+$/.test(env.GITHUB_RUN_ID||'')
     || !/^[a-f0-9]{40}$/.test(env.GITHUB_SHA||'')
     || !['schedule','workflow_dispatch','push','workflow_run'].includes(env.GITHUB_EVENT_NAME))return null;
-  return {repository:env.GITHUB_REPOSITORY,runId:env.GITHUB_RUN_ID,headSha:env.GITHUB_SHA,
+  // workflow_run and checkout(ref: main) can execute a newer commit than GITHUB_SHA.
+  let checkoutSha = null;
+  if (env.GITHUB_WORKSPACE) {
+    try {
+      const sha = execFileSync('git', ['-C', env.GITHUB_WORKSPACE, 'rev-parse', '--verify', 'HEAD'],
+        { encoding: 'utf8', timeout: 2000, stdio: ['ignore', 'pipe', 'ignore'] }).trim();
+      if (/^[a-f0-9]{40}$/.test(sha)) checkoutSha = sha;
+    } catch { /* Missing checkout evidence stays unknown, never the trigger SHA. */ }
+  }
+  let triggeringRun = null;
+  if (env.GITHUB_EVENT_NAME === 'workflow_run' && env.GITHUB_EVENT_PATH) {
+    try {
+      if (fs.statSync(env.GITHUB_EVENT_PATH).size > 1_000_000) throw new Error('Oversized event');
+      const run = JSON.parse(fs.readFileSync(env.GITHUB_EVENT_PATH, 'utf8')).workflow_run;
+      if (run?.head_repository?.full_name === env.GITHUB_REPOSITORY
+        && /^\d+$/.test(String(run.id)) && /^[a-f0-9]{40}$/.test(run.head_sha || '')
+        && ['schedule', 'workflow_dispatch', 'push', 'workflow_run'].includes(run.event)) {
+        triggeringRun = { runId: String(run.id), headSha: run.head_sha, event: run.event,
+          name: cleanText(run.name, 160),
+          startedAt: Number.isFinite(Date.parse(run.run_started_at)) ? new Date(run.run_started_at).toISOString() : null,
+          url: `https://github.com/${env.GITHUB_REPOSITORY}/actions/runs/${run.id}` };
+      }
+    } catch { /* An unavailable event is a provenance gap, not a scheduled run. */ }
+  }
+  return {repository:env.GITHUB_REPOSITORY,runId:env.GITHUB_RUN_ID,headSha:env.GITHUB_SHA,checkoutSha,triggeringRun,
     event:env.GITHUB_EVENT_NAME,runAttempt:/^\d+$/.test(env.GITHUB_RUN_ATTEMPT||'')?env.GITHUB_RUN_ATTEMPT:null,
     url:`https://github.com/${env.GITHUB_REPOSITORY}/actions/runs/${env.GITHUB_RUN_ID}`};
 }

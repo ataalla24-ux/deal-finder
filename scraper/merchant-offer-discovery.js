@@ -1,10 +1,11 @@
 import { createHash } from 'node:crypto';
+import { load } from 'cheerio';
 import { merchantWebsite } from './vienna-merchant-discovery.js';
 import { extractFoodOffers } from './power-food-extraction.js';
 import { discoveryRejection } from './deal-discovery-policy.js';
 
 const DAY = 86400000;
-const OFFER_PATH = /(?:^|[\/\s_.-])(?:aktionen?|aktionsbon|angebote?|specials?|rabatt|deals?)(?=$|[\/\s_.-])|happy[-_\s]?hour|coupon|mittagsaktion|studentenangebot|geburtstagsangebot/i;
+const OFFER_PATH = /(?:^|[\/\s_.-])(?:aktionen?|aktionsbon|(?:tages|wochen|mittags)?angebote?|specials?|rabatt|deals?)(?=$|[\/\s_.-])|happy[-_\s]?hour|coupon|mittagsaktion|studentenangebot|geburtstagsangebot/i;
 const EXCLUDED_PATH = /(?:^|[\/_.-])(?:jobs?|jobangebote|karriere|careers?|stellen(?:angebote)?|bewerbung|catering|business|b2b|corporate|franchise|presse?|login|account|warenkorb|checkout|veranstaltungen?|reservierung|accessoires|running[-_]club|tee-gastronomie|ch|barcelona|praguex?|teams|kultur|bier)(?=$|[\/_.-])/i;
 
 export function canonicalOfferUrl(value, website) {
@@ -80,6 +81,23 @@ export function selectMerchantOfferPages(directory, websiteState, offerState, no
 export function extractMerchantOfferCandidates(html, task, now) {
   const source = { name: `merchant-website:${new URL(task.url).hostname}`, brand: task.merchant.name,
     url: task.url, allowedHosts: [new URL(task.url).hostname], category: 'Essen & Trinken' };
+  const url = new URL(task.url);
+  if (/^(?:www\.)?schmankerlbraeu\.at$/.test(url.hostname)
+    && url.pathname === '/pages/himmlisch-guat_aktionen.html') {
+    // This verified single-venue page places unrelated menu-pass teasers beside
+    // the actual offer. Keep that sidebar out of the benefit and price evidence.
+    const $ = load(html);
+    source.selector = '#content > .customPage';
+    source.offerContextSelector = '#content > h1';
+    source.offerContextPattern = /^Aktionen:\s*$/i;
+    source.currentOffers = true;
+    const location = $('#footer').text().replace(/\s+/g, ' ');
+    if (/Schmankerl-Br[aä]u/i.test(location)
+      && /Landwehrstra(?:ß|ss)e 6\s*(?:\(huma eleven\))?\s*1110 Wien/.test(location)) {
+      source.address = 'Landwehrstraße 6, 1110 Wien';
+      source.locationEvidenceUrl = task.url;
+    }
+  }
   return extractFoodOffers(html, source, { now, pageUrl: task.url }).deals.filter(deal => !discoveryRejection({ ...deal, originSource: 'vienna-merchant-website' })).map(deal => ({
     ...deal,
     id: `merchant-web-${createHash('sha256').update(`${task.url}|${deal.title}${/Angebot.*Details ansehen/.test(deal.title) ? `|${deal.evidence.contentHash}` : ''}`).digest('hex').slice(0, 20)}`,

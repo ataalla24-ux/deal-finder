@@ -16,7 +16,7 @@ const merchant = { name: 'Test Cafe', website, address: 'Testgasse 1, 1070 Wien'
   sourceUrl: 'https://www.openstreetmap.org/node/1', observedAt: now.toISOString() };
 const task = { url: `${website}angebote`, merchant };
 assert.equal(canonicalOfferUrl(`${task.url}?utm_source=ig#coffee`, website), task.url);
-for (const name of ['espresso-special/', 'angebote/bestellen']) assert.equal(canonicalOfferUrl(website + name, website), website + name);
+for (const name of ['espresso-special/', 'angebote/bestellen', 'tagesangebote.html', 'tagesangebot/', 'wochenangebot/', 'mittagsangebot/']) assert.equal(canonicalOfferUrl(website + name, website), website + name);
 for (const value of ['/jobangebote', '/catering-angebote', '/angebote/login', '/speisekarte', '/B2B-Angebote',
   '/redaktionelle-grundsatze', '/attraktionen/', '/ch/aktionen/', '/Specials.pdf', '/angebot.jpg', '/veranstaltungen/special-guest']) {
   assert.equal(canonicalOfferUrl(new URL(value, website).href, website), '');
@@ -81,6 +81,21 @@ assert.equal(new Set(genericOffers.map(d => d.id)).size, 2, 'generic titles must
 const unresolved = extractMerchantOfferCandidates('<article><h2>20 % Rabatt auf Pizza</h2><p>Nur Abholung.</p></article>', task, now)[0];
 assert.ok(unresolved);
 assert.notEqual(unresolved.distance, merchant.address, 'directory address is not campaign evidence');
+const singleVenueTask = { url: 'https://schmankerlbraeu.at/pages/himmlisch-guat_aktionen.html', merchant: { ...merchant, name: 'Schmankerl-Bräu', website: 'https://schmankerlbraeu.at/' } };
+const singleVenueHtml = '<div id="content"><h1>Aktionen:</h1><div class="customPage"><h3>Montag- Samstag</h3><h3>ab 16 Uhr</h3><h3>1/2 Backhuhn mit Salat</h3><h3>nur € 9,90</h3></div><div class="blogPosts"><h3>Menüpass</h3><p>Jedes 11. Menü gratis!</p></div></div><div id="footer">Schmankerl-Bräu Landwehrstraße 6 (huma eleven) 1110 Wien</div>';
+const singleVenue = extractMerchantOfferCandidates(singleVenueHtml, singleVenueTask, now);
+assert.equal(singleVenue.length, 1);
+assert.match(singleVenue[0].description, /Montag- Samstag.*ab 16 Uhr.*1\/2 Backhuhn mit Salat.*9,90/);
+assert.doesNotMatch(singleVenue[0].description, /Menüpass|gratis/);
+assert.equal(singleVenue[0].type, 'rabatt', 'a menu-pass teaser must not turn the paid chicken into a free meal');
+assert.equal(singleVenue[0].address, 'Landwehrstraße 6, 1110 Wien');
+assert.equal(singleVenue[0].evidence.offerTiming.recurring, true);
+assert.equal(singleVenue[0].reviewRequired, true);
+assert.equal(extractMerchantOfferCandidates(singleVenueHtml.replace('Landwehrstraße 6', 'Andere Straße 2'), singleVenueTask, now)[0].address, undefined, 'changed venue is not guessed');
+assert.equal(extractMerchantOfferCandidates(singleVenueHtml.replace('Aktionen:', 'Speisekarte:'), singleVenueTask, now).length, 0, 'ordinary menu is not the reviewed promotional layout');
+assert.equal(extractMerchantOfferCandidates(singleVenueHtml.replace('customPage', 'newLayout'), singleVenueTask, now).length, 0, 'unknown layout cannot borrow sidebar benefits');
+const singleVenueValidation = await validateDealsForSlack(singleVenue, { now, inspectDealUrlHealth: async url => ({ status: 200, finalUrl: url, dateHints: {} }) });
+assert.equal(singleVenueValidation.allowedDeals.length, 1, JSON.stringify(singleVenueValidation.results));
 const websiteResult = await validateDealsForSlack([unresolved], { now, inspectDealUrlHealth: async url => ({ status: 200, finalUrl: url, dateHints: {} }) });
 assert.equal(websiteResult.allowedDeals.length, 0);
 const review = selectFirecrawlReviewDeals(websiteResult.results, { now });

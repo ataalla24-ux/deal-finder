@@ -11,7 +11,7 @@ import {
 import { isAllowedFoodUrl } from "./power-food-sources.js";
 
 const FOOD =
-  /weckerl|laugenring|mohnschnecke|baguette|dinkel|kornspitz|kaffee|coffee|cappuccino|espresso|melange|matcha|tee\b|kakao|heißgetränk|heissgetraenk|mocktail|cocktail|drink|spritz|bier|beer|wein|limonade|getränk|burger|pizza|pasta|pommes|fries|kebab|kebap|döner|doener|schnitzel|hot.?dog|frühstück|breakfast|jause|brot|br[eö]t|breze|gebäck|semmel|knopferl|topfini|croissant|kuchen|strudel|dessert|eis\b|menü|menu|gericht|hauptspeise|teller|bällchen|waffel|sandwich|falafel|sushi|ramen|fish|fisch|backfisch|lachs|schollen|garnelen|chicken|snack|minis\s*xxl|schoko/i;
+  /weckerl|laugenring|mohnschnecke|baguette|dinkel|kornspitz|kaffee|coffee|cappuccino|espresso|melange|matcha|tee\b|kakao|heißgetränk|heissgetraenk|mocktail|cocktail|drink|spritz|bier|beer|wein|limonade|getränk|burger|pizza|pasta|pommes|fries|kebab|kebap|döner|doener|schnitzel|hot.?dog|frühstück|breakfast|jause|brot|br[eö]t|breze|gebäck|semmel|knopferl|topfini|croissant|kuchen|strudel|dessert|eis\b|menü|menu|gericht|hauptspeise|teller|bällchen|waffel|sandwich|falafel|sushi|ramen|fish|fisch|backfisch|lachs|schollen|garnelen|chicken|backhuhn|backhendl|snack|minis\s*xxl|schoko/i;
 const PRICE =
   /(?:€\s*\d{1,3}(?:[,.]\d{1,2})?|\d{1,3}(?:[,.]\d{1,2})?\s*(?:€|EUR\b|Euro\b))/i;
 const BENEFIT =
@@ -115,7 +115,7 @@ export function extractFoodExpiry(text, now) {
     validUntil,
     raw: end?.[0] || start?.[0] || compact?.[0] || (namedUntil ? namedEnd[0] : ""),
     recurring:
-      /bis auf widerruf|bis auf wiederuf|jeden|täglich|wochentags|montag bis|freitag und samstag|(?:montag|dienstag|mittwoch|donnerstag|freitag|samstag|sonntag) ist \w+tag|\b(?:daily|everyday|every\s+(?:day|monday|tuesday|wednesday|thursday|friday|saturday|sunday))\b/i.test(
+      /bis auf widerruf|bis auf wiederuf|jeden|täglich|wochentags|montag bis|freitag und samstag|(?:montag|dienstag|mittwoch|donnerstag|freitag|samstag|sonntag)\s*[-–]\s*(?:montag|dienstag|mittwoch|donnerstag|freitag|samstag|sonntag)\b|(?:montag|dienstag|mittwoch|donnerstag|freitag|samstag|sonntag) ist \w+tag|\b(?:daily|everyday|every\s+(?:day|monday|tuesday|wednesday|thursday|friday|saturday|sunday))\b/i.test(
         text,
       ),
   };

@@ -2,6 +2,7 @@ import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
+import { execFileSync } from 'node:child_process';
 
 import {
   buildPipelineRunReport,
@@ -54,6 +55,33 @@ assert.equal(verifier.registryViennaEvidence, 1);
 
 const docsDir = fs.mkdtempSync(path.join(os.tmpdir(), 'freefinder-pipeline-report-'));
 try {
+  const git = args => execFileSync('git', ['-C', docsDir, ...args], { encoding: 'utf8', stdio: ['ignore', 'pipe', 'pipe'] }).trim();
+  git(['init', '--quiet']);
+  git(['-c', 'user.name=Offline fixture', '-c', 'user.email=fixture@example.invalid',
+    '-c', 'commit.gpgsign=false', 'commit', '--allow-empty', '-m', 'Fixture']);
+  const checkoutSha = git(['rev-parse', 'HEAD']);
+  const eventPath = path.join(docsDir, 'event.json');
+  const triggeringRun = { id: 456, head_sha: 'b'.repeat(40), event: 'schedule',
+    name: 'TikTok Deal Scanner', run_started_at: '2026-11-11T17:15:00Z',
+    head_repository: { full_name: github.GITHUB_REPOSITORY }, ignoredSecret: 'do-not-copy-event-secrets' };
+  fs.writeFileSync(eventPath, JSON.stringify({ workflow_run: triggeringRun, other: 'never-persist-this' }));
+  const dispatchEnv = { ...github, GITHUB_EVENT_NAME: 'workflow_run', GITHUB_WORKSPACE: docsDir, GITHUB_EVENT_PATH: eventPath };
+  const provenance = githubRunProvenance(dispatchEnv);
+  assert.equal(provenance.headSha, github.GITHUB_SHA, 'event SHA is retained separately');
+  assert.equal(provenance.checkoutSha, checkoutSha, 'actual checked-out source is measured');
+  assert.equal(provenance.triggeringRun.runId, '456');
+  assert.equal(provenance.triggeringRun.event, 'schedule');
+  assert.equal(provenance.triggeringRun.headSha, triggeringRun.head_sha);
+  assert(!JSON.stringify(provenance).includes('do-not-copy-event-secrets'));
+  assert(!JSON.stringify(provenance).includes('never-persist-this'));
+  assert.equal(githubRunProvenance({ ...dispatchEnv, GITHUB_WORKSPACE: path.join(docsDir, 'missing') }).checkoutSha, null);
+  fs.writeFileSync(eventPath, JSON.stringify({ workflow_run: { ...triggeringRun, event: 'workflow_dispatch' } }));
+  assert.equal(githubRunProvenance(dispatchEnv).triggeringRun.event, 'workflow_dispatch', 'manual collectors never count as scheduled');
+  fs.writeFileSync(eventPath, JSON.stringify({ workflow_run: { ...triggeringRun, head_repository: { full_name: 'foreign/repo' } } }));
+  assert.equal(githubRunProvenance(dispatchEnv).triggeringRun, null);
+  fs.writeFileSync(eventPath, '{invalid');
+  assert.equal(githubRunProvenance(dispatchEnv).triggeringRun, null);
+  assert.equal(githubRunProvenance({ ...dispatchEnv, GITHUB_EVENT_NAME: 'schedule' }).triggeringRun, null);
   writePipelineRunReport(report, { docsDir, historyLimit: 2 });
   const second = buildPipelineRunReport({
     ...report,
