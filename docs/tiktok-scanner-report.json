@@ -1,5 +1,15 @@
 {
-  "lastUpdated": "2026-11-10T22:22:09.699Z",
+  "lastUpdated": "2026-11-11T12:42:48.805Z",
+  "runProvenance": {
+    "repository": "ataalla24-ux/deal-finder",
+    "runId": "43022561238",
+    "headSha": "9d584619dd44fb287d7ddc9e0d8d38a4a5848790",
+    "checkoutSha": "9d584619dd44fb287d7ddc9e0d8d38a4a5848790",
+    "triggeringRun": null,
+    "event": "schedule",
+    "runAttempt": "1",
+    "url": "https://github.com/ataalla24-ux/deal-finder/actions/runs/43022561238"
+  },
   "status": "discovery-degraded",
   "outputPreserved": true,
   "config": {
@@ -45,8 +55,8 @@
     "wien pizza 1+1",
     "wien gratis essen",
     "vienna free food",
-    "wien gratis 10 november 2026",
-    "wien deal 10 november 2026",
+    "wien gratis 11 november 2026",
+    "wien deal 11 november 2026",
     "wien gratis november 2026",
     "wien aktion november 2026",
     "wien rabatt november 2026",
@@ -112,36 +122,20 @@
   "discovered": 0,
   "apiCandidates": 0,
   "apiDiscovery": {
-    "errors": [
-      {
-        "keyword": "wien gratis kaffee",
-        "offset": 0,
-        "status": 200,
-        "error": "TikTok returned a provider error",
-        "code": "provider-error",
-        "providerCode": "2483"
-      }
-    ],
-    "attemptedRequests": 1,
+    "errors": [],
+    "attemptedRequests": 0,
     "emptyResponses": 0,
     "rawItems": 0,
     "normalizedItems": 0,
     "ignoredItems": 0,
-    "stoppedReason": "provider-error",
+    "stoppedReason": "api-cooldown",
     "nextRetryAt": "2026-11-11T22:22:04.465Z",
     "nextKeywordIndex": 1
   },
   "searchDiscovery": {
-    "errors": [
-      {
-        "query": "site:tiktok.com wien pizza 1+1",
-        "error": "Search challenge; no bypass attempted",
-        "httpStatus": 403,
-        "retryAt": ""
-      }
-    ],
-    "attemptedQueries": 4,
-    "stoppedReason": "search-unavailable",
+    "errors": [],
+    "attemptedQueries": 0,
+    "stoppedReason": "search-cooldown",
     "nextRetryAt": "2026-11-11T22:22:04.852Z",
     "lastAttemptAt": "2026-11-10T22:22:04.852Z",
     "nextQueryIndex": 4,
@@ -197,6 +191,7 @@
     "downloadRetries": 0,
     "retryableFailures": 0,
     "retriedCacheEntries": 0,
+    "aiRetryBudgetDeferred": 0,
     "duplicateEntries": 0,
     "skippedResolved": 0,
     "aiSkippedCircuitOpen": 0,
@@ -216,6 +211,7 @@
       "ffprobe": true
     },
     "ocrAvailable": true,
+    "ocrReused": 0,
     "backlogPending": 0,
     "backlogOldestAt": null,
     "rescueCandidates": 0,
@@ -225,28 +221,12 @@
     "aiAcceptedUnusable": 0
   },
   "timings": {
-    "apiDiscoveryMs": 3383,
-    "searchDiscoveryMs": 4567,
-    "mediaRescueMs": 142,
-    "totalScannerMs": 8410
+    "apiDiscoveryMs": 34,
+    "searchDiscoveryMs": 1,
+    "mediaRescueMs": 176,
+    "totalScannerMs": 1400
   },
-  "discoveryErrors": [
-    {
-      "query": "site:tiktok.com wien pizza 1+1",
-      "error": "Search challenge; no bypass attempted",
-      "httpStatus": 403,
-      "retryAt": ""
-    }
-  ],
-  "apiErrors": [
-    {
-      "keyword": "wien gratis kaffee",
-      "offset": 0,
-      "status": 200,
-      "error": "TikTok returned a provider error",
-      "code": "provider-error",
-      "providerCode": "2483"
-    }
-  ],
+  "discoveryErrors": [],
+  "apiErrors": [],
   "rejected": []
 }
