@@ -2,9 +2,151 @@
   "schemaVersion": 1,
   "sourceKey": "instagram-apify2",
   "sourceLabel": "Apify 2 Vienna Food Discovery",
-  "updatedAt": "2026-11-11T12:52:05.262Z",
-  "runCount": 39,
+  "updatedAt": "2026-11-11T23:34:25.464Z",
+  "runCount": 40,
   "runs": [
+    {
+      "schemaVersion": 1,
+      "runProvenance": {
+        "repository": "ataalla24-ux/deal-finder",
+        "runId": "43120751025",
+        "headSha": "531f2871becfdd42a540563436318c01395bcbd4",
+        "checkoutSha": "72ac1efa503f22e47bf2a32a92e3aca6c735a1db",
+        "triggeringRun": null,
+        "event": "schedule",
+        "runAttempt": "1",
+        "url": "https://github.com/ataalla24-ux/deal-finder/actions/runs/43120751025"
+      },
+      "runId": "instagram-apify2-2026-11-11T23:34:25.464Z",
+      "sourceKey": "instagram-apify2",
+      "sourceLabel": "Apify 2 Vienna Food Discovery",
+      "status": "completed",
+      "startedAt": "2026-11-11T23:34:05.731Z",
+      "finishedAt": "2026-11-11T23:34:25.464Z",
+      "durationMs": 19733,
+      "outputFile": "docs/deals-pending-instagram-apify2.json",
+      "counts": {
+        "rawCandidates": 4,
+        "normalizedCandidates": 4,
+        "verifiedCandidates": 0,
+        "previousDeals": 0,
+        "acceptedDeals": 0,
+        "rejectedDeals": 4
+      },
+      "rejectedByReason": {
+        "non-food-ad": 2,
+        "alcohol-offer": 2
+      },
+      "rejectedSamples": [
+        {
+          "reason": "non-food-ad",
+          "deal": {
+            "id": "",
+            "title": "",
+            "brand": "",
+            "url": "https://www.instagram.com/p/DfnIaD9GYQb/",
+            "source": "",
+            "pubDate": "",
+            "expires": "",
+            "postVerificationStatus": ""
+          }
+        },
+        {
+          "reason": "non-food-ad",
+          "deal": {
+            "id": "",
+            "title": "",
+            "brand": "",
+            "url": "https://www.instagram.com/p/Dfm7N0Nl5rq/",
+            "source": "",
+            "pubDate": "",
+            "expires": "",
+            "postVerificationStatus": ""
+          }
+        },
+        {
+          "reason": "alcohol-offer",
+          "deal": {
+            "id": "",
+            "title": "",
+            "brand": "",
+            "url": "https://www.instagram.com/p/DfnHkZZkVqi/",
+            "source": "",
+            "pubDate": "",
+            "expires": "",
+            "postVerificationStatus": ""
+          }
+        },
+        {
+          "reason": "alcohol-offer",
+          "deal": {
+            "id": "",
+            "title": "",
+            "brand": "",
+            "url": "https://www.instagram.com/p/DfnfbZIFmxQ/",
+            "source": "",
+            "pubDate": "",
+            "expires": "",
+            "postVerificationStatus": ""
+          }
+        }
+      ],
+      "diagnostics": {
+        "pendingDeals": 0,
+        "unchangedPosts": 0,
+        "providerErrors": 0,
+        "emptySourceRecords": 0,
+        "ocrCalls": 2,
+        "sources": [
+          {
+            "key": "hashtag:esseninwien",
+            "lastAttemptAt": "2026-11-11T23:34:05.731Z",
+            "status": "posts-returned",
+            "postsReturned": 1,
+            "consecutiveFailures": 0,
+            "consecutiveEmpty": 0,
+            "retryAt": ""
+          },
+          {
+            "key": "hashtag:viennafood",
+            "lastAttemptAt": "2026-11-11T23:34:05.731Z",
+            "postsReturned": 1,
+            "status": "posts-returned",
+            "consecutiveFailures": 0,
+            "retryAt": "",
+            "consecutiveEmpty": 0
+          },
+          {
+            "key": "hashtag:wienfood",
+            "lastAttemptAt": "2026-11-11T23:34:05.731Z",
+            "postsReturned": 1,
+            "status": "posts-returned",
+            "consecutiveFailures": 0,
+            "retryAt": "",
+            "consecutiveEmpty": 0
+          },
+          {
+            "key": "hashtag:wienisst",
+            "lastAttemptAt": "2026-11-11T23:34:05.731Z",
+            "postsReturned": 1,
+            "status": "posts-returned",
+            "consecutiveFailures": 0,
+            "retryAt": "",
+            "consecutiveEmpty": 0
+          }
+        ]
+      },
+      "constraints": {
+        "profiles": 22,
+        "hashtags": 4,
+        "perSource": 1,
+        "posts": 26,
+        "ocrPosts": 8,
+        "dailyUsd": 0.15,
+        "cycleUsd": 4.65
+      },
+      "errors": []
+    },
     {
       "schemaVersion": 1,
       "runProvenance": {
