@@ -2,6 +2,17 @@
 // proof that every promotion on the domain applies in Vienna.
 export const POWER_FOOD_SOURCES = [
   {
+    name: 'Mömax Restaurant',
+    brand: 'Mömax',
+    url: 'https://www.moemax.at/c/unserrestaurant',
+    allowedHosts: ['www.moemax.at'],
+    pathPrefix: '/c/unserrestaurant',
+    linkPattern: /\/c\/unserrestaurant$/,
+    couponMedia: 'moemax-reviewed-v1',
+    mediaOnly: true,
+    category: 'essen',
+  },
+  {
     name: 'Lets be Frank',
     brand: "Let's be Frank",
     url: 'https://letsbefrank.at/specials/',

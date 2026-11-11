@@ -11,7 +11,7 @@ import {
 import { isAllowedFoodUrl } from "./power-food-sources.js";
 
 const FOOD =
-  /weckerl|laugenring|mohnschnecke|baguette|dinkel|kornspitz|kaffee|coffee|cappuccino|espresso|melange|matcha|tee\b|kakao|heißgetränk|heissgetraenk|mocktail|cocktail|drink|spritz|bier|beer|wein|limonade|getränk|burger|pizza|pasta|pommes|fries|kebab|kebap|döner|doener|schnitzel|hot.?dog|frühstück|breakfast|jause|brot|br[eö]t|breze|gebäck|semmel|knopferl|topfini|croissant|kuchen|strudel|dessert|eis\b|menü|menu|gericht|hauptspeise|teller|bällchen|waffel|sandwich|falafel|sushi|ramen|fish|fisch|backfisch|lachs|schollen|garnelen|chicken|backhuhn|backhendl|snack|minis\s*xxl|schoko/i;
+  /weckerl|laugenring|mohnschnecke|baguette|dinkel|kornspitz|kaffee|coffee|cappuccino|espresso|melange|matcha|tee\b|kakao|heißgetränk|heissgetraenk|mocktail|cocktail|drink|spritz|bier|beer|wein|limonade|getränk|burger|pizza|pasta|spaghetti|\bsteak\b|pommes|fries|kebab|kebap|döner|doener|schnitzel|hot.?dog|frühstück|breakfast|jause|brot|br[eö]t|breze|gebäck|semmel|knopferl|topfini|croissant|kuchen|strudel|dessert|eis\b|menü|menu|gericht|hauptspeise|teller|bällchen|waffel|sandwich|falafel|sushi|ramen|fish|fisch|backfisch|lachs|schollen|garnelen|chicken|backhuhn|backhendl|snack|minis\s*xxl|schoko/i;
 const PRICE =
   /(?:€\s*\d{1,3}(?:[,.]\d{1,2})?|\d{1,3}(?:[,.]\d{1,2})?\s*(?:€|EUR\b|Euro\b))/i;
 const BENEFIT =
@@ -159,6 +159,7 @@ export function extractFoodOffers(html, source, options = {}) {
       rejected: [{ reason: "foreign-redirect", url: pageUrl }],
       links: [],
     };
+  if (source.mediaOnly) return {deals:[],rejected:[],links:[]};
   const $ = load(html);
   $("script,style,noscript,nav,footer,header").remove();
   const bodyText = textOf($, $("body"));

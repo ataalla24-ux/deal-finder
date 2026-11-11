@@ -59,15 +59,17 @@ export async function crawlFoodSource(source, options) {
         rejected.push(...media.rejected);
       }
       const mediaFailed = media?.assets.filter(a=>a.status==='error') || [];
+      const mediaDeferred = media?.assets.filter(a=>a.status==='deferred') || [];
       pages.push({
         url,
         finalUrl: response.finalUrl || url,
-        status: mediaFailed.length ? 'error' : 'ok',
+        status: mediaFailed.length ? 'error' : mediaDeferred.length ? 'needs-review' : 'ok',
         candidates: parsed.deals.length + (media?.deals.length || 0),
         bytes: response.bytes || response.html.length,
         ...(media ? {media:media.assets} : {}),
         ...(mediaFailed.length ? {error:mediaFailed.map(a=>a.error).join('; '),
           httpStatus:mediaFailed[0].httpStatus,retryAt:mediaFailed[0].retryAt} : {}),
+        ...(!mediaFailed.length && mediaDeferred.length ? {error:mediaDeferred.map(a=>a.error).join('; ')} : {}),
       });
       if (mediaFailed.some(a=>/HTTP (401|403|429)/.test(a.error))) break;
       for (const link of discoverFoodLinks(

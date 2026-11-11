@@ -9,6 +9,8 @@ import {POWER_FOOD_SOURCES,isAllowedFoodUrl} from '../scraper/power-food-sources
 import {verifyOfficialFoodDeal} from '../scraper/power-food-verification.js';
 import {crawlFoodSource} from '../scraper/power-food-crawler.js';
 import {applyCardEditorial} from '../scraper/deal-card-editor.js';
+import {reviewedRestaurantCards, allowedRestaurantCouponAsset} from '../scraper/reviewed-restaurant-coupons.js';
+import fs from 'node:fs';
 const source = POWER_FOOD_SOURCES.find(s=>s.name==='NORDSEE');
 const now = new Date('2026-10-23T12:00:00Z');
 const url = source.url+'/pdf';
@@ -19,6 +21,61 @@ const data = Buffer.from('%PDF-fixture');
 card.sha256 = crypto.createHash('sha256').update('unchanged coupon pixels').digest('hex');
 const asset = {kind:'pdf',url,sha256:crypto.createHash('sha256').update(data).digest('hex')};
 const mocks = {fetchAsset:async()=>data,readAsset:async()=>[card]};
+const restaurantDocument = JSON.parse(fs.readFileSync(new URL('../reviews/restaurant-coupon-documents.json', import.meta.url))).documents[0];
+const restaurantSource = POWER_FOOD_SOURCES.find(s=>s.name==='Mömax Restaurant');
+const restaurantAsset = {kind:'pdf',format:'reviewed-restaurant-v1',url:restaurantDocument.url,sha256:restaurantDocument.sha256};
+const restaurantHtml = `<a href="${restaurantAsset.url}">Exklusive Angebote des Monats</a>`;
+
+test('restaurant PDF transport only accepts its dedicated Austrian CDN paths',()=>{
+  assert.ok(allowedRestaurantCouponAsset(restaurantAsset.url,'pdf'));
+  for(const url of [restaurantAsset.url+'?redirect=evil',restaurantAsset.url+'#x',restaurantAsset.url.replace('https:','http:'),restaurantAsset.url.replace('moemax.a.bigcontent.io','other.a.bigcontent.io'),restaurantAsset.url.replace('at_dvat','de_dvat')]) assert.equal(allowedRestaurantCouponAsset(url,'pdf'),false,url);
+  assert.equal(allowedRestaurantCouponAsset(restaurantAsset.url,'image'),false);
+});
+test('reviewed restaurant facts require exact current document identity; changed documents held',()=>{
+  const cards=reviewedRestaurantCards(restaurantAsset);
+  assert.equal(cards.length,5);
+  assert.equal(new Set(cards.map(c=>c.title)).size,5);
+  assert.match(cards[1].title,/5,50/);
+  assert.match(cards[1].footer,/Abholpreise.*Pro Person ein Gutschein.*vorzeigen und abgeben.*Vorrat/);
+  assert.ok(cards.every(c=>!/Stiegl|Bier|After Work/i.test(c.footer)));
+  assert.throws(()=>reviewedRestaurantCards({...restaurantAsset,sha256:'a'.repeat(64)}),/needs-review/);
+  assert.throws(()=>reviewedRestaurantCards({...restaurantAsset,url:restaurantAsset.url.replace('44-6','45-6')}),/needs-review/);
+});
+test('Mömax offers require linked reviewed PDF, not normal menu prices or an arbitrary merchant',async()=>{
+  assert.equal(discoverCouponMedia(restaurantHtml,restaurantSource).length,1);
+  assert.deepEqual(discoverCouponMedia(restaurantHtml,{...restaurantSource,couponMedia:undefined}),[]);
+  assert.deepEqual(discoverCouponMedia(restaurantHtml,restaurantSource,'https://evil.test'),[]);
+  const {extractFoodOffers}=await import('../scraper/power-food-extraction.js');
+  assert.equal(extractFoodOffers('<h2>Burger für 5 €</h2><p>Aktionspreis für Möbelkunden!</p>',restaurantSource).deals.length,0);
+});
+test('all five restaurant coupons preserve dates and conditions, expiry rejects them',()=>{
+  for(const c of reviewedRestaurantCards(restaurantAsset)) {
+    const {deal}=couponCardOffer(c,restaurantAsset,restaurantSource,new Date('2026-11-11T12:00Z'));
+    assert.ok(deal,c.title);
+    assert.equal(deal.validFrom,'2026-11-02');
+    assert.equal(deal.validUntil,'2026-11-30');
+    assert.equal(deal.category,'essen');
+    assert.ok(deal.reviewRequired);
+    assert.equal(deal.evidence.restaurantLocations.addresses.length,4);
+    assert.equal(couponCardOffer(c,restaurantAsset,restaurantSource,new Date('2026-12-01T12:00Z')).deal,undefined);
+  }
+});
+test('unknown restaurant PDF is deferred without OCR, AI, retries or pretending no offers',async()=>{
+  let reads=0;
+  const r=await crawlFoodSource(restaurantSource,{now:new Date('2026-11-11T12:00Z'),
+    fetchPage:async()=>({html:restaurantHtml,finalUrl:restaurantSource.url}),
+    couponMedia:{fetchAsset:async()=>{reads++;return Buffer.from('%PDF-unknown');}}});
+  assert.equal(reads,1);assert.equal(r.rows.length,0);
+  assert.equal(r.pages[0].status,'needs-review');
+  assert.equal(r.pages[0].media[0].error,'coupon-document-needs-review');
+  assert.notEqual(r.operationalStatus,'no-offers');
+});
+test('blocked restaurant root cannot be bypassed by directly fetching the PDF',async()=>{
+  let pdfCalls=0;
+  const r=await crawlFoodSource(restaurantSource,{fetchPage:async()=>{throw Object.assign(new Error('HTTP 403'),{status:403});},
+    couponMedia:{fetchAsset:async()=>{pdfCalls++;return data;}}});
+  assert.equal(pdfCalls,0);assert.equal(r.rows.length,0);assert.equal(r.pages.length,1);
+});
 
 test('asset allowlist is separate from HTML URL policy',()=>{
   assert.ok(allowedCouponAsset(url,'pdf'));

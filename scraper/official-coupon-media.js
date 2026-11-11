@@ -8,6 +8,7 @@ import { promisify } from 'node:util';
 import { extractFoodOffers, foodText } from './power-food-extraction.js';
 import { sourceHttpError, sourceFailureFields } from './source-http-policy.js';
 import { discoveryRejection } from './deal-discovery-policy.js';
+import { allowedRestaurantCouponAsset, reviewedRestaurantCards, MOEMAX_RESTAURANT } from './reviewed-restaurant-coupons.js';
 
 const exec = promisify(execFile);
 const HASH = data => crypto.createHash('sha256').update(data).digest('hex');
@@ -17,6 +18,7 @@ const MAX_CARDS = 12;
 const escapes = value => String(value).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 
 export function allowedCouponAsset(value, kind) {
+  if (allowedRestaurantCouponAsset(value, kind)) return true;
   try {
     const u = new URL(value);
     if (u.protocol !== 'https:' || u.hostname !== 'www.nordsee.com' || u.port || u.username || u.password || u.hash) return false;
@@ -27,6 +29,13 @@ export function allowedCouponAsset(value, kind) {
 }
 
 export function discoverCouponMedia(html, source, pageUrl = source.url) {
+  if (source.couponMedia === 'moemax-reviewed-v1' && pageUrl === MOEMAX_RESTAURANT) {
+    const $ = load(html);
+    return [...new Set($('a[href]').toArray().map(e => {
+      try { return new URL($(e).attr('href'), pageUrl).href; } catch { return ''; }
+    }).filter(url => allowedRestaurantCouponAsset(url, 'pdf')))]
+      .slice(0, 1).map(url => ({kind:'pdf',url,title:'',format:'reviewed-restaurant-v1'}));
+  }
   if (source.couponMedia !== 'nordsee-at-v1' || pageUrl !== ROOT) return [];
   const $ = load(html);
   const assets = [];
@@ -122,6 +131,8 @@ async function ocrCard(file, dir, index, deadline) {
 }
 
 export async function readCouponAsset(asset, data) {
+  if (asset.format === 'reviewed-restaurant-v1')
+    return reviewedRestaurantCards({...asset, sha256: HASH(data)});
   if (process.env.COUPON_TOOLS_AVAILABLE === '0') throw new Error('coupon-tools-unavailable');
   const deadline = Date.now()+180000;
   const dir = await fs.mkdtemp(path.join(os.tmpdir(),'freefinder-coupon-'));
@@ -148,6 +159,19 @@ export async function readCouponAsset(asset, data) {
 }
 
 export function couponCardOffer(card, asset, source, now = new Date()) {
+  if (source.couponMedia === 'moemax-reviewed-v1' && asset.format === 'reviewed-restaurant-v1'
+      && card.format === 'reviewed-restaurant-v1') {
+    const html = `<article class="coupon"><h2>${escapes(card.title)}</h2><p>${escapes(card.footer)}</p></article>`;
+    const parsed = extractFoodOffers(html, {...source, mediaOnly:false, selector:'.coupon'}, {now,pageUrl:source.url});
+    const deal = parsed.deals[0];
+    if (!deal) return {reason:parsed.rejected[0]?.reason || 'coupon-not-an-offer'};
+    deal.evidence.extractionMethod = 'official-reviewed-coupon-document';
+    deal.evidence.media = {url:asset.url,kind:asset.kind,sha256:asset.sha256,index:card.index,cardSha256:card.sha256};
+    deal.evidence.restaurantLocations = {sourceUrl:card.locationSource,addresses:card.locations};
+    deal.reviewRequired = true;
+    deal.missingFields = [...new Set([...deal.missingFields,'Gutschein und teilnehmende Wiener Restaurants vor Veröffentlichung prüfen'])];
+    return {deal};
+  }
   const exclusion = discoveryRejection({title:asset.title || '',description:[card.footer,card.benefit,card.discount,card.side].join(' ')});
   if (exclusion) return {reason:exclusion};
   const footer = foodText(card.footer);
@@ -204,7 +228,7 @@ export async function extractCouponMediaOffers(html, source, options = {}) {
   if (options.assetUrl) selected = assets.filter(a=>a.url===options.assetUrl);
   for (const asset of selected) {
     try {
-      if (!options.readAsset && process.env.COUPON_TOOLS_AVAILABLE === '0') throw new Error('coupon-tools-unavailable');
+      if (!options.readAsset && asset.format !== 'reviewed-restaurant-v1' && process.env.COUPON_TOOLS_AVAILABLE === '0') throw new Error('coupon-tools-unavailable');
       const data = await (options.fetchAsset || fetchCouponAsset)(asset);
       const bound = {...asset,sha256:HASH(data)};
       const cards = await (options.readAsset || readCouponAsset)(bound,data);
@@ -216,7 +240,7 @@ export async function extractCouponMediaOffers(html, source, options = {}) {
       }
       result.assets.push({url:asset.url,kind:asset.kind,status:'ok',bytes:data.length,cards:cards.length,sha256:bound.sha256});
     } catch (error) {
-      result.assets.push({url:asset.url,kind:asset.kind,status:error.message === 'coupon-tools-unavailable' ? 'deferred' : 'error',error:error.message,...sourceFailureFields(error)});
+      result.assets.push({url:asset.url,kind:asset.kind,status:['coupon-tools-unavailable','coupon-document-needs-review'].includes(error.message) ? 'deferred' : 'error',error:error.message,...sourceFailureFields(error)});
       if ([401,403,429].includes(error.status || error.httpStatus) || /HTTP (401|403|429)/.test(error.message)) break;
     }
   }
