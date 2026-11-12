@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-11-12T09:34:26.586Z",
+  "generatedAt": "2026-11-12T09:36:23.379Z",
   "discoveryAvailability": {
     "note": "Transport evidence, not deal yield. Retry eligibility is not recovery. Candidate counts are not Slack deliveries. No extra runs or quota resets.",
     "lanes": [
@@ -285,6 +285,7 @@
       "reportedSources": 9,
       "failedSources": [],
       "completedWithErrors": [
+        "food3",
         "joe",
         "power",
         "wien-combined"
@@ -600,22 +601,24 @@
         "Ort unklar: GOOD PIZZA. FREE PEPSI. 🥤🍕 Warum nur Pizza bestellen ..."
       ],
       "lastRun": {
-        "status": "completed",
-        "startedAt": "2026-11-11T09:01:10.043Z",
-        "finishedAt": "2026-11-11T09:02:24.632Z",
-        "durationMs": 74589,
+        "status": "completed-with-errors",
+        "startedAt": "2026-11-12T09:31:03.668Z",
+        "finishedAt": "2026-11-12T09:34:08.977Z",
+        "durationMs": 185309,
         "counts": {
-          "rawCandidates": 12,
-          "normalizedCandidates": 12,
-          "verifiedCandidates": 2,
-          "previousDeals": 0,
-          "acceptedDeals": 2,
-          "rejectedDeals": 10
+          "rawCandidates": 7,
+          "normalizedCandidates": 7,
+          "verifiedCandidates": 1,
+          "previousDeals": 1,
+          "acceptedDeals": 1,
+          "rejectedDeals": 7
         },
         "rejectedByReason": {
-          "post-verification-rejected": 10
+          "post-verification-rejected": 7
         },
-        "errors": [],
+        "errors": [
+          "https://www.instagram.com/explore/tags/lunchdealwien/: Firecrawl Agent nach 120s abgebrochen"
+        ],
         "reportFile": "deal-pipeline-last-run-food3.json"
       },
       "uniqueRate": 0,
