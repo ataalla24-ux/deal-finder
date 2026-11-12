@@ -24,7 +24,8 @@ export function getNonConsumerOfferRejection(value) {
   const text = offerText(value);
   const merchantMediaAudience = /\b(?:for\s+(?:vienna\s+)?(?:restaurants|bars|cafes|hotels)|fuer\s+(?:wiener\s+)?(?:restaurants|lokale|gastronomen)|restaurantbetreiber)\b/.test(text);
   const mediaService = /\b(?:reels?|edited\s+photos|bearbeitete\s+fotos|videoproduktion|werbevideos?|marketingpaket)\b/.test(text);
-  const foodPerk = /\b(?:gratis|kostenlos\w*|free)\s+(?:kaffee|coffee|pizza|burger|essen|menue)\b|\b(?:kaffee|coffee|pizza|burger|essen|menue)\s+(?:gratis|kostenlos\w*|free)\b/.test(text);
+  const foodPerk = /\b(?:gratis|kostenlos\w*|free)\s+(?:kaffee|coffee|pizza|burger|essen|menue)\b|\b(?:kaffee|coffee|pizza|burger|essen|menue)\s+(?:gratis|kostenlos\w*|free)\b/.test(text)
+    || /\b(?:\d{1,2}\s*%\s*(?:rabatt\s+)?(?:auf|off)|1\s*\+\s*1)\s+(?:(?:alle|unsere|the|our)\s+)?(?:speisen|essen|pizza|burger|kaffee|coffee|menues?|mocktails?)\b/.test(text);
   if (merchantMediaAudience && mediaService && BENEFIT.test(text) && !foodPerk) return 'business-lead-generation';
   const partnerRecruitment = /\b(?:partnerplaetze|partnerplatz|partner\s+in\s+wien)\b/.test(text)
     && /\b(?:handwerker|dienstleister|unternehmer|je\s+branche)\b/.test(text)

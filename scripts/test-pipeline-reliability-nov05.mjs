@@ -132,6 +132,8 @@ test('November 11 non-offers cannot pass the standard or food review lanes', asy
     'Konditorkrapfen: 4+1 gratis, 8+2 gratis, 16+4 gratis.',
     'Schritt-fuer-Schritt-Anleitungen mit Zutaten. Heute bei uns: 20% Rabatt auf Pizza mit Code PIZZA20.',
     'For Vienna restaurants: free edited photos. Fuer alle Gaeste gibt es gratis Kaffee.',
+    'For Vienna restaurants: free edited photos. Fuer alle Gaeste: 20% Rabatt auf Pizza.',
+    'For Vienna restaurants: free edited photos. Fuer alle Gaeste: 1+1 Burger.',
     'Baeume pflanzen in Wien: Heute gibt es gratis Pizza fuer alle Teilnehmer.',
   ]) assert.equal(discoveryRejection({ title: description, description }), '', description);
 });
