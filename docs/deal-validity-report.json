@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-11-12T14:40:32.663Z",
+  "generatedAt": "2026-11-12T15:08:20.066Z",
   "summary": {
     "maxAgeDays": 7,
     "total": 255,
@@ -11,7 +11,7 @@
       "Gottesdienste nur im Wochenlauf": 36,
       "älter als 7 Tage (2026-11-02)": 5,
       "älter als 7 Tage (2020-04-25)": 1,
-      "älter als 7 Tage (2026-02-22)": 80,
+      "älter als 7 Tage (2026-02-22)": 81,
       "URL ungültig (fehlende Ziel-URL)": 2,
       "älter als 7 Tage (2017-04-20)": 1,
       "älter als 7 Tage (2026-10-26)": 1,
@@ -41,7 +41,6 @@
       "älter als 7 Tage (2026-06-03)": 2,
       "älter als 7 Tage (2026-05-06)": 2,
       "älter als 45 Tage trotz ausdrücklich noch aktive Gültigkeit (2026-08-04)": 1,
-      "älter als 7 Tage (2023-07-18)": 1,
       "nicht eindeutig in Wien": 7,
       "älter als 7 Tage (2009-05-01)": 1,
       "älter als 7 Tage (2014-06-07)": 1,
@@ -882,7 +881,7 @@
       "warnings": [
         "kein Ablaufdatum gefunden"
       ],
-      "sourceDate": "2026-11-12T14:39:43.052Z",
+      "sourceDate": "2026-11-12T15:06:50.674Z",
       "sourceDateSource": "url.publicationDate",
       "sourceAgeDays": 0,
       "expiryDate": "",
@@ -1990,7 +1989,6 @@
         "älter als 7 Tage (2026-06-03)"
       ],
       "warnings": [
-        "URL nicht eindeutig prüfbar (temporärer Fehler)",
         "kein Ablaufdatum gefunden"
       ],
       "sourceDate": "2026-06-03T12:04:16.000Z",
@@ -1998,7 +1996,7 @@
       "sourceAgeDays": 162,
       "expiryDate": "",
       "expirySource": "",
-      "urlStatus": "unklar: temporärer URL-Fehler"
+      "urlStatus": "HTTP 200"
     },
     {
       "id": "g2-1fbs8a9",
@@ -2009,15 +2007,13 @@
       "reasons": [
         "älter als 7 Tage (2026-05-06)"
       ],
-      "warnings": [
-        "URL nicht eindeutig prüfbar (temporärer Fehler)"
-      ],
+      "warnings": [],
       "sourceDate": "2026-05-06T18:03:21.000Z",
       "sourceDateSource": "url.tiktokVideoId",
       "sourceAgeDays": 190,
       "expiryDate": "",
       "expirySource": "deal.expires",
-      "urlStatus": "unklar: temporärer URL-Fehler"
+      "urlStatus": "HTTP 200"
     },
     {
       "id": "g2-w9534k",
@@ -2807,15 +2803,17 @@
       "url": "https://www.stephansdom.at",
       "reasons": [
         "kein konkretes Angebot erkennbar",
-        "älter als 7 Tage (2023-07-18)"
+        "älter als 7 Tage (2026-02-22)"
       ],
-      "warnings": [],
-      "sourceDate": "2023-07-18T09:23:42.000Z",
-      "sourceDateSource": "url.publicationDate",
-      "sourceAgeDays": 1213,
+      "warnings": [
+        "URL nicht eindeutig prüfbar (temporärer Fehler)"
+      ],
+      "sourceDate": "2026-02-22T21:12:35.964Z",
+      "sourceDateSource": "deal.pubDate",
+      "sourceAgeDays": 263,
       "expiryDate": "",
       "expirySource": "deal.expires",
-      "urlStatus": "HTTP 200"
+      "urlStatus": "unklar: temporärer URL-Fehler"
     },
     {
       "id": "gottesdienste-3-20260222",
@@ -5227,16 +5225,23 @@
   ],
   "runProvenance": {
     "repository": "ataalla24-ux/deal-finder",
-    "runId": "43239376354",
-    "headSha": "e563a0c51928260cf5e37c87a63134dd331f29ad",
-    "checkoutSha": "e563a0c51928260cf5e37c87a63134dd331f29ad",
-    "triggeringRun": null,
-    "event": "workflow_dispatch",
+    "runId": "43244195931",
+    "headSha": "a71912ab34e64ee6e15393086c3f0b50fef61de9",
+    "checkoutSha": "a71912ab34e64ee6e15393086c3f0b50fef61de9",
+    "triggeringRun": {
+      "runId": "43241980362",
+      "headSha": "731b5673d257201af4fcfffc7651b2d60574e14c",
+      "event": "workflow_dispatch",
+      "name": "Meta Instagram Deal Discovery",
+      "startedAt": "2026-11-12T14:53:56.000Z",
+      "url": "https://github.com/ataalla24-ux/deal-finder/actions/runs/43241980362"
+    },
+    "event": "workflow_run",
     "runAttempt": "1",
-    "url": "https://github.com/ataalla24-ux/deal-finder/actions/runs/43239376354"
+    "url": "https://github.com/ataalla24-ux/deal-finder/actions/runs/43244195931"
   },
   "instagramDelivery": {
-    "checkedAt": "2026-11-12T14:40:32.674Z",
+    "checkedAt": "2026-11-12T15:08:20.081Z",
     "scope": "instagram-ai-agent/standard-slack-lane",
     "extractedCandidates": 3,
     "counts": {
@@ -5291,7 +5296,7 @@
     ]
   },
   "tiktokDelivery": {
-    "checkedAt": "2026-11-12T14:40:32.676Z",
+    "checkedAt": "2026-11-12T15:08:20.083Z",
     "scope": "tiktok-deals-scanner/standard-slack-lane",
     "extractedCandidates": 0,
     "counts": {},
