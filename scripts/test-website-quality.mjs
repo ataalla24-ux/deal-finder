@@ -148,7 +148,17 @@ assert.equal(normalizedIcons.slice(normalizedIcons.indexOf('<body>')), iconFixtu
 assert.equal(polishSiteIcons(normalizedIcons), normalizedIcons);
 assert.doesNotMatch(normalizedIcons, /old\.svg/);
 const invitationSource = read('docs/invite.html');
-assert.equal(load(invitationSource)('meta[property="og:url"]').length, 0, 'Keep invitation-link parameters intact');
+const invitationPage = load(invitationSource);
+const appDownloadPage = load(read('docs/app/index.html'));
+assert.equal(invitationPage('meta[property="og:url"]').length, 0, 'Keep invitation-link parameters intact');
+for (const selector of [
+  'meta[property="og:image"]', 'meta[property="og:image:secure_url"]', 'meta[property="og:image:type"]',
+  'meta[property="og:image:width"]', 'meta[property="og:image:height"]', 'meta[property="og:image:alt"]',
+  'meta[name="twitter:image"]', 'meta[name="twitter:image:alt"]',
+]) {
+  assert.equal(invitationPage(selector).length, 1, `Invitation preview: ${selector}`);
+  assert.equal(invitationPage(selector).attr('content'), appDownloadPage(selector).attr('content'), `Invitation and download preview: ${selector}`);
+}
 assert.equal(polishSharingMetadata(invitationSource), invitationSource);
 assert.equal(polishSharingMetadata(iconFixture), iconFixture, 'Do not add share previews to private tools');
 const shortcuts = manifest.shortcuts;

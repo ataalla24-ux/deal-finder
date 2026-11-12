@@ -3,6 +3,7 @@ import assert from 'node:assert/strict';
 const base = 'https://www.freefinder.at';
 const code = 'RM-0123456789ABCDEF01234567';
 const token = 'ASNFZ4mrze8BI0Vn';
+const previewURL = 'https://freefinder.at/assets/campaigns/app-food-preview-20261102.jpg';
 const results = [];
 const get = async url => fetch(url, { redirect: 'manual', signal: AbortSignal.timeout(15000) });
 
@@ -30,10 +31,15 @@ for (const suffix of ['', '?deal=pizza-1']) {
   const landing = await get(target);
   assert.equal(landing.status, 200);
   const html = await landing.text();
-  assert.match(html, /property="og:image"/);
-  assert.match(html, /invitation-20261020\.jpg/);
+  assert.ok(html.includes(`<meta property="og:image" content="${previewURL}">`));
+  assert.ok(html.includes(`<meta name="twitter:image" content="${previewURL}">`));
   results.push({ path, status: response.status, location: target, landing: landing.status, imageMetadata: true });
 }
+
+const preview = await get(previewURL);
+assert.equal(preview.status, 200);
+assert.match(preview.headers.get('content-type') || '', /^image\/jpeg\b/i);
+assert.equal(Buffer.from(await preview.arrayBuffer()).readUInt16BE(0), 0xffd8);
 
 for (const path of ['/i/too-short', '/i/' + token + '?next=https://example.com']) {
   const response = await get(base + path);
