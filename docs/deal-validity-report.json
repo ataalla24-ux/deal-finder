@@ -1,21 +1,22 @@
 {
-  "generatedAt": "2026-11-12T10:37:39.243Z",
+  "generatedAt": "2026-11-12T11:01:03.751Z",
   "summary": {
     "maxAgeDays": 7,
-    "total": 253,
-    "allowed": 0,
-    "blocked": 253,
-    "warnings": 0,
+    "total": 254,
+    "allowed": 2,
+    "blocked": 252,
+    "warnings": 1,
     "reasonCounts": {
       "kein konkretes Angebot erkennbar": 180,
       "Gottesdienste nur im Wochenlauf": 36,
       "älter als 7 Tage (2026-11-02)": 5,
       "älter als 7 Tage (2020-04-25)": 1,
-      "älter als 7 Tage (2026-02-22)": 81,
+      "älter als 7 Tage (2026-02-22)": 80,
       "URL ungültig (fehlende Ziel-URL)": 2,
       "älter als 7 Tage (2017-04-20)": 1,
       "älter als 7 Tage (2026-10-26)": 1,
-      "URL ungültig (HTTP 404)": 16,
+      "älter als 7 Tage (2025-07-30)": 1,
+      "URL ungültig (HTTP 404)": 14,
       "abgelaufen (2026-11-06)": 1,
       "älter als 7 Tage (2026-08-05)": 1,
       "abgelaufen (2026-07-01)": 1,
@@ -56,7 +57,7 @@
       "kein konkreter Deal": 180,
       "Gottesdienste außerhalb Wochenlauf": 36,
       "älter als 7 Tage": 145,
-      "ungültige URL": 24,
+      "ungültige URL": 22,
       "abgelaufen": 13,
       "sonstiges": 5,
       "Post-Datum in Zukunft": 3,
@@ -148,11 +149,11 @@
       },
       "Gutscheine.at": {
         "total": 8,
-        "allowed": 0,
-        "blocked": 8,
-        "warnings": 0,
+        "allowed": 1,
+        "blocked": 7,
+        "warnings": 1,
         "reasonCategoryCounts": {
-          "ungültige URL": 8,
+          "ungültige URL": 6,
           "abgelaufen": 3
         }
       },
@@ -220,8 +221,8 @@
         }
       },
       "vienna-merchant-website": {
-        "total": 3,
-        "allowed": 0,
+        "total": 4,
+        "allowed": 1,
         "blocked": 3,
         "warnings": 0,
         "reasonCategoryCounts": {
@@ -232,7 +233,40 @@
       }
     }
   },
-  "allowed": [],
+  "allowed": [
+    {
+      "id": "gs-16701",
+      "title": "Bis zu 20€ Rabatt nach Anmeldung zum Newsletter",
+      "brand": "123.live",
+      "source": "Gutscheine.at",
+      "url": "https://www.gutscheine.at/123-live",
+      "reasons": [],
+      "warnings": [
+        "URL nicht eindeutig prüfbar (temporärer Fehler)"
+      ],
+      "sourceDate": "2026-11-11T14:39:20.449Z",
+      "sourceDateSource": "deal.pubDate",
+      "sourceAgeDays": 1,
+      "expiryDate": "",
+      "expirySource": "deal.expires",
+      "urlStatus": "unklar: temporärer URL-Fehler"
+    },
+    {
+      "id": "merchant-web-8a4a878c29dd8a321161",
+      "title": "Fünf Angebote, jede Woche.",
+      "brand": "Da Luigi",
+      "source": "vienna-merchant-website",
+      "url": "https://www.da-luigi.at/aktionen.html",
+      "reasons": [],
+      "warnings": [],
+      "sourceDate": "2026-11-12T10:57:29.889Z",
+      "sourceDateSource": "deal.discoveredAt",
+      "sourceAgeDays": 0,
+      "expiryDate": "",
+      "expirySource": "deal.evidence.offerTiming",
+      "urlStatus": "HTTP 200"
+    }
+  ],
   "blocked": [
     {
       "id": "jesuszentrum-events-20261102",
@@ -685,18 +719,17 @@
       "reasons": [
         "kein konkretes Angebot erkennbar",
         "Gottesdienste nur im Wochenlauf",
-        "älter als 7 Tage (2026-02-22)"
+        "älter als 7 Tage (2025-07-30)"
       ],
       "warnings": [
-        "URL nicht eindeutig prüfbar (temporärer Fehler)",
         "kein Ablaufdatum gefunden"
       ],
-      "sourceDate": "2026-02-22T21:13:07.698Z",
-      "sourceDateSource": "deal.pubDate",
-      "sourceAgeDays": 263,
+      "sourceDate": "2025-07-30T05:18:47.000Z",
+      "sourceDateSource": "url.publicationDate",
+      "sourceAgeDays": 470,
       "expiryDate": "",
       "expirySource": "",
-      "urlStatus": "unklar: temporärer URL-Fehler"
+      "urlStatus": "HTTP 200"
     },
     {
       "id": "extra-21-20260222",
@@ -878,7 +911,7 @@
       "warnings": [
         "kein Ablaufdatum gefunden"
       ],
-      "sourceDate": "2026-11-12T10:36:15.122Z",
+      "sourceDate": "2026-11-12T10:59:34.396Z",
       "sourceDateSource": "url.publicationDate",
       "sourceAgeDays": 0,
       "expiryDate": "",
@@ -3372,23 +3405,6 @@
       "urlStatus": "ungültig: HTTP 404"
     },
     {
-      "id": "gs-16701",
-      "title": "Bis zu 20€ Rabatt nach Anmeldung zum Newsletter",
-      "brand": "123.live",
-      "source": "Gutscheine.at",
-      "url": "https://www.gutscheine.at/123-live",
-      "reasons": [
-        "URL ungültig (HTTP 404)"
-      ],
-      "warnings": [],
-      "sourceDate": "2026-11-11T14:39:20.449Z",
-      "sourceDateSource": "deal.pubDate",
-      "sourceAgeDays": 1,
-      "expiryDate": "",
-      "expirySource": "deal.expires",
-      "urlStatus": "ungültig: HTTP 404"
-    },
-    {
       "id": "gs-586256",
       "title": "Singles' Day: 25% auf nicht reduzierte Produkte & gratis Gua Sha Stein mit dem Code",
       "brand": "Asambeauty",
@@ -3431,16 +3447,17 @@
       "source": "Gutscheine.at",
       "url": "https://www.gutscheine.at/baby-walz",
       "reasons": [
-        "URL ungültig (HTTP 404)",
         "abgelaufen (2026-11-11)"
       ],
-      "warnings": [],
+      "warnings": [
+        "URL nicht eindeutig prüfbar (temporärer Fehler)"
+      ],
       "sourceDate": "2026-11-11T14:39:20.449Z",
       "sourceDateSource": "deal.pubDate",
       "sourceAgeDays": 1,
       "expiryDate": "2026-11-11",
       "expirySource": "deal.expires",
-      "urlStatus": "ungültig: HTTP 404"
+      "urlStatus": "unklar: temporärer URL-Fehler"
     },
     {
       "id": "gs-581290",
@@ -5174,23 +5191,23 @@
   ],
   "runProvenance": {
     "repository": "ataalla24-ux/deal-finder",
-    "runId": "43201700144",
-    "headSha": "995f8adf33e43cf3eb1a306647aedc206578d10f",
-    "checkoutSha": "995f8adf33e43cf3eb1a306647aedc206578d10f",
+    "runId": "43205173333",
+    "headSha": "1590797f750dc4c2d0f27a5b87a31baed9c3c285",
+    "checkoutSha": "1590797f750dc4c2d0f27a5b87a31baed9c3c285",
     "triggeringRun": {
-      "runId": "43200008333",
-      "headSha": "a865d60c7e36bdb710d82b96accf5cf10d02a196",
-      "event": "workflow_dispatch",
-      "name": "Meta Instagram Deal Discovery",
-      "startedAt": "2026-11-12T10:23:55.000Z",
-      "url": "https://github.com/ataalla24-ux/deal-finder/actions/runs/43200008333"
+      "runId": "43204867389",
+      "headSha": "0fdcf988a3e3a75d461f01565cfe1c19e260f0db",
+      "event": "schedule",
+      "name": "Vienna Merchant Discovery",
+      "startedAt": "2026-11-12T10:57:14.000Z",
+      "url": "https://github.com/ataalla24-ux/deal-finder/actions/runs/43204867389"
     },
     "event": "workflow_run",
     "runAttempt": "1",
-    "url": "https://github.com/ataalla24-ux/deal-finder/actions/runs/43201700144"
+    "url": "https://github.com/ataalla24-ux/deal-finder/actions/runs/43205173333"
   },
   "instagramDelivery": {
-    "checkedAt": "2026-11-12T10:37:39.258Z",
+    "checkedAt": "2026-11-12T11:01:04.672Z",
     "scope": "instagram-ai-agent/standard-slack-lane",
     "extractedCandidates": 3,
     "counts": {
@@ -5245,7 +5262,7 @@
     ]
   },
   "tiktokDelivery": {
-    "checkedAt": "2026-11-12T10:37:39.260Z",
+    "checkedAt": "2026-11-12T11:01:04.674Z",
     "scope": "tiktok-deals-scanner/standard-slack-lane",
     "extractedCandidates": 0,
     "counts": {},
