@@ -101,4 +101,55 @@ assert.equal(challengeForbidden.status, 'blocked');
 assert.equal(challengeForbidden.credentialsState, 'invalid');
 assert.equal(challengeForbidden.shouldRefreshCookies, true);
 
-console.log('instagram auth reliability tests passed');
+const browserConfig = { INSTAGRAM_AUTH_METHOD: 'own-profile-ui', INSTAGRAM_USERNAME: 'fixture_user' };
+const noLegacyEndpoint = async () => assert.fail('Browser mode must not call obsolete profile API');
+let browserCalls = 0;
+const validProfile = await validateInstagramAuth(cookies, {
+  env: browserConfig, nowMs, fetchImpl: noLegacyEndpoint,
+  browserProbe: async (input, account) => {
+    browserCalls++;
+    assert.deepEqual(input, cookies);
+    assert.equal(account, 'fixture_user');
+    return { ok: true, accountMatched: true };
+  },
+});
+assert.equal(browserCalls, 1);
+assert.equal(validProfile.ok, true);
+assert.equal(validProfile.canProceed, true);
+assert.equal(validProfile.shouldRefreshCookies, false);
+assert.equal(validProfile.username, 'configured-account');
+
+const pausedBrowser = await validateInstagramAuth(cookies, {
+  env: browserConfig, nowMs: nowMs + 30_000, previousReport: rateLimited,
+  fetchImpl: noLegacyEndpoint, browserProbe: async () => assert.fail('Do not bypass saved cooldown'),
+});
+assert.equal(pausedBrowser.canProceed, false);
+assert.equal(pausedBrowser.nextRetryAt, rateLimited.nextRetryAt);
+assert.equal(pausedBrowser.attempts, 0);
+
+const newBrowserLimit = await validateInstagramAuth(cookies, {
+  env: browserConfig, nowMs, fetchImpl: noLegacyEndpoint,
+  browserProbe: async () => { throw Object.assign(new Error('private provider response'), { status: 'rate-limited' }); },
+});
+assert.equal(newBrowserLimit.status, 'rate-limited');
+assert.equal(newBrowserLimit.canProceed, false);
+assert.equal(newBrowserLimit.shouldRefreshCookies, false);
+assert.equal(JSON.stringify(newBrowserLimit).includes('private provider'), false);
+
+const unconfirmedProfile = await validateInstagramAuth(cookies, {
+  env: browserConfig, nowMs, fetchImpl: noLegacyEndpoint,
+  browserProbe: async () => ({ ok: true, accountMatched: false }),
+});
+assert.equal(unconfirmedProfile.ok, false);
+assert.equal(unconfirmedProfile.canProceed, false);
+assert.equal(unconfirmedProfile.credentialsState, 'unknown');
+assert.equal(unconfirmedProfile.shouldRefreshCookies, false);
+
+const missingProfileAccount = await validateInstagramAuth(cookies, {
+  env: { INSTAGRAM_AUTH_METHOD: 'own-profile-ui' }, nowMs,
+  browserProbe: async () => assert.fail('Missing account must stop before browser starts'),
+});
+assert.equal(missingProfileAccount.status, 'missing-account');
+assert.equal(missingProfileAccount.attempts, 0);
+
+console.log('instagram auth reliability tests passed, including own-profile validation and preserved cooldowns');

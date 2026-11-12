@@ -54,10 +54,11 @@ jobs:
         env:
           INSTAGRAM_SESSIONID: ${{ secrets.INSTAGRAM_SESSIONID }}
           INSTAGRAM_COOKIES: ${{ secrets.INSTAGRAM_COOKIES }}
+          INSTAGRAM_USERNAME: ${{ secrets.INSTAGRAM_USERNAME }}
           INSTAGRAM_AUTH_CONTEXT: Firecrawl Daily Sync
-          INSTAGRAM_AUTH_TEST_USERNAME: ciosgrill
-          INSTAGRAM_AUTH_ATTEMPTS: "3"
-          INSTAGRAM_AUTH_BACKOFF_MS: "60000"
+          INSTAGRAM_AUTH_METHOD: own-profile-ui
+          INSTAGRAM_AUTH_ATTEMPTS: "1"
+          SENTRY_DISABLED: "1"
           INSTAGRAM_AUTH_CLEAR_PENDING_ON_FAILURE: "0"
           INSTAGRAM_AUTH_CLEAR_MODE: daily-sync
           SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}

@@ -223,6 +223,20 @@ function instagramHeaders(cookieHeader, username) {
   };
 }
 
+async function probeOwnProfile(cookies, username) {
+  const { chromium } = await import('playwright');
+  const { validateBrowserSession } = await import('./refresh-instagram-cookies.mjs');
+  const browser = await chromium.launch({ headless: true });
+  try {
+    const context = await browser.newContext({ locale: 'de-AT', timezoneId: 'Europe/Vienna' });
+    await context.addCookies(cookies.map(({ name, value }) => ({ name, value, domain: '.instagram.com', path: '/', secure: true })));
+    const page = await context.newPage();
+    return await validateBrowserSession(page, { username });
+  } finally {
+    await browser.close();
+  }
+}
+
 export async function validateInstagramAuth(cookies, options = {}) {
   const config = options.env || env;
   const nowMs = Number.isFinite(options.nowMs) ? options.nowMs : Date.now();
@@ -253,7 +267,7 @@ export async function validateInstagramAuth(cookies, options = {}) {
 
   const previous = previousRateLimitState(previousReport);
   if (previous.nextRetryAt && Date.parse(previous.nextRetryAt) > nowMs) {
-    return rateLimitResult({
+    const paused = rateLimitResult({
       username,
       diagnostics,
       previousReport,
@@ -262,6 +276,22 @@ export async function validateInstagramAuth(cookies, options = {}) {
       circuitOpen: true,
       config,
     });
+    if (config.INSTAGRAM_AUTH_METHOD === 'own-profile-ui') paused.canProceed = false;
+    return paused;
+  }
+
+  if (config.INSTAGRAM_AUTH_METHOD === 'own-profile-ui') {
+    const account = String(config.INSTAGRAM_USERNAME || '').trim();
+    const base = { username: 'configured-account', diagnostics, apiUserFound: false, validationMethod: 'own-profile-ui', shouldRefreshCookies: false, credentialsState: 'unknown', rateLimited: false, circuitOpen: false, canProceed: false };
+    if (!/^[a-z0-9._]{1,30}$/i.test(account)) return { ...base, ok: false, status: 'missing-account', reason: 'Scraper-Kontoname fehlt für die Profilprüfung', attempts: 0 };
+    try {
+      const result = await (options.browserProbe || probeOwnProfile)(cookies, account);
+      if (result?.ok !== true || result?.accountMatched !== true) throw new Error('Profile not confirmed');
+      return { ...base, ok: true, status: 'ok', reason: 'Sitzung und eigene Profilansicht bestätigt', attempts: 1, credentialsState: 'valid', canProceed: true, consecutiveRateLimits: 0, nextRetryAt: '' };
+    } catch (error) {
+      if (error?.status === 'rate-limited') return { ...rateLimitResult({ username: base.username, diagnostics, previousReport, nowMs, response: { status: 429 }, config }), validationMethod: 'own-profile-ui', canProceed: false };
+      return { ...base, ok: false, status: error?.status === 'blocked' ? 'blocked' : 'validation-unconfirmed', reason: 'Eigene Profilansicht nicht bestätigt; keine automatische Neuanmeldung', attempts: 1 };
+    }
   }
 
   const url = `https://www.instagram.com/api/v1/users/web_profile_info/?username=${encodeURIComponent(username)}`;
