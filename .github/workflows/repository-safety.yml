@@ -3,9 +3,9 @@ name: Repository Safety
 on:
   push:
     branches: [main]
-    paths: ['.github/workflows/**', 'scripts/test-workflow-permissions.rb', 'scripts/*launch-readiness.mjs', 'scripts/*secret-guard.mjs', 'scripts/instagram-session-audit.mjs']
+    paths: ['.github/workflows/**', 'scripts/test-workflow-permissions.rb', 'scripts/*launch-readiness.mjs', 'scripts/*secret-guard.mjs', 'scripts/instagram-session-audit.mjs', 'scripts/*public-state*.mjs', 'scripts/community-public-boundary.mjs', 'scripts/deals-feed-contract.mjs', 'scraper/deal-review-feedback.js']
   pull_request:
-    paths: ['.github/workflows/**', 'scripts/test-workflow-permissions.rb', 'scripts/*launch-readiness.mjs', 'scripts/*secret-guard.mjs', 'scripts/instagram-session-audit.mjs']
+    paths: ['.github/workflows/**', 'scripts/test-workflow-permissions.rb', 'scripts/*launch-readiness.mjs', 'scripts/*secret-guard.mjs', 'scripts/instagram-session-audit.mjs', 'scripts/*public-state*.mjs', 'scripts/community-public-boundary.mjs', 'scripts/deals-feed-contract.mjs', 'scraper/deal-review-feedback.js']
   workflow_dispatch:
 
 permissions:

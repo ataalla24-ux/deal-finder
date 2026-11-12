@@ -3,6 +3,7 @@ import { createHash } from 'node:crypto';
 import { fileURLToPath } from 'node:url';
 import path from 'node:path';
 import { inspectDealUrlHealth } from '../scraper/expiry-utils.js';
+import { redactPublishedCommunityDraft } from './community-public-boundary.mjs';
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const text = value => String(value || '').replace(/\s+/g, ' ').trim();
@@ -88,8 +89,8 @@ export async function buildReview(deals, edits = [], { inspect = inspectDealUrlH
     } catch { health = null; }
     entries.push({ id: deal.id, title: deal.title, url: deal.url, checkedAt: now.toISOString(),
       ...assessExpiry(deal, health, { now, protectedByEdit }),
-      // Preserve complete original record for audit; never rewrite the live feed here.
-      originalDeal: deal,
+      // Preserve public offer evidence, not the private submission payload.
+      originalDeal: redactPublishedCommunityDraft(deal),
     });
   }
   return { schemaVersion: 1, mode: 'shadow', apply: false, checkedAt: now.toISOString(), entries };

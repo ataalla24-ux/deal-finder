@@ -3,6 +3,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { sanitizePublicDealText } from '../scraper/public-deal-text.js';
 import { applyDealRedemptions, loadDealRedemptions } from './deal-redemptions.mjs';
+import { redactPublishedCommunityDraft } from './community-public-boundary.mjs';
 
 export const DEALS_FEED_SCHEMA_VERSION = 1;
 
@@ -27,7 +28,7 @@ export function stampDealsFeedBundle(bundle, options = {}) {
   const nowIso = options.nowIso || new Date().toISOString();
   const redemptionManifest = Object.hasOwn(options, 'redemptionManifest')
     ? options.redemptionManifest : loadDealRedemptions(options.redemptionManifestPath);
-  const deals = applyDealRedemptions(bundle.deals.map(sanitizePublicDealText), redemptionManifest, Date.parse(nowIso));
+  const deals = applyDealRedemptions(bundle.deals.map(redactPublishedCommunityDraft).map(sanitizePublicDealText), redemptionManifest, Date.parse(nowIso));
   return {
     ...bundle,
     deals,

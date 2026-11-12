@@ -38,7 +38,7 @@ export function reviewFeedbackKey(deal = {}) {
 export function normalizeReviewFeedbackStore(value = {}) {
   const events = ensureArray(value?.events)
     .filter((event) => event && typeof event === 'object' && cleanText(event.key, 300))
-    .map((event) => ({
+    .map(({ decisionUser, ...event }) => ({
       ...event,
       key: cleanText(event.key, 300),
       decision: ['approved', 'rejected'].includes(cleanText(event.decision, 20))
@@ -136,9 +136,6 @@ export function upsertReviewFeedback(store, deal, update = {}) {
     slackSentAt: isoTimestamp(update.slackSentAt || deal.pipelineLifecycle?.slackSentAt || previous.slackSentAt),
     decision,
     decidedAt: update.decision ? now : isoTimestamp(previous.decidedAt),
-    decisionUser: update.decision
-      ? cleanText(update.user, 120)
-      : cleanText(previous.decisionUser, 120),
     decisionSource: update.decision
       ? cleanText(update.decisionSource, 80)
       : cleanText(previous.decisionSource, 80),

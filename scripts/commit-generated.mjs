@@ -8,6 +8,7 @@ import { stampDealsFeedFile } from './deals-feed-contract.mjs';
 import { mergeSourceOutbox } from './generated-source-merge.mjs';
 import { privateCommunityRow } from './community-public-boundary.mjs';
 import { assertPublicationSafe } from './repository-secret-guard.mjs';
+import { minimizeCapturedPublicStates } from './minimize-public-state.mjs';
 
 const DEFAULT_REMOTE = process.env.GIT_GENERATED_REMOTE || 'origin';
 const DEFAULT_BRANCH = process.env.GIT_GENERATED_BRANCH || process.env.GITHUB_REF_NAME || 'main';
@@ -684,7 +685,7 @@ async function main() {
     return;
   }
 
-  const states = captureFiles(changedFiles);
+  const states = minimizeCapturedPublicStates(captureFiles(changedFiles));
   assertPublicationSafe(states);
   assertNoPrivateCommunityOutput(states);
   const mapConsistency = captureMapConsistency(states, baseRef, mapReadInputs);
@@ -699,10 +700,10 @@ async function main() {
       // Always compare with the original checkout, including on push retries.
       const mapRemoteHashes = assertMapRemoteInputs(mapConsistency, headRef);
       assertBlogConsistency(blogConsistency, states, headRef);
-      const safeStates = resolveSameFileRemoteChanges(states, baseRef, headRef, {
+      const safeStates = minimizeCapturedPublicStates(resolveSameFileRemoteChanges(states, baseRef, headRef, {
         skipConflicts: options.skipConflicts,
         replaceConflicts: options.replaceConflicts,
-      });
+      }));
       assertPublicationSafe(safeStates);
       assertNoPrivateCommunityOutput(safeStates);
       if(photoConsistency) {

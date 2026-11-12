@@ -19,6 +19,9 @@ on:
       - "scripts/test-deal-map-*.mjs"
       - "scripts/test-slack-business-map-review.mjs"
       - "scripts/commit-generated.mjs"
+      - "scripts/*public-state*.mjs"
+      - "scripts/community-public-boundary.mjs"
+      - "scraper/deal-review-feedback.js"
       - "scripts/validate-map-coverage.mjs"
       - "scraper/deal-normalization-utils.js"
       - "scripts/cache-deal-logos.mjs"
@@ -100,6 +103,9 @@ jobs:
 
       - name: Validate live feed contract
         run: npm run test:feed-contract
+
+      - name: Keep internal identity and submission payloads out of public output
+        run: node --test scripts/test-public-state-minimization.mjs scripts/test-repository-secret-guard.mjs
 
       - name: Validate reviewed in-app redemption details
         run: |
