@@ -1,0 +1,134 @@
+{
+  "reviewedAt": "2026-11-12",
+  "baseline": {
+    "commit": "95ec35b96ef4868c9f9c0085c0caaefb79ef4afb",
+    "feedSha256": "da6e9bb27133363aa2bceb31a3ae8ffe3049a30099d97a7393e81048dc80511c",
+    "total": 75,
+    "covered": 49,
+    "held": 17,
+    "informational": 4,
+    "missing": 5,
+    "changed": 1
+  },
+  "publication": {
+    "kind": "existing-guide-revision",
+    "slug": "ikea-1-euro-fruehstueck-wien",
+    "primaryKeyword": "IKEA Wien Nord 1 Euro Frühstück",
+    "url": "https://freefinder.at/blog/ikea-1-euro-fruehstueck-wien.html",
+    "expires": "2027-01-02T10:30:00+01:00",
+    "additions": [
+      "Friday/Saturday restaurant opening windows and holiday closures",
+      "Donaustadt address and transit access",
+      "Two-person breakfast price comparison",
+      "Branch-specific source and redemption conditions",
+      "Contextual link from the district guide and consistent search preview"
+    ],
+    "image": "/assets/blog/photos/breakfast.jpg",
+    "imagePolicy": "Existing locally generated FreeFinder symbol photo with its two WebP variants, catalogued in scripts/blog-photo-catalog.mjs."
+  },
+  "searchData": {
+    "freshMetrics": null,
+    "checked": [
+      "tracked repository exports",
+      "connected Google Drive",
+      "connected FreeFinder Gmail",
+      "available connector inventory"
+    ],
+    "historicalBasis": "2026-10-02 through 2026-10-29, reviewed 2026-10-30",
+    "opportunity": "Local inexpensive food intent seen in the historic district-guide work. Put branch, price and deadline in the title, with both time windows and district in the description. No IKEA-specific impression or CTR figures were available."
+  },
+  "sourceReceipts": {
+    "https://www.ikea.com/at/de/stores/wien-nord/": {
+      "httpStatus": 200,
+      "sha256": "7f42fbe2ff374a6adcd8cf7c922ce7eb313be78f1462fe79340f0affa6493cd8"
+    },
+    "https://www.ikea.com/at/de/offers/": {
+      "httpStatus": 200,
+      "sha256": "58e486154ec793c72efc9b99bc03684035029fca11173195a529d1142395bef2"
+    }
+  },
+  "coverageDecisions": [
+    {
+      "id": "fc4g-vqsqje",
+      "status": "covered",
+      "slug": "ikea-1-euro-fruehstueck-wien",
+      "decisionType": "substantive-existing-guide-revision",
+      "sources": [
+        "https://www.ikea.com/at/de/stores/wien-nord/",
+        "https://www.ikea.com/at/de/offers/",
+        "https://www.wienerlinien.at/fahrplaene"
+      ],
+      "finding": "Wien Nord confirms EUR 1 instead of EUR 2.99, from restaurant opening on Friday and Saturday until 10:30, through January 2, 2027. Regular windows Fri 09:00–10:30 and Sat 08:30–10:30. Holiday closures December 25–26 and January 1. While stocks last, no combination. Official nationwide page says until revoked; guide uses the exact branch deadline and does not infer menu components or a free drink."
+    },
+    {
+      "id": "meta-ig-17977851744156986",
+      "status": "held",
+      "decisionType": "source-verified-editorially-deferred",
+      "sources": [
+        "https://villavida.at/event/women-coffee-discover-the-stories-behind-every-cup-%E2%98%95/",
+        "https://www.instagram.com/p/DfmtMyGuGVB/embed/captioned/",
+        "https://villavida.at/reserve/"
+      ],
+      "finding": "Official venue event and merchant announcement confirm a free six-coffee tasting on November 21 at Linke Wienzeile 102. The announcement specifies 11:00–13:00, limited places and reservation; the venue’s Event metadata repeats the 11:00 start as its end. Availability was not tested. One dated session deferred in favor of the longer-running breakfast guide."
+    },
+    {
+      "id": "gs-585940",
+      "status": "held",
+      "decisionType": "merchant-expiry-unverified",
+      "sources": [
+        "https://www.converse.com/at/products/black-friday/singles-day?icid=WE_WE_2026_11_11_D_Hmpg_P1_SinglesDay_image",
+        "https://www.gutscheine.at/neue-gutscheine"
+      ],
+      "finding": "Official Austrian storefront, read via web search after a direct HTTP 403, shows 40 percent on selected marked styles. December 2 appears at the voucher portal and was not confirmed by the retailer. No new article for the online shopping offer."
+    },
+    {
+      "id": "meta-ig-17871407427661669",
+      "status": "held",
+      "decisionType": "source-verified-editorially-deferred",
+      "sources": [
+        "https://www.instagram.com/p/DfmOdD-MGGT/embed/captioned/",
+        "https://aida.at/en/location/"
+      ],
+      "finding": "Merchant caption and visually checked poster confirm 4+1, 8+2 and 16+4, while stocks last, daily fresh production and preorder for larger quantities. The November 11 start of Fasching is not an end date. The official locator confirms Singerstraße 1 in 1010 Wien; no branch-wide participation, price or mix-and-match guarantee was established. A distinct merchant offer from the archived one-day Tuchlauben article."
+    },
+    {
+      "id": "meta-ig-18109832677961158",
+      "status": "held",
+      "decisionType": "source-verified-short-duration",
+      "sources": [
+        "https://www.instagram.com/reel/DfjnFpnIN5i/embed/captioned/",
+        "https://www.mampf-wien.at/"
+      ],
+      "finding": "Merchant co-authored announcement confirms free Semmel-Döner on November 14, 12:00–15:00, for followers of both named accounts. Merchant website confirms Hellwagstraße 7, 1200 Wien. Fewer than seven full days remain."
+    },
+    {
+      "id": "meta-ig-18109413841942940",
+      "status": "covered",
+      "slug": "noodle-king-wien-20-prozent-vorteilsclub",
+      "decisionType": "changed-feed-existing-guide-still-matches",
+      "sources": [
+        "https://vorteilsclub.wien.at/meine-vorteile/noodle-king"
+      ],
+      "finding": "Official benefit page confirms 20 percent on noodle boxes and one selected drink for personal consumption with the membership card shown before the first order. No official end date. The existing guide already gives these conditions and distinguishes the former app date; the feed correction does not require a second publication."
+    },
+    {
+      "id": "g2-1ibrcmr",
+      "status": "held",
+      "decisionType": "branch-promotion-unverified-short-duration",
+      "sources": [
+        "https://www.lieferando.at/speisekarte/burger-king-r-wien-am-hauptbahnhof"
+      ],
+      "finding": "New in concurrent approval b01ec419f4. The exact Lieferando Hauptbahnhof menu verifies the 1100 Wien branch and lists some matching base prices, but does not expose the 1+1 category or a branch-specific deadline in the public web capture. The explicitly listed category at other branches is different evidence. The app record expires within one day. No new article."
+    },
+    {
+      "id": "g2-14bbizv",
+      "status": "held",
+      "decisionType": "branch-promotion-unverified-short-duration",
+      "sources": [
+        "https://www.lieferando.at/speisekarte/starbucks-wien-neubaugasse",
+        "https://www.lieferando.at/speisekarte/starbucks-wien-neubaugasse?jet-source=content_page"
+      ],
+      "finding": "New in concurrent approval 6fece5b653. The exact Lieferando menu confirms Neubaugasse 4 and shows a different KAFFEE5 promotion in one capture. The public branch menu does not establish the 40-percent product selection or an official end date. Generic district result snippets do not bind the discount to this branch. App expiry is within one day. No new article."
+    }
+  ]
+}
