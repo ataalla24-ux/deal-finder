@@ -3,9 +3,9 @@ name: Repository Safety
 on:
   push:
     branches: [main]
-    paths: ['.github/workflows/**', 'scripts/test-workflow-permissions.rb', 'scripts/*launch-readiness.mjs', 'scripts/*secret-guard.mjs', 'scripts/instagram-session-audit.mjs', 'scripts/*public-state*.mjs', 'scripts/community-public-boundary.mjs', 'scripts/deals-feed-contract.mjs', 'scraper/deal-review-feedback.js']
+    paths: ['.github/workflows/**', 'scripts/test-workflow-permissions.rb', 'scripts/*launch-readiness.mjs', 'scripts/*secret-guard.mjs', 'scripts/instagram-session-audit.mjs', 'scripts/*public-state*.mjs', 'scripts/community-public-boundary.mjs', 'scripts/deals-feed-contract.mjs', 'scraper/deal-review-feedback.js', 'docs/_config.yml', 'docs/.nojekyll', 'scripts/test-pages-public-boundary.rb']
   pull_request:
-    paths: ['.github/workflows/**', 'scripts/test-workflow-permissions.rb', 'scripts/*launch-readiness.mjs', 'scripts/*secret-guard.mjs', 'scripts/instagram-session-audit.mjs', 'scripts/*public-state*.mjs', 'scripts/community-public-boundary.mjs', 'scripts/deals-feed-contract.mjs', 'scraper/deal-review-feedback.js']
+    paths: ['.github/workflows/**', 'scripts/test-workflow-permissions.rb', 'scripts/*launch-readiness.mjs', 'scripts/*secret-guard.mjs', 'scripts/instagram-session-audit.mjs', 'scripts/*public-state*.mjs', 'scripts/community-public-boundary.mjs', 'scripts/deals-feed-contract.mjs', 'scraper/deal-review-feedback.js', 'docs/_config.yml', 'docs/.nojekyll', 'scripts/test-pages-public-boundary.rb']
   workflow_dispatch:
 
 permissions:
@@ -21,6 +21,7 @@ jobs:
         with:
           ruby-version: '3.3'
       - run: ruby scripts/test-workflow-permissions.rb
+      - run: ruby scripts/test-pages-public-boundary.rb
       - uses: actions/setup-node@v4
         with:
           node-version: '22'

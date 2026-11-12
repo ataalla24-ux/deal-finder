@@ -19,6 +19,7 @@ try {
   fs.symlinkSync(path.join(root, 'node_modules'), path.join(temp, 'node_modules'), 'dir');
   for (const name of [
     'scripts/validate-production-feed.mjs', 'scripts/deals-feed-contract.mjs', 'scripts/deal-redemptions.mjs',
+    'scripts/community-public-boundary.mjs',
     'scripts/add-deal-moderation-entry.mjs', 'scripts/apply-deal-moderation.mjs',
     'scripts/sync-deal-map-references.mjs', 'scripts/sync-featured-deal-references.mjs',
     'scripts/stamp-deals-feed.mjs',
