@@ -1,7 +1,7 @@
 {
-  "generatedAt": "2026-11-12T11:54:36.227Z",
+  "generatedAt": "2026-11-12T12:16:38.028Z",
   "source": "instagram-graph-cross-source-verification",
-  "status": "ok",
+  "status": "degraded",
   "configured": true,
   "scannedFiles": [
     "deals-pending-church-events.json",
@@ -63,8 +63,8 @@
       "candidates": 1
     },
     "deals-pending-firecrawl5.json": {
-      "deals": 1,
-      "candidates": 0
+      "deals": 3,
+      "candidates": 1
     },
     "deals-pending-flights.json": {
       "deals": 2,
@@ -167,10 +167,14 @@
       "candidates": 0
     }
   },
-  "candidatePosts": 4,
-  "candidateAccounts": 4,
+  "candidatePosts": 5,
+  "candidateAccounts": 5,
   "skippedAccountCooldowns": 0,
   "selectedAccounts": [
+    {
+      "username": "meatmewien",
+      "candidates": 1
+    },
     {
       "username": "wienxtra",
       "candidates": 1
@@ -191,7 +195,12 @@
   "fetchedPosts": 100,
   "exactMatches": 1,
   "retainedEvidencePosts": 2000,
-  "errors": [],
+  "errors": [
+    {
+      "username": "meatmewien",
+      "message": "Meta API 400: Invalid user id for https://graph.facebook.com/v26.0/17841438552673858?fields=business_discovery.username%28meatmewien%29%7Busername%2Cname%2Cmedia.limit%2825%29%7Bid%2Ccaption%2Cmedia_type%2Cpermalink%2Ctimestamp%2Clike_count%2Ccomments_count%2Cmedia_product_type%2Cmedia_url%2Cthumbnail_url%2Cchildren%7Bmedia_type%2Cmedia_url%2Cthumbnail_url%7D%7D%7D&access_token=[redacted]"
+    }
+  ],
   "accountFailures": {
     "natascha_rapid": {
       "count": 3,
@@ -199,19 +208,19 @@
       "cooldownUntil": "2026-11-09T08:35:05.096Z"
     },
     "meatmewien": {
-      "count": 1,
-      "lastAt": "2026-11-10T12:14:01.955Z",
-      "cooldownUntil": "2026-11-11T12:14:01.955Z"
+      "count": 2,
+      "lastAt": "2026-11-12T12:16:38.028Z",
+      "cooldownUntil": "2026-11-13T12:16:38.028Z"
     }
   },
   "sharedQuota": {
     "limitPerHour": 296,
     "usageThreshold": 95,
-    "requests": 4,
+    "requests": 5,
     "reserved": 5,
     "stopped": false,
     "reason": "",
-    "highestUsagePercent": 35,
+    "highestUsagePercent": 7,
     "waitedMs": 0,
     "pacingMs": 0,
     "retryAt": "",
@@ -220,6 +229,6 @@
     "storageFailure": null
   },
   "blockedEvidencePosts": 57,
-  "unmatchedCandidatePosts": 3,
-  "message": "1/4 fresh cross-source Instagram candidates matched exactly via Graph API."
+  "unmatchedCandidatePosts": 4,
+  "message": "1/5 fresh cross-source Instagram candidates matched exactly via Graph API."
 }
