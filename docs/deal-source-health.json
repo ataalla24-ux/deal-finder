@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-11-12T00:31:22.820Z",
+  "generatedAt": "2026-11-12T00:37:39.179Z",
   "discoveryAvailability": {
     "note": "Transport evidence, not deal yield. Retry eligibility is not recovery. Candidate counts are not Slack deliveries. No extra runs or quota resets.",
     "lanes": [
@@ -60,12 +60,6 @@
     "duplicateClusters": 8,
     "topHealthySources": [
       {
-        "sourceKey": "meta-instagram",
-        "sourceLabel": "Meta Instagram Graph",
-        "healthScore": 75,
-        "totalDeals": 62
-      },
-      {
         "sourceKey": "instagram-apify",
         "sourceLabel": "Apify Instagram",
         "healthScore": 75,
@@ -76,6 +70,12 @@
         "sourceLabel": "Member Benefits",
         "healthScore": 74,
         "totalDeals": 110
+      },
+      {
+        "sourceKey": "meta-instagram",
+        "sourceLabel": "Meta Instagram Graph",
+        "healthScore": 73,
+        "totalDeals": 62
       },
       {
         "sourceKey": "firecrawl5",
@@ -140,9 +140,9 @@
       {
         "sourceKey": "meta-instagram",
         "sourceLabel": "Meta Instagram Graph",
-        "coverageScore": 47,
+        "coverageScore": 46,
         "totalDeals": 62,
-        "fresh1dCount": 10
+        "fresh1dCount": 9
       },
       {
         "sourceKey": "gutscheine",
@@ -181,7 +181,7 @@
       {
         "sourceKey": "meta-instagram",
         "sourceLabel": "Meta Instagram Graph",
-        "precisionScore": 72,
+        "precisionScore": 71,
         "totalDeals": 62
       },
       {
@@ -201,7 +201,7 @@
       {
         "sourceKey": "meta-instagram",
         "sourceLabel": "Meta Instagram Graph",
-        "sourceWeightScore": 63,
+        "sourceWeightScore": 62,
         "totalDeals": 62
       },
       {
@@ -292,86 +292,6 @@
     }
   },
   "sources": [
-    {
-      "sourceKey": "meta-instagram",
-      "file": "deals-pending-meta-instagram.json",
-      "sourceLabel": "Meta Instagram Graph",
-      "totalDeals": 62,
-      "uniqueDeals": 59,
-      "duplicateDeals": 3,
-      "duplicateAcrossSources": 3,
-      "fresh1dCount": 10,
-      "fresh7dCount": 50,
-      "viennaCount": 62,
-      "foodDrinkCount": 43,
-      "promoCount": 30,
-      "missingUrlCount": 0,
-      "sampleTitles": [
-        "🎁 For Vienna restaurants, bars, cafés and hotels: 1 Reel (20 s) + 3 edited photos, free, so you can see what your venue looks like on camer",
-        "🍜 🎁 Vom 1. - 13. Dezember schenken wir euch ab 100 € Konsum bei uns im Restaurant einen Gutschein im Wert von 20 €",
-        "Gratis Lebensmittel in Wien?"
-      ],
-      "lastRun": null,
-      "uniqueRate": 1,
-      "duplicateRate": 0,
-      "fresh1dRate": 0.2,
-      "fresh7dRate": 0.8,
-      "viennaRate": 1,
-      "foodDrinkRate": 0.7,
-      "promoRate": 0.5,
-      "missingUrlRate": 0,
-      "averageQualityScore": 86.9,
-      "topCategories": [
-        {
-          "value": "essen",
-          "count": 29
-        },
-        {
-          "value": "kaffee",
-          "count": 11
-        },
-        {
-          "value": "shopping",
-          "count": 10
-        },
-        {
-          "value": "kultur",
-          "count": 5
-        },
-        {
-          "value": "supermarkt",
-          "count": 3
-        },
-        {
-          "value": "technik",
-          "count": 3
-        }
-      ],
-      "topTypes": [
-        {
-          "value": "rabatt",
-          "count": 36
-        },
-        {
-          "value": "gratis",
-          "count": 21
-        },
-        {
-          "value": "bogo",
-          "count": 4
-        },
-        {
-          "value": "gutschein",
-          "count": 1
-        }
-      ],
-      "issues": [],
-      "healthScore": 75,
-      "missionFitScore": 58,
-      "coverageScore": 47,
-      "precisionScore": 72,
-      "sourceWeightScore": 63
-    },
     {
       "sourceKey": "instagram-apify",
       "file": "deals-pending-instagram-apify.json",
@@ -512,6 +432,88 @@
       "coverageScore": 74,
       "precisionScore": 72,
       "sourceWeightScore": 70
+    },
+    {
+      "sourceKey": "meta-instagram",
+      "file": "deals-pending-meta-instagram.json",
+      "sourceLabel": "Meta Instagram Graph",
+      "totalDeals": 62,
+      "uniqueDeals": 59,
+      "duplicateDeals": 3,
+      "duplicateAcrossSources": 3,
+      "fresh1dCount": 9,
+      "fresh7dCount": 50,
+      "viennaCount": 62,
+      "foodDrinkCount": 43,
+      "promoCount": 29,
+      "missingUrlCount": 0,
+      "sampleTitles": [
+        "20% off all food on your birthday",
+        "🎁 For Vienna restaurants, bars, cafés and hotels: 1 Reel (20 s) + 3 edited photos, free, so you can see what your venue looks like on camer",
+        "🍜 🎁 Vom 1. - 13. Dezember schenken wir euch ab 100 € Konsum bei uns im Restaurant einen Gutschein im Wert von 20 €"
+      ],
+      "lastRun": null,
+      "uniqueRate": 1,
+      "duplicateRate": 0,
+      "fresh1dRate": 0.1,
+      "fresh7dRate": 0.8,
+      "viennaRate": 1,
+      "foodDrinkRate": 0.7,
+      "promoRate": 0.5,
+      "missingUrlRate": 0,
+      "averageQualityScore": 86.9,
+      "topCategories": [
+        {
+          "value": "essen",
+          "count": 29
+        },
+        {
+          "value": "kaffee",
+          "count": 11
+        },
+        {
+          "value": "shopping",
+          "count": 10
+        },
+        {
+          "value": "kultur",
+          "count": 5
+        },
+        {
+          "value": "supermarkt",
+          "count": 3
+        },
+        {
+          "value": "technik",
+          "count": 3
+        }
+      ],
+      "topTypes": [
+        {
+          "value": "rabatt",
+          "count": 37
+        },
+        {
+          "value": "gratis",
+          "count": 20
+        },
+        {
+          "value": "bogo",
+          "count": 4
+        },
+        {
+          "value": "gutschein",
+          "count": 1
+        }
+      ],
+      "issues": [
+        "wenige Deals sind frischer als 1 Tag"
+      ],
+      "healthScore": 73,
+      "missionFitScore": 56,
+      "coverageScore": 46,
+      "precisionScore": 71,
+      "sourceWeightScore": 62
     },
     {
       "sourceKey": "firecrawl5",
