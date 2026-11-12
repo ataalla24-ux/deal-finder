@@ -86,6 +86,29 @@ test('active pause does not even install a browser transport or navigate', async
   assert.equal(result.nextRetryAt,previous.nextRetryAt);assert.equal(result.attemptedRequests,0);
 });
 
+test('TikTok diagnostics distinguish a local request cap from unreadable or missing provider responses', async () => {
+  for (const [config, reason] of [
+    [{html: '<body>Search unavailable</body>'}, 'no-search-request'],
+    [{html: '<script>fetch("/api/search/item/full/?keyword=private-value&count=30&token=do-not-log")</script>'}, 'request-policy-blocked'],
+    [{api: () => ({status:200,contentType:'text/html',body:'<html>Unavailable</html>'})}, 'non-json-response'],
+    [{api: () => ({status:200,contentType:'application/json',headers:{'content-length':'0'},body:''})}, 'empty-response'],
+    [{documentStatus:403,html:'denied'}, 'document-http-error'],
+    [{html:'<body>Verify to continue</body>'}, 'access-challenge'],
+    [{html:'<form><input type="password"></form>'}, 'login-wall'],
+  ]) await fixture(config,async(page,calls)=>{
+    const result=await scan(page);
+    assert.equal(result.errors[0].transportReason,reason);
+    assert.equal(result.rows.length,0);
+    assert.ok(result.nextRetryAt);
+    assert.doesNotMatch(JSON.stringify(result),/private-value|do-not-log/);
+    if (reason==='request-policy-blocked') {
+      assert.equal(result.observedSearchEndpoints['item-full'],1);
+      assert.equal(result.blockedRequestReasons['unexpected-endpoint'],1);
+      assert.equal(calls.length,0,'diagnostics must not authorize an alternate endpoint');
+    }
+  });
+});
+
 test('frontend cannot exceed the existing request cap or substitute another endpoint', async () => {
   await fixture({html:`<script>
     const base='/api/search/general/full/?keyword=wien%20gratis%20kaffee&count=30';

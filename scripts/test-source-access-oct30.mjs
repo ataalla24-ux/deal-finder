@@ -4,7 +4,7 @@ import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
 import { createInstagramWebAccess } from '../scraper/instagram-web-access-policy.js';
-import { discoverProfileCandidates, enrichPreviews, enrichRenderedPreviews, fetchRenderedInstagramPreview, extractViennaLocation } from '../scraper/instagram-ai-agent.js';
+import { discoverProfileCandidates, enrichPreviews, enrichRenderedPreviews, fetchInstagramPreview, fetchRenderedInstagramPreview, extractViennaLocation } from '../scraper/instagram-ai-agent.js';
 import { filterAlreadyQueuedDeals, loadQueuedDealDuplicateKeys, loadRecentlySeenPostKeys, buildSlackMessage } from '../scraper/slack-notify.js';
 import { runScheduledPowerSource } from '../scraper/power-source-scheduling.js';
 import { POWER_FOOD_SOURCES } from '../scraper/power-food-sources.js';
@@ -184,6 +184,54 @@ test('a rendered login wall is not accepted just because generic metadata exists
   assert.equal(fake.calls.navigation, 1);
   assert.match(errors[0].error, /login-wall/);
   assert.equal(access.pause().reason, 'login-wall');
+});
+
+test('public Instagram posts with ordinary login navigation are not a login wall', async () => {
+  const fake = browser();
+  fake.page.evaluate = async () => ({ finalUrl: candidates[0].url, title: 'Cafe Wien on Instagram',
+    bodyText: 'Anmelden Registrieren Cafe Wien Heute 1+1 Kaffee in Wien, nur am 12. November 2026.',
+    ogDescription: 'Cafe Wien: Heute 1+1 Kaffee in Wien, nur am 12. November 2026.', times: [] });
+  const result = await fetchRenderedInstagramPreview(fake.page, candidates[0].url);
+  assert.equal(result.loginWall, false);
+  assert.match(result.description, /1\+1 Kaffee/);
+});
+
+test('Instagram login redirects, forms and blocking dialogs remain denied despite post metadata', async () => {
+  for (const changes of [
+    { finalUrl: 'https://www.instagram.com/accounts/login/?next=/p/Test0/' },
+    { hasLoginForm: true },
+    { blockingDialogText: 'Melde dich an, um diesen Beitrag anzusehen.' },
+  ]) {
+    const fake = browser();
+    fake.page.evaluate = async () => ({ finalUrl: candidates[0].url, title: 'Instagram',
+      bodyText: 'Cafe Wien', ogDescription: 'Cafe Wien: Heute 1+1 Kaffee in Wien.', times: [], ...changes });
+    const result = await fetchRenderedInstagramPreview(fake.page, candidates[0].url);
+    assert.equal(result.loginWall, true, JSON.stringify(changes));
+  }
+});
+
+test('static Instagram preview ignores navigation login URLs, but retains real access walls', async () => {
+  const metadata = '<meta property="og:title" content="Cafe Wien on Instagram"><meta property="og:description" content="Heute 1+1 Kaffee in Wien.">';
+  const publicHtml = `<html><head><title>Cafe Wien on Instagram</title>${metadata}</head><body><a href="/accounts/login/">Anmelden</a><a>Registrieren</a><article>Heute 1+1 Kaffee in Wien.</article></body></html>`;
+  const get = (html, url = candidates[0].url) => fetchInstagramPreview(candidates[0].url, { fetcher: async () => {
+    const response = new Response(html, { headers: { 'content-type': 'text/html' } });
+    Object.defineProperty(response, 'url', { value: url });
+    return response;
+  } });
+  const good = await get(publicHtml);
+  assert.equal(good.loginWall, false);
+  assert.match(good.description, /1\+1 Kaffee/);
+  for (const html of [
+    `<html><title>Login \u2022 Instagram</title>${metadata}</html>`,
+    `<html>${metadata}<form><input type="password"></form></html>`,
+    `<html>${metadata}<body>Log in to Instagram</body></html>`,
+    `<html>${metadata}<div role="dialog">Melde dich an, um diesen Beitrag anzusehen.</div></html>`,
+  ]) {
+    const blocked = await get(html);
+    assert.equal(blocked.loginWall, true);
+    assert.equal(blocked.description, '');
+  }
+  assert.equal((await get(publicHtml, 'https://www.instagram.com/challenge/')).loginWall, true);
 });
 
 test('BackWerk follows the migrated Austrian offers and rejects the expired Snackbox', async () => {

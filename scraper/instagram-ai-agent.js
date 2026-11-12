@@ -16,6 +16,7 @@ import { discoveryRejection } from './deal-discovery-policy.js';
 import { requestOpenAi } from './instagram-media-evidence.js';
 import { modelForTask } from './ai-credit-budget.js';
 import { createInstagramWebAccess } from './instagram-web-access-policy.js';
+import { instagramPageHasAccessWall } from './instagram-page-access.js';
 import { githubRunProvenance } from './pipeline-run-report-utils.js';
 import { runInstagramSearchQueries } from './instagram-search-discovery.js';
 import { readPublicSearchResponse } from './public-search-response.js';
@@ -1245,9 +1246,9 @@ function extractDateFromHtml(html) {
   return { date: '', source: '' };
 }
 
-async function fetchInstagramPreview(url) {
+export async function fetchInstagramPreview(url, options = {}) {
   const cookieHeader = activeInstagramCookieHeader();
-  const response = await fetch(url, {
+  const response = await (options.fetcher || fetch)(url, {
     signal: AbortSignal.timeout(12000),
     redirect: 'follow',
     headers: {
@@ -1262,7 +1263,7 @@ async function fetchInstagramPreview(url) {
   const finalUrl = response.url || url;
   const status = response.status;
   if (status === 429) openInstagramRuntimeCircuit('preview-http-429', { rateLimited: true });
-  const loginWall = /\/accounts\/login|login \u2022 instagram|log in to instagram|sign in to view/i.test(`${finalUrl} ${html.slice(0, 5000)}`);
+  const loginWall = instagramPageHasAccessWall({ finalUrl, html });
   const preview = {
     status,
     finalUrl,
@@ -1326,6 +1327,9 @@ export async function fetchRenderedInstagramPreview(page, url) {
         text: node.textContent || '',
       })).slice(0, 24),
       bodyText: document.body?.innerText || '',
+      hasLoginForm: Array.from(document.querySelectorAll('form input[type="password"]')).some(node => node.getClientRects().length > 0),
+      blockingDialogText: Array.from(document.querySelectorAll('[role="dialog"], [aria-modal="true"]'))
+        .filter(node => node.getClientRects().length > 0).map(node => node.innerText || '').join(' '),
     };
   });
 
@@ -1334,7 +1338,7 @@ export async function fetchRenderedInstagramPreview(page, url) {
     status,
     retryAfter,
     finalUrl: data.finalUrl,
-    loginWall: /accounts\/login|anmelden|registrieren|log in to instagram/i.test(cleanText(data.bodyText, 500)),
+    loginWall: instagramPageHasAccessWall(data),
     title: cleanText(data.ogTitle || data.title, 1200),
     description: cleanText(data.ogDescription, 2200),
     image: cleanText(data.image, 1200),

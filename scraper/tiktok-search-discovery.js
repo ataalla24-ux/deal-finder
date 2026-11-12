@@ -1,5 +1,9 @@
 import { retryAfterAt } from './source-http-policy.js';
 
+const transportReasons = new Set(['response-unavailable', 'request-policy-blocked', 'response-http-error',
+  'response-too-large', 'empty-response', 'non-json-response', 'response-read-failed', 'request-failed', 'response-timeout',
+  'no-search-request', 'document-http-error', 'login-wall', 'access-challenge']);
+
 export function tikTokDiscoveryHealth(api, search, accepted = 0) {
   const unavailable = Boolean(api.errors?.length || search.errors?.length || api.nextRetryAt || search.nextRetryAt);
   return { status: unavailable ? 'discovery-degraded' : 'completed', outputPreserved: unavailable && accepted === 0 };
@@ -7,7 +11,8 @@ export function tikTokDiscoveryHealth(api, search, accepted = 0) {
 
 export function parseTikTokSearchResponse(result = {}) {
   const status = Number(result.status || 0);
-  if (!result.ok) return { error: status >= 400 ? `HTTP ${status}` : 'Empty or non-JSON TikTok response', code: 'transport-unavailable' };
+  if (!result.ok) return { error: status >= 400 ? `HTTP ${status}` : 'Empty or non-JSON TikTok response', code: 'transport-unavailable',
+    transportReason: transportReasons.has(result.transportReason) ? result.transportReason : 'response-unavailable' };
   const body = result.body;
   if (!body || typeof body !== 'object') return { error: 'Missing TikTok response object', code: 'invalid-response' };
   const providerCode = body.status_code ?? body.statusCode;
@@ -47,7 +52,8 @@ export async function runTikTokApiDiscovery({ keywords, request, normalize, wait
       }
       if (parsed.error) {
         result.errors.push({ keyword, offset, status: Number(response?.status || 0),
-          error: parsed.error, code: parsed.code, providerCode: parsed.providerCode });
+          error: parsed.error, code: parsed.code, providerCode: parsed.providerCode,
+          ...(parsed.transportReason ? { transportReason: parsed.transportReason } : {}) });
         result.stoppedReason = parsed.code;
         result.nextRetryAt = new Date(Math.max(+now + 86400000, Date.parse(retryAfterAt(response?.retryAfter, now)) || 0)).toISOString();
         return result;

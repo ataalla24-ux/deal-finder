@@ -35,6 +35,8 @@ test('TikTok response codes and unknown shapes are not successful zero results',
   assert.equal(parseTikTokSearchResponse({ok:true,status:200,body:{}}).code,'schema-mismatch');
   assert.equal(parseTikTokSearchResponse({ok:false,status:200}).code,'transport-unavailable');
   assert.deepEqual(parseTikTokSearchResponse({ok:true,status:200,body:{item_list:[item]}}).batch,[item]);
+  assert.equal(parseTikTokSearchResponse({ok:false,status:0,transportReason:'request-policy-blocked'}).transportReason,'request-policy-blocked');
+  assert.equal(parseTikTokSearchResponse({ok:false,status:0,transportReason:'secret-url?token=private'}).transportReason,'response-unavailable');
 });
 
 test('known TikTok envelopes normalize only actual post identities and real timestamps', () => {

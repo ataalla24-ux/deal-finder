@@ -26,6 +26,8 @@ jobs:
       TIKTOK_MAX_API_CANDIDATES: 1200
     steps:
       - uses: actions/checkout@v4
+        with:
+          ref: main
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
@@ -41,10 +43,19 @@ jobs:
       - name: Install Playwright Chromium
         run: npx playwright install --with-deps chromium chromium-headless-shell
 
-      - name: Install TikTok media OCR tools
+      - name: Inspect TikTok media OCR tools
+        id: media_tools
+        run: node scripts/coupon-tools-preflight.mjs --social-media
+
+      - name: Install missing TikTok media OCR tools
+        if: steps.media_tools.outputs.available != 'true'
+        continue-on-error: true
+        timeout-minutes: 5
+        env:
+          MISSING_PACKAGES: ${{ steps.media_tools.outputs.packages }}
         run: |
-          sudo apt-get update
-          sudo apt-get install -y --no-install-recommends ffmpeg tesseract-ocr tesseract-ocr-deu tesseract-ocr-eng
+          sudo apt-get -o Acquire::Retries=1 -o Acquire::http::Timeout=20 -o Acquire::https::Timeout=20 update
+          sudo apt-get -o Acquire::Retries=1 -o Acquire::http::Timeout=20 -o Acquire::https::Timeout=20 install -y --no-install-recommends $MISSING_PACKAGES
 
       - name: Scan current TikTok deals
         env:

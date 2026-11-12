@@ -20,7 +20,7 @@ export function inspectCouponTools(run = spawnSync, { includePdf = true } = {}) 
 }
 
 if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) {
-  const result = inspectCouponTools(spawnSync, { includePdf: !process.argv.includes('--instagram') });
+  const result = inspectCouponTools(spawnSync, { includePdf: !process.argv.some(arg => ['--instagram', '--social-media'].includes(arg)) });
   console.log(JSON.stringify(result));
   if (process.env.GITHUB_OUTPUT) fs.appendFileSync(process.env.GITHUB_OUTPUT,
     `available=${result.available}\npackages=${result.packages.join(' ')}\n`);

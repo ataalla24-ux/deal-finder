@@ -109,6 +109,21 @@ test('Instagram captions survive unavailable optional OCR dependencies without i
   assert.match(collect, /meta_graph_health.outputs.ready == 'true'/);
 });
 
+test('TikTok uses current saved pauses and does not lose captions to optional OCR setup failures', () => {
+  const workflow = fs.readFileSync('.github/workflows/tiktok-deals.yml', 'utf8');
+  assert.match(workflow, /actions\/checkout@v4\s+with:\s+ref: main/);
+  assert.match(workflow, /coupon-tools-preflight\.mjs --social-media/);
+  const install = workflow.split('- name: Install missing TikTok media OCR tools')[1].split('- name: Scan current')[0];
+  assert.match(install, /available != 'true'/);
+  assert.match(install, /continue-on-error: true/);
+  assert.match(install, /timeout-minutes: 5/);
+  assert.match(install, /Acquire::Retries=1/);
+  const collect = workflow.split('- name: Scan current TikTok deals')[1].split('- name: Commit')[0];
+  assert.doesNotMatch(collect, /steps\.media_tools|always\(\)/);
+  assert.match(workflow, /TIKTOK_SEARCH_PAGES: 3/);
+  assert.match(workflow, /TIKTOK_SEARCH_COUNT: 30/);
+});
+
 test('November 11 non-offers cannot pass the standard or food review lanes', async () => {
   const rejects = [
     'Mehr Genuss. Weniger zahlen. Gratisangebote und Food-Deals in Wien mit FreeFinder entdecken. Kaffee fuer 2,50 EUR. Burger King 1+1. Werbung fuer FreeFinder.',
