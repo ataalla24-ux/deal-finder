@@ -4,6 +4,12 @@ import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
 import { FOOD_GRAPH_HASHTAGS, COMBINED_FOOD_HASHTAGS, foodGraphHashtags, selectInstagramFoodAccounts, isDedicatedFoodHashtag } from '../scraper/instagram-food-source-policy.js';
+
+assert.deepEqual(selectInstagramFoodAccounts([{
+  username: 'freefinder.at', approvedFoodSource: true, consumerFoodOfferEvidence: true,
+  name: 'FreeFinder Essen und Trinken Wien', approvedDeals: 100,
+}]).excluded, [{ username: 'freefinder.at', reason: 'own-deal-republication' }],
+'our own reposts must not consume merchant slots even after historical false approvals');
 import { buildConfig, loadAccountCatalog, runMetaInstagramCollector } from '../scraper/meta-instagram-deals.js';
 import { selectCoverageAccounts, selectCoverageHashtags } from '../scraper/instagram-source-scheduler.js';
 import { runWienDealsCombined } from '../scraper/wien-deals-combined.js';

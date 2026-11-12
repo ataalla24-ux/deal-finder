@@ -32,6 +32,7 @@ function foodIdentity(value) {
   return isFoodDrinkSource(text) || /noodles?|dimsum|dim.sum|schnitzel|hotpot|bistro|deli(?:[._\s]|$)|cafe|caf[eé]|baeckerei|b.ckerei|restaurant|bakery|focaccia|kitchen|sandwich|kebap|kebab|sushi|grill(?:[._\s]|$)/i.test(text);
 }
 const EXCLUDED = new Map([
+  ['freefinder.at', 'own-deal-republication'],
   ['flugninja.at', 'flight-compensation'],
   ['welovehandmade.at', 'craft-workshops'],
   ['howmuch.live', 'price-directory-software'],

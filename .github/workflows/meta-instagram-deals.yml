@@ -87,11 +87,20 @@ jobs:
         if: steps.meta_graph_health.outcome == 'failure'
         run: exit 1
 
-      - name: Install Instagram media OCR tools
+      - name: Inspect Instagram media OCR tools
+        id: media_tools
         if: ${{ steps.meta_graph_health.outputs.ready == 'true' && !inputs.health_only }}
+        run: node scripts/coupon-tools-preflight.mjs --instagram
+
+      - name: Install missing Instagram media OCR tools
+        if: ${{ steps.meta_graph_health.outputs.ready == 'true' && !inputs.health_only && steps.media_tools.outputs.available != 'true' }}
+        continue-on-error: true
+        timeout-minutes: 5
+        env:
+          MISSING_PACKAGES: ${{ steps.media_tools.outputs.packages }}
         run: |
-          sudo apt-get update
-          sudo apt-get install -y --no-install-recommends ffmpeg tesseract-ocr tesseract-ocr-deu tesseract-ocr-eng
+          sudo apt-get -o Acquire::Retries=1 -o Acquire::http::Timeout=20 -o Acquire::https::Timeout=20 update
+          sudo apt-get -o Acquire::Retries=1 -o Acquire::http::Timeout=20 -o Acquire::https::Timeout=20 install -y --no-install-recommends $MISSING_PACKAGES
 
       - name: Collect official Meta Instagram deals
         if: ${{ steps.meta_graph_health.outputs.ready == 'true' && !inputs.health_only }}

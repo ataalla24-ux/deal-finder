@@ -109,6 +109,15 @@ export function getEditorialRoundupPromotionReason(value) {
 export function getNonOfferContentReason(value) {
   const text = cleanPromotionText(value);
   if (!text) return '';
+  if (/\bwerbung\s+f(?:ü|ue)r\s+freefinder\b/i.test(text)) {
+    return 'FreeFinder-Eigenwerbung statt neuem Einzelangebot';
+  }
+  const recipeInstructions = /\b(?:schritt[- ]f(?:ü|ue)r[- ]schritt[- ]anleitungen?|step[- ]by[- ]step\s+(?:recipe|instructions))\b/i.test(text)
+    && /\b(?:zutaten|ingredients)\b/i.test(text);
+  const actualRedemption = /\b(?:bei\s+uns|bestell(?:e|en|t)|order\s+now|einl(?:ö|oe)sen|mit\s+(?:dem\s+)?(?:code|gutschein)|\d{1,2}\s*%\s*(?:rabatt|discount))\b/i.test(text);
+  if (recipeInstructions && !actualRedemption) return 'Rezeptanleitung statt einloesbarem Angebot';
+  if (/\bbaumpflanzaktion\b/i.test(text) && /\b(?:teilgenommen|verbrachten|begleitet\s+haben)\b/i.test(text)
+      && !INDEPENDENT_PROMOTION_PATTERN.test(text)) return 'Veranstaltungsrueckblick statt aktuellem Angebot';
   const volunteerRecruitment = /\b(?:volunteers?\s+wanted|freiwillige\s+gesucht|helping\s+hand)\b/i.test(text);
   const publicFoodGift = text.split(/[.!?;]+/).some(clause =>
     /\b(?:g[aä]ste|gaeste|kunden|kundinnen|besucher|public)\b/i.test(clause)

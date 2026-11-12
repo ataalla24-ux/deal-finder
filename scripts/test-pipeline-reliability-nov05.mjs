@@ -87,6 +87,55 @@ test('coupon preflight skips installed tools and bounds both package operations'
   assert.doesNotMatch(action, /exit 0|continue-on-error/);
 });
 
+test('Instagram captions survive unavailable optional OCR dependencies without installing PDF tools', () => {
+  const calls = [];
+  const available = inspectCouponTools((tool, args) => {
+    calls.push(tool);
+    return { status: 0, stdout: args.includes('--list-langs') ? 'deu\neng\n' : '' };
+  }, { includePdf: false });
+  assert.equal(available.available, true);
+  assert(!calls.some(tool => tool.startsWith('pdf')));
+  const missing = inspectCouponTools(() => ({ status: 1 }), { includePdf: false });
+  assert.deepEqual(missing.packages, ['ffmpeg', 'tesseract-ocr', 'tesseract-ocr-deu', 'tesseract-ocr-eng']);
+  const workflow = fs.readFileSync('.github/workflows/meta-instagram-deals.yml', 'utf8');
+  assert.match(workflow, /coupon-tools-preflight\.mjs --instagram/);
+  const install = workflow.split('- name: Install missing Instagram media OCR tools')[1].split('- name: Collect official')[0];
+  assert.match(install, /available != 'true'/);
+  assert.match(install, /continue-on-error: true/);
+  assert.match(install, /timeout-minutes: 5/);
+  assert.match(install, /Acquire::Retries=1/);
+  const collect = workflow.split('- name: Collect official Meta Instagram deals')[1].split('- name: Verify factual')[0];
+  assert.doesNotMatch(collect, /steps\.media_tools|always\(\)/);
+  assert.match(collect, /meta_graph_health.outputs.ready == 'true'/);
+});
+
+test('November 11 non-offers cannot pass the standard or food review lanes', async () => {
+  const rejects = [
+    'Mehr Genuss. Weniger zahlen. Gratisangebote und Food-Deals in Wien mit FreeFinder entdecken. Kaffee fuer 2,50 EUR. Burger King 1+1. Werbung fuer FreeFinder.',
+    'Mit nur 10 Euro ein Fruehstueck fuer zwei Personen zaubern. Das Video bietet Schritt-fuer-Schritt-Anleitungen und erklaert, welche Zutaten man im Supermarkt kaufen muss.',
+    'For Vienna restaurants, bars, cafes and hotels: 1 Reel (20 s) + 3 edited photos, free. One offer per venue.',
+    'TIPTRUST: Neue Partner in Wien. Die ersten 2 starten gratis. 0 EUR Einrichtung, 0 EUR monatlich. Du bist Handwerker oder Dienstleister? Pruefe deinen Partnerplatz.',
+    'Wie jedes Jahr haben wir als Kubbe Cocuk an der Baumpflanzaktion teilgenommen. Gemeinsam verbrachten wir einen schoenen Tag. Danke an die Stadt Wien.',
+  ];
+  for (const description of rejects) {
+    const deal = { ...candidate(description), title: description, description };
+    assert(discoveryRejection(deal), description);
+    assert(isUnsafeSocialFoodReviewContent(description), description);
+    const checked = await validateDealsForSlack([deal], { now, inspectDealUrlHealth: inspection });
+    assert.equal(checked.allowedDeals.length, 0, description);
+  }
+  for (const description of [
+    'Running + Boxing oder Pilates + Brunch fuer nur 10 EUR. 14. November in Wien.',
+    '5 Gerichte zur Auswahl inklusive Suppe fuer nur 14,90 EUR. Wien.',
+    'Gratis Semmel-Doener am 14.11.2026 von 12 bis 15 Uhr fuer alle Follower.',
+    '2 EUR Rabatt auf Mocktails (18 bis 20 Uhr).',
+    'Konditorkrapfen: 4+1 gratis, 8+2 gratis, 16+4 gratis.',
+    'Schritt-fuer-Schritt-Anleitungen mit Zutaten. Heute bei uns: 20% Rabatt auf Pizza mit Code PIZZA20.',
+    'For Vienna restaurants: free edited photos. Fuer alle Gaeste gibt es gratis Kaffee.',
+    'Baeume pflanzen in Wien: Heute gibt es gratis Pizza fuer alle Teilnehmer.',
+  ]) assert.equal(discoveryRejection({ title: description, description }), '', description);
+});
+
 const badAds = [
   'NiKa Bilanz zeigt dir wo jeder Euro hingeht. Rechnung, Betrag und MwSt. Belege an den Steuerberater. Schick uns deine Speisekarte und sieh gratis welche Gerichte zu wenig verdienen. Wien.',
   'Mit e-stempel.at sammeln Ihre Gaeste digitale Kaffeestempel. Belohnen Sie Treue mit Levels, z. B. Stufe 1: Gratis Espresso, Stufe 2: ein Stueck Torte. Wien.',

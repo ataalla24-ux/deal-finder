@@ -2,7 +2,7 @@ import fs from 'node:fs';
 import { spawnSync } from 'node:child_process';
 import { pathToFileURL } from 'node:url';
 
-export function inspectCouponTools(run = spawnSync) {
+export function inspectCouponTools(run = spawnSync, { includePdf = true } = {}) {
   const packages = new Set();
   const tools = {};
   for (const [tool, args, pkg] of [
@@ -10,6 +10,7 @@ export function inspectCouponTools(run = spawnSync) {
     ['pdfinfo', ['-v'], 'poppler-utils'], ['pdftotext', ['-v'], 'poppler-utils'],
     ['tesseract', ['--version'], 'tesseract-ocr'],
   ]) {
+    if (!includePdf && pkg === 'poppler-utils') continue;
     tools[tool] = run(tool, args, { timeout: 3000, encoding: 'utf8', stdio: 'pipe' }).status === 0;
     if (!tools[tool]) packages.add(pkg);
   }
@@ -19,7 +20,7 @@ export function inspectCouponTools(run = spawnSync) {
 }
 
 if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) {
-  const result = inspectCouponTools();
+  const result = inspectCouponTools(spawnSync, { includePdf: !process.argv.includes('--instagram') });
   console.log(JSON.stringify(result));
   if (process.env.GITHUB_OUTPUT) fs.appendFileSync(process.env.GITHUB_OUTPUT,
     `available=${result.available}\npackages=${result.packages.join(' ')}\n`);

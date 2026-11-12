@@ -1,0 +1,52 @@
+{
+  "reviewedPeriod": {
+    "timezone": "Europe/Vienna",
+    "day": "2026-11-11",
+    "start": "2026-11-10T23:00:00Z",
+    "endExclusive": "2026-11-11T23:00:00Z"
+  },
+  "baselineHead": "4d5d79ab4bdf9baab20372e49f8d60c3afcb0ea0",
+  "evidenceDirectory": "output/scraper-yield-20261112",
+  "deliveryEvidence": "Historical persisted Slack response IDs plus successful dispatch logs; channel connector returned no messages and exact thread lookup returned thread_not_found. No recipient-side UI claim.",
+  "slack": {
+    "newMessageReceipts": 31,
+    "standardCards": 24,
+    "reviewCards": 7,
+    "foodRelatedStandardCards": 8,
+    "foodReviewCards": 3,
+    "caveat": "Cards are not new live approvals or proof all conditions are complete. Review cards are not verified usable offers. Retained outbox rows and old card edits are excluded."
+  },
+  "foodReceipts": [
+    { "merchant": "Aguacate", "offer": "Running/boxing or Pilates plus brunch for 10 EUR", "id": "meta-ig-18122208028990523", "slackTs": "1794357175.611639", "dispatch": "42932060666", "collection": "manual Meta 42931023279" },
+    { "merchant": "MAMPF", "offer": "Free Semmel-Doener on 14 November, following both accounts required", "id": "meta-ig-18109832677961158", "slackTs": "1794378428.794419", "dispatch": "42972387935", "collection": "scheduled Meta 42971699605" },
+    { "merchant": "Maehrischer Spatz", "offer": "Lunch including soup for 14.90 EUR", "id": "instagram-ai-76ab08807b4e", "slackTs": "1794385514.278209", "dispatch": "42986713503", "collection": "Reprocessed Instagram candidate after roundup fix; not a fresh scheduled source read" },
+    { "merchant": "AIDA", "offer": "Krapfen 4+1, 8+2, 16+4 free", "id": "meta-ig-17871407427661669", "slackTs": "1794405400.976579", "dispatch": "43033048750", "collection": "manual Meta 43031019221" },
+    { "merchant": "IKEA Wien Nord", "offer": "Breakfast 1 EUR instead of 2.99 EUR", "id": "fc4g-vqsqje", "slackTs": "1794410507.074409", "dispatch": "43045480716", "collection": "scheduled Firecrawl 4 43043299631" },
+    { "merchant": "Choo Foodstore", "offer": "30 percent on selected snacks, 40 percent with Wolt+", "id": "fc4g-1hyle6i", "slackTs": "1794410508.645299", "dispatch": "43045480716", "collection": "scheduled Firecrawl 4 43043299631" },
+    { "merchant": "Villa Vida", "offer": "Free coffee cupping on 21 November, reservation required", "id": "meta-ig-17977851744156986", "slackTs": "1794423600.753689", "dispatch": "43082790517", "collection": "manual Meta 43082093103" },
+    { "merchant": "MABEL'S No90", "offer": "2 EUR off alcohol-free mocktails 18-20", "id": "power-food-259559b43794", "slackTs": "1794430916.444659", "dispatch": "43099284357", "collection": "scheduled Power 43094872262", "deduplication": "Older same-homepage card power-food-f1060f833b9f was a 17.90 EUR burger, not this benefit" }
+  ],
+  "foodReviews": [
+    { "merchant": "Schmankerl-Braeu", "slackTs": "1794394318.229929" },
+    { "merchant": "ANKER", "slackTs": "1794394319.680729", "note": "Existing owner moderation remains binding" },
+    { "merchant": "Peter Pane", "slackTs": "1794394320.393569" }
+  ],
+  "collectors": {
+    "metaScheduled": { "started": 4, "completedCollection": 3, "failedBeforeCollection": ["43045882224"], "profileVisits": 46, "distinctProfiles": 44, "distinctHashtags": 5, "postReadsIncludingRepeats": 1203, "newCandidateRows": 3 },
+    "metaManualSeparate": { "completedCollection": 15, "profileVisits": 639, "distinctProfiles": 535, "distinctHashtags": 18, "postReadsIncludingRepeats": 15517, "newCandidateRows": 16 },
+    "apify2Scheduled": { "run": "43023905247", "postReads": 4, "knownPosts": 1, "unsuitablePosts": 3, "accepted": 0, "reportedActorChargeUSD": 0.0078, "balanceClaim": false },
+    "tiktokScheduled": { "run": "43022561238", "postReads": 0, "accepted": 0, "reason": "Existing access cooldown respected" },
+    "powerScheduled": { "runs": ["43023931573", "43094872262"], "candidateRowsPerRun": [37, 38], "newFoodDeliveries": 1, "note": "Candidate lists overlap heavily with already known/live offers; do not sum as new deals" },
+    "foodProvidersScheduled": { "runs": ["42929866659", "43050388459", "43110475427"], "newFoodDeliveries": 0, "limits": ["ScrapingBee trial unverified or expired", "ScraperAPI provider cost limit", "Zyte/current readable IKEA pages yielded no concrete new offer"] },
+    "instagramWeb": { "scheduledRuns": ["42981484069", "43093839182"], "eveningProfileReads": 0, "eveningAcceptedCandidates": 3, "eveningNewDeliveries": 0, "reason": "Access cooldown; remaining candidates lacked a concrete benefit or had conflicting/old post dates" }
+  },
+  "repairs": [
+    "Check installed OCR/video tools first; install only missing Instagram tools, bound installation to five minutes and keep caption collection available if optional package installation fails",
+    "Reject explicit FreeFinder self-advertising, recipe-only instructions, retrospective tree-planting reports, merchant video-service promotions and trade-partner recruitment",
+    "Exclude own freefinder.at profile before allocating merchant source slots, even when previous false positives made it appear high-yield"
+  ],
+  "unchanged": ["human approval", "live deal records", "source cooldowns", "quotas", "API budgets", "schedules", "accounts and keys"],
+  "notPerformed": ["manual collector/Actor/model/provider extraction", "manual Slack dispatch", "customer messages", "paid service activation", "native builds or Store uploads"],
+  "remaining": ["Real Instagram web and TikTok access restrictions", "Meta usage headroom and Ad Library server errors", "Provider trial/cost limits", "Post-repair regular collection and actual delivery still need observation"],
+  "localTests": { "broadFiles": 13, "broadRunnerCases": 22, "sourceAndReliabilityFiles": 4, "sourceAndReliabilityRunnerCases": 20, "overlap": true, "failures": 0 }
+}

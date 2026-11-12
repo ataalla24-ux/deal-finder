@@ -22,6 +22,14 @@ const PROFESSIONAL = /\b(?:coaching|teamcoaching|erstgespraech|beratung|besichti
 
 export function getNonConsumerOfferRejection(value) {
   const text = offerText(value);
+  const merchantMediaAudience = /\b(?:for\s+(?:vienna\s+)?(?:restaurants|bars|cafes|hotels)|fuer\s+(?:wiener\s+)?(?:restaurants|lokale|gastronomen)|restaurantbetreiber)\b/.test(text);
+  const mediaService = /\b(?:reels?|edited\s+photos|bearbeitete\s+fotos|videoproduktion|werbevideos?|marketingpaket)\b/.test(text);
+  const foodPerk = /\b(?:gratis|kostenlos\w*|free)\s+(?:kaffee|coffee|pizza|burger|essen|menue)\b|\b(?:kaffee|coffee|pizza|burger|essen|menue)\s+(?:gratis|kostenlos\w*|free)\b/.test(text);
+  if (merchantMediaAudience && mediaService && BENEFIT.test(text) && !foodPerk) return 'business-lead-generation';
+  const partnerRecruitment = /\b(?:partnerplaetze|partnerplatz|partner\s+in\s+wien)\b/.test(text)
+    && /\b(?:handwerker|dienstleister|unternehmer|je\s+branche)\b/.test(text)
+    && /\b(?:einrichtung|monatlich|netto\s*\/\s*monat)\b/.test(text);
+  if (partnerRecruitment && !foodPerk) return 'business-lead-generation';
   const tradeAudience=/\b(?:fuer\s+(?:betriebe|installateure|elektriker|handwerksbetriebe)|(?:ihrem|ihren|eurem|euer)\s+betrieb|for\s+(?:businesses|plumbers|electricians))\b/.test(text);
   const jobMarketplace=/\b(?:provision|grundgebuehr|servicegebuehr|serviceabo|offene\s+auftraege|auftraege\s+(?:ansehen|finden)|commission|service\s+fee)\b/.test(text)
     && /\b(?:registrieren|registrierung|auftraege|auftrag|register|sign\s+up)\b/.test(text);
