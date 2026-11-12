@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-11-12T15:07:27.316Z",
+  "generatedAt": "2026-11-12T15:32:11.973Z",
   "discoveryAvailability": {
     "note": "Transport evidence, not deal yield. Retry eligibility is not recovery. Candidate counts are not Slack deliveries. No extra runs or quota resets.",
     "lanes": [
@@ -54,9 +54,9 @@
   },
   "summary": {
     "filesConsidered": 32,
-    "totalCandidates": 649,
-    "uniqueCandidates": 633,
-    "distinctCandidates": 641,
+    "totalCandidates": 658,
+    "uniqueCandidates": 642,
+    "distinctCandidates": 650,
     "duplicateClusters": 8,
     "topHealthySources": [
       {
@@ -126,7 +126,7 @@
       {
         "sourceKey": "member-benefits",
         "sourceLabel": "Member Benefits",
-        "coverageScore": 85,
+        "coverageScore": 71,
         "totalDeals": 110,
         "fresh1dCount": 14
       },
@@ -138,25 +138,25 @@
         "fresh1dCount": 0
       },
       {
+        "sourceKey": "gutscheine",
+        "sourceLabel": "Gutscheine.at",
+        "coverageScore": 41,
+        "totalDeals": 36,
+        "fresh1dCount": 36
+      },
+      {
         "sourceKey": "meta-instagram",
         "sourceLabel": "Meta Instagram Graph",
-        "coverageScore": 43,
+        "coverageScore": 38,
         "totalDeals": 53,
         "fresh1dCount": 5
       },
       {
         "sourceKey": "vienna-promo-radar",
         "sourceLabel": "Vienna Promo Radar",
-        "coverageScore": 37,
+        "coverageScore": 36,
         "totalDeals": 68,
         "fresh1dCount": 1
-      },
-      {
-        "sourceKey": "firecrawl4",
-        "sourceLabel": "Firecrawl Key 4 - Instagram Direct",
-        "coverageScore": 30,
-        "totalDeals": 52,
-        "fresh1dCount": 0
       }
     ],
     "topPrecisionSources": [
@@ -195,7 +195,7 @@
       {
         "sourceKey": "member-benefits",
         "sourceLabel": "Member Benefits",
-        "sourceWeightScore": 72,
+        "sourceWeightScore": 69,
         "totalDeals": 110
       },
       {
@@ -213,7 +213,7 @@
       {
         "sourceKey": "meta-instagram",
         "sourceLabel": "Meta Instagram Graph",
-        "sourceWeightScore": 59,
+        "sourceWeightScore": 58,
         "totalDeals": 53
       },
       {
@@ -430,9 +430,9 @@
       ],
       "healthScore": 74,
       "missionFitScore": 63,
-      "coverageScore": 85,
+      "coverageScore": 71,
       "precisionScore": 72,
-      "sourceWeightScore": 72
+      "sourceWeightScore": 69
     },
     {
       "sourceKey": "meta-instagram",
@@ -512,9 +512,9 @@
       ],
       "healthScore": 70,
       "missionFitScore": 53,
-      "coverageScore": 43,
+      "coverageScore": 38,
       "precisionScore": 68,
-      "sourceWeightScore": 59
+      "sourceWeightScore": 58
     },
     {
       "sourceKey": "food3",
@@ -653,7 +653,7 @@
       ],
       "healthScore": 63,
       "missionFitScore": 66,
-      "coverageScore": 13,
+      "coverageScore": 12,
       "precisionScore": 63,
       "sourceWeightScore": 54
     },
@@ -1163,9 +1163,9 @@
       ],
       "healthScore": 50,
       "missionFitScore": 73,
-      "coverageScore": 23,
+      "coverageScore": 17,
       "precisionScore": 64,
-      "sourceWeightScore": 55
+      "sourceWeightScore": 54
     },
     {
       "sourceKey": "church-gemeinde",
@@ -1268,6 +1268,82 @@
       "coverageScore": 5,
       "precisionScore": 42,
       "sourceWeightScore": 28
+    },
+    {
+      "sourceKey": "gutscheine",
+      "file": "deals-pending-gutscheine.json",
+      "sourceLabel": "Gutscheine.at",
+      "totalDeals": 36,
+      "uniqueDeals": 36,
+      "duplicateDeals": 0,
+      "duplicateAcrossSources": 0,
+      "fresh1dCount": 36,
+      "fresh7dCount": 36,
+      "viennaCount": 0,
+      "foodDrinkCount": 3,
+      "promoCount": 5,
+      "missingUrlCount": 0,
+      "sampleTitles": [
+        "Bis zu 78% Rabatt auf OFF-WHITE, Diesel & Dsquared2 für Kinder",
+        "Bis zu 71% Rabatt auf adidas Performance",
+        "Bis zu 72% Rabatt auf Vagabond bei Lounge by Zalando"
+      ],
+      "lastRun": null,
+      "uniqueRate": 1,
+      "duplicateRate": 0,
+      "fresh1dRate": 1,
+      "fresh7dRate": 1,
+      "viennaRate": 0,
+      "foodDrinkRate": 0.1,
+      "promoRate": 0.1,
+      "missingUrlRate": 0,
+      "averageQualityScore": 51.3,
+      "topCategories": [
+        {
+          "value": "shopping",
+          "count": 29
+        },
+        {
+          "value": "beauty",
+          "count": 3
+        },
+        {
+          "value": "essen",
+          "count": 2
+        },
+        {
+          "value": "kaffee",
+          "count": 1
+        },
+        {
+          "value": "kirche",
+          "count": 1
+        }
+      ],
+      "topTypes": [
+        {
+          "value": "rabatt",
+          "count": 30
+        },
+        {
+          "value": "gutschein",
+          "count": 4
+        },
+        {
+          "value": "gratis",
+          "count": 2
+        }
+      ],
+      "issues": [
+        "geringe Food-/Drink-Relevanz",
+        "wenige klare Gratis-/Promo-Signale",
+        "Wien-Signal ist zu schwach"
+      ],
+      "healthScore": 46,
+      "missionFitScore": 28,
+      "coverageScore": 41,
+      "precisionScore": 31,
+      "sourceWeightScore": 36
     },
     {
       "sourceKey": "gemeinde",
@@ -1558,7 +1634,7 @@
       ],
       "healthScore": 41,
       "missionFitScore": 22,
-      "coverageScore": 37,
+      "coverageScore": 36,
       "precisionScore": 30,
       "sourceWeightScore": 32
     },
@@ -1625,75 +1701,6 @@
       "coverageScore": 8,
       "precisionScore": 37,
       "sourceWeightScore": 30
-    },
-    {
-      "sourceKey": "gutscheine",
-      "file": "deals-pending-gutscheine.json",
-      "sourceLabel": "Gutscheine.at",
-      "totalDeals": 27,
-      "uniqueDeals": 27,
-      "duplicateDeals": 0,
-      "duplicateAcrossSources": 0,
-      "fresh1dCount": 0,
-      "fresh7dCount": 27,
-      "viennaCount": 0,
-      "foodDrinkCount": 1,
-      "promoCount": 3,
-      "missingUrlCount": 0,
-      "sampleTitles": [
-        "Bis zu 72% Rabatt auf Steve Madden & Kurt Geiger",
-        "Bis zu 67% Rabatt auf good morning",
-        "Bis zu 76% Rabatt auf Scotch & Soda"
-      ],
-      "lastRun": null,
-      "uniqueRate": 1,
-      "duplicateRate": 0,
-      "fresh1dRate": 0,
-      "fresh7dRate": 1,
-      "viennaRate": 0,
-      "foodDrinkRate": 0,
-      "promoRate": 0.1,
-      "missingUrlRate": 0,
-      "averageQualityScore": 46,
-      "topCategories": [
-        {
-          "value": "shopping",
-          "count": 22
-        },
-        {
-          "value": "beauty",
-          "count": 4
-        },
-        {
-          "value": "essen",
-          "count": 1
-        }
-      ],
-      "topTypes": [
-        {
-          "value": "rabatt",
-          "count": 24
-        },
-        {
-          "value": "gratis",
-          "count": 2
-        },
-        {
-          "value": "gutschein",
-          "count": 1
-        }
-      ],
-      "issues": [
-        "wenige Deals sind frischer als 1 Tag",
-        "geringe Food-/Drink-Relevanz",
-        "wenige klare Gratis-/Promo-Signale",
-        "Wien-Signal ist zu schwach"
-      ],
-      "healthScore": 30,
-      "missionFitScore": 3,
-      "coverageScore": 13,
-      "precisionScore": 16,
-      "sourceWeightScore": 15
     },
     {
       "sourceKey": "flights",
