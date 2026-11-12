@@ -9,7 +9,7 @@ const get = async url => fetch(url, { redirect: 'manual', signal: AbortSignal.ti
 
 const health = await get(base + '/_link-health');
 assert.equal(health.status, 200);
-assert.equal(await health.text(), 'FreeFinder invitation links v1');
+assert.equal(await health.text(), 'FreeFinder invitation links v2; compact-deal-v1');
 results.push({ path: '/_link-health', status: health.status });
 
 for (const path of ['/', '/privacy.html', '/support.html', '/invite.html?invite=' + code]) {
