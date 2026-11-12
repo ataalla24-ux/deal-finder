@@ -3,9 +3,9 @@ name: Repository Safety
 on:
   push:
     branches: [main]
-    paths: ['.github/workflows/**', 'scripts/test-workflow-permissions.rb', 'scripts/*launch-readiness.mjs']
+    paths: ['.github/workflows/**', 'scripts/test-workflow-permissions.rb', 'scripts/*launch-readiness.mjs', 'scripts/*secret-guard.mjs', 'scripts/instagram-session-audit.mjs']
   pull_request:
-    paths: ['.github/workflows/**', 'scripts/test-workflow-permissions.rb', 'scripts/*launch-readiness.mjs']
+    paths: ['.github/workflows/**', 'scripts/test-workflow-permissions.rb', 'scripts/*launch-readiness.mjs', 'scripts/*secret-guard.mjs', 'scripts/instagram-session-audit.mjs']
   workflow_dispatch:
 
 permissions:
@@ -25,6 +25,9 @@ jobs:
         with:
           node-version: '22'
       - run: node --test scripts/test-launch-readiness.mjs
+      - run: node --test scripts/test-repository-secret-guard.mjs
+      - name: Reject session exports and private runtime files in the public tree
+        run: node scripts/repository-secret-guard.mjs
       - name: Read-only operations overview
         if: ${{ github.event_name != 'pull_request' }}
         run: node scripts/check-launch-readiness.mjs

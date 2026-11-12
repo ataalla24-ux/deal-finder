@@ -7,6 +7,7 @@ import { spawnSync } from 'child_process';
 import { stampDealsFeedFile } from './deals-feed-contract.mjs';
 import { mergeSourceOutbox } from './generated-source-merge.mjs';
 import { privateCommunityRow } from './community-public-boundary.mjs';
+import { assertPublicationSafe } from './repository-secret-guard.mjs';
 
 const DEFAULT_REMOTE = process.env.GIT_GENERATED_REMOTE || 'origin';
 const DEFAULT_BRANCH = process.env.GIT_GENERATED_BRANCH || process.env.GITHUB_REF_NAME || 'main';
@@ -684,6 +685,7 @@ async function main() {
   }
 
   const states = captureFiles(changedFiles);
+  assertPublicationSafe(states);
   assertNoPrivateCommunityOutput(states);
   const mapConsistency = captureMapConsistency(states, baseRef, mapReadInputs);
   const blogConsistency = captureBlogConsistency(states, baseRef);
@@ -701,6 +703,7 @@ async function main() {
         skipConflicts: options.skipConflicts,
         replaceConflicts: options.replaceConflicts,
       });
+      assertPublicationSafe(safeStates);
       assertNoPrivateCommunityOutput(safeStates);
       if(photoConsistency) {
         const retained=new Map(safeStates.map(state=>[state.path,state]));

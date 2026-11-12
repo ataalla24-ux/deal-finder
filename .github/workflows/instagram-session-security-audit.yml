@@ -1,0 +1,25 @@
+name: Instagram Session Security Audit (Read Only)
+on:
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  compare:
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    timeout-minutes: 3
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: Fetch only the known historical object for local comparison
+        run: git fetch --no-tags --depth=1 origin 1587805dca3d8a65ec5379fb1ccb968147fdc0c3
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Compare in memory without contacting Instagram or printing credentials
+        env:
+          INSTAGRAM_COOKIES: ${{ secrets.INSTAGRAM_COOKIES }}
+          INSTAGRAM_SESSIONID: ${{ secrets.INSTAGRAM_SESSIONID }}
+          INSTAGRAM_USERNAME: ${{ secrets.INSTAGRAM_USERNAME }}
+        run: node scripts/instagram-session-audit.mjs
