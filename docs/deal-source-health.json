@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-11-12T13:55:49.602Z",
+  "generatedAt": "2026-11-12T13:57:43.175Z",
   "discoveryAvailability": {
     "note": "Transport evidence, not deal yield. Retry eligibility is not recovery. Candidate counts are not Slack deliveries. No extra runs or quota resets.",
     "lanes": [
@@ -54,9 +54,9 @@
   },
   "summary": {
     "filesConsidered": 32,
-    "totalCandidates": 648,
-    "uniqueCandidates": 632,
-    "distinctCandidates": 640,
+    "totalCandidates": 649,
+    "uniqueCandidates": 633,
+    "distinctCandidates": 641,
     "duplicateClusters": 8,
     "topHealthySources": [
       {
@@ -721,6 +721,114 @@
       "sourceWeightScore": 45
     },
     {
+      "sourceKey": "power",
+      "file": "deals-pending-power.json",
+      "sourceLabel": "Power Scraper",
+      "totalDeals": 37,
+      "uniqueDeals": 37,
+      "duplicateDeals": 0,
+      "duplicateAcrossSources": 0,
+      "fresh1dCount": 0,
+      "fresh7dCount": 0,
+      "viennaCount": 15,
+      "foodDrinkCount": 26,
+      "promoCount": 13,
+      "missingUrlCount": 0,
+      "sampleTitles": [
+        "BILLA auf WhatsApp Nie wieder Angebote verpassen! Der BILLA WhatsApp Chat bringt",
+        "Zum Apple Music Abo für Studierende gibt's Apple TV kostenlos dazu. Fußnote ◊ Sp",
+        "Late Night Dinner Special Every day · 9:30–10:30 PM Enjoy 30% off our regular à la carte food menu."
+      ],
+      "lastRun": {
+        "status": "completed-with-errors",
+        "startedAt": "2026-11-12T13:54:53.006Z",
+        "finishedAt": "2026-11-12T13:55:20.829Z",
+        "durationMs": 27823,
+        "counts": {
+          "rawCandidates": 37,
+          "normalizedCandidates": 37,
+          "verifiedCandidates": 0,
+          "previousDeals": 0,
+          "acceptedDeals": 37,
+          "rejectedDeals": 0
+        },
+        "rejectedByReason": {},
+        "errors": [
+          "Too Good To Go: deferred until 2026-11-18T20:17:10.489Z",
+          "Mömax Restaurant: deferred until 2026-11-14T20:17:10.509Z",
+          "MediaMarkt: HTTP 404",
+          "Saturn: deferred until 2026-11-13T13:06:44.863Z",
+          "Spar: deferred until 2026-11-13T13:06:46.721Z",
+          "Müller: deferred until 2026-11-13T13:42:42.707Z",
+          "Conrad: HTTP 403",
+          "Decathlon: HTTP 403"
+        ],
+        "reportFile": "deal-pipeline-last-run-power.json"
+      },
+      "uniqueRate": 1,
+      "duplicateRate": 0,
+      "fresh1dRate": 0,
+      "fresh7dRate": 0,
+      "viennaRate": 0.4,
+      "foodDrinkRate": 0.7,
+      "promoRate": 0.4,
+      "missingUrlRate": 0,
+      "averageQualityScore": 61.7,
+      "topCategories": [
+        {
+          "value": "essen",
+          "count": 17
+        },
+        {
+          "value": "trinken",
+          "count": 8
+        },
+        {
+          "value": "kaffee",
+          "count": 5
+        },
+        {
+          "value": "sport",
+          "count": 3
+        },
+        {
+          "value": "technik",
+          "count": 3
+        },
+        {
+          "value": "supermarkt",
+          "count": 1
+        }
+      ],
+      "topTypes": [
+        {
+          "value": "rabatt",
+          "count": 28
+        },
+        {
+          "value": "gratis",
+          "count": 5
+        },
+        {
+          "value": "bogo",
+          "count": 3
+        },
+        {
+          "value": "freebie",
+          "count": 1
+        }
+      ],
+      "issues": [
+        "wenige Deals sind frischer als 1 Tag",
+        "Wien-Signal ist zu schwach"
+      ],
+      "healthScore": 57,
+      "missionFitScore": 42,
+      "coverageScore": 25,
+      "precisionScore": 51,
+      "sourceWeightScore": 45
+    },
+    {
       "sourceKey": "gastro2",
       "file": "deals-pending-gastro2.json",
       "sourceLabel": "Firecrawl Key 1 - Gastro",
@@ -820,115 +928,6 @@
       "coverageScore": 70,
       "precisionScore": 49,
       "sourceWeightScore": 55
-    },
-    {
-      "sourceKey": "power",
-      "file": "deals-pending-power.json",
-      "sourceLabel": "Power Scraper",
-      "totalDeals": 36,
-      "uniqueDeals": 36,
-      "duplicateDeals": 0,
-      "duplicateAcrossSources": 0,
-      "fresh1dCount": 0,
-      "fresh7dCount": 0,
-      "viennaCount": 15,
-      "foodDrinkCount": 25,
-      "promoCount": 12,
-      "missingUrlCount": 0,
-      "sampleTitles": [
-        "BILLA auf WhatsApp Nie wieder Angebote verpassen! Der BILLA WhatsApp Chat bringt",
-        "Zum Apple Music Abo für Studierende gibt's Apple TV kostenlos dazu. Fußnote ◊ Sp",
-        "Late Night Dinner Special Every day · 9:30–10:30 PM Enjoy 30% off our regular à la carte food menu."
-      ],
-      "lastRun": {
-        "status": "completed-with-errors",
-        "startedAt": "2026-11-11T20:17:10.486Z",
-        "finishedAt": "2026-11-11T20:17:41.772Z",
-        "durationMs": 31286,
-        "counts": {
-          "rawCandidates": 38,
-          "normalizedCandidates": 38,
-          "verifiedCandidates": 0,
-          "previousDeals": 0,
-          "acceptedDeals": 38,
-          "rejectedDeals": 0
-        },
-        "rejectedByReason": {},
-        "errors": [
-          "Too Good To Go: HTTP 429",
-          "Foodsharing AT: page.goto: Timeout 8000ms exceeded. Call log: - navigating to \"https://foodsharing.at/\", waiting until \"domcontentloaded\"",
-          "Mömax Restaurant: HTTP 403",
-          "MediaMarkt: deferred until 2026-11-12T13:23:38.046Z",
-          "Saturn: deferred until 2026-11-13T13:06:44.863Z",
-          "Spar: deferred until 2026-11-13T13:06:46.721Z",
-          "Müller: deferred until 2026-11-13T13:42:42.707Z",
-          "Conrad: deferred until 2026-11-12T13:23:40.770Z"
-        ],
-        "reportFile": "deal-pipeline-last-run-power.json"
-      },
-      "uniqueRate": 1,
-      "duplicateRate": 0,
-      "fresh1dRate": 0,
-      "fresh7dRate": 0,
-      "viennaRate": 0.4,
-      "foodDrinkRate": 0.7,
-      "promoRate": 0.3,
-      "missingUrlRate": 0,
-      "averageQualityScore": 61.9,
-      "topCategories": [
-        {
-          "value": "essen",
-          "count": 16
-        },
-        {
-          "value": "trinken",
-          "count": 7
-        },
-        {
-          "value": "kaffee",
-          "count": 5
-        },
-        {
-          "value": "sport",
-          "count": 4
-        },
-        {
-          "value": "technik",
-          "count": 3
-        },
-        {
-          "value": "supermarkt",
-          "count": 1
-        }
-      ],
-      "topTypes": [
-        {
-          "value": "rabatt",
-          "count": 29
-        },
-        {
-          "value": "bogo",
-          "count": 3
-        },
-        {
-          "value": "gratis",
-          "count": 3
-        },
-        {
-          "value": "freebie",
-          "count": 1
-        }
-      ],
-      "issues": [
-        "wenige Deals sind frischer als 1 Tag",
-        "wenige klare Gratis-/Promo-Signale",
-        "Wien-Signal ist zu schwach"
-      ],
-      "healthScore": 56,
-      "missionFitScore": 39,
-      "coverageScore": 24,
-      "precisionScore": 49,
-      "sourceWeightScore": 43
     },
     {
       "sourceKey": "instagram-ai",
@@ -1928,9 +1927,9 @@
       "sampleTitles": [],
       "lastRun": {
         "status": "completed",
-        "startedAt": "2026-11-11T23:34:05.731Z",
-        "finishedAt": "2026-11-11T23:34:25.464Z",
-        "durationMs": 19733,
+        "startedAt": "2026-11-12T13:54:15.380Z",
+        "finishedAt": "2026-11-12T13:55:04.474Z",
+        "durationMs": 49094,
         "counts": {
           "rawCandidates": 4,
           "normalizedCandidates": 4,
@@ -1940,8 +1939,9 @@
           "rejectedDeals": 4
         },
         "rejectedByReason": {
-          "non-food-ad": 2,
-          "alcohol-offer": 2
+          "no-consumer-food-benefit": 2,
+          "non-food-ad": 1,
+          "alcohol-offer": 1
         },
         "errors": [],
         "reportFile": "deal-pipeline-last-run-instagram-apify2.json"
