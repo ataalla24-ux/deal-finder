@@ -1,9 +1,10 @@
-import '../sentry/instrument.mjs';
 import fs from 'fs';
 import path from 'path';
 import crypto from 'crypto';
+import { pathToFileURL } from 'node:url';
 import { chromium } from 'playwright';
 import { fetchInstagramCodeFromGmail, gmailInstagramCodeConfigured } from './lib/gmail-instagram-code.mjs';
+import { instagramLoginCredentials, instagramLoginPageState, workflowMaskValue } from './lib/instagram-login-policy.mjs';
 
 const ROOT = process.cwd();
 const ENV_PATH = path.join(ROOT, '.env');
@@ -46,9 +47,6 @@ const INSTAGRAM_PROMPT_BUTTONS = [
   'Not now',
   'Später',
   'Skip',
-  'Weiter',
-  'Continue',
-  'Fortfahren',
 ];
 
 class InstagramRefreshError extends Error {
@@ -62,15 +60,6 @@ class InstagramRefreshError extends Error {
 
 function cleanText(value) {
   return String(value || '').replace(/\s+/g, ' ').trim();
-}
-
-function safePageUrl(rawUrl) {
-  try {
-    const parsed = new URL(rawUrl);
-    return `${parsed.origin}${parsed.pathname}${parsed.search ? '?...' : ''}`;
-  } catch {
-    return String(rawUrl || '');
-  }
 }
 
 function loadEnv() {
@@ -95,17 +84,10 @@ function loadEnv() {
 const env = { ...loadEnv(), ...process.env };
 
 function mask(value) {
-  const text = cleanText(value);
+  const text = String(value || '');
   if (text && process.env.GITHUB_ACTIONS) {
-    console.log(`::add-mask::${text}`);
+    console.log(`::add-mask::${workflowMaskValue(text)}`);
   }
-}
-
-function requireEnv(name, fallbackName = '') {
-  const value = cleanText(env[name] || (fallbackName ? env[fallbackName] : ''));
-  if (!value) throw new Error(`${name}${fallbackName ? `/${fallbackName}` : ''} fehlt`);
-  mask(value);
-  return value;
 }
 
 function base32ToBuffer(secret) {
@@ -143,26 +125,10 @@ function generateTotp(secret, now = Date.now()) {
   return String(binary % 1000000).padStart(6, '0');
 }
 
-async function clickFirstVisible(page, selectors, timeout = 700) {
-  for (const selector of selectors) {
-    try {
-      const locator = page.locator(selector).first();
-      if (await locator.isVisible({ timeout })) {
-        await locator.click({ timeout: 1500 });
-        await page.waitForTimeout(350);
-        return true;
-      }
-    } catch {
-      // Try next selector.
-    }
-  }
-  return false;
-}
-
 async function clickButtonByText(page, labels, timeout = 700) {
   for (const label of labels) {
     try {
-      const locator = page.getByRole('button', { name: label }).first();
+      const locator = page.getByRole('button', { name: label, exact: true }).first();
       if (await locator.isVisible({ timeout })) {
         await locator.click({ timeout: 1500 });
         await page.waitForTimeout(350);
@@ -205,13 +171,14 @@ async function firstVisibleLocator(page, selectors, timeout = 15000) {
   return null;
 }
 
-async function diagnosePage(page) {
-  const snapshot = await page.evaluate(() => ({
-    title: document.title || '',
-    url: location.href,
-    body: document.body?.innerText?.slice(0, 600) || '',
-  })).catch(() => ({ title: '', url: page.url(), body: '' }));
-  return `${snapshot.title || 'ohne Titel'} @ ${safePageUrl(snapshot.url)}: ${cleanText(snapshot.body).slice(0, 240)}`;
+async function pageLoginState(page) {
+  const body = await page.locator('body').innerText({ timeout: 1500 }).catch(() => '');
+  return instagramLoginPageState(page.url(), body);
+}
+
+export async function diagnosePage(page) {
+  // Do not persist page text: challenge pages can contain email addresses and codes.
+  return `state=${await pageLoginState(page)}; loginForm=${await loginFormVisible(page)}`;
 }
 
 async function openLoginPage(page) {
@@ -232,8 +199,8 @@ async function openLoginPage(page) {
   }
 }
 
-async function fillLoginForm(page, username, password) {
-  await openLoginPage(page);
+export async function fillLoginForm(page, username, password, { openPage = true } = {}) {
+  if (openPage) await openLoginPage(page);
 
   const usernameInput = await firstVisibleLocator(page, USERNAME_SELECTORS, 20000);
   const passwordInput = await firstVisibleLocator(page, PASSWORD_SELECTORS, 10000);
@@ -241,8 +208,16 @@ async function fillLoginForm(page, username, password) {
     throw new Error(`Instagram Login-Formular nicht gefunden: ${await diagnosePage(page)}`);
   }
 
-  await usernameInput.fill(username, { timeout: 10000 });
-  await passwordInput.fill(password, { timeout: 10000 });
+  try {
+    await usernameInput.fill(username, { timeout: 10000 });
+    await passwordInput.fill(password, { timeout: 10000 });
+    if (await usernameInput.inputValue() !== username || await passwordInput.inputValue() !== password) {
+      throw new Error('input mismatch');
+    }
+  } catch {
+    throw new InstagramRefreshError('form-mismatch', 'Instagram-Eingabefelder stimmen nicht mit den konfigurierten Werten überein; kein Login gesendet.');
+  }
+  console.log('Instagram login fields verified: username=true; password=true');
   return { usernameInput, passwordInput };
 }
 
@@ -255,73 +230,38 @@ async function loginFormVisible(page) {
   return Boolean(await firstVisibleLocator(page, PASSWORD_SELECTORS, 900));
 }
 
-async function waitForLoginAttemptResult(page, context, timeout = 9000) {
+export async function waitForLoginAttemptResult(page, context, timeout = 15000) {
   const deadline = Date.now() + timeout;
 
   while (Date.now() < deadline) {
     if (await hasSessionCookie(context)) return 'session';
-    if (await twoFactorInputVisible(page)) return 'transition';
-    if (await emailCodeChallengeVisible(page)) return 'transition';
+    if (await emailCodeChallengeVisible(page)) return 'email-code';
+    if (await twoFactorInputVisible(page)) return 'two-factor';
 
     const blockingState = await detectBlockingState(page);
-    if (blockingState) throw new Error(blockingState);
-
-    const stillOnLogin = /\/accounts\/login/i.test(page.url()) && await loginFormVisible(page);
-    if (!stillOnLogin) return 'transition';
+    if (blockingState) throw blockingState;
 
     await page.waitForTimeout(700);
   }
 
-  return '';
+  throw new InstagramRefreshError('login-unconfirmed', `Instagram hat den einmaligen Login noch nicht bestätigt (${await diagnosePage(page)}). Kein automatischer Neuversuch.`);
 }
 
-async function submitLoginForm(page, context, passwordInput) {
-  const submitAttempts = [
-    {
-      label: 'submit button',
-      run: () => clickFirstVisible(page, ['button[type="submit"]'], 3500),
-    },
-    {
-      label: 'login button text',
-      run: () => clickButtonByText(page, ['Log in', 'Einloggen', 'Anmelden'], 2500),
-    },
-    {
-      label: 'password enter',
-      run: async () => {
-        await passwordInput.press('Enter');
-        return true;
-      },
-    },
-    {
-      label: 'form requestSubmit',
-      run: () => page.evaluate(() => {
-        const password = document.querySelector('input[type="password"]');
-        const form = password?.closest('form');
-        const submit = form?.querySelector('button[type="submit"]');
-        if (submit instanceof HTMLElement) {
-          submit.click();
-          return true;
-        }
-        if (typeof form?.requestSubmit === 'function') {
-          form.requestSubmit();
-          return true;
-        }
-        return false;
-      }),
-    },
-  ];
-
-  for (const attempt of submitAttempts) {
-    console.log(`Instagram login submit: ${attempt.label}`);
-    const submitted = await attempt.run().catch(() => false);
-    if (!submitted) continue;
-
-    await page.waitForLoadState('networkidle', { timeout: 12000 }).catch(() => {});
-    const result = await waitForLoginAttemptResult(page, context);
-    if (result) return result;
+export async function submitLoginForm(page, context, passwordInput, { resultTimeout = 15000 } = {}) {
+  const form = passwordInput.locator('xpath=ancestor::form[1]');
+  const scope = await form.count() ? form : page;
+  const loginButton = scope.getByRole('button', { name: /^(Log in|Einloggen|Anmelden)$/i }).first();
+  const submitButton = form.locator('button[type="submit"]').first();
+  // Choose before clicking. A timeout after a click may already have sent credentials.
+  try {
+    if (await loginButton.isVisible()) await loginButton.click({ timeout: 5000 });
+    else if (await submitButton.isVisible()) await submitButton.click({ timeout: 5000 });
+    else await passwordInput.press('Enter', { timeout: 5000 });
+  } catch {
+    throw new InstagramRefreshError('login-unconfirmed', 'Instagram-Login konnte nicht eindeutig bestätigt werden; kein weiterer Submit.');
   }
-
-  throw new Error(`Instagram Login wurde nicht akzeptiert: ${await diagnosePage(page)}`);
+  console.log('Instagram login submit: one attempt');
+  return waitForLoginAttemptResult(page, context, resultTimeout);
 }
 
 async function handleTwoFactor(page) {
@@ -331,7 +271,7 @@ async function handleTwoFactor(page) {
 
   if (!visible) return false;
   if (!totpSecret) {
-    throw new Error('Instagram fragt 2FA ab, aber INSTAGRAM_TOTP_SECRET fehlt');
+    throw new InstagramRefreshError('blocked', 'Instagram fragt 2FA ab, aber INSTAGRAM_TOTP_SECRET fehlt');
   }
 
   const code = generateTotp(totpSecret);
@@ -355,7 +295,7 @@ async function handleEmailCodeChallenge(page) {
   }
 
   if (!code) {
-    throw new Error('Instagram verlangt einen E-Mail-Bestätigungscode. Konfiguriere die Gmail API Secrets oder das Repository Secret INSTAGRAM_EMAIL_CODE.');
+    throw new InstagramRefreshError('blocked', 'Instagram verlangt einen E-Mail-Bestätigungscode. Konfiguriere die Gmail API Secrets oder das Repository Secret INSTAGRAM_EMAIL_CODE.');
   }
 
   mask(code);
@@ -373,7 +313,8 @@ function twoFactorInput(page) {
   return page.locator('input[name="verificationCode"], input[autocomplete="one-time-code"], input[type="tel"]').first();
 }
 
-async function twoFactorInputVisible(page) {
+export async function twoFactorInputVisible(page) {
+  if (await pageLoginState(page) !== 'two-factor') return false;
   try {
     return await twoFactorInput(page).isVisible({ timeout: 700 });
   } catch {
@@ -381,29 +322,16 @@ async function twoFactorInputVisible(page) {
   }
 }
 
-async function emailCodeChallengeVisible(page) {
-  if (/\/auth_platform\/codeentry/i.test(page.url())) return true;
-  const bodyText = await page.locator('body').innerText({ timeout: 1000 }).catch(() => '');
-  return /sieh in deinen e-mails nach|check your email|email.*code|code.*email|gib den code/i.test(cleanText(bodyText));
+export async function emailCodeChallengeVisible(page) {
+  return await pageLoginState(page) === 'email-code';
 }
 
 async function detectBlockingState(page) {
-  const currentUrl = page.url();
-  if (/\/challenge\/|\/checkpoint\/|two_factor|suspended|disabled/i.test(currentUrl)) {
-    return `Instagram Challenge/Verifizierung erkannt (${safePageUrl(currentUrl)})`;
-  }
-
-  const bodyText = await page.locator('body').innerText({ timeout: 5000 }).catch(() => '');
-  const signal = cleanText(bodyText).toLowerCase();
-  if (!signal) return '';
-
-  if (/challenge|required|confirm it'?s you|suspicious|help us confirm|verify your account|bestätige|verdächtig|verification code|security code|two-factor|authentifizierung|sicherheitscode/.test(signal)) {
-    return 'Instagram Challenge/Verifizierung erkannt';
-  }
-  if (/incorrect|falsch|passwort.*falsch|wrong password|invalid/.test(signal)) {
-    return 'Instagram Login-Daten wurden abgelehnt';
-  }
-  return '';
+  const state = await pageLoginState(page);
+  if (state === 'login-rejected') return new InstagramRefreshError(state, 'Instagram lehnt diesen Server-Login ab. Das beweist bei erfolgreicher manueller Anmeldung kein falsches Passwort.');
+  if (state === 'rate-limited') return new InstagramRefreshError(state, 'Instagram hat den Login gedrosselt; kein weiterer Versuch.');
+  if (['challenge', 'email-code', 'two-factor'].includes(state)) return new InstagramRefreshError('blocked', 'Instagram Challenge/Verifizierung noch nicht abgeschlossen.');
+  return null;
 }
 
 async function collectInstagramCookies(context) {
@@ -486,12 +414,13 @@ async function validateBrowserSession(page) {
       : 'validation-failed';
     throw new InstagramRefreshError(
       status,
-      `Instagram Auth-Validierung fehlgeschlagen (HTTP ${result.status}): ${cleanText(result.bodySample).slice(0, 160)}`,
+      `Instagram Auth-Validierung fehlgeschlagen (HTTP ${result.status})`,
       { httpStatus: result.status || 0 },
     );
   }
 
-  return result;
+  const { bodySample, ...safeResult } = result;
+  return safeResult;
 }
 
 function sortCookies(cookies) {
@@ -532,8 +461,8 @@ function writeSecretFiles(output) {
 
   const cookiesPath = path.join(outDir, 'instagram-cookies.txt');
   const sessionPath = path.join(outDir, 'instagram-sessionid.txt');
-  fs.writeFileSync(cookiesPath, output.cookieString);
-  fs.writeFileSync(sessionPath, output.sessionId);
+  fs.writeFileSync(cookiesPath, output.cookieString, { mode: 0o600 });
+  fs.writeFileSync(sessionPath, output.sessionId, { mode: 0o600 });
   fs.chmodSync(cookiesPath, 0o600);
   fs.chmodSync(sessionPath, 0o600);
 
@@ -596,7 +525,7 @@ function refreshPermission() {
   };
 }
 
-function classifyRefreshFailure(error) {
+export function classifyRefreshFailure(error) {
   if (error instanceof InstagramRefreshError) {
     return {
       status: error.status,
@@ -638,39 +567,34 @@ async function main() {
     return;
   }
 
-  const username = requireEnv('INSTAGRAM_USERNAME', 'IG_USERNAME');
-  const password = requireEnv('INSTAGRAM_PASSWORD', 'IG_PASSWORD');
+  const { username, password } = instagramLoginCredentials(env);
+  mask(username);
+  mask(password);
   const headless = cleanText(env.INSTAGRAM_COOKIE_REFRESH_HEADLESS || '1') !== '0';
 
   console.log('Instagram cookie refresh: starting login');
-  console.log(`- username: ${username}`);
   console.log(`- headless: ${headless ? 'true' : 'false'}`);
 
   const browser = await chromium.launch({
     headless,
-    args: ['--disable-blink-features=AutomationControlled', '--no-sandbox', '--disable-dev-shm-usage'],
+    args: ['--no-sandbox', '--disable-dev-shm-usage'],
   });
 
   try {
     const context = await browser.newContext({
       viewport: { width: 1366, height: 900 },
-      userAgent: 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36',
       locale: 'de-AT',
       timezoneId: 'Europe/Vienna',
     });
     const page = await context.newPage();
-    await page.addInitScript(() => {
-      Object.defineProperty(navigator, 'webdriver', { get: () => undefined });
-    });
-
     const { passwordInput } = await fillLoginForm(page, username, password);
     await submitLoginForm(page, context, passwordInput);
-    await handleTwoFactor(page);
     await handleEmailCodeChallenge(page);
+    await handleTwoFactor(page);
     await dismissInstagramPrompts(page);
 
     const blockingState = await detectBlockingState(page);
-    if (blockingState) throw new Error(blockingState);
+    if (blockingState) throw blockingState;
 
     const sessionCookies = await waitForSessionCookie(context);
     if (!sessionCookies.some((cookie) => cookie.name === 'sessionid' && cookie.value)) {
@@ -711,9 +635,9 @@ async function main() {
   }
 }
 
-main().catch((error) => {
+if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) main().catch((error) => {
   const failure = classifyRefreshFailure(error);
-  const shouldRetryLogin = ['login-wall', 'invalid-session', 'blocked'].includes(failure.status);
+  const shouldRetryLogin = false;
   const report = {
     updatedAt: new Date().toISOString(),
     ok: false,

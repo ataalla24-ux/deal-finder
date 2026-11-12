@@ -1,0 +1,24 @@
+name: Instagram Login Offline Tests
+on:
+  push:
+    branches: [main]
+    paths: ['scripts/refresh-instagram-cookies.mjs', 'scripts/lib/instagram-login-policy.mjs', 'scripts/test-instagram-login-*.mjs', '.github/workflows/instagram-login-tests.yml']
+  pull_request:
+    paths: ['scripts/refresh-instagram-cookies.mjs', 'scripts/lib/instagram-login-policy.mjs', 'scripts/test-instagram-login-*.mjs', '.github/workflows/instagram-login-tests.yml']
+permissions:
+  contents: read
+jobs:
+  offline:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: npm ci
+      - run: npx playwright install --with-deps chromium-headless-shell
+      - name: Local fixtures only; no account secrets or Instagram requests
+        run: node --test scripts/test-instagram-login-policy.mjs scripts/test-instagram-login-browser.mjs

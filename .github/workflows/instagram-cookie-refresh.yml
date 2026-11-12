@@ -15,7 +15,9 @@ concurrency:
 
 jobs:
   refresh-instagram-cookies:
+    if: github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
+    timeout-minutes: 8
     permissions:
       contents: read
     steps:
@@ -80,6 +82,10 @@ jobs:
           const status = process.env.REFRESH_STATUS || 'failed';
           const text = status === 'rate-limited'
             ? '⏳ *Instagram Cookie Refresh rate-limited*\\nInstagram hat den Login vorübergehend gedrosselt. Keine Cookies rotieren; nach dem Cooldown manuell erneut versuchen.'
+            : status === 'login-rejected'
+              ? '⚠️ *Instagram lehnt den Server-Login ab*\\nEin falsches Passwort ist damit nicht bewiesen. Kein automatischer Neuversuch; vorhandene Cookies unverändert.'
+            : status === 'blocked'
+              ? '⚠️ *Instagram-Bestätigung erforderlich*\\nE-Mail-Code oder Sicherheitsprüfung noch offen. Kein automatischer Neuversuch; vorhandene Cookies unverändert.'
             : process.env.SHOULD_RETRY_LOGIN === 'true'
               ? '⚠️ *Instagram Cookie Refresh fehlgeschlagen*\\nDie Session ist ungültig oder Instagram verlangt eine Challenge. Bitte Login/2FA/Challenge prüfen.'
               : `⚠️ *Instagram Cookie Refresh technisch fehlgeschlagen*\\nStatus: ${status}. Die vorhandenen Cookies wurden nicht ersetzt.`;

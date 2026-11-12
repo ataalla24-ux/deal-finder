@@ -1,5 +1,6 @@
 import { spawnSync } from 'node:child_process';
 import { pathToFileURL } from 'node:url';
+import { loginConfigurationAudit } from './lib/instagram-login-policy.mjs';
 
 export function cookieFields(raw) {
   const text = String(raw || '').trim();
@@ -40,6 +41,7 @@ export function compareInstagramSessions(historical, env) {
     historicalAccountNameVerified: false,
     providerSessionValidity: 'not-tested',
     credentialsChanged: false,
+    loginConfiguration: loginConfigurationAudit(env),
   };
 }
 
