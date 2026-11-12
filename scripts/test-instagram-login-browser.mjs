@@ -1,7 +1,8 @@
 import assert from 'node:assert/strict';
 import { after, before, test } from 'node:test';
 import { chromium } from 'playwright';
-import { fillLoginForm, submitLoginForm, waitForLoginAttemptResult, emailCodeChallengeVisible, twoFactorInputVisible, diagnosePage } from './refresh-instagram-cookies.mjs';
+import { fillLoginForm, submitLoginForm, waitForLoginAttemptResult, emailCodeChallengeVisible, twoFactorInputVisible, diagnosePage, validateBrowserSession } from './refresh-instagram-cookies.mjs';
+import { publishScraperSession } from './refresh-instagram-local.mjs';
 
 let browser;
 before(async () => { browser = await chromium.launch({ headless: true }); });
@@ -79,4 +80,36 @@ test('input changed by a page is rejected before any submit', async t => {
   const { page } = await fixture(t, login.replace('RESPONSE', '') + `<script>document.querySelector('[name=password]').addEventListener('input', e => e.target.value='changed');</script>`);
   await assert.rejects(fillLoginForm(page, 'fixture-user', 'fixture-password', { openPage: false }), e => e.status === 'form-mismatch');
   assert.equal(await page.evaluate(() => window.submits), 0);
+});
+
+test('manual session requires own-profile controls, matching location and cookie owner', async t => {
+  const { page, context } = await fixture(t, '<a href="/accounts/edit/">Profil bearbeiten</a>');
+  await context.addCookies([{ name: 'sessionid', value: 'fixture-session', domain: '.instagram.com', path: '/' }, { name: 'ds_user_id', value: 'fixture-owner', domain: '.instagram.com', path: '/' }]);
+  await assert.rejects(validateBrowserSession(page, { username: 'dermarollerdesign', expectedUserId: 'different-owner', timeout: 100 }), e => e.status === 'wrong-account');
+  const result = await validateBrowserSession(page, { username: 'dermarollerdesign', expectedUserId: 'fixture-owner' });
+  assert.equal(result.ok, true);
+  assert.equal(result.method, 'own-profile-ui');
+  assert.equal(Object.hasOwn(result, 'userId'), false);
+  assert.equal(Object.hasOwn(result, 'bodySample'), false);
+});
+
+test('other accounts, public login walls and profile errors cannot validate a session', async t => {
+  const { page, context } = await fixture(t, '<button>Follow</button>');
+  await context.addCookies([{ name: 'sessionid', value: 'fixture-session', domain: '.instagram.com', path: '/' }, { name: 'ds_user_id', value: 'fixture-owner', domain: '.instagram.com', path: '/' }]);
+  await assert.rejects(validateBrowserSession(page, { username: 'dermarollerdesign', timeout: 100 }), e => e.status === 'wrong-account');
+  await page.route('**/dermarollerdesign/', route => route.fulfill({ status: 429, body: 'Too many requests' }));
+  await assert.rejects(validateBrowserSession(page, { username: 'dermarollerdesign', timeout: 100 }), e => e.status === 'rate-limited');
+});
+
+test('local secret transfer is restricted to the two scraper secrets using stdin', () => {
+  const calls = [];
+  publishScraperSession({ cookieString: 'fixture-cookies', sessionId: 'fixture-session' }, (command, args, options) => {
+    calls.push({ command, args, input: options.input });
+    assert.equal(args.includes(options.input), false);
+    return { status: 0 };
+  });
+  assert.deepEqual(calls.map(call => call.args[2]), ['INSTAGRAM_COOKIES', 'INSTAGRAM_SESSIONID']);
+  assert.equal(calls.every(call => call.args.at(-1) === 'ataalla24-ux/deal-finder'), true);
+  assert.throws(() => publishScraperSession({ cookieString: 'fixture' }, () => assert.fail('No partial update')), /unvollständig/);
+  assert.throws(() => publishScraperSession({ cookieString: 'fixture', sessionId: 'fixture' }, () => ({ status: 1, stderr: 'sensitive-error' })), e => !e.message.includes('sensitive-error'));
 });

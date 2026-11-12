@@ -10,8 +10,6 @@ const ROOT = process.cwd();
 const ENV_PATH = path.join(ROOT, '.env');
 const INSTAGRAM_HOME = 'https://www.instagram.com/';
 const INSTAGRAM_LOGIN = 'https://www.instagram.com/accounts/login/';
-const INSTAGRAM_APP_ID = '936619743392459';
-const DEFAULT_TEST_USERNAME = 'instagram';
 const COOKIE_ORDER = [
   'sessionid',
   'csrftoken',
@@ -366,61 +364,30 @@ async function waitForSessionCookie(context, timeout = 20000) {
   return cookies;
 }
 
-async function validateBrowserSession(page) {
-  const username = cleanText(env.INSTAGRAM_AUTH_TEST_USERNAME) || DEFAULT_TEST_USERNAME;
-  await page.goto(INSTAGRAM_HOME, { waitUntil: 'domcontentloaded', timeout: 30000 }).catch(() => {});
-  await page.waitForTimeout(1000);
-
-  const result = await page.evaluate(async ({ username, appId }) => {
-    try {
-      const response = await fetch(`/api/v1/users/web_profile_info/?username=${encodeURIComponent(username)}`, {
-        credentials: 'include',
-        headers: {
-          'X-IG-App-ID': appId,
-          'X-Requested-With': 'XMLHttpRequest',
-          Accept: '*/*',
-        },
-      });
-      const text = await response.text();
-      let parsed = null;
-      try {
-        parsed = JSON.parse(text);
-      } catch {
-        parsed = null;
-      }
-      return {
-        ok: response.ok,
-        status: response.status,
-        username: parsed?.data?.user?.username || '',
-        bodySample: text.slice(0, 300),
-        retryAfter: response.headers.get('retry-after') || '',
-      };
-    } catch (error) {
-      return { ok: false, status: 0, username: '', bodySample: String(error?.message || error || '') };
+export async function validateBrowserSession(page, { username, expectedUserId = '', timeout = 20000 } = {}) {
+  if (!/^[a-z0-9._]{1,30}$/i.test(username || '')) throw new InstagramRefreshError('wrong-account', 'Erwartetes Scraper-Konto fehlt; keine Secrets aktualisiert.');
+  const targetPath = `/${username.toLowerCase()}/`;
+  // Ordinary own-profile UI, not the obsolete private web_profile_info endpoint.
+  const response = await page.goto(`${INSTAGRAM_HOME}${username}/`, { waitUntil: 'domcontentloaded', timeout: 30000 });
+  if (response && response.status() >= 400) throw new InstagramRefreshError(response.status() === 429 ? 'rate-limited' : 'validation-failed', `Instagram Profilprüfung fehlgeschlagen (HTTP ${response.status()}); keine Secrets aktualisiert.`);
+  const editProfile = page.getByRole('link', { name: /^(Edit profile|Profil bearbeiten)$/i }).first();
+  const editButton = page.getByRole('button', { name: /^(Edit profile|Profil bearbeiten)$/i }).first();
+  const deadline = Date.now() + timeout;
+  while (Date.now() < deadline) {
+    const current = new URL(page.url());
+    const exactProfile = current.origin === 'https://www.instagram.com' && `${current.pathname.replace(/\/$/, '').toLowerCase()}/` === targetPath;
+    const cookies = await collectInstagramCookies(page.context());
+    const owner = cookies.find(cookie => cookie.name === 'ds_user_id')?.value;
+    const sessionPresent = cookies.some(cookie => cookie.name === 'sessionid');
+    if (exactProfile && owner && sessionPresent && (!expectedUserId || owner === expectedUserId)
+      && (await editProfile.isVisible() || await editButton.isVisible())) {
+      return { ok: true, method: 'own-profile-ui', accountMatched: true, username };
     }
-  }, { username, appId: INSTAGRAM_APP_ID });
-
-  if (!result.ok || !result.username) {
-    if (result.status === 429 || /please wait|try again later/i.test(result.bodySample)) {
-      throw new InstagramRefreshError(
-        'rate-limited',
-        `Instagram Auth-Validierung wurde rate-limited (HTTP ${result.status || 429})`,
-        { httpStatus: result.status || 429, retryAfter: cleanText(result.retryAfter) },
-      );
-    }
-
-    const status = result.status === 401 || /login|log in|anmelden/i.test(result.bodySample)
-      ? 'login-wall'
-      : 'validation-failed';
-    throw new InstagramRefreshError(
-      status,
-      `Instagram Auth-Validierung fehlgeschlagen (HTTP ${result.status})`,
-      { httpStatus: result.status || 0 },
-    );
+    const blockingState = await detectBlockingState(page);
+    if (blockingState) throw blockingState;
+    await page.waitForTimeout(500);
   }
-
-  const { bodySample, ...safeResult } = result;
-  return safeResult;
+  throw new InstagramRefreshError('wrong-account', 'Eigene Profilansicht des erwarteten Scraper-Kontos nicht bestätigt; keine Secrets aktualisiert.');
 }
 
 function sortCookies(cookies) {
@@ -436,7 +403,7 @@ function sortCookies(cookies) {
   });
 }
 
-async function extractCookieOutput(context) {
+export async function extractCookieOutput(context) {
   const instagramCookies = await collectInstagramCookies(context);
   const session = instagramCookies.find((cookie) => cookie.name === 'sessionid');
   const csrf = instagramCookies.find((cookie) => cookie.name === 'csrftoken');
@@ -602,7 +569,7 @@ async function main() {
       throw new Error(`Instagram hat keinen sessionid Cookie gesetzt: ${await diagnosePage(page)}; Cookies: ${diagnostics.cookieNames.join(', ') || 'keine'}`);
     }
 
-    const validation = await validateBrowserSession(page);
+    const validation = await validateBrowserSession(page, { username });
     const output = await extractCookieOutput(context);
     const files = writeSecretFiles(output);
 

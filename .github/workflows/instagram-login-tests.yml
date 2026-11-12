@@ -2,9 +2,9 @@ name: Instagram Login Offline Tests
 on:
   push:
     branches: [main]
-    paths: ['scripts/refresh-instagram-cookies.mjs', 'scripts/lib/instagram-login-policy.mjs', 'scripts/test-instagram-login-*.mjs', '.github/workflows/instagram-login-tests.yml']
+    paths: ['scripts/refresh-instagram-cookies.mjs', 'scripts/refresh-instagram-local.mjs', 'scripts/lib/instagram-login-policy.mjs', 'scripts/test-instagram-login-*.mjs', '.github/workflows/instagram-login-tests.yml']
   pull_request:
-    paths: ['scripts/refresh-instagram-cookies.mjs', 'scripts/lib/instagram-login-policy.mjs', 'scripts/test-instagram-login-*.mjs', '.github/workflows/instagram-login-tests.yml']
+    paths: ['scripts/refresh-instagram-cookies.mjs', 'scripts/refresh-instagram-local.mjs', 'scripts/lib/instagram-login-policy.mjs', 'scripts/test-instagram-login-*.mjs', '.github/workflows/instagram-login-tests.yml']
 permissions:
   contents: read
 jobs:
