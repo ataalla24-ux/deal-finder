@@ -2,9 +2,152 @@
   "schemaVersion": 1,
   "sourceKey": "instagram-apify2",
   "sourceLabel": "Apify 2 Vienna Food Discovery",
-  "updatedAt": "2026-11-11T23:34:25.464Z",
-  "runCount": 40,
+  "updatedAt": "2026-11-12T13:55:04.474Z",
+  "runCount": 41,
   "runs": [
+    {
+      "schemaVersion": 1,
+      "runProvenance": {
+        "repository": "ataalla24-ux/deal-finder",
+        "runId": "43231686119",
+        "headSha": "c8545d0c740aff1409b13be8fc1a0b9c62ac7400",
+        "checkoutSha": "65a7d47d53be33839e1e5160ae527e7227ea72c8",
+        "triggeringRun": null,
+        "event": "schedule",
+        "runAttempt": "1",
+        "url": "https://github.com/ataalla24-ux/deal-finder/actions/runs/43231686119"
+      },
+      "runId": "instagram-apify2-2026-11-12T13:55:04.474Z",
+      "sourceKey": "instagram-apify2",
+      "sourceLabel": "Apify 2 Vienna Food Discovery",
+      "status": "completed",
+      "startedAt": "2026-11-12T13:54:15.380Z",
+      "finishedAt": "2026-11-12T13:55:04.474Z",
+      "durationMs": 49094,
+      "outputFile": "docs/deals-pending-instagram-apify2.json",
+      "counts": {
+        "rawCandidates": 4,
+        "normalizedCandidates": 4,
+        "verifiedCandidates": 0,
+        "previousDeals": 0,
+        "acceptedDeals": 0,
+        "rejectedDeals": 4
+      },
+      "rejectedByReason": {
+        "no-consumer-food-benefit": 2,
+        "non-food-ad": 1,
+        "alcohol-offer": 1
+      },
+      "rejectedSamples": [
+        {
+          "reason": "no-consumer-food-benefit",
+          "deal": {
+            "id": "",
+            "title": "",
+            "brand": "",
+            "url": "https://www.instagram.com/p/Dfo6aFJsWhk/",
+            "source": "",
+            "pubDate": "",
+            "expires": "",
+            "postVerificationStatus": ""
+          }
+        },
+        {
+          "reason": "non-food-ad",
+          "deal": {
+            "id": "",
+            "title": "",
+            "brand": "",
+            "url": "https://www.instagram.com/p/DfpJz-FjXPb/",
+            "source": "",
+            "pubDate": "",
+            "expires": "",
+            "postVerificationStatus": ""
+          }
+        },
+        {
+          "reason": "no-consumer-food-benefit",
+          "deal": {
+            "id": "",
+            "title": "",
+            "brand": "",
+            "url": "https://www.instagram.com/p/Dfo6DCZClw0/",
+            "source": "",
+            "pubDate": "",
+            "expires": "",
+            "postVerificationStatus": ""
+          }
+        },
+        {
+          "reason": "alcohol-offer",
+          "deal": {
+            "id": "",
+            "title": "",
+            "brand": "",
+            "url": "https://www.instagram.com/p/DfnHkZZkVqi/",
+            "source": "",
+            "pubDate": "",
+            "expires": "",
+            "postVerificationStatus": ""
+          }
+        }
+      ],
+      "diagnostics": {
+        "pendingDeals": 0,
+        "unchangedPosts": 0,
+        "providerErrors": 0,
+        "emptySourceRecords": 0,
+        "ocrCalls": 3,
+        "sources": [
+          {
+            "key": "hashtag:esseninwien",
+            "lastAttemptAt": "2026-11-12T13:54:15.380Z",
+            "status": "posts-returned",
+            "postsReturned": 1,
+            "consecutiveFailures": 0,
+            "consecutiveEmpty": 0,
+            "retryAt": ""
+          },
+          {
+            "key": "hashtag:viennafood",
+            "lastAttemptAt": "2026-11-12T13:54:15.380Z",
+            "postsReturned": 1,
+            "status": "posts-returned",
+            "consecutiveFailures": 0,
+            "retryAt": "",
+            "consecutiveEmpty": 0
+          },
+          {
+            "key": "hashtag:wienfood",
+            "lastAttemptAt": "2026-11-12T13:54:15.380Z",
+            "postsReturned": 1,
+            "status": "posts-returned",
+            "consecutiveFailures": 0,
+            "retryAt": "",
+            "consecutiveEmpty": 0
+          },
+          {
+            "key": "hashtag:wienisst",
+            "lastAttemptAt": "2026-11-12T13:54:15.380Z",
+            "postsReturned": 1,
+            "status": "posts-returned",
+            "consecutiveFailures": 0,
+            "retryAt": "",
+            "consecutiveEmpty": 0
+          }
+        ]
+      },
+      "constraints": {
+        "profiles": 22,
+        "hashtags": 4,
+        "perSource": 1,
+        "posts": 26,
+        "ocrPosts": 8,
+        "dailyUsd": 0.15,
+        "cycleUsd": 4.65
+      },
+      "errors": []
+    },
     {
       "schemaVersion": 1,
       "runProvenance": {
