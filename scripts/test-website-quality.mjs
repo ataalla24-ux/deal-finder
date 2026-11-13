@@ -56,6 +56,37 @@ for (const file of ['index.html', 'about.html', 'presse.html', 'support.html', '
 const index = load(read('docs/blog/index.html'));
 const privacyHtml = read('docs/privacy.html');
 const privacy = load(privacyHtml);
+assert.match(privacy('#addressBlock').text(), /Lotte-Hass-Weg 2\/23/);
+assert.equal(privacy('strong').filter((_, el) => privacy(el).text() === 'Lili Dóra Ataalla (FreeFinder)').length, 2);
+assert.equal(privacy('#imprintLink').attr('href'), './impressum.html');
+assert.equal(privacy('#deletionLink').attr('href'), './data-deletion.html');
+assert.match(privacy('#retentionList').text(), /14 Tage nach Einreichung/);
+assert.match(privacy('#retentionList').text(), /35 Tagen/);
+assert.match(privacy('#retentionList').text(), /180 Tage nach dem letzten Speichern/);
+assert.match(privacy('#communityDraftAccess').text(), /nicht als öffentliche Entwurfsliste/);
+assert.match(privacy('#transfersList').text(), /ausschließlich in den USA/);
+assert.match(privacy('#transfersSafeguards').text(), /EU-Standardvertragsklauseln/);
+assert.equal(privacy('#complaintBody a').attr('href'), 'https://dsb.gv.at/eingabe-an-die-dsb/beschwerde');
+assert.match(privacyHtml, /Internal community submissions and their review drafts expire 14 days after submission/);
+assert.match(privacyHtml, /No public draft list is provided/);
+assert.doesNotMatch(privacyHtml, /Stefan Ataalla|auch ohne Anmeldung abrufbar|accessible without signing in/);
+const privacyCopyScript = privacy('script').toArray().map(node => privacy(node).text()).find(code => code.includes('const I18N'));
+const privacyNodes = new Map();
+vm.runInNewContext(privacyCopyScript, {
+  document: {
+    documentElement: {},
+    getElementById(id) {
+      if (!privacy(`#${id}`).length) return null;
+      if (!privacyNodes.has(id)) privacyNodes.set(id, { classList: { toggle() {} } });
+      return privacyNodes.get(id);
+    },
+  },
+  navigator: { language: 'en-GB' },
+  localStorage: { getItem() { return null; }, setItem() {} },
+});
+assert.match(privacyNodes.get('retentionList').innerHTML, /14 days after submission/);
+assert.match(privacyNodes.get('transfersList').innerHTML, /exclusively in the United States/);
+assert.equal(privacyNodes.get('deletionLink').innerHTML, 'Data deletion information');
 assert.match(privacy('#pushWelcome').text(), /beiden Kanälen zustimmen oder ablehnen/);
 assert.match(privacy('#pushWelcome').text(), /Einzelne Arten.*Einstellungen und Mein Konto wählen/);
 assert.match(privacy('#pushWelcome').text(), /Systemfreigabe allein aktiviert keine E-Mails/);
