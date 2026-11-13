@@ -1,10 +1,10 @@
 {
-  "generatedAt": "2026-11-13T23:37:55.248Z",
+  "generatedAt": "2026-11-13T23:48:02.285Z",
   "summary": {
     "maxAgeDays": 7,
     "total": 255,
-    "allowed": 0,
-    "blocked": 255,
+    "allowed": 1,
+    "blocked": 254,
     "warnings": 0,
     "reasonCounts": {
       "kein konkretes Angebot erkennbar": 183,
@@ -35,7 +35,7 @@
       "URL ungültig (Inhalt nicht mehr verfügbar)": 6,
       "abgelaufen (2026-11-11)": 2,
       "abgelaufen (2026-11-02)": 3,
-      "selbst syndizierter FreeFinder-Post": 3,
+      "selbst syndizierter FreeFinder-Post": 2,
       "kein echtes Social-Post-Datum gefunden": 1,
       "älter als 7 Tage (2026-06-03)": 2,
       "älter als 7 Tage (2026-05-06)": 2,
@@ -63,7 +63,7 @@
       "sonstiges": 6,
       "abgelaufen": 11,
       "Post-Datum in Zukunft": 4,
-      "selbst syndiziert": 3,
+      "selbst syndiziert": 2,
       "kein echtes Post-Datum": 67,
       "nicht Wien": 6,
       "Gewinnspiel": 1,
@@ -72,12 +72,11 @@
     "sourceCounts": {
       "Apify Instagram Vienna Food Offers": {
         "total": 2,
-        "allowed": 0,
-        "blocked": 2,
+        "allowed": 1,
+        "blocked": 1,
         "warnings": 0,
         "reasonCategoryCounts": {
-          "älter als 7 Tage": 1,
-          "selbst syndiziert": 1
+          "älter als 7 Tage": 1
         }
       },
       "Firecrawl Food #2": {
@@ -248,7 +247,23 @@
       }
     }
   },
-  "allowed": [],
+  "allowed": [
+    {
+      "id": "igap-1jkfazh",
+      "title": "Schnitzel 1+1. Pizza gratis dazu. 🍽️🍕 Zwei Food-Deals in Wien fürs Wochenende speichern! 🍽️ Alleewirt: Zwei",
+      "brand": "on Instagram",
+      "source": "Apify Instagram Vienna Food Offers",
+      "url": "https://www.instagram.com/reel/Dfc4gCLD0bS/",
+      "reasons": [],
+      "warnings": [],
+      "sourceDate": "2026-11-07T19:00:21.000Z",
+      "sourceDateSource": "url.instagramShortcode",
+      "sourceAgeDays": 6,
+      "expiryDate": "2026-12-31",
+      "expirySource": "url.dateHints",
+      "urlStatus": "HTTP 200"
+    }
+  ],
   "blocked": [
     {
       "id": "jesuszentrum-events-20261102",
@@ -893,7 +908,7 @@
       "warnings": [
         "kein Ablaufdatum gefunden"
       ],
-      "sourceDate": "2026-11-13T23:36:08.969Z",
+      "sourceDate": "2026-11-13T23:46:49.015Z",
       "sourceDateSource": "url.publicationDate",
       "sourceAgeDays": 0,
       "expiryDate": "",
@@ -3600,23 +3615,6 @@
       "urlStatus": "HTTP 200"
     },
     {
-      "id": "igap-1jkfazh",
-      "title": "Schnitzel 1+1. Pizza gratis dazu. 🍽️🍕 Zwei Food-Deals in Wien fürs Wochenende speichern! 🍽️ Alleewirt: Zwei",
-      "brand": "on Instagram",
-      "source": "Apify Instagram Vienna Food Offers",
-      "url": "https://www.instagram.com/reel/Dfc4gCLD0bS/",
-      "reasons": [
-        "selbst syndizierter FreeFinder-Post"
-      ],
-      "warnings": [],
-      "sourceDate": "2026-11-07T19:00:21.000Z",
-      "sourceDateSource": "url.instagramShortcode",
-      "sourceAgeDays": 6,
-      "expiryDate": "2026-12-31",
-      "expirySource": "url.dateHints",
-      "urlStatus": "HTTP 200"
-    },
-    {
       "id": "benefit-drei-plus-bc9830c4ee323086",
       "title": "Drei: 50 % Rabatt von 6.11.2026 bis 6.1.2027 (Eislaufplatz Schönbrunn)",
       "brand": "Eislaufplatz Schönbrunn",
@@ -3672,7 +3670,7 @@
       "sourceDate": "2026-11-13T16:50:29.000Z",
       "sourceDateSource": "url.instagramShortcode",
       "sourceAgeDays": 0,
-      "expiryDate": "2026-11-16T21:09:54.353Z",
+      "expiryDate": "2026-11-16T23:40:29.134Z",
       "expirySource": "deal.structured",
       "urlStatus": "HTTP 200"
     },
@@ -5217,23 +5215,23 @@
   ],
   "runProvenance": {
     "repository": "ataalla24-ux/deal-finder",
-    "runId": "43528284984",
-    "headSha": "140378cfb6e2b5cc69b040751e036fdefc90fb90",
-    "checkoutSha": "140378cfb6e2b5cc69b040751e036fdefc90fb90",
+    "runId": "43529608088",
+    "headSha": "5960549e0cdb2dd2885138c226124f1905f8e713",
+    "checkoutSha": "5960549e0cdb2dd2885138c226124f1905f8e713",
     "triggeringRun": {
-      "runId": "43528242535",
-      "headSha": "140378cfb6e2b5cc69b040751e036fdefc90fb90",
-      "event": "schedule",
-      "name": "Community Deal Intake",
-      "startedAt": "2026-11-13T23:35:27.000Z",
-      "url": "https://github.com/ataalla24-ux/deal-finder/actions/runs/43528242535"
+      "runId": "43528665071",
+      "headSha": "b8285f600649f56e8081e552afb389f0e20c6e89",
+      "event": "workflow_dispatch",
+      "name": "Meta Instagram Deal Discovery",
+      "startedAt": "2026-11-13T23:38:57.000Z",
+      "url": "https://github.com/ataalla24-ux/deal-finder/actions/runs/43528665071"
     },
     "event": "workflow_run",
     "runAttempt": "1",
-    "url": "https://github.com/ataalla24-ux/deal-finder/actions/runs/43528284984"
+    "url": "https://github.com/ataalla24-ux/deal-finder/actions/runs/43529608088"
   },
   "instagramDelivery": {
-    "checkedAt": "2026-11-13T23:37:55.260Z",
+    "checkedAt": "2026-11-13T23:48:02.499Z",
     "scope": "instagram-ai-agent/standard-slack-lane",
     "extractedCandidates": 3,
     "counts": {
@@ -5287,7 +5285,7 @@
     ]
   },
   "tiktokDelivery": {
-    "checkedAt": "2026-11-13T23:37:55.262Z",
+    "checkedAt": "2026-11-13T23:48:02.501Z",
     "scope": "tiktok-deals-scanner/standard-slack-lane",
     "extractedCandidates": 0,
     "counts": {},
