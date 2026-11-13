@@ -68,6 +68,8 @@ try {
   assert.equal(read('deals-pending-all.json').deals.length, 1, 'blocked deal stays editable');
   assert.ok(read('deals-pending-all.json').deals[0].approvalBlock);
   assert.equal(notices.length, 1);
+  assert.match(notices[0].text, /Freigabe-Häkchen kann gesetzt bleiben/,
+    'date corrections must not require a second approval reaction');
   assert.equal(fs.existsSync(path.join(temp, 'docs/deal-review-feedback.json')), false, 'no public community review feedback');
   await main();
   assert.equal(notices.length, 1, 'retries do not repeat identical notices');
@@ -142,11 +144,7 @@ try {
   process.env.APPROVE_FULL_SCAN_MAX_THREADS = '1';
   process.env.APPROVE_FULL_SCAN_MAX_DEALS = '1';
   const { main: scheduled } = await import(`${pathToFileURL(path.join(temp, 'scraper/slack-approve.js'))}?scheduled`);
-  // The prior snapshot `edited` had a date-related hold; give it the actual
-  // map block from the same workflow before checking the retry behavior.
-  const pending = read('deals-pending-all.json');
-  pending.deals[0].approvalBlock.reasons = ['Kartenstandort fehlt (request-budget): Test'];
-  write('deals-pending-all.json', pending);
+  assert.match(edited.approvalBlock.reasons.join(' '), /Community-Aktionszeitraum unklar/);
   reactions = [];
   await scheduled();
   assert.equal(read('deals.json').deals.length, 0, 'withdrawn reaction cannot publish despite the stale thread snapshot');
@@ -180,6 +178,49 @@ try {
   assert.equal(finished.allowedDeals[0].description, 'Bei Abholung kostet die Pizza 4,90 Euro.');
   assert.equal(finished.allowedDeals[0].address, 'Wollzeile 29, 1010 Wien');
   assert.ok(read('deal-map-locations.json').locations.some(pin => pin.dealIds.includes(official.id)));
+
+  const reviewNeeded = { ...official, id: 'copy-retry', title: 'Pizza für 4,90 € bei Abholung',
+    description: 'Bei Abholung kostet die Pizza 4,90 Euro. #Pizza #Wien',
+    address: 'Wollzeile 29, 1010 Wien', distance: 'Wollzeile 29, 1010 Wien' };
+  const validationOptions = {
+    inspectDealUrlHealth: async url => ({ ok: true, status: 200, finalUrl: url, dateHints: {}, contentHints: {} }),
+    approvalFetchPage: async url => ({ url, status: 404 }),
+    approvalGeocode: async () => ({ latitude: 48.21, longitude: 16.371, address: 'Wollzeile 29, 1010 Wien', source: 'official-fixture' }),
+    now: new Date(),
+  };
+  const interrupted = await validateApprovalCandidates([reviewNeeded], { ...validationOptions,
+    approvalModelRequest: async () => { throw new Error('fixture limit'); },
+  });
+  assert.equal(interrupted.allowedDeals.length, 0, 'an interrupted content review must not publish unreviewed copy');
+  assert.match(interrupted.results[0].decision.reasons.join(' '), /Inhaltsprüfung ausstehend/);
+  assert.equal(interrupted.blockedDeals[0].approvalCopyReview.deferred, true);
+  assert.ok(!read('deal-map-locations.json').locations.some(pin => pin.dealIds.includes(reviewNeeded.id)),
+    'a held copy review must not leave a public map pin');
+  let retryCalls = 0;
+  const completed = await validateApprovalCandidates(interrupted.blockedDeals, { ...validationOptions,
+    now: new Date(+validationOptions.now + 3600000),
+    approvalModelRequest: async () => Response.json({ choices: [{ finish_reason: 'stop', message: { content: JSON.stringify(++retryCalls === 1 ? {
+      title: '', quote: '', description: 'Bei Abholung kostet die Pizza 4,90 Euro.',
+      conditionsQuote: official.metaGraphCaption, dateQuote: '',
+    } : { supported: true }) } }] }),
+  });
+  assert.equal(retryCalls, 2);
+  assert.equal(completed.allowedDeals[0]?.description, 'Bei Abholung kostet die Pizza 4,90 Euro.', JSON.stringify(completed.results));
+  assert.equal(completed.allowedDeals[0].approvalCopyReview.deferred, undefined);
+  let batchCalls = 0;
+  const batch = await validateApprovalCandidates([
+    { ...reviewNeeded, id: 'batch-first' }, { ...reviewNeeded, id: 'batch-second' },
+  ], { ...validationOptions,
+    approvalModelRequest: async () => Response.json({ choices: [{ finish_reason: 'stop', message: { content: JSON.stringify(++batchCalls === 1 ? {
+      title: '', quote: '', description: 'Bei Abholung kostet die Pizza 4,90 Euro.',
+      conditionsQuote: official.metaGraphCaption, dateQuote: '',
+    } : { supported: true }) } }] }),
+  });
+  assert.equal(batchCalls, 2, 'bulk approvals stay within the existing one-candidate review limit');
+  assert.deepEqual(batch.allowedDeals.map(deal => deal.id), ['batch-first']);
+  assert.deepEqual(batch.blockedDeals.map(deal => deal.id), ['batch-second']);
+  assert.equal(batch.blockedDeals[0].approvalCopyReview.waitingForSlot, true);
+  assert.match(batch.results[1].decision.reasons.join(' '), /Inhaltsprüfung ausstehend/);
   console.log('Isolated approval workflow: block, retain, notify, edit, approve, deduplicate, reject and scheduled retry passed');
 } finally {
   globalThis.fetch = previousFetch;

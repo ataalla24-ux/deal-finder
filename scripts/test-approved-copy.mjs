@@ -45,5 +45,28 @@ test('grounded Slack approval copy uses both roles once, respects edits and does
     assert.equal(unverified.title, deal.title);
     assert.equal(unverified.approvalCopyReview.patch, undefined);
     assert.equal(calls, 4);
+
+    const [first, waiting] = await reviewApprovedCopy([deal, { ...deal, id: 'second' }], { cwd, now, request });
+    assert.equal(calls, 6, 'the existing one-candidate limit is not increased');
+    assert.equal(waiting.approvalCopyReview.waitingForSlot, true);
+    assert.equal(waiting.title, deal.title, 'a queued review cannot pretend to be complete');
+    const [next] = await reviewApprovedCopy([waiting], { cwd, now, request });
+    assert.equal(calls, 8, 'a run-limit deferral can use the next available slot immediately');
+    assert.equal(next.approvalCopyReview.waitingForSlot, undefined);
+    assert.equal(next.title, first.title);
+
+    let failures = 0;
+    const unavailable = async () => { failures++; throw new Error('fixture provider unavailable'); };
+    const [deferred] = await reviewApprovedCopy([deal], { cwd, now, request: unavailable });
+    assert.equal(deferred.approvalCopyReview.deferred, true);
+    await reviewApprovedCopy([deferred], { cwd, now, request: unavailable });
+    assert.equal(failures, 1, 'provider cooldown prevents repeated billed attempts');
+    const [recovered] = await reviewApprovedCopy([deferred], {
+      cwd, now: new Date(+now + 3600000), request,
+    });
+    assert.equal(recovered.approvalCopyReview.deferred, undefined);
+    assert.equal(recovered.title, first.title);
+    const [ownerEdited] = await reviewApprovedCopy([{ ...deferred, editedInSlack: true }], { cwd, now, request });
+    assert.equal(ownerEdited.approvalCopyReview, undefined, 'obsolete holds do not override human corrections');
   } finally { await rm(cwd, { recursive: true, force: true }); }
 });

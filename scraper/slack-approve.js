@@ -807,6 +807,12 @@ async function validateApprovalCandidates(deals, options = {}) {
   let addedBlock = false;
   for (const { deal, decision } of validation.results) {
     if (!decision.allowed) continue;
+    if (humanApproved(deal) && !existingIds.has(deal.id)
+      && (deal.approvalCopyReview?.deferred || deal.approvalCopyReview?.waitingForSlot)) {
+      decision.allowed = false;
+      decision.reasons.push('Inhaltsprüfung ausstehend: Die automatische Prüfung wartet auf verfügbare Kapazität und wird erneut versucht.');
+      addedBlock = true;
+    }
     if (humanApproved(deal) && !existingIds.has(deal.id) && !isCommunitySubmission(deal)
       && !cleanText(deal.description)) {
       decision.allowed = false;
@@ -916,7 +922,7 @@ async function retainBlockedApproval(deal, reasons) {
 }
 
 function isApprovalRetryReason(reason) {
-  return isApprovalMapReason(reason) || /^(?:Beschreibung fehlt|nicht eindeutig in Wien|noch nicht gestartet|Aktionszeitraum auf Lokal-Website unklar)\b/i.test(reason);
+  return isApprovalMapReason(reason) || /^(?:Inhaltsprüfung ausstehend|Beschreibung fehlt|nicht eindeutig in Wien|noch nicht gestartet|Aktionszeitraum auf Lokal-Website unklar|Community-Aktionszeitraum unklar|Aktionszeitraum widersprüchlich|Aktionszeitraum ungültig|Ablaufdatum passt nicht zur aktuellen Couponrunde|Offizielle Aktion nicht erneut bestätigt)\b/i.test(reason);
 }
 
 async function clearBlockedApprovalNotice(deal) {

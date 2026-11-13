@@ -403,7 +403,6 @@ export async function reviewApprovedCopy(deals, { cwd, now = new Date(), request
   const edits = read(path.join(cwd, 'docs/live-deal-edits.json'), {}).edits || [];
   const eligible = deals.filter(deal => !existingIds.has(deal.id) && !deal.editedInSlack && !deal.slackFormEditTs
     && !deal.liveEditedAt && !deal.isBusiness && !protectedDeal(deal, edits, policy));
-  if (!eligible.length) return deals;
   const latest = latestMaintenanceEvidence(eligible, read(path.join(cwd, 'docs/instagram-graph-post-evidence.json'), {}).posts || [], now);
   for (const [id, evidence] of maintenanceEvidenceFor(eligible, read(path.join(cwd, 'reviews/maintenance-source-evidence.json'), {}), now)) {
     if (!latest.has(id)) latest.set(id, evidence);
@@ -418,14 +417,18 @@ export async function reviewApprovedCopy(deals, { cwd, now = new Date(), request
       || /(?:^|\s)#[\p{L}\d_]{3,}/u.test(deal.description || '')) && !requested.includes('description')) requested.push('description');
     const evidence = sourceTexts(deal, latest.get(deal.id)).filter(value => value.length <= 12000);
     if (!eligible.includes(deal) || !requested.length || !evidence.length || evidence.join(' ').length > 18000) {
-      result.push(deal);
+      const { approvalCopyReview, ...unreviewed } = deal;
+      result.push(approvalCopyReview ? unreviewed : deal);
       continue;
     }
     const hashKey = hash([1, maintenanceFingerprint({ ...deal, approvedAt: '' }), requested, evidence]);
     let memo = deal.approvalCopyReview;
     const age = +now - Date.parse(memo?.checkedAt);
-    if (!(memo?.hash === hashKey && age >= 0 && age < (memo.deferred ? 60 : 1440) * 60000)) {
-      if (attempts >= maxCandidates) { result.push(deal); continue; }
+    if (!(memo?.hash === hashKey && !memo.waitingForSlot && age >= 0 && age < (memo.deferred ? 60 : 1440) * 60000)) {
+      if (attempts >= maxCandidates) {
+        result.push({ ...deal, approvalCopyReview: { hash: hashKey, waitingForSlot: true } });
+        continue;
+      }
       attempts++;
       memo = { hash: hashKey, checkedAt: now.toISOString() };
       try {
