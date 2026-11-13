@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-11-13T11:53:02.190Z",
+  "generatedAt": "2026-11-13T11:57:10.188Z",
   "discoveryAvailability": {
     "note": "Transport evidence, not deal yield. Retry eligibility is not recovery. Candidate counts are not Slack deliveries. No extra runs or quota resets.",
     "lanes": [
@@ -54,10 +54,10 @@
   },
   "summary": {
     "filesConsidered": 32,
-    "totalCandidates": 678,
+    "totalCandidates": 680,
     "uniqueCandidates": 658,
-    "distinctCandidates": 668,
-    "duplicateClusters": 10,
+    "distinctCandidates": 669,
+    "duplicateClusters": 11,
     "topHealthySources": [
       {
         "sourceKey": "instagram-apify",
@@ -78,16 +78,16 @@
         "totalDeals": 51
       },
       {
+        "sourceKey": "firecrawl5",
+        "sourceLabel": "Firecrawl Key 5 - Instagram Gastro",
+        "healthScore": 65,
+        "totalDeals": 4
+      },
+      {
         "sourceKey": "food3",
         "sourceLabel": "Firecrawl Key 2 - Food",
         "healthScore": 64,
         "totalDeals": 1
-      },
-      {
-        "sourceKey": "instagram-ai",
-        "sourceLabel": "Instagram AI Agent",
-        "healthScore": 62,
-        "totalDeals": 3
       }
     ],
     "topMissionSources": [
@@ -104,6 +104,12 @@
         "totalDeals": 9
       },
       {
+        "sourceKey": "firecrawl5",
+        "sourceLabel": "Firecrawl Key 5 - Instagram Gastro",
+        "missionFitScore": 72,
+        "totalDeals": 4
+      },
+      {
         "sourceKey": "wien-combined",
         "sourceLabel": "Wien Deals Combined Graph",
         "missionFitScore": 72,
@@ -114,12 +120,6 @@
         "sourceLabel": "Apify Instagram",
         "missionFitScore": 71,
         "totalDeals": 2
-      },
-      {
-        "sourceKey": "member-benefits",
-        "sourceLabel": "Member Benefits",
-        "missionFitScore": 63,
-        "totalDeals": 110
       }
     ],
     "topCoverageSources": [
@@ -185,10 +185,10 @@
         "totalDeals": 1
       },
       {
-        "sourceKey": "meta-instagram",
-        "sourceLabel": "Meta Instagram Graph",
-        "precisionScore": 68,
-        "totalDeals": 51
+        "sourceKey": "firecrawl5",
+        "sourceLabel": "Firecrawl Key 5 - Instagram Gastro",
+        "precisionScore": 69,
+        "totalDeals": 4
       }
     ],
     "topWeightedSources": [
@@ -211,16 +211,16 @@
         "totalDeals": 2
       },
       {
+        "sourceKey": "firecrawl5",
+        "sourceLabel": "Firecrawl Key 5 - Instagram Gastro",
+        "sourceWeightScore": 58,
+        "totalDeals": 4
+      },
+      {
         "sourceKey": "meta-instagram",
         "sourceLabel": "Meta Instagram Graph",
         "sourceWeightScore": 57,
         "totalDeals": 51
-      },
-      {
-        "sourceKey": "wien-combined",
-        "sourceLabel": "Wien Deals Combined Graph",
-        "sourceWeightScore": 57,
-        "totalDeals": 1
       }
     ],
     "topSourcesToFix": [
@@ -285,6 +285,7 @@
       "reportedSources": 9,
       "failedSources": [],
       "completedWithErrors": [
+        "firecrawl5",
         "instagram-apify2",
         "joe",
         "power",
@@ -515,6 +516,81 @@
       "coverageScore": 35,
       "precisionScore": 68,
       "sourceWeightScore": 57
+    },
+    {
+      "sourceKey": "firecrawl5",
+      "file": "deals-pending-firecrawl5.json",
+      "sourceLabel": "Firecrawl Key 5 - Instagram Gastro",
+      "totalDeals": 4,
+      "uniqueDeals": 2,
+      "duplicateDeals": 2,
+      "duplicateAcrossSources": 2,
+      "fresh1dCount": 1,
+      "fresh7dCount": 4,
+      "viennaCount": 2,
+      "foodDrinkCount": 4,
+      "promoCount": 3,
+      "missingUrlCount": 0,
+      "sampleTitles": [
+        "Dancing Noodles: 🎄 Weihnachtszeit bei Dancing Noodles in Wien! 🍜 🎁 Vom 1.",
+        "Döner: POV: XL Dönersemmel in Wien😍 Alle die @mampfwien ...",
+        "ciosgrill: Mit 0 € Marketingbudget ganz Wien erobern? Challenge ..."
+      ],
+      "lastRun": {
+        "status": "completed-with-errors",
+        "startedAt": "2026-11-13T11:53:13.691Z",
+        "finishedAt": "2026-11-13T11:56:13.675Z",
+        "durationMs": 179984,
+        "counts": {
+          "rawCandidates": 26,
+          "normalizedCandidates": 26,
+          "verifiedCandidates": 4,
+          "previousDeals": 2,
+          "acceptedDeals": 4,
+          "rejectedDeals": 24
+        },
+        "rejectedByReason": {
+          "post-verification-rejected": 24
+        },
+        "errors": [
+          "https://www.instagram.com/mosquito_mexican/: Firecrawl Agent nach 120s abgebrochen"
+        ],
+        "reportFile": "deal-pipeline-last-run-firecrawl5.json"
+      },
+      "uniqueRate": 0.5,
+      "duplicateRate": 0.5,
+      "fresh1dRate": 0.3,
+      "fresh7dRate": 1,
+      "viennaRate": 0.5,
+      "foodDrinkRate": 1,
+      "promoRate": 0.8,
+      "missingUrlRate": 0,
+      "averageQualityScore": 80,
+      "topCategories": [
+        {
+          "value": "essen",
+          "count": 4
+        }
+      ],
+      "topTypes": [
+        {
+          "value": "gratis",
+          "count": 3
+        },
+        {
+          "value": "gutschein",
+          "count": 1
+        }
+      ],
+      "issues": [
+        "Wien-Signal ist zu schwach",
+        "hohe Überschneidung mit anderen Quellen"
+      ],
+      "healthScore": 65,
+      "missionFitScore": 72,
+      "coverageScore": 13,
+      "precisionScore": 69,
+      "sourceWeightScore": 58
     },
     {
       "sourceKey": "food3",
@@ -981,86 +1057,13 @@
       "sourceWeightScore": 55
     },
     {
-      "sourceKey": "firecrawl5",
-      "file": "deals-pending-firecrawl5.json",
-      "sourceLabel": "Firecrawl Key 5 - Instagram Gastro",
-      "totalDeals": 2,
-      "uniqueDeals": 1,
-      "duplicateDeals": 1,
-      "duplicateAcrossSources": 1,
-      "fresh1dCount": 0,
-      "fresh7dCount": 2,
-      "viennaCount": 1,
-      "foodDrinkCount": 2,
-      "promoCount": 1,
-      "missingUrlCount": 0,
-      "sampleTitles": [
-        "Dancing Noodles: 🎄 Weihnachtszeit bei Dancing Noodles in Wien! 🍜 🎁 Vom 1.",
-        "Döner: POV: XL Dönersemmel in Wien😍 Alle die @mampfwien ..."
-      ],
-      "lastRun": {
-        "status": "completed",
-        "startedAt": "2026-11-12T12:14:24.167Z",
-        "finishedAt": "2026-11-12T12:15:36.026Z",
-        "durationMs": 71859,
-        "counts": {
-          "rawCandidates": 15,
-          "normalizedCandidates": 15,
-          "verifiedCandidates": 3,
-          "previousDeals": 1,
-          "acceptedDeals": 3,
-          "rejectedDeals": 13
-        },
-        "rejectedByReason": {
-          "post-verification-rejected": 13
-        },
-        "errors": [],
-        "reportFile": "deal-pipeline-last-run-firecrawl5.json"
-      },
-      "uniqueRate": 0.5,
-      "duplicateRate": 0.5,
-      "fresh1dRate": 0,
-      "fresh7dRate": 1,
-      "viennaRate": 0.5,
-      "foodDrinkRate": 1,
-      "promoRate": 0.5,
-      "missingUrlRate": 0,
-      "averageQualityScore": 80,
-      "topCategories": [
-        {
-          "value": "essen",
-          "count": 2
-        }
-      ],
-      "topTypes": [
-        {
-          "value": "gratis",
-          "count": 1
-        },
-        {
-          "value": "gutschein",
-          "count": 1
-        }
-      ],
-      "issues": [
-        "wenige Deals sind frischer als 1 Tag",
-        "Wien-Signal ist zu schwach",
-        "hohe Überschneidung mit anderen Quellen"
-      ],
-      "healthScore": 56,
-      "missionFitScore": 57,
-      "coverageScore": 11,
-      "precisionScore": 59,
-      "sourceWeightScore": 48
-    },
-    {
       "sourceKey": "firecrawl4",
       "file": "deals-pending-firecrawl4.json",
       "sourceLabel": "Firecrawl Key 4 - Instagram Direct",
       "totalDeals": 54,
-      "uniqueDeals": 50,
-      "duplicateDeals": 4,
-      "duplicateAcrossSources": 4,
+      "uniqueDeals": 49,
+      "duplicateDeals": 5,
+      "duplicateAcrossSources": 5,
       "fresh1dCount": 0,
       "fresh7dCount": 6,
       "viennaCount": 3,
