@@ -9,6 +9,8 @@ const read = file => fs.readFileSync(path.join(root, file), 'utf8');
 const home = read('docs/index.html');
 const promo = read('docs/plus-gratis.html');
 const support = read('docs/support.html');
+const terms = read('docs/terms.html');
+const flyer = read('docs/pro-test.html');
 const manifest = JSON.parse(read('docs/manifest.json'));
 const sw = read('docs/sw.js');
 const proSection = home.match(/<section class="pro-section"[\s\S]*?<\/section>/)[0];
@@ -43,13 +45,37 @@ assert.match(promo, /Keine Zahlungsmethode erforderlich/);
 assert.doesNotMatch(promo, /FreeFinder PLUS|30 Tage PLUS|allen PLUS-Funktionen/);
 assert.doesNotMatch(promo, /assets\/campaigns\/plus30-preview\.png/);
 assert.doesNotMatch(support, /Pro (?:oder|or) Plus|PRO oder PLUS/);
+for (const page of [support, flyer]) {
+  assert.match(page, /href="(?:\.\/)?terms\.html"/);
+  assert.match(page, /href="(?:\.\/)?terms\.html#abo-hilfe"/);
+}
+assert.match(terms, /<h1><span data-language="de">Nutzungsbedingungen<\/span><span data-language="en" hidden>Terms of Use<\/span>/);
+const help = terms.match(/<section id="abo-hilfe">([\s\S]*?)<\/section>/)?.[1];
+assert.ok(help, 'The stable subscription help anchor must exist');
+for (const lang of ['de', 'en']) {
+  const copy = help.match(new RegExp(`<div data-language="${lang}"[^>]*>([\\s\\S]*?)<\\/div>`))?.[1];
+  assert.ok(copy, `Missing ${lang} subscription help`);
+  assert.equal([...copy.matchAll(/<h3>/g)].length, 3, `Cancellation, withdrawal and refund must be distinct (${lang})`);
+  for (const url of [
+    'https://apps.apple.com/account/subscriptions',
+    'https://play.google.com/store/account/subscriptions',
+    'https://www.apple.com/legal/internet-services/itunes/at/terms.html',
+    'https://www.apple.com/legal/internet-services/itunes/de/terms.html',
+    'https://play.google.com/intl/ALL_de/about/play-terms/',
+    'https://reportaproblem.apple.com/',
+    'https://support.google.com/googleplay/answer/15576634?hl=' + lang,
+  ]) assert.ok(copy.includes(`href="${url}"`), `Missing ${lang} help link: ${url}`);
+}
+assert.match(terms, /Apple-Standardlizenz \(EULA\)/);
+assert.match(terms, /Deine gesetzlichen Rechte gegenüber FreeFinder[^.]+bleiben unberührt/);
+assert.doesNotMatch(terms, /Keine Haftung|Stripe|<form\b/);
 assert.equal(manifest.shortcuts.find(s => s.url === '/#pro' || s.url === './#pro' || s.url === '#pro')?.description,
   'FreeFinder Pro öffnen');
 assert.match(sw, /freefinder-website-v9/);
 assert.doesNotMatch(sw, /stats-plus\.jpg|pro-sheet\.jpg|\.\/og-preview\.png/);
 
 let scripts = 0;
-for (const [file, html] of [['index.html', home], ['plus-gratis.html', promo], ['support.html', support]]) {
+for (const [file, html] of [['index.html', home], ['plus-gratis.html', promo], ['support.html', support], ['terms.html', terms]]) {
   for (const match of html.matchAll(/<script\b([^>]*)>([\s\S]*?)<\/script>/g)) {
     if (/application\/ld\+json/.test(match[1])) JSON.parse(match[2]);
     else if (match[2].trim()) { new vm.Script(match[2], { filename: file }); scripts++; }

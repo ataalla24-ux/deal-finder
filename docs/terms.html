@@ -4,24 +4,28 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Nutzungsbedingungen | FreeFinder App</title>
-  <meta name="description" content="Nutzungsbedingungen für FreeFinder, die App für kostenlose Angebote, Rabatte und lokale Deals in Wien.">
+  <meta name="description" content="Nutzungsbedingungen für FreeFinder und FreeFinder Pro: Leistungen, Preise, Kündigung, Widerruf und Erstattung.">
   <meta name="robots" content="index,follow,max-snippet:-1">
   <link rel="canonical" href="https://freefinder.at/terms.html">
   <style>
-    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 760px; margin: 0 auto; padding: 32px 20px; background: #f8fafc; color: #1f2937; line-height: 1.6; }
-    .card { background: white; border-radius: 16px; padding: 24px; box-shadow: 0 2px 8px rgba(0,0,0,0.06); }
-    .lang-switch { display: flex; gap: 10px; margin-bottom: 20px; }
-    .lang-switch button { border: none; border-radius: 999px; padding: 10px 16px; font-weight: 700; cursor: pointer; background: #e5e7eb; }
-    .lang-switch button.active { background: linear-gradient(135deg, #111827, #374151); color: #fff; }
-    h1, h2 { margin-bottom: 12px; }
-    p { margin-bottom: 14px; }
-    a { color: #667eea; }
+    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 720px; margin: 0 auto; padding: 24px 20px 48px; background: #fff; color: #202124; line-height: 1.6; }
+    .lang-switch:not([hidden]) { display: flex; gap: 4px; margin-bottom: 20px; }
+    .lang-switch button { border: 1px solid #d6d7da; border-radius: 6px; padding: 8px 14px; min-height: 44px; font: inherit; font-weight: 700; cursor: pointer; background: #fff; color: inherit; }
+    .lang-switch button[aria-pressed="true"] { background: #202124; border-color: #202124; color: #fff; }
+    h1, h2, h3 { line-height: 1.25; margin: 0 0 10px; }
+    h2 { font-size: 1.35rem; }
+    h3 { font-size: 1.05rem; margin-top: 18px; }
+    p { margin: 0 0 12px; }
+    ul { padding-inline-start: 22px; }
+    li + li { margin-top: 8px; }
+    section { border-top: 1px solid #ddd; padding-top: 22px; margin-top: 22px; scroll-margin-top: 16px; }
+    a { color: #9c3616; text-underline-offset: .15em; }
   </style>
   <link rel="stylesheet" href="/consent.css?v=7">
   <script defer src="/analytics-config.js"></script>
   <script defer src="/consent.js?v=8"></script>
   <meta property="og:title" content="Nutzungsbedingungen | FreeFinder App">
-  <meta property="og:description" content="Nutzungsbedingungen für FreeFinder, die App für kostenlose Angebote, Rabatte und lokale Deals in Wien.">
+  <meta property="og:description" content="Nutzungsbedingungen für FreeFinder und FreeFinder Pro: Leistungen, Preise, Kündigung, Widerruf und Erstattung.">
   <meta property="og:url" content="https://freefinder.at/terms.html">
   <meta property="og:image" content="https://freefinder.at/og-home-20261007.jpg">
   <meta property="og:type" content="website">
@@ -33,7 +37,7 @@
   <meta property="og:image:secure_url" content="https://freefinder.at/og-home-20261007.jpg">
   <meta name="twitter:card" content="summary_large_image">
   <meta name="twitter:title" content="Nutzungsbedingungen | FreeFinder App">
-  <meta name="twitter:description" content="Nutzungsbedingungen für FreeFinder, die App für kostenlose Angebote, Rabatte und lokale Deals in Wien.">
+  <meta name="twitter:description" content="Nutzungsbedingungen für FreeFinder und FreeFinder Pro: Leistungen, Preise, Kündigung, Widerruf und Erstattung.">
   <meta name="twitter:image" content="https://freefinder.at/og-home-20261007.jpg">
   <meta name="twitter:image:alt" content="FreeFinder: Gratis-Angebote und Rabatte in Wien">
   <meta name="apple-mobile-web-app-title" content="FreeFinder">
@@ -44,70 +48,110 @@
 </head>
 <body>
   <a class="skip-link" href="#main-content">Zum Inhalt</a>
-  <div class="lang-switch">
-    <button id="langDe" type="button" onclick="setLanguage('de')">Deutsch</button>
-    <button id="langEn" type="button" onclick="setLanguage('en')">English</button>
+  <div class="lang-switch" hidden>
+    <button type="button" data-select-language="de" lang="de" aria-pressed="true">Deutsch</button>
+    <button type="button" data-select-language="en" lang="en" aria-pressed="false">English</button>
   </div>
-  <main class="card" id="main-content" tabindex="-1">
-    <h1 id="title">Nutzungsbedingungen</h1>
-    <p id="intro"><strong>FreeFinder</strong> sammelt Hinweise zu kostenlosen Deals und Angeboten in Wien.</p>
-    <h2 id="useTitle">1. Nutzung</h2>
-    <p id="useBody">Die App ist kostenlos und dient der Information über Angebote in Wien.</p>
-    <h2 id="warrantyTitle">2. Keine Garantie</h2>
-    <p id="warrantyBody">Wir übernehmen keine Garantie für Aktualität, Richtigkeit oder Vollständigkeit angezeigter Deals.</p>
-    <h2 id="liabilityTitle">3. Keine Haftung</h2>
-    <p id="liabilityBody">Für Schäden durch die Nutzung der App übernehmen wir keine Haftung.</p>
-    <h2 id="copyrightTitle">4. Urheberrecht</h2>
-    <p id="copyrightBody">Alle Inhalte gehören den jeweiligen Eigentümern.</p>
-    <p id="updated">Stand: 16.02.2026</p>
-    <p><a href="/" id="backLink">Zurück zur App</a></p>
+  <main id="main-content" tabindex="-1">
+    <h1><span data-language="de">Nutzungsbedingungen</span><span data-language="en" hidden>Terms of Use</span></h1>
+    <header data-language="de">
+      <p>FreeFinder wird von Lili Dóra Ataalla betrieben. Die vollständigen Anbieterangaben findest du im <a href="/impressum.html">Impressum</a>. Diese Bedingungen gelten für die Nutzung von FreeFinder und FreeFinder Pro. Für gebuchte Business-Anzeigen gelten die Bedingungen der Anzeigenbuchung.</p>
+      <p>Stand: <time datetime="2026-11-13">13. November 2026</time> · <a href="#abo-hilfe">Direkt zur Abo-Hilfe</a></p>
+    </header>
+    <header data-language="en" hidden>
+      <p>FreeFinder is operated by Lili Dóra Ataalla. Full operator details are in the <a href="/impressum.html">legal notice</a>. These terms cover FreeFinder and FreeFinder Pro. Booked business ads are subject to their booking terms.</p>
+      <p>Updated: <time datetime="2026-11-13">13 November 2026</time> · <a href="#abo-hilfe">Go to subscription help</a></p>
+    </header>
+    <section id="pro">
+      <div data-language="de">
+        <h2>Free und Pro</h2>
+        <p>Du kannst Wiener Angebote ohne Abo entdecken. FreeFinder Pro ist freiwillig und umfasst unter anderem den vollständigen Tagesdeal, die Deal-Karte, die Suche in deiner Nähe und auf Wunsch Mitteilungen zu Top-Deals.</p>
+        <p>Du löst Angebote beim jeweiligen Anbieter ein. Es gelten dessen Angebotsbedingungen und die Verfügbarkeit vor Ort oder online. Pro ist keine Flatrate für Essen oder Getränke. Deine gesetzlichen Rechte gegenüber FreeFinder, auch bei Mängeln unserer digitalen Leistung, bleiben unberührt.</p>
+        <h3>Preis, Gratis-Monat und Verlängerung</h3>
+        <p>Pro-Abos für Verbraucher werden in der App über den App Store oder Google Play abgeschlossen. Vor der Bestätigung zeigt dir der Store den Gesamtpreis je Abrechnungszeitraum und ein etwaiges Testangebot. Ob du den Gratis-Monat bekommst, bestätigt der Store vor Abschluss. Beim Jahresabo wird der angezeigte Jahrespreis auf einmal berechnet.</p>
+        <p>Ein Abo verlängert sich nach einer Testphase und danach jeweils um den gewählten Abrechnungszeitraum, solange du es nicht kündigst. Durch das Öffnen dieser Website entsteht kein Abo. Maßgeblich für deinen Kauf sind die beim Abschluss angezeigten Konditionen. Wer für den Kauf dein Vertragspartner ist, entnimmst du den Store-Angaben und dem Kaufbeleg.</p>
+        <p>Ein separat gewährter, befristeter Gratiszugang ohne Abo endet wie beim jeweiligen Angebot angegeben. Er geht nicht automatisch in ein kostenpflichtiges Abo über.</p>
+      </div>
+      <div data-language="en" hidden>
+        <h2>Free and Pro</h2>
+        <p>You can discover deals in Vienna without a subscription. FreeFinder Pro is optional and includes the full deal of the day, the deal map, nearby search and optional alerts for top deals.</p>
+        <p>Redeem offers with the merchant. The merchant's offer terms and local or online availability apply. Pro is not an unlimited food or drink plan. Your statutory rights against FreeFinder, including for defects in our digital service, are unaffected.</p>
+        <h3>Price, free month and renewal</h3>
+        <p>Consumer Pro subscriptions are purchased in the app through the App Store or Google Play. Before confirmation, the store shows the total price per billing period and any trial offer. The store confirms free-month eligibility before you subscribe. An annual subscription is charged in full for the year at the price shown.</p>
+        <p>The subscription renews automatically after any trial and for each subsequent selected billing period unless cancelled. Opening this website does not start a subscription. The terms shown at checkout apply to your purchase. Check the store information and receipt for the contracting seller.</p>
+        <p>Separately granted free access for a limited time without a subscription ends as stated in that offer. It does not automatically become a paid subscription.</p>
+      </div>
+    </section>
+    <section id="abo-hilfe">
+      <div data-language="de">
+        <h2>Abo kündigen, widerrufen oder Erstattung beantragen</h2>
+        <h3>Kündigen</h3>
+        <p>Kündigen stoppt künftige Verlängerungen. Die App zu löschen oder das FreeFinder-Konto zu schließen kündigt dein Abo nicht. Kündige über dasselbe Store-Konto, mit dem du es abgeschlossen hast.</p>
+        <ul>
+          <li><a href="https://apps.apple.com/account/subscriptions">Apple-Abos verwalten</a>. Um einen kostenlosen Apple-Test nicht kostenpflichtig fortzusetzen, kündige mindestens 24 Stunden vor Ablauf.</li>
+          <li><a href="https://play.google.com/store/account/subscriptions">Google-Play-Abos verwalten</a>. Kündige vor Ende der Testphase oder vor der nächsten Verlängerung.</li>
+        </ul>
+        <h3>Gesetzlicher Widerruf</h3>
+        <p>Ein Widerruf (in Österreich auch Rücktritt) ist etwas anderes als eine Kündigung. Soweit dir ein gesetzliches Widerrufsrecht zusteht, beträgt die Frist bei einem online abgeschlossenen Dienstleistungsvertrag grundsätzlich 14 Tage ab Vertragsschluss. Je nach Vertragsart und den beim Kauf abgegebenen Erklärungen können gesetzliche Ausnahmen gelten. Diese Bedingungen schränken dein Widerrufsrecht nicht ein.</p>
+        <ul>
+          <li><strong>Apple:</strong> Apple beschreibt „Transaktion widerrufen“ in deinem Einkaufsverlauf sowie die weiteren Wege zur Widerrufserklärung in Abschnitt B der Bedingungen für <a href="https://www.apple.com/legal/internet-services/itunes/at/terms.html">Österreich</a> und <a href="https://www.apple.com/legal/internet-services/itunes/de/terms.html">Deutschland</a>.</li>
+          <li><strong>Google Play:</strong> Informationen zum Widerruf und das Musterformular findest du in den <a href="https://play.google.com/intl/ALL_de/about/play-terms/">Google-Play-Bedingungen</a>. Du kannst den Widerruf auch eindeutig erklären, etwa per Brief an Google Commerce Limited, c/o Customer Support, 70 Sir John Rogerson's Quay, Dublin 2, D02R296, Irland.</li>
+        </ul>
+        <h3>Erstattung beantragen</h3>
+        <p>Für eine Erstattung nutze <a href="https://reportaproblem.apple.com/">Apples Erstattungsantrag</a> oder die <a href="https://support.google.com/googleplay/answer/15576634?hl=de">Google-Play-Hilfe zur Erstattung</a>. Ein Erstattungsantrag allein ersetzt keine Kündigung. Bei Problemen mit dem Pro-Zugang oder Fragen zu deinen gesetzlichen Ansprüchen hilft der <a href="/support.html">FreeFinder-Support</a>.</p>
+      </div>
+      <div data-language="en" hidden>
+        <h2>Cancel, withdraw or request a refund</h2>
+        <h3>Cancel a subscription</h3>
+        <p>Cancellation stops future renewals. Uninstalling the app or closing your FreeFinder account does not cancel a subscription. Use the same store account you subscribed with.</p>
+        <ul>
+          <li><a href="https://apps.apple.com/account/subscriptions">Manage Apple subscriptions</a>. To avoid being charged after a free Apple trial, cancel at least 24 hours before it ends.</li>
+          <li><a href="https://play.google.com/store/account/subscriptions">Manage Google Play subscriptions</a>. Cancel before the trial ends or before the next renewal.</li>
+        </ul>
+        <h3>Statutory right of withdrawal</h3>
+        <p>Withdrawal is distinct from cancellation. Where a statutory right of withdrawal applies, the period for an online service contract is generally 14 days from conclusion. Statutory exceptions may apply depending on the type of contract and the declarations made at purchase. These terms do not restrict your right of withdrawal.</p>
+        <ul>
+          <li><strong>Apple:</strong> Apple explains how to withdraw through your purchase history and lists other ways to submit a withdrawal in Section B of its terms for <a href="https://www.apple.com/legal/internet-services/itunes/at/terms.html">Austria</a> and <a href="https://www.apple.com/legal/internet-services/itunes/de/terms.html">Germany</a>.</li>
+          <li><strong>Google Play:</strong> See the <a href="https://play.google.com/intl/ALL_de/about/play-terms/">Google Play terms (German)</a> for withdrawal instructions and a model form. You can also submit a clear withdrawal statement, for example by post to Google Commerce Limited, c/o Customer Support, 70 Sir John Rogerson's Quay, Dublin 2, D02R296, Ireland.</li>
+        </ul>
+        <h3>Request a refund</h3>
+        <p>For a refund, use <a href="https://reportaproblem.apple.com/">Apple's refund request</a> or <a href="https://support.google.com/googleplay/answer/15576634?hl=en">Google Play refund help</a>. A refund request alone does not replace cancellation. For help with Pro access or questions about your statutory rights, contact <a href="/support.html">FreeFinder support</a>.</p>
+      </div>
+    </section>
+    <section>
+      <div data-language="de">
+        <h2>Weitere Informationen</h2>
+        <p>Veröffentliche bei Einreichungen nur Inhalte, die du weitergeben darfst, und keine privaten Daten oder persönlichen Gutscheincodes.</p>
+        <p><a href="/privacy.html">Datenschutzerklärung</a> · <a href="https://www.apple.com/legal/internet-services/itunes/dev/stdeula/">Apple-Standardlizenz (EULA)</a> · <a href="/">FreeFinder entdecken</a></p>
+      </div>
+      <div data-language="en" hidden>
+        <h2>More information</h2>
+        <p>Only submit content you are allowed to share. Do not include private data or personal voucher codes.</p>
+        <p><a href="/privacy.html">Privacy policy</a> · <a href="https://www.apple.com/legal/internet-services/itunes/dev/stdeula/">Apple standard licence (EULA)</a> · <a href="/">Discover FreeFinder</a></p>
+      </div>
+    </section>
   </main>
   <script>
-    const I18N = {
-      de: {
-        title: 'Nutzungsbedingungen',
-        intro: '<strong>FreeFinder</strong> ist eine App, die kostenlose Deals und Angebote in Wien sammelt.',
-        useTitle: '1. Nutzung',
-        useBody: 'Die App ist kostenlos und dient der Informationsbeschaffung über kostenlose Angebote in Wien.',
-        warrantyTitle: '2. Keine Garantie',
-        warrantyBody: 'Wir übernehmen keine Garantie für die Aktualität, Richtigkeit oder Vollständigkeit der angezeigten Deals.',
-        liabilityTitle: '3. Keine Haftung',
-        liabilityBody: 'Für Schäden, die durch die Nutzung der App entstehen, übernehmen wir keine Haftung.',
-        copyrightTitle: '4. Urheberrecht',
-        copyrightBody: 'Alle Inhalte gehören den jeweiligen Eigentümern.',
-        updated: 'Stand: 16.02.2026',
-        backLink: '← Zurück zur App'
-      },
-      en: {
-        title: 'Terms of Use',
-        intro: '<strong>FreeFinder</strong> is an app that collects free deals and offers in Vienna.',
-        useTitle: '1. Use',
-        useBody: 'The app is free and is intended to help users discover free offers in Vienna.',
-        warrantyTitle: '2. No warranty',
-        warrantyBody: 'We do not guarantee the timeliness, accuracy or completeness of the displayed deals.',
-        liabilityTitle: '3. No liability',
-        liabilityBody: 'We accept no liability for damages resulting from use of the app.',
-        copyrightTitle: '4. Copyright',
-        copyrightBody: 'All content belongs to its respective owners.',
-        updated: 'Updated: 2026-02-16',
-        backLink: '← Back to app'
-      }
-    };
-    function setLanguage(lang) {
-      const copy = I18N[lang] || I18N.de;
-      try { localStorage.setItem('freefinder_language', lang); } catch (_) {}
-      document.documentElement.lang = lang;
-      document.getElementById('langDe').classList.toggle('active', lang === 'de');
-      document.getElementById('langEn').classList.toggle('active', lang === 'en');
-      Object.entries(copy).forEach(([key, value]) => {
-        const el = document.getElementById(key);
-        if (el) el.innerHTML = value;
+    const buttons = document.querySelectorAll('[data-select-language]');
+    function setLanguage(language) {
+      const lang = language === 'en' ? 'en' : 'de';
+      document.documentElement.lang = lang === 'en' ? 'en' : 'de-AT';
+      document.title = (lang === 'en' ? 'Terms of Use' : 'Nutzungsbedingungen') + ' | FreeFinder App';
+      document.querySelector('.skip-link').textContent = lang === 'en' ? 'Skip to content' : 'Zum Inhalt';
+      document.querySelectorAll('[data-language]').forEach(block => {
+        block.hidden = block.dataset.language !== lang;
       });
+      buttons.forEach(button => button.setAttribute('aria-pressed', String(button.dataset.selectLanguage === lang)));
     }
-    let saved = null;
+    let saved;
     try { saved = localStorage.getItem('freefinder_language'); } catch (_) {}
-    const detected = navigator.language && navigator.language.toLowerCase().startsWith('en') ? 'en' : 'de';
-    setLanguage(saved || detected);
+    setLanguage(saved || (navigator.language.toLowerCase().startsWith('en') ? 'en' : 'de'));
+    buttons.forEach(button => button.addEventListener('click', () => {
+      const lang = button.dataset.selectLanguage;
+      setLanguage(lang);
+      try { localStorage.setItem('freefinder_language', lang); } catch (_) {}
+    }));
+    document.querySelector('.lang-switch').hidden = false;
   </script>
 </body>
 </html>
