@@ -1,8 +1,8 @@
 {
   "version": 1,
-  "checkedAt": "2026-11-13T18:32:19.281Z",
+  "checkedAt": "2026-11-13T19:43:47.506Z",
   "feedHash": "2f9bb27dd9f335100f4060325101b70fcd99e5ec9c7c3587dcc256e892bab8ef",
-  "mapContextHash": "323d8cbb44e3aae43977cef56b6732c3a6e4c10283d9b90436e05018c19d6513",
+  "mapContextHash": "2e2937fcab3eb1b4c936667c279da7c0ea23de781ccff34f0c73ad3b462a4d08",
   "sourceEvidenceHash": "4799272fffc5c6e27b7fb1ebf64d6e2be22451c2d4adb68c51a28ddec6e2eeb4",
   "liveCount": 77,
   "checks": {
@@ -74,7 +74,7 @@
     "sharedAssignments": [],
     "caveat": "Current compiled selection and bounded asset/crop review; changed feeds need a fresh observation. No installed-version or recipient UI certification."
   },
-  "modelCalls": 2,
+  "modelCalls": 0,
   "photoDeferred": 0,
   "automaticPublicationEnabled": false,
   "live": [
@@ -312,7 +312,8 @@
         "status": "needs-review",
         "checkedAt": "2026-11-13T18:32:19.281Z",
         "provesMerchantPhoto": false,
-        "automaticReplacement": false
+        "automaticReplacement": false,
+        "cached": true
       },
       "nativePhoto": {
         "status": "feed-changed-recheck-required",
@@ -368,7 +369,8 @@
         "status": "needs-review",
         "checkedAt": "2026-11-13T18:32:19.281Z",
         "provesMerchantPhoto": false,
-        "automaticReplacement": false
+        "automaticReplacement": false,
+        "cached": true
       },
       "nativePhoto": {
         "status": "feed-changed-recheck-required",
@@ -3532,8 +3534,8 @@
     }
   ],
   "pending": {
-    "count": 191,
-    "reviewNeeded": 191,
+    "count": 192,
+    "reviewNeeded": 192,
     "rows": [
       {
         "id": "fc4g-zz2f5b",
@@ -8361,6 +8363,35 @@
         "publicationMode": "human-approval",
         "automaticPublicationAllowed": false,
         "fingerprint": "4ed503c65dda28180f32981d3daaa54ed97708d92ccb2b0999a9275f6d1a30b8"
+      },
+      {
+        "id": "meta-ig-17965098957216629",
+        "issues": [
+          {
+            "code": "long-title",
+            "label": "Titel lang; Bedingungen erhalten, nicht abschneiden."
+          },
+          {
+            "code": "missing-merchant",
+            "label": "Tatsaechlichen Anbieter bestaetigen."
+          },
+          {
+            "code": "upstream-validity-review",
+            "label": "Vorhandene Validierungshinweise vor Freigabe erneut pruefen."
+          },
+          {
+            "code": "map-incomplete",
+            "label": "Einloesestandorte sind noch nicht vollstaendig bestaetigt."
+          },
+          {
+            "code": "evidence-missing",
+            "label": "Kein gespeicherter Originaltext fuer automatische Korrektur."
+          }
+        ],
+        "requiresReview": true,
+        "publicationMode": "human-approval",
+        "automaticPublicationAllowed": false,
+        "fingerprint": "c5852579bb0983a070a3201a1a39c574998179e73ab422e0990be293873da48e"
       }
     ]
   },
