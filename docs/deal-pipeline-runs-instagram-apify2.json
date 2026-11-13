@@ -2,9 +2,136 @@
   "schemaVersion": 1,
   "sourceKey": "instagram-apify2",
   "sourceLabel": "Apify 2 Vienna Food Discovery",
-  "updatedAt": "2026-11-12T22:49:38.672Z",
-  "runCount": 42,
+  "updatedAt": "2026-11-13T13:18:32.116Z",
+  "runCount": 43,
   "runs": [
+    {
+      "schemaVersion": 1,
+      "runProvenance": {
+        "repository": "ataalla24-ux/deal-finder",
+        "runId": "43432404528",
+        "headSha": "b9a2073830fe072a708a9ebf01fda34c59c270c4",
+        "checkoutSha": "46af8ebe596d8a986bda1f73afc033620c6138df",
+        "triggeringRun": null,
+        "event": "schedule",
+        "runAttempt": "1",
+        "url": "https://github.com/ataalla24-ux/deal-finder/actions/runs/43432404528"
+      },
+      "runId": "instagram-apify2-2026-11-13T13:18:32.116Z",
+      "sourceKey": "instagram-apify2",
+      "sourceLabel": "Apify 2 Vienna Food Discovery",
+      "status": "completed",
+      "startedAt": "2026-11-13T13:17:59.168Z",
+      "finishedAt": "2026-11-13T13:18:32.116Z",
+      "durationMs": 32948,
+      "outputFile": "docs/deals-pending-instagram-apify2.json",
+      "counts": {
+        "rawCandidates": 4,
+        "normalizedCandidates": 3,
+        "verifiedCandidates": 0,
+        "previousDeals": 0,
+        "acceptedDeals": 0,
+        "rejectedDeals": 3
+      },
+      "rejectedByReason": {
+        "post-older-than-seven-days": 2,
+        "non-food-ad": 1
+      },
+      "rejectedSamples": [
+        {
+          "reason": "post-older-than-seven-days",
+          "deal": {
+            "id": "",
+            "title": "",
+            "brand": "",
+            "url": "https://www.instagram.com/p/Dd8G71zD77c/",
+            "source": "",
+            "pubDate": "",
+            "expires": "",
+            "postVerificationStatus": ""
+          }
+        },
+        {
+          "reason": "non-food-ad",
+          "deal": {
+            "id": "",
+            "title": "",
+            "brand": "",
+            "url": "https://www.instagram.com/p/DfrXg9CFCca/",
+            "source": "",
+            "pubDate": "",
+            "expires": "",
+            "postVerificationStatus": ""
+          }
+        },
+        {
+          "reason": "post-older-than-seven-days",
+          "deal": {
+            "id": "",
+            "title": "",
+            "brand": "",
+            "url": "https://www.instagram.com/p/DdgXf9_OQgq/",
+            "source": "",
+            "pubDate": "",
+            "expires": "",
+            "postVerificationStatus": ""
+          }
+        }
+      ],
+      "diagnostics": {
+        "pendingDeals": 0,
+        "unchangedPosts": 1,
+        "providerErrors": 0,
+        "emptySourceRecords": 0,
+        "ocrCalls": 1,
+        "sources": [
+          {
+            "key": "hashtag:wienkaffee",
+            "lastAttemptAt": "2026-11-13T13:17:59.168Z",
+            "postsReturned": 1,
+            "status": "stale-results",
+            "consecutiveEmpty": 5,
+            "retryAt": "2026-11-20T13:17:59.168Z"
+          },
+          {
+            "key": "hashtag:wienpizza",
+            "lastAttemptAt": "2026-11-13T13:17:59.168Z",
+            "postsReturned": 1,
+            "status": "stale-results",
+            "consecutiveEmpty": 5,
+            "retryAt": "2026-11-20T13:17:59.168Z"
+          },
+          {
+            "key": "hashtag:wienisst",
+            "lastAttemptAt": "2026-11-13T13:17:59.168Z",
+            "postsReturned": 1,
+            "status": "posts-returned",
+            "consecutiveFailures": 0,
+            "retryAt": "",
+            "consecutiveEmpty": 0
+          },
+          {
+            "key": "hashtag:esseninwien",
+            "lastAttemptAt": "2026-11-13T13:17:59.168Z",
+            "status": "posts-returned",
+            "postsReturned": 1,
+            "consecutiveFailures": 0,
+            "consecutiveEmpty": 0,
+            "retryAt": ""
+          }
+        ]
+      },
+      "constraints": {
+        "profiles": 22,
+        "hashtags": 4,
+        "perSource": 1,
+        "posts": 26,
+        "ocrPosts": 8,
+        "dailyUsd": 0.15,
+        "cycleUsd": 4.65
+      },
+      "errors": []
+    },
     {
       "schemaVersion": 1,
       "runProvenance": {
