@@ -10,7 +10,9 @@ import {
   loadDealModeration,
   moderationCounts,
 } from './deal-moderation-utils.js';
-import { isVagueExpiry, normalizeDealExpiry, parseExpiryDetails } from './expiry-utils.js';
+import { inspectDealUrlHealth, isVagueExpiry, normalizeDealExpiry, parseExpiryDetails, repairStartOnlyExpiry } from './expiry-utils.js';
+import { offerPeriodFields } from './offer-period-fields.js';
+import { hasOnlyPreviewDescription, preisjaegerThreadId } from './approval-source-evidence.js';
 import { isDealNewByDate } from './deal-freshness-utils.js';
 import { buildReport, buildSummary, validateDealsForSlack } from './deal-validity-agent.js';
 import { canonicalSocialPostKey, mergeDealEvidence, officialOmvVariantKey } from './deal-evidence-utils.js';
@@ -261,13 +263,19 @@ function mergeParsedDealsWithQueue(parsedDeals, queuedDeals) {
   if (ensureArray(parsedDeals).length === 0) return ensureArray(queuedDeals);
   return parsedDeals.map((parsed) => {
     const queued = queuedBySlackTs.get(cleanText(parsed.slackTs));
-    if (!queued) return parsed;
+    if (!queued || (parsed.id && queued.id && parsed.id !== queued.id)
+      || (parsed.url && queued.url && parsed.url !== queued.url)) return parsed;
     return {
       ...queued,
       ...parsed,
       // Slack is a preview, not the authoritative full editorial text. Human
       // thread edits are applied afterwards; form edits below retain priority.
-      ...(queued.cardEditorial ? { title: queued.title, description: queued.description, cardEditorial: queued.cardEditorial } : {}),
+      ...Object.fromEntries(['title', 'description', 'brand', 'source', 'originSource', 'evidence',
+        'address', 'distance', 'city', 'postalCode', 'category', 'type',
+        'sourcePublishedAt', 'sourcePublishedAtSource', 'pubDate', 'pubDateSource',
+        ].filter(field => Object.hasOwn(queued, field)).map(field => [field, queued[field]])),
+      ...(offerPeriodFields.some(field => queued[field])
+        ? Object.fromEntries(offerPeriodFields.map(field => [field, queued[field]])) : {}),
       ...(queued.cardEditorial?.appliedFields?.includes('expiryDisplayText')
         ? { expiryDisplayText: queued.expiryDisplayText } : {}),
       ...(queued.slackFormEditTs ? Object.fromEntries([
@@ -769,19 +777,43 @@ async function validateApprovalCandidates(deals, options = {}) {
     maxRequests: process.env.APPROVAL_MAP_GEOCODE_REQUESTS ?? 8,
     maxSourceRequests: process.env.APPROVAL_MAP_SOURCE_REQUESTS ?? 0,
   } : null;
-  let candidates = ensureArray(deals).map(deal => prepareCommunityApproval(deal, now));
+  const inputs = ensureArray(deals).map(deal => {
+    const input = { ...deal };
+    repairStartOnlyExpiry(input, { now });
+    return input;
+  });
+  let candidates = inputs.map(deal => prepareCommunityApproval(deal, now));
   const humanApproved = deal => deal.pipelineLifecycle?.manualDecision === 'approved';
+  // Reuse exactly the URL check validation already performs. No second source
+  // request, crawler, OCR or model call is needed to read this thread's text.
+  const healthCache = new Map();
+  const inspect = async (url, settings) => {
+    if (!healthCache.has(url)) healthCache.set(url, (options.inspectDealUrlHealth || inspectDealUrlHealth)(url, settings));
+    return healthCache.get(url);
+  };
+  const sourceEvidence = new Map();
+  for (const deal of candidates) {
+    if (!humanApproved(deal) || existingIds.has(deal.id) || !preisjaegerThreadId(deal.url)
+      || deal.editedInSlack || deal.slackFormEditTs || deal.liveEditedAt || isCommunitySubmission(deal)) continue;
+    let health;
+    try { health = await inspect(deal.url, { now, timeoutMs: options.timeoutMs }); } catch { health = {}; }
+    const evidence = !health.invalid && !health.transientError && !health.blockedByProtection
+      && health.status === 200 && health.approvalSourceEvidence?.sourceUrl === deal.url
+      ? health.approvalSourceEvidence : null;
+    sourceEvidence.set(deal.id, evidence || { sourceUrl: deal.url,
+      blockingReason: 'Aktueller Angebotsbeleg nicht eindeutig lesbar.' });
+  }
   const sourceLookup = mapOptions ? await findApprovalAddresses(candidates.filter(humanApproved), mapOptions) : null;
   candidates = candidates.map(deal => preparePublicationTitle(deal, { existingIds }));
   if (process.env.APPROVAL_SOURCE_COPY_REVIEW === '1' && (options.approvalModelRequest || process.env.OPENAI_API_KEY)) {
     const { reviewApprovedCopy } = await import('../scripts/automatic-deal-maintenance.mjs');
     const reviewed = await reviewApprovedCopy(candidates.filter(deal => humanApproved(deal) && !isCommunitySubmission(deal)), {
-      cwd: ROOT, now, existingIds, request: options.approvalModelRequest,
+      cwd: ROOT, now, existingIds, request: options.approvalModelRequest, sourceEvidence,
     });
     const byId = new Map(reviewed.map(deal => [deal.id, deal]));
     candidates = candidates.map(deal => byId.get(deal.id) || deal);
   }
-  const originals = new Map(ensureArray(deals).map(deal => [deal.id, deal]));
+  const originals = new Map(inputs.map(deal => [deal.id, deal]));
   const sourceAddresses = new Map();
   candidates = candidates.map(deal => {
     const proof = sourceLookup?.reviewed[deal.id];
@@ -800,12 +832,19 @@ async function validateApprovalCandidates(deals, options = {}) {
     return { ...deal, address, city: 'Wien', postalCode: site.postalCode, distance: address,
       missingFields: ensureArray(deal.missingFields).filter(field => field !== 'Ort') };
   });
-  const validation = await validateDealsForSlack(candidates, { ...options, now, communityApproval: true });
+  const validation = await validateDealsForSlack(candidates, { ...options, now, communityApproval: true,
+    inspectDealUrlHealth: inspect });
   await normalizeApprovedDealExpiries(validation.allowedDeals, { now, allowUrlLookup: false });
   // The source lookup and the validity check must agree before the address can
   // outlive the ephemeral evidence used to discover it.
   let addedBlock = false;
   for (const { deal, decision } of validation.results) {
+    const sourceHold = sourceEvidence.get(deal.id)?.blockingReason;
+    if (sourceHold) {
+      decision.allowed = false;
+      decision.reasons.push(`Angebotsbeleg ausstehend: ${sourceHold} Die Freigabe bleibt gespeichert; automatische Nachpruefung folgt.`);
+      addedBlock = true;
+    }
     if (!decision.allowed) continue;
     if (humanApproved(deal) && !existingIds.has(deal.id)
       && (deal.approvalCopyReview?.deferred || deal.approvalCopyReview?.waitingForSlot)) {
@@ -814,7 +853,7 @@ async function validateApprovalCandidates(deals, options = {}) {
       addedBlock = true;
     }
     if (humanApproved(deal) && !existingIds.has(deal.id) && !isCommunitySubmission(deal)
-      && !cleanText(deal.description)) {
+      && (!cleanText(deal.description) || (sourceEvidence.has(deal.id) && hasOnlyPreviewDescription(deal)))) {
       decision.allowed = false;
       decision.reasons.push('Beschreibung fehlt: Einloesung und Bedingungen sind noch nicht ausreichend belegt.');
       addedBlock = true;
@@ -922,7 +961,7 @@ async function retainBlockedApproval(deal, reasons) {
 }
 
 function isApprovalRetryReason(reason) {
-  return isApprovalMapReason(reason) || /^(?:Inhaltsprüfung ausstehend|Beschreibung fehlt|nicht eindeutig in Wien|noch nicht gestartet|Aktionszeitraum auf Lokal-Website unklar|Community-Aktionszeitraum unklar|Aktionszeitraum widersprüchlich|Aktionszeitraum ungültig|Ablaufdatum passt nicht zur aktuellen Couponrunde|Offizielle Aktion nicht erneut bestätigt)\b/i.test(reason);
+  return isApprovalMapReason(reason) || /^(?:Angebotsbeleg ausstehend|Inhaltsprüfung ausstehend|Beschreibung fehlt|nicht eindeutig in Wien|noch nicht gestartet|Aktionszeitraum auf Lokal-Website unklar|Community-Aktionszeitraum unklar|Aktionszeitraum widersprüchlich|Aktionszeitraum ungültig|Ablaufdatum passt nicht zur aktuellen Couponrunde|Offizielle Aktion nicht erneut bestätigt)\b/i.test(reason);
 }
 
 async function clearBlockedApprovalNotice(deal) {

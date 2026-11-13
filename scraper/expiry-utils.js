@@ -1,6 +1,7 @@
 import { load } from 'cheerio';
 import { cardEditorialWhen } from './deal-card-editor.js';
 import { hasReviewedOfferPeriod } from './offer-period-fields.js';
+import { extractApprovalSourceEvidence } from './approval-source-evidence.js';
 
 const URL_CHECK_UA = 'Mozilla/5.0 (compatible; FreeFinderBot/1.0; +https://freefinder.wien)';
 const DAY_MS = 24 * 60 * 60 * 1000;
@@ -645,7 +646,7 @@ export function parseExpiryShape(value, options = {}) {
     return { kind: 'recurring', raw, confidence: 'low' };
   }
 
-  let m = text.match(/(\d{1,2})\.(\d{1,2})\.(\d{2,4})\s*[-–]\s*(\d{1,2})\.(\d{1,2})\.(\d{2,4})/);
+  let m = text.match(/(\d{1,2})\.(\d{1,2})\.(\d{2,4})\s*(?:[-–]|bis)\s*(\d{1,2})\.(\d{1,2})\.(\d{2,4})/);
   if (m) {
     const startYear = m[3].length === 2 ? `20${m[3]}` : m[3];
     const endYear = m[6].length === 2 ? `20${m[6]}` : m[6];
@@ -772,7 +773,8 @@ export function parseExpiryShape(value, options = {}) {
 
   const hasStrongEndSignal = /\b(gültig bis|gueltig bis|endet|endet am|letzter tag|deadline|frist|einlösbar bis|einloesbar bis|aktion bis|läuft bis|laeuft bis|nur bis|bis)\b/.test(signalText);
   const hasEndSignal = hasStrongEndSignal || (/\bbis\b/.test(text) && (!hasSingleExplicitDate || hasDateRange || !hasTimeOnlyEndSignal));
-  const hasRealStartSignal = /\b(gültig ab|gueltig ab|startet|startet am|abholung ab|verfügbar ab|verfuegbar ab|ab eröffnung|ab eroeffnung|öffnet am|oeffnet am)\b/.test(signalText);
+  const hasBareDateStart = new RegExp(`\\bab\\s+(?:20\\d{2}-\\d{1,2}-\\d{1,2}|\\d{1,2}\\.\\s*\\d{1,2}(?:\\.|\\b)|\\d{1,2}\\.?\\s+(?:${monthPattern})\\b)`, 'i').test(raw);
+  const hasRealStartSignal = hasBareDateStart || /\b(gültig ab|gueltig ab|startet|startet am|abholung ab|verfügbar ab|verfuegbar ab|ab eröffnung|ab eroeffnung|öffnet am|oeffnet am)\b/.test(signalText);
   const hasTimeOnlyStartSignal = /\bab\s+\d{1,2}:\d{2}\b/.test(signalText);
   const hasStartSignal = !hasEndSignal && (hasRealStartSignal || (hasTimeOnlyStartSignal && !hasSingleExplicitDate));
   const hasSingleDayTimeWindow = hasSingleExplicitDate && hasTimeOnlyEndSignal;
@@ -1721,6 +1723,7 @@ export async function inspectDealUrlHealth(url, options = {}) {
       finalUrl,
       contentHints,
       dateHints,
+      approvalSourceEvidence: extractApprovalSourceEvidence(html, url, finalUrl),
       checkedAt: new Date().toISOString(),
     };
   } catch {
@@ -1733,10 +1736,35 @@ export async function inspectDealUrlHealth(url, options = {}) {
   }
 }
 
+// Repair only a derived end that repeats an explicit start. Independent or
+// human-reviewed end dates must not be erased by an older source literal.
+export function repairStartOnlyExpiry(deal, options = {}) {
+  const literal = cleanText(deal.expiresOriginal || deal.expiryDisplayText || deal.expires);
+  const shape = parseExpiryShape(literal, options);
+  if (shape.kind !== 'start' || !shape.validFrom || hasReviewedOfferPeriod(deal)
+    || deal.expiresDetectedFromUrl || /^(?:url|slack\.|manual)/i.test(deal.expiresSource || '')) return false;
+  const ends = [deal.expires, deal.validUntil, deal.validOn, deal.end_date, deal.validity_date].filter(Boolean);
+  if (ends.some(value => {
+    const parsed = parseExpiryDetails(value, options);
+    return !parsed?.date || parsed.date.toISOString().slice(0, 10) !== shape.validFrom;
+  })) return false;
+  applyStructuredExpiryFields(deal, literal, options);
+  deal.expiresOriginal = literal;
+  deal.expires = '';
+  deal.expiresPrecision = '';
+  delete deal.end_date;
+  delete deal.validity_date;
+  delete deal.expirySource;
+  delete deal.expiresSource;
+  return true;
+}
+
 export async function normalizeDealExpiry(deal, options = {}) {
   const now = options.now instanceof Date ? options.now : new Date();
+  if (repairStartOnlyExpiry(deal, { now })) return deal;
   const literal = cleanText(deal.expiresOriginal || deal.expiryDisplayText || '');
   const literalShape = parseExpiryShape(literal, { now });
+  if (literalShape.kind === 'start' && (deal.validUntil || deal.validOn || deal.expiresDetectedFromUrl)) return deal;
   const explicit = parseExplicitOfferPeriod(literal);
   if (explicit?.error) return deal;
   const explicitSchedule = hasExplicitOfferSchedule(literal) || /\bsolange\b/i.test(literal);
