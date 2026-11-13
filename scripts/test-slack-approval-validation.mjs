@@ -98,7 +98,7 @@ const [metadataPreserved] = mergeParsedDealsWithQueue([
   merchantUsername: 'testcafe',
   pipelineLifecycle: { version: 1, stage: 'slack-sent', slackSentAt: now.toISOString() },
 }]);
-assert.equal(metadataPreserved.title, 'Vom Slack-Text korrigierter Titel');
+assert.equal(metadataPreserved.title, parsedRoundTrip.title, 'rendered Slack previews do not override authoritative queue copy; explicit thread edits follow separately');
 assert.equal(metadataPreserved.socialFoodReview, true);
 assert.equal(metadataPreserved.scoutUsername, 'foodiewien');
 assert.equal(metadataPreserved.merchantUsername, 'testcafe');

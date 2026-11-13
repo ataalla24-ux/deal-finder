@@ -8,6 +8,7 @@ import { freeCreditOpenAiFetch, modelForTask } from '../scraper/ai-credit-budget
 import { canonicalInstagramPostKey, decodeInstagramShortcodeDate } from '../scraper/deal-evidence-utils.js';
 import { parseExpiryShape } from '../scraper/expiry-utils.js';
 import { maintenanceEvidenceFor } from './refresh-maintenance-evidence.mjs';
+import { hasOnlyPreviewDescription } from '../scraper/approval-source-evidence.js';
 import { isBenefitOnlyTitle } from '../scraper/offer-title-utils.js';
 import {photoSubjectHash} from './deal-photo-contract.mjs';
 export { automaticMaintenanceReviewCandidates } from './automatic-maintenance-review.mjs';
@@ -179,9 +180,13 @@ export function copyReviewReasons(deal, fields = new Set()) {
     || isBenefitOnlyTitle(deal.title)
     || /^(?:Instagram|TikTok|Community[- ]Deal)|gemeinsam schmeckt|jetzt sichern|mega deal/i.test(clean(deal.title)))) reasons.push('title');
   if (!fields.has('description') && !clean(deal.description)) reasons.push('description');
-  if (!dateFields.some(key => fields.has(key) || clean(deal[key]))) reasons.push('dates');
+  if (!dateFields.some(key => fields.has(key))
+    && (!dateFields.some(key => clean(deal[key])) || hasStartWithoutEnd(deal))) reasons.push('dates');
   return reasons;
 }
+
+const hasStartWithoutEnd = deal => deal.expiryKind === 'start' && exactDay(deal.validFrom)
+  && ![deal.validOn, deal.validUntil, deal.expires].some(clean);
 
 // Dates are parsed from a complete literal clause with an explicit year, never
 // from the model's normalized date or the timestamp of a social post.
@@ -190,9 +195,14 @@ export function groundedDatePatch(quote, evidence, deal, fields = new Set()) {
     || /ver(?:o|oe|ö)ffentlicht|gepostet|posted|published|upload|copyright/i.test(quote)
     || !/\b(?:am|vom|von|bis|g[uü]ltig|gueltig)\b/i.test(quote)
     || /verl[aä]ngert|voraussichtlich|dauerhaft|geburtstag/i.test(quote)) return {};
-  if (dateFields.some(key => fields.has(key) || clean(deal[key]))) return {};
+  const startOnly = hasStartWithoutEnd(deal);
+  if (dateFields.some(key => fields.has(key)) || (!startOnly && dateFields.some(key => clean(deal[key])))) return {};
   const shape = parseExpiryShape(quote);
   if (!['single', 'range', 'end'].includes(shape.kind) || !['high', 'medium'].includes(shape.confidence)) return {};
+  if (startOnly && ((shape.validFrom && shape.validFrom !== deal.validFrom)
+    || (shape.validOn && shape.validOn !== deal.validFrom)
+    || (shape.validUntil && shape.validUntil < deal.validFrom))) return {};
+  if (startOnly && shape.kind === 'end') Object.assign(shape, { kind: 'range', validFrom: deal.validFrom });
   const days = ['validFrom', 'validOn', 'validUntil'].filter(key => shape[key]);
   if (!days.length || days.some(key => !exactDay(shape[key]) || !quote.includes(shape[key].slice(0, 4)))) return {};
   return { ...Object.fromEntries(days.map(key => [key, shape[key]])), expiryKind: shape.kind,
@@ -397,7 +407,7 @@ async function titleProposal(deal, request, now, latestEvidence, fields = new Se
 
 // The approval queue retains a small memo so a missing pin cannot rebill the same review every scan.
 export async function reviewApprovedCopy(deals, { cwd, now = new Date(), request = freeCreditOpenAiFetch,
-  existingIds = new Set(), maxCandidates = 1 } = {}) {
+  existingIds = new Set(), maxCandidates = 1, sourceEvidence = new Map() } = {}) {
   const policy = read(path.join(cwd, 'reviews/automatic-maintenance-policy.json'), {});
   if (policy.version !== 1 || policy.enabled !== true || !policy.maxAiCandidatesPerRun) return deals;
   const edits = read(path.join(cwd, 'docs/live-deal-edits.json'), {}).edits || [];
@@ -407,13 +417,17 @@ export async function reviewApprovedCopy(deals, { cwd, now = new Date(), request
   for (const [id, evidence] of maintenanceEvidenceFor(eligible, read(path.join(cwd, 'reviews/maintenance-source-evidence.json'), {}), now)) {
     if (!latest.has(id)) latest.set(id, evidence);
   }
+  for (const deal of eligible) {
+    const evidence = sourceEvidence.get(deal.id);
+    if (evidence?.sourceUrl === deal.url) latest.set(deal.id, evidence);
+  }
   let attempts = 0;
   const result = [];
   for (const deal of deals) {
     const fields = protectedFields(deal, edits);
     const requested = copyReviewReasons(deal, fields);
     if (!fields.has('description') && (clean(deal.description).length > 550
-      || clean(deal.description) === deal.prePublicationTitleEdit?.originalTitle
+      || hasOnlyPreviewDescription(deal)
       || /(?:^|\s)#[\p{L}\d_]{3,}/u.test(deal.description || '')) && !requested.includes('description')) requested.push('description');
     const evidence = sourceTexts(deal, latest.get(deal.id)).filter(value => value.length <= 12000);
     if (!eligible.includes(deal) || !requested.length || !evidence.length || evidence.join(' ').length > 18000) {

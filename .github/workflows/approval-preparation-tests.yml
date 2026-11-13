@@ -1,0 +1,38 @@
+name: Approval Preparation Tests
+on:
+  pull_request:
+    paths:
+      - 'scraper/approval-source-evidence.js'
+      - 'scraper/expiry-utils.js'
+      - 'scraper/slack-approve.js'
+      - 'scripts/automatic-deal-maintenance.mjs'
+      - 'scripts/test-approval-source-copy.mjs'
+      - '.github/workflows/approval-preparation-tests.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'scraper/approval-source-evidence.js'
+      - 'scraper/expiry-utils.js'
+      - 'scraper/slack-approve.js'
+      - 'scripts/automatic-deal-maintenance.mjs'
+      - 'scripts/test-approval-source-copy.mjs'
+      - '.github/workflows/approval-preparation-tests.yml'
+permissions:
+  contents: read
+jobs:
+  offline:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    env:
+      SENTRY_DISABLED: '1'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: npm ci
+      - run: >-
+          node --test scripts/test-approval-source-copy.mjs scripts/test-approved-copy.mjs
+          scripts/test-slack-date-pipeline.mjs scripts/test-expiry-observation-date.mjs
+          scripts/test-expiry-normalization.mjs scripts/test-slack-approval-validation.mjs
+          scripts/test-slack-approval-queue.mjs scripts/test-approval-map-readiness.mjs
