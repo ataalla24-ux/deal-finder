@@ -7,6 +7,9 @@ import { copyReviewReasons, groundedDatePatch, reviewApprovedCopy } from './auto
 import { mkdir, mkdtemp, rm, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
+import { readFileSync } from 'node:fs';
+import { extractFoodOffers } from '../scraper/power-food-extraction.js';
+import { POWER_FOOD_SOURCES } from '../scraper/power-food-sources.js';
 
 const now = new Date('2026-11-13T20:00:00Z');
 const url = 'https://www.preisjaeger.at/deals/mcdonalds-gratis-fussball-donut-zum-osterreich-match-372365';
@@ -148,4 +151,56 @@ test('a later complete source can add a quoted end, but cannot rewrite an existi
   assert.deepEqual(groundedDatePatch(conflict, [conflict], deal), {});
   assert.deepEqual(groundedDatePatch(quote, [quote], deal, new Set(['validUntil'])), {});
   assert.deepEqual(groundedDatePatch(quote, [quote], { ...deal, validUntil: '2026-11-20' }), {});
+});
+
+test('official source verification precedes editorial copy; cached retries never bill or waive changed evidence', async () => {
+  const html = readFileSync(new URL('./fixtures/mcdonalds-foodora-20261113.html', import.meta.url), 'utf8');
+  const source = POWER_FOOD_SOURCES.find(row => row.name === "McDonald's");
+  const original = extractFoodOffers(html, source, { now, pageUrl: 'https://www.mcdonalds.at/' }).deals[1];
+  const input = { ...original, pipelineLifecycle: { manualDecision: 'approved' } };
+  const description = 'Bis einschließlich 30.11.2026 gibt es bei foodora zum Kauf eines Big Mac, McChicken, Filet-o-Fish, Crispy Veggie Burgers oder McPops in Strawberry, Chocolate oder Stracciatella ein zweites Exemplar desselben Produkts gratis. Der Mindestbestellwert bleibt unverändert. Das Angebot gilt in teilnehmenden Restaurants in Österreich, solange der Vorrat reicht. Produkte enthalten teilweise Schmelzkäsezubereitung; panierte Hühnerprodukte sind aus Hühnerfleischstücken geformt und zusammengefügt. Weitere Infos: www.foodora.at/mcdonalds';
+  const previous = process.env.APPROVAL_SOURCE_COPY_REVIEW;
+  process.env.APPROVAL_SOURCE_COPY_REVIEW = '1';
+  let calls = 0, reads = 0;
+  let pageHtml = html;
+  const options = { now, requireMap: false, existingDeals: [],
+    inspectDealUrlHealth: async url => ({ status: 200, finalUrl: url }),
+    fetchOfficialFoodPage: async url => { reads++; return { html: pageHtml, finalUrl: url }; },
+    approvalModelRequest: async () => {
+      calls++;
+      const content = calls % 2 ? { title: '', quote: '', description,
+        conditionsQuote: original.description, dateQuote: '' } : { supported: true };
+      return Response.json({ choices: [{ finish_reason: 'stop', message: { content: JSON.stringify(content) } }] });
+    } };
+  try {
+    const result = await validateApprovalCandidates([input], options);
+    assert.equal(calls, 2);
+    assert.equal(reads, 1);
+    assert.equal(result.allowedDeals.length, 1, JSON.stringify(result.report.blocked));
+    const approved = result.allowedDeals[0];
+    assert.equal(approved.description, description);
+    assert.equal(approved.validUntil, '2026-11-30');
+    assert.equal(approved.officialFoodReverifiedAt, now.toISOString());
+    assert.equal(input.description, original.description);
+    const retry = { ...input, approvalCopyReview: approved.approvalCopyReview };
+    const cached = await validateApprovalCandidates([retry], { ...options, approvalCachedReviewOnly: true });
+    assert.equal(cached.allowedDeals.length, 1);
+    assert.equal(calls, 2, 'fresh review memo is reused');
+    const waiting = await validateApprovalCandidates([input], { ...options, approvalCachedReviewOnly: true });
+    assert.equal(waiting.allowedDeals.length, 0, 'missing review cannot silently bypass the review gate');
+    assert.equal(calls, 2, 'cache-only mode must never call a model');
+    pageHtml = html.replaceAll('30.11.2026', '12.11.2026');
+    const withdrawn = await validateApprovalCandidates([retry], { ...options, approvalCachedReviewOnly: true });
+    assert.equal(withdrawn.allowedDeals.length, 0);
+    assert.ok(withdrawn.report.blocked.some(row => row.reasons.some(reason => /Offizielle Aktion/.test(reason))));
+    assert.equal(withdrawn.blockedDeals[0].description, original.description, 'pending preserves original source text');
+    pageHtml = html;
+    const forged = await validateApprovalCandidates([{ ...retry, description: 'Alles gratis in ganz Wien.' }],
+      { ...options, approvalCachedReviewOnly: true });
+    assert.equal(forged.allowedDeals.length, 0, 'original source fields must still match; a memo/hash is no proof');
+    assert.equal(calls, 2);
+  } finally {
+    if (previous === undefined) delete process.env.APPROVAL_SOURCE_COPY_REVIEW;
+    else process.env.APPROVAL_SOURCE_COPY_REVIEW = previous;
+  }
 });

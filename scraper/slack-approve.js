@@ -804,11 +804,14 @@ async function validateApprovalCandidates(deals, options = {}) {
       blockingReason: 'Aktueller Angebotsbeleg nicht eindeutig lesbar.' });
   }
   const sourceLookup = mapOptions ? await findApprovalAddresses(candidates.filter(humanApproved), mapOptions) : null;
+  const officialSourceCopy = new Map(candidates.filter(deal => deal.originSource === 'power-official-food')
+    .map(deal => [deal.id, { title: deal.title, description: deal.description }]));
   candidates = candidates.map(deal => preparePublicationTitle(deal, { existingIds }));
   if (process.env.APPROVAL_SOURCE_COPY_REVIEW === '1' && (options.approvalModelRequest || process.env.OPENAI_API_KEY)) {
     const { reviewApprovedCopy } = await import('../scripts/automatic-deal-maintenance.mjs');
     const reviewed = await reviewApprovedCopy(candidates.filter(deal => humanApproved(deal) && !isCommunitySubmission(deal)), {
       cwd: ROOT, now, existingIds, request: options.approvalModelRequest, sourceEvidence,
+      ...(options.approvalCachedReviewOnly || process.env.APPROVAL_COPY_CACHE_ONLY === '1' ? { maxCandidates: 0 } : {}),
     });
     const byId = new Map(reviewed.map(deal => [deal.id, deal]));
     candidates = candidates.map(deal => byId.get(deal.id) || deal);
@@ -832,8 +835,22 @@ async function validateApprovalCandidates(deals, options = {}) {
     return { ...deal, address, city: 'Wien', postalCode: site.postalCode, distance: address,
       missingFields: ensureArray(deal.missingFields).filter(field => field !== 'Ort') };
   });
-  const validation = await validateDealsForSlack(candidates, { ...options, now, communityApproval: true,
+  // Re-extract and compare the original merchant copy, not our own paraphrase.
+  // The in-memory snapshot is taken before either editor; a stored memo/hash
+  // cannot substitute for the current official source check.
+  const validation = await validateDealsForSlack(candidates.map(deal => officialSourceCopy.has(deal.id)
+    ? { ...deal, ...officialSourceCopy.get(deal.id) } : deal), { ...options, now, communityApproval: true,
     inspectDealUrlHealth: inspect });
+  const editorialCopy = new Map(candidates.map(deal => [deal.id, deal]));
+  for (const row of validation.results) {
+    if (!row.decision.allowed || !officialSourceCopy.has(row.deal.id)
+      || row.deal.officialFoodReverifiedAt !== now.toISOString()) continue;
+    const edited = editorialCopy.get(row.deal.id);
+    // Source-verified dates and participation always win over editorial output.
+    row.deal = { ...row.deal, title: edited.title, description: edited.description };
+  }
+  validation.allowedDeals = validation.results.filter(row => row.decision.allowed).map(row => row.deal);
+  validation.report = buildReport(validation.results, validation.summary);
   await normalizeApprovedDealExpiries(validation.allowedDeals, { now, allowUrlLookup: false });
   // The source lookup and the validity check must agree before the address can
   // outlive the ephemeral evidence used to discover it.

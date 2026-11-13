@@ -2,6 +2,7 @@ import assert from 'node:assert/strict';
 import {matchChainRule} from './deal-map-chain-rules.mjs';
 import {inspectDealLocation,enrichMap} from './deal-map-enrichment.mjs';
 import {requireApprovalMap} from './approval-map-readiness.mjs';
+import {readFileSync} from 'node:fs';
 const today='2026-11-05', now=new Date(today+'T12:00:00Z');
 const locations=[{id:'a',name:'Fixture Nord',address:'Am Hof 1, 1010 Wien',latitude:48.21,longitude:16.37,source:'verified-fixture',confidence:1},
   {id:'b',name:'Fixture Sued',address:'Wollzeile 2, 1010 Wien',latitude:48.22,longitude:16.38,source:'verified-fixture',confidence:1}];
@@ -54,4 +55,17 @@ const partialApproval=await requireApprovalMap(validation,{map,catalog:partialCa
 assert.equal(partialApproval.validation.allowedDeals.length,0);
 const existingPartial=await requireApprovalMap(validation,{map,catalog:partialCatalog,now,maxRequests:0,existingDeals:[deal]});
 assert.equal(existingPartial.validation.allowedDeals.length,1);
+const productionRules=JSON.parse(readFileSync(new URL('../reviews/map-chain-rules.json',import.meta.url))).rules;
+const productionCatalog=JSON.parse(readFileSync(new URL('../reviews/map-location-catalog.json',import.meta.url)));
+const fish={id:'current-fish-coupon',brand:'NORDSEE',url:'https://www.nordsee.com/at/coupons',
+  title:'2 Classic Fish Burger + Megafrites + 1 Softdrink 0,5 l PET: Mehr als 20 % Rabatt',
+  description:'Gültig bis 30.11.2026 in allen teilnehmenden Restaurants in Österreich. Nicht gültig an Autobahnraststätten.',
+  validUntil:'2026-11-30',distance:'Teilnehmende Restaurants in Österreich'};
+const fishRule=matchChainRule(fish,productionRules,'2026-11-13');
+assert.equal(fishRule.id,'nordsee-november-coupons-2026');
+const fishLocation=inspectDealLocation(fish,{map,catalog:{...productionCatalog,chainRules:productionRules},today:'2026-11-13'});
+assert.deepEqual([...fishLocation.locationIds].sort(),[...fishRule.locationIds].sort());
+assert.equal(fishLocation.locationIds.length,12);
+assert.equal(matchChainRule({...fish,description:fish.description+' Nur im Restaurant Donauzentrum.'},productionRules,'2026-11-13'),null);
+assert.equal(matchChainRule(fish,productionRules,'2026-12-01'),null);
 console.log('PASS: campaign identity/window, full branch set, exact/manual/named branch precedence, exclusions, incomplete catalog hold, cached replay and approval integration');

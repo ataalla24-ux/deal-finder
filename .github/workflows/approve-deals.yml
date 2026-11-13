@@ -5,6 +5,10 @@ on:
     - cron: '*/15 * * * *' # fallback polling if Slack Events miss a reaction
   workflow_dispatch:
     inputs:
+      cached_review_only:
+        description: 'Reuse existing copy reviews only; never start a new model request'
+        type: boolean
+        default: false
       slack_channel:
         description: 'Slack channel that received the approval reaction'
         required: false
@@ -76,6 +80,7 @@ jobs:
           GH_TOKEN: ${{ github.token }}
           OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
           APPROVAL_SOURCE_COPY_REVIEW: '1'
+          APPROVAL_COPY_CACHE_ONLY: ${{ github.event.inputs.cached_review_only == 'true' && '1' || '0' }}
           APPROVE_SLACK_CHANNEL_ID: ${{ github.event.inputs.slack_channel }}
           APPROVE_SLACK_MESSAGE_TS: ${{ github.event.inputs.message_ts }}
           APPROVE_SLACK_REACTION: ${{ github.event.inputs.reaction }}
