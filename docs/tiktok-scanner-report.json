@@ -1,14 +1,14 @@
 {
-  "lastUpdated": "2026-11-12T22:43:30.058Z",
+  "lastUpdated": "2026-11-13T13:05:34.309Z",
   "runProvenance": {
     "repository": "ataalla24-ux/deal-finder",
-    "runId": "43322408654",
-    "headSha": "8668acfcf0f2c740c83998fd8fcfe93e312c5bfc",
-    "checkoutSha": "8668acfcf0f2c740c83998fd8fcfe93e312c5bfc",
+    "runId": "43430517810",
+    "headSha": "6979515de5e1c17d768278f7c91762aa9510f3ec",
+    "checkoutSha": "6979515de5e1c17d768278f7c91762aa9510f3ec",
     "triggeringRun": null,
     "event": "schedule",
     "runAttempt": "1",
-    "url": "https://github.com/ataalla24-ux/deal-finder/actions/runs/43322408654"
+    "url": "https://github.com/ataalla24-ux/deal-finder/actions/runs/43430517810"
   },
   "status": "discovery-degraded",
   "outputPreserved": true,
@@ -55,8 +55,8 @@
     "wien pizza 1+1",
     "wien gratis essen",
     "vienna free food",
-    "wien gratis 12 november 2026",
-    "wien deal 12 november 2026",
+    "wien gratis 13 november 2026",
+    "wien deal 13 november 2026",
     "wien gratis november 2026",
     "wien aktion november 2026",
     "wien rabatt november 2026",
@@ -122,23 +122,49 @@
   "discovered": 0,
   "apiCandidates": 0,
   "apiDiscovery": {
-    "errors": [],
-    "attemptedRequests": 0,
+    "errors": [
+      {
+        "keyword": "wien 1 euro döner",
+        "offset": 0,
+        "status": 0,
+        "error": "Empty or non-JSON TikTok response",
+        "code": "transport-unavailable",
+        "transportReason": "request-policy-blocked"
+      }
+    ],
+    "attemptedRequests": 1,
     "emptyResponses": 0,
     "rawItems": 0,
     "normalizedItems": 0,
     "ignoredItems": 0,
-    "stoppedReason": "api-cooldown",
-    "nextRetryAt": "2026-11-12T23:28:03.418Z",
-    "nextKeywordIndex": 2
+    "stoppedReason": "transport-unavailable",
+    "nextRetryAt": "2026-11-14T13:05:20.311Z",
+    "nextKeywordIndex": 3,
+    "transport": "public-browser-search",
+    "navigations": 1,
+    "searchRequests": 0,
+    "blockedExtraRequests": 2,
+    "blockedRequestReasons": {
+      "unexpected-endpoint": 2
+    },
+    "observedSearchEndpoints": {
+      "other-search": 2
+    }
   },
   "searchDiscovery": {
-    "errors": [],
-    "attemptedQueries": 0,
-    "stoppedReason": "search-cooldown",
-    "nextRetryAt": "2026-11-12T23:28:15.471Z",
-    "lastAttemptAt": "2026-11-11T23:28:15.471Z",
-    "nextQueryIndex": 6,
+    "errors": [
+      {
+        "query": "site:tiktok.com wien nur heute gratis",
+        "error": "Search challenge; no bypass attempted",
+        "httpStatus": 403,
+        "retryAt": ""
+      }
+    ],
+    "attemptedQueries": 2,
+    "stoppedReason": "search-unavailable",
+    "nextRetryAt": "2026-11-14T13:05:32.340Z",
+    "lastAttemptAt": "2026-11-13T13:05:32.340Z",
+    "nextQueryIndex": 8,
     "deferredPostVisits": 0
   },
   "accepted": 0,
@@ -221,12 +247,28 @@
     "aiAcceptedUnusable": 0
   },
   "timings": {
-    "apiDiscoveryMs": 38,
-    "searchDiscoveryMs": 1,
-    "mediaRescueMs": 129,
-    "totalScannerMs": 444
+    "apiDiscoveryMs": 12060,
+    "searchDiscoveryMs": 1542,
+    "mediaRescueMs": 393,
+    "totalScannerMs": 14218
   },
-  "discoveryErrors": [],
-  "apiErrors": [],
+  "discoveryErrors": [
+    {
+      "query": "site:tiktok.com wien nur heute gratis",
+      "error": "Search challenge; no bypass attempted",
+      "httpStatus": 403,
+      "retryAt": ""
+    }
+  ],
+  "apiErrors": [
+    {
+      "keyword": "wien 1 euro döner",
+      "offset": 0,
+      "status": 0,
+      "error": "Empty or non-JSON TikTok response",
+      "code": "transport-unavailable",
+      "transportReason": "request-policy-blocked"
+    }
+  ],
   "rejected": []
 }
