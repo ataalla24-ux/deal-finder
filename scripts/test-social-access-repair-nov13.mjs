@@ -90,6 +90,9 @@ test('German BackWerk round and OCR numbers cannot acquire a Vienna location', (
   assert.equal(graph('Heute 1+1 Burger gratis!', { _mediaEvidence: { ocrText: 'Beliebiger Text', ai: {
     confidence: 0.99, isDeal: true, exclusion: 'none', offerText: '1+1 Burger gratis', locationText: '1070 Wien',
   } } }).rejection, 'missing-vienna-evidence');
+  assert.ok(graph('Unser Wochenplan', { _mediaEvidence: { visionImageCount: 1, ai: {
+    confidence: 0.99, isDeal: true, exclusion: 'none', offerText: '1+1 Burger gratis', locationText: 'Testgasse 1, 1070 Wien',
+  } } }).deal);
 });
 
 test('directory and own clips are excluded even with tempting OCR or stale outbox flags', () => {

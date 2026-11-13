@@ -1136,7 +1136,10 @@ export function normalizeGraphMediaItem(raw, context, config, now = new Date()) 
       ? cleanText(ai.offerText, 500)
       : '';
   const aiLocation = trustedAiOffer ? cleanText(ai.locationText, 240) : '';
-  const trustedAiLocation = aiLocation && ocrText.toLowerCase().includes(aiLocation.toLowerCase()) ? aiLocation : '';
+  // Vision can read an address even when OCR fails. A text-only answer may
+  // not add a location absent from the supplied text.
+  const trustedAiLocation = aiLocation && (Number(mediaEvidence.visionImageCount) > 0
+    || ocrText.toLowerCase().includes(aiLocation.toLowerCase())) ? aiLocation : '';
   const trustedAiValidity = trustedAiOffer ? cleanText(ai.validityText, 240) : '';
   const combinedEvidencePromotion = classifyPromotion([
     captionProse,
