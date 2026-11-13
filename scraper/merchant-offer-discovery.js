@@ -8,6 +8,16 @@ const DAY = 86400000;
 const OFFER_PATH = /(?:^|[\/\s_.-])(?:aktionen?|aktionsbon|(?:tages|wochen|mittags)?angebote?|specials?|rabatt|deals?)(?=$|[\/\s_.-])|happy[-_\s]?hour|coupon|mittagsaktion|studentenangebot|geburtstagsangebot/i;
 const EXCLUDED_PATH = /(?:^|[\/_.-])(?:jobs?|jobangebote|karriere|careers?|stellen(?:angebote)?|bewerbung|catering|business|b2b|corporate|franchise|presse?|login|account|warenkorb|checkout|veranstaltungen?|reservierung|accessoires|running[-_]club|tee-gastronomie|ch|barcelona|praguex?|teams|kultur|bier)(?=$|[\/_.-])/i;
 
+function explicitHomepageBenefit(deal) {
+  const text = deal.evidence?.textSample || '';
+  const price = /(?:€\s*\d{1,3}(?:[.,]\d{1,2})?|\d{1,3}(?:[.,]\d{1,2})?\s*(?:€|EUR\b|Euro\b))/i;
+  // Homepages mix promotions with the ordinary menu. "Special Burger" and
+  // "100 % Rindfleisch" must not turn a normal menu price into a discount.
+  return /\b(?:gratis|kostenlos(?:e[rmns]?)?|geschenkt)\b|\b\d+\s*\+\s*\d+\b|\b2\s*(?:für|fuer|for)\s*1\b/i.test(text)
+    || /(?:[-−]\s*|\b)[1-9]\d?(?:[.,]\d+)?\s*%\s*(?:rabatt|sparen|ersparnis|günstiger|billiger|discount|off|auf)\b/i.test(text)
+    || (price.test(text) && /\b(?:rabatt|ersparnis|billiger|günstiger|statt|aktionspreis|sonderpreis|vorteilspreis|kombiaktion|kaffeejause|bäckerjause|mittagsaktion)\b|\bhappy\s*hour\b/i.test(text));
+}
+
 export function canonicalOfferUrl(value, website) {
   try {
     const normalized = merchantWebsite(value);
@@ -24,9 +34,35 @@ export function canonicalOfferUrl(value, website) {
   } catch { return ''; }
 }
 
-export function merchantOfferHostPaused(url, state, now) {
+// A homepage is only eligible when it is the exact directory website already
+// fetched. Do not turn a redirect, another path, or a PDF into a new offer URL.
+export function canonicalHomepageUrl(value, website) {
+  try {
+    const page = new URL(merchantWebsite(value));
+    const home = new URL(merchantWebsite(website));
+    for (const url of [page, home]) {
+      for (const key of [...url.searchParams.keys()]) {
+        if (/^(utm_|fbclid$|gclid$)/i.test(key)) url.searchParams.delete(key);
+      }
+      url.searchParams.sort();
+    }
+    if (page.origin !== home.origin || page.pathname.replace(/\/$/, '') !== home.pathname.replace(/\/$/, '')
+      || page.search !== home.search || EXCLUDED_PATH.test(decodeURIComponent(page.pathname))
+      || /\.(?:pdf|jpe?g|png|webp|gif|mp4)$/i.test(page.pathname)) return '';
+    return page.href;
+  } catch { return ''; }
+}
+
+export function merchantOfferHostPaused(url, state, now, powerReport = {}) {
   const host = new URL(url).hostname.replace(/^www\./, '');
-  return Object.entries(state).some(([source, row]) => {
+  const powerPaused = (powerReport.sources || []).some(source => {
+    try {
+      return new URL(source.url).hostname.replace(/^www\./, '') === host
+        && ['access-denied', 'rate-limited'].includes(source.cooldown?.reason)
+        && Date.parse(source.cooldown.nextRetryAt) > +now;
+    } catch { return false; }
+  });
+  return powerPaused || Object.entries(state).some(([source, row]) => {
     if (![401, 403, 429].includes(row?.httpStatus)) return false;
     try {
       return new URL(source).hostname.replace(/^www\./, '') === host
@@ -79,6 +115,10 @@ export function selectMerchantOfferPages(directory, websiteState, offerState, no
 }
 
 export function extractMerchantOfferCandidates(html, task, now) {
+  const homepage = task.pageKind === 'homepage';
+  if (homepage && (!canonicalHomepageUrl(task.url, task.merchant?.website)
+    || !(Date.parse(task.merchant?.observedAt) >= +now - 45 * DAY)
+    || Date.parse(task.merchant.observedAt) > +now)) return [];
   const source = { name: `merchant-website:${new URL(task.url).hostname}`, brand: task.merchant.name,
     url: task.url, allowedHosts: [new URL(task.url).hostname], category: 'Essen & Trinken' };
   const url = new URL(task.url);
@@ -98,22 +138,27 @@ export function extractMerchantOfferCandidates(html, task, now) {
       source.locationEvidenceUrl = task.url;
     }
   }
-  return extractFoodOffers(html, source, { now, pageUrl: task.url }).deals.filter(deal => !discoveryRejection({ ...deal, originSource: 'vienna-merchant-website' })).map(deal => ({
+  return extractFoodOffers(html, source, { now, pageUrl: task.url }).deals
+    .filter(deal => (!homepage || explicitHomepageBenefit(deal))
+      && !discoveryRejection({ ...deal, originSource: 'vienna-merchant-website' })).map(deal => ({
     ...deal,
     id: `merchant-web-${createHash('sha256').update(`${task.url}|${deal.title}${/Angebot.*Details ansehen/.test(deal.title) ? `|${deal.evidence.contentHash}` : ''}`).digest('hex').slice(0, 20)}`,
     source: 'Offizielle Lokal-Website', originSource: 'vienna-merchant-website',
     // A Vienna directory address is a lead, not proof of coupon participation.
     evidence: { ...deal.evidence, directoryLead: { name: task.merchant.name,
       website: task.merchant.website, address: task.merchant.address, sourceUrl: task.merchant.sourceUrl,
-      observedAt: task.merchant.observedAt }, candidateLane: 'merchant-website-review' },
+      observedAt: task.merchant.observedAt }, candidateLane: 'merchant-website-review',
+      ...(homepage ? { discoveryPageKind: 'homepage' } : {}) },
   }));
 }
 
-export function currentMerchantCandidates(state, now) {
+export function currentMerchantCandidates(state, now, websiteState = {}) {
   const today = new Intl.DateTimeFormat('sv-SE', { timeZone: 'Europe/Vienna' }).format(now);
-  return Object.values(state).filter(row => row.status === 'ok'
-    && Date.parse(row.checkedAt) >= +now - 8 * DAY && Date.parse(row.checkedAt) <= +now)
-    .flatMap(row => row.deals || [])
+  const fresh = row => row.status === 'ok'
+    && Date.parse(row.checkedAt) >= +now - 8 * DAY && Date.parse(row.checkedAt) <= +now;
+  return [...Object.values(state).filter(fresh).flatMap(row => row.deals || []),
+    ...Object.values(websiteState).filter(fresh).flatMap(row => row.homepageDeals || [])
+      .filter(deal => deal.evidence?.discoveryPageKind === 'homepage' && isMerchantWebsiteReview(deal, now))]
     .filter(deal => !discoveryRejection(deal))
     .filter(deal => /^\d{4}-\d{2}-\d{2}$/.test(deal.validUntil || '')
       ? deal.validUntil >= today
@@ -127,7 +172,9 @@ export function isMerchantWebsiteReview(deal, now = new Date()) {
     && evidence?.source === 'official-merchant-page'
     && evidence?.candidateLane === 'merchant-website-review'
     && Number.isFinite(checked) && checked <= +now && checked >= +now - 8 * DAY
-    && Boolean(canonicalOfferUrl(deal.url, evidence?.directoryLead?.website))
+    && Boolean(evidence?.discoveryPageKind === 'homepage'
+      ? explicitHomepageBenefit(deal) && canonicalHomepageUrl(deal.url, evidence?.directoryLead?.website)
+      : canonicalOfferUrl(deal.url, evidence?.directoryLead?.website))
     && evidence?.sourceUrl === deal.url && Boolean(evidence?.textSample)
     && !discoveryRejection(deal);
 }

@@ -1,6 +1,7 @@
 import { load } from 'cheerio';
 import crypto from 'node:crypto';
 import fs from 'node:fs/promises';
+import { readFileSync } from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
 import { execFile } from 'node:child_process';
@@ -15,6 +16,7 @@ const HASH = data => crypto.createHash('sha256').update(data).digest('hex');
 const ROOT = 'https://www.nordsee.com/at/coupons';
 const MAX_BYTES = 8 * 1024 * 1024;
 const MAX_CARDS = 12;
+const NORDSEE_REVIEW = JSON.parse(readFileSync(new URL('../reviews/nordsee-coupon-cards-20261113.json', import.meta.url)));
 const escapes = value => String(value).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 
 export function allowedCouponAsset(value, kind) {
@@ -89,9 +91,23 @@ export async function fetchCouponAsset(asset, options = {}) {
   return data;
 }
 
-async function run(command, args) {
-  return exec(command, args, {timeout:20000,maxBuffer:1024*1024,
-    env:{...process.env,OMP_THREAD_LIMIT:'1',LC_ALL:'C'}});
+function remainingTime(runtime) {
+  const remaining = runtime.deadline-runtime.now();
+  if (remaining <= 0) throw new Error('coupon-ocr-total-time-limit');
+  return remaining;
+}
+
+async function run(command, args, runtime, options = {}) {
+  const timeout = Math.min(20000,remainingTime(runtime));
+  try {
+    const result = await runtime.execute(command,args,{maxBuffer:1024*1024,
+      env:{...process.env,OMP_THREAD_LIMIT:'1',LC_ALL:'C'},...options,timeout});
+    remainingTime(runtime);
+    return result;
+  } catch (error) {
+    remainingTime(runtime);
+    throw error;
+  }
 }
 
 export function parsePdfImageList(text) {
@@ -106,11 +122,20 @@ export function parsePdfImageList(text) {
   return rows;
 }
 
-async function ocrCard(file, dir, index, deadline) {
-  const {stdout:probe} = await run('ffprobe',['-v','error','-select_streams','v:0','-show_entries','stream=width,height','-of','json',file]);
+async function ocrCard(file, dir, index, runtime) {
+  const {stdout:probe} = await run('ffprobe',['-v','error','-select_streams','v:0','-show_entries','stream=width,height','-of','json',file],runtime);
   const {width,height} = JSON.parse(probe).streams?.[0] || {};
   if (!width || !height || width*height>6000000 || width<400 || height<350 || width/height<1 || width/height>1.15)
     throw new Error('unsupported-coupon-image-layout');
+  // Hash every decoded pixel, including prices, quantities, dates and fine
+  // print. PDF CreationDate and PNG compression cannot identify an offer.
+  // Bit-exact integer decoding also avoids platform-specific JPEG IDCT choices.
+  const {stdout:pixels} = await run('ffmpeg',[
+    '-hide_banner','-loglevel','error','-threads','1','-flags','+bitexact','-idct','simple',
+    '-i',file,'-sws_flags','+bitexact+accurate_rnd','-frames:v','1','-pix_fmt','rgb24','-f','rawvideo','pipe:1',
+  ],runtime,{maxBuffer:18000000,encoding:'buffer'});
+  if (pixels.length !== width*height*3) throw new Error('coupon-pixel-decode-mismatch');
+  const pixelSha256 = HASH(Buffer.concat([Buffer.from(`RGB24:${width}x${height}:`),pixels]));
   // This layout is opt-in for NORDSEE's individual coupon cards only. Never
   // crop an arbitrary multi-offer page and join prices from different cards.
   const areas = {
@@ -121,44 +146,69 @@ async function ocrCard(file, dir, index, deadline) {
   };
   const result = {};
   for (const [name,filter] of Object.entries(areas)) {
-    if (Date.now()>deadline) throw new Error('coupon-ocr-total-time-limit');
     const output = path.join(dir,`${index}-${name}.png`);
-    await run('ffmpeg',['-hide_banner','-loglevel','error','-threads','1','-i',file,'-vf',filter,'-frames:v','1',output]);
-    const {stdout} = await run('tesseract',[output,'stdout','-l','deu+eng','--psm',name==='discount'?'11':'6']);
+    await run('ffmpeg',['-hide_banner','-loglevel','error','-threads','1','-i',file,'-vf',filter,'-frames:v','1',output],runtime);
+    const {stdout} = await run('tesseract',[output,'stdout','-l','deu+eng','--psm',name==='discount'?'11':'6'],runtime);
     result[name] = stdout.trim().slice(0,8000);
   }
-  return result;
+  remainingTime(runtime);
+  return {...result,pixelSha256};
 }
 
-export async function readCouponAsset(asset, data) {
+export async function readCouponAsset(asset, data, options = {}) {
   if (asset.format === 'reviewed-restaurant-v1')
     return reviewedRestaurantCards({...asset, sha256: HASH(data)});
   if (process.env.COUPON_TOOLS_AVAILABLE === '0') throw new Error('coupon-tools-unavailable');
-  const deadline = Date.now()+180000;
+  const now = options.now || Date.now;
+  const runtime = {now,deadline:now()+180000,execute:options.execute || exec};
   const dir = await fs.mkdtemp(path.join(os.tmpdir(),'freefinder-coupon-'));
   try {
     const file = path.join(dir, asset.kind === 'pdf' ? 'input.pdf' : 'input.image');
     await fs.writeFile(file,data);
     let files;
     if (asset.kind === 'pdf') {
-      const {stdout:info} = await run('pdfinfo',[file]);
+      const {stdout:info} = await run('pdfinfo',[file],runtime);
       if (!/^Pages:\s+[12]\s*$/m.test(info)) throw new Error('coupon-pdf-page-limit');
-      const {stdout:list} = await run('pdfimages',['-f','1','-l','2','-list',file]);
+      const {stdout:list} = await run('pdfimages',['-f','1','-l','2','-list',file],runtime);
       const rows = parsePdfImageList(list);
-      await run('pdfimages',['-f','1','-l','2','-png','-j',file,path.join(dir,'card')]);
+      await run('pdfimages',['-f','1','-l','2','-png','-j',file,path.join(dir,'card')],runtime);
       files = (await fs.readdir(dir)).filter(f=>/^card-\d+\.(?:png|jpg)$/.test(f)).sort();
       if (files.length !== rows.length) throw new Error('coupon-pdf-extraction-mismatch');
     } else files = ['input.image'];
     const cards = [];
     for (const [index,name] of files.entries()) {
       const cardFile = path.join(dir,name);
-      cards.push({...await ocrCard(cardFile,dir,index,deadline),index,sha256:HASH(await fs.readFile(cardFile))});
+      cards.push({...await ocrCard(cardFile,dir,index,runtime),index,sha256:HASH(await fs.readFile(cardFile))});
     }
+    remainingTime(runtime);
     return cards;
   } finally { await fs.rm(dir,{recursive:true,force:true}); }
 }
 
 export function couponCardOffer(card, asset, source, now = new Date()) {
+  const original = parseCouponCardOffer(card,asset,source,now);
+  // Preserve already-readable offers, their IDs and their original evidence.
+  // Only a failed OCR reading may use facts reviewed against this exact card.
+  if (original.deal || !['coupon-terms-unreadable','coupon-benefit-unreadable',
+    'coupon-product-unreadable','coupon-quantity-unreadable'].includes(original.reason)) return original;
+  if (source.couponMedia !== 'nordsee-at-v1' || source.url !== ROOT
+      || !allowedCouponAsset(asset.url,asset.kind) || !asset.url.startsWith('https://www.nordsee.com/')) return original;
+  const reviewed = NORDSEE_REVIEW.cards.find(c=>c.pixelSha256 === card.pixelSha256);
+  if (!reviewed) return original;
+  const recovered = parseCouponCardOffer({...card,footer:reviewed.footer,benefit:reviewed.benefit,
+    discount:reviewed.discount,side:reviewed.side},asset,source,now,reviewed.foodLabel);
+  if (recovered.deal) {
+    recovered.deal.evidence.extractionMethod = 'official-reviewed-coupon-card';
+    recovered.deal.evidence.media.ocr = {footer:card.footer,benefit:card.benefit,discount:card.discount,side:card.side};
+    recovered.deal.evidence.media.review = {pixelSha256:card.pixelSha256,couponCode:reviewed.couponCode,
+      reviewedAt:NORDSEE_REVIEW.reviewedAt,sourceUrl:NORDSEE_REVIEW.sourceUrl,
+      footer:reviewed.footer,benefit:reviewed.benefit,discount:reviewed.discount,side:reviewed.side,
+      ...(reviewed.foodLabel ? {foodLabel:reviewed.foodLabel} : {})};
+  }
+  return recovered;
+}
+
+function parseCouponCardOffer(card, asset, source, now, reviewedFoodLabel = '') {
   if (source.couponMedia === 'moemax-reviewed-v1' && asset.format === 'reviewed-restaurant-v1'
       && card.format === 'reviewed-restaurant-v1') {
     const html = `<article class="coupon"><h2>${escapes(card.title)}</h2><p>${escapes(card.footer)}</p></article>`;
@@ -199,7 +249,7 @@ export function couponCardOffer(card, asset, source, now = new Date()) {
   if (/nur|nicht|kauf|bestell|ausgenommen|mitglied|mindest|pfand/i.test(prefix)) return {reason:'coupon-condition-before-product'};
   const conditions = footer.slice(footer.search(/Gültig bis/i));
   const side = foodText(card.side);
-  const text = `Gutschein. ${conditions}${/zzgl|pfand|eur|€|ausgenommen|nicht|nur/i.test(side) ? ' '+side : ''}`;
+  const text = `${reviewedFoodLabel || 'Gutschein'}. ${conditions}${/zzgl|pfand|eur|€|ausgenommen|nicht|nur/i.test(side) ? ' '+side : ''}`;
   const html = `<article class="coupon"><h2>${escapes(title)}</h2><p>${escapes(text)}</p></article>`;
   const parsed = extractFoodOffers(html,{...source,selector:'.coupon'},{now,pageUrl:ROOT});
   const deal = parsed.deals[0];

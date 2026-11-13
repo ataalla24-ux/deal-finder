@@ -186,13 +186,19 @@ export function extractFoodOffers(html, source, options = {}) {
     const notes=$('.column_attr > p').filter((i,e)=>/^\*\*\s+Beim Kauf/.test(foodText($(e).text())));
     if(heading.length===1 && notes.length===1){
       const note=foodText(notes.text());
-      const parts=note.match(/^\*\*\s+(Beim Kauf eines McMuffin Fresh Chicken, Nougatburgers oder Hashbrowns über die Bestellplattform foodora bis 10:30 Uhr und bis inklusive \d{2}\.\d{2}\.20\d{2}) oder (beim Kauf eines Hamburger Royal TS, Crispy Veggie Burgers, Filet-o-Fish, 6er Chicken McNuggets oder McPops® Strawberry, McPops® Chocolate oder McPops® Stracciatella über die Bestellplattform foodora bis inklusive \d{2}\.\d{2}\.20\d{2}) (erhalten .+)$/);
-      if(parts && /ein zweites Exemplar des jeweils gewählten Produktes gratis/.test(parts[3])
-          && /Mindestbestellwert unverändert/.test(parts[3])
-          && /In allen teilnehmenden Restaurants in Österreich/.test(parts[3])
-          && /www\.foodora\.at\/mcdonalds/.test(parts[3])){
-        blocks.push({text:`${parts[1]} ${parts[3]}`,title:"1+1 Frühstück bei McDonald's über foodora",method:'official-campaign-footnote'});
-        blocks.push({text:`${parts[2]} ${parts[3]}`,title:'1+1 Burger, Nuggets oder McPops über foodora',method:'official-campaign-footnote'});
+      const parts=note.match(/^\*\*\s+(Beim Kauf eines McMuffin Fresh Chicken, Nougatburgers oder Hashbrowns über die Bestellplattform foodora bis 10:30 Uhr und bis inklusive \d{2}\.\d{2}\.20\d{2}) oder (beim Kauf eines (.+?) über die Bestellplattform foodora bis inklusive \d{2}\.\d{2}\.20\d{2}) (erhalten .+)$/);
+      // The current main campaign has different products. Its own title and
+      // expiry must never extend the previous Royal TS / Nuggets offer.
+      const mainTitle = new Map([
+        ['Hamburger Royal TS, Crispy Veggie Burgers, Filet-o-Fish, 6er Chicken McNuggets oder McPops® Strawberry, McPops® Chocolate oder McPops® Stracciatella', '1+1 Burger, Nuggets oder McPops über foodora'],
+        ['Big Mac, McChicken, Filet-o-Fish, Crispy Veggie Burger oder McPops® Strawberry, McPops® Chocolate oder McPops® Stracciatella', '1+1 Big Mac, McChicken, Filet-o-Fish, Crispy Veggie Burger oder McPops über foodora'],
+      ]).get(parts?.[3]);
+      if(parts && mainTitle && /ein zweites Exemplar des jeweils gewählten Produktes gratis/.test(parts[4])
+          && /Mindestbestellwert unverändert/.test(parts[4])
+          && /In allen teilnehmenden Restaurants in Österreich/.test(parts[4])
+          && /www\.foodora\.at\/mcdonalds/.test(parts[4])){
+        blocks.push({text:`${parts[1]} ${parts[4]}`,title:"1+1 Frühstück bei McDonald's über foodora",method:'official-campaign-footnote'});
+        blocks.push({text:`${parts[2]} ${parts[4]}`,title:mainTitle,method:'official-campaign-footnote'});
       }else rejected.push({reason:'campaign-footnote-changed',url:pageUrl});
     }
   }

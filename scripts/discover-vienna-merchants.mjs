@@ -73,15 +73,29 @@ export async function runDiscovery(options = {}) {
   }
   const state = read('reviews/vienna-merchant-website-state.json', {});
   const offerState = read('reviews/vienna-merchant-offer-state.json', {});
+  const powerReport = read('docs/power-scraper-report.json', {});
+  const homepageMerchants = new Map();
+  for (const merchant of directory.merchants || []) {
+    if (!merchant.website || !(Date.parse(merchant.observedAt) >= +now - 45 * 86400000)
+      || Date.parse(merchant.observedAt) > +now) continue;
+    const previous = homepageMerchants.get(merchant.website);
+    // Shared mall/hotel websites can represent different businesses. Without
+    // an unambiguous name keep link discovery, but do not attribute their offers.
+    if (!homepageMerchants.has(merchant.website)) homepageMerchants.set(merchant.website, merchant);
+    else if (!previous || previous.name.trim().toLowerCase() !== merchant.name.trim().toLowerCase())
+      homepageMerchants.set(merchant.website, null);
+  }
   const budget = Math.max(0, Math.min(500, Number(process.env.VIENNA_WEBSITE_BUDGET ?? 200) || 0));
-  const offerTasks = selectMerchantOfferPages(directory, state, offerState, now, budget, read('docs/power-scraper-report.json', {}));
+  const offerTasks = selectMerchantOfferPages(directory, state, offerState, now, budget, powerReport);
   const sites = [...new Set(directory.merchants.map(m => m.website).filter(Boolean))]
-    .filter(url => !merchantOfferHostPaused(url, offerState, now))
+    .filter(url => !merchantOfferHostPaused(url, offerState, now, powerReport)
+      && !merchantOfferHostPaused(url, state, now))
     .filter(url => !offerTasks.some(task => new URL(task.url).origin === new URL(url).origin))
     .filter(url => state[url]?.policyVersion !== 2 || Date.parse(state[url].checkedAt) < now.getTime() - 30 * 86400000)
     .sort((a,b) => (Date.parse(state[a]?.checkedAt) || 0) - (Date.parse(state[b]?.checkedAt) || 0) || a.localeCompare(b))
     .slice(0, budget - offerTasks.length);
-  const tasks = [...offerTasks, ...sites.map(url => ({ url }))];
+  const tasks = [...offerTasks, ...sites.map(url => ({ url, homepageMerchant: homepageMerchants.get(url) }))];
+  const homepageCandidatesThisRun = [], offerPageCandidatesThisRun = [];
   let cursor = 0;
   async function worker() {
     while (cursor < tasks.length) {
@@ -103,7 +117,17 @@ export async function runDiscovery(options = {}) {
           // The final URL is the evidence URL; directory locations remain unverified leads.
           offerState[url] = { checkedAt: now.toISOString(), status: 'ok',
             deals: extractMerchantOfferCandidates(page.body, { ...task, url: page.url }, now) };
-        } else state[url] = { checkedAt: now.toISOString(), policyVersion: 2, status: 'ok', ...extractMerchantLinks(page.body, page.url) };
+          offerPageCandidatesThisRun.push(...offerState[url].deals);
+        } else {
+          const homepageDeals = task.homepageMerchant
+            ? extractMerchantOfferCandidates(page.body, { url: page.url, merchant: task.homepageMerchant, pageKind: 'homepage' }, now)
+            : [];
+          // Replace the previous proof with this response. Empty pages must not
+          // renew old offers; failed reads also replace the row below.
+          state[url] = { checkedAt: now.toISOString(), policyVersion: 2, status: 'ok',
+            ...extractMerchantLinks(page.body, page.url), homepageDeals };
+          homepageCandidatesThisRun.push(...homepageDeals);
+        }
       } catch (error) {
         targetState[url] = { checkedAt: now.toISOString(), policyVersion: 2, status: 'deferred', reason: error.message, ...sourceFailureFields(error) };
       }
@@ -111,7 +135,7 @@ export async function runDiscovery(options = {}) {
     }
   }
   await Promise.all(Array.from({ length: 4 }, worker));
-  const candidates = currentMerchantCandidates(offerState, now);
+  const candidates = currentMerchantCandidates(offerState, now, state);
   save('docs/deals-pending-vienna-websites.json', { lastUpdated: now.toISOString(), runProvenance: githubRunProvenance(), source: 'vienna-merchant-website', deals: candidates });
   const accounts = discoveryAccounts(directory, state, now);
   save('docs/vienna-discovery-accounts.json', { generatedAt: now.toISOString(), attribution: directory.attribution, licenseUrl: directory.licenseUrl, accounts });
@@ -119,6 +143,11 @@ export async function runDiscovery(options = {}) {
     sitesAttemptedThisRun: sites.length, offerPagesAttemptedThisRun: offerTasks.length,
     totalPageSlotsUsed: tasks.length, pageSlotBudget: budget,
     offerCandidates: candidates.length, offerPagesDeferredThisRun: offerTasks.filter(t => offerState[t.url]?.status !== 'ok').length,
+    homepageCandidatesThisRun: homepageCandidatesThisRun.length,
+    homepageCandidateIdsThisRun: homepageCandidatesThisRun.map(deal => deal.id),
+    offerPageCandidatesThisRun: offerPageCandidatesThisRun.length,
+    offerPageCandidateIdsThisRun: offerPageCandidatesThisRun.map(deal => deal.id),
+    retainedCandidateCount: candidates.filter(deal => ![...homepageCandidatesThisRun, ...offerPageCandidatesThisRun].some(row => row.id === deal.id)).length,
     websitesChecked: Object.keys(state).length,
     websitesReadable: Object.values(state).filter(s => s.status === 'ok').length,
     instagramAccounts: accounts.length, websiteLinkedAccounts: accounts.filter(a => a.evidenceKind === 'directory-and-website-link').length,

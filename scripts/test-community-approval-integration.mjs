@@ -24,8 +24,8 @@ try {
   fs.mkdirSync(path.join(temp, 'docs'));
   fs.mkdirSync(path.join(temp, 'reviews'));
   // Approval imports the reviewed coupon catalogue even for non-coupon deals.
-  fs.copyFileSync(path.join(root, 'reviews/restaurant-coupon-documents.json'),
-    path.join(temp, 'reviews/restaurant-coupon-documents.json'));
+  for (const file of ['restaurant-coupon-documents.json','nordsee-coupon-cards-20261113.json'])
+    fs.copyFileSync(path.join(root, 'reviews',file),path.join(temp, 'reviews',file));
   process.env.SENTRY_DISABLED = '1';
   process.env.SLACK_BOT_TOKEN = 'test-only';
   process.env.SLACK_CHANNEL_ID = 'C_TEST';

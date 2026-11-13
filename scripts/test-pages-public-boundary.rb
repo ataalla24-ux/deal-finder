@@ -7,7 +7,7 @@ config = YAML.load_file(File.join(docs, '_config.yml'))
 excluded = config.fetch('exclude')
 required = %w[deal-admin.html deals-pending-all.json deal-candidates-index.json
   deal-review-feedback.json sent-deal-ids.json meta-instagram-state.json
-  meta-instagram-scan-state.json]
+  meta-instagram-scan-state.json reviewed-social-source-pause.json]
 raise 'Jekyll exclusions bypassed by .nojekyll' if File.exist?(File.join(docs, '.nojekyll'))
 raise 'Missing internal website exclusions' unless (required - excluded).empty?
 raise 'App association files must remain public' unless config.fetch('include').include?('.well-known')

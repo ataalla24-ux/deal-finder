@@ -104,6 +104,18 @@ assert.match(buildFirecrawlReviewMessage(review.deals[0], 1), /Prüfkandidat/);
 assert.equal(selectFirecrawlReviewDeals([{ deal: unresolved, decision: { allowed: false, reasons: ['abgelaufen'] } }], { now }).deals.length, 0);
 assert.equal(selectFirecrawlReviewDeals(websiteResult.results, { now: new Date('2026-11-21') }).deals.length, 0);
 
+const unresolvedHomepage = extractMerchantOfferCandidates('<article><h2>20 % Rabatt auf Pizza</h2><p>Nur Abholung.</p></article>',
+  { url: website, merchant, pageKind: 'homepage' }, now)[0];
+assert.ok(unresolvedHomepage && isMerchantWebsiteReview(unresolvedHomepage, now));
+const homepageValidation = await validateDealsForSlack([unresolvedHomepage], { now,
+  inspectDealUrlHealth: async url => ({ status: 200, finalUrl: url, dateHints: {} }) });
+assert.equal(homepageValidation.allowedDeals.length, 0, 'a homepage cannot bypass missing period or Vienna evidence');
+const homepageReview = selectFirecrawlReviewDeals(homepageValidation.results, { now });
+assert.equal(homepageReview.deals.length, 1, 'the existing clearly labelled review lane accepts homepage evidence');
+assert.match(buildFirecrawlReviewMessage(homepageReview.deals[0], 1), /Prüfkandidat/);
+assert.equal(selectFirecrawlReviewDeals([{ deal: unresolvedHomepage,
+  decision: { allowed: false, reasons: ['abgelaufen'] } }], { now }).deals.length, 0);
+
 let mediaBits = (BigInt(Date.parse('2026-10-15T09:00:00Z')) - 1314220021300n) << 23n;
 let shortcode = '';
 while (mediaBits) { shortcode = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-_'[Number(mediaBits % 64n)] + shortcode; mediaBits /= 64n; }
@@ -217,4 +229,26 @@ const pausedRow = Object.values(files['reviews/vienna-merchant-offer-state.json'
 assert.equal(pausedRow.httpStatus, 429);
 assert.ok(pausedRow.retryAt);
 assert.equal(selectMerchantOfferPages({ merchants: [merchant] }, sites, files['reviews/vienna-merchant-offer-state.json'], new Date(+now + 9 * 86400000), 200).length, 0, 'host restriction also blocks other offer paths');
+
+const cappedFiles = {
+  'reviews/vienna-merchant-directory.json': { generatedAt: now.toISOString(), merchants: manyMerchants },
+  'reviews/vienna-merchant-website-state.json': manySites,
+};
+let cappedRequests = 0;
+const cappedReport = await runDiscovery({ now, read: (name, fallback) => cappedFiles[name] || fallback,
+  save: (name, value) => { cappedFiles[name] = value; }, wait: async () => {}, log: () => {},
+  fetchImpl: async () => { throw new Error('no external requests'); },
+  fetchPage: async url => {
+    cappedRequests++;
+    return url.endsWith('/robots.txt') ? { status: 404, headers: {}, body: '' }
+      : { status: 200, headers: { 'content-type': 'text/html' }, body: html, url };
+  },
+});
+assert.equal(cappedReport.totalPageSlotsUsed, 200);
+assert.equal(cappedReport.offerPagesAttemptedThisRun, 40);
+assert.equal(cappedReport.sitesAttemptedThisRun, 160);
+assert.equal(cappedRequests, 400, 'the 200 slots still use only robots plus each existing HTML response');
+assert.equal(cappedReport.homepageCandidatesThisRun, 320);
+assert.equal(cappedReport.offerPageCandidatesThisRun, 80);
+assert.equal(cappedReport.retainedCandidateCount, 0);
 console.log('Discovery recall: website budget, source isolation, review lane, expiry, Graph-to-validator, OCR reuse and transport evidence PASS (offline).');

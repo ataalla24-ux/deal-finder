@@ -55,6 +55,7 @@ try {
   writeQueue(seedDir, [{ id: 'approved-old', slackTs: '100.1', title: 'Old queue row' }], '2026-08-22T09:00:00.000Z');
   fs.writeFileSync(path.join(seedDir, 'docs/vienna-food-benefit-pause.json'), '{"retryAt":""}\n');
   writeCarrierPauses(seedDir, {});
+  writeFixture(seedDir, 'reviewed-social-source-pause.json', {});
   writeFixture(seedDir, 'deals-pending-firecrawl2.json', { deals: [
     { id: 'corrected', title: 'Old title', verified: false },
     { id: 'removed', title: 'Old campaign' },
@@ -75,6 +76,7 @@ try {
   writeQueue(concurrentDir, [{ id: 'remote-new', slackTs: '200.1', title: 'Remote deal' }], '2026-08-22T10:00:00.000Z');
   fs.writeFileSync(path.join(concurrentDir, 'docs/vienna-food-benefit-pause.json'), '{"retryAt":"2026-11-10T00:00:00Z"}\n');
   writeCarrierPauses(concurrentDir, {'https://www.a1.net':{retryAt:'2026-11-10T00:00:00Z'}});
+  writeFixture(concurrentDir, 'reviewed-social-source-pause.json', {'https://www.napoleon.wien':{retryAt:'2026-11-14T00:00:00Z'}});
   writeFixture(concurrentDir, 'deals-pending-firecrawl2.json', { deals: [
     { id: 'corrected', title: 'Reviewed title', verified: false },
     { id: 'edited-during-prune', title: 'New human correction' },
@@ -94,6 +96,7 @@ try {
   ], '2026-08-22T11:00:00.000Z');
   fs.writeFileSync(path.join(localDir, 'docs/vienna-food-benefit-pause.json'), '{"retryAt":"2026-10-24T00:00:00Z"}\n');
   writeCarrierPauses(localDir, {'https://www.drei.at':{retryAt:'2026-11-11T00:00:00Z'}});
+  writeFixture(localDir, 'reviewed-social-source-pause.json', {'https://www.napoleon.wien':{retryAt:'2026-11-13T00:00:00Z'}});
   writeFixture(localDir, 'deals-pending-firecrawl2.json', { deals: [
     { id: 'corrected', title: 'Stale automated title', verified: true },
     { id: 'removed', title: 'Stale enrichment' },
@@ -119,6 +122,7 @@ try {
     'docs/deals-pending-all.json',
     'docs/vienna-food-benefit-pause.json',
     'docs/carrier-benefit-pause.json',
+    'docs/reviewed-social-source-pause.json',
     'docs/deals-pending-firecrawl2.json',
     'docs/instagram-merchant-registry.json',
   ], localDir);
@@ -137,12 +141,14 @@ try {
   assert.deepEqual(JSON.parse(fs.readFileSync(path.join(verifyDir, 'docs/carrier-benefit-pause.json'))), {
     'https://www.a1.net':{retryAt:'2026-11-10T00:00:00Z'}, 'https://www.drei.at':{retryAt:'2026-11-11T00:00:00Z'},
   });
+  assert.equal(JSON.parse(fs.readFileSync(path.join(verifyDir, 'docs/reviewed-social-source-pause.json')))['https://www.napoleon.wien'].retryAt, '2026-11-14T00:00:00Z');
 
   // A source-owned collector may intentionally replace its own generated file
   // even if a verifier enriched the previous version while the collector ran.
   writeQueue(verifyDir, [{ id: 'remote-verification', title: 'Concurrent verifier output' }], '2026-08-22T12:00:00.000Z');
   fs.writeFileSync(path.join(verifyDir, 'docs/vienna-food-benefit-pause.json'), '{"retryAt":"2026-11-12T00:00:00Z"}\n');
   writeCarrierPauses(verifyDir, {'https://www.a1.net':{retryAt:'2026-11-12T00:00:00Z'},'https://www.drei.at':{retryAt:'2026-11-11T00:00:00Z'}});
+  writeFixture(verifyDir, 'reviewed-social-source-pause.json', {'https://www.napoleon.wien':{retryAt:'2026-11-16T00:00:00Z'}});
   run('git', ['add', 'docs'], verifyDir);
   run('git', ['commit', '-m', 'concurrent verifier output'], verifyDir);
   run('git', ['push', 'origin', 'main'], verifyDir);
@@ -150,6 +156,7 @@ try {
   writeQueue(localDir, [{ id: 'source-owned', title: 'Fresh collector output' }], '2026-08-22T13:00:00.000Z');
   fs.writeFileSync(path.join(localDir, 'docs/vienna-food-benefit-pause.json'), '{"retryAt":"2026-11-11T00:00:00Z"}\n');
   writeCarrierPauses(localDir, {'https://www.a1.net':{retryAt:'2026-11-11T00:00:00Z'},'https://www.hot.at':{retryAt:'2026-11-13T00:00:00Z'}});
+  writeFixture(localDir, 'reviewed-social-source-pause.json', {'https://www.napoleon.wien':{retryAt:'2026-11-15T00:00:00Z'}});
   run(process.execPath, [
     SCRIPT_PATH,
     '--replace-conflicts',
@@ -163,6 +170,7 @@ try {
     'docs/deals-pending-all.json',
     'docs/vienna-food-benefit-pause.json',
     'docs/carrier-benefit-pause.json',
+    'docs/reviewed-social-source-pause.json',
   ], localDir);
 
   run('git', ['clone', '--branch', 'main', remoteDir, replaceVerifyDir], tempDir);
@@ -174,6 +182,7 @@ try {
   assert.equal(carrierPauses['https://www.a1.net'].retryAt,'2026-11-12T00:00:00Z');
   assert.equal(carrierPauses['https://www.drei.at'].retryAt,'2026-11-11T00:00:00Z');
   assert.equal(carrierPauses['https://www.hot.at'].retryAt,'2026-11-13T00:00:00Z');
+  assert.equal(JSON.parse(fs.readFileSync(path.join(replaceVerifyDir, 'docs/reviewed-social-source-pause.json')))['https://www.napoleon.wien'].retryAt, '2026-11-16T00:00:00Z', 'Even replace mode must preserve a later official-source refusal pause');
 } finally {
   fs.rmSync(tempDir, { recursive: true, force: true });
 }

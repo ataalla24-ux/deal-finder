@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import crypto from 'node:crypto';
 import {
   allowedCouponAsset,discoverCouponMedia,fetchCouponAsset,parsePdfImageList,
-  couponCardOffer,extractCouponMediaOffers,
+  couponCardOffer,extractCouponMediaOffers,readCouponAsset,
 } from '../scraper/official-coupon-media.js';
 import {POWER_FOOD_SOURCES,isAllowedFoodUrl} from '../scraper/power-food-sources.js';
 import {verifyOfficialFoodDeal} from '../scraper/power-food-verification.js';
@@ -11,6 +11,7 @@ import {crawlFoodSource} from '../scraper/power-food-crawler.js';
 import {applyCardEditorial} from '../scraper/deal-card-editor.js';
 import {reviewedRestaurantCards, allowedRestaurantCouponAsset} from '../scraper/reviewed-restaurant-coupons.js';
 import fs from 'node:fs';
+import {spawnSync} from 'node:child_process';
 const source = POWER_FOOD_SOURCES.find(s=>s.name==='NORDSEE');
 const now = new Date('2026-10-23T12:00:00Z');
 const url = source.url+'/pdf';
@@ -25,6 +26,119 @@ const restaurantDocument = JSON.parse(fs.readFileSync(new URL('../reviews/restau
 const restaurantSource = POWER_FOOD_SOURCES.find(s=>s.name==='Mömax Restaurant');
 const restaurantAsset = {kind:'pdf',format:'reviewed-restaurant-v1',url:restaurantDocument.url,sha256:restaurantDocument.sha256};
 const restaurantHtml = `<a href="${restaurantAsset.url}">Exklusive Angebote des Monats</a>`;
+const nordseeCapture = JSON.parse(fs.readFileSync(new URL('./fixtures/nordsee-coupon-ocr-20261113.json', import.meta.url)));
+const nordseeReview = JSON.parse(fs.readFileSync(new URL('../reviews/nordsee-coupon-cards-20261113.json', import.meta.url)));
+
+const fakeCouponCommand = (command,args) => ({stdout:command==='ffprobe'
+  ? JSON.stringify({streams:[{width:800,height:740}]})
+  : command==='ffmpeg' && args.includes('rawvideo') ? Buffer.alloc(800*740*3)
+    : command==='tesseract' ? 'readable text' : ''});
+test('coupon deadline expires before the first subprocess without starting any tool',async()=>{
+  let ticks=0,calls=0;
+  await assert.rejects(readCouponAsset({kind:'image'},data,{now:()=>ticks++?180000:0,
+    execute:async()=>{calls++;return {stdout:''};}}),/coupon-ocr-total-time-limit/);
+  assert.equal(calls,0);
+});
+test('a late probe cannot start a new full-image hash phase',async()=>{
+  let clock=0;const calls=[];
+  await assert.rejects(readCouponAsset({kind:'image'},data,{now:()=>clock,
+    execute:async(command,args,options)=>{calls.push({command,timeout:options.timeout});clock=180001;return fakeCouponCommand(command,args);}}),/coupon-ocr-total-time-limit/);
+  assert.deepEqual(calls,[{command:'ffprobe',timeout:20000}]);
+});
+test('full-image hash timeout is capped by the remaining budget and late pixels are discarded',async()=>{
+  let clock=0;const calls=[];
+  await assert.rejects(readCouponAsset({kind:'image'},data,{now:()=>clock,
+    execute:async(command,args,options)=>{
+      calls.push({command,timeout:options.timeout});clock=calls.length===1?179999:180000;
+      return fakeCouponCommand(command,args);
+    }}),/coupon-ocr-total-time-limit/);
+  assert.deepEqual(calls,[{command:'ffprobe',timeout:20000},{command:'ffmpeg',timeout:1}]);
+});
+test('last OCR phase receives only remaining time and cannot return a late coupon',async()=>{
+  let clock=0;const calls=[];
+  await assert.rejects(readCouponAsset({kind:'image'},data,{now:()=>clock,
+    execute:async(command,args,options)=>{
+      calls.push({command,timeout:options.timeout});
+      if(calls.length===9)clock=179990;
+      if(calls.length===10)clock=180000;
+      return fakeCouponCommand(command,args);
+    }}),/coupon-ocr-total-time-limit/);
+  assert.equal(calls.length,10);assert.deepEqual(calls.at(-1),{command:'tesseract',timeout:10});
+});
+test('final file hashing cannot return a card after the total deadline',async()=>{
+  let calls=0,finished=false,checks=0;
+  await assert.rejects(readCouponAsset({kind:'image'},data,{now:()=>finished?(++checks>=3?180000:179999):0,
+    execute:async(command,args)=>{if(++calls===10)finished=true;return fakeCouponCommand(command,args);}}),/coupon-ocr-total-time-limit/);
+  assert.equal(calls,10);assert.equal(checks,3);
+});
+test('PDF inspection and extraction share the same deadline as image OCR',async()=>{
+  let clock=0;const calls=[];
+  await assert.rejects(readCouponAsset({kind:'pdf'},data,{now:()=>clock,
+    execute:async(command,args,options)=>{
+      calls.push({command,timeout:options.timeout});clock=calls.length===1?179999:180000;
+      return {stdout:command==='pdfinfo'?'Pages: 1\n':'1 0 image 800 740 rgb 3 8 jpeg no 1 0 300 300 342K 20%'};
+    }}),/coupon-ocr-total-time-limit/);
+  assert.deepEqual(calls,[{command:'pdfinfo',timeout:20000},{command:'pdfimages',timeout:1}]);
+});
+
+test('seven exact reviewed November cards recover without changing the four readable coupon IDs',()=>{
+  const at = new Date('2026-11-13T20:00:00Z');
+  const recovered = nordseeCapture.cards.map(c => couponCardOffer(c,asset,source,at));
+  assert.equal(recovered.filter(r=>r.deal).length,11);
+  for (const index of [3,4,6,10]) {
+    const c = nordseeCapture.cards[index];
+    const original = couponCardOffer({...c,pixelSha256:undefined},asset,source,at).deal;
+    assert.deepEqual(recovered[index].deal,original);
+  }
+  assert.equal(new Set(recovered.map(r=>r.deal.id)).size,11);
+  for (const index of [0,1,2,5,7,8,9]) {
+    const d=recovered[index].deal;
+    assert.equal(d.evidence.extractionMethod,'official-reviewed-coupon-card');
+    assert.equal(d.validUntil,'2026-11-30');
+    assert.ok(d.reviewRequired);
+    assert.equal(d.price,undefined);
+    assert.match(d.description,/Nicht gültig an Autobahnraststätten/);
+    assert.match(d.description,/teilnehmenden Restaurants in Österreich/);
+    assert.equal(couponCardOffer(nordseeCapture.cards[index],asset,source,new Date('2026-12-01T12:00:00Z')).deal,undefined);
+  }
+  assert.match(recovered[1].deal.description,/0,25 EUR Pfand/);
+  assert.match(recovered[1].deal.title,/Softdrink 0,5 l PET/);
+  assert.match(recovered[2].deal.title,/2 Bremer, 2 Backfisch-Baguettes, 1 Fish & Chips/);
+  assert.match(recovered[9].deal.title,/2 Menüs.*Schollenfilet.*oder Alaska-Seelachsfilet.*1 Softdrink 0,2 l/);
+});
+test('reviewed card fallback requires exact full-image identity and its original official source',()=>{
+  const c=nordseeCapture.cards[1],at=new Date('2026-11-13T20:00:00Z');
+  for(const changed of [{...c,pixelSha256:undefined},{...c,pixelSha256:'a'.repeat(64)}])
+    assert.equal(couponCardOffer(changed,asset,source,at).deal,undefined);
+  for(const changedAsset of [{...asset,url:'https://evil.test/at/coupons/pdf'},{...asset,url:'https://www.nordsee.com/de/coupons/pdf'}, {...asset,metadataExpiry:'2026-11-12'}])
+    assert.equal(couponCardOffer(c,changedAsset,source,at).deal,undefined);
+  for(const changedSource of [{...source,couponMedia:undefined},{...source,url:'https://www.nordsee.com/de/coupons'}])
+    assert.equal(couponCardOffer(c,asset,changedSource,at).deal,undefined);
+});
+test('real PNG and JPEG cards produce the reviewed full-pixel fingerprints locally', async t=>{
+  if (['ffmpeg','ffprobe','tesseract'].some(command=>spawnSync(command,['-version']).error)) {
+    assert.notEqual(process.env.REQUIRE_COUPON_PIXEL_TEST,'1','Real coupon tools are required for the Linux fingerprint contract');
+    t.skip('Optional local coupon tools absent; semantic and hash-bound policy tests still run');return;
+  }
+  for(const [name,index] of [['card-000.png',0],['card-005.jpg',5]]) {
+    const data=fs.readFileSync(new URL('./fixtures/nordsee-coupons-20261113/'+name,import.meta.url));
+    const [actual]=await readCouponAsset({kind:'image',url:image},data);
+    assert.equal(actual.pixelSha256,nordseeCapture.cards[index].pixelSha256,name);
+    assert.ok(nordseeReview.cards.some(c=>c.pixelSha256===actual.pixelSha256));
+  }
+  const original=fs.readFileSync(new URL('./fixtures/nordsee-coupons-20261113/card-000.png',import.meta.url));
+  const encode=filter=>{
+    const encoded=spawnSync('ffmpeg',['-hide_banner','-loglevel','error','-threads','1','-i','pipe:0',
+      ...(filter?['-vf',filter]:[]),'-frames:v','1','-pix_fmt','rgb24','-f','image2pipe','-c:v','png','pipe:1'],
+    {input:original,maxBuffer:8000000});
+    assert.equal(encoded.status,0,String(encoded.stderr));return encoded.stdout;
+  };
+  const [reencoded]=await readCouponAsset({kind:'image',url:image},encode());
+  assert.equal(reencoded.pixelSha256,nordseeCapture.cards[0].pixelSha256,'PNG encoding does not change coupon facts');
+  const [changed]=await readCouponAsset({kind:'image',url:image},encode('drawbox=x=0:y=0:w=1:h=1:color=white:t=fill'));
+  assert.notEqual(changed.pixelSha256,nordseeCapture.cards[0].pixelSha256,'Even one changed pixel prevents the reviewed fallback');
+  assert.equal(couponCardOffer({...changed,footer:'unreadable'},asset,source,new Date('2026-11-13T20:00:00Z')).deal,undefined);
+});
 
 test('restaurant PDF transport only accepts its dedicated Austrian CDN paths',()=>{
   assert.ok(allowedRestaurantCouponAsset(restaurantAsset.url,'pdf'));

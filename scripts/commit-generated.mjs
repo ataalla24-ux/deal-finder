@@ -438,7 +438,7 @@ function mergeKnownGeneratedJson(state, ref, baseRef) {
     return { ...state, content: Buffer.from(`${JSON.stringify(payload, null, 2)}\n`) };
   }
 
-  if (state.path === 'docs/carrier-benefit-pause.json') {
+  if (['docs/carrier-benefit-pause.json', 'docs/reviewed-social-source-pause.json'].includes(state.path)) {
     if ([localPayload, remotePayload].some(payload => !payload || typeof payload !== 'object' || Array.isArray(payload))) return null;
     const payload = { ...remotePayload };
     for (const [origin, row] of Object.entries(localPayload)) {
@@ -524,7 +524,7 @@ function resolveSameFileRemoteChanges(states, baseRef, headRef, options = {}) {
           continue;
         }
       }
-      if (['docs/vienna-food-benefit-pause.json', 'docs/carrier-benefit-pause.json'].includes(state.path)) {
+      if (['docs/vienna-food-benefit-pause.json', 'docs/carrier-benefit-pause.json', 'docs/reviewed-social-source-pause.json'].includes(state.path)) {
         const mergedState = mergeKnownGeneratedJson(state, headRef, baseRef);
         if (mergedState) {
           safeStates.push(mergedState);

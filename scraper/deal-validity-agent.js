@@ -3,6 +3,7 @@ import { verifyViennaFoodBenefit } from './vienna-food-benefits.js';
 import { verifyCarrierBenefit } from './carrier-benefits.js';
 import { hasFreshActiveAdEvidence } from './meta-ad-library-coverage.js';
 import { currentOriginalOffer } from './current-original-offer.js';
+import { verifyReviewedSocialOfficialOffer } from './reviewed-social-official-source.js';
 import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
@@ -1090,11 +1091,16 @@ async function validateDeal(deal, context) {
   // malformed/dead link still runs through the regular validation gates.
   const reviewedWithoutLink = reviewedCommunity && !String(deal.url || '').trim()
     && [deal.brand, deal.title, deal.distance || deal.address].every(value => String(value || '').trim());
+  const reviewedOfficial = await verifyReviewedSocialOfficialOffer(deal, {
+    ...context.reviewedSocialOfficialOptions, approvalContext: context.communityApproval,
+    now, cache: context.officialFoodCache,
+  });
   const viennaFood = await verifyViennaFoodBenefit(deal, { now, cache: context.officialFoodCache, fetchPage: context.fetchViennaBenefitPage });
   const verifiedBenefit = viennaFood || await verifyCarrierBenefit(deal, { now, cache: context.officialFoodCache, fetchPage: context.fetchCarrierBenefitPage });
   // This source already has a strict, paced fetcher with a persistent pause.
   // Do not issue an unpaced generic probe ahead of its own source guard.
-  const health = verifiedBenefit ? { finalUrl:url,dateHints:{},contentHints:{},...(verifiedBenefit.ok ? {ok:true,status:200} : {}) } : reviewedWithoutLink
+  const health = reviewedOfficial ? (reviewedOfficial.health || { finalUrl: url, dateHints: {}, contentHints: {} })
+    : verifiedBenefit ? { finalUrl:url,dateHints:{},contentHints:{},...(verifiedBenefit.ok ? {ok:true,status:200} : {}) } : reviewedWithoutLink
     ? { reason: 'Community-Angebot ohne Link manuell freigegeben', dateHints: {}, contentHints: {} }
     : await inspectUrlWithCache(url, context.urlCache, context.urlOptions);
   const officialFood = verifiedBenefit || await verifyOfficialFoodDeal(deal, { now, cache: context.officialFoodCache, fetchPage: context.fetchOfficialFoodPage });
@@ -1155,10 +1161,10 @@ async function validateDeal(deal, context) {
     // A human-reviewed community offer with a concrete calendar window does
     // not need a platform post timestamp. Old dated social posts stay blocked.
     activeValidity: socialPostDeal
-      ? freshlyActiveAd || Boolean(currentOriginal) || reviewedCommunity && !publicationCandidates.length && activeValidity
+      ? freshlyActiveAd || Boolean(currentOriginal) || reviewedOfficial?.ok || reviewedCommunity && !publicationCandidates.length && activeValidity
       : activeValidity,
     recurring: socialPostDeal ? false : recurring,
-    extendedMaxAgeDays: freshlyActiveAd ? 365 : currentOriginal ? 90 : context.extendedMaxAgeDays,
+    extendedMaxAgeDays: freshlyActiveAd ? 365 : currentOriginal ? 90 : reviewedOfficial?.ok ? 45 : context.extendedMaxAgeDays,
   });
   const relativeOffer = getRelativeOfferDecision(deal, freshness.selected, now, {
     activeValidity,
@@ -1181,6 +1187,8 @@ async function validateDeal(deal, context) {
     if (metaNonOffer) reasons.push(`Kein konkreter Meta-Deal (${metaNonOffer})`);
   }
   const warnings = [];
+  if (reviewedOfficial && !reviewedOfficial.ok) reasons.push(`Offizielle Vergleichsquelle nicht bestätigt (${reviewedOfficial.reason})`);
+  if (reviewedOfficial?.ok) warnings.push('Bestehender manuell bestätigter Originalpost: identische Aktion und Wiener Standort im aktuellen offiziellen Homepage-Angebotssegment erneut bestätigt; ursprüngliches Postdatum unverändert');
   if (currentOriginal && currentOriginal.ageDays > 7) warnings.push('Älterer Originalpost: konkretes Aktionsende mit Jahr frisch über Graph bestätigt; keine automatische Freigabe');
   if (freshlyActiveAd) warnings.push('Aktive Meta-Anzeige frisch durch Meta bestätigt; Kampagnenstart bleibt unverändert, Ablauf und relative Aktionsdaten werden separat geprüft');
   if (reviewedCommunity && deal.communityApprovalIssue) reasons.push(deal.communityApprovalIssue);
@@ -1189,7 +1197,7 @@ async function validateDeal(deal, context) {
   if (officialFood?.ok && deal.evidence?.media) warnings.push('Lokale Coupon-OCR: Produkt, Mengen, Bedingungen und Wiener Filialteilnahme am verlinkten Original vor Freigabe prüfen; kein garantierter OCR-Preis');
 
   const graphBlockingReason = cleanText(deal.metaGraphBlockingReason);
-  if (graphBlockingReason && !(graphBlockingReason === 'post-too-old' && currentOriginal)) {
+  if (graphBlockingReason && !(graphBlockingReason === 'post-too-old' && (currentOriginal || reviewedOfficial?.ok))) {
     reasons.push(`Meta-Graph-Widerspruch (${graphBlockingReason})`);
   }
 
@@ -1208,7 +1216,7 @@ async function validateDeal(deal, context) {
   }
 
   const legacyFirecrawlDeal = isLegacyFirecrawlDeal(deal);
-  const viennaConfirmed = Boolean(officialFood?.viennaBranchEvidence) || (socialPostDeal && !legacyFirecrawlDeal
+  const viennaConfirmed = Boolean(officialFood?.viennaBranchEvidence) || Boolean(reviewedOfficial?.ok) || (socialPostDeal && !legacyFirecrawlDeal
     ? hasSocialViennaEvidence(deal, context)
     : isExplicitlyUsableInVienna(deal, health));
   if (officialFood?.viennaBranchEvidence) {
@@ -1288,9 +1296,12 @@ async function validateDeal(deal, context) {
     url: url || deal.url,
     validity: buildPublicValidationMeta(decision),
     ...(officialFood?.ok ? { officialFoodReverifiedAt: now.toISOString() } : {}),
+    ...(reviewedOfficial?.ok ? { officialSourceCorroboration: reviewedOfficial.proof } : {}),
   };
 
-  if (selectedDate?.iso && selectedDate.source !== 'url.couponRoundUpdatedAt' && (
+  if (!reviewedOfficial?.ok) delete nextDeal.officialSourceCorroboration;
+
+  if (!reviewedOfficial?.ok && selectedDate?.iso && selectedDate.source !== 'url.couponRoundUpdatedAt' && (
     !deal.pubDate
     || selectedDate.source.startsWith('url.')
     || !isTrustedPublicationSource(deal.pubDateSource)
@@ -1435,6 +1446,7 @@ async function validateDealsForSlack(deals, options = {}) {
     fetchOfficialFoodPage: options.fetchOfficialFoodPage,
     fetchViennaBenefitPage: options.fetchViennaBenefitPage,
     fetchCarrierBenefitPage: options.fetchCarrierBenefitPage,
+    reviewedSocialOfficialOptions: options.reviewedSocialOfficialOptions,
     urlOptions: {
       now,
       timeoutMs,

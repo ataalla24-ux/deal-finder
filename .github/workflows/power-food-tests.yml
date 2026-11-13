@@ -4,6 +4,10 @@ on:
     paths:
       - "scraper/*discovery*.js"
       - "scraper/current-original-offer.js"
+      - "scraper/reviewed-social-official-source.js"
+      - "scripts/test-reviewed-social-official-source.mjs"
+      - "scripts/fixtures/napoleon-home-offer-*.html"
+      - "scripts/fixtures/mcdonalds-foodora-*.html"
       - "scraper/instagram-graph-evidence.js"
       - "scraper/instagram-media-evidence.js"
       - "scripts/discover-vienna-merchants.mjs"
@@ -21,6 +25,9 @@ on:
       - "scraper/official-coupon-media.js"
       - "scraper/reviewed-restaurant-coupons.js"
       - "reviews/restaurant-coupon-documents.json"
+      - "reviews/nordsee-coupon-cards-*.json"
+      - "scripts/fixtures/nordsee-*"
+      - "scripts/fixtures/nordsee-*/**"
       - "scripts/test-official-coupon-media.mjs"
       - ".github/actions/coupon-tools/**"
       - "scraper/power-*.js"
@@ -53,6 +60,10 @@ on:
     paths:
       - "scraper/*discovery*.js"
       - "scraper/current-original-offer.js"
+      - "scraper/reviewed-social-official-source.js"
+      - "scripts/test-reviewed-social-official-source.mjs"
+      - "scripts/fixtures/napoleon-home-offer-*.html"
+      - "scripts/fixtures/mcdonalds-foodora-*.html"
       - "scraper/instagram-graph-evidence.js"
       - "scraper/instagram-media-evidence.js"
       - "scripts/discover-vienna-merchants.mjs"
@@ -70,6 +81,9 @@ on:
       - "scraper/official-coupon-media.js"
       - "scraper/reviewed-restaurant-coupons.js"
       - "reviews/restaurant-coupon-documents.json"
+      - "reviews/nordsee-coupon-cards-*.json"
+      - "scripts/fixtures/nordsee-*"
+      - "scripts/fixtures/nordsee-*/**"
       - "scripts/test-official-coupon-media.mjs"
       - ".github/actions/coupon-tools/**"
       - "scraper/power-*.js"
@@ -105,14 +119,19 @@ jobs:
     timeout-minutes: 10
     env:
       SENTRY_DISABLED: "1"
+      REQUIRE_COUPON_PIXEL_TEST: "1"
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
           node-version: "22"
       - run: npm ci
+      - uses: ./.github/actions/coupon-tools
+        with:
+          force: 'true'
       - run: |
           node scripts/test-discovery-recall.mjs
+          node --test scripts/test-reviewed-social-official-source.mjs
           node scripts/test-pipeline-run-reports.mjs
           node scripts/test-vienna-merchant-discovery.mjs
           node --test scripts/test-vienna-food-benefits.mjs
