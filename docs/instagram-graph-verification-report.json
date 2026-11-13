@@ -1,7 +1,7 @@
 {
-  "generatedAt": "2026-11-13T21:10:10.954Z",
+  "generatedAt": "2026-11-13T21:17:36.013Z",
   "source": "instagram-graph-cross-source-verification",
-  "status": "ok",
+  "status": "failed-preserved",
   "configured": true,
   "scannedFiles": [
     "deals-pending-church-events.json",
@@ -135,7 +135,7 @@
       "candidates": 0
     },
     "deals-pending-meta-instagram.json": {
-      "deals": 51,
+      "deals": 50,
       "candidates": 1
     },
     "deals-pending-power.json": {
@@ -184,10 +184,15 @@
       "candidates": 1
     }
   ],
-  "fetchedPosts": 75,
-  "exactMatches": 3,
+  "fetchedPosts": 0,
+  "exactMatches": 0,
   "retainedEvidencePosts": 2000,
-  "errors": [],
+  "errors": [
+    {
+      "username": "merkezrestaurant.at",
+      "message": "Instagram shared quota paused: shared cooldown"
+    }
+  ],
   "accountFailures": {
     "natascha_rapid": {
       "count": 3,
@@ -203,19 +208,25 @@
   "sharedQuota": {
     "limitPerHour": 190,
     "usageThreshold": 95,
-    "requests": 3,
-    "reserved": 5,
-    "stopped": false,
-    "reason": "",
-    "highestUsagePercent": 27,
+    "requests": 0,
+    "reserved": 0,
+    "stopped": true,
+    "reason": "Instagram shared quota paused: shared cooldown",
+    "highestUsagePercent": 0,
     "waitedMs": 0,
     "pacingMs": 0,
-    "retryAt": "",
+    "retryAt": "2026-11-13T21:25:09.260Z",
     "adaptiveSafetyCeiling": 190,
     "adaptiveIncreases": 0,
     "storageFailure": null
   },
+  "globalError": {
+    "username": "merkezrestaurant.at",
+    "status": 0,
+    "code": "SCAN_BUDGET",
+    "message": "Instagram shared quota paused: shared cooldown"
+  },
   "blockedEvidencePosts": 55,
-  "unmatchedCandidatePosts": 0,
-  "message": "3/3 fresh cross-source Instagram candidates matched exactly via Graph API."
+  "unmatchedCandidatePosts": 3,
+  "message": "0/3 fresh cross-source Instagram candidates matched exactly via Graph API."
 }
