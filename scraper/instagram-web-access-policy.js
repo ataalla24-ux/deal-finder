@@ -7,7 +7,7 @@ const reasonFor = status => [401, 403, 429].includes(Number(status)) ? `http-${N
 
 // Website access is independent of Graph API access. Never rotate cookies,
 // language URLs or transports to retry a denied website request.
-export function createInstagramWebAccess({ previousReport = {}, healthReport = {}, now = () => new Date() } = {}) {
+export function createInstagramWebAccess({ previousReport = {}, relatedReport = {}, healthReport = {}, now = () => new Date() } = {}) {
   const current = () => now instanceof Date ? now : now();
   const state = {};
   const retain = (scope, value) => {
@@ -33,6 +33,10 @@ export function createInstagramWebAccess({ previousReport = {}, healthReport = {
       retain('profiles', { nextRetryAt: new Date(previousTime + 6 * HOUR).toISOString(),
         lastAttemptAt: previousReport.lastUpdated, reason: 'profile-unavailable' });
     }
+  }
+  for (const scope of ['all', 'profiles']) {
+    const other = relatedReport.webAccess?.[scope];
+    if (time(other?.nextRetryAt) > +current()) retain(scope, other);
   }
   const health = instagramAuthCircuitStatus(healthReport, current());
   if (!health.allowed) retain('all', { nextRetryAt: health.nextRetryAt, lastAttemptAt: healthReport.updatedAt, reason: 'auth-health-cooldown' });

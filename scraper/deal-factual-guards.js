@@ -5,6 +5,12 @@ export function locationConflictReason(deal = {}) {
   // Generated descriptions may contain a default Vienna address. Prefer the
   // original post when deciding where the actual promotion takes place.
   const caption = text(deal.metaGraphCaption || deal.evidence?.textSample || deal.description);
+  const metaInstagram = /^meta-ig-/.test(deal.id || '') || /^Meta Instagram\b/i.test(deal.originSource || '');
+  // An inferred city or a German nationwide offer is not an Austrian branch.
+  if (metaInstagram && /\b(?:Deutschland|Germany)\b/i.test(text(deal.brand))
+      && !/\b(?:in|auch in|f[uü]r)\s+(?:Wien|Vienna|Österreich|Austria)\b|\b(?:österreichweit|austria-wide)\b|\b1(?:0[1-9]|1\d|2[0-3])0\s+(?:Wien|Vienna)\b/i.test(caption)) {
+    return 'Ortswiderspruch: deutsches Angebot ohne belegte Geltung in Österreich';
+  }
   const outside = '(?:Graz|Salzburg|Linz|Innsbruck|Klagenfurt|Villach|Berlin|München|Dubai|Abu Dhabi)';
   const explicitElsewhere = new RegExp(`\\b(?:in|bei|nahe|at)\\s+${outside}\\b`, 'i');
   const venueElsewhere = new RegExp(`(?:📍|\\b(?:Standort|Location|Adresse|Address)\\s*:)\\s*[^.!?]{0,180}\\b${outside}\\b`, 'i');

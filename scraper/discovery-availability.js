@@ -5,8 +5,11 @@ export function discoveryAvailability(instagram = {}, tiktok = {}, now = new Dat
     const stale = !Number.isFinite(observed) || observed > +now || +now - observed > 48 * 3600000;
     const reason = String(part?.stoppedReason || part?.reason || '');
     const retryAt = part?.nextRetryAt || '';
-    const paused = Date.parse(retryAt) > +now;
-    return { name, observedAt, status: stale ? 'unknown-stale-report' : !part ? 'unknown-missing-lane' : paused ? 'paused'
+    const retry = Date.parse(retryAt);
+    const paused = retry > +now;
+    const awaitingObservation = Number.isFinite(observed) && observed < retry && retry <= +now;
+    return { name, observedAt, status: paused ? 'paused'
+      : awaitingObservation ? 'awaiting-post-cooldown-run' : stale ? 'unknown-stale-report' : !part ? 'unknown-missing-lane'
       : reason ? 'recovery-not-yet-proven' : 'no-block-reported', reason, retryAt, ...counts,
       deliveredToSlack: null };
   };

@@ -2,7 +2,7 @@ name: "Firecrawl Daily Sync"
 
 on:
   schedule:
-    - cron: '20 5 * * *' # Keep Instagram API calls spaced out from cookie refresh and Apify.
+    - cron: '20 5 * * *' # Keep this source pass spaced out from cookie refresh and Apify.
   workflow_dispatch:
     inputs:
       joe_only:
@@ -24,6 +24,8 @@ jobs:
       PLAYWRIGHT_BROWSERS_PATH: 0
     steps:
       - uses: actions/checkout@v4
+        with:
+          ref: main
 
       - uses: actions/setup-node@v4
         with:
@@ -48,8 +50,15 @@ jobs:
         if: ${{ !inputs.joe_only }}
         run: node scraper/build-instagram-merchant-registry.js
 
-      - name: Check Instagram Auth
+      - name: Respect saved Instagram web cooldowns
         if: ${{ !inputs.joe_only }}
+        id: instagram-access
+        env:
+          SENTRY_DISABLED: "1"
+        run: node scraper/instagram-daily-sync.js --access-preflight
+
+      - name: Check Instagram Auth
+        if: ${{ steps.instagram-access.outputs.proceed == 'true' }}
         id: instagram-auth
         env:
           INSTAGRAM_SESSIONID: ${{ secrets.INSTAGRAM_SESSIONID }}
@@ -66,44 +75,20 @@ jobs:
         run: node scripts/check-instagram-auth.mjs
 
       - name: Run Instagram Daily Sync
-        if: ${{ !inputs.joe_only && steps.instagram-auth.outputs.ok == 'true' }}
+        if: ${{ steps.instagram-access.outputs.proceed == 'true' && steps.instagram-auth.outputs.ok == 'true' }}
         env:
           INSTAGRAM_SESSIONID: ${{ secrets.INSTAGRAM_SESSIONID }}
           INSTAGRAM_COOKIES: ${{ secrets.INSTAGRAM_COOKIES }}
           IG_MAX_AGE_DAYS: 7
           IG_MAX_DEALS: 800
           IG_MAX_SOURCES_TOTAL: 220
-          IG_MAX_TIMELINE_POSTS: 120
+          IG_MAX_TIMELINE_POSTS: 4
           IG_MAX_REGISTRY_ACCOUNTS: 220
           IG_MIN_SCORE: 0
           IG_MAX_DEALS_PER_ACCOUNT: 120
           IG_SOURCE_DELAY_MS: 1800
           IG_MAX_RUN_MINUTES: 80
         run: |
-          node - <<'NODE'
-          const session = String(process.env.INSTAGRAM_SESSIONID || '').trim();
-          const rawCookies = String(process.env.INSTAGRAM_COOKIES || '').trim();
-          const cookieParts = rawCookies
-            ? rawCookies.split(';').map((p) => p.trim()).filter(Boolean)
-            : [];
-          const cookieNames = cookieParts
-            .map((part) => {
-              const eq = part.indexOf('=');
-              return eq > 0 ? part.slice(0, eq).trim() : '';
-            })
-            .filter(Boolean);
-
-          console.log(`DEBUG INSTAGRAM_SESSIONID set: ${session ? 'yes' : 'no'}`);
-          console.log(`DEBUG INSTAGRAM_COOKIES length: ${rawCookies.length}`);
-          console.log(`DEBUG INSTAGRAM_COOKIES parts: ${cookieParts.length}`);
-          console.log(`DEBUG INSTAGRAM_COOKIES names: ${cookieNames.join(',') || '(none)'}`);
-          NODE
-          COOKIE_FILE="$RUNNER_TEMP/instagram-cookies.txt"
-          printf '%s\n' "$INSTAGRAM_COOKIES" > "$COOKIE_FILE"
-          if [ -n "$INSTAGRAM_SESSIONID" ] && ! grep -q 'sessionid=' "$COOKIE_FILE"; then
-            printf '; sessionid=%s\n' "$INSTAGRAM_SESSIONID" >> "$COOKIE_FILE"
-          fi
-          export INSTAGRAM_COOKIES_FILE="$COOKIE_FILE"
           node scraper/instagram-daily-sync.js
 
       - name: Run jö Scraper

@@ -3,6 +3,12 @@ import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import { normalizeCategoryForScraper } from './category-utils.js';
+import { discoveryRejection } from './deal-discovery-policy.js';
+import { locationConflictReason } from './deal-factual-guards.js';
+import { instagramPageHasAccessWall } from './instagram-page-access.js';
+import { createInstagramWebAccess } from './instagram-web-access-policy.js';
+import { applyInstagramCookies, loadInstagramCookieHints } from './instagram-auth-utils.js';
+import { githubRunProvenance } from './pipeline-run-report-utils.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -22,7 +28,7 @@ const DEFAULT_CONFIG = {
   maxAgeDays: 7,
   maxDealsPerRun: 40,
   maxSourcesTotal: 24,
-  maxTimelinePostsPerAccount: 18,
+  maxTimelinePostsPerAccount: 4,
   maxRegistryAccounts: 12,
   minDealScore: 58,
   maxDealsPerAccount: 3,
@@ -30,7 +36,9 @@ const DEFAULT_CONFIG = {
   maxRunMinutes: 45,
 };
 
-const TRUSTED_PUBDATE_SOURCE = 'profileTimeline';
+// One shared budget for browser navigations; unlike the old timeline endpoint,
+// every post now needs its own page.
+const MAX_PAGE_VISITS = 40;
 
 const SEED_ACCOUNTS = [
   'ciosgrill',
@@ -159,7 +167,8 @@ function buildConfig() {
     maxAgeDays: Math.min(7, toNum(process.env.IG_MAX_AGE_DAYS, DEFAULT_CONFIG.maxAgeDays)),
     maxDealsPerRun: toNum(process.env.IG_MAX_DEALS, DEFAULT_CONFIG.maxDealsPerRun),
     maxSourcesTotal: toNum(process.env.IG_MAX_SOURCES_TOTAL, DEFAULT_CONFIG.maxSourcesTotal),
-    maxTimelinePostsPerAccount: toNum(process.env.IG_MAX_TIMELINE_POSTS, DEFAULT_CONFIG.maxTimelinePostsPerAccount),
+    maxTimelinePostsPerAccount: Math.min(DEFAULT_CONFIG.maxTimelinePostsPerAccount,
+      toNum(process.env.IG_MAX_TIMELINE_POSTS, DEFAULT_CONFIG.maxTimelinePostsPerAccount)),
     maxRegistryAccounts: toNum(process.env.IG_MAX_REGISTRY_ACCOUNTS, DEFAULT_CONFIG.maxRegistryAccounts),
     minDealScore: toNum(process.env.IG_MIN_SCORE, DEFAULT_CONFIG.minDealScore),
     maxDealsPerAccount: toNum(process.env.IG_MAX_DEALS_PER_ACCOUNT, DEFAULT_CONFIG.maxDealsPerAccount),
@@ -301,68 +310,6 @@ function stableId(seed) {
   return hash.toString(36);
 }
 
-function buildCookieHints() {
-  const hints = [];
-  const sessionId = cleanText(process.env.INSTAGRAM_SESSIONID);
-  if (sessionId) hints.push({ name: 'sessionid', value: sessionId });
-
-  const cookieFile = cleanText(process.env.INSTAGRAM_COOKIES_FILE);
-  if (cookieFile && fs.existsSync(cookieFile)) {
-    const lines = fs.readFileSync(cookieFile, 'utf-8').split(/\r?\n/);
-    for (const line of lines) {
-      const trimmed = line.trim();
-      if (!trimmed || trimmed.startsWith('#')) continue;
-
-      if (line.includes('\t')) {
-        const cols = line.split('\t').map((c) => c.trim());
-        if (cols.length >= 2) {
-          const name = cols[0];
-          const value = cols[1];
-          if (name && value) hints.push({ name, value, domain: cols[2] || '.instagram.com' });
-          continue;
-        }
-      }
-
-      const parts = trimmed.split(';').map((p) => p.trim()).filter(Boolean);
-      for (const part of parts) {
-        const eq = part.indexOf('=');
-        if (eq <= 0) continue;
-        const name = part.slice(0, eq).trim();
-        const value = part.slice(eq + 1).trim();
-        if (name && value) hints.push({ name, value, domain: '.instagram.com' });
-      }
-    }
-  }
-
-  return hints;
-}
-
-function buildCookieHeader() {
-  const parts = [];
-  const seen = new Set();
-  for (const hint of buildCookieHints()) {
-    const name = cleanText(hint?.name);
-    const value = cleanText(hint?.value);
-    if (!name || !value) continue;
-    const pair = `${name}=${value}`;
-    if (seen.has(pair)) continue;
-    seen.add(pair);
-    parts.push(pair);
-  }
-  return parts.join('; ');
-}
-
-function buildInstagramApiHeaders(cookieHeader, referer = 'https://www.instagram.com/') {
-  return {
-    'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36',
-    Cookie: cookieHeader,
-    'X-IG-App-ID': '936619743392459',
-    'X-Requested-With': 'XMLHttpRequest',
-    Referer: referer,
-    Accept: '*/*',
-  };
-}
-
 async function dismissInstagramOverlays(page) {
   const labels = [
     'Nur erforderliche Cookies erlauben',
@@ -382,61 +329,6 @@ async function dismissInstagramOverlays(page) {
     } catch {}
   }
   try { await page.keyboard.press('Escape'); } catch {}
-}
-
-async function fetchInstagramJsonInBrowser(page, url, referer) {
-  if (!page || !url) return null;
-  try {
-    const result = await page.evaluate(async ({ url, referer }) => {
-      try {
-        const response = await fetch(url, {
-          method: 'GET',
-          credentials: 'include',
-          referrer: referer,
-          headers: {
-            'X-IG-App-ID': '936619743392459',
-            'X-Requested-With': 'XMLHttpRequest',
-            Accept: '*/*',
-          },
-        });
-        const text = await response.text();
-        return { ok: response.ok, status: response.status, text };
-      } catch (error) {
-        return { ok: false, status: 0, text: '', error: String(error?.message || error || '') };
-      }
-    }, { url, referer });
-
-    if (!result?.ok || !result?.text) return null;
-    return JSON.parse(result.text);
-  } catch {
-    return null;
-  }
-}
-
-async function fetchInstagramProfileInBrowser(page, username) {
-  if (!page || !username) return null;
-  try {
-    const url = `https://www.instagram.com/api/v1/users/web_profile_info/?username=${encodeURIComponent(username)}`;
-    const parsed = await fetchInstagramJsonInBrowser(page, url, `https://www.instagram.com/${encodeURIComponent(username)}/`);
-    return parsed?.data?.user || null;
-  } catch {
-    return null;
-  }
-}
-
-async function fetchInstagramProfileDirect(username, cookieHeader) {
-  if (!username || !cookieHeader) return null;
-  try {
-    const url = `https://www.instagram.com/api/v1/users/web_profile_info/?username=${encodeURIComponent(username)}`;
-    const response = await fetch(url, {
-      headers: buildInstagramApiHeaders(cookieHeader, `https://www.instagram.com/${encodeURIComponent(username)}/`),
-    });
-    if (!response.ok) return null;
-    const parsed = await response.json();
-    return parsed?.data?.user || null;
-  } catch {
-    return null;
-  }
 }
 
 function normalizeInstagramPostUrl(rawUrl) {
@@ -468,35 +360,9 @@ function normalizePostHref(href) {
   return '';
 }
 
-function extractPostUrls(html) {
-  const urls = new Set();
-  const re = /https:\/\/(?:www\.)?instagram\.com\/(?:p|reel)\/[A-Za-z0-9_-]+\//g;
-  const matches = html.match(re) || [];
-  for (const match of matches) urls.add(match);
-  return [...urls];
-}
-
-function extractShortcodesFromText(text) {
-  const urls = new Set();
-  if (!text) return urls;
-  const patterns = [
-    /"shortcode"\s*:\s*"([A-Za-z0-9_-]{8,})"/g,
-    /"code"\s*:\s*"([A-Za-z0-9_-]{8,})"/g,
-    /\/(?:p|reel)\/([A-Za-z0-9_-]{8,})\//g,
-  ];
-  for (const re of patterns) {
-    let match;
-    while ((match = re.exec(text)) !== null) {
-      if (/^[a-z]{2}_[A-Z]{2}$/i.test(match[1])) continue;
-      urls.add(`https://www.instagram.com/p/${match[1]}/`);
-    }
-  }
-  return urls;
-}
-
 async function collectLinksFromDom(page) {
   try {
-    const hrefs = await page.$$eval('a[href]', (nodes) => nodes.map((n) => n.getAttribute('href') || '').filter(Boolean));
+    const hrefs = await page.$$eval('main a[href]', (nodes) => nodes.map((n) => n.getAttribute('href') || '').filter(Boolean));
     const urls = new Set();
     for (const href of hrefs) {
       const normalized = normalizePostHref(href);
@@ -508,92 +374,12 @@ async function collectLinksFromDom(page) {
   }
 }
 
-async function collectLinksFromScripts(page) {
-  try {
-    const scriptContents = await page.$$eval('script', (nodes) => nodes.map((n) => n.textContent || '').filter(Boolean));
-    const urls = new Set();
-    for (const content of scriptContents.slice(0, 60)) {
-      for (const url of extractShortcodesFromText(content)) urls.add(url);
-    }
-    return [...urls];
-  } catch {
-    return [];
+function parseDateFromPage({ ldDate, timeDateTime }) {
+  for (const [value, source] of [[ldDate, 'ldDate'], [timeDateTime, 'timeDatetime']]) {
+    if (!/^\d{4}-\d{2}-\d{2}(?:T|$)/.test(value)) continue;
+    const stamp = Date.parse(value);
+    if (Number.isFinite(stamp)) return { iso: new Date(stamp).toISOString(), source };
   }
-}
-
-function parseRelativeAgeToDate(text, nowMs = Date.now()) {
-  const raw = cleanText(text).toLowerCase();
-  if (!raw) return null;
-
-  const match = raw.match(/(?:edited\s*•\s*)?(\d+)\s*([dhwmy])/i);
-  if (!match) return null;
-
-  const n = Number(match[1]);
-  const unit = match[2].toLowerCase();
-  if (!Number.isFinite(n) || n < 0) return null;
-
-  const msPerUnit = {
-    d: 24 * 60 * 60 * 1000,
-    h: 60 * 60 * 1000,
-    w: 7 * 24 * 60 * 60 * 1000,
-    m: 30 * 24 * 60 * 60 * 1000,
-    y: 365 * 24 * 60 * 60 * 1000,
-  };
-  const ms = msPerUnit[unit];
-  if (!ms) return null;
-
-  return new Date(nowMs - n * ms).toISOString();
-}
-
-function parseDateFromPage({ ldDate, timeDateTime, igScriptTimestamp, ogDescription, fullText, fallbackNow = Date.now() }) {
-  if (ldDate) {
-    const ts = Date.parse(ldDate);
-    if (!Number.isNaN(ts)) return { iso: new Date(ts).toISOString(), source: 'ldDate' };
-  }
-
-  if (timeDateTime) {
-    const ts = Date.parse(timeDateTime);
-    if (!Number.isNaN(ts)) return { iso: new Date(ts).toISOString(), source: 'timeDatetime' };
-  }
-
-  if (igScriptTimestamp) {
-    const ts = Number(igScriptTimestamp);
-    if (Number.isFinite(ts) && ts > 0) {
-      const ms = ts > 1e12 ? ts : ts * 1000;
-      return { iso: new Date(ms).toISOString(), source: 'igScriptTimestamp' };
-    }
-  }
-
-  const text = cleanText(ogDescription);
-  const ymd = text.match(/(\d{4})-(\d{2})-(\d{2})/);
-  if (ymd) return { iso: new Date(`${ymd[1]}-${ymd[2]}-${ymd[3]}T12:00:00Z`).toISOString(), source: 'ogDescriptionDate' };
-
-  const dmy = text.match(/(\d{1,2})\.(\d{1,2})\.(\d{2,4})/);
-  if (dmy) {
-    const yyyy = dmy[3].length === 2 ? `20${dmy[3]}` : dmy[3];
-    const mm = String(dmy[2]).padStart(2, '0');
-    const dd = String(dmy[1]).padStart(2, '0');
-    return { iso: new Date(`${yyyy}-${mm}-${dd}T12:00:00Z`).toISOString(), source: 'ogDescriptionDate' };
-  }
-
-  const dmyNoYear = text.match(/(\d{1,2})\.(\d{1,2})(?!\.)/);
-  if (dmyNoYear) {
-    const mm = String(dmyNoYear[2]).padStart(2, '0');
-    const dd = String(dmyNoYear[1]).padStart(2, '0');
-    const now = new Date(fallbackNow);
-    let candidate = new Date(`${now.getFullYear()}-${mm}-${dd}T12:00:00Z`);
-    if (candidate.getTime() - fallbackNow > 30 * 24 * 60 * 60 * 1000) {
-      candidate = new Date(`${now.getFullYear() - 1}-${mm}-${dd}T12:00:00Z`);
-    }
-    if (!Number.isNaN(candidate.getTime())) return { iso: candidate.toISOString(), source: 'ogDescriptionDate' };
-  }
-
-  const relFromOg = parseRelativeAgeToDate(ogDescription, fallbackNow);
-  if (relFromOg) return { iso: relFromOg, source: 'relativeAge' };
-
-  const relFromText = parseRelativeAgeToDate(fullText, fallbackNow);
-  if (relFromText) return { iso: relFromText, source: 'relativeAge' };
-
   return null;
 }
 
@@ -618,65 +404,41 @@ function deriveBrandFromPostData(data, postUrl) {
   }
 }
 
-function toMirrorUrl(url) {
-  return `https://r.jina.ai/http://${url.replace(/^https?:\/\//, '')}`;
+export async function openInstagramDailyPage(page, url, access, settleMs = 900) {
+  if (access.pause('profiles')) return 'paused';
+  const response = await page.goto(url, { waitUntil: 'domcontentloaded', timeout: 12000 });
+  const status = response?.status();
+  if ([401, 403, 429].includes(status)) {
+    access.failure('all', { status, retryAfter: response.headers()['retry-after'] });
+    return 'blocked';
+  }
+  if (instagramPageHasAccessWall({ finalUrl: page.url() })) {
+    access.failure('all', { reason: 'login-wall' });
+    return 'blocked';
+  }
+  if (!response || !response.ok()) return 'unavailable';
+  await page.waitForTimeout(settleMs);
+  if (instagramPageHasAccessWall({ finalUrl: page.url(), html: await page.content() })) {
+    access.failure('all', { reason: 'login-wall' });
+    return 'blocked';
+  }
+  return new URL(page.url()).pathname.toLowerCase() === new URL(url).pathname.toLowerCase()
+    && new URL(page.url()).hostname === 'www.instagram.com' ? 'readable' : 'unavailable';
 }
 
-async function fetchMirrorText(url) {
-  try {
-    const response = await fetch(toMirrorUrl(url), { headers: { 'User-Agent': 'Mozilla/5.0' } });
-    if (!response.ok) return '';
-    return await response.text();
-  } catch {
-    return '';
+function readJson(filePath) {
+  try { return JSON.parse(fs.readFileSync(filePath, 'utf8')); } catch (error) {
+    if (error.code !== 'ENOENT') throw error;
+    return {};
   }
 }
 
-async function collectProfileFallbackLinks(page, username) {
-  const normalized = normalizeUsername(username);
-  if (!page || !normalized) return [];
-  const links = new Set();
-
-  const collectOnCurrentPage = async () => {
-    const domUrls = await collectLinksFromDom(page);
-    const scriptUrls = await collectLinksFromScripts(page);
-    const html = await page.content();
-    const htmlUrls = extractPostUrls(html);
-    for (const url of [...domUrls, ...scriptUrls, ...htmlUrls]) {
-      links.add(normalizeInstagramPostUrl(url));
-      if (links.size >= CONFIG.maxTimelinePostsPerAccount) break;
-    }
-  };
-
-  try {
-    await page.goto(`https://www.instagram.com/${normalized}/`, { waitUntil: 'domcontentloaded', timeout: 25000 });
-    await page.waitForTimeout(1400);
-    await dismissInstagramOverlays(page);
-    await collectOnCurrentPage();
-  } catch {}
-
-  if (links.size < 4) {
-    try {
-      await page.goto(`https://www.instagram.com/${normalized}/reels/`, { waitUntil: 'domcontentloaded', timeout: 25000 });
-      await page.waitForTimeout(1200);
-      await dismissInstagramOverlays(page);
-      await collectOnCurrentPage();
-    } catch {}
-  }
-
-  return [...links].filter(Boolean).slice(0, CONFIG.maxTimelinePostsPerAccount);
-}
-
-function buildInstagramPostUrl(node) {
-  const shortcode = cleanText(node?.shortcode);
-  if (!shortcode) return '';
-  const pathKind = node?.is_video || node?.__typename === 'GraphVideo' ? 'reel' : 'p';
-  return `https://www.instagram.com/${pathKind}/${shortcode}/`;
-}
-
-function extractCaptionFromNode(node) {
-  const edges = Array.isArray(node?.edge_media_to_caption?.edges) ? node.edge_media_to_caption.edges : [];
-  return edges.map((edge) => cleanText(edge?.node?.text)).filter(Boolean).join(' ');
+function dailyWebAccess() {
+  return createInstagramWebAccess({
+    previousReport: readJson(DISCOVERY_REPORT_PATH),
+    relatedReport: readJson(path.join(DOCS_DIR, 'instagram-ai-report.json')),
+    healthReport: readJson(path.join(DOCS_DIR, 'instagram-auth-health.json')),
+  });
 }
 
 function prettifyUsername(username) {
@@ -686,14 +448,6 @@ function prettifyUsername(username) {
     .trim();
   if (!text) return '';
   return text.split(' ').map((part) => `${part[0].toUpperCase()}${part.slice(1)}`).join(' ');
-}
-
-function deriveBrandFromUser(user) {
-  const fullName = cleanText(user?.full_name);
-  const username = normalizeUsername(user?.username);
-  if (fullName && fullName.length >= 3 && !/^(vienna|wien)$/i.test(fullName)) return fullName;
-  if (username) return prettifyUsername(username);
-  return 'Instagram';
 }
 
 function sourcePerformanceScore(stat) {
@@ -954,11 +708,9 @@ function buildDealFromCandidate({
   combinedText,
   brand,
   locationName,
-  rawTitle,
   source,
   sourcePerformance,
   rejectionReasons,
-  seenUrls,
   accountDealCounts,
 }) {
   if (!pubDateIso) {
@@ -977,14 +729,14 @@ function buildDealFromCandidate({
     rejectionReasons.expired += 1;
     return null;
   }
-  if (isGiveawayOnly(combinedText)) {
+  if (isGiveawayOnly(combinedText) || discoveryRejection(combinedText)) {
     rejectionReasons.giveaway += 1;
     return null;
   }
 
-  const isWien = containsKeyword(`${combinedText} ${locationName}`, WIEN_KEYWORDS)
-    || /wien|vienna/i.test(cleanText(source?.username))
-    || /wien|vienna/i.test(cleanText(brand));
+  const locationText = `${combinedText} ${locationName}`.replace(/#[\p{L}\p{N}_.-]+/gu, ' ');
+  const isWien = !locationConflictReason({ description: locationText })
+    && containsKeyword(locationText, WIEN_KEYWORDS.filter(keyword => !/^\d/.test(keyword)));
   if (!isWien) {
     rejectionReasons.notWien += 1;
     return null;
@@ -1024,7 +776,7 @@ function buildDealFromCandidate({
     accountHint: source.username,
     sourceKey: source.key,
   });
-  const title = limitTitle(cleanText(rawTitle) || buildFallbackTitle({ type, brand, text: combinedText }));
+  const title = limitTitle(buildFallbackTitle({ type, brand, text: combinedText }));
   const description = buildDealDescription({
     type,
     brand,
@@ -1052,9 +804,9 @@ function buildDealFromCandidate({
     qualityScore: score,
     ownerUsername: source.username,
     sourcePublishedAt: pubDateIso,
-    sourcePublishedAtSource: pubDateSource || TRUSTED_PUBDATE_SOURCE,
+    sourcePublishedAtSource: pubDateSource,
     pubDate: pubDateIso,
-    pubDateSource: pubDateSource || TRUSTED_PUBDATE_SOURCE,
+    pubDateSource,
     discoveredBy: source.sourceType,
     sourceHits: 1,
     reviewTier: score >= 84 ? 'high' : score >= 70 ? 'medium' : 'low',
@@ -1067,7 +819,7 @@ function buildDealFromCandidate({
     candidate: formatCandidateSnapshot({
       url: postUrl,
       pubDate: pubDateIso,
-      pubDateSource: pubDateSource || TRUSTED_PUBDATE_SOURCE,
+      pubDateSource,
       sourceKey: source.key,
       sourceType: source.sourceType,
       score,
@@ -1079,12 +831,14 @@ function buildDealFromCandidate({
   };
 }
 
-async function buildDealFromPostPage(page, source, postUrl, sourcePerformance, rejectionReasons, seenUrls, accountDealCounts) {
+async function buildDealFromPostPage(page, source, postUrl, sourcePerformance, rejectionReasons, accountDealCounts, access) {
   try {
-    await page.goto(postUrl, { waitUntil: 'domcontentloaded', timeout: 12000 });
-    await page.waitForTimeout(900);
+    if (await openInstagramDailyPage(page, postUrl, access) !== 'readable') {
+      rejectionReasons.noContent += 1;
+      return null;
+    }
 
-    let data = await page.evaluate(() => {
+    const data = await page.evaluate(() => {
       const result = {
         ldDate: '',
         ldCaption: '',
@@ -1092,9 +846,7 @@ async function buildDealFromPostPage(page, source, postUrl, sourcePerformance, r
         ogTitle: '',
         ogDescription: '',
         timeDateTime: '',
-        igScriptTimestamp: 0,
         locationName: '',
-        text: document.body ? document.body.innerText : '',
       };
 
       for (const script of document.querySelectorAll('script[type="application/ld+json"]')) {
@@ -1115,61 +867,27 @@ async function buildDealFromPostPage(page, source, postUrl, sourcePerformance, r
       if (ogTitle?.content) result.ogTitle = ogTitle.content;
       if (ogDescription?.content) result.ogDescription = ogDescription.content;
 
-      const timeEl = document.querySelector('time[datetime]');
+      const timeEl = document.querySelector('main article time[datetime]');
       if (timeEl?.getAttribute('datetime')) result.timeDateTime = timeEl.getAttribute('datetime') || '';
 
       const locationLink = document.querySelector('a[href*="/explore/locations/"]');
       if (locationLink?.textContent) result.locationName = locationLink.textContent;
 
-      const scriptTexts = Array.from(document.querySelectorAll('script'))
-        .map((n) => n.textContent || '')
-        .filter(Boolean)
-        .slice(0, 120);
-      for (const text of scriptTexts) {
-        const taken = text.match(/"taken_at_timestamp"\s*:\s*(\d{9,13})/);
-        if (taken) {
-          result.igScriptTimestamp = Number(taken[1]);
-          break;
-        }
-        const created = text.match(/"created_at"\s*:\s*(\d{9,13})/);
-        if (created) {
-          result.igScriptTimestamp = Number(created[1]);
-          break;
-        }
-      }
-
       return result;
     });
 
-    if (!data.ldCaption && !data.ogDescription) {
-      const mirrorText = await fetchMirrorText(postUrl);
-      if (mirrorText) {
-        const firstLines = mirrorText.split('\n').slice(0, 40).join(' ');
-        data = {
-          ...data,
-          ogDescription: data.ogDescription || firstLines,
-          text: `${data.text || ''} ${mirrorText.slice(0, 3000)}`,
-        };
-      }
-    }
-
     const combinedText = cleanText([
       data.ldCaption,
-      data.ogTitle,
       data.ogDescription,
-      data.text.slice(0, 2000),
     ].join(' '));
 
     const pubDateMeta = parseDateFromPage({
       ldDate: data.ldDate,
       timeDateTime: data.timeDateTime,
-      igScriptTimestamp: data.igScriptTimestamp,
-      ogDescription: data.ogDescription,
-      fullText: combinedText,
     });
 
     const brand = cleanText(deriveBrandFromPostData(data, postUrl)) || prettifyUsername(source.username) || 'Instagram';
-    const locationName = cleanText(data.locationName) || 'Wien';
+    const locationName = cleanText(data.locationName);
 
     return buildDealFromCandidate({
       postUrl,
@@ -1181,7 +899,6 @@ async function buildDealFromPostPage(page, source, postUrl, sourcePerformance, r
       source,
       sourcePerformance,
       rejectionReasons,
-      seenUrls,
       accountDealCounts,
     });
   } catch {
@@ -1190,29 +907,20 @@ async function buildDealFromPostPage(page, source, postUrl, sourcePerformance, r
   }
 }
 
-async function fetchInstagramProfileWithFallbacks(page, username, cookieHeader) {
-  const normalized = normalizeUsername(username);
-  if (!normalized) return { user: null, strategy: 'invalid' };
-
-  const direct = await fetchInstagramProfileDirect(normalized, cookieHeader);
-  if (direct) return { user: direct, strategy: 'direct-api', fallbackLinks: [] };
-
-  const browser = await fetchInstagramProfileInBrowser(page, normalized);
-  if (browser) return { user: browser, strategy: 'browser-api', fallbackLinks: [] };
-
-  const fallbackLinks = await collectProfileFallbackLinks(page, normalized);
-  if (fallbackLinks.length > 0) {
-    return { user: null, strategy: 'profile-dom', fallbackLinks };
-  }
-
-  return { user: null, strategy: 'none', fallbackLinks: [] };
-}
-
 function writeJson(filePath, payload) {
   fs.writeFileSync(filePath, JSON.stringify(payload, null, 2));
 }
 
 async function main() {
+  const access = dailyWebAccess();
+  const pause = access.pause('profiles');
+  if (process.argv.includes('--access-preflight') || pause) {
+    console.log(pause ? `Instagram Daily Sync paused until ${pause.nextRetryAt} (${pause.reason}); pending deals unchanged.` : 'Instagram Daily Sync eligible; access not yet verified.');
+    if (process.env.GITHUB_OUTPUT && process.argv.includes('--access-preflight')) {
+      fs.appendFileSync(process.env.GITHUB_OUTPUT, `proceed=${!pause}\n`);
+    }
+    return;
+  }
   loadEnvFile();
   CONFIG = buildConfig();
   const sourceStats = loadSourceStats();
@@ -1225,63 +933,35 @@ async function main() {
   const accountDealCounts = new Map();
   let totalCandidates = 0;
   let visitedPosts = 0;
+  let readableProfiles = 0;
+  let pageVisits = 0;
   const runStartedAt = Date.now();
   let stoppedByRunBudget = false;
 
-  const shouldStopForRunBudget = () => (
-    Number.isFinite(CONFIG.maxRunMinutes) &&
-    CONFIG.maxRunMinutes > 0 &&
-    Date.now() - runStartedAt >= CONFIG.maxRunMinutes * 60 * 1000
-  );
+  const shouldStopForRunBudget = () => pageVisits >= MAX_PAGE_VISITS
+    || Date.now() - runStartedAt >= CONFIG.maxRunMinutes * 60 * 1000;
 
   let browser;
   try {
     const { chromium } = await import('playwright');
     browser = await chromium.launch({
       headless: true,
-      args: ['--disable-blink-features=AutomationControlled', '--no-sandbox', '--disable-dev-shm-usage'],
+      args: ['--no-sandbox', '--disable-dev-shm-usage'],
     });
 
     const context = await browser.newContext({
       viewport: { width: 1366, height: 900 },
-      userAgent: 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36',
       locale: 'de-AT',
       timezoneId: 'Europe/Vienna',
     });
 
-    const cookieHints = buildCookieHints();
-    const cookieHeader = buildCookieHeader();
-    const profileStrategyCounts = {
-      directApi: 0,
-      browserApi: 0,
-      profileDom: 0,
-      none: 0,
-    };
-    if (cookieHints.length > 0) {
-      await context.addCookies(
-        cookieHints.map((cookie) => ({
-          name: cookie.name,
-          value: cookie.value,
-          domain: cookie.domain || '.instagram.com',
-          path: '/',
-          secure: true,
-          httpOnly: cookie.name === 'sessionid',
-          sameSite: 'Lax',
-        }))
-      );
-      console.log(`🍪 loaded ${cookieHints.length} Instagram cookies`);
-    } else {
-      console.log('ℹ️ no Instagram cookies found; coverage can be lower');
-    }
+    await applyInstagramCookies(context, loadInstagramCookieHints({
+      INSTAGRAM_SESSIONID: process.env.INSTAGRAM_SESSIONID,
+      INSTAGRAM_COOKIES: process.env.INSTAGRAM_COOKIES,
+      INSTAGRAM_COOKIES_FILE: process.env.INSTAGRAM_COOKIES_FILE,
+    }));
 
     const page = await context.newPage();
-    await page.addInitScript(() => {
-      Object.defineProperty(navigator, 'webdriver', { get: () => undefined });
-    });
-
-    await page.goto('https://www.instagram.com/', { waitUntil: 'domcontentloaded', timeout: 25000 });
-    await page.waitForTimeout(1500);
-    await dismissInstagramOverlays(page);
 
     console.log('📸 INSTAGRAM DAILY SYNC V2');
     console.log('========================================');
@@ -1289,6 +969,7 @@ async function main() {
     console.log(`⏱️ search budget: ${CONFIG.maxRunMinutes} min, delay ${CONFIG.sourceDelayMs}ms/account`);
 
     for (const source of sourceQueue) {
+      if (access.pause('profiles')) break;
       if (shouldStopForRunBudget()) {
         stoppedByRunBudget = true;
         console.log(`⏱️ stopping source loop after ${Math.round((Date.now() - runStartedAt) / 1000)}s budget`);
@@ -1308,135 +989,71 @@ async function main() {
       runStats.set(source.key, stat);
 
       const sourcePerformance = sourcePerformanceScore(sourceStats[source.key]);
-      const profileResult = await fetchInstagramProfileWithFallbacks(page, source.username, cookieHeader);
-      if (profileResult.strategy === 'direct-api') profileStrategyCounts.directApi += 1;
-      else if (profileResult.strategy === 'browser-api') profileStrategyCounts.browserApi += 1;
-      else if (profileResult.strategy === 'profile-dom') profileStrategyCounts.profileDom += 1;
-      else profileStrategyCounts.none += 1;
-
-      console.log(`🔎 timeline source ${source.key} (${profileResult.strategy || 'none'})`);
-
-      if (profileResult.user) {
-        const user = profileResult.user;
-        let timelineEdges = Array.isArray(user.edge_owner_to_timeline_media?.edges)
-          ? user.edge_owner_to_timeline_media.edges
-          : [];
-
-        if (timelineEdges.length === 0) {
-          const fallbackLinks = await collectProfileFallbackLinks(page, source.username);
-          if (fallbackLinks.length === 0) {
-            rejectionReasons.noTimeline += 1;
-          } else {
-            profileStrategyCounts.profileDom += 1;
-            stat.links += fallbackLinks.length;
-            totalCandidates += fallbackLinks.length;
-            console.log(`   ↳ fallback links after empty timeline: ${fallbackLinks.length}`);
-
-            for (const postUrl of fallbackLinks.slice(0, CONFIG.maxTimelinePostsPerAccount)) {
-              visitedPosts += 1;
-              const built = await buildDealFromPostPage(
-                page,
-                source,
-                postUrl,
-                sourcePerformance,
-                rejectionReasons,
-                seenUrls,
-                accountDealCounts
-            );
-              if (!built) continue;
-              stat.acceptedDeals += 1;
-              acceptedDeals.push(built.deal);
-              candidateSnapshot.push(built.candidate);
-            }
-          }
+      pageVisits += 1;
+      const profile = await openInstagramDailyPage(page, `https://www.instagram.com/${source.username}/`, access)
+        .catch(() => 'unavailable');
+      console.log(`Instagram profile ${source.key}: ${profile}`);
+      if (access.pause('profiles')) break;
+      if (profile !== 'readable') {
+        rejectionReasons.noProfile += 1;
+      } else {
+        await dismissInstagramOverlays(page);
+        const links = (await collectLinksFromDom(page)).slice(0, CONFIG.maxTimelinePostsPerAccount);
+        if (links.length) {
+          readableProfiles += 1;
+          access.success('profiles');
+          access.success('all');
+        } else {
+          rejectionReasons.noTimeline += 1;
         }
-
-        if (timelineEdges.length > 0) {
-          const slicedEdges = timelineEdges.slice(0, CONFIG.maxTimelinePostsPerAccount);
-          stat.links += slicedEdges.length;
-          totalCandidates += slicedEdges.length;
-          console.log(`   ↳ timeline links: ${slicedEdges.length}`);
-
-          for (const edge of slicedEdges) {
-            visitedPosts += 1;
-            const node = edge?.node;
-            const postUrl = buildInstagramPostUrl(node);
-            if (!postUrl) {
-              rejectionReasons.noPostUrl += 1;
-              continue;
-            }
-
-            const pubDateMs = Number(node?.taken_at_timestamp || 0) * 1000;
-            const pubDateIso = Number.isFinite(pubDateMs) && pubDateMs > 0 ? new Date(pubDateMs).toISOString() : '';
-            const caption = extractCaptionFromNode(node);
-            const locationName = cleanText(node?.location?.name);
-            const brand = deriveBrandFromUser(user);
-            const combinedText = cleanText([
-              caption,
-              locationName,
-              user?.full_name,
-              user?.username,
-              user?.biography,
-            ].join(' '));
-
-            const built = buildDealFromCandidate({
-              postUrl,
-              pubDateIso,
-              pubDateSource: TRUSTED_PUBDATE_SOURCE,
-              combinedText,
-              brand,
-              locationName,
-              rawTitle: caption,
-              source,
-              sourcePerformance,
-              rejectionReasons,
-              seenUrls,
-              accountDealCounts,
-            });
-            if (!built) continue;
-
-            stat.acceptedDeals += 1;
-            acceptedDeals.push(built.deal);
-            candidateSnapshot.push(built.candidate);
-          }
-        }
-      } else if (profileResult.fallbackLinks.length > 0) {
-        const fallbackLinks = profileResult.fallbackLinks.slice(0, CONFIG.maxTimelinePostsPerAccount);
-        stat.links += fallbackLinks.length;
-        totalCandidates += fallbackLinks.length;
-        console.log(`   ↳ profile fallback links: ${fallbackLinks.length}`);
-
-        for (const postUrl of fallbackLinks) {
+        stat.links += links.length;
+        totalCandidates += links.length;
+        for (const postUrl of links) {
+          if (seenUrls.has(postUrl)) continue;
+          if (access.pause('profiles')) break;
+          if (shouldStopForRunBudget()) { stoppedByRunBudget = true; break; }
+          seenUrls.add(postUrl);
+          pageVisits += 1;
           visitedPosts += 1;
           const built = await buildDealFromPostPage(
-            page,
-            source,
-            postUrl,
-            sourcePerformance,
-            rejectionReasons,
-            seenUrls,
-            accountDealCounts
+            page, source, postUrl, sourcePerformance, rejectionReasons, accountDealCounts, access,
           );
           if (!built) continue;
           stat.acceptedDeals += 1;
           acceptedDeals.push(built.deal);
           candidateSnapshot.push(built.candidate);
         }
-      } else {
-        rejectionReasons.noProfile += 1;
       }
 
+      if (access.pause('profiles')) break;
       if (CONFIG.sourceDelayMs > 0) {
         await page.waitForTimeout(CONFIG.sourceDelayMs);
       }
     }
 
-    const finalDeals = acceptedDeals
+    const acceptedUrls = new Set(acceptedDeals.map(deal => deal.url));
+    const retained = (readJson(OUTPUT_DISCOVERY_PATH).deals || []).filter(deal =>
+      !acceptedUrls.has(deal.url) && isFresh(deal.pubDate) && !isExpiryInPast(deal.validUntil || deal.expires)
+      && !discoveryRejection(deal) && !locationConflictReason(deal));
+    const finalDeals = [...acceptedDeals, ...retained]
       .slice()
       .sort((a, b) => {
         if ((b.qualityScore || 0) !== (a.qualityScore || 0)) return (b.qualityScore || 0) - (a.qualityScore || 0);
         return Date.parse(b.pubDate || '') - Date.parse(a.pubDate || '');
-      });
+      }).slice(0, CONFIG.maxDealsPerRun);
+    const runMeta = {
+      mode: 'profile-dom',
+      status: access.pause('profiles') ? 'access-blocked' : readableProfiles ? 'collected' : 'no-readable-profiles',
+      visitedSources: runStats.size,
+      readableProfiles,
+      pageVisits,
+      totalCandidates,
+      visitedPosts,
+      scrapedDealsRaw: acceptedDeals.length,
+      retainedDeals: retained.length,
+      stoppedByRunBudget,
+      rejectionReasons,
+    };
 
     const persistedStats = { ...sourceStats };
     for (const [key, stat] of runStats.entries()) {
@@ -1467,16 +1084,7 @@ async function main() {
       source: 'instagram-daily-sync-v2',
       totalDeals: finalDeals.length,
       deals: finalDeals,
-      meta: {
-        mode: 'timeline-api-v2',
-        visitedSources: sourceQueue.length,
-        totalCandidates,
-        visitedPosts,
-        scrapedDealsRaw: acceptedDeals.length,
-        stoppedByRunBudget,
-        profileStrategies: profileStrategyCounts,
-        rejectionReasons,
-      },
+      meta: runMeta,
     };
 
     const mergedPayload = {
@@ -1489,7 +1097,7 @@ async function main() {
           discovery: finalDeals.length,
           merged: finalDeals.length,
         },
-        mode: 'timeline-api-v2',
+        mode: 'profile-dom',
       },
       deals: finalDeals.map((deal) => ({ ...deal, source: 'Instagram' })),
     };
@@ -1505,19 +1113,17 @@ async function main() {
       deals: [],
     };
 
-    writeJson(OUTPUT_DISCOVERY_PATH, discoveryPayload);
-    writeJson(OUTPUT_MERGED_PATH, mergedPayload);
-    writeJson(OUTPUT_WEB_PATH, disabledWebPayload);
+    if (acceptedDeals.length) {
+      writeJson(OUTPUT_DISCOVERY_PATH, discoveryPayload);
+      writeJson(OUTPUT_MERGED_PATH, mergedPayload);
+      writeJson(OUTPUT_WEB_PATH, disabledWebPayload);
+    }
     writeJson(DISCOVERY_REPORT_PATH, {
       updatedAt: new Date().toISOString(),
-      mode: 'timeline-api-v2',
-      visitedSources: sourceQueue.length,
-      totalCandidates,
-      visitedPosts,
-      savedDeals: finalDeals.length,
-      stoppedByRunBudget,
-      profileStrategies: profileStrategyCounts,
-      rejectionReasons,
+      github: githubRunProvenance(),
+      ...runMeta,
+      webAccess: access.snapshot(),
+      savedDeals: acceptedDeals.length ? finalDeals.length : 0,
       topSources,
       candidates: candidateSnapshot.slice(0, 200),
     });
@@ -1529,23 +1135,12 @@ async function main() {
     });
     writeJson(SOURCE_STATS_PATH, {
       updatedAt: new Date().toISOString(),
-      runMeta: {
-        mode: 'timeline-api-v2',
-        visitedSources: sourceQueue.length,
-        totalCandidates,
-        visitedPosts,
-        scrapedDealsRaw: acceptedDeals.length,
-        savedDeals: finalDeals.length,
-        stoppedByRunBudget,
-        profileStrategies: profileStrategyCounts,
-      },
+      runMeta,
       topSources,
       sources: persistedStats,
     });
 
-    console.log(`✅ saved ${finalDeals.length} deals → ${OUTPUT_DISCOVERY_PATH}`);
-    console.log(`✅ merged Instagram deals → ${OUTPUT_MERGED_PATH}`);
-    console.log(`   web: 0, discovery: ${finalDeals.length}, merged: ${finalDeals.length}`);
+    console.log(`Instagram Daily Sync: ${runMeta.status}, ${readableProfiles} profiles with posts, ${acceptedDeals.length} accepted, ${retained.length} retained.`);
   } catch (error) {
     console.error(`❌ Instagram Daily Sync v2 failed: ${error.message}`);
     process.exitCode = 1;
@@ -1554,4 +1149,9 @@ async function main() {
   }
 }
 
-main();
+if (process.argv[1] && path.resolve(process.argv[1]) === __filename) {
+  main().catch(error => {
+    console.error(`Instagram Daily Sync failed before navigation: ${error.code || error.name}`);
+    process.exitCode = 1;
+  });
+}

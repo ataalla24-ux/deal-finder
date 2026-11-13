@@ -1,4 +1,5 @@
 import { getNonOfferContentReason } from './promotion-quality-utils.js';
+import { locationConflictReason } from './deal-factual-guards.js';
 import { isKitchenApplianceOffer } from './category-utils.js';
 
 function normalize(value) {
@@ -106,6 +107,8 @@ export function consumerFoodExclusion(value) {
 
 export function discoveryRejection(value) {
   const text = offerText(value);
+  if ((/^meta-ig-/.test(value?.id || '') || /^Meta Instagram\b/i.test(value?.originSource || ''))
+      && locationConflictReason(value)) return 'non-vienna-location';
   if (value?.originSource === 'vienna-merchant-website') {
     // A restaurant directory can link to a mall or an international hotel site.
     // Its category/address must not turn unrelated offers into Vienna food deals.

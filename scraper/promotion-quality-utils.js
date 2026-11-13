@@ -106,10 +106,17 @@ export function getEditorialRoundupPromotionReason(value) {
   return 'redaktioneller Mehrfach-Roundup statt eindeutigem Einzelangebot';
 }
 
+export function isFreeFinderSyndication(value) {
+  const text = cleanPromotionText(value);
+  return /\b(?:eigen)?werbung\s+f(?:ü|ue)r\s+freefinder\b/i.test(text)
+    || /\boriginal[- ]?link\b.{0,140}\b(?:direkt\s+)?in\s+freefinder\b/i.test(text)
+    || /\balle aktuellen bedingungen\b.{0,180}\bfreefinder\b/i.test(text);
+}
+
 export function getNonOfferContentReason(value) {
   const text = cleanPromotionText(value);
   if (!text) return '';
-  if (/\bwerbung\s+f(?:ü|ue)r\s+freefinder\b/i.test(text)) {
+  if (isFreeFinderSyndication(text)) {
     return 'FreeFinder-Eigenwerbung statt neuem Einzelangebot';
   }
   const recipeInstructions = /\b(?:schritt[- ]f(?:ü|ue)r[- ]schritt[- ]anleitungen?|step[- ]by[- ]step\s+(?:recipe|instructions))\b/i.test(text)
@@ -132,8 +139,16 @@ export function getNonOfferContentReason(value) {
     return 'Angebotsuebersicht ohne benannten konkreten Vorteil';
   }
   const freePriceDirectory = /\b(?:free|kostenlose?)\s+(?:map|karte|app)\b.{0,60}\b(?:real\s+prices|echten?\s+Preisen|Preisvergleich)\b/i.test(text);
-  if (freePriceDirectory && !INDEPENDENT_PROMOTION_PATTERN.test(text)) {
-    return 'kostenloses Preisverzeichnis statt konkretem Einzelangebot';
+  const freeOpeningHoursDirectory = /\baussteckzeiten\b/i.test(text)
+    && /\b(?:gratis[- ]?app|kostenlose?\s+app)\b/i.test(text);
+  if (!namedFreeFood && !INDEPENDENT_PROMOTION_PATTERN.test(text)) {
+    if (freePriceDirectory) return 'kostenloses Preisverzeichnis statt konkretem Einzelangebot';
+    if (freeOpeningHoursDirectory) return 'Aussteckzeiten-Verzeichnis statt konkretem Einzelangebot';
+  }
+  const ordinaryMenu = /\b(?:einblick\s+in\s+unser(?:e[ns]?)?\b|auf\s+dem\s+bild\s*:)/i.test(text)
+    && /\b(?:tagesgerichte?|tageskarte|aktuelle\s+(?:speise)?karte)\b/i.test(text);
+  if (ordinaryMenu && !namedFreeFood && !INDEPENDENT_PROMOTION_PATTERN.test(text)) {
+    return 'Speisekartenvorschau ohne konkreten Angebotsvorteil';
   }
   const withoutIncidentalFree = text.replace(/\bfree\s+(?:trade|time|speech|spirit|cancellation|wifi|wi-fi)\b/gi, '');
   if (/\bfree\s+trade\b/i.test(text) && !INDEPENDENT_PROMOTION_PATTERN.test(withoutIncidentalFree)) return 'Freihandel ist kein Gratisangebot';

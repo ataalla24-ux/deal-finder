@@ -54,6 +54,8 @@ import {
   getLeadGenerationOnlyPromotionReason,
   getMembershipOnlyPromotionReason,
   getNonGuaranteedPromotionReason,
+  isFreeFinderSyndication,
+  getNonOfferContentReason,
 } from './promotion-quality-utils.js';
 
 const __filename = fileURLToPath(import.meta.url);
@@ -159,18 +161,14 @@ const EXCLUDED_PATTERNS = [
 const RECOMMENDATION_LANGUAGE_PATTERN = /\b(?:favou?rite|lieblings(?:restaurant|lokal|platz|spot|ort)|summer\s+spot|things\s+to\s+do|must[-\s]?visit|guide|tipps?|vibe|empfehl\w*|recommend\w*|save\s+(?:this|and)|send\s+this)\b/i;
 const EXPLICIT_PROMOTION_BEYOND_GENERIC_FREE_PATTERN = /(?:\b\d{1,2}\s*%|\b1\s*[+&]\s*1\b|\b2\s*(?:für|fuer|for)\s*1\b|\b(?:rabatt|gutschein|coupon|deal|aktion|angebot|special|happy\s*hour)\b|\b(?:statt|nur\s+heute|today\s+only)\b|\b(?:gratis|kostenlos|free)\s+(?:zu|zum|bei|with)\b|\b(?:nur|only|um|für|fuer|for)\s+(?:nur\s+|only\s+)?(?:€\s*\d{1,3}(?:[,.]\d{1,2})?|\d{1,3}(?:[,.]\d{1,2})?\s*(?:€(?!\w)|euro\b|eur\b)))/i;
 
-const SELF_SYNDICATION_PATTERNS = [
-  /\boriginal[- ]?link\b.{0,140}\b(?:direkt\s+)?in\s+freefinder\b/i,
-  /\balle aktuellen bedingungen\b.{0,180}\bfreefinder\b/i,
-];
-
 const OUTSIDE_VIENNA_LOCATION_PATTERN = /\b(?:in|bei|am|im|standort(?:e)?\s*:?|location\s*:?)\s+(?:st\.?\s*p(?:ö|oe)lten|graz|linz|salzburg|innsbruck|klagenfurt|eisenstadt|bregenz|wiener\s+neustadt|wr\.?\s+neustadt|krems|bratislava)\b/i;
 const WIDE_AVAILABILITY_PATTERN = /\b(?:österreichweit|oesterreichweit|austria[- ]?wide|online|alle[nr]?\s+(?:filialen|standorten))\b/i;
 
 const VIENNA_PATTERNS = [
   /\bwien\b/i,
   /\bvienna\b/i,
-  /\b(?:1010|1020|1030|1040|1050|1060|1070|1080|1090|1100|1110|1120|1130|1140|1150|1160|1170|1180|1190|1200|1210|1220|1230)\b/,
+  /\b(?:in|PLZ)\s+1(?:0[1-9]|1\d|2[0-3])0\b/i,
+  /\b1(?:0[1-9]|1\d|2[0-3])0[.,]?\s+[\p{L}-]+(?:gasse|stra(?:ße|sse)|platz|weg|ring)\s+\d+\b/iu,
   /\b(?:innere stadt|leopoldstadt|landstraße|landstrasse|wieden|margareten|mariahilf|neubau|josefstadt|alsergrund|favoriten|meidling|hietzing|penzing|rudolfsheim|ottakring|hernals|währing|waehring|döbling|doebling|brigittenau|floridsdorf|donaustadt|liesing)\b/i,
 ];
 
@@ -371,6 +369,11 @@ function hasViennaText(value) {
 
 function textWithoutHashtags(value) {
   return cleanText(value, 5000).replace(/#[\p{L}\p{N}_.-]+/gu, ' ');
+}
+
+function graphLocationText(caption, ocrText, aiLocation = '') {
+  return [textWithoutHashtags(caption), aiLocation,
+    ocrText.match(/\b1(?:0[1-9]|1\d|2[0-3])0\s+(?:Wien|Vienna)\b/i)?.[0]].filter(Boolean).join(' ');
 }
 
 function hasConflictingOutsideViennaLocation(value) {
@@ -1111,8 +1114,11 @@ export function normalizeAdLibraryItem(raw, config, now = new Date()) {
 export function normalizeGraphMediaItem(raw, context, config, now = new Date()) {
   const caption = cleanText(raw?.caption, 4000);
   const captionProse = textWithoutHashtags(caption);
-  if (SELF_SYNDICATION_PATTERNS.some((pattern) => pattern.test(caption))) {
+  if (isFreeFinderSyndication(caption)) {
     return { deal: null, rejection: 'self-syndicated-deal' };
+  }
+  if (getNonOfferContentReason(captionProse)) {
+    return { deal: null, rejection: 'non-offer-content' };
   }
   if (hasConflictingOutsideViennaLocation(caption)) {
     return { deal: null, rejection: 'non-vienna-location' };
@@ -1129,7 +1135,8 @@ export function normalizeGraphMediaItem(raw, context, config, now = new Date()) 
     && ai.exclusion === 'none'
       ? cleanText(ai.offerText, 500)
       : '';
-  const trustedAiLocation = trustedAiOffer ? cleanText(ai.locationText, 240) : '';
+  const aiLocation = trustedAiOffer ? cleanText(ai.locationText, 240) : '';
+  const trustedAiLocation = aiLocation && ocrText.toLowerCase().includes(aiLocation.toLowerCase()) ? aiLocation : '';
   const trustedAiValidity = trustedAiOffer ? cleanText(ai.validityText, 240) : '';
   const combinedEvidencePromotion = classifyPromotion([
     captionProse,
@@ -1174,7 +1181,7 @@ export function normalizeGraphMediaItem(raw, context, config, now = new Date()) 
 
   const account = context?.account || null;
   const viennaEvidence = findViennaEvidence({
-    caption: [captionProse, ocrText, trustedAiLocation].filter(Boolean).join(' '),
+    caption: graphLocationText(caption, ocrText, trustedAiLocation),
     // A hashtag is a discovery hint, not proof that the actual offer is in Vienna.
     sourceName: context?.sourceType === 'account' ? context?.sourceName : '',
     username: raw?.username || account?.username,
@@ -1206,6 +1213,9 @@ export function normalizeGraphMediaItem(raw, context, config, now = new Date()) 
     ownerUsername: brandUsername,
     url,
   }) || fallbackBrand;
+  if (locationConflictReason({ brand, originSource: 'Meta Instagram', metaGraphCaption: captionProse })) {
+    return { deal: null, rejection: 'non-vienna-location' };
+  }
   // Keep raw OCR as evidence, not customer-facing copy. A stray "1%" from a
   // noisy video frame must not outrank a clear free-offer caption.
   const titleText = captionPromotion.accepted
@@ -2070,7 +2080,7 @@ function graphCandidateAuditRow(entry, outcome, config) {
     roleIndex: config.accountRoleIndex,
   });
   const vienna = findViennaEvidence({
-    caption: [item.caption, mediaEvidence.ocrText, mediaEvidence.ai?.locationText].filter(Boolean).join(' '),
+    caption: graphLocationText(item.caption, cleanText(mediaEvidence.ocrText, 4000)),
     username: ownerUsername,
   }, context.account, config);
   return {
@@ -2086,7 +2096,8 @@ function graphCandidateAuditRow(entry, outcome, config) {
     pubDate: toIso(item.timestamp),
     rejectionReason: outcome?.rejection || '',
     qualityScore: Number(outcome?.deal?.qualityScore || 0),
-    viennaVerified: outcome?.deal?.viennaVerified === true || vienna.verified,
+    viennaVerified: outcome?.deal?.viennaVerified === true
+      || (outcome?.rejection !== 'non-vienna-location' && vienna.verified),
     mediaEvidence: {
       analyzedAt: cleanText(mediaEvidence.analyzedAt, 80),
       ocrText: cleanText(mediaEvidence.ocrText, 1600),

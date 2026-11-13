@@ -106,7 +106,11 @@ const CONFIG = {
 const INSTAGRAM_COOKIE_HINTS = loadInstagramCookieHints();
 const INSTAGRAM_AUTH = instagramAuthSummary(INSTAGRAM_COOKIE_HINTS);
 const INSTAGRAM_AUTH_CIRCUIT = instagramAuthCircuitStatus(readJson(INSTAGRAM_AUTH_HEALTH_PATH, {}));
-const WEB_ACCESS = createInstagramWebAccess({ previousReport: readJson(REPORT_PATH, {}), healthReport: readJson(INSTAGRAM_AUTH_HEALTH_PATH, {}) });
+const WEB_ACCESS = createInstagramWebAccess({
+  previousReport: readJson(REPORT_PATH, {}),
+  relatedReport: readJson(path.join(DOCS_DIR, 'instagram-discovery-report.json'), {}),
+  healthReport: readJson(INSTAGRAM_AUTH_HEALTH_PATH, {}),
+});
 let instagramCookieAccessEnabled = INSTAGRAM_AUTH.authenticatedSession && INSTAGRAM_AUTH_CIRCUIT.allowed;
 let instagramRateLimitedDuringRun = false;
 let previewTransportBlocked = false;
@@ -1854,11 +1858,11 @@ function buildQualityScore(candidate, signal) {
 
 function getRejectionReason(candidate, signal, score) {
   const primarySignal = postSignal(candidate) || signal;
+  if (isSelfSyndicatedPost(candidate, primarySignal)) return 'selbst syndizierter FreeFinder-Post';
   const policy = discoveryRejection(primarySignal);
   if (policy) return policy;
   if (!signal) return 'kein Textsignal zum Post';
   if (hasPattern(BLOCKED_SOURCE_PATTERNS, signal)) return 'NeoTaste blockiert';
-  if (isSelfSyndicatedPost(candidate, primarySignal)) return 'selbst syndizierter FreeFinder-Post';
   const pubDate = parsePubDate(candidate);
   if (!pubDate?.date) return 'kein echtes Instagram-Postdatum';
   const dateSignal = offerDateSignal(candidate) || primarySignal;
