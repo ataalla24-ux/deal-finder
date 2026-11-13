@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-11-13T16:33:03.963Z",
+  "generatedAt": "2026-11-13T17:10:03.118Z",
   "discoveryAvailability": {
     "note": "Transport evidence, not deal yield. Retry eligibility is not recovery. Candidate counts are not Slack deliveries. No extra runs or quota resets.",
     "lanes": [
@@ -110,16 +110,16 @@
         "totalDeals": 4
       },
       {
-        "sourceKey": "wien-combined",
-        "sourceLabel": "Wien Deals Combined Graph",
-        "missionFitScore": 72,
-        "totalDeals": 1
-      },
-      {
         "sourceKey": "instagram-apify",
         "sourceLabel": "Apify Instagram",
         "missionFitScore": 71,
         "totalDeals": 2
+      },
+      {
+        "sourceKey": "member-benefits",
+        "sourceLabel": "Member Benefits",
+        "missionFitScore": 63,
+        "totalDeals": 110
       }
     ],
     "topCoverageSources": [
@@ -147,9 +147,9 @@
       {
         "sourceKey": "meta-instagram",
         "sourceLabel": "Meta Instagram Graph",
-        "coverageScore": 34,
+        "coverageScore": 33,
         "totalDeals": 50,
-        "fresh1dCount": 4
+        "fresh1dCount": 3
       },
       {
         "sourceKey": "vienna-promo-radar",
@@ -179,16 +179,16 @@
         "totalDeals": 110
       },
       {
-        "sourceKey": "wien-combined",
-        "sourceLabel": "Wien Deals Combined Graph",
-        "precisionScore": 70,
-        "totalDeals": 1
-      },
-      {
         "sourceKey": "firecrawl5",
         "sourceLabel": "Firecrawl Key 5 - Instagram Gastro",
         "precisionScore": 69,
         "totalDeals": 4
+      },
+      {
+        "sourceKey": "meta-instagram",
+        "sourceLabel": "Meta Instagram Graph",
+        "precisionScore": 68,
+        "totalDeals": 50
       }
     ],
     "topWeightedSources": [
@@ -442,7 +442,7 @@
       "uniqueDeals": 47,
       "duplicateDeals": 3,
       "duplicateAcrossSources": 3,
-      "fresh1dCount": 4,
+      "fresh1dCount": 3,
       "fresh7dCount": 40,
       "viennaCount": 50,
       "foodDrinkCount": 33,
@@ -512,7 +512,7 @@
       ],
       "healthScore": 70,
       "missionFitScore": 53,
-      "coverageScore": 34,
+      "coverageScore": 33,
       "precisionScore": 68,
       "sourceWeightScore": 57
     },
@@ -712,80 +712,6 @@
       "coverageScore": 11,
       "precisionScore": 63,
       "sourceWeightScore": 48
-    },
-    {
-      "sourceKey": "wien-combined",
-      "file": "deals-pending-wien-combined.json",
-      "sourceLabel": "Wien Deals Combined Graph",
-      "totalDeals": 1,
-      "uniqueDeals": 0,
-      "duplicateDeals": 1,
-      "duplicateAcrossSources": 1,
-      "fresh1dCount": 1,
-      "fresh7dCount": 1,
-      "viennaCount": 1,
-      "foodDrinkCount": 1,
-      "promoCount": 0,
-      "missingUrlCount": 0,
-      "sampleTitles": [
-        "✨ Special Golden Apple – 7,40 € / 9,40 € Warme Äpfel, Ahorn-Pekannuss-Granola, Vanilleeis, Schlagobers und Goldschimmer"
-      ],
-      "lastRun": {
-        "status": "completed-with-errors",
-        "startedAt": "2026-11-13T07:08:26.170Z",
-        "finishedAt": "2026-11-13T07:09:39.197Z",
-        "durationMs": 73027,
-        "counts": {
-          "rawCandidates": 52,
-          "normalizedCandidates": 1,
-          "verifiedCandidates": 1,
-          "previousDeals": 0,
-          "acceptedDeals": 1,
-          "rejectedDeals": 49
-        },
-        "rejectedByReason": {
-          "general-recommendation": 4,
-          "non-offer-content": 1,
-          "no-concrete-offer": 40,
-          "alcohol-offer": 2,
-          "missing-vienna-evidence": 1,
-          "missing-text": 1
-        },
-        "errors": [
-          "#viennarestaurants: Instagram shared quota paused: rolling-hour budget exhausted"
-        ],
-        "reportFile": "deal-pipeline-last-run-wien-combined.json"
-      },
-      "uniqueRate": 0,
-      "duplicateRate": 1,
-      "fresh1dRate": 1,
-      "fresh7dRate": 1,
-      "viennaRate": 1,
-      "foodDrinkRate": 1,
-      "promoRate": 0,
-      "missingUrlRate": 0,
-      "averageQualityScore": 78,
-      "topCategories": [
-        {
-          "value": "essen",
-          "count": 1
-        }
-      ],
-      "topTypes": [
-        {
-          "value": "rabatt",
-          "count": 1
-        }
-      ],
-      "issues": [
-        "wenige klare Gratis-/Promo-Signale",
-        "hohe Überschneidung mit anderen Quellen"
-      ],
-      "healthScore": 62,
-      "missionFitScore": 72,
-      "coverageScore": 11,
-      "precisionScore": 70,
-      "sourceWeightScore": 57
     },
     {
       "sourceKey": "instagram-verified",
@@ -1334,6 +1260,81 @@
       "coverageScore": 5,
       "precisionScore": 42,
       "sourceWeightScore": 28
+    },
+    {
+      "sourceKey": "wien-combined",
+      "file": "deals-pending-wien-combined.json",
+      "sourceLabel": "Wien Deals Combined Graph",
+      "totalDeals": 1,
+      "uniqueDeals": 0,
+      "duplicateDeals": 1,
+      "duplicateAcrossSources": 1,
+      "fresh1dCount": 0,
+      "fresh7dCount": 1,
+      "viennaCount": 1,
+      "foodDrinkCount": 1,
+      "promoCount": 0,
+      "missingUrlCount": 0,
+      "sampleTitles": [
+        "✨ Special Golden Apple – 7,40 € / 9,40 € Warme Äpfel, Ahorn-Pekannuss-Granola, Vanilleeis, Schlagobers und Goldschimmer"
+      ],
+      "lastRun": {
+        "status": "completed-with-errors",
+        "startedAt": "2026-11-13T07:08:26.170Z",
+        "finishedAt": "2026-11-13T07:09:39.197Z",
+        "durationMs": 73027,
+        "counts": {
+          "rawCandidates": 52,
+          "normalizedCandidates": 1,
+          "verifiedCandidates": 1,
+          "previousDeals": 0,
+          "acceptedDeals": 1,
+          "rejectedDeals": 49
+        },
+        "rejectedByReason": {
+          "general-recommendation": 4,
+          "non-offer-content": 1,
+          "no-concrete-offer": 40,
+          "alcohol-offer": 2,
+          "missing-vienna-evidence": 1,
+          "missing-text": 1
+        },
+        "errors": [
+          "#viennarestaurants: Instagram shared quota paused: rolling-hour budget exhausted"
+        ],
+        "reportFile": "deal-pipeline-last-run-wien-combined.json"
+      },
+      "uniqueRate": 0,
+      "duplicateRate": 1,
+      "fresh1dRate": 0,
+      "fresh7dRate": 1,
+      "viennaRate": 1,
+      "foodDrinkRate": 1,
+      "promoRate": 0,
+      "missingUrlRate": 0,
+      "averageQualityScore": 78,
+      "topCategories": [
+        {
+          "value": "essen",
+          "count": 1
+        }
+      ],
+      "topTypes": [
+        {
+          "value": "rabatt",
+          "count": 1
+        }
+      ],
+      "issues": [
+        "wenige Deals sind frischer als 1 Tag",
+        "wenige klare Gratis-/Promo-Signale",
+        "hohe Überschneidung mit anderen Quellen"
+      ],
+      "healthScore": 48,
+      "missionFitScore": 50,
+      "coverageScore": 10,
+      "precisionScore": 58,
+      "sourceWeightScore": 43
     },
     {
       "sourceKey": "gemeinde",
