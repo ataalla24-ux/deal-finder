@@ -1,8 +1,8 @@
 {
   "version": 1,
-  "checkedAt": "2026-11-13T16:40:07.176Z",
-  "feedHash": "dd37f2001910cb793ce45b4b1b1033bc9f24ebb065dba0b9e6d8a8c9ac6d9138",
-  "mapContextHash": "189bfce707eeab0d7ad4fc0946d69108d41b3be8bbbf89638ddadcec4889bd73",
+  "checkedAt": "2026-11-13T18:32:19.281Z",
+  "feedHash": "2f9bb27dd9f335100f4060325101b70fcd99e5ec9c7c3587dcc256e892bab8ef",
+  "mapContextHash": "323d8cbb44e3aae43977cef56b6732c3a6e4c10283d9b90436e05018c19d6513",
   "sourceEvidenceHash": "4799272fffc5c6e27b7fb1ebf64d6e2be22451c2d4adb68c51a28ddec6e2eeb4",
   "liveCount": 77,
   "checks": {
@@ -74,7 +74,7 @@
     "sharedAssignments": [],
     "caveat": "Current compiled selection and bounded asset/crop review; changed feeds need a fresh observation. No installed-version or recipient UI certification."
   },
-  "modelCalls": 0,
+  "modelCalls": 2,
   "photoDeferred": 0,
   "automaticPublicationEnabled": false,
   "live": [
@@ -306,7 +306,13 @@
       "websitePhoto": {
         "src": "/assets/blog/photos/gift.webp",
         "key": "gift",
-        "status": "not-reviewed"
+        "matchesProduct": false,
+        "emptyTableOrPackaging": true,
+        "uncertain": true,
+        "status": "needs-review",
+        "checkedAt": "2026-11-13T18:32:19.281Z",
+        "provesMerchantPhoto": false,
+        "automaticReplacement": false
       },
       "nativePhoto": {
         "status": "feed-changed-recheck-required",
@@ -356,7 +362,13 @@
       "websitePhoto": {
         "src": "/assets/blog/photos/krapfen.webp",
         "key": "krapfen",
-        "status": "not-reviewed"
+        "matchesProduct": false,
+        "emptyTableOrPackaging": false,
+        "uncertain": false,
+        "status": "needs-review",
+        "checkedAt": "2026-11-13T18:32:19.281Z",
+        "provesMerchantPhoto": false,
+        "automaticReplacement": false
       },
       "nativePhoto": {
         "status": "feed-changed-recheck-required",
@@ -1981,6 +1993,53 @@
       }
     },
     {
+      "id": "power-food-eca409ce31f3",
+      "issues": [
+        {
+          "code": "upstream-validity-review",
+          "label": "Vorhandene Validierungshinweise vor Freigabe erneut pruefen."
+        }
+      ],
+      "requiresReview": true,
+      "publicationMode": "human-approval",
+      "automaticPublicationAllowed": false,
+      "fingerprint": "19069fbdaf882fc60a28f3c18aa0f9b2821ea2838610d11cfb9dc50f04db531c",
+      "map": {
+        "status": "mapped",
+        "reason": "reviewed-chain-campaign",
+        "locationIds": [
+          "nordsee-at-1427",
+          "nordsee-at-1440",
+          "nordsee-at-1428",
+          "nordsee-at-1432",
+          "nordsee-at-1429",
+          "nordsee-at-1431",
+          "nordsee-at-1441",
+          "nordsee-at-1442",
+          "nordsee-at-1435",
+          "nordsee-at-1438",
+          "nordsee-at-1437",
+          "nordsee-at-1443"
+        ]
+      },
+      "websitePhoto": {
+        "src": "/assets/blog/photos/fish.webp",
+        "key": "fish",
+        "matchesProduct": true,
+        "emptyTableOrPackaging": false,
+        "uncertain": true,
+        "status": "needs-review",
+        "checkedAt": "2026-11-12T01:32:41.547Z",
+        "provesMerchantPhoto": false,
+        "automaticReplacement": false,
+        "cached": true
+      },
+      "nativePhoto": {
+        "status": "feed-changed-recheck-required",
+        "originalPhoto": null
+      }
+    },
+    {
       "id": "power-food-fea2efd7d1c2",
       "issues": [
         {
@@ -2659,53 +2718,6 @@
         "src": "/assets/blog/photos/pizza.webp",
         "key": "pizza",
         "status": "not-reviewed"
-      },
-      "nativePhoto": {
-        "status": "feed-changed-recheck-required",
-        "originalPhoto": null
-      }
-    },
-    {
-      "id": "power-food-eca409ce31f3",
-      "issues": [
-        {
-          "code": "upstream-validity-review",
-          "label": "Vorhandene Validierungshinweise vor Freigabe erneut pruefen."
-        }
-      ],
-      "requiresReview": true,
-      "publicationMode": "human-approval",
-      "automaticPublicationAllowed": false,
-      "fingerprint": "19069fbdaf882fc60a28f3c18aa0f9b2821ea2838610d11cfb9dc50f04db531c",
-      "map": {
-        "status": "mapped",
-        "reason": "reviewed-chain-campaign",
-        "locationIds": [
-          "nordsee-at-1427",
-          "nordsee-at-1440",
-          "nordsee-at-1428",
-          "nordsee-at-1432",
-          "nordsee-at-1429",
-          "nordsee-at-1431",
-          "nordsee-at-1441",
-          "nordsee-at-1442",
-          "nordsee-at-1435",
-          "nordsee-at-1438",
-          "nordsee-at-1437",
-          "nordsee-at-1443"
-        ]
-      },
-      "websitePhoto": {
-        "src": "/assets/blog/photos/fish.webp",
-        "key": "fish",
-        "matchesProduct": true,
-        "emptyTableOrPackaging": false,
-        "uncertain": true,
-        "status": "needs-review",
-        "checkedAt": "2026-11-12T01:32:41.547Z",
-        "provesMerchantPhoto": false,
-        "automaticReplacement": false,
-        "cached": true
       },
       "nativePhoto": {
         "status": "feed-changed-recheck-required",
@@ -3520,8 +3532,8 @@
     }
   ],
   "pending": {
-    "count": 190,
-    "reviewNeeded": 190,
+    "count": 191,
+    "reviewNeeded": 191,
     "rows": [
       {
         "id": "fc4g-zz2f5b",
@@ -3669,31 +3681,6 @@
         "fingerprint": "e0f96f371e5a53c7f807427739880457b8a2904c19f82e8c1c67cea27543fb4f"
       },
       {
-        "id": "power-food-73cf88790a2d",
-        "issues": [
-          {
-            "code": "period-unconfirmed",
-            "label": "Aktionszeitraum oder dauerhafte Gueltigkeit pruefen."
-          },
-          {
-            "code": "source-blocked",
-            "label": "Bestehende Quellensperre bleibt wirksam."
-          },
-          {
-            "code": "upstream-validity-review",
-            "label": "Vorhandene Validierungshinweise vor Freigabe erneut pruefen."
-          },
-          {
-            "code": "map-incomplete",
-            "label": "Einloesestandorte sind noch nicht vollstaendig bestaetigt."
-          }
-        ],
-        "requiresReview": true,
-        "publicationMode": "human-approval",
-        "automaticPublicationAllowed": false,
-        "fingerprint": "606f729bb9781fc1bfb5aa21746181e6bbf98281a2f005ef8e2f4af2b4c557eb"
-      },
-      {
         "id": "g2-15kbyb4",
         "issues": [
           {
@@ -3808,27 +3795,6 @@
         "publicationMode": "human-approval",
         "automaticPublicationAllowed": false,
         "fingerprint": "43d01cdc150c4944594aff159ca9ccb925a861bbaa4074be4347a834189057b1"
-      },
-      {
-        "id": "meta-ig-17953636767316025",
-        "issues": [
-          {
-            "code": "period-unconfirmed",
-            "label": "Aktionszeitraum oder dauerhafte Gueltigkeit pruefen."
-          },
-          {
-            "code": "upstream-validity-review",
-            "label": "Vorhandene Validierungshinweise vor Freigabe erneut pruefen."
-          },
-          {
-            "code": "map-incomplete",
-            "label": "Einloesestandorte sind noch nicht vollstaendig bestaetigt."
-          }
-        ],
-        "requiresReview": true,
-        "publicationMode": "human-approval",
-        "automaticPublicationAllowed": false,
-        "fingerprint": "d83a19a94d1ced8530234bbfd827891795647f640b80f40bc9b60d7fd7fa4c67"
       },
       {
         "id": "g2-125hmn8",
@@ -6384,31 +6350,6 @@
         "fingerprint": "4920636bcfb80e4463f9b5970ffec83fb94244b77b323611084bd3c0e78a4cde"
       },
       {
-        "id": "meta-ig-18100044578652986",
-        "issues": [
-          {
-            "code": "long-title",
-            "label": "Titel lang; Bedingungen erhalten, nicht abschneiden."
-          },
-          {
-            "code": "invalid-date",
-            "label": "Datumsfeld ungueltig; nicht automatisch raten."
-          },
-          {
-            "code": "upstream-validity-review",
-            "label": "Vorhandene Validierungshinweise vor Freigabe erneut pruefen."
-          },
-          {
-            "code": "map-incomplete",
-            "label": "Einloesestandorte sind noch nicht vollstaendig bestaetigt."
-          }
-        ],
-        "requiresReview": true,
-        "publicationMode": "human-approval",
-        "automaticPublicationAllowed": false,
-        "fingerprint": "51cc0747ad05c241ab0fa4d74fe9fcbba35a1609dadf6d906686c0104d5cd767"
-      },
-      {
         "id": "gs-17521",
         "issues": [
           {
@@ -6457,31 +6398,6 @@
         "publicationMode": "human-approval",
         "automaticPublicationAllowed": false,
         "fingerprint": "567eff1c5f7be4a6b9460d6917b871c15f009251c6b93f7a400622d995e43471"
-      },
-      {
-        "id": "meta-ig-18101671448672416",
-        "issues": [
-          {
-            "code": "period-unconfirmed",
-            "label": "Aktionszeitraum oder dauerhafte Gueltigkeit pruefen."
-          },
-          {
-            "code": "source-blocked",
-            "label": "Bestehende Quellensperre bleibt wirksam."
-          },
-          {
-            "code": "upstream-validity-review",
-            "label": "Vorhandene Validierungshinweise vor Freigabe erneut pruefen."
-          },
-          {
-            "code": "map-incomplete",
-            "label": "Einloesestandorte sind noch nicht vollstaendig bestaetigt."
-          }
-        ],
-        "requiresReview": true,
-        "publicationMode": "human-approval",
-        "automaticPublicationAllowed": false,
-        "fingerprint": "fa1034057c99221d8080351b44a24830d9d9c8e515e582ff1773972368bd6ea8"
       },
       {
         "id": "instagram-ai-050d44385c33",
@@ -6797,52 +6713,6 @@
         "fingerprint": "d474b1d1a4f5e5bc7386b39689062ff35a5fc4fb5157a404ade71ed642134164"
       },
       {
-        "id": "fc4g-12cp699",
-        "issues": [
-          {
-            "code": "period-unconfirmed",
-            "label": "Aktionszeitraum oder dauerhafte Gueltigkeit pruefen."
-          },
-          {
-            "code": "upstream-validity-review",
-            "label": "Vorhandene Validierungshinweise vor Freigabe erneut pruefen."
-          },
-          {
-            "code": "evidence-missing",
-            "label": "Kein gespeicherter Originaltext fuer automatische Korrektur."
-          }
-        ],
-        "requiresReview": true,
-        "publicationMode": "human-approval",
-        "automaticPublicationAllowed": false,
-        "fingerprint": "861d38e1e1b757f990365af7ab72f3bbf39b5f76787d07ce5487188cf301bbfb"
-      },
-      {
-        "id": "fc4g-1y539jl",
-        "issues": [
-          {
-            "code": "long-title",
-            "label": "Titel lang; Bedingungen erhalten, nicht abschneiden."
-          },
-          {
-            "code": "period-unconfirmed",
-            "label": "Aktionszeitraum oder dauerhafte Gueltigkeit pruefen."
-          },
-          {
-            "code": "upstream-validity-review",
-            "label": "Vorhandene Validierungshinweise vor Freigabe erneut pruefen."
-          },
-          {
-            "code": "map-incomplete",
-            "label": "Einloesestandorte sind noch nicht vollstaendig bestaetigt."
-          }
-        ],
-        "requiresReview": true,
-        "publicationMode": "human-approval",
-        "automaticPublicationAllowed": false,
-        "fingerprint": "ff3b5ea83f3720a37f37fc35c946a51d177d809427cb861fb5c4930f0cc7d7a1"
-      },
-      {
         "id": "gs-578296",
         "issues": [
           {
@@ -6887,27 +6757,6 @@
         "publicationMode": "human-approval",
         "automaticPublicationAllowed": false,
         "fingerprint": "30586f7eafaa264c2ac3f9c6f45e73dded7b2326a92e3e188a6d6a341c6b5686"
-      },
-      {
-        "id": "fc4g-1r04rhe",
-        "issues": [
-          {
-            "code": "source-blocked",
-            "label": "Bestehende Quellensperre bleibt wirksam."
-          },
-          {
-            "code": "map-incomplete",
-            "label": "Einloesestandorte sind noch nicht vollstaendig bestaetigt."
-          },
-          {
-            "code": "evidence-missing",
-            "label": "Kein gespeicherter Originaltext fuer automatische Korrektur."
-          }
-        ],
-        "requiresReview": true,
-        "publicationMode": "human-approval",
-        "automaticPublicationAllowed": false,
-        "fingerprint": "4102f5904c63ca4706d3c68f4daad76cd2d74ef9d57d7dc7374936ce37809a0e"
       },
       {
         "id": "benefit-vienna-food-424d774e91098f23",
@@ -7159,402 +7008,6 @@
         "publicationMode": "human-approval",
         "automaticPublicationAllowed": false,
         "fingerprint": "d57ffe55cbcd6b14a55cccaa413290b9bf163b41a826303bd181301d4ed4d256"
-      },
-      {
-        "id": "meta-ig-18144733252610394",
-        "issues": [
-          {
-            "code": "excluded-offer",
-            "label": "Angebot durch gemeinsame Discovery-Regeln ausgeschlossen: non-vienna-location."
-          },
-          {
-            "code": "long-title",
-            "label": "Titel lang; Bedingungen erhalten, nicht abschneiden."
-          },
-          {
-            "code": "invalid-date",
-            "label": "Datumsfeld ungueltig; nicht automatisch raten."
-          },
-          {
-            "code": "source-blocked",
-            "label": "Bestehende Quellensperre bleibt wirksam."
-          },
-          {
-            "code": "map-incomplete",
-            "label": "Einloesestandorte sind noch nicht vollstaendig bestaetigt."
-          }
-        ],
-        "requiresReview": true,
-        "publicationMode": "human-approval",
-        "automaticPublicationAllowed": false,
-        "fingerprint": "bccecb4003a9fe7eb98194b366af2af2c3a306a0ea65ae5602fbfb1234c1dbc4"
-      },
-      {
-        "id": "meta-ig-18502067695105404",
-        "issues": [
-          {
-            "code": "excluded-offer",
-            "label": "Angebot durch gemeinsame Discovery-Regeln ausgeschlossen: non-offer-content."
-          },
-          {
-            "code": "source-blocked",
-            "label": "Bestehende Quellensperre bleibt wirksam."
-          },
-          {
-            "code": "upstream-validity-review",
-            "label": "Vorhandene Validierungshinweise vor Freigabe erneut pruefen."
-          }
-        ],
-        "requiresReview": true,
-        "publicationMode": "human-approval",
-        "automaticPublicationAllowed": false,
-        "fingerprint": "6452c23c3aacc3f05f25d9ce8ca8018929a62ed6f7b27536ecc310cbec442a08"
-      },
-      {
-        "id": "meta-ig-17980915229916153",
-        "issues": [
-          {
-            "code": "invalid-date",
-            "label": "Datumsfeld ungueltig; nicht automatisch raten."
-          },
-          {
-            "code": "upstream-validity-review",
-            "label": "Vorhandene Validierungshinweise vor Freigabe erneut pruefen."
-          },
-          {
-            "code": "map-incomplete",
-            "label": "Einloesestandorte sind noch nicht vollstaendig bestaetigt."
-          }
-        ],
-        "requiresReview": true,
-        "publicationMode": "human-approval",
-        "automaticPublicationAllowed": false,
-        "fingerprint": "c0c2f659a9c1f669830910f76b15e8f4d91c923f19136e4f413ec625bc5a5577"
-      },
-      {
-        "id": "meta-ig-18149087608667909",
-        "issues": [
-          {
-            "code": "long-title",
-            "label": "Titel lang; Bedingungen erhalten, nicht abschneiden."
-          },
-          {
-            "code": "upstream-validity-review",
-            "label": "Vorhandene Validierungshinweise vor Freigabe erneut pruefen."
-          },
-          {
-            "code": "map-incomplete",
-            "label": "Einloesestandorte sind noch nicht vollstaendig bestaetigt."
-          }
-        ],
-        "requiresReview": true,
-        "publicationMode": "human-approval",
-        "automaticPublicationAllowed": false,
-        "fingerprint": "a369a92e0093b30abbeb63e1282ead846b47c8852a5d98c3cad8fb37e05c3a75"
-      },
-      {
-        "id": "social-food-review-p7kyg7",
-        "issues": [
-          {
-            "code": "excluded-offer",
-            "label": "Angebot durch gemeinsame Discovery-Regeln ausgeschlossen: non-offer-content."
-          },
-          {
-            "code": "long-title",
-            "label": "Titel lang; Bedingungen erhalten, nicht abschneiden."
-          },
-          {
-            "code": "invalid-date",
-            "label": "Datumsfeld ungueltig; nicht automatisch raten."
-          },
-          {
-            "code": "map-incomplete",
-            "label": "Einloesestandorte sind noch nicht vollstaendig bestaetigt."
-          }
-        ],
-        "requiresReview": true,
-        "publicationMode": "human-approval",
-        "automaticPublicationAllowed": false,
-        "fingerprint": "7de6582c103233f379f148ab4f8fcdc44bf55cdfea83d43323063451be2621f8"
-      },
-      {
-        "id": "social-food-review-1edjjr2",
-        "issues": [
-          {
-            "code": "excluded-offer",
-            "label": "Angebot durch gemeinsame Discovery-Regeln ausgeschlossen: non-offer-content."
-          },
-          {
-            "code": "long-title",
-            "label": "Titel lang; Bedingungen erhalten, nicht abschneiden."
-          },
-          {
-            "code": "invalid-date",
-            "label": "Datumsfeld ungueltig; nicht automatisch raten."
-          },
-          {
-            "code": "map-incomplete",
-            "label": "Einloesestandorte sind noch nicht vollstaendig bestaetigt."
-          }
-        ],
-        "requiresReview": true,
-        "publicationMode": "human-approval",
-        "automaticPublicationAllowed": false,
-        "fingerprint": "aca41a8772c8c05e2cab7ca99a35c5059d46c3f0de793db7ebf93cf66e32a3ea"
-      },
-      {
-        "id": "meta-ig-17995284714069966",
-        "issues": [
-          {
-            "code": "excluded-offer",
-            "label": "Angebot durch gemeinsame Discovery-Regeln ausgeschlossen: non-offer-content."
-          },
-          {
-            "code": "long-title",
-            "label": "Titel lang; Bedingungen erhalten, nicht abschneiden."
-          },
-          {
-            "code": "upstream-validity-review",
-            "label": "Vorhandene Validierungshinweise vor Freigabe erneut pruefen."
-          },
-          {
-            "code": "map-incomplete",
-            "label": "Einloesestandorte sind noch nicht vollstaendig bestaetigt."
-          }
-        ],
-        "requiresReview": true,
-        "publicationMode": "human-approval",
-        "automaticPublicationAllowed": false,
-        "fingerprint": "2d27a765ac2f577af80b0b53dbb64a944db304bd7ba020e75fd6afbf8d7ef9a2"
-      },
-      {
-        "id": "meta-ig-18176607961457022",
-        "issues": [
-          {
-            "code": "product-unspecified",
-            "label": "Titel nennt nur den Vorteil, nicht das konkrete Produkt oder die Leistung."
-          },
-          {
-            "code": "invalid-date",
-            "label": "Datumsfeld ungueltig; nicht automatisch raten."
-          },
-          {
-            "code": "upstream-validity-review",
-            "label": "Vorhandene Validierungshinweise vor Freigabe erneut pruefen."
-          },
-          {
-            "code": "map-incomplete",
-            "label": "Einloesestandorte sind noch nicht vollstaendig bestaetigt."
-          }
-        ],
-        "requiresReview": true,
-        "publicationMode": "human-approval",
-        "automaticPublicationAllowed": false,
-        "fingerprint": "4a8fda2ed6f1ee29435dc4dc5bef642c1c2d791a8ab10959fd5e6a43d6a524cb"
-      },
-      {
-        "id": "gs-588905",
-        "issues": [
-          {
-            "code": "long-title",
-            "label": "Titel lang; Bedingungen erhalten, nicht abschneiden."
-          },
-          {
-            "code": "missing-conditions",
-            "label": "Beschreibung und Einloesebedingungen fehlen."
-          },
-          {
-            "code": "invalid-date",
-            "label": "Datumsfeld ungueltig; nicht automatisch raten."
-          },
-          {
-            "code": "evidence-missing",
-            "label": "Kein gespeicherter Originaltext fuer automatische Korrektur."
-          }
-        ],
-        "requiresReview": true,
-        "publicationMode": "human-approval",
-        "automaticPublicationAllowed": false,
-        "fingerprint": "98f8035ccf58cb74e534cfc9073746321f13460088db2d5aab5aba4c278d59c0"
-      },
-      {
-        "id": "gs-16701",
-        "issues": [
-          {
-            "code": "missing-conditions",
-            "label": "Beschreibung und Einloesebedingungen fehlen."
-          },
-          {
-            "code": "period-unconfirmed",
-            "label": "Aktionszeitraum oder dauerhafte Gueltigkeit pruefen."
-          },
-          {
-            "code": "upstream-validity-review",
-            "label": "Vorhandene Validierungshinweise vor Freigabe erneut pruefen."
-          },
-          {
-            "code": "evidence-missing",
-            "label": "Kein gespeicherter Originaltext fuer automatische Korrektur."
-          }
-        ],
-        "requiresReview": true,
-        "publicationMode": "human-approval",
-        "automaticPublicationAllowed": false,
-        "fingerprint": "b4092f9e0e944be5a90687810e7b19a89ce9ca8ca22598a64735c59e6b2b448d"
-      },
-      {
-        "id": "merchant-web-8a4a878c29dd8a321161",
-        "issues": [
-          {
-            "code": "period-unconfirmed",
-            "label": "Aktionszeitraum oder dauerhafte Gueltigkeit pruefen."
-          },
-          {
-            "code": "map-incomplete",
-            "label": "Einloesestandorte sind noch nicht vollstaendig bestaetigt."
-          }
-        ],
-        "requiresReview": true,
-        "publicationMode": "human-approval",
-        "automaticPublicationAllowed": false,
-        "fingerprint": "9d6b084e9869014bd425f47caf947ebfcc6c05c411ace06466de3a5ec2bf1222"
-      },
-      {
-        "id": "g2-s2eodg",
-        "issues": [
-          {
-            "code": "period-unconfirmed",
-            "label": "Aktionszeitraum oder dauerhafte Gueltigkeit pruefen."
-          },
-          {
-            "code": "source-blocked",
-            "label": "Bestehende Quellensperre bleibt wirksam."
-          },
-          {
-            "code": "upstream-validity-review",
-            "label": "Vorhandene Validierungshinweise vor Freigabe erneut pruefen."
-          },
-          {
-            "code": "map-incomplete",
-            "label": "Einloesestandorte sind noch nicht vollstaendig bestaetigt."
-          },
-          {
-            "code": "evidence-missing",
-            "label": "Kein gespeicherter Originaltext fuer automatische Korrektur."
-          }
-        ],
-        "requiresReview": true,
-        "publicationMode": "human-approval",
-        "automaticPublicationAllowed": false,
-        "fingerprint": "afa6612729a9f6389e2286aa24d7da2b44eebfbdbd0f0df0552438f76c10c06c"
-      },
-      {
-        "id": "g2-1u1ywot",
-        "issues": [
-          {
-            "code": "period-unconfirmed",
-            "label": "Aktionszeitraum oder dauerhafte Gueltigkeit pruefen."
-          },
-          {
-            "code": "source-blocked",
-            "label": "Bestehende Quellensperre bleibt wirksam."
-          },
-          {
-            "code": "upstream-validity-review",
-            "label": "Vorhandene Validierungshinweise vor Freigabe erneut pruefen."
-          },
-          {
-            "code": "map-incomplete",
-            "label": "Einloesestandorte sind noch nicht vollstaendig bestaetigt."
-          },
-          {
-            "code": "evidence-missing",
-            "label": "Kein gespeicherter Originaltext fuer automatische Korrektur."
-          }
-        ],
-        "requiresReview": true,
-        "publicationMode": "human-approval",
-        "automaticPublicationAllowed": false,
-        "fingerprint": "8c8b435d4a8e0b80eb0564cd35f29a8b4f79921fda3c6c67d416c1679dc05f9c"
-      },
-      {
-        "id": "g2-1ds91pt",
-        "issues": [
-          {
-            "code": "long-title",
-            "label": "Titel lang; Bedingungen erhalten, nicht abschneiden."
-          },
-          {
-            "code": "period-unconfirmed",
-            "label": "Aktionszeitraum oder dauerhafte Gueltigkeit pruefen."
-          },
-          {
-            "code": "source-blocked",
-            "label": "Bestehende Quellensperre bleibt wirksam."
-          },
-          {
-            "code": "upstream-validity-review",
-            "label": "Vorhandene Validierungshinweise vor Freigabe erneut pruefen."
-          },
-          {
-            "code": "map-incomplete",
-            "label": "Einloesestandorte sind noch nicht vollstaendig bestaetigt."
-          },
-          {
-            "code": "evidence-missing",
-            "label": "Kein gespeicherter Originaltext fuer automatische Korrektur."
-          }
-        ],
-        "requiresReview": true,
-        "publicationMode": "human-approval",
-        "automaticPublicationAllowed": false,
-        "fingerprint": "244b7d229a5e437696ea6c6d79f5079cfde4b00bbbcb1fb314ad0447bbc6af9f"
-      },
-      {
-        "id": "meta-ig-17898697404416855",
-        "issues": [
-          {
-            "code": "excluded-offer",
-            "label": "Angebot durch gemeinsame Discovery-Regeln ausgeschlossen: business-lead-generation."
-          },
-          {
-            "code": "period-unconfirmed",
-            "label": "Aktionszeitraum oder dauerhafte Gueltigkeit pruefen."
-          },
-          {
-            "code": "upstream-validity-review",
-            "label": "Vorhandene Validierungshinweise vor Freigabe erneut pruefen."
-          },
-          {
-            "code": "map-incomplete",
-            "label": "Einloesestandorte sind noch nicht vollstaendig bestaetigt."
-          }
-        ],
-        "requiresReview": true,
-        "publicationMode": "human-approval",
-        "automaticPublicationAllowed": false,
-        "fingerprint": "793cc41937a0aeafd0fd22af968cf77da31a7b3493bdf938cce9687b6f9bdea6"
-      },
-      {
-        "id": "meta-ig-17866302456692825",
-        "issues": [
-          {
-            "code": "long-title",
-            "label": "Titel lang; Bedingungen erhalten, nicht abschneiden."
-          },
-          {
-            "code": "upstream-validity-review",
-            "label": "Vorhandene Validierungshinweise vor Freigabe erneut pruefen."
-          },
-          {
-            "code": "map-incomplete",
-            "label": "Einloesestandorte sind noch nicht vollstaendig bestaetigt."
-          }
-        ],
-        "requiresReview": true,
-        "publicationMode": "human-approval",
-        "automaticPublicationAllowed": false,
-        "fingerprint": "71011a710c099bc38dd2428dd29a24cbae6762027ad1e7ce0e7bb78d847dd58c"
       },
       {
         "id": "power-food-259559b43794",
@@ -8055,6 +7508,799 @@
         "fingerprint": "5be0522ca99be2f3d7fe1bd91819cdf452360e05cdabeff5486b3ed8372788c3"
       },
       {
+        "id": "power-e2d083a924f9",
+        "issues": [
+          {
+            "code": "long-title",
+            "label": "Titel lang; Bedingungen erhalten, nicht abschneiden."
+          },
+          {
+            "code": "period-unconfirmed",
+            "label": "Aktionszeitraum oder dauerhafte Gueltigkeit pruefen."
+          },
+          {
+            "code": "upstream-validity-review",
+            "label": "Vorhandene Validierungshinweise vor Freigabe erneut pruefen."
+          },
+          {
+            "code": "map-incomplete",
+            "label": "Einloesestandorte sind noch nicht vollstaendig bestaetigt."
+          },
+          {
+            "code": "evidence-missing",
+            "label": "Kein gespeicherter Originaltext fuer automatische Korrektur."
+          }
+        ],
+        "requiresReview": true,
+        "publicationMode": "human-approval",
+        "automaticPublicationAllowed": false,
+        "fingerprint": "bcd75d3e761256703a5c147e074c00fd1666ac599f57608f4c3d7f96d0075df8"
+      },
+      {
+        "id": "gs-589934",
+        "issues": [
+          {
+            "code": "missing-conditions",
+            "label": "Beschreibung und Einloesebedingungen fehlen."
+          },
+          {
+            "code": "invalid-date",
+            "label": "Datumsfeld ungueltig; nicht automatisch raten."
+          },
+          {
+            "code": "evidence-missing",
+            "label": "Kein gespeicherter Originaltext fuer automatische Korrektur."
+          }
+        ],
+        "requiresReview": true,
+        "publicationMode": "human-approval",
+        "automaticPublicationAllowed": false,
+        "fingerprint": "a9e93e4d0cfa47260803785efdc8ec206646b27cddc4ebfdf87dd9c5d731f4d0"
+      },
+      {
+        "id": "gs-589241",
+        "issues": [
+          {
+            "code": "missing-conditions",
+            "label": "Beschreibung und Einloesebedingungen fehlen."
+          },
+          {
+            "code": "invalid-date",
+            "label": "Datumsfeld ungueltig; nicht automatisch raten."
+          },
+          {
+            "code": "evidence-missing",
+            "label": "Kein gespeicherter Originaltext fuer automatische Korrektur."
+          }
+        ],
+        "requiresReview": true,
+        "publicationMode": "human-approval",
+        "automaticPublicationAllowed": false,
+        "fingerprint": "c6a7d1fb1aebbb3bbe26f0ee90920b6cdc821a119516e216a52e52f672be1347"
+      },
+      {
+        "id": "gs-589286",
+        "issues": [
+          {
+            "code": "missing-conditions",
+            "label": "Beschreibung und Einloesebedingungen fehlen."
+          },
+          {
+            "code": "invalid-date",
+            "label": "Datumsfeld ungueltig; nicht automatisch raten."
+          },
+          {
+            "code": "evidence-missing",
+            "label": "Kein gespeicherter Originaltext fuer automatische Korrektur."
+          }
+        ],
+        "requiresReview": true,
+        "publicationMode": "human-approval",
+        "automaticPublicationAllowed": false,
+        "fingerprint": "c3e706bd1947a8ba555dff37e84166b2d343185783ee257b699fe406c44fb7b6"
+      },
+      {
+        "id": "meta-ig-18348759556281857",
+        "issues": [
+          {
+            "code": "upstream-validity-review",
+            "label": "Vorhandene Validierungshinweise vor Freigabe erneut pruefen."
+          },
+          {
+            "code": "map-incomplete",
+            "label": "Einloesestandorte sind noch nicht vollstaendig bestaetigt."
+          }
+        ],
+        "requiresReview": true,
+        "publicationMode": "human-approval",
+        "automaticPublicationAllowed": false,
+        "fingerprint": "15fd54d32b045eb01e22098f62e18c1449957afbc8055d28f2aa53425de4d843"
+      },
+      {
+        "id": "fc5-1qyhjul",
+        "issues": [
+          {
+            "code": "long-title",
+            "label": "Titel lang; Bedingungen erhalten, nicht abschneiden."
+          },
+          {
+            "code": "period-unconfirmed",
+            "label": "Aktionszeitraum oder dauerhafte Gueltigkeit pruefen."
+          },
+          {
+            "code": "source-blocked",
+            "label": "Bestehende Quellensperre bleibt wirksam."
+          },
+          {
+            "code": "upstream-validity-review",
+            "label": "Vorhandene Validierungshinweise vor Freigabe erneut pruefen."
+          },
+          {
+            "code": "map-incomplete",
+            "label": "Einloesestandorte sind noch nicht vollstaendig bestaetigt."
+          }
+        ],
+        "requiresReview": true,
+        "publicationMode": "human-approval",
+        "automaticPublicationAllowed": false,
+        "fingerprint": "77f8d001ba908f32ebbf0e9f53158de1beff09c77ba11ad0ea8518288bad8d3c"
+      },
+      {
+        "id": "meta-ig-18021569807981689",
+        "issues": [
+          {
+            "code": "long-title",
+            "label": "Titel lang; Bedingungen erhalten, nicht abschneiden."
+          },
+          {
+            "code": "upstream-validity-review",
+            "label": "Vorhandene Validierungshinweise vor Freigabe erneut pruefen."
+          },
+          {
+            "code": "map-incomplete",
+            "label": "Einloesestandorte sind noch nicht vollstaendig bestaetigt."
+          }
+        ],
+        "requiresReview": true,
+        "publicationMode": "human-approval",
+        "automaticPublicationAllowed": false,
+        "fingerprint": "4466b5f676386faecb0eb05e9fcbbc47d493178bd0a95e74ef56f86597b8796a"
+      },
+      {
+        "id": "merchant-web-0a626179e0793884bcc5",
+        "issues": [
+          {
+            "code": "period-unconfirmed",
+            "label": "Aktionszeitraum oder dauerhafte Gueltigkeit pruefen."
+          },
+          {
+            "code": "map-incomplete",
+            "label": "Einloesestandorte sind noch nicht vollstaendig bestaetigt."
+          }
+        ],
+        "requiresReview": true,
+        "publicationMode": "human-approval",
+        "automaticPublicationAllowed": false,
+        "fingerprint": "dbf8596bd456a8297375b451df42236035191f0e1ac6216476ae3688d34b4185"
+      },
+      {
+        "id": "merchant-web-24bca34ea4e9cbd5d83d",
+        "issues": [
+          {
+            "code": "long-title",
+            "label": "Titel lang; Bedingungen erhalten, nicht abschneiden."
+          },
+          {
+            "code": "period-unconfirmed",
+            "label": "Aktionszeitraum oder dauerhafte Gueltigkeit pruefen."
+          },
+          {
+            "code": "map-incomplete",
+            "label": "Einloesestandorte sind noch nicht vollstaendig bestaetigt."
+          }
+        ],
+        "requiresReview": true,
+        "publicationMode": "human-approval",
+        "automaticPublicationAllowed": false,
+        "fingerprint": "5bc40c6af3b5e671716298746302c10825a97bba8a8c632b286e8bff40a4fd05"
+      },
+      {
+        "id": "meta-ig-18144733252610394",
+        "issues": [
+          {
+            "code": "excluded-offer",
+            "label": "Angebot durch gemeinsame Discovery-Regeln ausgeschlossen: non-vienna-location."
+          },
+          {
+            "code": "long-title",
+            "label": "Titel lang; Bedingungen erhalten, nicht abschneiden."
+          },
+          {
+            "code": "invalid-date",
+            "label": "Datumsfeld ungueltig; nicht automatisch raten."
+          },
+          {
+            "code": "source-blocked",
+            "label": "Bestehende Quellensperre bleibt wirksam."
+          },
+          {
+            "code": "map-incomplete",
+            "label": "Einloesestandorte sind noch nicht vollstaendig bestaetigt."
+          }
+        ],
+        "requiresReview": true,
+        "publicationMode": "human-approval",
+        "automaticPublicationAllowed": false,
+        "fingerprint": "bccecb4003a9fe7eb98194b366af2af2c3a306a0ea65ae5602fbfb1234c1dbc4"
+      },
+      {
+        "id": "meta-ig-18502067695105404",
+        "issues": [
+          {
+            "code": "excluded-offer",
+            "label": "Angebot durch gemeinsame Discovery-Regeln ausgeschlossen: non-offer-content."
+          },
+          {
+            "code": "source-blocked",
+            "label": "Bestehende Quellensperre bleibt wirksam."
+          },
+          {
+            "code": "upstream-validity-review",
+            "label": "Vorhandene Validierungshinweise vor Freigabe erneut pruefen."
+          }
+        ],
+        "requiresReview": true,
+        "publicationMode": "human-approval",
+        "automaticPublicationAllowed": false,
+        "fingerprint": "6452c23c3aacc3f05f25d9ce8ca8018929a62ed6f7b27536ecc310cbec442a08"
+      },
+      {
+        "id": "meta-ig-17980915229916153",
+        "issues": [
+          {
+            "code": "invalid-date",
+            "label": "Datumsfeld ungueltig; nicht automatisch raten."
+          },
+          {
+            "code": "upstream-validity-review",
+            "label": "Vorhandene Validierungshinweise vor Freigabe erneut pruefen."
+          },
+          {
+            "code": "map-incomplete",
+            "label": "Einloesestandorte sind noch nicht vollstaendig bestaetigt."
+          }
+        ],
+        "requiresReview": true,
+        "publicationMode": "human-approval",
+        "automaticPublicationAllowed": false,
+        "fingerprint": "c0c2f659a9c1f669830910f76b15e8f4d91c923f19136e4f413ec625bc5a5577"
+      },
+      {
+        "id": "meta-ig-18149087608667909",
+        "issues": [
+          {
+            "code": "long-title",
+            "label": "Titel lang; Bedingungen erhalten, nicht abschneiden."
+          },
+          {
+            "code": "upstream-validity-review",
+            "label": "Vorhandene Validierungshinweise vor Freigabe erneut pruefen."
+          },
+          {
+            "code": "map-incomplete",
+            "label": "Einloesestandorte sind noch nicht vollstaendig bestaetigt."
+          }
+        ],
+        "requiresReview": true,
+        "publicationMode": "human-approval",
+        "automaticPublicationAllowed": false,
+        "fingerprint": "a369a92e0093b30abbeb63e1282ead846b47c8852a5d98c3cad8fb37e05c3a75"
+      },
+      {
+        "id": "social-food-review-p7kyg7",
+        "issues": [
+          {
+            "code": "excluded-offer",
+            "label": "Angebot durch gemeinsame Discovery-Regeln ausgeschlossen: non-offer-content."
+          },
+          {
+            "code": "long-title",
+            "label": "Titel lang; Bedingungen erhalten, nicht abschneiden."
+          },
+          {
+            "code": "invalid-date",
+            "label": "Datumsfeld ungueltig; nicht automatisch raten."
+          },
+          {
+            "code": "map-incomplete",
+            "label": "Einloesestandorte sind noch nicht vollstaendig bestaetigt."
+          }
+        ],
+        "requiresReview": true,
+        "publicationMode": "human-approval",
+        "automaticPublicationAllowed": false,
+        "fingerprint": "7de6582c103233f379f148ab4f8fcdc44bf55cdfea83d43323063451be2621f8"
+      },
+      {
+        "id": "social-food-review-1edjjr2",
+        "issues": [
+          {
+            "code": "excluded-offer",
+            "label": "Angebot durch gemeinsame Discovery-Regeln ausgeschlossen: non-offer-content."
+          },
+          {
+            "code": "long-title",
+            "label": "Titel lang; Bedingungen erhalten, nicht abschneiden."
+          },
+          {
+            "code": "invalid-date",
+            "label": "Datumsfeld ungueltig; nicht automatisch raten."
+          },
+          {
+            "code": "map-incomplete",
+            "label": "Einloesestandorte sind noch nicht vollstaendig bestaetigt."
+          }
+        ],
+        "requiresReview": true,
+        "publicationMode": "human-approval",
+        "automaticPublicationAllowed": false,
+        "fingerprint": "aca41a8772c8c05e2cab7ca99a35c5059d46c3f0de793db7ebf93cf66e32a3ea"
+      },
+      {
+        "id": "meta-ig-17995284714069966",
+        "issues": [
+          {
+            "code": "excluded-offer",
+            "label": "Angebot durch gemeinsame Discovery-Regeln ausgeschlossen: non-offer-content."
+          },
+          {
+            "code": "long-title",
+            "label": "Titel lang; Bedingungen erhalten, nicht abschneiden."
+          },
+          {
+            "code": "upstream-validity-review",
+            "label": "Vorhandene Validierungshinweise vor Freigabe erneut pruefen."
+          },
+          {
+            "code": "map-incomplete",
+            "label": "Einloesestandorte sind noch nicht vollstaendig bestaetigt."
+          }
+        ],
+        "requiresReview": true,
+        "publicationMode": "human-approval",
+        "automaticPublicationAllowed": false,
+        "fingerprint": "2d27a765ac2f577af80b0b53dbb64a944db304bd7ba020e75fd6afbf8d7ef9a2"
+      },
+      {
+        "id": "meta-ig-18176607961457022",
+        "issues": [
+          {
+            "code": "product-unspecified",
+            "label": "Titel nennt nur den Vorteil, nicht das konkrete Produkt oder die Leistung."
+          },
+          {
+            "code": "invalid-date",
+            "label": "Datumsfeld ungueltig; nicht automatisch raten."
+          },
+          {
+            "code": "upstream-validity-review",
+            "label": "Vorhandene Validierungshinweise vor Freigabe erneut pruefen."
+          },
+          {
+            "code": "map-incomplete",
+            "label": "Einloesestandorte sind noch nicht vollstaendig bestaetigt."
+          }
+        ],
+        "requiresReview": true,
+        "publicationMode": "human-approval",
+        "automaticPublicationAllowed": false,
+        "fingerprint": "4a8fda2ed6f1ee29435dc4dc5bef642c1c2d791a8ab10959fd5e6a43d6a524cb"
+      },
+      {
+        "id": "gs-588905",
+        "issues": [
+          {
+            "code": "long-title",
+            "label": "Titel lang; Bedingungen erhalten, nicht abschneiden."
+          },
+          {
+            "code": "missing-conditions",
+            "label": "Beschreibung und Einloesebedingungen fehlen."
+          },
+          {
+            "code": "invalid-date",
+            "label": "Datumsfeld ungueltig; nicht automatisch raten."
+          },
+          {
+            "code": "evidence-missing",
+            "label": "Kein gespeicherter Originaltext fuer automatische Korrektur."
+          }
+        ],
+        "requiresReview": true,
+        "publicationMode": "human-approval",
+        "automaticPublicationAllowed": false,
+        "fingerprint": "98f8035ccf58cb74e534cfc9073746321f13460088db2d5aab5aba4c278d59c0"
+      },
+      {
+        "id": "gs-16701",
+        "issues": [
+          {
+            "code": "missing-conditions",
+            "label": "Beschreibung und Einloesebedingungen fehlen."
+          },
+          {
+            "code": "period-unconfirmed",
+            "label": "Aktionszeitraum oder dauerhafte Gueltigkeit pruefen."
+          },
+          {
+            "code": "upstream-validity-review",
+            "label": "Vorhandene Validierungshinweise vor Freigabe erneut pruefen."
+          },
+          {
+            "code": "evidence-missing",
+            "label": "Kein gespeicherter Originaltext fuer automatische Korrektur."
+          }
+        ],
+        "requiresReview": true,
+        "publicationMode": "human-approval",
+        "automaticPublicationAllowed": false,
+        "fingerprint": "b4092f9e0e944be5a90687810e7b19a89ce9ca8ca22598a64735c59e6b2b448d"
+      },
+      {
+        "id": "merchant-web-8a4a878c29dd8a321161",
+        "issues": [
+          {
+            "code": "period-unconfirmed",
+            "label": "Aktionszeitraum oder dauerhafte Gueltigkeit pruefen."
+          },
+          {
+            "code": "map-incomplete",
+            "label": "Einloesestandorte sind noch nicht vollstaendig bestaetigt."
+          }
+        ],
+        "requiresReview": true,
+        "publicationMode": "human-approval",
+        "automaticPublicationAllowed": false,
+        "fingerprint": "9d6b084e9869014bd425f47caf947ebfcc6c05c411ace06466de3a5ec2bf1222"
+      },
+      {
+        "id": "g2-s2eodg",
+        "issues": [
+          {
+            "code": "period-unconfirmed",
+            "label": "Aktionszeitraum oder dauerhafte Gueltigkeit pruefen."
+          },
+          {
+            "code": "source-blocked",
+            "label": "Bestehende Quellensperre bleibt wirksam."
+          },
+          {
+            "code": "upstream-validity-review",
+            "label": "Vorhandene Validierungshinweise vor Freigabe erneut pruefen."
+          },
+          {
+            "code": "map-incomplete",
+            "label": "Einloesestandorte sind noch nicht vollstaendig bestaetigt."
+          },
+          {
+            "code": "evidence-missing",
+            "label": "Kein gespeicherter Originaltext fuer automatische Korrektur."
+          }
+        ],
+        "requiresReview": true,
+        "publicationMode": "human-approval",
+        "automaticPublicationAllowed": false,
+        "fingerprint": "afa6612729a9f6389e2286aa24d7da2b44eebfbdbd0f0df0552438f76c10c06c"
+      },
+      {
+        "id": "g2-1u1ywot",
+        "issues": [
+          {
+            "code": "period-unconfirmed",
+            "label": "Aktionszeitraum oder dauerhafte Gueltigkeit pruefen."
+          },
+          {
+            "code": "source-blocked",
+            "label": "Bestehende Quellensperre bleibt wirksam."
+          },
+          {
+            "code": "upstream-validity-review",
+            "label": "Vorhandene Validierungshinweise vor Freigabe erneut pruefen."
+          },
+          {
+            "code": "map-incomplete",
+            "label": "Einloesestandorte sind noch nicht vollstaendig bestaetigt."
+          },
+          {
+            "code": "evidence-missing",
+            "label": "Kein gespeicherter Originaltext fuer automatische Korrektur."
+          }
+        ],
+        "requiresReview": true,
+        "publicationMode": "human-approval",
+        "automaticPublicationAllowed": false,
+        "fingerprint": "8c8b435d4a8e0b80eb0564cd35f29a8b4f79921fda3c6c67d416c1679dc05f9c"
+      },
+      {
+        "id": "g2-1ds91pt",
+        "issues": [
+          {
+            "code": "long-title",
+            "label": "Titel lang; Bedingungen erhalten, nicht abschneiden."
+          },
+          {
+            "code": "period-unconfirmed",
+            "label": "Aktionszeitraum oder dauerhafte Gueltigkeit pruefen."
+          },
+          {
+            "code": "source-blocked",
+            "label": "Bestehende Quellensperre bleibt wirksam."
+          },
+          {
+            "code": "upstream-validity-review",
+            "label": "Vorhandene Validierungshinweise vor Freigabe erneut pruefen."
+          },
+          {
+            "code": "map-incomplete",
+            "label": "Einloesestandorte sind noch nicht vollstaendig bestaetigt."
+          },
+          {
+            "code": "evidence-missing",
+            "label": "Kein gespeicherter Originaltext fuer automatische Korrektur."
+          }
+        ],
+        "requiresReview": true,
+        "publicationMode": "human-approval",
+        "automaticPublicationAllowed": false,
+        "fingerprint": "244b7d229a5e437696ea6c6d79f5079cfde4b00bbbcb1fb314ad0447bbc6af9f"
+      },
+      {
+        "id": "meta-ig-17898697404416855",
+        "issues": [
+          {
+            "code": "excluded-offer",
+            "label": "Angebot durch gemeinsame Discovery-Regeln ausgeschlossen: business-lead-generation."
+          },
+          {
+            "code": "period-unconfirmed",
+            "label": "Aktionszeitraum oder dauerhafte Gueltigkeit pruefen."
+          },
+          {
+            "code": "upstream-validity-review",
+            "label": "Vorhandene Validierungshinweise vor Freigabe erneut pruefen."
+          },
+          {
+            "code": "map-incomplete",
+            "label": "Einloesestandorte sind noch nicht vollstaendig bestaetigt."
+          }
+        ],
+        "requiresReview": true,
+        "publicationMode": "human-approval",
+        "automaticPublicationAllowed": false,
+        "fingerprint": "793cc41937a0aeafd0fd22af968cf77da31a7b3493bdf938cce9687b6f9bdea6"
+      },
+      {
+        "id": "meta-ig-17866302456692825",
+        "issues": [
+          {
+            "code": "long-title",
+            "label": "Titel lang; Bedingungen erhalten, nicht abschneiden."
+          },
+          {
+            "code": "upstream-validity-review",
+            "label": "Vorhandene Validierungshinweise vor Freigabe erneut pruefen."
+          },
+          {
+            "code": "map-incomplete",
+            "label": "Einloesestandorte sind noch nicht vollstaendig bestaetigt."
+          }
+        ],
+        "requiresReview": true,
+        "publicationMode": "human-approval",
+        "automaticPublicationAllowed": false,
+        "fingerprint": "71011a710c099bc38dd2428dd29a24cbae6762027ad1e7ce0e7bb78d847dd58c"
+      },
+      {
+        "id": "fc4g-12cp699",
+        "issues": [
+          {
+            "code": "period-unconfirmed",
+            "label": "Aktionszeitraum oder dauerhafte Gueltigkeit pruefen."
+          },
+          {
+            "code": "upstream-validity-review",
+            "label": "Vorhandene Validierungshinweise vor Freigabe erneut pruefen."
+          },
+          {
+            "code": "evidence-missing",
+            "label": "Kein gespeicherter Originaltext fuer automatische Korrektur."
+          }
+        ],
+        "requiresReview": true,
+        "publicationMode": "human-approval",
+        "automaticPublicationAllowed": false,
+        "fingerprint": "861d38e1e1b757f990365af7ab72f3bbf39b5f76787d07ce5487188cf301bbfb"
+      },
+      {
+        "id": "fc4g-1y539jl",
+        "issues": [
+          {
+            "code": "long-title",
+            "label": "Titel lang; Bedingungen erhalten, nicht abschneiden."
+          },
+          {
+            "code": "period-unconfirmed",
+            "label": "Aktionszeitraum oder dauerhafte Gueltigkeit pruefen."
+          },
+          {
+            "code": "upstream-validity-review",
+            "label": "Vorhandene Validierungshinweise vor Freigabe erneut pruefen."
+          },
+          {
+            "code": "map-incomplete",
+            "label": "Einloesestandorte sind noch nicht vollstaendig bestaetigt."
+          }
+        ],
+        "requiresReview": true,
+        "publicationMode": "human-approval",
+        "automaticPublicationAllowed": false,
+        "fingerprint": "ff3b5ea83f3720a37f37fc35c946a51d177d809427cb861fb5c4930f0cc7d7a1"
+      },
+      {
+        "id": "meta-ig-18110381867263498",
+        "issues": [
+          {
+            "code": "long-title",
+            "label": "Titel lang; Bedingungen erhalten, nicht abschneiden."
+          },
+          {
+            "code": "missing-merchant",
+            "label": "Tatsaechlichen Anbieter bestaetigen."
+          },
+          {
+            "code": "period-unconfirmed",
+            "label": "Aktionszeitraum oder dauerhafte Gueltigkeit pruefen."
+          },
+          {
+            "code": "upstream-validity-review",
+            "label": "Vorhandene Validierungshinweise vor Freigabe erneut pruefen."
+          },
+          {
+            "code": "map-incomplete",
+            "label": "Einloesestandorte sind noch nicht vollstaendig bestaetigt."
+          }
+        ],
+        "requiresReview": true,
+        "publicationMode": "human-approval",
+        "automaticPublicationAllowed": false,
+        "fingerprint": "70ec277bcede9eba3772c63a2591265e204148d233ed11013cf2f80a3aabb692"
+      },
+      {
+        "id": "meta-ig-18100044578652986",
+        "issues": [
+          {
+            "code": "long-title",
+            "label": "Titel lang; Bedingungen erhalten, nicht abschneiden."
+          },
+          {
+            "code": "invalid-date",
+            "label": "Datumsfeld ungueltig; nicht automatisch raten."
+          },
+          {
+            "code": "upstream-validity-review",
+            "label": "Vorhandene Validierungshinweise vor Freigabe erneut pruefen."
+          },
+          {
+            "code": "map-incomplete",
+            "label": "Einloesestandorte sind noch nicht vollstaendig bestaetigt."
+          }
+        ],
+        "requiresReview": true,
+        "publicationMode": "human-approval",
+        "automaticPublicationAllowed": false,
+        "fingerprint": "51cc0747ad05c241ab0fa4d74fe9fcbba35a1609dadf6d906686c0104d5cd767"
+      },
+      {
+        "id": "fc4g-1r04rhe",
+        "issues": [
+          {
+            "code": "source-blocked",
+            "label": "Bestehende Quellensperre bleibt wirksam."
+          },
+          {
+            "code": "map-incomplete",
+            "label": "Einloesestandorte sind noch nicht vollstaendig bestaetigt."
+          },
+          {
+            "code": "evidence-missing",
+            "label": "Kein gespeicherter Originaltext fuer automatische Korrektur."
+          }
+        ],
+        "requiresReview": true,
+        "publicationMode": "human-approval",
+        "automaticPublicationAllowed": false,
+        "fingerprint": "4102f5904c63ca4706d3c68f4daad76cd2d74ef9d57d7dc7374936ce37809a0e"
+      },
+      {
+        "id": "meta-ig-18101671448672416",
+        "issues": [
+          {
+            "code": "period-unconfirmed",
+            "label": "Aktionszeitraum oder dauerhafte Gueltigkeit pruefen."
+          },
+          {
+            "code": "source-blocked",
+            "label": "Bestehende Quellensperre bleibt wirksam."
+          },
+          {
+            "code": "upstream-validity-review",
+            "label": "Vorhandene Validierungshinweise vor Freigabe erneut pruefen."
+          },
+          {
+            "code": "map-incomplete",
+            "label": "Einloesestandorte sind noch nicht vollstaendig bestaetigt."
+          }
+        ],
+        "requiresReview": true,
+        "publicationMode": "human-approval",
+        "automaticPublicationAllowed": false,
+        "fingerprint": "fa1034057c99221d8080351b44a24830d9d9c8e515e582ff1773972368bd6ea8"
+      },
+      {
+        "id": "power-food-73cf88790a2d",
+        "issues": [
+          {
+            "code": "period-unconfirmed",
+            "label": "Aktionszeitraum oder dauerhafte Gueltigkeit pruefen."
+          },
+          {
+            "code": "source-blocked",
+            "label": "Bestehende Quellensperre bleibt wirksam."
+          },
+          {
+            "code": "upstream-validity-review",
+            "label": "Vorhandene Validierungshinweise vor Freigabe erneut pruefen."
+          },
+          {
+            "code": "map-incomplete",
+            "label": "Einloesestandorte sind noch nicht vollstaendig bestaetigt."
+          }
+        ],
+        "requiresReview": true,
+        "publicationMode": "human-approval",
+        "automaticPublicationAllowed": false,
+        "fingerprint": "606f729bb9781fc1bfb5aa21746181e6bbf98281a2f005ef8e2f4af2b4c557eb"
+      },
+      {
+        "id": "fc4g-1opqd7m",
+        "issues": [
+          {
+            "code": "missing-conditions",
+            "label": "Beschreibung und Einloesebedingungen fehlen."
+          },
+          {
+            "code": "invalid-date",
+            "label": "Datumsfeld ungueltig; nicht automatisch raten."
+          },
+          {
+            "code": "source-blocked",
+            "label": "Bestehende Quellensperre bleibt wirksam."
+          },
+          {
+            "code": "map-incomplete",
+            "label": "Einloesestandorte sind noch nicht vollstaendig bestaetigt."
+          },
+          {
+            "code": "evidence-missing",
+            "label": "Kein gespeicherter Originaltext fuer automatische Korrektur."
+          }
+        ],
+        "requiresReview": true,
+        "publicationMode": "human-approval",
+        "automaticPublicationAllowed": false,
+        "fingerprint": "356cf5863d41b6abef9a452ffd0bdeba717ffdb76cf53265ec20c3ee059a6421"
+      },
+      {
         "id": "g2-93n04l",
         "issues": [
           {
@@ -8092,71 +8338,8 @@
         "fingerprint": "d4b39b74eaedf639a081e68e817c861959ed85fe0170e80094360d4ac9defd32"
       },
       {
-        "id": "merchant-web-24bca34ea4e9cbd5d83d",
+        "id": "merchant-web-f5effc2c265a56c39f08",
         "issues": [
-          {
-            "code": "long-title",
-            "label": "Titel lang; Bedingungen erhalten, nicht abschneiden."
-          },
-          {
-            "code": "period-unconfirmed",
-            "label": "Aktionszeitraum oder dauerhafte Gueltigkeit pruefen."
-          },
-          {
-            "code": "map-incomplete",
-            "label": "Einloesestandorte sind noch nicht vollstaendig bestaetigt."
-          }
-        ],
-        "requiresReview": true,
-        "publicationMode": "human-approval",
-        "automaticPublicationAllowed": false,
-        "fingerprint": "c23766b31b84e983a6f79ec8944e5f2dcbf907f2ab45b14946bff86c9f87574a"
-      },
-      {
-        "id": "merchant-web-0a626179e0793884bcc5",
-        "issues": [
-          {
-            "code": "period-unconfirmed",
-            "label": "Aktionszeitraum oder dauerhafte Gueltigkeit pruefen."
-          },
-          {
-            "code": "map-incomplete",
-            "label": "Einloesestandorte sind noch nicht vollstaendig bestaetigt."
-          }
-        ],
-        "requiresReview": true,
-        "publicationMode": "human-approval",
-        "automaticPublicationAllowed": false,
-        "fingerprint": "dbf8596bd456a8297375b451df42236035191f0e1ac6216476ae3688d34b4185"
-      },
-      {
-        "id": "meta-ig-18021569807981689",
-        "issues": [
-          {
-            "code": "long-title",
-            "label": "Titel lang; Bedingungen erhalten, nicht abschneiden."
-          },
-          {
-            "code": "upstream-validity-review",
-            "label": "Vorhandene Validierungshinweise vor Freigabe erneut pruefen."
-          },
-          {
-            "code": "map-incomplete",
-            "label": "Einloesestandorte sind noch nicht vollstaendig bestaetigt."
-          }
-        ],
-        "requiresReview": true,
-        "publicationMode": "human-approval",
-        "automaticPublicationAllowed": false,
-        "fingerprint": "151a185beeda0c271d9d355034e23cce094298c15cfa228c69bbd76f9e1bdf35"
-      },
-      {
-        "id": "fc5-1qyhjul",
-        "issues": [
-          {
-            "code": "long-title",
-            "label": "Titel lang; Bedingungen erhalten, nicht abschneiden."
-          },
           {
             "code": "period-unconfirmed",
             "label": "Aktionszeitraum oder dauerhafte Gueltigkeit pruefen."
@@ -8177,113 +8360,7 @@
         "requiresReview": true,
         "publicationMode": "human-approval",
         "automaticPublicationAllowed": false,
-        "fingerprint": "8b8a1757abcddec41d14500b21ec4746bf06b9c84d59a9d20240a107d0f3b1b6"
-      },
-      {
-        "id": "meta-ig-18348759556281857",
-        "issues": [
-          {
-            "code": "upstream-validity-review",
-            "label": "Vorhandene Validierungshinweise vor Freigabe erneut pruefen."
-          },
-          {
-            "code": "map-incomplete",
-            "label": "Einloesestandorte sind noch nicht vollstaendig bestaetigt."
-          }
-        ],
-        "requiresReview": true,
-        "publicationMode": "human-approval",
-        "automaticPublicationAllowed": false,
-        "fingerprint": "240ff63524d0e5039112a2c0c7b096693ed9bc633b78d6937a061920721eb582"
-      },
-      {
-        "id": "gs-589286",
-        "issues": [
-          {
-            "code": "evidence-missing",
-            "label": "Kein gespeicherter Originaltext fuer automatische Korrektur."
-          }
-        ],
-        "requiresReview": true,
-        "publicationMode": "human-approval",
-        "automaticPublicationAllowed": false,
-        "fingerprint": "95d4b4fc5cc0fbcd93ebefdabcdf934477934127c6d079fd5b5aa516f80ff4ab"
-      },
-      {
-        "id": "gs-589241",
-        "issues": [
-          {
-            "code": "evidence-missing",
-            "label": "Kein gespeicherter Originaltext fuer automatische Korrektur."
-          }
-        ],
-        "requiresReview": true,
-        "publicationMode": "human-approval",
-        "automaticPublicationAllowed": false,
-        "fingerprint": "990018bae41b3944204e2dd29d964ccd98daaf6381235b9c6b8021c410c306b0"
-      },
-      {
-        "id": "gs-589934",
-        "issues": [
-          {
-            "code": "evidence-missing",
-            "label": "Kein gespeicherter Originaltext fuer automatische Korrektur."
-          }
-        ],
-        "requiresReview": true,
-        "publicationMode": "human-approval",
-        "automaticPublicationAllowed": false,
-        "fingerprint": "4200d3beaa317c303ae655f2f0e8e6d1ff2d227453e93c0a9a3fb523eb41d30e"
-      },
-      {
-        "id": "fc4g-1opqd7m",
-        "issues": [
-          {
-            "code": "source-blocked",
-            "label": "Bestehende Quellensperre bleibt wirksam."
-          },
-          {
-            "code": "map-incomplete",
-            "label": "Einloesestandorte sind noch nicht vollstaendig bestaetigt."
-          },
-          {
-            "code": "evidence-missing",
-            "label": "Kein gespeicherter Originaltext fuer automatische Korrektur."
-          }
-        ],
-        "requiresReview": true,
-        "publicationMode": "human-approval",
-        "automaticPublicationAllowed": false,
-        "fingerprint": "ce731b54fafea4fdfb84e1d56d908a842b6346068b018cc7b07b07310f7c72bb"
-      },
-      {
-        "id": "power-e2d083a924f9",
-        "issues": [
-          {
-            "code": "long-title",
-            "label": "Titel lang; Bedingungen erhalten, nicht abschneiden."
-          },
-          {
-            "code": "period-unconfirmed",
-            "label": "Aktionszeitraum oder dauerhafte Gueltigkeit pruefen."
-          },
-          {
-            "code": "upstream-validity-review",
-            "label": "Vorhandene Validierungshinweise vor Freigabe erneut pruefen."
-          },
-          {
-            "code": "map-incomplete",
-            "label": "Einloesestandorte sind noch nicht vollstaendig bestaetigt."
-          },
-          {
-            "code": "evidence-missing",
-            "label": "Kein gespeicherter Originaltext fuer automatische Korrektur."
-          }
-        ],
-        "requiresReview": true,
-        "publicationMode": "human-approval",
-        "automaticPublicationAllowed": false,
-        "fingerprint": "bcd75d3e761256703a5c147e074c00fd1666ac599f57608f4c3d7f96d0075df8"
+        "fingerprint": "4ed503c65dda28180f32981d3daaa54ed97708d92ccb2b0999a9275f6d1a30b8"
       }
     ]
   },
