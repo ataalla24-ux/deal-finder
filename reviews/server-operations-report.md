@@ -1,20 +1,20 @@
 # FreeFinder Betriebsbericht
 
-Stand: 2026-11-13T19:43:48.953Z
+Stand: 2026-11-13T20:40:04.779Z
 
-- 77 Live-Angebote; 192 nicht-live Entwuerfe geprueft.
+- 77 Live-Angebote; 202 nicht-live Entwuerfe geprueft.
 - 0 neue IDs seit letzter Bestandsaufnahme; keine automatische Erfolgszuordnung.
 - 0 Entwuerfe ohne formale Pruefluecke, weiterhin menschliche Freigabe.
-- Pilot: 50 Faelle gesammelt, 0 unabhaengig bewertet, 5 regulaere Qualitaetslaeufe beobachtet. Automatische Freigabe AUS.
+- Pilot: 50 Faelle gesammelt, 0 unabhaengig bewertet, 6 regulaere Qualitaetslaeufe beobachtet. Automatische Freigabe AUS.
 - Neue Slack-Zustellungen: hier nicht nachgewiesen.
-- API: internal-ledger; 0.363403 USD intern gebucht/reserviert in 24 Stunden. Kein Anbieter-Kontostand.
+- API: internal-ledger; 0.385321 USD intern gebucht/reserviert in 24 Stunden. Kein Anbieter-Kontostand.
 
 ## Naechste Schritte
 
-- source-evidence-needed: 83
+- source-evidence-needed: 84
 - blocked-source: 48
-- venue-verification-needed: 60
-- copy-or-period-review: 1
+- venue-verification-needed: 67
+- copy-or-period-review: 3
 
 ## Native Bilder
 
@@ -27,8 +27,8 @@ Stand: 2026-11-13T19:43:48.953Z
 
 ## Aktualitaet
 
-- Entwurfsregeln frisch und lokal geprueft, ohne Modell- oder Quellenaufruf. 192 unterschiedliche IDs in 192 Eintraegen; doppelte IDs bleiben Prueffaelle.
-- Live-/Bildpruefstand: current; letzte Pruefung 2026-11-13T19:43:47.506Z. Bei veraltetem Stand sind leere Hinweisliste und Bildzaehler KEIN Entwarnungsnachweis.
+- Entwurfsregeln frisch und lokal geprueft, ohne Modell- oder Quellenaufruf. 202 unterschiedliche IDs in 202 Eintraegen; doppelte IDs bleiben Prueffaelle.
+- Live-/Bildpruefstand: current; letzte Pruefung 2026-11-13T20:39:52.458Z. Bei veraltetem Stand sind leere Hinweisliste und Bildzaehler KEIN Entwarnungsnachweis.
 
 ## Freigabe und Einloesung
 
@@ -40,6 +40,6 @@ Stand: 2026-11-13T19:43:48.953Z
 ## Quellen
 
 - docs/apify-discovery-report.json: succeeded; {"fetchedRecords":4,"freshAcceptedDeals":0,"pendingDeals":0,"duplicatePosts":0,"unchangedPosts":1,"providerErrors":0}; Slack-Zustellungen nicht aus Kandidaten ableiten.
-- docs/meta-instagram-report.json: degraded; {"freshPostsFetched":482,"newDeals":2,"repeatedDeals":51,"totalDeals":53}; Slack-Zustellungen nicht aus Kandidaten ableiten.
-- docs/power-scraper-report.json: see-source-results; {"acceptedDeals":39,"healthySources":46,"failedSources":2,"deferredSources":11,"rawDeals":39}; Slack-Zustellungen nicht aus Kandidaten ableiten.
-- docs/instagram-ai-report.json: see-source-results; {"discoveredCandidates":11,"acceptedDeals":3,"aiRescueCandidates":1,"aiRescued":0}; Slack-Zustellungen nicht aus Kandidaten ableiten.
+- docs/meta-instagram-report.json: degraded; {"freshPostsFetched":1822,"newDeals":0,"repeatedDeals":51,"totalDeals":51}; Slack-Zustellungen nicht aus Kandidaten ableiten.
+- docs/power-scraper-report.json: see-source-results; {"acceptedDeals":48,"healthySources":46,"failedSources":1,"deferredSources":12,"rawDeals":48}; Slack-Zustellungen nicht aus Kandidaten ableiten.
+- docs/instagram-ai-report.json: see-source-results; {"discoveredCandidates":13,"acceptedDeals":3,"aiRescueCandidates":1,"aiRescued":0}; Slack-Zustellungen nicht aus Kandidaten ableiten.
