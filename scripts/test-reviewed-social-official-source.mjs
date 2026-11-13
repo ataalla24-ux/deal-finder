@@ -27,6 +27,25 @@ const page = async () => ({ status: 200, finalUrl: home, html });
 const options = extra => ({ now, approvalContext: true, readState: emptyState, recordPause: () => { throw new Error('No real state writes'); }, fetchPage: page, ...extra });
 const noSocial = async () => { throw new Error('Must not request Instagram'); };
 
+test('blocked approval retry cannot restore an old official corroboration from pending state', async () => {
+  const { validateApprovalCandidates } = await import('../scraper/slack-approve.js');
+  const previous = process.env.APPROVAL_SOURCE_COPY_REVIEW;
+  process.env.APPROVAL_SOURCE_COPY_REVIEW = '0';
+  try {
+    const result = await validateApprovalCandidates([{ ...deal,
+      officialSourceCorroboration: { sourceUrl: home, checkedAt: '2026-11-13T12:00:00Z' },
+    }], { now, existingDeals: [], requireMap: false, inspectDealUrlHealth: noSocial,
+      reviewedSocialOfficialOptions: options({ fetchPage: async () => ({ status: 200, finalUrl: home, html: '<p>Offer removed</p>' }) }),
+    });
+    assert.equal(result.allowedDeals.length, 0);
+    assert.equal(result.blockedDeals[0].officialSourceCorroboration, undefined);
+    assert.equal(result.blockedDeals[0].pipelineLifecycle.manualDecision, 'approved');
+  } finally {
+    if (previous === undefined) delete process.env.APPROVAL_SOURCE_COPY_REVIEW;
+    else process.env.APPROVAL_SOURCE_COPY_REVIEW = previous;
+  }
+});
+
 test('one official request replaces the social probe only for existing human approval; original dates and identity survive', async () => {
   let requests = 0;
   const result = await validateDealsForSlack([deal, structuredClone(deal)], {

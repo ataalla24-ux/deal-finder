@@ -880,7 +880,12 @@ async function validateApprovalCandidates(deals, options = {}) {
     const results = validation.results.map(row => {
       if (row.decision.allowed) return row;
       const original = originals.get(row.deal.id);
-      return original ? { ...row, deal: { ...original, approvalCopyReview: row.deal.approvalCopyReview } } : row;
+      if (!original) return row;
+      const pending = { ...original, approvalCopyReview: row.deal.approvalCopyReview };
+      // Current source corroboration is recomputed on every approval attempt.
+      // Restoring the pending input must not resurrect an older successful proof.
+      delete pending.officialSourceCorroboration;
+      return { ...row, deal: pending };
     });
     return { ...validation, results, blockedDeals: results.filter(row => !row.decision.allowed).map(row => row.deal) };
   };
