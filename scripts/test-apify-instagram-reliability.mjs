@@ -294,6 +294,11 @@ assert.deepEqual(
   'an exhausted external Apify budget is reported without erasing output or creating recurring false outage failures',
 );
 assert.equal(classifyApifyApiFailure({ message: 'too many requests', httpStatus: 429 }).controlled, false);
+assert.deepEqual(classifyApifyApiFailure({ message: 'user-or-token-not-found', httpStatus: 401 }), {
+  operationalStatus: 'authentication-invalid', reasonCode: 'api-token-invalid', controlled: false,
+});
+assert.equal(classifyApifyApiFailure({ message: 'Actor access denied', httpStatus: 403 }).operationalStatus, 'failed',
+  'an Actor permission error is not proof of an invalid account token');
 assert.equal(shouldSkipBudgetBlockedRetry({
   operationalStatus: 'budget-blocked',
   updatedAt: '2026-07-17T10:00:00.000Z',

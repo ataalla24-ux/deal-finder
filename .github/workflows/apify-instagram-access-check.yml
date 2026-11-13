@@ -1,0 +1,30 @@
+name: Apify Instagram Read-only Access Check
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: apify-instagram-access-check
+  cancel-in-progress: false
+
+jobs:
+  check-access:
+    runs-on: ubuntu-latest
+    timeout-minutes: 3
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Test metadata-only access probe offline
+        run: node --test scripts/test-apify-instagram-access.mjs
+      - name: Read account and Actor metadata only
+        env:
+          APIFY_TOKEN: ${{ secrets.APIFY_TOKEN }}
+          APIFY_INSTAGRAM_VIENNA_ACTOR_ID: ${{ secrets.APIFY_INSTAGRAM_VIENNA_ACTOR_ID }}
+        run: node scripts/check-apify-instagram-access.mjs

@@ -16,6 +16,27 @@ const conditionalSecond = await conditionalStore.read();
 assert.equal(conditionalSecond.state.pausedUntil, 0, 'cached state cannot be mutated by callers');
 assert.equal(conditionalSecond.revision, 'state-sha');
 assert.equal(cachedReads, 2, 'still observe global pauses via conditional polling, not a stale local-only lease');
+
+// A conflicting writer invalidates our ETag. Otherwise a stale conditional
+// response can keep all bounded CAS retries on the same rejected revision.
+for (const status of [409, 422]) {
+  let conflict = false;
+  const waits = [];
+  const conflictingStore = githubQuotaStore({ GITHUB_REPOSITORY: 'owner/repo', GH_TOKEN: 'test-token' }, async (url, init) => {
+    if (url.includes('/git/ref/')) return Response.json({});
+    if (init.method === 'PUT') { conflict = true; return Response.json({}, { status }); }
+    if (conflict) assert.equal(init.headers['If-None-Match'], undefined, 'SHA conflict must invalidate the cached ETag');
+    return Response.json({ content: Buffer.from(JSON.stringify({ version: 1, reservations: [], pausedUntil: conflict ? 1234 : 0 })).toString('base64'),
+      sha: conflict ? 'concurrent-sha' : 'old-sha' }, { headers: { etag: '"old-etag"' } });
+  }, { sleep: async ms => waits.push(ms) });
+  const original = await conflictingStore.read();
+  assert.equal(await conflictingStore.compareAndSwap(original.revision, original.state), false);
+  const current = await conflictingStore.read();
+  assert.equal(current.revision, 'concurrent-sha');
+  assert.equal(current.state.pausedUntil, 1234, 'never overwrite another runner\'s pause');
+  assert.equal(waits.length, 1);
+  assert(waits[0] >= 200 && waits[0] <= 500, 'conflict backoff is bounded within the existing retry count');
+}
 let now = Date.parse('2026-09-07T20:00:00Z');
 const makeStore = () => {
   let state = { version: 1, reservations: [], pausedUntil: 0 };

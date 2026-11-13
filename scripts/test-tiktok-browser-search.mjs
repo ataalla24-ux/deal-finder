@@ -103,9 +103,27 @@ test('TikTok diagnostics distinguish a local request cap from unreadable or miss
     assert.doesNotMatch(JSON.stringify(result),/private-value|do-not-log/);
     if (reason==='request-policy-blocked') {
       assert.equal(result.observedSearchEndpoints['item-full'],1);
+      assert.equal(result.observedSearchPaths['/api/search/item/full/'],1);
       assert.equal(result.blockedRequestReasons['unexpected-endpoint'],1);
       assert.equal(calls.length,0,'diagnostics must not authorize an alternate endpoint');
     }
+  });
+});
+
+test('route diagnostics retain known route shapes only, without authorizing them or logging credentials', async () => {
+  await fixture({html:`<script>
+    fetch('/api/search/general/preview/?keyword=private-value&token=do-not-log');
+    fetch('/api/search/general/full?keyword=private-value&signature=do-not-log');
+    fetch('/api/search/privateaccount/privatetoken/?token=do-not-log');
+    </script>`},async(page,calls)=>{
+    const result=await scan(page);
+    assert.equal(calls.length,0);
+    assert.equal(result.searchRequests,0);
+    assert.equal(result.errors[0].transportReason,'request-policy-blocked');
+    assert.equal(result.observedSearchPaths['/api/search/general/preview/'],1);
+    assert.equal(result.observedSearchPaths['/api/search/general/full'],1);
+    assert.equal(result.observedSearchPaths['[redacted]'],1);
+    assert.doesNotMatch(JSON.stringify(result), /private-value|do-not-log|privateaccount|privatetoken/);
   });
 });
 

@@ -23,6 +23,8 @@ on:
       - '.github/workflows/daily-deal-pick.yml'
       - '.github/workflows/validate-live-deals.yml'
       - 'scripts/test-apify*'
+      - 'scripts/check-apify-instagram-access.mjs'
+      - '.github/workflows/apify-instagram-access-check.yml'
       - '.github/workflows/apify-discovery.yml'
       - 'scripts/test-slack-food-improvements.mjs'
       - 'scripts/test-food-quality-oct30.mjs'
@@ -78,6 +80,8 @@ on:
       - '.github/workflows/daily-deal-pick.yml'
       - '.github/workflows/validate-live-deals.yml'
       - 'scripts/test-apify*'
+      - 'scripts/check-apify-instagram-access.mjs'
+      - '.github/workflows/apify-instagram-access-check.yml'
       - '.github/workflows/apify-discovery.yml'
       - 'scripts/test-instagram-graph*.mjs'
       - 'scripts/test-instagram-shared-quota.mjs'
@@ -143,6 +147,7 @@ jobs:
           node scripts/test-slack-deal-quality.mjs
           node scripts/test-deal-review-feedback.mjs
           node scripts/test-apify-instagram-reliability.mjs
+          node --test scripts/test-apify-instagram-access.mjs
           node --test scripts/test-apify-discovery.mjs scripts/test-apify-food-discovery.mjs
           node scripts/test-instagram-max-coverage.mjs
           node scripts/test-instagram-media-budget.mjs

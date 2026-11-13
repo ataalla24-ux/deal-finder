@@ -88,7 +88,13 @@ export function githubQuotaStore(env, fetchImpl = globalThis.fetch, {
       for (let attempt = 0; attempt < 2; attempt += 1) {
         const result = await request(`/contents/${file}`, 'PUT', body);
         if ([200, 201].includes(result.status)) { cached = null; return true; }
-        if ([409, 422].includes(result.status)) return false;
+        if ([409, 422].includes(result.status)) {
+          // Another runner may have committed a pause or reservation. Drop
+          // stale conditional state and spread the existing bounded retries.
+          cached = null;
+          await sleep(200 + Math.floor(Math.random() * 301));
+          return false;
+        }
         if (![500, 502, 503, 504].includes(result.status)) throw storageFailure(result, 'write-state');
         const seconds = Number(result.retryAfter);
         const retryMs = Number.isFinite(seconds) ? seconds * 1000 : Date.parse(result.retryAfter) - Date.now();

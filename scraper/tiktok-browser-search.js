@@ -6,7 +6,7 @@ export async function createTikTokBrowserSearch(page, { pages = 3, count = 30, t
   const responses = [];
   const admitted = new Set();
   const stats = { transport: 'public-browser-search', navigations: 0, searchRequests: 0, blockedExtraRequests: 0,
-    blockedRequestReasons: {}, observedSearchEndpoints: {} };
+    blockedRequestReasons: {}, observedSearchEndpoints: {}, observedSearchPaths: {} };
   const unavailable = (status = 0, retryAfter = '', transportReason = 'response-unavailable') => ({ ok: false, status, retryAfter, transportReason });
   const deliver = value => {
     if (closed) return;
@@ -21,6 +21,14 @@ export async function createTikTokBrowserSearch(page, { pages = 3, count = 30, t
       : url.pathname === '/api/search/item/full/' ? 'item-full'
       : url.pathname === '/api/search/user/full/' ? 'user-full' : 'other-search';
     stats.observedSearchEndpoints[endpoint] = (stats.observedSearchEndpoints[endpoint] || 0) + 1;
+    // Retain only short route names, never a query, signature, user ID, or
+    // foreign origin. Unknown paths remain blocked pending a source review.
+    const safePath = url.origin === 'https://www.tiktok.com'
+      && /^\/api\/search\/(?:general|item|user|suggest|recommend|suggest_words|suggest_guide|live|video|business)(?:\/(?:full|preview))?\/?$/.test(url.pathname)
+      ? url.pathname : '[redacted]';
+    if (Object.hasOwn(stats.observedSearchPaths, safePath) || Object.keys(stats.observedSearchPaths).length < 12) {
+      stats.observedSearchPaths[safePath] = (stats.observedSearchPaths[safePath] || 0) + 1;
+    }
     const requestCount = Number(url.searchParams.get('count') || count);
     const matching = url.origin === 'https://www.tiktok.com'
       && url.pathname === '/api/search/general/full/'

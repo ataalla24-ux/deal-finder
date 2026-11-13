@@ -796,6 +796,9 @@ export function classifyApifyRunHealth({ summary, rawDatasetItems, acceptedDeals
 
 export function classifyApifyApiFailure(error) {
   const message = normalizeText(error?.message || error);
+  if (Number(error?.httpStatus || 0) === 401) {
+    return { operationalStatus: 'authentication-invalid', reasonCode: 'api-token-invalid', controlled: false };
+  }
   if (/monthly usage hard limit exceeded/i.test(message)) {
     return {
       operationalStatus: 'budget-blocked',
