@@ -68,4 +68,9 @@ assert.deepEqual([...fishLocation.locationIds].sort(),[...fishRule.locationIds].
 assert.equal(fishLocation.locationIds.length,12);
 assert.equal(matchChainRule({...fish,description:fish.description+' Nur im Restaurant Donauzentrum.'},productionRules,'2026-11-13'),null);
 assert.equal(matchChainRule(fish,productionRules,'2026-12-01'),null);
+const reviewedCoupons=JSON.parse(readFileSync(new URL('../reviews/nordsee-coupon-cards-20261113.json',import.meta.url)));
+for(const card of reviewedCoupons.cards) {
+  const coupon={...fish,title:card.footer.split('\n')[0],description:card.footer};
+  assert.equal(matchChainRule(coupon,productionRules,'2026-11-13')?.id,fishRule.id,card.couponCode);
+}
 console.log('PASS: campaign identity/window, full branch set, exact/manual/named branch precedence, exclusions, incomplete catalog hold, cached replay and approval integration');
