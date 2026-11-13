@@ -1,11 +1,11 @@
 {
-  "generatedAt": "2026-11-13T18:41:10.296Z",
+  "generatedAt": "2026-11-13T18:44:05.149Z",
   "summary": {
     "maxAgeDays": 7,
-    "total": 259,
-    "allowed": 0,
+    "total": 260,
+    "allowed": 1,
     "blocked": 259,
-    "warnings": 0,
+    "warnings": 1,
     "reasonCounts": {
       "kein konkretes Angebot erkennbar": 184,
       "Gottesdienste nur im Wochenlauf": 36,
@@ -204,10 +204,10 @@
         }
       },
       "Meta Instagram Hashtag API": {
-        "total": 3,
-        "allowed": 0,
+        "total": 4,
+        "allowed": 1,
         "blocked": 3,
-        "warnings": 0,
+        "warnings": 1,
         "reasonCategoryCounts": {
           "kein konkreter Deal": 3
         }
@@ -244,7 +244,25 @@
       }
     }
   },
-  "allowed": [],
+  "allowed": [
+    {
+      "id": "meta-ig-17965098957216629",
+      "title": "NEUER WEIHNACHTSMARKT IN WIEN 🎄 Am Schwarzenbergplatz rund um den Hochstrahlbrunnen gibt es in diesem Jahr einen neuen Christkindlmarkt",
+      "brand": "Instagram",
+      "source": "Meta Instagram Hashtag API",
+      "url": "https://www.instagram.com/reel/DfsQR9xOaWB/",
+      "reasons": [],
+      "warnings": [
+        "Inhalt prüfen: Titel zu lang; Angebot kurz benennen, Bedingungen in den Details behalten; Caption-Reste oder Emoji-Codes im sichtbaren Text"
+      ],
+      "sourceDate": "2026-11-13T18:16:45.000Z",
+      "sourceDateSource": "url.instagramShortcode",
+      "sourceAgeDays": 0,
+      "expiryDate": "2026-12-23",
+      "expirySource": "url.contentHints.title",
+      "urlStatus": "HTTP 200"
+    }
+  ],
   "blocked": [
     {
       "id": "jesuszentrum-events-20261102",
@@ -889,7 +907,7 @@
       "warnings": [
         "kein Ablaufdatum gefunden"
       ],
-      "sourceDate": "2026-11-13T18:40:09.534Z",
+      "sourceDate": "2026-11-13T18:42:47.527Z",
       "sourceDateSource": "url.publicationDate",
       "sourceAgeDays": 0,
       "expiryDate": "",
@@ -2761,7 +2779,6 @@
         "älter als 7 Tage (2026-02-22)"
       ],
       "warnings": [
-        "URL nicht eindeutig prüfbar (temporärer Fehler)",
         "kein Ablaufdatum gefunden"
       ],
       "sourceDate": "2026-02-22T21:13:07.696Z",
@@ -2769,7 +2786,7 @@
       "sourceAgeDays": 264,
       "expiryDate": "",
       "expirySource": "",
-      "urlStatus": "unklar: temporärer URL-Fehler"
+      "urlStatus": "HTTP 200"
     },
     {
       "id": "extra-30-20260222",
@@ -5287,16 +5304,23 @@
   ],
   "runProvenance": {
     "repository": "ataalla24-ux/deal-finder",
-    "runId": "43484685961",
-    "headSha": "1fa8ccfe822eb2edc77e26c2eb24aa7764d2501c",
-    "checkoutSha": "1fa8ccfe822eb2edc77e26c2eb24aa7764d2501c",
-    "triggeringRun": null,
-    "event": "workflow_dispatch",
+    "runId": "43485273927",
+    "headSha": "0a39cfb370b4f75e56309380fd358040965a0f14",
+    "checkoutSha": "0a39cfb370b4f75e56309380fd358040965a0f14",
+    "triggeringRun": {
+      "runId": "43484673079",
+      "headSha": "1fa8ccfe822eb2edc77e26c2eb24aa7764d2501c",
+      "event": "workflow_dispatch",
+      "name": "Meta Instagram Deal Discovery",
+      "startedAt": "2026-11-13T18:38:58.000Z",
+      "url": "https://github.com/ataalla24-ux/deal-finder/actions/runs/43484673079"
+    },
+    "event": "workflow_run",
     "runAttempt": "1",
-    "url": "https://github.com/ataalla24-ux/deal-finder/actions/runs/43484685961"
+    "url": "https://github.com/ataalla24-ux/deal-finder/actions/runs/43485273927"
   },
   "instagramDelivery": {
-    "checkedAt": "2026-11-13T18:41:10.311Z",
+    "checkedAt": "2026-11-13T18:44:05.546Z",
     "scope": "instagram-ai-agent/standard-slack-lane",
     "extractedCandidates": 3,
     "counts": {
@@ -5351,7 +5375,7 @@
     ]
   },
   "tiktokDelivery": {
-    "checkedAt": "2026-11-13T18:41:10.313Z",
+    "checkedAt": "2026-11-13T18:44:05.547Z",
     "scope": "tiktok-deals-scanner/standard-slack-lane",
     "extractedCandidates": 0,
     "counts": {},
