@@ -7,9 +7,14 @@ export async function checkApifyInstagramAccess(env = process.env, fetchImpl = g
   const actorId = String(env.APIFY_INSTAGRAM_VIENNA_ACTOR_ID || '').trim();
   const report = { checkedAt: new Date().toISOString(), mode: 'read-only-access',
     tokenConfigured: Boolean(token), actorConfigured: Boolean(actorId),
-    authenticated: false, actorAccessible: false, requests: 0, actorRunsStarted: 0 };
+    authenticated: false, actorAccessible: false, runListAccessible: false,
+    requests: 0, actorRunsStarted: 0, runPermissionVerified: false, collectionRecoveryVerified: false };
   if (!token || !actorId) return { ...report, status: 'configuration-missing' };
-  for (const [step, route] of [['account', '/users/me'], ['actor', `/acts/${encodeURIComponent(actorId)}`]]) {
+  // Scoped collector tokens deliberately cannot read the private account profile.
+  // Actor metadata plus its authenticated run list suffice for a read-only probe.
+  const actorRoute = `/acts/${encodeURIComponent(actorId)}`;
+  let resolvedActorId;
+  for (const [step, route] of [['actor', actorRoute], ['runs', `${actorRoute}/runs?limit=1&desc=1`]]) {
     report.requests += 1;
     let response;
     try {
@@ -24,11 +29,23 @@ export async function checkApifyInstagramAccess(env = process.env, fetchImpl = g
           : response.status === 429 ? 'rate-limited' : 'provider-unavailable' };
     let data;
     try { data = (await response.json())?.data; } catch { /* no raw provider response in diagnostics */ }
-    if (!data || typeof data.id !== 'string' || !data.id) return { ...report, step, status: 'unverified-response' };
-    if (step === 'account') report.authenticated = true;
-    else report.actorAccessible = true;
+    if (step === 'actor') {
+      if (!data || typeof data.id !== 'string' || !data.id
+        || (actorId !== data.id && actorId !== `${data.username}~${data.name}`)) {
+        return { ...report, step, status: 'unverified-response' };
+      }
+      resolvedActorId = data.id;
+      report.actorAccessible = true;
+    } else {
+      if (!Array.isArray(data?.items) || data.items.length > 1
+        || data.items.some(run => !run || typeof run.id !== 'string' || !run.id || run.actId !== resolvedActorId)) {
+        return { ...report, step, status: 'unverified-response' };
+      }
+      report.authenticated = true;
+      report.runListAccessible = true;
+    }
   }
-  return { ...report, status: 'access-verified', collectionRecoveryVerified: false };
+  return { ...report, status: 'access-verified' };
 }
 
 if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) {
