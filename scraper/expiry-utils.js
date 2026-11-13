@@ -497,10 +497,20 @@ function isolateLeadingExpiryToken(text) {
   return normalized;
 }
 
+function withoutObservationDates(value) {
+  const month = '(?:januar|jänner|jaenner|februar|märz|maerz|april|mai|juni|juli|august|september|oktober|november|dezember)';
+  const date = `(?:20\\d{2}-\\d{2}-\\d{2}|\\d{1,2}[./]\\d{1,2}[./]20\\d{2}|\\d{1,2}\\.?\\s+${month}\\s+20\\d{2})`;
+  // Retrieval timestamps describe evidence freshness, never the offer period.
+  const observation = new RegExp(`\\b(?:(?:aktuell\\s+bei\\s+)?abruf|abgerufen|(?:zuletzt\\s+)?geprüft|(?:zuletzt\\s+)?geprueft|(?:preis)?stand)\\s*(?:am\\s*|vom\\s*|:)?\\s*${date}(?!\\d)`, 'gi');
+  return cleanText(value.replace(observation, '').replace(/^[\s;,]+|[\s;,]+$/g, ''));
+}
+
 export function parseExpiryDetails(value, options = {}) {
   const now = options.now instanceof Date ? options.now : new Date();
   const text = cleanText(value);
   if (!text) return null;
+  const offerText = withoutObservationDates(text);
+  if (offerText !== text) return parseExpiryDetails(offerText, options);
 
   const explicit = parseExplicitOfferPeriod(text);
   if (explicit) return explicit.error ? null : {
@@ -542,6 +552,8 @@ export function parseExpiryShape(value, options = {}) {
   const dateInferenceNow = Number.isNaN(referenceDate.getTime()) ? now : referenceDate;
   const raw = cleanText(value);
   if (!raw) return { kind: 'unknown', raw: '' };
+  const offerText = withoutObservationDates(raw);
+  if (offerText !== raw) return { ...parseExpiryShape(offerText, options), raw };
   const explicit = parseExplicitOfferPeriod(raw);
   if (explicit) return explicit.error ? { kind: 'unknown', raw, confidence: 'low', error: explicit.error }
     : { ...explicit, raw, confidence: 'high' };

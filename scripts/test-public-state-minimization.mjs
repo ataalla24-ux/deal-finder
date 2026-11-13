@@ -46,3 +46,15 @@ test('generated output boundary protects both initial and merged states without 
   assert.ok(!clean.content.toString().includes('U_PRIVATE'));
   assert.equal(queue.content,content);
 });
+
+test('public lifecycle retains approval evidence but never the internal reviewer identity', () => {
+  const lifecycle = {stage:'published',manualDecision:'approved',manualDecisionAt:'2026-11-12T09:00:00Z',manualDecisionUser:'U_PRIVATE'};
+  for (const id of ['merchant:test','community:test']) {
+    const raw = {id,title:'Gratis Kaffee',pipelineLifecycle:lifecycle};
+    const clean = minimizePublicState('docs/deals.json',{deals:[raw]}).deals[0];
+    assert.deepEqual(clean.pipelineLifecycle,{stage:'published',manualDecision:'approved',manualDecisionAt:'2026-11-12T09:00:00Z'});
+    assert.equal(raw.pipelineLifecycle.manualDecisionUser,'U_PRIVATE');
+    assert.equal(stampDealsFeedBundle({deals:[raw]},{redemptionManifest:null}).deals[0].pipelineLifecycle.manualDecisionUser,undefined);
+    assert.ok(!JSON.stringify(minimizePublicState('docs/verified-expiry-review.json',{entries:[{originalDeal:raw}]})).includes('U_PRIVATE'));
+  }
+});

@@ -32,6 +32,7 @@ on:
       - "scraper/deal-evidence-utils.js"
       - "scraper/offer-period-fields.js"
       - "scripts/test-slack-date-pipeline.mjs"
+      - "scripts/test-expiry-observation-date.mjs"
       - "scraper/slack-approve.js"
       - "scripts/approval-map-readiness.mjs"
       - "scripts/test-approval-map-readiness.mjs"
@@ -139,6 +140,7 @@ jobs:
           node --test scripts/test-approved-copy.mjs
           node scripts/test-slack-date-pipeline.mjs
           node scripts/test-expiry-normalization.mjs
+          node --test scripts/test-expiry-observation-date.mjs
           node scripts/test-deal-validity-evidence.mjs
           node scripts/test-slack-delivery-state.mjs
           node scripts/test-discovery-non-consumer-offers.mjs
