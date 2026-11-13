@@ -1,7 +1,7 @@
 {
-  "generatedAt": "2026-11-13T03:39:36.203Z",
+  "generatedAt": "2026-11-13T04:04:21.933Z",
   "source": "instagram-graph-cross-source-verification",
-  "status": "ok",
+  "status": "failed-preserved",
   "configured": true,
   "scannedFiles": [
     "deals-pending-church-events.json",
@@ -135,8 +135,8 @@
       "candidates": 0
     },
     "deals-pending-meta-instagram.json": {
-      "deals": 57,
-      "candidates": 0
+      "deals": 58,
+      "candidates": 1
     },
     "deals-pending-power.json": {
       "deals": 37,
@@ -167,19 +167,28 @@
       "candidates": 0
     }
   },
-  "candidatePosts": 1,
-  "candidateAccounts": 1,
+  "candidatePosts": 2,
+  "candidateAccounts": 2,
   "skippedAccountCooldowns": 0,
   "selectedAccounts": [
     {
       "username": "wolf_baeckerei",
       "candidates": 1
+    },
+    {
+      "username": "napoleon.wien",
+      "candidates": 1
     }
   ],
-  "fetchedPosts": 25,
+  "fetchedPosts": 0,
   "exactMatches": 0,
   "retainedEvidencePosts": 2000,
-  "errors": [],
+  "errors": [
+    {
+      "username": "wolf_baeckerei",
+      "message": "Instagram shared quota paused: shared cooldown"
+    }
+  ],
   "accountFailures": {
     "natascha_rapid": {
       "count": 3,
@@ -193,21 +202,27 @@
     }
   },
   "sharedQuota": {
-    "limitPerHour": 296,
+    "limitPerHour": 190,
     "usageThreshold": 95,
-    "requests": 1,
-    "reserved": 5,
-    "stopped": false,
-    "reason": "",
-    "highestUsagePercent": 70,
+    "requests": 0,
+    "reserved": 0,
+    "stopped": true,
+    "reason": "Instagram shared quota paused: shared cooldown",
+    "highestUsagePercent": 0,
     "waitedMs": 0,
     "pacingMs": 0,
-    "retryAt": "",
+    "retryAt": "2026-11-13T04:10:55.089Z",
     "adaptiveSafetyCeiling": 190,
     "adaptiveIncreases": 0,
     "storageFailure": null
   },
-  "blockedEvidencePosts": 54,
-  "unmatchedCandidatePosts": 1,
-  "message": "0/1 fresh cross-source Instagram candidates matched exactly via Graph API."
+  "globalError": {
+    "username": "wolf_baeckerei",
+    "status": 0,
+    "code": "SCAN_BUDGET",
+    "message": "Instagram shared quota paused: shared cooldown"
+  },
+  "blockedEvidencePosts": 55,
+  "unmatchedCandidatePosts": 2,
+  "message": "0/2 fresh cross-source Instagram candidates matched exactly via Graph API."
 }
