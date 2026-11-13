@@ -13,7 +13,10 @@ const read = file => JSON.parse(fs.readFileSync(path.join(temp, 'docs', file), '
 try {
   for (const dir of ['scraper', 'sentry']) fs.cpSync(path.join(root, dir), path.join(temp, dir), { recursive: true });
   fs.mkdirSync(path.join(temp, 'scripts'));
-  for (const file of ['deal-map-review.mjs', 'deal-map-enrichment.mjs', 'deal-map-chain-rules.mjs', 'approval-map-readiness.mjs']) {
+  for (const file of ['deal-map-review.mjs', 'deal-map-enrichment.mjs', 'deal-map-chain-rules.mjs',
+    'deal-map-source-addresses.mjs', 'approval-map-readiness.mjs', 'discover-vienna-merchants.mjs',
+    'automatic-deal-maintenance.mjs', 'automatic-maintenance-review.mjs', 'refresh-maintenance-evidence.mjs',
+    'deal-photo-contract.mjs']) {
     fs.copyFileSync(path.join(root, 'scripts', file), path.join(temp, 'scripts', file));
   }
   fs.copyFileSync(path.join(root, 'package.json'), path.join(temp, 'package.json'));
@@ -46,6 +49,7 @@ try {
     const target = new URL(url);
     if (target.hostname !== 'slack.com') return new Response('Forbidden', { status: 403 });
     if (target.pathname.endsWith('/auth.test')) return Response.json({ ok: true, user_id: 'BOT' });
+    if (target.pathname.endsWith('/conversations.history')) return Response.json({ ok: true, messages: [] });
     if (target.pathname.endsWith('/conversations.replies')) return Response.json(repliesAllowed
       ? { ok: true, messages: [message] } : { ok: false, error: 'missing_scope' });
     if (target.pathname.endsWith('/reactions.get')) return Response.json({ ok: true, message: { ...message, reactions } });
@@ -55,7 +59,7 @@ try {
     }
     throw new Error(`Unexpected request: ${url}`);
   };
-  const { main } = await import(pathToFileURL(path.join(temp, 'scraper/slack-approve.js')));
+  const { main, validateApprovalCandidates } = await import(pathToFileURL(path.join(temp, 'scraper/slack-approve.js')));
   const { buildSlackMessage } = await import(pathToFileURL(path.join(temp, 'scraper/slack-notify.js')));
   write('deals.json', { deals: [], totalDeals: 0 });
   write('deals-pending-all.json', { deals: [source] });
@@ -81,6 +85,11 @@ try {
   await main();
   assert.equal(read('deals.json').deals.length, 0, 'a human approval without a map location stays pending');
   assert.match(read('deals-pending-all.json').deals[0].approvalBlock.reasons.join(' '), /Kartenstandort fehlt/);
+  assert.match(notices.at(-1).text, /Freigabe-Häkchen kann gesetzt bleiben/);
+  assert.deepEqual(JSON.parse(fs.readFileSync(path.join(temp, 'reviews/map-source-address-cache.json'))), {},
+    'private submissions must not create public source cache entries');
+  assert.deepEqual(JSON.parse(fs.readFileSync(path.join(temp, 'reviews/approval-map-readiness.json'))).checks, {},
+    'private submission IDs and location diagnostics must stay out of the public report');
   write('deal-map-locations.json', { locations: [{ id: 'reviewed-branch', name: source.brand,
     address: source.address, latitude: 48.232, longitude: 16.386, confidence: 1,
     source: 'official-fixture', dealIds: [source.id] }] });
@@ -120,7 +129,58 @@ try {
   await main();
   assert.equal(read('deals.json').deals.length, 0);
   assert.equal(read('deals-pending-all.json').deals.length, 0, 'manual rejection still removes the candidate');
-  console.log('Isolated approval workflow: block, retain, notify, edit, approve, recover, deduplicate and reject passed');
+
+  // An old hold gets a slot even with a newer thread and cannot publish on a
+  // stale cached reaction. It may publish on a later scan with no new event.
+  const currentTs = Math.floor(Date.now() / 1000);
+  write('deals-pending-all.json', { deals: [edited, { ...recoverable, id: 'newer', slackTs: `${currentTs}.645859`,
+    slackThreadTs: `${currentTs - 3}.871219` }] });
+  message = { ts: source.slackTs, thread_ts: source.slackThreadTs, user: 'BOT', text: 'fixture',
+    reactions: [{ name: 'white_check_mark', users: ['U_REVIEWER'] }] };
+  repliesAllowed = true;
+  delete process.env.APPROVE_SLACK_MESSAGE_TS;
+  process.env.APPROVE_FULL_SCAN_MAX_THREADS = '1';
+  process.env.APPROVE_FULL_SCAN_MAX_DEALS = '1';
+  const { main: scheduled } = await import(`${pathToFileURL(path.join(temp, 'scraper/slack-approve.js'))}?scheduled`);
+  // The prior snapshot `edited` had a date-related hold; give it the actual
+  // map block from the same workflow before checking the retry behavior.
+  const pending = read('deals-pending-all.json');
+  pending.deals[0].approvalBlock.reasons = ['Kartenstandort fehlt (request-budget): Test'];
+  write('deals-pending-all.json', pending);
+  reactions = [];
+  await scheduled();
+  assert.equal(read('deals.json').deals.length, 0, 'withdrawn reaction cannot publish despite the stale thread snapshot');
+  reactions = [{ name: 'white_check_mark', users: ['U_REVIEWER'] }];
+  await scheduled();
+  assert.equal(read('deals.json').deals[0].id, source.id, 'a regular scan publishes the held deal when evidence and the reaction are present');
+  assert.deepEqual(read('deals-pending-all.json').deals.map(row => row.id), ['newer']);
+
+  const official = { id: 'official-cafe', title: 'Mega Deal: Pizza um 4,90 Euro bei Abholung', brand: 'Cafe Fixture',
+    source: 'Merchant fixture', url: 'https://cafemorgen.at/angebote/pizza', metaGraphCaption: 'Pizza um 4,90 Euro bei Abholung.',
+    validUntil: nextMonth, pipelineLifecycle: { manualDecision: 'approved' } };
+  fs.writeFileSync(path.join(temp, 'reviews/automatic-maintenance-policy.json'), JSON.stringify({ version: 1, enabled: true, maxAiCandidatesPerRun: 4 }));
+  process.env.APPROVAL_MAP_GEOCODE_REQUESTS = '1';
+  process.env.APPROVAL_MAP_SOURCE_REQUESTS = '2';
+  process.env.APPROVAL_SOURCE_COPY_REVIEW = '1';
+  const restaurant = { '@type': 'Restaurant', name: official.brand, url: official.url, mainEntityOfPage: official.url,
+    address: { '@type': 'PostalAddress', streetAddress: 'Wollzeile 29', postalCode: '1010', addressLocality: 'Wien' } };
+  let modelCalls = 0;
+  const finished = await validateApprovalCandidates([official], {
+    inspectDealUrlHealth: async url => ({ ok: true, status: 200, finalUrl: url, dateHints: {}, contentHints: {} }),
+    approvalFetchPage: async url => url.endsWith('/robots.txt') ? { url, status: 404 } : { url, status: 200,
+      headers: { 'content-type': 'text/html' }, body: `<main><h1>${official.title}</h1><p>Dieses Angebot gilt bei Cafe Fixture, Wollzeile 29, 1010 Wien.</p><script type="application/ld+json">${JSON.stringify(restaurant)}</script></main>` },
+    approvalGeocode: async () => ({ latitude: 48.21, longitude: 16.371, address: 'Wollzeile 29, 1010 Wien', source: 'official-fixture' }),
+    approvalModelRequest: async () => Response.json({ choices: [{ finish_reason: 'stop', message: { content: JSON.stringify(++modelCalls === 1 ? {
+      title: 'Pizza für 4,90 € bei Abholung', quote: official.metaGraphCaption,
+      description: 'Bei Abholung kostet die Pizza 4,90 Euro.', conditionsQuote: official.metaGraphCaption, dateQuote: '',
+    } : { supported: true }) } }] }),
+  });
+  assert.equal(modelCalls, 2);
+  assert.equal(finished.allowedDeals[0]?.title, 'Pizza für 4,90 € bei Abholung', JSON.stringify(finished.results));
+  assert.equal(finished.allowedDeals[0].description, 'Bei Abholung kostet die Pizza 4,90 Euro.');
+  assert.equal(finished.allowedDeals[0].address, 'Wollzeile 29, 1010 Wien');
+  assert.ok(read('deal-map-locations.json').locations.some(pin => pin.dealIds.includes(official.id)));
+  console.log('Isolated approval workflow: block, retain, notify, edit, approve, deduplicate, reject and scheduled retry passed');
 } finally {
   globalThis.fetch = previousFetch;
   for (const key of Object.keys(process.env)) if (!(key in previousEnv)) delete process.env[key];

@@ -28,7 +28,7 @@ const catalog = await optional('reviews/map-location-catalog.json');
 catalog.chainRules=(await optional('reviews/map-chain-rules.json')).rules||[];
 const reviewed = await optional('reviews/map-addresses.json');
 const sourceCache = await optional('reviews/map-source-address-cache.json');
-// Approval stays fast: network source discovery belongs to scheduled reconciliation.
+// Reuse approval evidence without network calls when the request budget is zero.
 const sourceBudget = Math.max(0, Math.min(20, Number(process.env.MAP_SOURCE_REQUESTS) || 0));
 const { enrichSourceAddresses } = await import('./deal-map-source-addresses.mjs');
 const sources = await enrichSourceAddresses({ deals, map, catalog, reviewed, cache: sourceCache, now, maxRequests: sourceBudget });

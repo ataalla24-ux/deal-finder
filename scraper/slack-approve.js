@@ -12,11 +12,12 @@ import {
 } from './deal-moderation-utils.js';
 import { isVagueExpiry, normalizeDealExpiry, parseExpiryDetails } from './expiry-utils.js';
 import { isDealNewByDate } from './deal-freshness-utils.js';
-import { validateDealsForSlack } from './deal-validity-agent.js';
+import { buildReport, buildSummary, validateDealsForSlack } from './deal-validity-agent.js';
 import { canonicalSocialPostKey, mergeDealEvidence, officialOmvVariantKey } from './deal-evidence-utils.js';
 import { advanceDealLifecycle } from './deal-lifecycle.js';
 import { isCommunitySubmission, prepareCommunityApproval } from './community-review-utils.js';
 import { preparePublicationTitle } from './pre-publication-title.js';
+import { findApprovalAddresses, isApprovalMapReason, requireApprovalMap } from '../scripts/approval-map-readiness.mjs';
 import {
   loadReviewFeedback,
   resolveHumanReviewDecision,
@@ -744,8 +745,9 @@ function normalizePendingDeal(raw) {
 }
 
 function redactPublishedCommunityDraft(deal) {
-  if (!isCommunitySubmission(deal)) return deal;
-  const { submittedContent, communityExtraction, ...published } = deal;
+  const { approvalCopyReview, ...publicDeal } = deal;
+  if (!isCommunitySubmission(deal)) return publicDeal;
+  const { submittedContent, communityExtraction, ...published } = publicDeal;
   return published;
 }
 
@@ -753,32 +755,105 @@ async function validateApprovalCandidates(deals, options = {}) {
   const now = options.now instanceof Date ? options.now : new Date();
   const existingDeals = options.existingDeals ?? loadExistingApprovedDeals();
   const existingIds = new Set(existingDeals.map(deal => deal.id));
-  const candidates = ensureArray(deals).map(deal => prepareCommunityApproval(
-    preparePublicationTitle(deal, { existingIds }), now,
-  ));
-  const validation = await validateDealsForSlack(candidates, {
-    ...options, now, communityApproval: true,
-  });
-  if (!(options.requireMap ?? process.env.APPROVAL_REQUIRE_MAP === '1')) return validation;
-  const { requireApprovalMap } = await import('../scripts/approval-map-readiness.mjs');
-  const readiness = await requireApprovalMap(validation, {
+  const requireMap = options.requireMap ?? process.env.APPROVAL_REQUIRE_MAP === '1';
+  const mapOptions = requireMap ? {
     existingDeals,
     map: loadJson(path.join(DOCS_DIR, 'deal-map-locations.json'), { locations: [] }),
     catalog: {...loadJson(path.join(ROOT, 'reviews/map-location-catalog.json'), {}),
       chainRules: loadJson(path.join(ROOT, 'reviews/map-chain-rules.json'), {}).rules || []},
     reviewed: loadJson(path.join(ROOT, 'reviews/map-addresses.json'), {}),
     cache: loadJson(path.join(ROOT, 'reviews/map-geocode-cache.json'), {}), now,
+    sourceCache: loadJson(path.join(ROOT, 'reviews/map-source-address-cache.json'), {}),
+    lookup: options.approvalGeocode,
+    fetchPage: options.approvalFetchPage,
     maxRequests: process.env.APPROVAL_MAP_GEOCODE_REQUESTS ?? 8,
+    maxSourceRequests: process.env.APPROVAL_MAP_SOURCE_REQUESTS ?? 0,
+  } : null;
+  let candidates = ensureArray(deals).map(deal => prepareCommunityApproval(deal, now));
+  const humanApproved = deal => deal.pipelineLifecycle?.manualDecision === 'approved';
+  const sourceLookup = mapOptions ? await findApprovalAddresses(candidates.filter(humanApproved), mapOptions) : null;
+  candidates = candidates.map(deal => preparePublicationTitle(deal, { existingIds }));
+  if (process.env.APPROVAL_SOURCE_COPY_REVIEW === '1' && (options.approvalModelRequest || process.env.OPENAI_API_KEY)) {
+    const { reviewApprovedCopy } = await import('../scripts/automatic-deal-maintenance.mjs');
+    const reviewed = await reviewApprovedCopy(candidates.filter(deal => humanApproved(deal) && !isCommunitySubmission(deal)), {
+      cwd: ROOT, now, existingIds, request: options.approvalModelRequest,
+    });
+    const byId = new Map(reviewed.map(deal => [deal.id, deal]));
+    candidates = candidates.map(deal => byId.get(deal.id) || deal);
+  }
+  const originals = new Map(ensureArray(deals).map(deal => [deal.id, deal]));
+  const sourceAddresses = new Map();
+  candidates = candidates.map(deal => {
+    const proof = sourceLookup?.reviewed[deal.id];
+    const site = proof?.managedBy === 'source-address-discovery-v1' ? proof.locations[0] : null;
+    if (!site) return deal;
+    // Persist the address, not a temporary map override tied to the title.
+    // Event locations also require an independently confirmed end day.
+    delete sourceLookup.reviewed[deal.id];
+    const edited = [...ensureArray(deal.slackEditedFields), ...ensureArray(deal.liveEditedFields)];
+    const end = cleanText(deal.validUntil || deal.validOn).slice(0, 10);
+    if (deal.address || ['address', 'distance', 'city', 'postalCode'].some(field => edited.includes(field))
+      || (proof.evidenceKind === 'jsonld-event-location' && (!/^\d{4}-\d{2}-\d{2}$/.test(end) || !site.validUntil
+        || end > site.validUntil || (proof.evidenceExpiresAt && !deal.expires?.includes('T'))))) return deal;
+    const address = `${site.street} ${site.number}, ${site.postalCode} Wien`;
+    sourceAddresses.set(deal.id, { address, end: site.validUntil, expiresAt: proof.evidenceExpiresAt });
+    return { ...deal, address, city: 'Wien', postalCode: site.postalCode, distance: address,
+      missingFields: ensureArray(deal.missingFields).filter(field => field !== 'Ort') };
   });
+  const validation = await validateDealsForSlack(candidates, { ...options, now, communityApproval: true });
+  await normalizeApprovedDealExpiries(validation.allowedDeals, { now, allowUrlLookup: false });
+  // The source lookup and the validity check must agree before the address can
+  // outlive the ephemeral evidence used to discover it.
+  let addedBlock = false;
+  for (const { deal, decision } of validation.results) {
+    if (!decision.allowed) continue;
+    if (humanApproved(deal) && !existingIds.has(deal.id) && !isCommunitySubmission(deal)
+      && !cleanText(deal.description)) {
+      decision.allowed = false;
+      decision.reasons.push('Beschreibung fehlt: Einloesung und Bedingungen sind noch nicht ausreichend belegt.');
+      addedBlock = true;
+    }
+    const site = sourceAddresses.get(deal.id);
+    if (!decision.allowed || !site || cleanText(deal.address) !== site.address) continue;
+    const checkedEnd = cleanText(deal.validUntil || deal.validOn).slice(0, 10);
+    if ((site.end && (!checkedEnd || checkedEnd > site.end)) || (site.expiresAt
+      && (!deal.expires?.includes('T') || !(Date.parse(deal.expires) <= Date.parse(site.expiresAt))))) {
+      decision.allowed = false;
+      decision.reasons.push('Kartenstandort fehlt (source-period-conflict): Angebotszeitraum und Standortbeleg passen nicht zusammen.');
+      addedBlock = true;
+    }
+  }
+  if (addedBlock) {
+    validation.allowedDeals = validation.results.filter(row => row.decision.allowed).map(row => row.deal);
+    validation.blockedDeals = validation.results.filter(row => !row.decision.allowed).map(row => row.deal);
+    validation.summary = buildSummary(validation.results, validation.summary.maxAgeDays);
+    validation.report = buildReport(validation.results, validation.summary);
+  }
+  // Keep only the original input and the review memo in pending state. Retried
+  // validations must not mistake an earlier machine suggestion for evidence.
+  const restorePending = validation => {
+    const results = validation.results.map(row => {
+      if (row.decision.allowed) return row;
+      const original = originals.get(row.deal.id);
+      return original ? { ...row, deal: { ...original, approvalCopyReview: row.deal.approvalCopyReview } } : row;
+    });
+    return { ...validation, results, blockedDeals: results.filter(row => !row.decision.allowed).map(row => row.deal) };
+  };
+  if (!mapOptions) return restorePending(validation);
+  const readiness = await requireApprovalMap(validation, { ...mapOptions, sourceLookup });
   if (readiness.changed) {
     for (const [file, payload] of [
-      ['docs/deal-map-locations.json', readiness.map],
-      ['reviews/map-location-catalog.json', readiness.catalog],
+      ...(readiness.projectionChanged ? [
+        ['docs/deal-map-locations.json', readiness.map],
+        ['reviews/map-location-catalog.json', readiness.catalog],
+      ] : []),
       ['reviews/map-geocode-cache.json', readiness.cache],
-      ['reviews/approval-map-readiness.json', { checkedAt: now.toISOString(), requests: readiness.requests, checks: readiness.checks }],
+      ['reviews/map-source-address-cache.json', readiness.sourceCache],
+      ['reviews/approval-map-readiness.json', { checkedAt: now.toISOString(), requests: readiness.requests,
+        sourceRequests: readiness.sourceRequests, checks: readiness.checks }],
     ]) fs.writeFileSync(path.join(ROOT, file), JSON.stringify(payload, null, 2) + '\n');
   }
-  return readiness.validation;
+  return restorePending(readiness.validation);
 }
 
 function recoverTargetedCommunityDeal(message, event, sourceDeals, botUserId) {
@@ -812,12 +887,15 @@ async function retainBlockedApproval(deal, reasons) {
   const blocked = { ...deal, approvedAt: '', approvalBlock: {
     ...deal.approvalBlock, reasons, checkedAt: new Date().toISOString(),
   } };
-  const signature = JSON.stringify(reasons);
+  const retryable = reasons.some(isApprovalRetryReason);
+  const signature = JSON.stringify(retryable ? [2, ...reasons] : reasons);
   if (blocked.approvalBlock.notifiedSignature === signature) return blocked;
   const truncate = (text, limit) => Array.from(String(text || '')).slice(0, limit).join('');
   const text = `Noch nicht veröffentlicht: ${truncate(deal.title, 180)}\n`
     + reasons.map(reason => `- ${truncate(reason, 500)}`).join('\n')
-    + '\nDer Deal bleibt gespeichert. Bitte beim Deal auf Bearbeiten klicken, fehlende Angaben ergänzen und danach das Freigabe-Häkchen entfernen und erneut setzen.';
+    + (retryable
+      ? '\nDein Freigabe-Häkchen kann gesetzt bleiben. FreeFinder prüft den Deal automatisch erneut und veröffentlicht nach erfolgreicher Prüfung. Fehlende Belege kannst du unter Bearbeiten ergänzen.'
+      : '\nDer Deal bleibt gespeichert. Bitte beim Deal auf Bearbeiten klicken, fehlende Angaben ergänzen und danach das Freigabe-Häkchen entfernen und erneut setzen.');
   const noticeTs = blocked.approvalBlock.noticeTs;
   try {
     const response = await fetch(`https://slack.com/api/${noticeTs ? 'chat.update' : 'chat.postMessage'}`, {
@@ -835,6 +913,10 @@ async function retainBlockedApproval(deal, reasons) {
     console.error(`Slack approval notice failed for ${deal.id}: ${error.message}; retained for retry`);
   }
   return blocked;
+}
+
+function isApprovalRetryReason(reason) {
+  return isApprovalMapReason(reason) || /^(?:Beschreibung fehlt|nicht eindeutig in Wien|noch nicht gestartet|Aktionszeitraum auf Lokal-Website unklar)\b/i.test(reason);
 }
 
 async function clearBlockedApprovalNotice(deal) {
@@ -864,8 +946,7 @@ function formatApprovalValidationReasons(validation) {
     });
 }
 
-async function normalizeApprovedDealExpiries(approvedDeals) {
-  const now = new Date();
+async function normalizeApprovedDealExpiries(approvedDeals, { now = new Date(), allowUrlLookup: enableUrlLookup = true } = {}) {
   const urlCache = new Map();
   let urlChecksUsed = 0;
   let urlExpiryHits = 0;
@@ -881,7 +962,7 @@ async function normalizeApprovedDealExpiries(approvedDeals) {
       (!rawExpiry || isVagueExpiry(rawExpiry) || !parsedExpiry || parsedExpiry.precision !== 'day')
     );
     const cached = deal.url ? urlCache.has(deal.url) : false;
-    const allowUrlLookup = wantsUrlLookup && (cached || urlChecksUsed < MAX_APPROVAL_URL_EXPIRY_CHECKS);
+    const allowUrlLookup = enableUrlLookup && wantsUrlLookup && (cached || urlChecksUsed < MAX_APPROVAL_URL_EXPIRY_CHECKS);
 
     const beforeCacheSize = urlCache.size;
     await normalizeDealExpiry(deal, { now, urlCache, allowUrlLookup });
@@ -1044,10 +1125,10 @@ async function getThreadMessages(threadTs) {
   return messages;
 }
 
-async function getReactions(messageTs, channelId = SLACK_CHANNEL_ID) {
+async function getReactions(messageTs, channelId = SLACK_CHANNEL_ID, fallback = []) {
   const url = `https://slack.com/api/reactions.get?channel=${encodeURIComponent(channelId)}&timestamp=${encodeURIComponent(messageTs)}`;
   const data = await slackApi(url);
-  if (!data.ok) return [];
+  if (!data.ok || !data.message) return fallback;
   return ensureArray(data.message?.reactions);
 }
 
@@ -1192,12 +1273,12 @@ async function runTargetedApproval({ moderation, botUserId }) {
   }
 
   const remainingPending = queuedDeals.filter((deal) => cleanText(deal.slackTs) !== APPROVE_SLACK_MESSAGE_TS);
-  const reactions = await getReactions(APPROVE_SLACK_MESSAGE_TS, targetChannel);
+  const reactions = await getReactions(APPROVE_SLACK_MESSAGE_TS, targetChannel, null);
   const reviewDecision = resolveHumanReviewDecision({
     reactions,
     botUserId,
-    eventReaction: APPROVE_SLACK_REACTION,
-    eventUser: APPROVE_SLACK_REACTION_USER,
+    eventReaction: reactions === null && !targetDeal.approvalBlock ? APPROVE_SLACK_REACTION : '',
+    eventUser: reactions === null && !targetDeal.approvalBlock ? APPROVE_SLACK_REACTION_USER : '',
   });
   if (!reviewDecision.decision) {
     console.log('ℹ️ Targeted Slack message has no human approval/rejection reaction yet');
@@ -1290,9 +1371,6 @@ async function runTargetedApproval({ moderation, botUserId }) {
     return true;
   }
 
-  const expiryNormalization = await normalizeApprovedDealExpiries(approvedModeration.deals);
-  console.log(`🔎 approval expiry checks: ${expiryNormalization.urlChecksUsed}/${MAX_APPROVAL_URL_EXPIRY_CHECKS}, Treffer: ${expiryNormalization.urlExpiryHits}`);
-
   const existingApprovedDeals = loadExistingApprovedDealsForMerge(moderation);
   const publishedAt = new Date();
   const publishedDeals = approvedModeration.deals.map((deal) => (
@@ -1338,6 +1416,12 @@ async function main() {
     console.log(`🛡️ Moderation filter: ${queuedModeration.removed.length} queued Deals entfernt`);
   }
   const queuedDeals = queuedModeration.deals;
+  const approvalRetries = queuedDeals.filter(deal => cleanText(deal.slackTs) && cleanText(deal.slackThreadTs)
+    && ensureArray(deal.approvalBlock?.reasons).some(isApprovalRetryReason))
+    .sort((left, right) => String(left.approvalBlock.checkedAt || '').localeCompare(String(right.approvalBlock.checkedAt || '')))
+    .slice(0, Math.min(4, APPROVE_FULL_SCAN_MAX_THREADS || 4, APPROVE_FULL_SCAN_MAX_DEALS || 4));
+  const retryThreads = [...new Set(approvalRetries.map(deal => cleanText(deal.slackThreadTs)))];
+  const retryKeys = new Set(approvalRetries.map(pendingApprovalKey));
   const queueThreadTs = [...new Set(queuedDeals.map((deal) => cleanText(deal.slackThreadTs)).filter(Boolean))];
   const recentThreadTs = [...new Set(await findRecentDigestThreadTs())].filter(Boolean);
   let threadCandidates = [...new Set([...queueThreadTs, ...recentThreadTs])]
@@ -1349,7 +1433,7 @@ async function main() {
       `🧭 limiting fallback scan to newest ${APPROVE_FULL_SCAN_MAX_THREADS}/${threadCandidates.length} thread(s); ` +
       'older pending deals stay queued for direct reaction events'
     );
-    threadCandidates = threadCandidates.slice(0, APPROVE_FULL_SCAN_MAX_THREADS);
+    threadCandidates = [...new Set([...retryThreads, ...threadCandidates])].slice(0, APPROVE_FULL_SCAN_MAX_THREADS);
   }
 
   if (threadCandidates.length === 0) {
@@ -1383,7 +1467,15 @@ async function main() {
       !String(deal.id || '').startsWith('community:')
       || queueDealsForThread.some(row => row.id === deal.id && row.slackTs === deal.slackTs)
     ));
-    const basePendingDeals = mergeParsedDealsWithQueue(parsedDeals, queueDealsForThread);
+    const queuedRetries = new Map(queueDealsForThread.filter(deal => retryKeys.has(pendingApprovalKey(deal)))
+      .map(deal => [pendingApprovalKey(deal), deal]));
+    const basePendingDeals = mergeParsedDealsWithQueue(parsedDeals, queueDealsForThread)
+      .map(deal => queuedRetries.get(pendingApprovalKey(deal)) || deal);
+    const parsedKeys = new Set(basePendingDeals.map(pendingApprovalKey));
+    for (const deal of queueDealsForThread) {
+      const key = pendingApprovalKey(deal);
+      if (retryKeys.has(key) && !parsedKeys.has(key)) basePendingDeals.push(deal);
+    }
     const editResult = applySlackEdits(basePendingDeals, threadMessages);
     pendingDeals.push(...editResult.deals);
     appliedEditCount += editResult.appliedCount;
@@ -1417,7 +1509,8 @@ async function main() {
   const moderatedPendingDeals = liveFallbackFilter.deals;
   const approvalCheckDeals = moderatedPendingDeals
     .slice()
-    .sort((left, right) => slackTsNumber(right.slackTs) - slackTsNumber(left.slackTs))
+    .sort((left, right) => Number(retryKeys.has(pendingApprovalKey(right))) - Number(retryKeys.has(pendingApprovalKey(left)))
+      || slackTsNumber(right.slackTs) - slackTsNumber(left.slackTs))
     .slice(0, APPROVE_FULL_SCAN_MAX_DEALS > 0 ? APPROVE_FULL_SCAN_MAX_DEALS : undefined);
   const deferredPendingDeals = moderatedPendingDeals.filter((deal) => {
     const key = pendingApprovalKey(deal);
@@ -1448,7 +1541,7 @@ async function main() {
     const deal = approvalCheckDeals[i];
     const msg = messageByTs.get(deal.slackTs);
     let reactions = msg && Array.isArray(msg.reactions) ? msg.reactions : [];
-    if (reactions.length === 0 && deal.slackTs) {
+    if ((retryKeys.has(pendingApprovalKey(deal)) || reactions.length === 0) && deal.slackTs) {
       reactions = await getReactions(deal.slackTs);
     }
     const reviewDecision = resolveHumanReviewDecision({ reactions, botUserId });
@@ -1565,9 +1658,6 @@ async function main() {
       });
     }
   }
-
-  const expiryNormalization = await normalizeApprovedDealExpiries(approvedModeration.deals);
-  console.log(`🔎 approval expiry checks: ${expiryNormalization.urlChecksUsed}/${MAX_APPROVAL_URL_EXPIRY_CHECKS}, Treffer: ${expiryNormalization.urlExpiryHits}`);
 
   const publishedAt = new Date();
   const publishedDeals = approvedModeration.deals.map((deal) => (

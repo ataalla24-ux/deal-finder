@@ -59,7 +59,9 @@ jobs:
           SENTRY_DISABLED=1 node scripts/test-community-approval-integration.mjs
           SENTRY_DISABLED=1 node scripts/test-slack-date-pipeline.mjs
           SENTRY_DISABLED=1 node scripts/test-approval-map-readiness.mjs
+          SENTRY_DISABLED=1 node scripts/test-deal-map-source-addresses.mjs
           SENTRY_DISABLED=1 node scripts/test-deal-map-chain-rules.mjs
+          SENTRY_DISABLED=1 node --test scripts/test-approved-copy.mjs
 
       - name: ✅ Read Slack ✅ Reactions & Approve
         id: approval
@@ -69,6 +71,9 @@ jobs:
           SENTRY_DISABLED: '1'
           SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
           SLACK_CHANNEL_ID: ${{ secrets.SLACK_CHANNEL_ID }}
+          GH_TOKEN: ${{ github.token }}
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+          APPROVAL_SOURCE_COPY_REVIEW: '1'
           APPROVE_SLACK_CHANNEL_ID: ${{ github.event.inputs.slack_channel }}
           APPROVE_SLACK_MESSAGE_TS: ${{ github.event.inputs.message_ts }}
           APPROVE_SLACK_REACTION: ${{ github.event.inputs.reaction }}
@@ -79,6 +84,7 @@ jobs:
           LIVE_DEAL_REMOVALS_ENABLED: '0'
           APPROVAL_REQUIRE_MAP: '1'
           APPROVAL_MAP_GEOCODE_REQUESTS: '8'
+          APPROVAL_MAP_SOURCE_REQUESTS: '4'
         run: |
           node scripts/community-private-state.mjs hydrate
           node scraper/slack-approve.js
@@ -116,10 +122,14 @@ jobs:
         run: npm run logos:cache
 
       - name: 📤 Push Approved Deals
+        env:
+          # Replay newly verified locations from the approval cache, without another lookup.
+          MAP_SOURCE_REQUESTS: '0'
+          MAP_GEOCODE_REQUESTS: '0'
         run: |
           DEAL_COUNT=$(cat docs/deals.json | python3 -c "import sys, json; print(json.load(sys.stdin)['totalDeals'])" 2>/dev/null || echo "?")
           TIMESTAMP=$(date -u +"%H:%M")
-          node scripts/commit-generated.mjs --message "✅ ${TIMESTAMP} - Genehmigte Deals (${DEAL_COUNT} total)" --files docs/deals.json docs/deals-pending-all.json docs/deal-review-feedback.json docs/instagram-merchant-registry.json docs/live-deal-validation-report.json docs/live-deal-review-candidates.json docs/live-deal-edit-report.json docs/assets/brand-logos docs/vienna-food-benefit-pause.json docs/carrier-benefit-pause.json docs/deal-map-locations.json reviews/map-location-catalog.json reviews/map-geocode-cache.json reviews/approval-map-readiness.json
+          node scripts/commit-generated.mjs --message "✅ ${TIMESTAMP} - Genehmigte Deals (${DEAL_COUNT} total)" --files docs/deals.json docs/deals-pending-all.json docs/deal-review-feedback.json docs/instagram-merchant-registry.json docs/live-deal-validation-report.json docs/live-deal-review-candidates.json docs/live-deal-edit-report.json docs/assets/brand-logos docs/vienna-food-benefit-pause.json docs/carrier-benefit-pause.json docs/deal-map-locations.json reviews/map-location-catalog.json reviews/map-geocode-cache.json reviews/map-source-address-cache.json reviews/approval-map-readiness.json
 
       - name: Persist private review changes after successful publication
         env:

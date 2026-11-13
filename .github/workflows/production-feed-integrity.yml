@@ -32,6 +32,12 @@ on:
       - "scraper/deal-evidence-utils.js"
       - "scraper/offer-period-fields.js"
       - "scripts/test-slack-date-pipeline.mjs"
+      - "scraper/slack-approve.js"
+      - "scripts/approval-map-readiness.mjs"
+      - "scripts/test-approval-map-readiness.mjs"
+      - "scripts/test-approved-copy.mjs"
+      - "scripts/test-community-approval-integration.mjs"
+      - ".github/workflows/approve-deals.yml"
       - "scraper/normalize-live-deals.js"
       - "scraper/slack-digest-utils.js"
       - "scraper/slack-notify.js"
@@ -128,6 +134,9 @@ jobs:
           node scripts/validate-original-deal-photos.mjs
           node scripts/test-slack-deal-quality.mjs
           node scripts/test-slack-approval-validation.mjs
+          node scripts/test-approval-map-readiness.mjs
+          node scripts/test-community-approval-integration.mjs
+          node --test scripts/test-approved-copy.mjs
           node scripts/test-slack-date-pipeline.mjs
           node scripts/test-expiry-normalization.mjs
           node scripts/test-deal-validity-evidence.mjs
