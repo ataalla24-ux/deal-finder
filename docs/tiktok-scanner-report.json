@@ -1,14 +1,14 @@
 {
-  "lastUpdated": "2026-11-13T13:05:34.309Z",
+  "lastUpdated": "2026-11-13T22:36:19.777Z",
   "runProvenance": {
     "repository": "ataalla24-ux/deal-finder",
-    "runId": "43430517810",
-    "headSha": "6979515de5e1c17d768278f7c91762aa9510f3ec",
-    "checkoutSha": "6979515de5e1c17d768278f7c91762aa9510f3ec",
+    "runId": "43520509432",
+    "headSha": "245621fa55fbeed088d8f2245ec21fc2da6abf4d",
+    "checkoutSha": "245621fa55fbeed088d8f2245ec21fc2da6abf4d",
     "triggeringRun": null,
     "event": "schedule",
     "runAttempt": "1",
-    "url": "https://github.com/ataalla24-ux/deal-finder/actions/runs/43430517810"
+    "url": "https://github.com/ataalla24-ux/deal-finder/actions/runs/43520509432"
   },
   "status": "discovery-degraded",
   "outputPreserved": true,
@@ -122,46 +122,20 @@
   "discovered": 0,
   "apiCandidates": 0,
   "apiDiscovery": {
-    "errors": [
-      {
-        "keyword": "wien 1 euro döner",
-        "offset": 0,
-        "status": 0,
-        "error": "Empty or non-JSON TikTok response",
-        "code": "transport-unavailable",
-        "transportReason": "request-policy-blocked"
-      }
-    ],
-    "attemptedRequests": 1,
+    "errors": [],
+    "attemptedRequests": 0,
     "emptyResponses": 0,
     "rawItems": 0,
     "normalizedItems": 0,
     "ignoredItems": 0,
-    "stoppedReason": "transport-unavailable",
+    "stoppedReason": "api-cooldown",
     "nextRetryAt": "2026-11-14T13:05:20.311Z",
-    "nextKeywordIndex": 3,
-    "transport": "public-browser-search",
-    "navigations": 1,
-    "searchRequests": 0,
-    "blockedExtraRequests": 2,
-    "blockedRequestReasons": {
-      "unexpected-endpoint": 2
-    },
-    "observedSearchEndpoints": {
-      "other-search": 2
-    }
+    "nextKeywordIndex": 3
   },
   "searchDiscovery": {
-    "errors": [
-      {
-        "query": "site:tiktok.com wien nur heute gratis",
-        "error": "Search challenge; no bypass attempted",
-        "httpStatus": 403,
-        "retryAt": ""
-      }
-    ],
-    "attemptedQueries": 2,
-    "stoppedReason": "search-unavailable",
+    "errors": [],
+    "attemptedQueries": 0,
+    "stoppedReason": "search-cooldown",
     "nextRetryAt": "2026-11-14T13:05:32.340Z",
     "lastAttemptAt": "2026-11-13T13:05:32.340Z",
     "nextQueryIndex": 8,
@@ -247,28 +221,12 @@
     "aiAcceptedUnusable": 0
   },
   "timings": {
-    "apiDiscoveryMs": 12060,
-    "searchDiscoveryMs": 1542,
-    "mediaRescueMs": 393,
-    "totalScannerMs": 14218
+    "apiDiscoveryMs": 43,
+    "searchDiscoveryMs": 0,
+    "mediaRescueMs": 869,
+    "totalScannerMs": 2334
   },
-  "discoveryErrors": [
-    {
-      "query": "site:tiktok.com wien nur heute gratis",
-      "error": "Search challenge; no bypass attempted",
-      "httpStatus": 403,
-      "retryAt": ""
-    }
-  ],
-  "apiErrors": [
-    {
-      "keyword": "wien 1 euro döner",
-      "offset": 0,
-      "status": 0,
-      "error": "Empty or non-JSON TikTok response",
-      "code": "transport-unavailable",
-      "transportReason": "request-policy-blocked"
-    }
-  ],
+  "discoveryErrors": [],
+  "apiErrors": [],
   "rejected": []
 }
