@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-11-13T12:39:45.532Z",
+  "generatedAt": "2026-11-13T13:06:35.668Z",
   "discoveryAvailability": {
     "note": "Transport evidence, not deal yield. Retry eligibility is not recovery. Candidate counts are not Slack deliveries. No extra runs or quota resets.",
     "lanes": [
@@ -33,30 +33,30 @@
       },
       {
         "name": "tiktok-public-search",
-        "observedAt": "2026-11-12T22:43:30.058Z",
-        "status": "awaiting-post-cooldown-run",
-        "reason": "api-cooldown",
-        "retryAt": "2026-11-12T23:28:03.418Z",
-        "attempted": 0,
+        "observedAt": "2026-11-13T13:05:34.309Z",
+        "status": "paused",
+        "reason": "transport-unavailable",
+        "retryAt": "2026-11-14T13:05:20.311Z",
+        "attempted": 1,
         "rawItems": 0,
         "deliveredToSlack": null
       },
       {
         "name": "tiktok-web-search",
-        "observedAt": "2026-11-12T22:43:30.058Z",
-        "status": "awaiting-post-cooldown-run",
-        "reason": "search-cooldown",
-        "retryAt": "2026-11-12T23:28:15.471Z",
-        "attempted": 0,
+        "observedAt": "2026-11-13T13:05:34.309Z",
+        "status": "paused",
+        "reason": "search-unavailable",
+        "retryAt": "2026-11-14T13:05:32.340Z",
+        "attempted": 2,
         "deliveredToSlack": null
       }
     ]
   },
   "summary": {
     "filesConsidered": 32,
-    "totalCandidates": 680,
-    "uniqueCandidates": 658,
-    "distinctCandidates": 669,
+    "totalCandidates": 681,
+    "uniqueCandidates": 659,
+    "distinctCandidates": 670,
     "duplicateClusters": 11,
     "topHealthySources": [
       {
@@ -75,7 +75,7 @@
         "sourceKey": "meta-instagram",
         "sourceLabel": "Meta Instagram Graph",
         "healthScore": 70,
-        "totalDeals": 51
+        "totalDeals": 52
       },
       {
         "sourceKey": "firecrawl5",
@@ -147,9 +147,9 @@
       {
         "sourceKey": "meta-instagram",
         "sourceLabel": "Meta Instagram Graph",
-        "coverageScore": 34,
-        "totalDeals": 51,
-        "fresh1dCount": 5
+        "coverageScore": 35,
+        "totalDeals": 52,
+        "fresh1dCount": 6
       },
       {
         "sourceKey": "vienna-promo-radar",
@@ -220,7 +220,7 @@
         "sourceKey": "meta-instagram",
         "sourceLabel": "Meta Instagram Graph",
         "sourceWeightScore": 57,
-        "totalDeals": 51
+        "totalDeals": 52
       }
     ],
     "topSourcesToFix": [
@@ -439,20 +439,20 @@
       "sourceKey": "meta-instagram",
       "file": "deals-pending-meta-instagram.json",
       "sourceLabel": "Meta Instagram Graph",
-      "totalDeals": 51,
-      "uniqueDeals": 48,
+      "totalDeals": 52,
+      "uniqueDeals": 49,
       "duplicateDeals": 3,
       "duplicateAcrossSources": 3,
-      "fresh1dCount": 5,
-      "fresh7dCount": 41,
-      "viennaCount": 51,
+      "fresh1dCount": 6,
+      "fresh7dCount": 42,
+      "viennaCount": 52,
       "foodDrinkCount": 35,
       "promoCount": 19,
       "missingUrlCount": 0,
       "sampleTitles": [
+        "💥 Sonderangebot: 1 kg nur 5,99 €!",
         "Folge uns und kommentiere WIEN: Du bekommst unser kostenloses Mini-Buch mit 10 Wien-Geheimtipps direkt per DM",
-        "✨ Special Golden Apple – 7,40 € / 9,40 € Warme Äpfel, Ahorn-Pekannuss-Granola, Vanilleeis, Schlagobers und Goldschimmer",
-        "20 % Rabatt auf reguläre Tages- und Wochenend-Tickets"
+        "✨ Special Golden Apple – 7,40 € / 9,40 € Warme Äpfel, Ahorn-Pekannuss-Granola, Vanilleeis, Schlagobers und Goldschimmer"
       ],
       "lastRun": null,
       "uniqueRate": 0.9,
@@ -463,18 +463,18 @@
       "foodDrinkRate": 0.7,
       "promoRate": 0.4,
       "missingUrlRate": 0,
-      "averageQualityScore": 86.9,
+      "averageQualityScore": 86.7,
       "topCategories": [
         {
           "value": "essen",
           "count": 26
         },
         {
-          "value": "kaffee",
-          "count": 7
+          "value": "shopping",
+          "count": 8
         },
         {
-          "value": "shopping",
+          "value": "kaffee",
           "count": 7
         },
         {
@@ -493,7 +493,7 @@
       "topTypes": [
         {
           "value": "rabatt",
-          "count": 35
+          "count": 36
         },
         {
           "value": "gratis",
@@ -513,7 +513,7 @@
       ],
       "healthScore": 70,
       "missionFitScore": 53,
-      "coverageScore": 34,
+      "coverageScore": 35,
       "precisionScore": 68,
       "sourceWeightScore": 57
     },
