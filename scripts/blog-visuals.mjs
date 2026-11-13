@@ -9,6 +9,7 @@ export const covers = {
   ...backfillCovers,
   ...catchupCovers,
   ...Object.fromEntries([...novemberGuides, ...heldRecheckGuides].map(guide => [guide.slug, { lines: [guide.title], topic: guide.eyebrow, tone: 'yellow' }])),
+  'dancing-noodles-20-euro-gutschein-wien': { lines: ['Dancing Noodles'], topic: 'Essen in Margareten', tone: 'green' },
   'gratis-omv-kaffee': { lines: ['OMV VIVA', 'Winterkaffee mit jö.'], topic: 'Kaffee & Getränke', tone: 'yellow' },
   'blumencafe-kaffee-kuchen-6-euro-wien': { lines: ['Blumencafé', 'Kaffee & Kuchen.'], topic: 'Kaffeepause in Währing', tone: 'green' },
   'wien-guides': { lines: ['Deals & Gutscheine', 'in Wien.'], topic: 'FreeFinder Blog', tone: 'green' },
@@ -79,7 +80,7 @@ export function polishBlogCardVisuals(html, filename) {
 
 export function visualPicture(visual, { article = false, eager = false, sizes: customSizes } = {}) {
   const sizes = customSizes || (article ? '(max-width: 760px) calc(100vw - 40px), 760px' : '(max-width: 620px) calc(100vw - 40px), (max-width: 950px) calc((100vw - 60px) / 2), 354px');
-  return `<picture><source type="image/webp" srcset="${visual.thumbnail} 480w, ${visual.webp} 1200w" sizes="${sizes}"><img${article ? ' class="article-image"' : ''} src="${visual.src}" alt="${escape(visual.alt)}" width="1200" height="630" loading="${eager ? 'eager' : 'lazy'}" decoding="async"></picture>`;
+  return `<picture><source type="image/webp" srcset="${visual.thumbnail} 480w, ${visual.webp} 1200w" sizes="${sizes}"><img${article ? ' class="article-image"' : ''} src="${visual.src}" alt="${escape(visual.alt)}" width="${visual.width}" height="${visual.height}" loading="${eager ? 'eager' : 'lazy'}" decoding="async"></picture>`;
 }
 
 const discoveryTopics = [
@@ -160,7 +161,7 @@ export function polishBlogVisuals(html, filename) {
     html = html.replace($.html(element), visualPicture(visual, { article: hero.hasClass('article-image'), eager: true }));
   }
   const metadata = { 'og:image': social, 'og:image:secure_url': social, 'og:image:type': 'image/jpeg',
-    'og:image:width': '1200', 'og:image:height': '630', 'og:image:alt': visual.alt, 'twitter:image': social, 'twitter:image:alt': visual.alt };
+    'og:image:width': String(visual.width), 'og:image:height': String(visual.height), 'og:image:alt': visual.alt, 'twitter:image': social, 'twitter:image:alt': visual.alt };
   const seen = new Set();
   html = html.replace(/<meta\b[^>]*>/g, tag => {
     const meta = load(tag)('meta');

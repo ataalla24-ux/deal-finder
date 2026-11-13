@@ -59,6 +59,7 @@ export const photoRecipes = {
 
 // Match the benefit, not a merchant word in the URL (Pizza Rando offers döner).
 export const articlePhotos = {
+  'dancing-noodles-20-euro-gutschein-wien': 'vegetable-noodles',
   'fat-monk-dc-tower-wien-lieferando-rabatt': 'bowl',
   'marden-wien-1120-lieferando-super-deals': 'restaurant',
   'brille24-novlens-50-prozent-glaeser-oesterreich': 'smartphone',
@@ -159,5 +160,5 @@ export function photoVisual(slug, cover) {
   const key = articlePhotos[slug] || photoKey({ id: slug, title: cover.lines.join(' '), category: cover.topic, brand: cover.brand });
   if (!Object.hasOwn(photoRecipes, key)) throw new Error(`Missing photographic subject: ${key}`);
   return { src: `/assets/blog/photos/${key}.jpg`, webp: `/assets/blog/photos/${key}.webp`, thumbnail: `/assets/blog/photos/${key}-480.webp`,
-    alt: `Symbolfoto: ${photoRecipes[key].subject}`, width: 1200, height: 630 };
+    alt: `Symbolfoto: ${photoRecipes[key].subject}`, width: 1200, height: photoRecipes[key].outputHeight || 630 };
 }
