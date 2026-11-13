@@ -111,6 +111,49 @@ test('healthcheck429 pauses every website transport without disabling cached evi
   assert.equal(candidates[0].preview, undefined);
 });
 
+test('empty Instagram profiles with normal login navigation are not access failures or recovery', async () => {
+  const first = createInstagramWebAccess({ now });
+  first.failure('profiles', { reason: 'profile-unavailable' });
+  const saved = first.snapshot();
+  for (const text of ['Cafe Wien', 'Anmelden Registrieren Cafe Wien']) {
+    const access = createInstagramWebAccess({ now: clock(7), previousReport: { webAccess: saved } });
+    const fake = browser();
+    fake.page.evaluate = async () => ({ title: 'Cafe Wien', text,
+      html: '<a href="/accounts/login/">Anmelden</a><main>Cafe Wien</main>' });
+    const result = await discoverProfileCandidates([{ username: 'merchant' }], new Map(), {
+      enabled: true, access, browserType: fake.browserType,
+    });
+    assert.equal(result.blocked, 0);
+    assert.equal(result.noPostLinks, 1);
+    assert.equal(result.discovered, 0);
+    assert.deepEqual(access.snapshot(), saved, 'no content is not evidence of access recovery');
+  }
+});
+
+test('Instagram profile refusal stops all transports before accepting stale post links', async () => {
+  for (const extra of [
+    { finalUrl: 'https://www.instagram.com/accounts/login/' },
+    { html: '<form><input type="password"></form><a href="/p/StalePost123/">Post</a>' },
+    { text: 'Melde dich an, um diesen Beitrag anzusehen.' },
+  ]) {
+    const fake = browser();
+    fake.page.evaluate = async () => ({ title: 'Instagram', text: 'Cafe Wien',
+      html: '<a href="/p/StalePost123/">Post</a>', ...extra });
+    const access = createInstagramWebAccess({ now });
+    const map = new Map();
+    const result = await discoverProfileCandidates([{ username: 'merchant' }, { username: 'other' }], map, {
+      enabled: true, access, browserType: fake.browserType,
+    });
+    assert.equal(result.stoppedReason, 'login-wall');
+    assert.equal(result.discovered, 0);
+    assert.equal(map.size, 0);
+    assert.equal(fake.calls.navigation, 1);
+    assert.equal(access.pause().reason, 'login-wall');
+    await enrichRenderedPreviews(candidates, { enabled: true, access, browserType: fake.browserType });
+    assert.equal(fake.calls.launch, 1, 'no transport switch after refusal');
+  }
+});
+
 test('legacy profile blocks pause profiles, not exact-post public previews', async () => {
   const access = createInstagramWebAccess({ now: clock(1), previousReport: { lastUpdated: now.toISOString(), profileDiscovery: { stoppedReason: 'three-consecutive-profile-blocks' } } });
   assert.equal(access.pause(), null);

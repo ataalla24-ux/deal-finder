@@ -1060,7 +1060,6 @@ export async function discoverProfileCandidates(accounts, map, options = {}) {
   const browser = await (options.browserType || chromium).launch({ headless: true });
   const context = await browser.newContext({
     viewport: { width: 1366, height: 900 },
-    userAgent: USER_AGENT,
     locale: 'de-AT',
     timezoneId: 'Europe/Vienna',
   });
@@ -1097,10 +1096,21 @@ export async function discoverProfileCandidates(accounts, map, options = {}) {
           await page.mouse.wheel(0, 900).catch(() => {});
           await page.waitForTimeout(700);
           data = await page.evaluate(() => ({
+            finalUrl: location.href,
             title: document.title || '',
             text: document.body?.innerText || '',
             html: document.documentElement?.innerHTML || '',
           }));
+          // Check the actual profile access before trusting embedded/cached links.
+          if (instagramPageHasAccessWall({ ...data, bodyText: data.text })) {
+            stats.blocked += 1;
+            stats.stoppedEarly = true;
+            stats.stoppedReason = 'login-wall';
+            stats.nextRetryAt = access.failure('all', { reason: 'login-wall' }).nextRetryAt;
+            if (!options.access) openInstagramRuntimeCircuit('profile-login-wall');
+            stopProfileScan = true;
+            break;
+          }
           urls = extractInstagramPostPaths(data.html).slice(0, CONFIG.maxProfilePostsPerAccount);
           if (urls.length > 0 || !isProfileUnavailable(data)) break;
         }
@@ -1112,7 +1122,6 @@ export async function discoverProfileCandidates(accounts, map, options = {}) {
           } else {
             stats.noPostLinks += 1;
             consecutiveUnavailable = 0;
-            access.success('profiles');
           }
         } else {
           consecutiveUnavailable = 0;
@@ -1168,7 +1177,7 @@ export async function discoverProfileCandidates(accounts, map, options = {}) {
 
 function isProfileUnavailable(data = {}) {
   const signal = normalizeAscii([data.title, data.text].filter(Boolean).join(' '));
-  return /seite konnte nicht geladen werden|etwas ist schiefgelaufen|something went wrong|page could not be loaded|log in|anmelden|registrieren/.test(signal);
+  return /seite konnte nicht geladen werden|etwas ist schiefgelaufen|something went wrong|page could not be loaded/.test(signal);
 }
 
 function isInstagramLikeUrl(value) {
@@ -2585,7 +2594,6 @@ export async function enrichRenderedPreviews(candidates, options = {}) {
   const browser = await (options.browserType || chromium).launch({ headless: true });
   const context = await browser.newContext({
     viewport: { width: 1366, height: 900 },
-    userAgent: USER_AGENT,
     locale: 'de-AT',
     timezoneId: 'Europe/Vienna',
   });

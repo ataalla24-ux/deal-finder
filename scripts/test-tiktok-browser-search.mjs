@@ -54,6 +54,21 @@ test('pagination uses scrolling and the frontend cursor, bounded by existing pag
   });
 });
 
+test('the same general-full route works with or without a final slash, under one request cap', async () => {
+  await fixture({html: `<script>
+    const base='/api/search/general/full?keyword=wien%20gratis%20kaffee&count=30';
+    fetch(base); fetch('/api/search/general/full/?keyword=wien%20gratis%20kaffee&count=30');
+    </script>`}, async(page,calls)=>{
+    const result=await scan(page,{pages:1});
+    assert.equal(result.rows.length,1);
+    assert.equal(calls.length,1);
+    assert.equal(calls[0].pathname,'/api/search/general/full');
+    assert.equal(result.searchRequests,1);
+    assert.equal(result.blockedRequestReasons['request-cap'],1);
+    assert.equal(result.errors.length,0);
+  });
+});
+
 test('provider error 2483 and HTTP 429 stay refusals, with persisted Retry-After and no retries', async () => {
   for (const api of [()=>response({status_code:2483}),()=>({status:429,headers:{'Retry-After':'172800'},body:''})]) {
     await fixture({api},async(page,calls)=>{

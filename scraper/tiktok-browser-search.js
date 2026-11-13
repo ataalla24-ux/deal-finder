@@ -17,7 +17,8 @@ export async function createTikTokBrowserSearch(page, { pages = 3, count = 30, t
   const route = async route => {
     const request = route.request();
     const url = new URL(request.url());
-    const endpoint = url.pathname === '/api/search/general/full/' ? 'general-full'
+    const isGeneralFull = /^\/api\/search\/general\/full\/?$/.test(url.pathname);
+    const endpoint = isGeneralFull ? 'general-full'
       : url.pathname === '/api/search/item/full/' ? 'item-full'
       : url.pathname === '/api/search/user/full/' ? 'user-full' : 'other-search';
     stats.observedSearchEndpoints[endpoint] = (stats.observedSearchEndpoints[endpoint] || 0) + 1;
@@ -31,7 +32,7 @@ export async function createTikTokBrowserSearch(page, { pages = 3, count = 30, t
     }
     const requestCount = Number(url.searchParams.get('count') || count);
     const matching = url.origin === 'https://www.tiktok.com'
-      && url.pathname === '/api/search/general/full/'
+      && isGeneralFull
       && url.searchParams.get('keyword') === keyword;
     if (!matching || requests >= pages || !Number.isFinite(requestCount) || requestCount > count || requestCount < 1) {
       stats.blockedExtraRequests++;
