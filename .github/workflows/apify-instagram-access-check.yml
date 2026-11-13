@@ -2,6 +2,12 @@ name: Apify Instagram Read-only Access Check
 
 on:
   workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/apify-instagram-access-check.yml'
+      - 'scripts/check-apify-instagram-access.mjs'
+      - 'scripts/test-apify-instagram-access.mjs'
 
 permissions:
   contents: read
@@ -24,6 +30,7 @@ jobs:
       - name: Test metadata-only access probe offline
         run: node --test scripts/test-apify-instagram-access.mjs
       - name: Read account and Actor metadata only
+        if: github.event_name == 'workflow_dispatch'
         env:
           APIFY_TOKEN: ${{ secrets.APIFY_TOKEN }}
           APIFY_INSTAGRAM_VIENNA_ACTOR_ID: ${{ secrets.APIFY_INSTAGRAM_VIENNA_ACTOR_ID }}
