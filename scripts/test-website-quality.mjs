@@ -36,6 +36,23 @@ for (const file of fs.readdirSync(path.join(root, 'docs'), { recursive: true }).
     assert.equal($('[data-deal-status-banner][hidden]').length, 0);
   }
 }
+const imprint = load(read('docs/impressum.html'));
+assert.equal(imprint('address strong').text(), 'Lili Dóra Ataalla');
+assert.match(imprint('address').text(), /Lotte-Hass-Weg 2\/23[\s\S]*1220 Wien/);
+assert.equal(imprint('address a[href^="mailto:"]').attr('href'), 'mailto:freefinder.at@gmail.com');
+assert.equal(imprint('address a[href^="tel:"]').attr('href'), 'tel:+436604904417');
+assert.match(imprint('main').text(), /40343846/);
+assert.match(imprint('main').text(), /Sammeln und Weitergeben von allgemein zugänglichen Informationen/);
+assert.match(imprint('main').text(), /Magistratisches Bezirksamt für den 22\. Bezirk/);
+assert.doesNotMatch(imprint('main').text(), /Ankündigungsunternehmen|Anzeigenplätze|geboren/);
+for (const file of ['index.html', 'about.html', 'presse.html', 'support.html', 'pro-test.html', 'app/index.html']) {
+  const page = load(read(`docs/${file}`));
+  assert.ok(page('a').toArray().some(node => {
+    const href = page(node).attr('href');
+    return href && new URL(href, `https://freefinder.at/${file}`).href === 'https://freefinder.at/impressum.html';
+  }), `${file}: link to the public legal notice`);
+}
+
 const index = load(read('docs/blog/index.html'));
 const privacyHtml = read('docs/privacy.html');
 const privacy = load(privacyHtml);
