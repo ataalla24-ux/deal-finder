@@ -121,6 +121,7 @@ export const articlePhotos = {
   'filmsommer-moebelmuseum-wien-gratis': 'cinema',
   'open-house-wien-2026-gratis': 'city',
   'wien-meine-geschichte-gratis-eintritt': 'museum',
+  'gratis-wien-wochenende': 'museum',
   'app-gutscheine-wien': 'smartphone',
   'eins-plus-eins-wien': 'gift',
   'gratis-essen-wien': 'breakfast',

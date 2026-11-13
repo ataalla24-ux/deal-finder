@@ -43,6 +43,7 @@ export const covers = {
   'filmsommer-moebelmuseum-wien-gratis': { lines: ['Filmsommer', 'Möbelmuseum Wien.'], topic: 'Kino & Kultur', tone: 'blue' },
   'open-house-wien-2026-gratis': { lines: ['Open House', 'Wien.'], topic: 'Architektur entdecken', tone: 'blue' },
   'wien-meine-geschichte-gratis-eintritt': { lines: ['Wien Museum', 'Meine Geschichte.'], topic: 'Kultur & Eintritt', tone: 'yellow' },
+  'gratis-wien-wochenende': { lines: ['Gratis in Wien', 'dieses Wochenende.'], topic: 'Freizeit in Wien', tone: 'blue' },
   'app-gutscheine-wien': { lines: ['App-Gutscheine', 'in Wien.'], topic: 'Aktivieren & einlösen', tone: 'blue' },
   'eins-plus-eins-wien': { lines: ['1+1-Aktionen', 'in Wien.'], topic: 'Vergleichen & sparen', tone: 'rose' },
   'gratis-essen-wien': { lines: ['Gratis essen', 'in Wien.'], topic: 'Angebote & Voraussetzungen', tone: 'green' },
