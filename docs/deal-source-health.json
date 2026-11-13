@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-11-13T01:09:40.954Z",
+  "generatedAt": "2026-11-13T01:37:26.444Z",
   "discoveryAvailability": {
     "note": "Transport evidence, not deal yield. Retry eligibility is not recovery. Candidate counts are not Slack deliveries. No extra runs or quota resets.",
     "lanes": [
@@ -55,10 +55,16 @@
   "summary": {
     "filesConsidered": 32,
     "totalCandidates": 664,
-    "uniqueCandidates": 646,
-    "distinctCandidates": 655,
-    "duplicateClusters": 9,
+    "uniqueCandidates": 648,
+    "distinctCandidates": 656,
+    "duplicateClusters": 8,
     "topHealthySources": [
+      {
+        "sourceKey": "wien-combined",
+        "sourceLabel": "Wien Deals Combined Graph",
+        "healthScore": 84,
+        "totalDeals": 1
+      },
       {
         "sourceKey": "instagram-apify",
         "sourceLabel": "Apify Instagram",
@@ -81,12 +87,6 @@
         "sourceKey": "food3",
         "sourceLabel": "Firecrawl Key 2 - Food",
         "healthScore": 64,
-        "totalDeals": 1
-      },
-      {
-        "sourceKey": "wien-combined",
-        "sourceLabel": "Wien Deals Combined Graph",
-        "healthScore": 62,
         "totalDeals": 1
       }
     ],
@@ -140,7 +140,7 @@
       {
         "sourceKey": "meta-instagram",
         "sourceLabel": "Meta Instagram Graph",
-        "coverageScore": 41,
+        "coverageScore": 42,
         "totalDeals": 57,
         "fresh1dCount": 8
       },
@@ -167,6 +167,12 @@
         "totalDeals": 1
       },
       {
+        "sourceKey": "wien-combined",
+        "sourceLabel": "Wien Deals Combined Graph",
+        "precisionScore": 78,
+        "totalDeals": 1
+      },
+      {
         "sourceKey": "instagram-apify",
         "sourceLabel": "Apify Instagram",
         "precisionScore": 74,
@@ -177,12 +183,6 @@
         "sourceLabel": "Member Benefits",
         "precisionScore": 72,
         "totalDeals": 110
-      },
-      {
-        "sourceKey": "wien-combined",
-        "sourceLabel": "Wien Deals Combined Graph",
-        "precisionScore": 70,
-        "totalDeals": 1
       },
       {
         "sourceKey": "meta-instagram",
@@ -199,6 +199,12 @@
         "totalDeals": 110
       },
       {
+        "sourceKey": "wien-combined",
+        "sourceLabel": "Wien Deals Combined Graph",
+        "sourceWeightScore": 64,
+        "totalDeals": 1
+      },
+      {
         "sourceKey": "food3",
         "sourceLabel": "Firecrawl Key 2 - Food",
         "sourceWeightScore": 62,
@@ -213,14 +219,8 @@
       {
         "sourceKey": "meta-instagram",
         "sourceLabel": "Meta Instagram Graph",
-        "sourceWeightScore": 58,
+        "sourceWeightScore": 59,
         "totalDeals": 57
-      },
-      {
-        "sourceKey": "wien-combined",
-        "sourceLabel": "Wien Deals Combined Graph",
-        "sourceWeightScore": 57,
-        "totalDeals": 1
       }
     ],
     "topSourcesToFix": [
@@ -294,6 +294,77 @@
     }
   },
   "sources": [
+    {
+      "sourceKey": "wien-combined",
+      "file": "deals-pending-wien-combined.json",
+      "sourceLabel": "Wien Deals Combined Graph",
+      "totalDeals": 1,
+      "uniqueDeals": 1,
+      "duplicateDeals": 0,
+      "duplicateAcrossSources": 0,
+      "fresh1dCount": 1,
+      "fresh7dCount": 1,
+      "viennaCount": 1,
+      "foodDrinkCount": 1,
+      "promoCount": 0,
+      "missingUrlCount": 0,
+      "sampleTitles": [
+        "✨ Special Golden Apple – 7,40 € / 9,40 € Warme Äpfel, Ahorn-Pekannuss-Granola, Vanilleeis, Schlagobers und Goldschimmer"
+      ],
+      "lastRun": {
+        "status": "completed-with-errors",
+        "startedAt": "2026-11-12T20:20:33.570Z",
+        "finishedAt": "2026-11-12T20:21:24.552Z",
+        "durationMs": 50982,
+        "counts": {
+          "rawCandidates": 53,
+          "normalizedCandidates": 1,
+          "verifiedCandidates": 1,
+          "previousDeals": 0,
+          "acceptedDeals": 1,
+          "rejectedDeals": 48
+        },
+        "rejectedByReason": {
+          "no-concrete-offer": 42,
+          "missing-vienna-evidence": 1,
+          "general-recommendation": 3,
+          "alcohol-offer": 2
+        },
+        "errors": [
+          "#wienfoodie: Instagram scan paused: request-budget"
+        ],
+        "reportFile": "deal-pipeline-last-run-wien-combined.json"
+      },
+      "uniqueRate": 1,
+      "duplicateRate": 0,
+      "fresh1dRate": 1,
+      "fresh7dRate": 1,
+      "viennaRate": 1,
+      "foodDrinkRate": 1,
+      "promoRate": 0,
+      "missingUrlRate": 0,
+      "averageQualityScore": 78,
+      "topCategories": [
+        {
+          "value": "essen",
+          "count": 1
+        }
+      ],
+      "topTypes": [
+        {
+          "value": "rabatt",
+          "count": 1
+        }
+      ],
+      "issues": [
+        "wenige klare Gratis-/Promo-Signale"
+      ],
+      "healthScore": 84,
+      "missionFitScore": 72,
+      "coverageScore": 11,
+      "precisionScore": 78,
+      "sourceWeightScore": 64
+    },
     {
       "sourceKey": "instagram-apify",
       "file": "deals-pending-instagram-apify.json",
@@ -440,9 +511,9 @@
       "file": "deals-pending-meta-instagram.json",
       "sourceLabel": "Meta Instagram Graph",
       "totalDeals": 57,
-      "uniqueDeals": 53,
-      "duplicateDeals": 4,
-      "duplicateAcrossSources": 4,
+      "uniqueDeals": 54,
+      "duplicateDeals": 3,
+      "duplicateAcrossSources": 3,
       "fresh1dCount": 8,
       "fresh7dCount": 46,
       "viennaCount": 57,
@@ -517,9 +588,9 @@
       ],
       "healthScore": 70,
       "missionFitScore": 53,
-      "coverageScore": 41,
+      "coverageScore": 42,
       "precisionScore": 68,
-      "sourceWeightScore": 58
+      "sourceWeightScore": 59
     },
     {
       "sourceKey": "food3",
@@ -589,78 +660,6 @@
       "coverageScore": 15,
       "precisionScore": 80,
       "sourceWeightScore": 62
-    },
-    {
-      "sourceKey": "wien-combined",
-      "file": "deals-pending-wien-combined.json",
-      "sourceLabel": "Wien Deals Combined Graph",
-      "totalDeals": 1,
-      "uniqueDeals": 0,
-      "duplicateDeals": 1,
-      "duplicateAcrossSources": 1,
-      "fresh1dCount": 1,
-      "fresh7dCount": 1,
-      "viennaCount": 1,
-      "foodDrinkCount": 1,
-      "promoCount": 0,
-      "missingUrlCount": 0,
-      "sampleTitles": [
-        "✨ Special Golden Apple – 7,40 € / 9,40 € Warme Äpfel, Ahorn-Pekannuss-Granola, Vanilleeis, Schlagobers und Goldschimmer"
-      ],
-      "lastRun": {
-        "status": "completed-with-errors",
-        "startedAt": "2026-11-12T20:20:33.570Z",
-        "finishedAt": "2026-11-12T20:21:24.552Z",
-        "durationMs": 50982,
-        "counts": {
-          "rawCandidates": 53,
-          "normalizedCandidates": 1,
-          "verifiedCandidates": 1,
-          "previousDeals": 0,
-          "acceptedDeals": 1,
-          "rejectedDeals": 48
-        },
-        "rejectedByReason": {
-          "no-concrete-offer": 42,
-          "missing-vienna-evidence": 1,
-          "general-recommendation": 3,
-          "alcohol-offer": 2
-        },
-        "errors": [
-          "#wienfoodie: Instagram scan paused: request-budget"
-        ],
-        "reportFile": "deal-pipeline-last-run-wien-combined.json"
-      },
-      "uniqueRate": 0,
-      "duplicateRate": 1,
-      "fresh1dRate": 1,
-      "fresh7dRate": 1,
-      "viennaRate": 1,
-      "foodDrinkRate": 1,
-      "promoRate": 0,
-      "missingUrlRate": 0,
-      "averageQualityScore": 78,
-      "topCategories": [
-        {
-          "value": "essen",
-          "count": 1
-        }
-      ],
-      "topTypes": [
-        {
-          "value": "rabatt",
-          "count": 1
-        }
-      ],
-      "issues": [
-        "wenige klare Gratis-/Promo-Signale",
-        "hohe Überschneidung mit anderen Quellen"
-      ],
-      "healthScore": 62,
-      "missionFitScore": 72,
-      "coverageScore": 11,
-      "precisionScore": 70,
-      "sourceWeightScore": 57
     },
     {
       "sourceKey": "instagram-verified",
