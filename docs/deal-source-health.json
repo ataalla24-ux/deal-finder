@@ -1,21 +1,21 @@
 {
-  "generatedAt": "2026-11-13T20:06:33.560Z",
+  "generatedAt": "2026-11-13T20:29:55.515Z",
   "discoveryAvailability": {
     "note": "Transport evidence, not deal yield. Retry eligibility is not recovery. Candidate counts are not Slack deliveries. No extra runs or quota resets.",
     "lanes": [
       {
         "name": "instagram-search",
-        "observedAt": "2026-11-13T07:53:01.468Z",
-        "status": "awaiting-post-cooldown-run",
-        "reason": "search-cooldown",
-        "retryAt": "2026-11-13T08:14:38.717Z",
-        "attempted": 0,
+        "observedAt": "2026-11-13T20:28:22.713Z",
+        "status": "paused",
+        "reason": "search-unavailable",
+        "retryAt": "2026-11-14T20:27:59.928Z",
+        "attempted": 1,
         "discovered": 0,
         "deliveredToSlack": null
       },
       {
         "name": "instagram-profiles",
-        "observedAt": "2026-11-13T07:53:01.468Z",
+        "observedAt": "2026-11-13T20:28:22.713Z",
         "status": "paused",
         "reason": "web-access-cooldown",
         "retryAt": "2026-11-18T20:10:08.659Z",
@@ -24,7 +24,7 @@
       },
       {
         "name": "instagram-previews",
-        "observedAt": "2026-11-13T07:53:01.468Z",
+        "observedAt": "2026-11-13T20:28:22.713Z",
         "status": "paused",
         "reason": "web-access-cooldown",
         "retryAt": "2026-11-18T20:10:08.659Z",
@@ -84,10 +84,10 @@
         "totalDeals": 1
       },
       {
-        "sourceKey": "instagram-ai",
-        "sourceLabel": "Instagram AI Agent",
-        "healthScore": 62,
-        "totalDeals": 3
+        "sourceKey": "instagram-verified",
+        "sourceLabel": "Instagram",
+        "healthScore": 61,
+        "totalDeals": 6
       }
     ],
     "topMissionSources": [
@@ -584,61 +584,6 @@
       "sourceWeightScore": 62
     },
     {
-      "sourceKey": "instagram-ai",
-      "file": "deals-pending-instagram-ai.json",
-      "sourceLabel": "Instagram AI Agent",
-      "totalDeals": 3,
-      "uniqueDeals": 2,
-      "duplicateDeals": 1,
-      "duplicateAcrossSources": 1,
-      "fresh1dCount": 0,
-      "fresh7dCount": 3,
-      "viennaCount": 3,
-      "foodDrinkCount": 2,
-      "promoCount": 1,
-      "missingUrlCount": 0,
-      "sampleTitles": [
-        "6 Krapfen für 9 € oder 10 Krapfen für 13 €",
-        "Eine Pepsi gratis zu jeder direkten telefonischen Bestellung",
-        "Mittagsmenü mit Salat oder Suppe um 9,99 € in Hietzing"
-      ],
-      "lastRun": null,
-      "uniqueRate": 0.7,
-      "duplicateRate": 0.3,
-      "fresh1dRate": 0,
-      "fresh7dRate": 1,
-      "viennaRate": 1,
-      "foodDrinkRate": 0.7,
-      "promoRate": 0.3,
-      "missingUrlRate": 0,
-      "averageQualityScore": 97.3,
-      "topCategories": [
-        {
-          "value": "essen & trinken",
-          "count": 3
-        }
-      ],
-      "topTypes": [
-        {
-          "value": "rabatt",
-          "count": 2
-        },
-        {
-          "value": "freebie",
-          "count": 1
-        }
-      ],
-      "issues": [
-        "wenige Deals sind frischer als 1 Tag",
-        "wenige klare Gratis-/Promo-Signale"
-      ],
-      "healthScore": 62,
-      "missionFitScore": 48,
-      "coverageScore": 11,
-      "precisionScore": 63,
-      "sourceWeightScore": 48
-    },
-    {
       "sourceKey": "instagram-verified",
       "file": "deals-pending-instagram-verified.json",
       "sourceLabel": "Instagram",
@@ -776,6 +721,61 @@
       "coverageScore": 13,
       "precisionScore": 66,
       "sourceWeightScore": 54
+    },
+    {
+      "sourceKey": "instagram-ai",
+      "file": "deals-pending-instagram-ai.json",
+      "sourceLabel": "Instagram AI Agent",
+      "totalDeals": 3,
+      "uniqueDeals": 2,
+      "duplicateDeals": 1,
+      "duplicateAcrossSources": 1,
+      "fresh1dCount": 1,
+      "fresh7dCount": 3,
+      "viennaCount": 3,
+      "foodDrinkCount": 1,
+      "promoCount": 1,
+      "missingUrlCount": 0,
+      "sampleTitles": [
+        "Mittagsteller für 10,80 € im Restaurant ROTH",
+        "Gratis Pepsi zu jeder direkten telefonischen Bestellung",
+        "Mittagsmenü mit Salat oder Suppe für 9,99 € in Hietzing"
+      ],
+      "lastRun": null,
+      "uniqueRate": 0.7,
+      "duplicateRate": 0.3,
+      "fresh1dRate": 0.3,
+      "fresh7dRate": 1,
+      "viennaRate": 1,
+      "foodDrinkRate": 0.3,
+      "promoRate": 0.3,
+      "missingUrlRate": 0,
+      "averageQualityScore": 97.3,
+      "topCategories": [
+        {
+          "value": "essen & trinken",
+          "count": 3
+        }
+      ],
+      "topTypes": [
+        {
+          "value": "rabatt",
+          "count": 2
+        },
+        {
+          "value": "freebie",
+          "count": 1
+        }
+      ],
+      "issues": [
+        "geringe Food-/Drink-Relevanz",
+        "wenige klare Gratis-/Promo-Signale"
+      ],
+      "healthScore": 58,
+      "missionFitScore": 41,
+      "coverageScore": 10,
+      "precisionScore": 57,
+      "sourceWeightScore": 43
     },
     {
       "sourceKey": "power",

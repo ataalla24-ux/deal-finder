@@ -1,13 +1,13 @@
 {
-  "generatedAt": "2026-11-13T20:07:08.755Z",
+  "generatedAt": "2026-11-13T20:30:47.239Z",
   "summary": {
     "maxAgeDays": 7,
     "total": 257,
-    "allowed": 0,
-    "blocked": 257,
+    "allowed": 1,
+    "blocked": 256,
     "warnings": 0,
     "reasonCounts": {
-      "kein konkretes Angebot erkennbar": 184,
+      "kein konkretes Angebot erkennbar": 183,
       "Gottesdienste nur im Wochenlauf": 36,
       "älter als 7 Tage (2026-11-02)": 5,
       "älter als 7 Tage (2020-04-25)": 1,
@@ -55,7 +55,7 @@
       "älter als 7 Tage (2018-04-17)": 1
     },
     "reasonCategoryCounts": {
-      "kein konkreter Deal": 184,
+      "kein konkreter Deal": 183,
       "Gottesdienste außerhalb Wochenlauf": 36,
       "älter als 7 Tage": 149,
       "ungültige URL": 25,
@@ -160,12 +160,12 @@
       },
       "instagram-ai-agent": {
         "total": 3,
-        "allowed": 0,
-        "blocked": 3,
+        "allowed": 1,
+        "blocked": 2,
         "warnings": 0,
         "reasonCategoryCounts": {
-          "kein konkreter Deal": 2,
-          "älter als 7 Tage": 1
+          "älter als 7 Tage": 1,
+          "kein konkreter Deal": 1
         }
       },
       "Kirchen Verzeichnis": {
@@ -244,7 +244,23 @@
       }
     }
   },
-  "allowed": [],
+  "allowed": [
+    {
+      "id": "instagram-ai-f459f600d5a1",
+      "title": "Mittagsteller für 10,80 € im Restaurant ROTH",
+      "brand": "Restaurant ROTH",
+      "source": "instagram-ai-agent",
+      "url": "https://www.instagram.com/p/DfrvgwJjVkj/",
+      "reasons": [],
+      "warnings": [],
+      "sourceDate": "2026-11-13T13:30:25.000Z",
+      "sourceDateSource": "url.instagramShortcode",
+      "sourceAgeDays": 0,
+      "expiryDate": "",
+      "expirySource": "deal.evidence.offerTiming",
+      "urlStatus": "HTTP 200"
+    }
+  ],
   "blocked": [
     {
       "id": "jesuszentrum-events-20261102",
@@ -889,7 +905,7 @@
       "warnings": [
         "kein Ablaufdatum gefunden"
       ],
-      "sourceDate": "2026-11-13T20:04:14.000Z",
+      "sourceDate": "2026-11-13T20:28:40.418Z",
       "sourceDateSource": "url.publicationDate",
       "sourceAgeDays": 0,
       "expiryDate": "",
@@ -3534,28 +3550,8 @@
       "urlStatus": "ungültig: HTTP 404"
     },
     {
-      "id": "instagram-ai-65792c0c8a99",
-      "title": "6 Krapfen für 9 € oder 10 Krapfen für 13 €",
-      "brand": "Tuchlauben EIS",
-      "source": "instagram-ai-agent",
-      "url": "https://www.instagram.com/p/DfjNTNNjjCY/",
-      "reasons": [
-        "kein konkretes Angebot erkennbar"
-      ],
-      "warnings": [
-        "Inhalt prüfen: Gültigkeitszeitraum nicht belegt; nicht als unbegrenzt gültig behandeln",
-        "kein Ablaufdatum gefunden"
-      ],
-      "sourceDate": "2026-11-10T05:57:33.000Z",
-      "sourceDateSource": "url.instagramShortcode",
-      "sourceAgeDays": 3,
-      "expiryDate": "",
-      "expirySource": "",
-      "urlStatus": "HTTP 200"
-    },
-    {
-      "id": "instagram-ai-43b5f57ecebd",
-      "title": "Eine Pepsi gratis zu jeder direkten telefonischen Bestellung",
+      "id": "instagram-ai-5c7679e8af09",
+      "title": "Gratis Pepsi zu jeder direkten telefonischen Bestellung",
       "brand": "Only Pizza",
       "source": "instagram-ai-agent",
       "url": "https://www.instagram.com/p/DfIZoK6xzYU/",
@@ -3574,8 +3570,8 @@
       "urlStatus": "HTTP 200"
     },
     {
-      "id": "instagram-ai-08262e028b72",
-      "title": "Mittagsmenü mit Salat oder Suppe um 9,99 € in Hietzing",
+      "id": "instagram-ai-68d8cf228590",
+      "title": "Mittagsmenü mit Salat oder Suppe für 9,99 € in Hietzing",
       "brand": "Mittagsmenü",
       "source": "instagram-ai-agent",
       "url": "https://www.instagram.com/reel/DfcwZ05tPa0/",
@@ -5247,48 +5243,47 @@
   ],
   "runProvenance": {
     "repository": "ataalla24-ux/deal-finder",
-    "runId": "43497800789",
-    "headSha": "09af62ebfdbbe670f96e48a67e089581cadf2c9e",
-    "checkoutSha": "97e1f58fcea11f25c5e9054e4ca2ed57c6aa72ab",
+    "runId": "43501881767",
+    "headSha": "2614d9a9d726f900e0ff8f7bf91121d9ac02467b",
+    "checkoutSha": "2614d9a9d726f900e0ff8f7bf91121d9ac02467b",
     "triggeringRun": {
-      "runId": "43496487407",
-      "headSha": "74f510ac2ce5652472641b791426331332d2ea8e",
-      "event": "workflow_dispatch",
-      "name": "Meta Instagram Deal Discovery",
-      "startedAt": "2026-11-13T19:53:56.000Z",
-      "url": "https://github.com/ataalla24-ux/deal-finder/actions/runs/43496487407"
+      "runId": "43501709979",
+      "headSha": "46449281d2a2affe55280dfcded1734d2c2a4081",
+      "event": "schedule",
+      "name": "Instagram AI Agent",
+      "startedAt": "2026-11-13T20:27:22.000Z",
+      "url": "https://github.com/ataalla24-ux/deal-finder/actions/runs/43501709979"
     },
     "event": "workflow_run",
     "runAttempt": "1",
-    "url": "https://github.com/ataalla24-ux/deal-finder/actions/runs/43497800789"
+    "url": "https://github.com/ataalla24-ux/deal-finder/actions/runs/43501881767"
   },
   "instagramDelivery": {
-    "checkedAt": "2026-11-13T20:07:08.765Z",
+    "checkedAt": "2026-11-13T20:30:47.703Z",
     "scope": "instagram-ai-agent/standard-slack-lane",
     "extractedCandidates": 3,
     "counts": {
-      "validator-blocked": 3
+      "slack-confirmed": 1,
+      "validator-blocked": 2
     },
     "rows": [
       {
-        "id": "instagram-ai-65792c0c8a99",
-        "url": "https://www.instagram.com/p/DfjNTNNjjCY/",
-        "title": "6 Krapfen für 9 € oder 10 Krapfen für 13 €",
-        "brand": "Tuchlauben EIS",
-        "status": "validator-blocked",
-        "reasons": [
-          "kein konkretes Angebot erkennbar"
-        ],
-        "sourceDate": "2026-11-10T05:57:33.000Z",
+        "id": "instagram-ai-f459f600d5a1",
+        "url": "https://www.instagram.com/p/DfrvgwJjVkj/",
+        "title": "Mittagsteller für 10,80 € im Restaurant ROTH",
+        "brand": "Restaurant ROTH",
+        "status": "slack-confirmed",
+        "reasons": [],
+        "sourceDate": "2026-11-13T13:30:25.000Z",
         "sourceDateSource": "url.instagramShortcode",
-        "declaredSourceDate": "2026-11-10T05:57:33.000Z",
-        "slackTs": "",
-        "slackThreadTs": ""
+        "declaredSourceDate": "2026-11-13T13:30:04.000Z",
+        "slackTs": "1794601847.572259",
+        "slackThreadTs": "1794601847.418249"
       },
       {
-        "id": "instagram-ai-43b5f57ecebd",
+        "id": "instagram-ai-5c7679e8af09",
         "url": "https://www.instagram.com/p/DfIZoK6xzYU/",
-        "title": "Eine Pepsi gratis zu jeder direkten telefonischen Bestellung",
+        "title": "Gratis Pepsi zu jeder direkten telefonischen Bestellung",
         "brand": "Only Pizza",
         "status": "validator-blocked",
         "reasons": [
@@ -5301,9 +5296,9 @@
         "slackThreadTs": ""
       },
       {
-        "id": "instagram-ai-08262e028b72",
+        "id": "instagram-ai-68d8cf228590",
         "url": "https://www.instagram.com/reel/DfcwZ05tPa0/",
-        "title": "Mittagsmenü mit Salat oder Suppe um 9,99 € in Hietzing",
+        "title": "Mittagsmenü mit Salat oder Suppe für 9,99 € in Hietzing",
         "brand": "Mittagsmenü",
         "status": "validator-blocked",
         "reasons": [
@@ -5318,7 +5313,7 @@
     ]
   },
   "tiktokDelivery": {
-    "checkedAt": "2026-11-13T20:07:08.766Z",
+    "checkedAt": "2026-11-13T20:30:47.708Z",
     "scope": "tiktok-deals-scanner/standard-slack-lane",
     "extractedCandidates": 0,
     "counts": {},
