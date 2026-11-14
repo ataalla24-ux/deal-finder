@@ -21,7 +21,7 @@ for (const slug of slugs) {
   assert.equal($('meta[property="og:url"]').attr('content'), canonical);
   const entry = sitemap('url').filter((_, element) => sitemap(element).find('loc').text() === canonical);
   assert.equal(entry.length, 1, `${slug}: one sitemap entry`);
-  const modified = slug === 'geburtstag-gratis-wien' ? '2026-11-13' : '2026-10-30';
+  const modified = { 'guenstig-essen-wien': '2026-11-14', 'geburtstag-gratis-wien': '2026-11-13', 'kinodonnerstag-wien-drei': '2026-10-30' }[slug];
   assert.equal(entry.find('lastmod').text(), modified);
   const graph = JSON.parse($('script[type="application/ld+json"]').text())['@graph'];
   const article = graph.find(item => item['@type'] === 'Article');
