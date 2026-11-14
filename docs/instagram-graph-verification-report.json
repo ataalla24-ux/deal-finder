@@ -1,7 +1,7 @@
 {
-  "generatedAt": "2026-11-14T03:32:12.773Z",
+  "generatedAt": "2026-11-14T03:37:32.545Z",
   "source": "instagram-graph-cross-source-verification",
-  "status": "ok",
+  "status": "failed-preserved",
   "configured": true,
   "scannedFiles": [
     "deals-pending-church-events.json",
@@ -136,7 +136,7 @@
     },
     "deals-pending-meta-instagram.json": {
       "deals": 50,
-      "candidates": 4
+      "candidates": 3
     },
     "deals-pending-power.json": {
       "deals": 48,
@@ -167,14 +167,10 @@
       "candidates": 0
     }
   },
-  "candidatePosts": 8,
-  "candidateAccounts": 8,
+  "candidatePosts": 7,
+  "candidateAccounts": 7,
   "skippedAccountCooldowns": 0,
   "selectedAccounts": [
-    {
-      "username": "irodiongreek",
-      "candidates": 1
-    },
     {
       "username": "eatinvienna_",
       "candidates": 1
@@ -194,12 +190,21 @@
     {
       "username": "merkezrestaurant.at",
       "candidates": 1
+    },
+    {
+      "username": "x.x.x.l_grill_restaurant",
+      "candidates": 1
     }
   ],
-  "fetchedPosts": 150,
-  "exactMatches": 5,
+  "fetchedPosts": 0,
+  "exactMatches": 0,
   "retainedEvidencePosts": 2000,
-  "errors": [],
+  "errors": [
+    {
+      "username": "eatinvienna_",
+      "message": "Instagram shared quota paused: rolling-hour budget exhausted"
+    }
+  ],
   "accountFailures": {
     "natascha_rapid": {
       "count": 3,
@@ -215,19 +220,25 @@
   "sharedQuota": {
     "limitPerHour": 237,
     "usageThreshold": 95,
-    "requests": 6,
-    "reserved": 7,
-    "stopped": false,
-    "reason": "",
-    "highestUsagePercent": 58,
+    "requests": 0,
+    "reserved": 0,
+    "stopped": true,
+    "reason": "Instagram shared quota paused: rolling-hour budget exhausted",
+    "highestUsagePercent": 0,
     "waitedMs": 0,
     "pacingMs": 0,
-    "retryAt": "",
+    "retryAt": "2026-11-14T03:59:29.129Z",
     "adaptiveSafetyCeiling": 190,
     "adaptiveIncreases": 0,
     "storageFailure": null
   },
+  "globalError": {
+    "username": "eatinvienna_",
+    "status": 0,
+    "code": "SCAN_BUDGET",
+    "message": "Instagram shared quota paused: rolling-hour budget exhausted"
+  },
   "blockedEvidencePosts": 57,
-  "unmatchedCandidatePosts": 3,
-  "message": "5/8 fresh cross-source Instagram candidates matched exactly via Graph API."
+  "unmatchedCandidatePosts": 7,
+  "message": "0/7 fresh cross-source Instagram candidates matched exactly via Graph API."
 }
