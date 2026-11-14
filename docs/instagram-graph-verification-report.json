@@ -1,7 +1,7 @@
 {
-  "generatedAt": "2026-11-14T18:44:05.572Z",
+  "generatedAt": "2026-11-14T18:49:16.687Z",
   "source": "instagram-graph-cross-source-verification",
-  "status": "ok",
+  "status": "degraded",
   "configured": true,
   "scannedFiles": [
     "deals-pending-church-events.json",
@@ -196,10 +196,15 @@
       "candidates": 1
     }
   ],
-  "fetchedPosts": 146,
-  "exactMatches": 4,
+  "fetchedPosts": 21,
+  "exactMatches": 1,
   "retainedEvidencePosts": 2000,
-  "errors": [],
+  "errors": [
+    {
+      "username": "rochus1030",
+      "message": "Instagram shared quota paused: rolling-hour budget exhausted"
+    }
+  ],
   "accountFailures": {
     "natascha_rapid": {
       "count": 3,
@@ -215,19 +220,25 @@
   "sharedQuota": {
     "limitPerHour": 296,
     "usageThreshold": 95,
-    "requests": 6,
-    "reserved": 10,
-    "stopped": false,
-    "reason": "",
-    "highestUsagePercent": 86,
+    "requests": 1,
+    "reserved": 1,
+    "stopped": true,
+    "reason": "Instagram shared quota paused: rolling-hour budget exhausted",
+    "highestUsagePercent": 88,
     "waitedMs": 0,
     "pacingMs": 0,
-    "retryAt": "",
+    "retryAt": "2026-11-14T18:59:35.654Z",
     "adaptiveSafetyCeiling": 190,
     "adaptiveIncreases": 0,
     "storageFailure": null
   },
+  "globalError": {
+    "username": "rochus1030",
+    "status": 0,
+    "code": "SCAN_BUDGET",
+    "message": "Instagram shared quota paused: rolling-hour budget exhausted"
+  },
   "blockedEvidencePosts": 60,
-  "unmatchedCandidatePosts": 4,
-  "message": "4/8 fresh cross-source Instagram candidates matched exactly via Graph API."
+  "unmatchedCandidatePosts": 7,
+  "message": "1/8 fresh cross-source Instagram candidates matched exactly via Graph API."
 }
