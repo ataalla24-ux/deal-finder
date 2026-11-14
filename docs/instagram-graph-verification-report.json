@@ -1,7 +1,7 @@
 {
-  "generatedAt": "2026-11-14T22:44:05.529Z",
+  "generatedAt": "2026-11-14T22:46:16.476Z",
   "source": "instagram-graph-cross-source-verification",
-  "status": "ok",
+  "status": "failed-preserved",
   "configured": true,
   "scannedFiles": [
     "deals-pending-church-events.json",
@@ -83,8 +83,8 @@
       "candidates": 0
     },
     "deals-pending-gastro2.json": {
-      "deals": 132,
-      "candidates": 2
+      "deals": 131,
+      "candidates": 1
     },
     "deals-pending-gemeinde.json": {
       "deals": 33,
@@ -136,7 +136,7 @@
     },
     "deals-pending-meta-instagram.json": {
       "deals": 46,
-      "candidates": 3
+      "candidates": 4
     },
     "deals-pending-power.json": {
       "deals": 48,
@@ -172,6 +172,10 @@
   "skippedAccountCooldowns": 0,
   "selectedAccounts": [
     {
+      "username": "mannerfriends",
+      "candidates": 1
+    },
+    {
       "username": "vorteilsclub.wien",
       "candidates": 1
     },
@@ -190,16 +194,17 @@
     {
       "username": "eatinvienna_",
       "candidates": 1
-    },
-    {
-      "username": "steinbauer_andreas",
-      "candidates": 1
     }
   ],
-  "fetchedPosts": 146,
-  "exactMatches": 5,
+  "fetchedPosts": 0,
+  "exactMatches": 0,
   "retainedEvidencePosts": 2000,
-  "errors": [],
+  "errors": [
+    {
+      "username": "mannerfriends",
+      "message": "Instagram shared quota paused: shared cooldown"
+    }
+  ],
   "accountFailures": {
     "natascha_rapid": {
       "count": 3,
@@ -215,11 +220,11 @@
   "sharedQuota": {
     "limitPerHour": 190,
     "usageThreshold": 95,
-    "requests": 6,
-    "reserved": 10,
+    "requests": 0,
+    "reserved": 0,
     "stopped": true,
-    "reason": "Meta usage headroom",
-    "highestUsagePercent": 96,
+    "reason": "Instagram shared quota paused: shared cooldown",
+    "highestUsagePercent": 0,
     "waitedMs": 0,
     "pacingMs": 0,
     "retryAt": "2026-11-14T22:54:17.822Z",
@@ -227,7 +232,13 @@
     "adaptiveIncreases": 0,
     "storageFailure": null
   },
+  "globalError": {
+    "username": "mannerfriends",
+    "status": 0,
+    "code": "SCAN_BUDGET",
+    "message": "Instagram shared quota paused: shared cooldown"
+  },
   "blockedEvidencePosts": 60,
-  "unmatchedCandidatePosts": 2,
-  "message": "5/7 fresh cross-source Instagram candidates matched exactly via Graph API."
+  "unmatchedCandidatePosts": 7,
+  "message": "0/7 fresh cross-source Instagram candidates matched exactly via Graph API."
 }
