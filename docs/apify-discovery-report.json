@@ -1,14 +1,14 @@
 {
-  "generatedAt": "2026-11-13T22:44:01.761Z",
+  "generatedAt": "2026-11-14T12:22:12.449Z",
   "runProvenance": {
     "repository": "ataalla24-ux/deal-finder",
-    "runId": "43521609661",
-    "headSha": "e919e63e8e4bae2787ae75bcb6a2ab6829ff090e",
-    "checkoutSha": "b783442f8e2289a8b413a2be1a1c6e1ee3bf1b73",
+    "runId": "43594439308",
+    "headSha": "879a2ef4ee424980e31f045a3a7cc44a4b2657ed",
+    "checkoutSha": "145f6a351443c6af8a12430d80d7fcfb6aea5696",
     "triggeringRun": null,
     "event": "schedule",
     "runAttempt": "1",
-    "url": "https://github.com/ataalla24-ux/deal-finder/actions/runs/43521609661"
+    "url": "https://github.com/ataalla24-ux/deal-finder/actions/runs/43594439308"
   },
   "purpose": "scan",
   "limits": {
@@ -25,7 +25,7 @@
     "reason": "",
     "plan": "FREE",
     "includedCreditUsd": 5,
-    "accountUsageUsd": 1.9964044054438648,
+    "accountUsageUsd": 2.0068195130990474,
     "accountLimitUsd": 5,
     "cycle": {
       "startAt": "2026-10-15T00:00:00.000Z",
@@ -37,9 +37,15 @@
   },
   "selectedSources": [
     {
-      "key": "hashtag:gratiswien",
+      "key": "hashtag:wienisst",
       "kind": "hashtag",
-      "url": "https://www.instagram.com/explore/tags/gratiswien/",
+      "url": "https://www.instagram.com/explore/tags/wienisst/",
+      "priority": 0
+    },
+    {
+      "key": "hashtag:esseninwien",
+      "kind": "hashtag",
+      "url": "https://www.instagram.com/explore/tags/esseninwien/",
       "priority": 0
     },
     {
@@ -53,64 +59,48 @@
       "kind": "hashtag",
       "url": "https://www.instagram.com/explore/tags/wienfood/",
       "priority": 0
-    },
-    {
-      "key": "hashtag:esseninwien",
-      "kind": "hashtag",
-      "url": "https://www.instagram.com/explore/tags/esseninwien/",
-      "priority": 0
     }
   ],
   "status": "succeeded",
   "fetchedRecords": 4,
   "freshAcceptedDeals": 0,
   "pendingDeals": 0,
-  "unchangedPosts": 1,
+  "unchangedPosts": 2,
   "duplicatePosts": 0,
   "providerErrors": 0,
   "emptySourceRecords": 0,
   "ocrCalls": 2,
   "candidateAudit": [
     {
-      "key": "instagram:DfsR3idmQ-j",
-      "url": "https://www.instagram.com/p/DfsR3idmQ-j/",
-      "ownerUsername": "seesushi.palaisferstel",
+      "key": "instagram:DfuKCVLGikY",
+      "url": "https://www.instagram.com/p/DfuKCVLGikY/",
+      "ownerUsername": "foodie_onthe.road",
       "status": "rejected",
-      "reason": "no-consumer-food-benefit",
+      "reason": "non-food-ad",
       "ocrUsed": true,
       "ocrDeferred": false,
       "ocrErrors": 0
     },
     {
-      "key": "instagram:DfsOYuGDY5g",
-      "url": "https://www.instagram.com/p/DfsOYuGDY5g/",
-      "ownerUsername": "babylon1030",
+      "key": "instagram:DfsWaqnjd1_",
+      "url": "https://www.instagram.com/p/DfsWaqnjd1_/",
+      "ownerUsername": "freshkitchenwien",
       "status": "rejected",
       "reason": "no-consumer-food-benefit",
       "ocrUsed": true,
-      "ocrDeferred": false,
-      "ocrErrors": 0
-    },
-    {
-      "key": "instagram:DfJ7N9mCAAi",
-      "url": "https://www.instagram.com/p/DfJ7N9mCAAi/",
-      "ownerUsername": "graetzlperle",
-      "status": "rejected",
-      "reason": "post-older-than-seven-days",
-      "ocrUsed": false,
       "ocrDeferred": false,
       "ocrErrors": 0
     }
   ],
   "actorRuns": [
     {
-      "id": "4sQ73jEYitryfIFJN",
+      "id": "eKjtZk7cxELiNrmVM",
       "actorId": "apify~instagram-hashtag-scraper",
-      "reportedChargeUsd": 0.0104
+      "reportedChargeUsd": 0
     }
   ],
   "batchErrors": [],
-  "reportedChargeUsd": 0.0104,
+  "reportedChargeUsd": 0,
   "tools": {
     "tesseract": true,
     "ffmpeg": false,
@@ -118,17 +108,26 @@
   },
   "sources": [
     {
-      "key": "hashtag:gratiswien",
-      "lastAttemptAt": "2026-11-13T22:44:01.761Z",
+      "key": "hashtag:wienisst",
+      "lastAttemptAt": "2026-11-14T12:22:12.449Z",
       "postsReturned": 1,
-      "status": "stale-results",
+      "status": "posts-returned",
       "consecutiveFailures": 0,
-      "consecutiveEmpty": 3,
-      "retryAt": "2026-11-20T22:44:01.761Z"
+      "retryAt": "",
+      "consecutiveEmpty": 0
+    },
+    {
+      "key": "hashtag:esseninwien",
+      "lastAttemptAt": "2026-11-14T12:22:12.449Z",
+      "status": "posts-returned",
+      "postsReturned": 1,
+      "consecutiveFailures": 0,
+      "consecutiveEmpty": 0,
+      "retryAt": ""
     },
     {
       "key": "hashtag:viennafood",
-      "lastAttemptAt": "2026-11-13T22:44:01.761Z",
+      "lastAttemptAt": "2026-11-14T12:22:12.449Z",
       "postsReturned": 1,
       "status": "posts-returned",
       "consecutiveFailures": 0,
@@ -137,21 +136,12 @@
     },
     {
       "key": "hashtag:wienfood",
-      "lastAttemptAt": "2026-11-13T22:44:01.761Z",
+      "lastAttemptAt": "2026-11-14T12:22:12.449Z",
       "postsReturned": 1,
       "status": "posts-returned",
       "consecutiveFailures": 0,
       "retryAt": "",
       "consecutiveEmpty": 0
-    },
-    {
-      "key": "hashtag:esseninwien",
-      "lastAttemptAt": "2026-11-13T22:44:01.761Z",
-      "status": "posts-returned",
-      "postsReturned": 1,
-      "consecutiveFailures": 0,
-      "consecutiveEmpty": 0,
-      "retryAt": ""
     }
   ]
 }
