@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-11-14T18:28:22.110Z",
+  "generatedAt": "2026-11-14T18:30:40.920Z",
   "discoveryAvailability": {
     "note": "Transport evidence, not deal yield. Retry eligibility is not recovery. Candidate counts are not Slack deliveries. No extra runs or quota resets.",
     "lanes": [
@@ -54,17 +54,11 @@
   },
   "summary": {
     "filesConsidered": 32,
-    "totalCandidates": 666,
-    "uniqueCandidates": 645,
-    "distinctCandidates": 655,
+    "totalCandidates": 665,
+    "uniqueCandidates": 644,
+    "distinctCandidates": 654,
     "duplicateClusters": 10,
     "topHealthySources": [
-      {
-        "sourceKey": "instagram-apify",
-        "sourceLabel": "Apify Instagram",
-        "healthScore": 75,
-        "totalDeals": 2
-      },
       {
         "sourceKey": "member-benefits",
         "sourceLabel": "Member Benefits",
@@ -80,6 +74,12 @@
       {
         "sourceKey": "food3",
         "sourceLabel": "Firecrawl Key 2 - Food",
+        "healthScore": 64,
+        "totalDeals": 1
+      },
+      {
+        "sourceKey": "instagram-apify",
+        "sourceLabel": "Apify Instagram",
         "healthScore": 64,
         "totalDeals": 1
       },
@@ -104,12 +104,6 @@
         "totalDeals": 9
       },
       {
-        "sourceKey": "instagram-apify",
-        "sourceLabel": "Apify Instagram",
-        "missionFitScore": 71,
-        "totalDeals": 2
-      },
-      {
         "sourceKey": "firecrawl5",
         "sourceLabel": "Firecrawl Key 5 - Instagram Gastro",
         "missionFitScore": 65,
@@ -120,6 +114,12 @@
         "sourceLabel": "Member Benefits",
         "missionFitScore": 63,
         "totalDeals": 110
+      },
+      {
+        "sourceKey": "instagram-apify",
+        "sourceLabel": "Apify Instagram",
+        "missionFitScore": 63,
+        "totalDeals": 1
       }
     ],
     "topCoverageSources": [
@@ -167,12 +167,6 @@
         "totalDeals": 1
       },
       {
-        "sourceKey": "instagram-apify",
-        "sourceLabel": "Apify Instagram",
-        "precisionScore": 74,
-        "totalDeals": 2
-      },
-      {
         "sourceKey": "member-benefits",
         "sourceLabel": "Member Benefits",
         "precisionScore": 72,
@@ -189,6 +183,12 @@
         "sourceLabel": "Firecrawl Key 5 - Instagram Gastro",
         "precisionScore": 66,
         "totalDeals": 4
+      },
+      {
+        "sourceKey": "joe",
+        "sourceLabel": "jö Bonus Club",
+        "precisionScore": 64,
+        "totalDeals": 9
       }
     ],
     "topWeightedSources": [
@@ -205,12 +205,6 @@
         "totalDeals": 1
       },
       {
-        "sourceKey": "instagram-apify",
-        "sourceLabel": "Apify Instagram",
-        "sourceWeightScore": 61,
-        "totalDeals": 2
-      },
-      {
         "sourceKey": "meta-instagram",
         "sourceLabel": "Meta Instagram Graph",
         "sourceWeightScore": 58,
@@ -221,6 +215,12 @@
         "sourceLabel": "Firecrawl Key 5 - Instagram Gastro",
         "sourceWeightScore": 54,
         "totalDeals": 4
+      },
+      {
+        "sourceKey": "joe",
+        "sourceLabel": "jö Bonus Club",
+        "sourceWeightScore": 54,
+        "totalDeals": 9
       }
     ],
     "topSourcesToFix": [
@@ -291,60 +291,6 @@
     }
   },
   "sources": [
-    {
-      "sourceKey": "instagram-apify",
-      "file": "deals-pending-instagram-apify.json",
-      "sourceLabel": "Apify Instagram",
-      "totalDeals": 2,
-      "uniqueDeals": 2,
-      "duplicateDeals": 0,
-      "duplicateAcrossSources": 0,
-      "fresh1dCount": 0,
-      "fresh7dCount": 2,
-      "viennaCount": 1,
-      "foodDrinkCount": 2,
-      "promoCount": 2,
-      "missingUrlCount": 0,
-      "sampleTitles": [
-        "GOOD PIZZA. FREE PEPSI. 🥤🍕 Warum nur Pizza bestellen, wenn du eine Pepsi GRATIS dazubekommen kannst? 👀 Bei",
-        "Schnitzel 1+1. Pizza gratis dazu. 🍽️🍕 Zwei Food-Deals in Wien fürs Wochenende speichern! 🍽️ Alleewirt: Zwei"
-      ],
-      "lastRun": null,
-      "uniqueRate": 1,
-      "duplicateRate": 0,
-      "fresh1dRate": 0,
-      "fresh7dRate": 1,
-      "viennaRate": 0.5,
-      "foodDrinkRate": 1,
-      "promoRate": 1,
-      "missingUrlRate": 0,
-      "averageQualityScore": 95,
-      "topCategories": [
-        {
-          "value": "essen",
-          "count": 2
-        }
-      ],
-      "topTypes": [
-        {
-          "value": "bogo",
-          "count": 1
-        },
-        {
-          "value": "freebie",
-          "count": 1
-        }
-      ],
-      "issues": [
-        "wenige Deals sind frischer als 1 Tag",
-        "Wien-Signal ist zu schwach"
-      ],
-      "healthScore": 75,
-      "missionFitScore": 71,
-      "coverageScore": 13,
-      "precisionScore": 74,
-      "sourceWeightScore": 61
-    },
     {
       "sourceKey": "member-benefits",
       "file": "deals-pending-member-benefits.json",
@@ -580,6 +526,55 @@
       "coverageScore": 15,
       "precisionScore": 80,
       "sourceWeightScore": 62
+    },
+    {
+      "sourceKey": "instagram-apify",
+      "file": "deals-pending-instagram-apify.json",
+      "sourceLabel": "Apify Instagram",
+      "totalDeals": 1,
+      "uniqueDeals": 1,
+      "duplicateDeals": 0,
+      "duplicateAcrossSources": 0,
+      "fresh1dCount": 0,
+      "fresh7dCount": 1,
+      "viennaCount": 0,
+      "foodDrinkCount": 1,
+      "promoCount": 1,
+      "missingUrlCount": 0,
+      "sampleTitles": [
+        "Schnitzel 1+1. Pizza gratis dazu. 🍽️🍕 Zwei Food-Deals in Wien fürs Wochenende speichern! 🍽️ Alleewirt: Zwei"
+      ],
+      "lastRun": null,
+      "uniqueRate": 1,
+      "duplicateRate": 0,
+      "fresh1dRate": 0,
+      "fresh7dRate": 1,
+      "viennaRate": 0,
+      "foodDrinkRate": 1,
+      "promoRate": 1,
+      "missingUrlRate": 0,
+      "averageQualityScore": 95,
+      "topCategories": [
+        {
+          "value": "essen",
+          "count": 1
+        }
+      ],
+      "topTypes": [
+        {
+          "value": "bogo",
+          "count": 1
+        }
+      ],
+      "issues": [
+        "wenige Deals sind frischer als 1 Tag",
+        "Wien-Signal ist zu schwach"
+      ],
+      "healthScore": 64,
+      "missionFitScore": 63,
+      "coverageScore": 10,
+      "precisionScore": 60,
+      "sourceWeightScore": 52
     },
     {
       "sourceKey": "instagram-verified",
