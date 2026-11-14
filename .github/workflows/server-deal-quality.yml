@@ -65,7 +65,7 @@ jobs:
       - name: Verify safe correction and preservation rules
         if: steps.slot.outputs.run == 'true'
         run: |
-          node --test scripts/test-ai-credit-budget.mjs scripts/test-automatic-maintenance.mjs scripts/test-server-quality.mjs scripts/test-server-operations.mjs scripts/test-server-blog.mjs scripts/test-lightweight-state-committer.mjs scripts/test-native-artwork-review.mjs scripts/test-server-quality-publication-workflow.mjs
+          node --test scripts/test-ai-credit-budget.mjs scripts/test-automatic-maintenance.mjs scripts/test-live-deal-enrichment.mjs scripts/test-server-quality.mjs scripts/test-server-operations.mjs scripts/test-server-blog.mjs scripts/test-lightweight-state-committer.mjs scripts/test-native-artwork-review.mjs scripts/test-server-quality-publication-workflow.mjs
           node scripts/test-pre-publication-title.mjs
           node scripts/test-deal-photo-contract.mjs
           node --test scripts/test-original-deal-photos.mjs

@@ -118,6 +118,22 @@ export function candidatesFor(deal, reviewed, today) {
   if (onlineOnly(deal)) return { reason: 'online-only', addresses: [] };
   const override = reviewed[deal.id];
   if (override) {
+    if (override.dealUrl && override.dealUrl !== deal.url) return { reason: 'reviewed-offer-identity-mismatch', addresses: [] };
+    if (override.managedBy === 'reviewed-public-voucher-venue-v1') {
+      const edited = [...(deal.slackEditedFields || []), ...(deal.liveEditedFields || [])];
+      const explicit = [deal.address, deal.location, deal.ort].filter(Boolean);
+      const expected = override.locations || [];
+      const matches = value => extractAddresses(value).length === 1 && expected.some(address =>
+        addressKey(extractAddresses(value)[0]) === addressKey(address)
+        && (!extractAddresses(value)[0].postalCode || extractAddresses(value)[0].postalCode === address.postalCode));
+      if (deal.editedInSlack || deal.slackFormEditTs || deal.slackEditedAt || deal.liveEditedAt
+        || edited.some(key => ['address', 'location', 'ort', 'distance', 'city', 'postalCode'].includes(key))
+        || explicit.some(value => !matches(value))
+        || (deal.city && !['wien', 'vienna'].includes(normalize(deal.city)))
+        || (deal.postalCode && !expected.some(address => address.postalCode === deal.postalCode))) {
+        return { reason: 'reviewed-offer-location-conflict', addresses: [] };
+      }
+    }
     const addresses = (override.locations || []).filter(x => x.street && x.number && validDay(x.validFrom) && validDay(x.validUntil)
       && (!x.validFrom || x.validFrom <= today) && (!x.validUntil || x.validUntil >= today));
     return { reason: addresses.length ? '' : 'no-current-reviewed-branch', addresses };
@@ -214,7 +230,7 @@ export function inspectDealLocation(deal, { map = {}, catalog = {}, reviewed = {
       return { ...base, status: 'mapped', reason: 'existing-registry', locationIds: approved.map(x => x.id) };
     }
   }
-  if (['multiple-branches-need-review', 'no-current-reviewed-branch', 'address-in-caption-needs-review', 'vienna-address-needs-review', 'outside-vienna-needs-review'].includes(candidates.reason)) {
+  if (['multiple-branches-need-review', 'no-current-reviewed-branch', 'address-in-caption-needs-review', 'vienna-address-needs-review', 'outside-vienna-needs-review', 'reviewed-offer-identity-mismatch', 'reviewed-offer-location-conflict'].includes(candidates.reason)) {
     return { ...base, status: 'needs-review' };
   }
   const locations = catalogLocations(map, catalog).filter(location => verifiedLocation(location, today));

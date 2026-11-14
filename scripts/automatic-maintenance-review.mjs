@@ -9,6 +9,8 @@ export function automaticMaintenanceReviewCandidates(report, now = new Date()) {
     'newer-manual-period-correction': 'Neuere manuelle Datumsänderung bleibt maßgeblich',
   };
   return (report.review || []).filter(row => row.id).map(row => ({ id: row.id,
-    reason: `Automatische Pflege: ${reasons[row.reason] || 'Gültigkeit anhand der Originalquelle prüfen; keine automatische Entfernung'}`,
+    reason: `Automatische Pflege: ${row.reason === 'copy-needs-grounded-review' && row.fields?.includes('description')
+      ? 'Vollständige Bedingungen werden anhand der Quelle nachgeprüft; der Deal bleibt sichtbar'
+      : reasons[row.reason] || 'Gültigkeit anhand der Originalquelle prüfen; keine automatische Entfernung'}`,
     details: { sourceSystem: 'automatic-maintenance-review', automaticRemovalEligible: false } }));
 }

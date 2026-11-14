@@ -1,3 +1,5 @@
+import { basicCopyHold, prepareTwoStagePublication } from './approval-two-stage.js';
+import { captureMapEnrichmentInput, projectEnrichmentDeal } from './deal-enrichment-state.js';
 import { officialFoodOfferKey } from './power-food-sources.js';
 import '../sentry/instrument.mjs';
 import fs from 'fs';
@@ -13,7 +15,7 @@ import {
 import { inspectDealUrlHealth, isVagueExpiry, normalizeDealExpiry, parseExpiryDetails, repairStartOnlyExpiry } from './expiry-utils.js';
 import { offerPeriodFields } from './offer-period-fields.js';
 import { hasOnlyPreviewDescription, preisjaegerThreadId } from './approval-source-evidence.js';
-import { isSupportedIamstudentApprovalUrl, iamstudentApprovalDateHold, prepareIamstudentApprovalCopy } from './approval-iamstudent-source-evidence.js';
+import { isSupportedIamstudentApprovalUrl, isReviewedIamstudentApprovalEvidence, iamstudentApprovalDateHold, prepareIamstudentApprovalCopy, prepareIamstudentApprovalPeriod } from './approval-iamstudent-source-evidence.js';
 import { isRestoredIamstudentApprovalRetry } from './approval-restored-source-retry.js';
 import { isDealNewByDate } from './deal-freshness-utils.js';
 import { buildReport, buildSummary, validateDealsForSlack } from './deal-validity-agent.js';
@@ -807,8 +809,9 @@ async function validateApprovalCandidates(deals, options = {}) {
       blockingReason: 'Aktueller Angebotsbeleg nicht eindeutig lesbar.' });
   }
   candidates = candidates.map(deal => {
-    const prepared = prepareIamstudentApprovalCopy(deal, sourceEvidence.get(deal.id), { existingIds });
-    if (prepared !== deal) console.log('IAMSTUDENT source copy prepared:', JSON.stringify({ id: deal.id,
+    const periodPrepared = prepareIamstudentApprovalPeriod(deal, sourceEvidence.get(deal.id), { existingIds, now });
+    const prepared = prepareIamstudentApprovalCopy(periodPrepared, sourceEvidence.get(deal.id), { existingIds });
+    if (prepared !== periodPrepared) console.log('IAMSTUDENT source copy prepared:', JSON.stringify({ id: deal.id,
       fields: prepared.reviewedSourceCopy.fields, method: prepared.reviewedSourceCopy.method }));
     return prepared;
   });
@@ -825,15 +828,22 @@ async function validateApprovalCandidates(deals, options = {}) {
     const byId = new Map(reviewed.map(deal => [deal.id, deal]));
     candidates = candidates.map(deal => byId.get(deal.id) || deal);
   }
-  const originals = new Map(inputs.map(deal => [deal.id, deal]));
+  // Preserve the proven machine-period correction across unrelated holds, but
+  // restore original copy so a prior suggestion can never become source proof.
+  const originals = new Map(inputs.map(deal => [deal.id,
+    prepareIamstudentApprovalPeriod(deal, sourceEvidence.get(deal.id), { existingIds, now })]));
   const sourceAddresses = new Map();
   candidates = candidates.map(deal => {
     const proof = sourceLookup?.reviewed[deal.id];
-    const site = proof?.managedBy === 'source-address-discovery-v1' ? proof.locations[0] : null;
+    const voucherVenue = proof?.managedBy === 'reviewed-public-voucher-venue-v1'
+      && proof.dealUrl === deal.url && proof.locations?.length === 1
+      && proof.offerContentHash === sourceEvidence.get(deal.id)?.contentHash
+      && isReviewedIamstudentApprovalEvidence(deal, sourceEvidence.get(deal.id));
+    const site = proof?.managedBy === 'source-address-discovery-v1' || voucherVenue ? proof.locations[0] : null;
     if (!site) return deal;
     // Persist the address, not a temporary map override tied to the title.
     // Event locations also require an independently confirmed end day.
-    delete sourceLookup.reviewed[deal.id];
+    if (!voucherVenue) delete sourceLookup.reviewed[deal.id];
     const edited = [...ensureArray(deal.slackEditedFields), ...ensureArray(deal.liveEditedFields)];
     const end = cleanText(deal.validUntil || deal.validOn).slice(0, 10);
     if (deal.address || ['address', 'distance', 'city', 'postalCode'].some(field => edited.includes(field))
@@ -879,17 +889,14 @@ async function validateApprovalCandidates(deals, options = {}) {
       addedBlock = true;
     }
     if (!decision.allowed) continue;
-    if (humanApproved(deal) && !existingIds.has(deal.id)
-      && (deal.approvalCopyReview?.deferred || deal.approvalCopyReview?.waitingForSlot)) {
-      decision.allowed = false;
-      decision.reasons.push('Inhaltsprüfung ausstehend: Die automatische Prüfung wartet auf verfügbare Kapazität und wird erneut versucht.');
-      addedBlock = true;
-    }
-    if (humanApproved(deal) && !existingIds.has(deal.id) && !isCommunitySubmission(deal)
-      && (!cleanText(deal.description) || (sourceEvidence.has(deal.id) && hasOnlyPreviewDescription(deal)))) {
-      decision.allowed = false;
-      decision.reasons.push('Beschreibung fehlt: Einloesung und Bedingungen sind noch nicht ausreichend belegt.');
-      addedBlock = true;
+    if (humanApproved(deal) && !existingIds.has(deal.id) && !isCommunitySubmission(deal)) {
+      const copyPending = hasOnlyPreviewDescription(deal) || deal.approvalCopyReview?.deferred || deal.approvalCopyReview?.waitingForSlot;
+      const hold = copyPending ? basicCopyHold(deal, sourceEvidence.get(deal.id), { now }) : '';
+      if (hold) {
+        decision.allowed = false;
+        decision.reasons.push(hold);
+        addedBlock = true;
+      } else Object.assign(deal, prepareTwoStagePublication(deal, { now, sourceEvidence: sourceEvidence.get(deal.id) }));
     }
     const site = sourceAddresses.get(deal.id);
     if (!decision.allowed || !site || cleanText(deal.address) !== site.address) continue;
@@ -907,6 +914,17 @@ async function validateApprovalCandidates(deals, options = {}) {
     validation.summary = buildSummary(validation.results, validation.summary.maxAgeDays);
     validation.report = buildReport(validation.results, validation.summary);
   }
+  const cacheCandidates = validation.allowedDeals.filter(deal => deal.enrichmentFields?.includes('description') && sourceEvidence.has(deal.id));
+  if (cacheCandidates.length) {
+    const { createMaintenanceSourceEntry } = await import('../scripts/refresh-maintenance-evidence.mjs');
+    const cache = loadJson(path.join(ROOT, 'reviews/maintenance-source-evidence.json'), { version: 1, entries: {} });
+    let changed = false;
+    for (const deal of cacheCandidates) {
+      const entry = createMaintenanceSourceEntry(deal, sourceEvidence.get(deal.id), now);
+      if (entry) { cache.entries[deal.url] = entry; changed = true; }
+    }
+    if (changed) fs.writeFileSync(path.join(ROOT, 'reviews/maintenance-source-evidence.json'), JSON.stringify(cache, null, 2) + '\n');
+  }
   // Keep only the original input and the review memo in pending state. Retried
   // validations must not mistake an earlier machine suggestion for evidence.
   const restorePending = validation => {
@@ -923,7 +941,7 @@ async function validateApprovalCandidates(deals, options = {}) {
     return { ...validation, results, blockedDeals: results.filter(row => !row.decision.allowed).map(row => row.deal) };
   };
   if (!mapOptions) return restorePending(validation);
-  const readiness = await requireApprovalMap(validation, { ...mapOptions, sourceLookup });
+  const readiness = await requireApprovalMap(validation, { ...mapOptions, sourceLookup, twoStage: true });
   if (readiness.changed) {
     for (const [file, payload] of [
       ...(readiness.projectionChanged ? [
@@ -936,6 +954,14 @@ async function validateApprovalCandidates(deals, options = {}) {
         sourceRequests: readiness.sourceRequests, checks: readiness.checks }],
     ]) fs.writeFileSync(path.join(ROOT, file), JSON.stringify(payload, null, 2) + '\n');
   }
+  const enrichmentInputs = loadJson(path.join(ROOT, 'reviews/enrichment-inputs.json'), { version: 1, entries: {} });
+  let inputsChanged = false;
+  for (const deal of readiness.validation.allowedDeals) {
+    if (!deal.enrichmentFields?.includes('map')) continue;
+    enrichmentInputs.entries[deal.id] = captureMapEnrichmentInput(deal);
+    inputsChanged = true;
+  }
+  if (inputsChanged) fs.writeFileSync(path.join(ROOT, 'reviews/enrichment-inputs.json'), JSON.stringify(enrichmentInputs, null, 2) + '\n');
   return restorePending(readiness.validation);
 }
 
@@ -999,7 +1025,7 @@ async function retainBlockedApproval(deal, reasons) {
 }
 
 function isApprovalRetryReason(reason) {
-  return isApprovalMapReason(reason) || /^(?:Angebotsbeleg ausstehend|Inhaltsprüfung ausstehend|Beschreibung fehlt|nicht eindeutig in Wien|noch nicht gestartet|Aktionszeitraum auf Lokal-Website unklar|Community-Aktionszeitraum unklar|Aktionszeitraum widersprüchlich|Aktionszeitraum ungültig|Ablaufdatum passt nicht zur aktuellen Couponrunde|Offizielle Aktion nicht erneut bestätigt)\b/i.test(reason);
+  return isApprovalMapReason(reason) || /^(?:Grundprüfung|Angebotsbeleg ausstehend|Inhaltsprüfung ausstehend|Beschreibung fehlt|nicht eindeutig in Wien|noch nicht gestartet|Aktionszeitraum auf Lokal-Website unklar|Community-Aktionszeitraum unklar|Aktionszeitraum widersprüchlich|Aktionszeitraum ungültig|Ablaufdatum passt nicht zur aktuellen Couponrunde|Offizielle Aktion nicht erneut bestätigt)\b/i.test(reason);
 }
 
 async function clearBlockedApprovalNotice(deal) {
@@ -1289,7 +1315,7 @@ function mergeApprovedDeals(existingDeals, newlyApproved) {
 
 function saveDealsJson(deals) {
   const payload = {
-    deals,
+    deals: deals.map(projectEnrichmentDeal),
     totalDeals: deals.length,
     lastUpdated: new Date().toISOString(),
   };
@@ -1430,6 +1456,7 @@ async function runTargetedApproval({ moderation, botUserId }) {
   const approved = approvalValidation.allowedDeals.map((deal) => ({
     ...manuallyApprovedDeal,
     ...deal,
+    ...Object.fromEntries(offerPeriodFields.map(field => [field, deal[field]])),
     pipelineLifecycle: manuallyApprovedDeal.pipelineLifecycle,
     approvedAt: decisionAt.toISOString(),
     approvalBlock: undefined,
@@ -1725,6 +1752,7 @@ async function main() {
     return {
       ...original,
       ...deal,
+      ...Object.fromEntries(offerPeriodFields.map(field => [field, deal[field]])),
       pipelineLifecycle: original.pipelineLifecycle || deal.pipelineLifecycle,
       approvedAt: original.approvedAt || deal.approvedAt,
       approvalBlock: undefined,

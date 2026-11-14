@@ -187,7 +187,9 @@ test('official source verification precedes editorial copy; cached retries never
     assert.equal(cached.allowedDeals.length, 1);
     assert.equal(calls, 2, 'fresh review memo is reused');
     const waiting = await validateApprovalCandidates([input], { ...options, approvalCachedReviewOnly: true });
-    assert.equal(waiting.allowedDeals.length, 0, 'missing review cannot silently bypass the review gate');
+    assert.equal(waiting.allowedDeals.length, 1, 'source-verified complete basic copy may publish before optional polish');
+    assert.deepEqual(waiting.allowedDeals[0].enrichmentFields, ['description']);
+    assert.equal(waiting.allowedDeals[0].approvalPublicationMode, 'two-stage-v1');
     assert.equal(calls, 2, 'cache-only mode must never call a model');
     pageHtml = html.replaceAll('30.11.2026', '12.11.2026');
     const withdrawn = await validateApprovalCandidates([retry], { ...options, approvalCachedReviewOnly: true });

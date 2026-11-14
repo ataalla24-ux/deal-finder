@@ -1,3 +1,4 @@
+import { projectEnrichmentDeal, stripEnrichmentNotice } from '../scraper/deal-enrichment-state.js';
 import crypto from 'node:crypto';
 import fs from 'node:fs';
 import path from 'node:path';
@@ -28,7 +29,10 @@ export function stampDealsFeedBundle(bundle, options = {}) {
   const nowIso = options.nowIso || new Date().toISOString();
   const redemptionManifest = Object.hasOwn(options, 'redemptionManifest')
     ? options.redemptionManifest : loadDealRedemptions(options.redemptionManifestPath);
-  const deals = applyDealRedemptions(bundle.deals.map(redactPublishedCommunityDraft).map(sanitizePublicDealText), redemptionManifest, Date.parse(nowIso));
+  const bindingDeals = bundle.deals.map(redactPublishedCommunityDraft).map(sanitizePublicDealText).map(deal =>
+    deal.approvalPublicationMode === 'two-stage-v1' && deal.enrichmentFields?.includes('description')
+      ? { ...deal, description: stripEnrichmentNotice(deal.description) } : deal);
+  const deals = applyDealRedemptions(bindingDeals, redemptionManifest, Date.parse(nowIso)).map(projectEnrichmentDeal);
   return {
     ...bundle,
     deals,

@@ -10,10 +10,16 @@ import { parseExpiryShape } from '../scraper/expiry-utils.js';
 import { maintenanceEvidenceFor } from './refresh-maintenance-evidence.mjs';
 import { hasOnlyPreviewDescription } from '../scraper/approval-source-evidence.js';
 import { isBenefitOnlyTitle } from '../scraper/offer-title-utils.js';
+import { reviewedIamstudentCopy } from '../scraper/approval-iamstudent-source-evidence.js';
+import { projectEnrichmentDeal, stripEnrichmentNotice, updateDealEnrichment } from '../scraper/deal-enrichment-state.js';
 import {photoSubjectHash} from './deal-photo-contract.mjs';
 export { automaticMaintenanceReviewCandidates } from './automatic-maintenance-review.mjs';
 
 const clean = value => String(value || '').replace(/\s+/g, ' ').trim();
+const pendingDescription = deal => deal.enrichmentPending === true && deal.enrichmentFields?.includes('description');
+const dueDescription = (deal, now) => pendingDescription(deal) && !(Date.parse(deal.enrichmentNextReviewAt) > +now);
+const completeDescription = (deal, patch, now) => pendingDescription(deal) && clean(patch.description)
+  ? projectEnrichmentDeal(updateDealEnrichment(deal, { completedFields: ['description'], now })) : deal;
 const hash = value => createHash('sha256').update(JSON.stringify(value)).digest('hex');
 const read = (file, fallback) => { try { return JSON.parse(fs.readFileSync(file, 'utf8')); } catch (error) { if (error.code === 'ENOENT') return fallback; throw error; } };
 const write = (file, value) => { fs.mkdirSync(path.dirname(file), { recursive: true }); fs.writeFileSync(file, JSON.stringify(value, null, 2) + '\n'); };
@@ -179,7 +185,7 @@ export function copyReviewReasons(deal, fields = new Set()) {
   if (!fields.has('title') && (clean(deal.title).length > 50 || !clean(deal.title)
     || isBenefitOnlyTitle(deal.title)
     || /^(?:Instagram|TikTok|Community[- ]Deal)|gemeinsam schmeckt|jetzt sichern|mega deal/i.test(clean(deal.title)))) reasons.push('title');
-  if (!fields.has('description') && !clean(deal.description)) reasons.push('description');
+  if (!fields.has('description') && (pendingDescription(deal) || !clean(deal.description))) reasons.push('description');
   if (!dateFields.some(key => fields.has(key))
     && (!dateFields.some(key => clean(deal[key])) || hasStartWithoutEnd(deal))) reasons.push('dates');
   return reasons;
@@ -304,11 +310,11 @@ export function maintainDeals(deals, { policy = {}, state = {}, edits = [], now 
       && !Object.keys(cachedPatch.patch).some(key => fields.has(key))) {
       const replay = { ...deal, ...cachedPatch.patch };
       if (maintenanceFingerprint(replay) === cachedPatch.resultHash) {
-        deal = replay;
+        deal = completeDescription(replay, cachedPatch.patch, now);
         corrected.push({id:deal.id, fields:Object.keys(cachedPatch.patch), method:'verified-correction-replay'});
       }
     }
-    if (!protectedDeal(deal, edits, policy) && policy.automaticLocalCopy === true && !fields.has('title') && !fields.has('description')) {
+    if (!protectedDeal(deal, edits, policy) && !pendingDescription(deal) && policy.automaticLocalCopy === true && !fields.has('title') && !fields.has('description')) {
       const cached = nextState.corrections.find(entry => entry.id === deal.id && entry.inputHash === fingerprint && !entry.patch);
       if (cached) {
         const replay = { ...deal, title: cached.title, description: cached.description };
@@ -470,25 +476,54 @@ export async function maintainFeedFile({ cwd = process.cwd(), allowAi = false, a
   const result = maintainDeals(deals, { policy, edits, state: beforeState, now, sourceEvidence });
   result.report.ai = { attempted: 0, corrected: 0, deferred: 0 };
   result.state.checks ||= [];
-  if (allowAi && apply && process.env.OPENAI_API_KEY && policy.enabled === true) {
-    for (let index = 0; index < result.deals.length && result.report.ai.attempted < Math.min(4, policy.maxAiCandidatesPerRun || 0); index++) {
+  // Prioritize due work without reordering the public feed. A placeholder is
+  // still pending, and a failed review does not immediately rebill on pushes.
+  const order = result.deals.map((deal, index) => ({ deal, index })).sort((a, b) =>
+    Number(dueDescription(b.deal, now)) - Number(dueDescription(a.deal, now))
+    || (dueDescription(a.deal, now) && dueDescription(b.deal, now)
+      ? (Date.parse(a.deal.enrichmentNextReviewAt) || 0) - (Date.parse(b.deal.enrichmentNextReviewAt) || 0) : 0));
+  let reviewed = 0;
+  const maxReviews = Math.min(4, Math.max(0, Number(policy.maxAiCandidatesPerRun) || 0));
+  for (const { index } of order) {
+      if (reviewed >= maxReviews) break;
       const deal = result.deals[index], fields = protectedFields(deal, edits);
       if (protectedDeal(deal, edits, policy) || !copyReviewReasons(deal, fields).length
+        || pendingDescription(deal) && !dueDescription(deal, now)
         || !sourceTexts(deal, sourceEvidence.get(deal.id)).length) continue;
       const inputHash = maintenanceFingerprint(deal);
-      const checkHash = hash([inputHash, sourceTexts(deal, sourceEvidence.get(deal.id)), [...fields].sort(), 3]);
+      const fixed = pendingDescription(deal) && !fields.has('description')
+        ? reviewedIamstudentCopy(sourceEvidence.get(deal.id)?.approvalSourceEvidence) : null;
+      if (fixed) {
+        const patch = { description: fixed.description };
+        const next = completeDescription({ ...deal, ...patch }, patch, now);
+        result.deals[index] = next;
+        result.state.corrections.push({ id: deal.id, inputHash, resultHash: maintenanceFingerprint(next), at: now.toISOString(),
+          sourceHash: hash(sourceTexts(deal, sourceEvidence.get(deal.id))), patch, method: 'reviewed-source-template-v1' });
+        result.report.corrected.push({ id: deal.id, fields: ['description'], method: 'reviewed-source-template-v1' });
+        result.changed = true;
+        reviewed++;
+        continue;
+      }
+      if (!(allowAi && apply && process.env.OPENAI_API_KEY)) continue;
+      const checkHash = hash([inputHash, sourceTexts(deal, sourceEvidence.get(deal.id)), [...fields].sort(), pendingDescription(deal) ? 4 : 3]);
       if (result.state.checks.some(row => row.hash === checkHash && +now - Date.parse(row.at) < 24 * 3600000)) continue;
       const prior = result.state.corrections.find(entry => entry.id === deal.id && entry.inputHash === inputHash);
-      if (prior) continue;
+      if (prior && !pendingDescription(deal)) continue;
+      reviewed++;
       result.report.ai.attempted++;
+      if (pendingDescription(deal)) {
+        const delay = deal.enrichmentFields.includes('map') ? 3600000 : 86400000;
+        result.deals[index] = updateDealEnrichment(deal, { nextReviewAt: new Date(+now + delay).toISOString(), now });
+        result.changed = true;
+      }
       try {
-        const proposal = await titleProposal(deal, request, now, sourceEvidence.get(deal.id), fields);
+        const proposal = await titleProposal({ ...deal, description: stripEnrichmentNotice(deal.description) }, request, now, sourceEvidence.get(deal.id), fields);
         result.state.checks.push({ id:deal.id, hash:checkHash, at:now.toISOString(), outcome:proposal ? 'verified-patch' : 'no-safe-patch' });
         if (!proposal) continue;
         const patch = { ...proposal.patch };
         // Publish exactly the independently reviewed patch, never append source
         // text or an old advertising title after the verifier has approved it.
-        const next = { ...deal, ...patch };
+        const next = completeDescription({ ...result.deals[index], ...patch }, patch, now);
         result.deals[index] = next;
         result.state.corrections.push({ id: deal.id, inputHash, resultHash: maintenanceFingerprint(next), at: now.toISOString(),
           sourceHash: hash(sourceTexts(deal, sourceEvidence.get(deal.id))),
@@ -497,8 +532,11 @@ export async function maintainFeedFile({ cwd = process.cwd(), allowAi = false, a
         result.report.corrected.push({ id: deal.id, fields: Object.keys(patch), method: 'source-grounded-terra-draft-sol-verification' });
         result.report.ai.corrected++;
         result.changed = true;
-      } catch { result.report.ai.deferred++; break; }
-    }
+      } catch {
+        if (pendingDescription(deal)) result.state.checks.push({ id: deal.id, hash: checkHash, at: now.toISOString(), outcome: 'deferred' });
+        result.report.ai.deferred++;
+        break;
+      }
   }
   result.state.checks = result.state.checks.slice(-2000);
   for (let index=0;index<result.deals.length;index++) {

@@ -19,6 +19,9 @@ const OPTIONAL_OUTPUTS = [
 const OUTPUTS = [MAP, COVERAGE, 'reviews/map-geocode-cache.json', ...OPTIONAL_OUTPUTS];
 const SOURCE_INPUTS = [
   'reviews/map-chain-rules.json',
+  'reviews/enrichment-inputs.json',
+  'scraper/deal-enrichment-state.js',
+  'scripts/deals-feed-contract.mjs',
   'docs/live-deal-edits.json',
   'reviews/verified-expiry-state.json',
   'reviews/verified-expiry-archive.json',
@@ -408,4 +411,24 @@ test('queue-only writers ignore map input drift entirely', t => {
   assert.equal(result.status, 0, result.output);
   assert.deepEqual(JSON.parse(remoteText(f, FEED)).deals, [{ id: 'remote' }]);
   assert.deepEqual(JSON.parse(remoteText(f, 'docs/deals-pending-all.json')).deals, [{ id: 'local-new' }]);
+});
+
+
+test('map completion publishes its final feed and projection atomically', t => {
+  const f = fixture(t);
+  const script = fs.readFileSync(path.join(f.local, 'scripts/enrich-deal-map.mjs'), 'utf8');
+  fs.writeFileSync(path.join(f.local, 'scripts/enrich-deal-map.mjs'), script.replace("const text = fs.readFileSync('docs/deals.json', 'utf8');", `
+const updated = JSON.parse(fs.readFileSync('docs/deals.json', 'utf8'));
+updated.deals[0].enrichmentPending = false;
+fs.writeFileSync('docs/deals.json', JSON.stringify(updated));
+const text = fs.readFileSync('docs/deals.json', 'utf8');`));
+  // This is the implementation already installed on main, not an unstaged input.
+  commit(f.local, 'install fixture map completion');
+  run('git', ['push', 'origin', 'main'], f.local);
+  write(f.local, FEED, { deals: [{ id: 'base', title: 'Base deal', enrichmentPending: true }] });
+  const result = generate(f, [FEED]);
+  assert.equal(result.status, 0, result.output);
+  const feed = remoteText(f, FEED);
+  assert.equal(JSON.parse(feed).deals[0].enrichmentPending, false);
+  assert.equal(JSON.parse(remoteText(f, MAP)).feedHash, createHash('sha256').update(feed).digest('hex'));
 });

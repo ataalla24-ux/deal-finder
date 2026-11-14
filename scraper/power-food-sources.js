@@ -182,6 +182,9 @@ export const POWER_FOOD_SOURCES = [
   {
     name: "KFC",
     url: "https://kfc.co.at/",
+    // Current promotional homepage: exact saved original and the successful
+    // 2026-11-14 approval recheck confirm its offer block, not branch coverage.
+    currentOffers: true,
     category: "essen",
     allowedHosts: ["www.kfc.co.at", "kfc.co.at"],
     imageOfferSelector: "main > section img[alt]",

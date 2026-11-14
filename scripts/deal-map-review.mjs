@@ -9,6 +9,8 @@ const text = (value, max = 240) => Array.from(String(value || '').toWellFormed()
   .replace(/\s+/g, ' ').trim()).slice(0, max).join('');
 const escapeSlack = value => value.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
 const reasonLabels = {
+  'reviewed-offer-identity-mismatch': 'Die geprüfte Filialzuordnung gehört zu einer anderen Angebotsquelle.',
+  'reviewed-offer-location-conflict': 'Die geprüfte Filiale darf eine geänderte Standortangabe nicht ersetzen.',
   'existing-registry': 'Die Filiale ist im Kartenregister bereits sicher zugeordnet.',
   'reviewed-chain-campaign': 'Alle bestaetigten teilnehmenden Filialen dieser Aktion sind zugeordnet.',
   'chain-branch-catalog-incomplete': 'Eine bestaetigte Filiale fehlt im Koordinatenregister; keine geratenen Kartenpunkte.',

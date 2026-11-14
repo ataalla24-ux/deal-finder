@@ -1,4 +1,5 @@
-import { enrichMap, inspectDealLocation } from './deal-map-enrichment.mjs';
+import { projectEnrichmentDeal, updateDealEnrichment } from '../scraper/deal-enrichment-state.js';
+import { enrichMap, inspectDealLocation, locationFingerprint } from './deal-map-enrichment.mjs';
 import { enrichSourceAddresses } from './deal-map-source-addresses.mjs';
 import { buildSummary, buildReport } from '../scraper/deal-validity-agent.js';
 import { isCommunitySubmission } from '../scraper/community-review-utils.js';
@@ -18,7 +19,7 @@ export async function findApprovalAddresses(deals, { existingDeals, map, catalog
 // Only newly approved on-site offers are gated; existing live records stay intact.
 export async function requireApprovalMap(validation, { existingDeals = [], map = { locations: [] },
   catalog = {}, reviewed = {}, cache = {}, sourceCache = {}, now = new Date(), lookup, fetchPage,
-  maxRequests = 8, maxSourceRequests = 0, sourceLookup } = {}) {
+  maxRequests = 8, maxSourceRequests = 0, sourceLookup, twoStage = false } = {}) {
   const existingIds = new Set(existingDeals.map(deal => deal.id));
   const candidates = validation.allowedDeals.filter(deal => !existingIds.has(deal.id));
   if (!candidates.length && !sourceLookup) return { validation, changed: false };
@@ -45,6 +46,12 @@ export async function requireApprovalMap(validation, { existingDeals = [], map =
       : source?.reason === 'source-url-ineligible'
         ? 'Keine teilnehmende Wiener Filiale belegt. Die vorhandene Quelle reicht dafuer nicht aus.'
         : 'Noch keine eindeutige teilnehmende Wiener Filiale belegt.';
+    if (twoStage && result.deal.approvalPublicationMode === 'two-stage-v1'
+      && result.deal.pipelineLifecycle?.manualDecision === 'approved'
+      && !['source-period-conflict', 'reviewed-offer-identity-mismatch', 'reviewed-offer-location-conflict'].includes(reason)) {
+      return { ...result, deal: updateDealEnrichment(result.deal, { pendingFields: ['map'], now }),
+        decision: { ...result.decision, warnings: [...(result.decision.warnings || []), 'Standort folgt: Bestätigte Kartenstandorte werden automatisch ergänzt.'] } };
+    }
     return { ...result, decision: { ...result.decision, allowed: false,
       reasons: [...(result.decision.reasons || []),
         `Kartenstandort fehlt (${reason}): ${hint}`] } };
@@ -52,7 +59,7 @@ export async function requireApprovalMap(validation, { existingDeals = [], map =
   const summary = buildSummary(results, validation.summary?.maxAgeDays ?? 7);
   // A held deal must not leave a public pin. Cached coordinates can be reused
   // when its live reaction and all publication checks pass on a later run.
-  const allowedIds = new Set(results.filter(result => result.decision.allowed).map(result => result.deal.id));
+  const allowedIds = new Set(results.filter(result => result.decision.allowed && !result.deal.enrichmentFields?.includes('map')).map(result => result.deal.id));
   const locations = new Map(map.locations.map(location => [location.id, location]));
   const catalogLocations = new Map((catalog.locations || []).map(location => [location.id, location]));
   const bindings = new Map((catalog.dealBindings || []).map(binding => [binding.dealId, binding]));
@@ -70,8 +77,12 @@ export async function requireApprovalMap(validation, { existingDeals = [], map =
     if (allowedIds.has(binding.dealId)) bindings.set(binding.dealId, binding);
   }
   const nextLocations = [...locations.values()];
-  const projectionChanged = JSON.stringify(nextLocations) !== JSON.stringify(map.locations);
-  const mapForPublication = projectionChanged ? { ...map, lastUpdated: now.toISOString(), locations: nextLocations } : map;
+  const pendingMap = results.filter(result => result.decision.allowed && result.deal.enrichmentFields?.includes('map')).map(result => projectEnrichmentDeal(result.deal));
+  const pendingIds = new Set(pendingMap.map(deal => deal.id));
+  const exclusions = [...(map.geocodingExclusions || []).filter(entry => !pendingIds.has(entry.dealId)),
+    ...pendingMap.map(deal => ({ dealId: deal.id, fingerprint: locationFingerprint(deal), reason: 'enrichment-map-pending', locationIds: [] }))];
+  const projectionChanged = JSON.stringify(exclusions) !== JSON.stringify(map.geocodingExclusions || []) || JSON.stringify(nextLocations) !== JSON.stringify(map.locations);
+  const mapForPublication = projectionChanged ? { ...map, lastUpdated: now.toISOString(), locations: nextLocations, ...(exclusions.length ? { geocodingExclusions: exclusions } : {}) } : map;
   const { chainRules: _chainRules, ...persistedCatalog } = catalog;
   const catalogForPublication = projectionChanged ? { ...persistedCatalog, schemaVersion: enriched.catalog.schemaVersion,
     locations: [...catalogLocations.values()], ...(bindings.size ? { dealBindings: [...bindings.values()] } : {}) } : persistedCatalog;

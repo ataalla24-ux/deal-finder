@@ -1687,7 +1687,7 @@ export async function inspectDealUrlHealth(url, options = {}) {
         invalid: false,
         status,
         finalUrl,
-        checkedAt: new Date().toISOString(),
+        checkedAt: (options.now instanceof Date && Number.isFinite(+options.now) ? options.now : new Date()).toISOString(),
       };
     }
 
@@ -1729,7 +1729,7 @@ export async function inspectDealUrlHealth(url, options = {}) {
       contentHints,
       dateHints,
       approvalSourceEvidence: iamstudentEvidence || extractApprovalSourceEvidence(html, url, finalUrl),
-      checkedAt: new Date().toISOString(),
+      checkedAt: (options.now instanceof Date && Number.isFinite(+options.now) ? options.now : new Date()).toISOString(),
     };
   } catch {
     return {

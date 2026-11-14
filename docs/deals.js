@@ -16,6 +16,7 @@
   const normalize = value => value.toLocaleLowerCase('de-AT').replace(/ß/g, 'ss')
     .replace(/ae/g, 'a').replace(/oe/g, 'o').replace(/ue/g, 'u').normalize('NFKD').replace(/[\u0300-\u036f]/g, '');
   const searchable = new Map(cards.map(card => [card, normalize(card.textContent)]));
+  const expiryOrder = card => card.dataset.expiry === undefined ? Infinity : Number(card.dataset.expiry);
   let type = 'all';
 
   function update() {
@@ -26,7 +27,11 @@
     const available = { all: 0 };
     let visible = 0;
     for (const card of cards) {
-      const active = card.dataset.expiryDay ? card.dataset.expiryDay >= today : Number(card.dataset.expiry) >= now;
+      // Only server-admitted, published cards receive this explicit marker.
+      // A real date always wins; the review schedule is never an offer expiry.
+      const active = card.dataset.expiryDay ? card.dataset.expiryDay >= today
+        : card.dataset.expiry !== undefined ? Number(card.dataset.expiry) >= now
+          : card.dataset.expiryUnknown === 'true';
       if (active) {
         available.all++;
         available[card.dataset.type] = (available[card.dataset.type] || 0) + 1;
@@ -38,7 +43,7 @@
       if (matches) visible++;
     }
     const ordered = [...cards].sort((a, b) => {
-      if (sort.value === 'ending') return Number(a.dataset.expiry) - Number(b.dataset.expiry) || Number(a.dataset.order) - Number(b.dataset.order);
+      if (sort.value === 'ending') return expiryOrder(a) - expiryOrder(b) || Number(a.dataset.order) - Number(b.dataset.order);
       if (sort.value === 'brand') return a.querySelector('.live-deal-brand').textContent.localeCompare(b.querySelector('.live-deal-brand').textContent, 'de-AT') || Number(a.dataset.order) - Number(b.dataset.order);
       return Number(a.dataset.order) - Number(b.dataset.order);
     });

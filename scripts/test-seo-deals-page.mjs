@@ -3,6 +3,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { spawnSync } from 'node:child_process';
+import vm from 'node:vm';
 import { load } from 'cheerio';
 import { photoKey, photoDefinitions } from './deal-photos.mjs';
 
@@ -51,6 +52,37 @@ function generate(deals, now = '2026-10-05T10:00:00Z') {
   assert.match($('#dealHubTitle').text(), /Web-Auswahl/);
   assert.equal(schema['@graph'][0].mainEntity.numberOfItems, ids.length, 'Schema and visible card counts must agree');
   return { html, ids, $: load(html) };
+}
+
+// Exercise the shipped filter script against generated cards without network
+// or a browser install. The adapter supplies only the DOM methods it uses.
+function filterPage(html, now, sort = 'recommended') {
+  const $ = load(html), wrappers = new Map();
+  function wrap(node) {
+    if (!node) return null;
+    if (wrappers.has(node)) return wrappers.get(node);
+    const element = {
+      node, value: $(node).attr('id') === 'dealSort' ? sort : $(node).is('select') ? 'all' : '',
+      hidden: $(node).attr('hidden') !== undefined,
+      dataset: Object.fromEntries(Object.entries(node.attribs || {}).filter(([key]) => key.startsWith('data-'))
+        .map(([key, value]) => [key.slice(5).replace(/-([a-z])/g, (_, char) => char.toUpperCase()), value])),
+      get textContent() { return $(node).text(); },
+      set textContent(value) { $(node).text(value); },
+      querySelector: selector => wrap($(node).find(selector)[0]),
+      querySelectorAll: selector => $(node).find(selector).toArray().map(wrap),
+      appendChild: child => $(node).append(child.node),
+      setAttribute: (key, value) => $(node).attr(key, String(value)),
+      addEventListener() {},
+    };
+    wrappers.set(node, element); return element;
+  }
+  const document = { querySelector: selector => wrap($(selector)[0]),
+    getElementById: id => wrap($(`[id="${id}"]`)[0]), addEventListener() {} };
+  class FixedDate extends Date { static now() { return Date.parse(now); } }
+  vm.runInNewContext(fs.readFileSync(path.join(ROOT, 'docs/deals.js'), 'utf8'),
+    { document, window: { addEventListener() {} }, Date: FixedDate, Intl });
+  return { visible: $('#dealGrid .live-deal-card').toArray().filter(node => !wrap(node).hidden).map(node => $(node).attr('id')),
+    count: $('#dealCount').text() };
 }
 
 try {
@@ -124,6 +156,57 @@ try {
   assert.deepEqual(expiryEvidence.ids, ['explicit-date-after-review', 'legacy-timestamp']);
   assert.equal(expiryEvidence.$('#deal-explicit-date-after-review').attr('data-expiry-day'), '2026-10-07');
   assert.equal(expiryEvidence.$('#deal-legacy-timestamp').attr('data-expiry-day'), undefined);
+
+  const published = (id, fields = {}) => deal(id, { expires: '', expiryKind: 'unknown',
+    approvalPublicationMode: 'two-stage-v1', enrichmentPending: true,
+    enrichmentFields: ['description', 'map'], enrichmentNextReviewAt: '2026-10-06T09:00:00Z',
+    validity: { status: 'warning', warnings: ['kein Ablaufdatum gefunden'] },
+    pipelineLifecycle: { manualDecision: 'approved', stage: 'published', publishedAt: '2026-10-05T09:00:00Z' },
+    distance: 'Wien · Standort folgt', ...fields });
+  const staged = generate([
+    published('published-unknown'),
+    published('published-known', { validUntil: '2026-10-07' }),
+    published('published-enriched', { enrichmentPending: false, enrichmentNextReviewAt: null }),
+    published('raw-pending', { approvalPublicationMode: undefined }),
+    published('not-published', { pipelineLifecycle: { manualDecision: 'approved', stage: 'validated' } }),
+    published('not-approved', { pipelineLifecycle: { manualDecision: 'rejected', stage: 'published', publishedAt: '2026-10-05T09:00:00Z' } }),
+    published('blocked-basic-check', { validity: { status: 'blocked' } }),
+    published('no-basic-check', { validity: undefined }),
+    published('future-publication', { pipelineLifecycle: { manualDecision: 'approved', stage: 'published', publishedAt: '2026-10-06T09:00:00Z' } }),
+    published('staged-expired', { validUntil: '2026-10-04' }),
+    published('staged-expired-timestamp', { expires: '2026-10-05T09:00:00Z' }),
+    published('staged-future', { validFrom: '2026-10-06' }),
+    published('staged-invalid-date', { validUntil: '2026-02-30' }),
+    published('staged-unresolved-date', { expires: '2026-13-01' }),
+    published('staged-invalid-legacy-date', { expires: '2027-02-30', expiryKind: 'end', validity: { status: 'ok' } }),
+  ]);
+  assert.deepEqual([...staged.ids].sort(), ['published-unknown', 'published-known', 'published-enriched'].sort(),
+    'Only approved, basically valid and already published rows gain the unknown-end path; genuine date conflicts remain excluded');
+  const unknownCard = staged.$('#deal-published-unknown');
+  assert.equal(unknownCard.attr('data-expiry'), undefined, 'Unknown end must not become an artificial timestamp');
+  assert.equal(unknownCard.attr('data-expiry-unknown'), 'true');
+  assert.equal(unknownCard.find('time').length, 0, 'Next review is not an offer deadline');
+  assert.match(unknownCard.find('.deal-facts').text(), /Enddatum unbekannt/);
+  assert.match(unknownCard.find('.deal-card-badges').text(), /Details werden ergänzt/);
+  assert.match(unknownCard.find('.live-deal-location').text(), /Standort folgt/);
+  assert.ok(!unknownCard.text().includes('06. Oktober'), 'Review schedule stays out of public validity copy');
+  assert.match(staged.$('#deal-published-known .deal-facts').text(), /Gültig bis 07\. Oktober 2026/);
+  assert.doesNotMatch(staged.$('#deal-published-enriched .deal-card-badges').text(), /ergänzt/);
+  assert.doesNotMatch(staged.$('.deal-selection-note').text(), /Weitere Angebote ohne bekanntes Enddatum findest du in der App/,
+    'Public selection explanation must include the new approved unknown-end path');
+  assert.deepEqual(filterPage(staged.html, '2026-10-06T12:00:00Z', 'ending').visible,
+    ['deal-published-known', 'deal-published-unknown', 'deal-published-enriched'],
+    'Browser ending-first sorting places unknown ends last without treating the next review as an expiry');
+  assert.deepEqual(filterPage(staged.html, '2026-10-08T12:00:00Z').visible.sort(),
+    ['deal-published-enriched', 'deal-published-unknown'], 'Browser filtering still removes real ended offers');
+  const conflictingMarker = load(staged.html);
+  conflictingMarker('#deal-published-known').attr('data-expiry-unknown', 'true');
+  assert.ok(!filterPage(conflictingMarker.html(), '2026-10-08T12:00:00Z').visible.includes('deal-published-known'),
+    'An unknown marker cannot override an actual calendar deadline');
+  const missingMarker = load(staged.html);
+  missingMarker('#deal-published-unknown').removeAttr('data-expiry-unknown');
+  assert.ok(!filterPage(missingMarker.html(), '2026-10-06T12:00:00Z').visible.includes('deal-published-unknown'),
+    'Missing expiry alone is not a browser visibility grant');
 
   const caption = 'Wohlfühl-Paket für 64 €: gültig bis 02.11.2026. <script>alert(1)</script>';
   const descriptions = generate([

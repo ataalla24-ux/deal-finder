@@ -177,7 +177,7 @@ test('actual approval path shares one GET, reaches copy-review queue and retains
     assert.equal(calls, 0);
     assert.equal(result.allowedDeals.length, 0, 'fresh source alone does not replace the copy reviewer or location check');
     assert.ok(!result.results[0].decision.reasons.some(reason => /Angebotsbeleg ausstehend|relative Kurz-Aktion/.test(reason)));
-    assert.ok(result.results[0].decision.reasons.some(reason => /Inhaltsprüfung ausstehend|Beschreibung fehlt|nicht eindeutig in Wien/.test(reason)));
+    assert.ok(result.results[0].decision.reasons.some(reason => /Grundprüfung|nicht eindeutig in Wien/.test(reason)));
     assert.equal(result.blockedDeals[0].pipelineLifecycle.manualDecision, 'approved');
   } finally {
     globalThis.fetch = previousFetch;

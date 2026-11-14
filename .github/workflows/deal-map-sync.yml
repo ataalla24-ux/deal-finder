@@ -40,6 +40,7 @@ jobs:
         run: |
           node --test scripts/test-automatic-maintenance.mjs
           node scripts/test-deal-map-enrichment.mjs
+          node scripts/test-map-enrichment-reconciliation.mjs
           node scripts/test-deal-map-chain-rules.mjs
           node scripts/test-map-location-pipeline.mjs
           node scripts/test-map-geocode-fairness.mjs
@@ -59,9 +60,9 @@ jobs:
         run: |
           node scripts/validate-deal-map-locations.mjs
           node scripts/validate-map-coverage.mjs
-      - name: Publish only map projections and internal review state
+      - name: Publish verified map and enrichment updates
         run: >-
           node scripts/commit-generated.mjs --message "Reconcile verified deal map locations"
-          --files docs/deal-map-locations.json reviews/map-location-catalog.json
+          --files docs/deals.json docs/deal-map-locations.json reviews/map-location-catalog.json
           reviews/map-geocode-cache.json reviews/map-source-address-cache.json
           reviews/map-business-campaigns.json reviews/map-coverage.json

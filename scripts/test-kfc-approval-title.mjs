@@ -24,17 +24,18 @@ test('saved source excerpt reproduces the exact queued ID, full description and 
   assert.equal(original.evidence.contentHash, 'fbcfc52691ccdb4bed424b086cb6b1830d52aabdd0bba3da2e31b75b4631576b');
 });
 
-test('only the exact known legacy title is accepted without supplying freshness or a Vienna branch', async () => {
+test('title equivalence alone supplies no fresh transport proof or Vienna branch', async () => {
   let reads = 0;
   const proof = await verifyOfficialFoodDeal(input, { now, fetchPage: async url => {
     reads++; assert.equal(url, source.url); return { html, finalUrl: url };
   } });
   assert.equal(reads, 1);
   assert.equal(proof.ok, true);
-  assert.equal(proof.current, false);
+  assert.equal(proof.current, true);
+  assert.equal(proof.currentOfferVerification, undefined, 'title match without current HTTP metadata cannot relax age');
   assert.equal(proof.viennaBranchEvidence, '');
   assert.equal(proof.branchEvidenceUrl, '');
-  assert.equal(source.currentOffers, undefined);
+  assert.equal(source.currentOffers, true);
   assert.equal(source.branchEvidenceUrl, undefined);
 });
 

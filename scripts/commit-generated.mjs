@@ -37,6 +37,9 @@ const MAP_INPUT_FILES = [
   'reviews/maintenance-source-evidence.json',
   'docs/instagram-graph-post-evidence.json',
   'reviews/map-addresses.json',
+  'reviews/enrichment-inputs.json',
+  'scraper/deal-enrichment-state.js',
+  'scripts/deals-feed-contract.mjs',
   'reviews/map-chain-rules.json',
   // These are read/modify/write inputs as well as generated outputs.
   ...MAP_GENERATED_FILES.filter(file => file !== 'reviews/map-coverage.json'),
@@ -654,6 +657,11 @@ async function main() {
       throw new Error(`Map enrichment failed: ${cleanText(mapSync.stderr || mapSync.stdout)}`);
     }
     if (cleanText(mapSync.stdout)) console.log(cleanText(mapSync.stdout));
+    // Map completion also updates the same live record's verified location and
+    // pending status. Guard/publish that final feed atomically with its map.
+    const finalFeedHash = localFileHash(dealsPath);
+    mapReadInputs.set(dealsPath, finalFeedHash);
+    if (photoConsistency) photoConsistency.find(input => input.path === dealsPath).hash = finalFeedHash;
     options.patterns.push(...MAP_GENERATED_FILES);
     const featuredSync = spawnSync(process.execPath, ['scripts/sync-featured-deal-references.mjs'], {
       cwd: process.cwd(),

@@ -192,7 +192,7 @@ try {
     approvalModelRequest: async () => { throw new Error('fixture limit'); },
   });
   assert.equal(interrupted.allowedDeals.length, 0, 'an interrupted content review must not publish unreviewed copy');
-  assert.match(interrupted.results[0].decision.reasons.join(' '), /Inhaltsprüfung ausstehend/);
+  assert.match(interrupted.results[0].decision.reasons.join(' '), /Grundprüfung/);
   assert.equal(interrupted.blockedDeals[0].approvalCopyReview.deferred, true);
   assert.ok(!read('deal-map-locations.json').locations.some(pin => pin.dealIds.includes(reviewNeeded.id)),
     'a held copy review must not leave a public map pin');
@@ -220,7 +220,7 @@ try {
   assert.deepEqual(batch.allowedDeals.map(deal => deal.id), ['batch-first']);
   assert.deepEqual(batch.blockedDeals.map(deal => deal.id), ['batch-second']);
   assert.equal(batch.blockedDeals[0].approvalCopyReview.waitingForSlot, true);
-  assert.match(batch.results[1].decision.reasons.join(' '), /Inhaltsprüfung ausstehend/);
+  assert.match(batch.results[1].decision.reasons.join(' '), /Grundprüfung/);
   console.log('Isolated approval workflow: block, retain, notify, edit, approve, deduplicate, reject and scheduled retry passed');
 } finally {
   globalThis.fetch = previousFetch;

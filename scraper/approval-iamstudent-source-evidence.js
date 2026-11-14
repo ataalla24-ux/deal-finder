@@ -1,5 +1,6 @@
 import { load } from 'cheerio';
 import { createHash } from 'node:crypto';
+import { offerPeriodFields, hasReviewedOfferPeriod } from './offer-period-fields.js';
 
 // One reviewed public voucher, not a general reader for login-only coupons.
 const URL = 'https://www.iamstudent.at/g/vapiano-gutschein-mit-50-prozent-studentenrabatt-gsh-wise26';
@@ -20,11 +21,49 @@ export function isSupportedIamstudentApprovalUrl(value) {
   return value === URL;
 }
 
-function isReviewedEvidence(deal, evidence) {
+export function isReviewedIamstudentApprovalEvidence(deal, evidence) {
   return isSupportedIamstudentApprovalUrl(deal?.url) && evidence?.sourceUrl === deal.url
     && evidence.sourceKind === 'iamstudent-public-voucher' && evidence.voucherId === '13585'
     && !evidence.blockingReason && evidence.contentHash === CAPTION_HASH
     && typeof evidence.caption === 'string' && hash(evidence.caption) === CAPTION_HASH;
+}
+
+// Reusable only with the exact current reviewed source; callers still enforce
+// their own live/manual-field and evidence-age protections.
+export function reviewedIamstudentCopy(evidence) {
+  return isReviewedIamstudentApprovalEvidence({ url: URL }, evidence)
+    ? { title: REVIEWED_TITLE, description: REVIEWED_DESCRIPTION } : null;
+}
+
+// Correct only the captured, unedited machine period on this one pending row.
+// The current source proves availability and a personal 30-day redemption rule,
+// not a calendar end. Neither a saved correction nor a copy memo is fresh proof.
+export function prepareIamstudentApprovalPeriod(deal, evidence, { existingIds = new Set(), now } = {}) {
+  if (!isReviewedIamstudentApprovalEvidence(deal, evidence) || deal.id !== 'g2-15kbyb4'
+    || deal.source !== 'Slack Digest' || deal.originSource !== 'Firecrawl Gastro #2'
+    || deal.pipelineLifecycle?.manualDecision !== 'approved'
+    || existingIds.has(deal.id) || deal.pipelineLifecycle.publishedAt || deal.pipelineLifecycle.stage === 'published'
+    || deal.editedInSlack || deal.slackEditedAt || deal.slackFormEditTs || deal.liveEditedAt
+    || deal.isBusiness || deal.campaignId || deal.forceKeep || hasReviewedOfferPeriod(deal)
+    || [...(deal.slackEditedFields || []), ...(deal.liveEditedFields || [])].length
+    || clean(deal.title) !== QUEUE_TITLE || clean(deal.description)
+    || deal.expires !== '2027-02-28' || deal.expiresOriginal !== 'bis 28.02.2027'
+    || deal.validUntil !== '2027-02-28T12:00:00.000Z' || deal.expiryDisplayText !== '2027-02-28'
+    || deal.expiryKind !== 'end' || deal.dateConfidence !== 'medium'
+    || deal.expiresSource !== 'deal.structured' || deal.expirySource !== 'deal.structured'
+    || ['validOn', 'validFrom', 'end_date', 'validity_date', 'validityText', 'expiresPrecision'].some(key => clean(deal[key]))
+    || deal.expiresDetectedFromUrl || Object.keys(deal.evidence || {}).length
+    || !(now instanceof Date) || !Number.isFinite(now.getTime())
+    || now.getTime() >= Date.parse('2027-02-28T00:00:00.000Z')) return deal;
+  const previousPeriod = Object.fromEntries(offerPeriodFields.filter(key => Object.hasOwn(deal, key)).map(key => [key, deal[key]]));
+  const corrected = { ...deal };
+  for (const key of offerPeriodFields) delete corrected[key];
+  corrected.expiryKind = 'unknown';
+  // Audit only: validators read the top-level offer period, never this history.
+  corrected.unverifiedPeriodCorrection = { method: 'iamstudent-unverified-machine-end-v1',
+    checkedAt: now.toISOString(), sourceUrl: URL, contentHash: CAPTION_HASH,
+    previousPeriod, previousPeriodHash: hash(JSON.stringify(previousPeriod)) };
+  return corrected;
 }
 
 // Reviewed fixed wording for this one complete current offer. This is not
@@ -33,7 +72,7 @@ function isReviewedEvidence(deal, evidence) {
 export function prepareIamstudentApprovalCopy(deal, evidence, { existingIds = new Set() } = {}) {
   // The ordinary reaction runner sets approvedAt before validation. Only live
   // membership or an actual publication lifecycle marks an already live deal.
-  if (!isReviewedEvidence(deal, evidence) || deal.pipelineLifecycle?.manualDecision !== 'approved'
+  if (!isReviewedIamstudentApprovalEvidence(deal, evidence) || deal.pipelineLifecycle?.manualDecision !== 'approved'
     || existingIds.has(deal.id) || deal.pipelineLifecycle.publishedAt || deal.pipelineLifecycle.stage === 'published'
     || deal.editedInSlack || deal.slackEditedAt
     || deal.slackFormEditTs || deal.liveEditedAt || deal.isBusiness || deal.campaignId || deal.forceKeep
@@ -48,10 +87,10 @@ export function prepareIamstudentApprovalCopy(deal, evidence, { existingIds = ne
 }
 
 // This reviewed source supplies only a personal 30-day redemption period, not
-// a calendar deadline. Keep a pre-existing absolute end for human review; do
-// not silently replace it with either the countdown or an assumed open end.
+// a calendar deadline. Apart from the exact machine correction above, existing
+// absolute ends remain held; never derive an end from the countdown.
 export function iamstudentApprovalDateHold(deal, evidence) {
-  if (!isReviewedEvidence(deal, evidence)) return '';
+  if (!isReviewedIamstudentApprovalEvidence(deal, evidence)) return '';
   const structuredEnd = [deal.validUntil, deal.validOn, deal.evidence?.offerTiming?.validUntil].some(value => clean(value));
   const literalEnd = [deal.expires, deal.expiresOriginal, deal.expiryDisplayText, deal.end_date, deal.validity_date]
     .some(value => /\b20\d{2}\b|\b\d{1,2}[./]\d{1,2}[./]\d{2}\b/.test(clean(value)));

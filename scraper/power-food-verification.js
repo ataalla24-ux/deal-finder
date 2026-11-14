@@ -3,6 +3,49 @@ import { POWER_FOOD_SOURCES, isAllowedFoodUrl } from "./power-food-sources.js";
 import { extractFoodOffers } from "./power-food-extraction.js";
 import { sourceHttpError } from "./source-http-policy.js";
 import { extractCouponMediaOffers } from './official-coupon-media.js';
+import { parseExpiryShape } from './expiry-utils.js';
+
+// Transport provenance stays local to the verifier, separate from caller-owned
+// evidence timestamps and serialized caches. One run may share its page read.
+const currentFetches = new WeakMap();
+
+function sameCurrentLandingPage(url, source) {
+  try { return new URL(url).href === new URL(source.url).href; } catch { return false; }
+}
+
+function preservesKnownPeriod(deal, extracted, now) {
+  const same = (field, value) => !value || (/T\d{2}:\d{2}/.test(String(value))
+    ? value === extracted[field] : String(value).slice(0, 10) === String(extracted[field] || '').slice(0, 10));
+  if (['validOn', 'validFrom', 'validUntil'].some(field => !same(field, deal[field]))) return false;
+  if (['validFrom', 'validUntil'].some(field => !same(field, deal.evidence?.offerTiming?.[field]))) return false;
+  for (const literal of [deal.expires, deal.expiresOriginal, deal.expiryDisplayText, deal.end_date, deal.validity_date]) {
+    if (!literal) continue;
+    if (/T\d{2}:\d{2}/.test(String(literal)) && literal !== extracted.expires) return false;
+    const shape = parseExpiryShape(literal, { now });
+    if (['validOn', 'validFrom', 'validUntil'].some(field => !same(field, shape[field]))) return false;
+  }
+  return true;
+}
+
+function currentOfferVerification(deal, match, source, response, transport, now) {
+  if (source.currentOffers !== true || deal.evidence?.media || response.status !== 200
+    || !sameCurrentLandingPage(deal.url, source) || !sameCurrentLandingPage(response.finalUrl, source)
+    || transport?.response !== response || transport?.checkedAt !== now.toISOString()
+    || transport?.requestedUrl !== deal.url || match.id !== deal.id
+    || !preservesKnownPeriod(deal, match, now)) return undefined;
+  // Inactive templates cannot turn an old campaign into a current offer merely
+  // because their unchanged text is still present in the downloaded HTML.
+  const $ = load(response.html);
+  $('template,[hidden],[aria-hidden="true"]').remove();
+  $('[style]').filter((_, node) => /display\s*:\s*none|visibility\s*:\s*hidden/i.test($(node).attr('style'))).remove();
+  const visible = extractFoodOffers($.html(), source, { now, pageUrl: response.finalUrl }).deals
+    .some(row => row.id === match.id && row.description === match.description
+      && row.evidence.contentHash === match.evidence.contentHash);
+  if (!visible) return undefined;
+  return { method: 'current-official-landing-page-v1', checkedAt: now.toISOString(),
+    sourceUrl: deal.url, finalUrl: response.finalUrl, offerId: match.id,
+    contentHash: match.evidence.contentHash };
+}
 
 function couponTitleMatches(extracted, displayed) {
   const normalize = value => String(value).normalize('NFC').toLowerCase()
@@ -63,7 +106,7 @@ export async function fetchOfficialFoodPage(url, source) {
       }
       chunks.push(value);
     }
-    return { html: Buffer.concat(chunks).toString("utf8"), finalUrl: url };
+    return { html: Buffer.concat(chunks).toString("utf8"), finalUrl: url, status: response.status };
   }
   throw new Error("Redirect limit");
 }
@@ -79,17 +122,22 @@ export async function verifyOfficialFoodDeal(deal, options = {}) {
   if (deal.evidence?.media && source.couponMedia !== 'moemax-reviewed-v1' && !options.couponMedia?.readAsset && process.env.COUPON_TOOLS_AVAILABLE === '0')
     return { ok: false, deferred: true, reason: 'coupon-tools-unavailable' };
   const cache = options.cache || new Map();
+  const now = options.now || new Date();
   const key = source.name + "|" + deal.url;
+  if (!currentFetches.has(cache)) currentFetches.set(cache, new Map());
+  const fetches = currentFetches.get(cache);
   if (!cache.has(key))
     cache.set(
       key,
-      (options.fetchPage || fetchOfficialFoodPage)(deal.url, source).catch(
+      (options.fetchPage || fetchOfficialFoodPage)(deal.url, source).then(response => {
+        fetches.set(key, { response, requestedUrl: deal.url, checkedAt: now.toISOString() });
+        return response;
+      }).catch(
         (error) => ({ error: error.message }),
       ),
     );
   const response = await cache.get(key);
   if (response.error) return { ok: false, reason: "source-unavailable" };
-  const now = options.now || new Date();
   let parsed = extractFoodOffers(response.html, source, {
     now,
     pageUrl: response.finalUrl || deal.url,
@@ -155,6 +203,7 @@ export async function verifyOfficialFoodDeal(deal, options = {}) {
   return {
     ok: true,
     current,
+    currentOfferVerification: currentOfferVerification(deal, match, source, response, fetches.get(key), now),
     deal: match,
     viennaBranchEvidence,
     branchEvidenceUrl: source.branchEvidenceUrl || "",

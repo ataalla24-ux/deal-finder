@@ -250,7 +250,7 @@ test('current source template passes ordinary validation with one normal GET and
   }
 });
 
-test('unconfirmed existing calendar end holds even after copy and location are complete; original dates remain untouched', async () => {
+test('calendar ends outside the exact reviewed machine-recovery row remain held and untouched', async () => {
   const { validateApprovalCandidates } = await import('../scraper/slack-approve.js');
   const previous = globalThis.fetch;
   const previousReview = process.env.APPROVAL_SOURCE_COPY_REVIEW;

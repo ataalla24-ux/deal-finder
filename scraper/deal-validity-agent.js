@@ -3,6 +3,7 @@ import { verifyViennaFoodBenefit } from './vienna-food-benefits.js';
 import { verifyCarrierBenefit } from './carrier-benefits.js';
 import { hasFreshActiveAdEvidence } from './meta-ad-library-coverage.js';
 import { currentOriginalOffer } from './current-original-offer.js';
+import { currentPublicVoucherEvidence } from './current-public-voucher-evidence.js';
 import { verifyReviewedSocialOfficialOffer } from './reviewed-social-official-source.js';
 import fs from 'fs';
 import path from 'path';
@@ -364,7 +365,7 @@ function isViennaOriginFlight(deal) {
     && /(?:\boriginIata=VIE\b|\b(?:roundtrip|hin\s*&?\s*zurück|return)\b[^.!?]{0,80}\b(?:wien|vienna|VIE)\b|\b(?:wien|vienna|VIE)\b[^.!?]{0,80}\b(?:roundtrip|hin\s*&?\s*zurück|return)\b)/i.test(route);
 }
 
-function isExplicitlyUsableInVienna(deal, health = null) {
+function isExplicitlyUsableInVienna(deal, health = null, now = new Date()) {
   const contentHints = reliableContentHints(health);
   const verifiedLocationText = [
     deal.address,
@@ -373,7 +374,7 @@ function isExplicitlyUsableInVienna(deal, health = null) {
     deal.city,
     deal.postalCode,
   ].map(cleanText).filter(Boolean).join(' ');
-  const strongLocationText = [
+  let strongLocationText = [
     deal.address,
     locationValueToText(deal.location),
     deal.ort,
@@ -381,7 +382,7 @@ function isExplicitlyUsableInVienna(deal, health = null) {
     deal.postalCode,
     hasMissingLocation(deal) ? '' : deal.distance,
   ].map(cleanText).filter(Boolean).join(' ');
-  const contextText = [
+  let contextText = [
     deal.brand,
     deal.title,
     deal.description,
@@ -389,6 +390,15 @@ function isExplicitlyUsableInVienna(deal, health = null) {
     contentHints.title,
     contentHints.description,
   ].map(cleanText).filter(Boolean).join(' ');
+  const currentVoucher = currentPublicVoucherEvidence(deal, health, now);
+  if (currentVoucher?.scope === 'AT-except-Linz') {
+    // This current, exact voucher explicitly includes Austrian restaurants.
+    // Keep every other location/conflict signal and keep the full public copy;
+    // only its source-confirmed excluded city is not a positive venue claim.
+    contextText = contextText.replace(/\b(?:außer|ausser|ausgenommen)(?:\s+im)?(?:\s+VAPIANO)?\s+Linz\b/gi, ' ');
+    strongLocationText = strongLocationText.replace(/\b(?:außer|ausser|ausgenommen)(?:\s+im)?(?:\s+VAPIANO)?\s+Linz\b/gi, ' ');
+    if (NON_VIENNA_PLACE_PATTERN.test(strongLocationText) || hasNonViennaPostalCode(strongLocationText)) return false;
+  }
   const allText = `${strongLocationText} ${contextText}`.trim();
 
   if (VIENNA_NEGATION_PATTERN.test(allText)) return false;
@@ -411,6 +421,7 @@ function isExplicitlyUsableInVienna(deal, health = null) {
   if (conflictingLocation) return false;
   if (hasViennaSignalInText(contextText)) return true;
   if (NON_VIENNA_PLACE_PATTERN.test(contextText)) return false;
+  if (currentVoucher?.scope === 'AT-except-Linz') return true;
   if (isVerifiedViennaMemberBenefit(deal)) return true;
   if (PLACE_BOUND_OFFER_PATTERN.test(contextText)) return false;
 
@@ -1009,6 +1020,12 @@ function getFreshnessDecision(publicationCandidates, maxAgeDays, now, options = 
   }
 
   const age = ageDays(selected.date, now);
+  const currentSource = options.currentOfficialOffer ? 'aktueller offizieller Angebotsseite'
+    : options.currentPublicVoucher ? 'aktueller öffentlicher Gutscheinseite' : '';
+  if (age !== null && age > maxAgeDays && currentSource) {
+    return { blocked: false, selected, ageDays: Number(age.toFixed(1)),
+      warning: `Ursprüngliches Quelldatum bleibt ${toIsoDate(selected.date)}; identisches Angebot auf ${currentSource} erneut bestätigt` };
+  }
   if (age !== null && age > maxAgeDays) {
     if (extendedBy && age <= options.extendedMaxAgeDays) {
       return {
@@ -1168,6 +1185,9 @@ async function validateDeal(deal, context) {
       ? freshlyActiveAd || Boolean(currentOriginal) || reviewedOfficial?.ok || reviewedCommunity && !publicationCandidates.length && activeValidity
       : activeValidity,
     recurring: socialPostDeal ? false : recurring,
+    currentOfficialOffer: !socialPostDeal && !newsAggregatorDeal && deal.originSource === 'power-official-food'
+      && officialFood?.ok === true && officialFood.currentOfferVerification?.checkedAt === now.toISOString(),
+    currentPublicVoucher: !socialPostDeal && !newsAggregatorDeal ? currentPublicVoucherEvidence(deal, health, now) : null,
     extendedMaxAgeDays: freshlyActiveAd ? 365 : currentOriginal ? 90 : reviewedOfficial?.ok ? 45 : context.extendedMaxAgeDays,
   });
   const relativeOffer = getRelativeOfferDecision(deal, freshness.selected, now, {
@@ -1222,7 +1242,7 @@ async function validateDeal(deal, context) {
   const legacyFirecrawlDeal = isLegacyFirecrawlDeal(deal);
   const viennaConfirmed = Boolean(officialFood?.viennaBranchEvidence) || Boolean(reviewedOfficial?.ok) || (socialPostDeal && !legacyFirecrawlDeal
     ? hasSocialViennaEvidence(deal, context)
-    : isExplicitlyUsableInVienna(deal, health));
+    : isExplicitlyUsableInVienna(deal, health, now));
   if (officialFood?.viennaBranchEvidence) {
     warnings.push('Wiener Filialnetz auf offizieller Seite bestätigt; Teilnahme der gewünschten Filiale prüfen');
     deal = { ...deal, distance: 'Wien – teilnehmende Filialen laut Anbieter', merchantLocationEvidence: { url: officialFood.branchEvidenceUrl, text: officialFood.viennaBranchEvidence }, missingFields: [...new Set([...(deal.missingFields || []).filter(field => field !== 'Ort'), 'Filialteilnahme'])] };
