@@ -1,14 +1,14 @@
 {
-  "generatedAt": "2026-11-14T12:22:12.449Z",
+  "generatedAt": "2026-11-14T21:37:45.572Z",
   "runProvenance": {
     "repository": "ataalla24-ux/deal-finder",
-    "runId": "43594439308",
-    "headSha": "879a2ef4ee424980e31f045a3a7cc44a4b2657ed",
-    "checkoutSha": "145f6a351443c6af8a12430d80d7fcfb6aea5696",
+    "runId": "43643784901",
+    "headSha": "f57ec3701bce67208d4ef1c52fd7d4735e4b76ea",
+    "checkoutSha": "bf898e1deae4f6adff9b61a2710012d3581bd75f",
     "triggeringRun": null,
     "event": "schedule",
     "runAttempt": "1",
-    "url": "https://github.com/ataalla24-ux/deal-finder/actions/runs/43594439308"
+    "url": "https://github.com/ataalla24-ux/deal-finder/actions/runs/43643784901"
   },
   "purpose": "scan",
   "limits": {
@@ -25,7 +25,7 @@
     "reason": "",
     "plan": "FREE",
     "includedCreditUsd": 5,
-    "accountUsageUsd": 2.0068195130990474,
+    "accountUsageUsd": 2.0172316598660105,
     "accountLimitUsd": 5,
     "cycle": {
       "startAt": "2026-10-15T00:00:00.000Z",
@@ -36,12 +36,6 @@
     "pricingModel": "PAY_PER_EVENT"
   },
   "selectedSources": [
-    {
-      "key": "hashtag:wienisst",
-      "kind": "hashtag",
-      "url": "https://www.instagram.com/explore/tags/wienisst/",
-      "priority": 0
-    },
     {
       "key": "hashtag:esseninwien",
       "kind": "hashtag",
@@ -59,6 +53,12 @@
       "kind": "hashtag",
       "url": "https://www.instagram.com/explore/tags/wienfood/",
       "priority": 0
+    },
+    {
+      "key": "hashtag:wienisst",
+      "kind": "hashtag",
+      "url": "https://www.instagram.com/explore/tags/wienisst/",
+      "priority": 0
     }
   ],
   "status": "succeeded",
@@ -72,21 +72,21 @@
   "ocrCalls": 2,
   "candidateAudit": [
     {
-      "key": "instagram:DfuKCVLGikY",
-      "url": "https://www.instagram.com/p/DfuKCVLGikY/",
-      "ownerUsername": "foodie_onthe.road",
+      "key": "instagram:DfuYgGDNUjD",
+      "url": "https://www.instagram.com/p/DfuYgGDNUjD/",
+      "ownerUsername": "tinmowien",
       "status": "rejected",
-      "reason": "non-food-ad",
+      "reason": "no-consumer-food-benefit",
       "ocrUsed": true,
       "ocrDeferred": false,
       "ocrErrors": 0
     },
     {
-      "key": "instagram:DfsWaqnjd1_",
-      "url": "https://www.instagram.com/p/DfsWaqnjd1_/",
-      "ownerUsername": "freshkitchenwien",
+      "key": "instagram:Dfu_hIwiWHo",
+      "url": "https://www.instagram.com/p/Dfu_hIwiWHo/",
+      "ownerUsername": "yuplanet.at",
       "status": "rejected",
-      "reason": "no-consumer-food-benefit",
+      "reason": "non-food-ad",
       "ocrUsed": true,
       "ocrDeferred": false,
       "ocrErrors": 0
@@ -94,13 +94,13 @@
   ],
   "actorRuns": [
     {
-      "id": "eKjtZk7cxELiNrmVM",
+      "id": "1RoUGVZbgB43fARsQ",
       "actorId": "apify~instagram-hashtag-scraper",
-      "reportedChargeUsd": 0
+      "reportedChargeUsd": 0.0078
     }
   ],
   "batchErrors": [],
-  "reportedChargeUsd": 0,
+  "reportedChargeUsd": 0.0078,
   "tools": {
     "tesseract": true,
     "ffmpeg": false,
@@ -108,17 +108,8 @@
   },
   "sources": [
     {
-      "key": "hashtag:wienisst",
-      "lastAttemptAt": "2026-11-14T12:22:12.449Z",
-      "postsReturned": 1,
-      "status": "posts-returned",
-      "consecutiveFailures": 0,
-      "retryAt": "",
-      "consecutiveEmpty": 0
-    },
-    {
       "key": "hashtag:esseninwien",
-      "lastAttemptAt": "2026-11-14T12:22:12.449Z",
+      "lastAttemptAt": "2026-11-14T21:37:45.572Z",
       "status": "posts-returned",
       "postsReturned": 1,
       "consecutiveFailures": 0,
@@ -127,7 +118,7 @@
     },
     {
       "key": "hashtag:viennafood",
-      "lastAttemptAt": "2026-11-14T12:22:12.449Z",
+      "lastAttemptAt": "2026-11-14T21:37:45.572Z",
       "postsReturned": 1,
       "status": "posts-returned",
       "consecutiveFailures": 0,
@@ -136,7 +127,16 @@
     },
     {
       "key": "hashtag:wienfood",
-      "lastAttemptAt": "2026-11-14T12:22:12.449Z",
+      "lastAttemptAt": "2026-11-14T21:37:45.572Z",
+      "postsReturned": 1,
+      "status": "posts-returned",
+      "consecutiveFailures": 0,
+      "retryAt": "",
+      "consecutiveEmpty": 0
+    },
+    {
+      "key": "hashtag:wienisst",
+      "lastAttemptAt": "2026-11-14T21:37:45.572Z",
       "postsReturned": 1,
       "status": "posts-returned",
       "consecutiveFailures": 0,
