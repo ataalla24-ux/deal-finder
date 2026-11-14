@@ -1,14 +1,14 @@
 {
-  "lastUpdated": "2026-11-14T12:09:59.369Z",
+  "lastUpdated": "2026-11-14T21:28:23.763Z",
   "runProvenance": {
     "repository": "ataalla24-ux/deal-finder",
-    "runId": "43593390448",
-    "headSha": "c7106090e47e1acb6e161fe8a830b7356efcad44",
-    "checkoutSha": "c7106090e47e1acb6e161fe8a830b7356efcad44",
+    "runId": "43642892832",
+    "headSha": "9d65ee0ea5ac8574341d7d76c50121e4391d504d",
+    "checkoutSha": "9d65ee0ea5ac8574341d7d76c50121e4391d504d",
     "triggeringRun": null,
     "event": "schedule",
     "runAttempt": "1",
-    "url": "https://github.com/ataalla24-ux/deal-finder/actions/runs/43593390448"
+    "url": "https://github.com/ataalla24-ux/deal-finder/actions/runs/43642892832"
   },
   "status": "discovery-degraded",
   "outputPreserved": true,
@@ -122,23 +122,53 @@
   "discovered": 0,
   "apiCandidates": 0,
   "apiDiscovery": {
-    "errors": [],
-    "attemptedRequests": 0,
+    "errors": [
+      {
+        "keyword": "wien pizza 1+1",
+        "offset": 0,
+        "status": 0,
+        "error": "Empty or non-JSON TikTok response",
+        "code": "transport-unavailable",
+        "transportReason": "request-policy-blocked"
+      }
+    ],
+    "attemptedRequests": 1,
     "emptyResponses": 0,
     "rawItems": 0,
     "normalizedItems": 0,
     "ignoredItems": 0,
-    "stoppedReason": "api-cooldown",
-    "nextRetryAt": "2026-11-14T13:05:20.311Z",
-    "nextKeywordIndex": 3
+    "stoppedReason": "transport-unavailable",
+    "nextRetryAt": "2026-11-15T21:28:08.439Z",
+    "nextKeywordIndex": 4,
+    "transport": "public-browser-search",
+    "navigations": 1,
+    "searchRequests": 0,
+    "blockedExtraRequests": 2,
+    "blockedRequestReasons": {
+      "unexpected-endpoint": 2
+    },
+    "observedSearchEndpoints": {
+      "other-search": 2
+    },
+    "observedSearchPaths": {
+      "[redacted]": 1,
+      "/api/search/user/preview/": 1
+    }
   },
   "searchDiscovery": {
-    "errors": [],
-    "attemptedQueries": 0,
-    "stoppedReason": "search-cooldown",
-    "nextRetryAt": "2026-11-14T13:05:32.340Z",
-    "lastAttemptAt": "2026-11-13T13:05:32.340Z",
-    "nextQueryIndex": 8,
+    "errors": [
+      {
+        "query": "site:tiktok.com wien gratis eintritt",
+        "error": "Search challenge; no bypass attempted",
+        "httpStatus": 403,
+        "retryAt": ""
+      }
+    ],
+    "attemptedQueries": 3,
+    "stoppedReason": "search-unavailable",
+    "nextRetryAt": "2026-11-15T21:28:20.546Z",
+    "lastAttemptAt": "2026-11-14T21:28:20.546Z",
+    "nextQueryIndex": 11,
     "deferredPostVisits": 0
   },
   "accepted": 0,
@@ -177,10 +207,10 @@
     "aiAccepted": 0,
     "aiSkippedLowIntent": 0,
     "aiSkippedUnrecoverable": 0,
-    "analysisWallTimeMs": 0,
+    "analysisWallTimeMs": 1,
     "analysisTotalItemTimeMs": 0,
     "analysisMaxItemTimeMs": 0,
-    "aiWallTimeMs": 1,
+    "aiWallTimeMs": 0,
     "aiTotalRequestTimeMs": 0,
     "aiMaxRequestTimeMs": 0,
     "inputTokens": 0,
@@ -221,12 +251,28 @@
     "aiAcceptedUnusable": 0
   },
   "timings": {
-    "apiDiscoveryMs": 42,
-    "searchDiscoveryMs": 0,
-    "mediaRescueMs": 514,
-    "totalScannerMs": 845
+    "apiDiscoveryMs": 12143,
+    "searchDiscoveryMs": 3039,
+    "mediaRescueMs": 148,
+    "totalScannerMs": 15563
   },
-  "discoveryErrors": [],
-  "apiErrors": [],
+  "discoveryErrors": [
+    {
+      "query": "site:tiktok.com wien gratis eintritt",
+      "error": "Search challenge; no bypass attempted",
+      "httpStatus": 403,
+      "retryAt": ""
+    }
+  ],
+  "apiErrors": [
+    {
+      "keyword": "wien pizza 1+1",
+      "offset": 0,
+      "status": 0,
+      "error": "Empty or non-JSON TikTok response",
+      "code": "transport-unavailable",
+      "transportReason": "request-policy-blocked"
+    }
+  ],
   "rejected": []
 }
