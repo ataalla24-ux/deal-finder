@@ -1,12 +1,12 @@
 {
-  "generatedAt": "2026-11-14T20:10:10.304Z",
+  "generatedAt": "2026-11-14T20:54:50.481Z",
   "discoveryAvailability": {
     "note": "Transport evidence, not deal yield. Retry eligibility is not recovery. Candidate counts are not Slack deliveries. No extra runs or quota resets.",
     "lanes": [
       {
         "name": "instagram-search",
         "observedAt": "2026-11-14T18:43:20.196Z",
-        "status": "paused",
+        "status": "awaiting-post-cooldown-run",
         "reason": "search-cooldown",
         "retryAt": "2026-11-14T20:27:59.928Z",
         "attempted": 0,
@@ -54,9 +54,9 @@
   },
   "summary": {
     "filesConsidered": 32,
-    "totalCandidates": 660,
-    "uniqueCandidates": 641,
-    "distinctCandidates": 650,
+    "totalCandidates": 662,
+    "uniqueCandidates": 643,
+    "distinctCandidates": 652,
     "duplicateClusters": 9,
     "topHealthySources": [
       {
@@ -75,7 +75,7 @@
         "sourceKey": "meta-instagram",
         "sourceLabel": "Meta Instagram Graph",
         "healthScore": 70,
-        "totalDeals": 44
+        "totalDeals": 46
       },
       {
         "sourceKey": "instagram-apify",
@@ -152,11 +152,11 @@
         "fresh1dCount": 0
       },
       {
-        "sourceKey": "firecrawl4",
-        "sourceLabel": "Firecrawl Key 4 - Instagram Direct",
-        "coverageScore": 33,
-        "totalDeals": 56,
-        "fresh1dCount": 0
+        "sourceKey": "meta-instagram",
+        "sourceLabel": "Meta Instagram Graph",
+        "coverageScore": 35,
+        "totalDeals": 46,
+        "fresh1dCount": 5
       }
     ],
     "topPrecisionSources": [
@@ -182,7 +182,7 @@
         "sourceKey": "meta-instagram",
         "sourceLabel": "Meta Instagram Graph",
         "precisionScore": 66,
-        "totalDeals": 44
+        "totalDeals": 46
       },
       {
         "sourceKey": "joe",
@@ -208,7 +208,7 @@
         "sourceKey": "meta-instagram",
         "sourceLabel": "Meta Instagram Graph",
         "sourceWeightScore": 55,
-        "totalDeals": 44
+        "totalDeals": 46
       },
       {
         "sourceKey": "firecrawl5",
@@ -448,20 +448,20 @@
       "sourceKey": "meta-instagram",
       "file": "deals-pending-meta-instagram.json",
       "sourceLabel": "Meta Instagram Graph",
-      "totalDeals": 44,
-      "uniqueDeals": 42,
+      "totalDeals": 46,
+      "uniqueDeals": 44,
       "duplicateDeals": 2,
       "duplicateAcrossSources": 2,
-      "fresh1dCount": 3,
-      "fresh7dCount": 35,
-      "viennaCount": 44,
+      "fresh1dCount": 5,
+      "fresh7dCount": 37,
+      "viennaCount": 46,
       "foodDrinkCount": 28,
       "promoCount": 17,
       "missingUrlCount": 0,
       "sampleTitles": [
-        "Mittagsmenüs ab 16.11 - 20.11 🍽️ 📸 : alekssocial",
-        "Book in 3 easy steps at hh-drivecompany.com confirmed within 15 minutes, free cancellation",
-        "20 % auf alle Paar-Kurse und profitierst darüber hinaus von mehr als 900 weiteren Vorteil"
+        "Für 23,90 € in der Gastwirtschaft Schmid",
+        "💚 Für 23,90 € während unserer Ganslwochen genießen",
+        "Mittagsmenüs ab 16.11 - 20.11 🍽️ 📸 : alekssocial"
       ],
       "lastRun": null,
       "uniqueRate": 1,
@@ -472,7 +472,7 @@
       "foodDrinkRate": 0.6,
       "promoRate": 0.4,
       "missingUrlRate": 0,
-      "averageQualityScore": 86.9,
+      "averageQualityScore": 86.7,
       "topCategories": [
         {
           "value": "essen",
@@ -480,7 +480,7 @@
         },
         {
           "value": "shopping",
-          "count": 6
+          "count": 8
         },
         {
           "value": "kaffee",
@@ -502,7 +502,7 @@
       "topTypes": [
         {
           "value": "rabatt",
-          "count": 29
+          "count": 31
         },
         {
           "value": "gratis",
@@ -518,7 +518,7 @@
       ],
       "healthScore": 70,
       "missionFitScore": 49,
-      "coverageScore": 33,
+      "coverageScore": 35,
       "precisionScore": 66,
       "sourceWeightScore": 55
     },
