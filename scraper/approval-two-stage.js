@@ -47,7 +47,7 @@ function materialConditionHold(source, copy) {
     [/\b(?:einmalig|einmal|1\s*(?:x|mal))\b/, 'Einmalige Einlösung'],
     [/\b(?:pro|je)\s+(?:person|gast)\b/, 'Personenlimit'],
     [/\bnur\s+vor\s+ort\b/, 'Einlösung nur vor Ort'],
-    [/\b(?:mindestbestellwert|mindestumsatz|bestellwert|warenwert|mbw)\b/, 'Mindestbetrag'],
+    [/\b(?:mindestbestellwert|mindestumsatz|bestellwert|warenwert|mbw)\b/, 'Mindestbetrag', 'mindestbestellwert|mindestumsatz|bestellwert|warenwert|mbw'],
   ];
   for (const [pattern, label, term] of conditions) {
     if (!pattern.test(source)) continue;
@@ -96,6 +96,19 @@ export function basicCopyHold(deal, sourceEvidence, { now = new Date() } = {}) {
   if (!source) return '';
   const original = normalized(source);
   const copy = normalized(`${deal.title || ''} ${deal.description || ''}`);
+  // Only a literal matching product is covered by this narrow negative proof.
+  // Another product's positive "gratis" cannot reverse "Kaffee nicht gratis".
+  const freeClaim = /\b(?:gratis|kostenlos(?:e[rmns]?)?|geschenkt(?:e[rmns]?)?|free)\b/;
+  const title = normalized(deal.title);
+  if (freeClaim.test(title)) {
+    const deniedProducts = [
+      ...values(original, /\b([\p{L}][\p{L}-]{2,})\s+(?:(?:ist|gibt\s+es)\s+)?nicht\s+(?:gratis|kostenlos|geschenkt|free)\b/gu),
+      ...values(original, /\bkein(?:e[rmns]?)?\s+(?:gratis|kostenlos(?:e[rmns]?)?|geschenkt(?:e[rmns]?)?|free)\s+([\p{L}][\p{L}-]{2,})\b/gu),
+    ];
+    if (deniedProducts.some(product => new RegExp(`(?<![\\p{L}\\p{N}])${product}(?![\\p{L}\\p{N}])`, 'u').test(title))) {
+      return 'Grundprüfung: Gratis-Titel widerspricht dem ausdrücklich nicht kostenlosen Produkt.';
+    }
+  }
   const conditionHold = materialConditionHold(original, copy);
   if (conditionHold) return `Grundprüfung: ${conditionHold}`;
   const sourceFacts = amountFacts(original), copyFacts = amountFacts(copy);

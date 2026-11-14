@@ -203,3 +203,22 @@ test('a changed monetary amount cannot hide behind an unclassified price phrase 
     assert.equal(basicCopyHold({ ...base, title: 'Pizza für 4,90 € bei Abholung', description: '' }, { caption }), '');
   }
 });
+
+test('explicitly denied free product cannot borrow another product’s free claim', () => {
+  for (const caption of ['Kaffee ist nicht gratis, sondern kostet 5 Euro.',
+    'Kaffee nicht gratis, aber gratis Kuchen.', 'Kein kostenloser Kaffee, aber gratis Kuchen.']) {
+    assert.match(basicCopyHold({ ...base, title: 'Kaffee gratis', description: '' }, { caption }), /Gratis-Titel/, caption);
+  }
+  assert.equal(basicCopyHold({ ...base, title: 'Kuchen gratis', description: '' },
+    { caption: 'Kaffee ist nicht gratis, aber gratis Kuchen.' }), '');
+});
+
+test('an explicit absence of minimum spend does not create a mandatory description', () => {
+  const deal = { ...base, title: '5 Euro Rabatt', description: '' };
+  for (const caption of ['5 Euro Rabatt. Kein Mindestbestellwert erforderlich.',
+    '5 Euro Rabatt. MBW ist nicht nötig.', '5 Euro Rabatt ohne Mindestumsatz.']) {
+    assert.equal(basicCopyHold(deal, { caption }), '', caption);
+  }
+  assert.match(basicCopyHold(deal, { caption: '5 Euro Rabatt. Mindestbestellwert 20 Euro.' }), /Mindestbetrag/);
+  assert.match(basicCopyHold(deal, { caption: '5 Euro Rabatt. Kein Mindestbestellwert erforderlich. Mindestbestellwert 20 Euro bei Lieferung.' }), /Mindestbetrag/);
+});
