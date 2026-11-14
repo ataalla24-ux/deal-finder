@@ -13,6 +13,8 @@ import {
 import { inspectDealUrlHealth, isVagueExpiry, normalizeDealExpiry, parseExpiryDetails, repairStartOnlyExpiry } from './expiry-utils.js';
 import { offerPeriodFields } from './offer-period-fields.js';
 import { hasOnlyPreviewDescription, preisjaegerThreadId } from './approval-source-evidence.js';
+import { isSupportedIamstudentApprovalUrl, iamstudentApprovalDateHold, prepareIamstudentApprovalCopy } from './approval-iamstudent-source-evidence.js';
+import { isRestoredIamstudentApprovalRetry } from './approval-restored-source-retry.js';
 import { isDealNewByDate } from './deal-freshness-utils.js';
 import { buildReport, buildSummary, validateDealsForSlack } from './deal-validity-agent.js';
 import { canonicalSocialPostKey, mergeDealEvidence, officialOmvVariantKey } from './deal-evidence-utils.js';
@@ -793,7 +795,8 @@ async function validateApprovalCandidates(deals, options = {}) {
   };
   const sourceEvidence = new Map();
   for (const deal of candidates) {
-    if (!humanApproved(deal) || existingIds.has(deal.id) || !preisjaegerThreadId(deal.url)
+    if (!humanApproved(deal) || existingIds.has(deal.id)
+      || (!preisjaegerThreadId(deal.url) && !isSupportedIamstudentApprovalUrl(deal.url))
       || deal.editedInSlack || deal.slackFormEditTs || deal.liveEditedAt || isCommunitySubmission(deal)) continue;
     let health;
     try { health = await inspect(deal.url, { now, timeoutMs: options.timeoutMs }); } catch { health = {}; }
@@ -803,6 +806,12 @@ async function validateApprovalCandidates(deals, options = {}) {
     sourceEvidence.set(deal.id, evidence || { sourceUrl: deal.url,
       blockingReason: 'Aktueller Angebotsbeleg nicht eindeutig lesbar.' });
   }
+  candidates = candidates.map(deal => {
+    const prepared = prepareIamstudentApprovalCopy(deal, sourceEvidence.get(deal.id), { existingIds });
+    if (prepared !== deal) console.log('IAMSTUDENT source copy prepared:', JSON.stringify({ id: deal.id,
+      fields: prepared.reviewedSourceCopy.fields, method: prepared.reviewedSourceCopy.method }));
+    return prepared;
+  });
   const sourceLookup = mapOptions ? await findApprovalAddresses(candidates.filter(humanApproved), mapOptions) : null;
   const officialSourceCopy = new Map(candidates.filter(deal => deal.originSource === 'power-official-food')
     .map(deal => [deal.id, { title: deal.title, description: deal.description }]));
@@ -856,6 +865,13 @@ async function validateApprovalCandidates(deals, options = {}) {
   // outlive the ephemeral evidence used to discover it.
   let addedBlock = false;
   for (const { deal, decision } of validation.results) {
+    const sourceDateHold = iamstudentApprovalDateHold(deal, sourceEvidence.get(deal.id))
+      || iamstudentApprovalDateHold(originals.get(deal.id), sourceEvidence.get(deal.id));
+    if (sourceDateHold) {
+      decision.allowed = false;
+      decision.reasons.push(sourceDateHold);
+      addedBlock = true;
+    }
     const sourceHold = sourceEvidence.get(deal.id)?.blockingReason;
     if (sourceHold) {
       decision.allowed = false;
@@ -1484,7 +1500,8 @@ async function main() {
   }
   const queuedDeals = queuedModeration.deals;
   const approvalRetries = queuedDeals.filter(deal => cleanText(deal.slackTs) && cleanText(deal.slackThreadTs)
-    && ensureArray(deal.approvalBlock?.reasons).some(isApprovalRetryReason))
+    && (ensureArray(deal.approvalBlock?.reasons).some(isApprovalRetryReason)
+      || isRestoredIamstudentApprovalRetry(deal)))
     .sort((left, right) => String(left.approvalBlock.checkedAt || '').localeCompare(String(right.approvalBlock.checkedAt || '')))
     .slice(0, Math.min(4, APPROVE_FULL_SCAN_MAX_THREADS || 4, APPROVE_FULL_SCAN_MAX_DEALS || 4));
   const retryThreads = [...new Set(approvalRetries.map(deal => cleanText(deal.slackThreadTs)))];

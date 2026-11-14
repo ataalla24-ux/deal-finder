@@ -2,6 +2,7 @@ import { load } from 'cheerio';
 import { cardEditorialWhen } from './deal-card-editor.js';
 import { hasReviewedOfferPeriod } from './offer-period-fields.js';
 import { extractApprovalSourceEvidence } from './approval-source-evidence.js';
+import { isSupportedIamstudentApprovalUrl, extractIamstudentApprovalSourceEvidence } from './approval-iamstudent-source-evidence.js';
 
 const URL_CHECK_UA = 'Mozilla/5.0 (compatible; FreeFinderBot/1.0; +https://freefinder.wien)';
 const DAY_MS = 24 * 60 * 60 * 1000;
@@ -1623,7 +1624,7 @@ export async function inspectDealUrlHealth(url, options = {}) {
         'user-agent': URL_CHECK_UA,
         accept: 'text/html,application/xhtml+xml,*/*',
       },
-      redirect: 'follow',
+      redirect: isSupportedIamstudentApprovalUrl(url) ? 'manual' : 'follow',
       signal: controller.signal,
     });
 
@@ -1703,7 +1704,11 @@ export async function inspectDealUrlHealth(url, options = {}) {
       };
     }
 
-    const deadReason = detectDeadLinkReason(html, { hostname });
+    const iamstudentEvidence = extractIamstudentApprovalSourceEvidence(html, url, finalUrl);
+    // Only a fully matched current public voucher may replace whole-page hidden
+    // UI templates with its own visible offer text for withdrawal detection.
+    const confirmedIamstudent = Boolean(iamstudentEvidence?.caption && !iamstudentEvidence.blockingReason);
+    const deadReason = detectDeadLinkReason(confirmedIamstudent ? iamstudentEvidence.caption : html, { hostname });
 
     if (deadReason) {
       return {
@@ -1723,7 +1728,7 @@ export async function inspectDealUrlHealth(url, options = {}) {
       finalUrl,
       contentHints,
       dateHints,
-      approvalSourceEvidence: extractApprovalSourceEvidence(html, url, finalUrl),
+      approvalSourceEvidence: iamstudentEvidence || extractApprovalSourceEvidence(html, url, finalUrl),
       checkedAt: new Date().toISOString(),
     };
   } catch {

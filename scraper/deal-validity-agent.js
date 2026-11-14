@@ -610,7 +610,11 @@ function getConcreteOfferDecision(deal, health = null) {
 
 function getRelativeOfferDecision(deal, selectedPublication, now, options = {}) {
   if (!selectedPublication?.date || options.activeValidity || options.recurring) return { blocked: false };
-  const text = getOfferText(deal, options.health);
+  const source = options.health?.approvalSourceEvidence;
+  const text = hasReliableHealthPayload(options.health) && source?.sourceUrl === deal.url
+    && !source.blockingReason && cleanText(source.caption)
+    ? getOfferText(deal, { ...options.health, contentHints: { description: source.caption } })
+    : getOfferText(deal, options.health);
   const mentionsToday = /\b(?:heute|today|tonight)\b/i.test(text)
     && !/\b(?:ab\s+heute|starting\s+today|from\s+today)\b/i.test(text);
   const oneDayOffer = mentionsToday && /\b(?:gratis|kostenlos|free\s+entry|free|rabatt|aktion|deal|special)\b/i.test(text);
