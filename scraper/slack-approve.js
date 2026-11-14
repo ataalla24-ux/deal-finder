@@ -1,3 +1,4 @@
+import { prepareReviewedApprovalCopy } from './approval-reviewed-source-copy.js';
 import { basicCopyHold, prepareTwoStagePublication } from './approval-two-stage.js';
 import { captureMapEnrichmentInput, projectEnrichmentDeal } from './deal-enrichment-state.js';
 import { officialFoodOfferKey } from './power-food-sources.js';
@@ -805,13 +806,13 @@ async function validateApprovalCandidates(deals, options = {}) {
     const evidence = !health.invalid && !health.transientError && !health.blockedByProtection
       && health.status === 200 && health.approvalSourceEvidence?.sourceUrl === deal.url
       ? health.approvalSourceEvidence : null;
-    sourceEvidence.set(deal.id, evidence || { sourceUrl: deal.url,
+    sourceEvidence.set(deal.id, evidence ? { ...evidence, checkedAt: health.checkedAt } : { sourceUrl: deal.url,
       blockingReason: 'Aktueller Angebotsbeleg nicht eindeutig lesbar.' });
   }
   candidates = candidates.map(deal => {
     const periodPrepared = prepareIamstudentApprovalPeriod(deal, sourceEvidence.get(deal.id), { existingIds, now });
-    const prepared = prepareIamstudentApprovalCopy(periodPrepared, sourceEvidence.get(deal.id), { existingIds });
-    if (prepared !== periodPrepared) console.log('IAMSTUDENT source copy prepared:', JSON.stringify({ id: deal.id,
+    const prepared = prepareReviewedApprovalCopy(prepareIamstudentApprovalCopy(periodPrepared, sourceEvidence.get(deal.id), { existingIds }), sourceEvidence.get(deal.id), { existingIds, now });
+    if (prepared !== periodPrepared) console.log(`${isSupportedIamstudentApprovalUrl(deal.url) ? 'IAMSTUDENT' : 'Reviewed'} source copy prepared:`, JSON.stringify({ id: deal.id,
       fields: prepared.reviewedSourceCopy.fields, method: prepared.reviewedSourceCopy.method }));
     return prepared;
   });

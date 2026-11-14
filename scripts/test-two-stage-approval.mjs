@@ -30,10 +30,105 @@ test('known mandatory conditions never become an optional description task', () 
     'Gratis Kaffee für Studierende, einmalig pro Gast.', 'Gratis Kaffee ab Mindestbestellwert 20 Euro.', 'Gratis Kaffee nur dienstags von 14 bis 16 Uhr.']) {
     assert.match(basicCopyHold({ ...base, description: '' }, { caption }), /Grundprüfung/);
   }
-  assert.match(basicCopyHold({ ...base, description: '' }), /Angebotsbeleg/);
+  assert.equal(basicCopyHold({ ...base, description: '' }), '');
   assert.equal(basicCopyHold(base, { caption: base.description }), '');
   assert.match(basicCopyHold({ ...base, title: '10 Euro Rabatt in der App', description: '5 Euro Rabatt in der App. Mindestbestellwert 50 Euro.' }, { caption: '5 Euro Rabatt in der App. Mindestbestellwert 50 Euro.' }), /Grundprüfung/);
   assert.match(basicCopyHold({ ...base, title: '10 Euro Rabatt', description: 'Mindestbestellwert 10 Euro' }, { caption: '5 Euro Rabatt, Mindestbestellwert 50 Euro' }), /Grundprüfung/);
+});
+
+test('basic-valid approved copy may be absent or paraphrased without copying the source article', () => {
+  const deal = { ...base, validUntil: '2026-11-20', description: '' };
+  assert.equal(basicCopyHold(deal, { caption: 'Gratis Kaffee in Wien.' }), '');
+  assert.equal(basicCopyHold(deal), '');
+  assert.equal(basicCopyHold(deal, { caption: 'Gratis Kaffee, ohne App.' }), '');
+  for (const caption of ['Gratis Kaffee. Keine App nötig.', 'Gratis Kaffee. Kein Coupon nötig.',
+    'Gratis Kaffee. Gutschein ist nicht erforderlich.', 'Gratis Kaffee. Am Montag wurde darüber berichtet.']) {
+    assert.equal(basicCopyHold(deal, { caption }), '', caption);
+  }
+  assert.deepEqual(prepareTwoStagePublication(deal, { now }).enrichmentFields, ['description']);
+  assert.equal(prepareTwoStagePublication(deal, { now }).description, '');
+  const source = '5 Euro Rabatt. Nur für Neukunden in der App. Mindestbestellwert 20 Euro.';
+  assert.equal(basicCopyHold({ ...base, title: '5 € Rabatt', description:
+    'Neukundinnen erhalten in der App einen Rabatt von 5 Euro ab einem Bestellwert von 20 Euro.' }, { caption: source }), '');
+  assert.equal(basicCopyHold({ ...base, title: 'Kaffee gratis', description:
+    'Zum Frühstückskauf gibt es dienstags zwischen 14 und 16 Uhr einmalig einen kostenlosen Kaffee pro Person.' },
+  { caption: 'Gratis Kaffee bei Kauf eines Frühstücks, einmalig pro Gast, nur dienstags von 14 bis 16 Uhr.' }), '');
+});
+
+test('required conditions cannot be satisfied by their negation; explicitly optional conditions remain optional', () => {
+  for (const [caption, title, reason] of [
+    ['Gratis Kaffee nur mit Gutschein.', 'Gratis Kaffee ohne Gutschein', /Gutschein/],
+    ['Gratis Kaffee nur mit Coupon.', 'Gratis Kaffee. Kein Coupon erforderlich.', /Coupon/],
+    ['Gratis Kaffee in der App.', 'Gratis Kaffee. App ist nicht erforderlich.', /App/],
+    ['5 Euro Rabatt nur für Neukunden.', '5 Euro Rabatt für alle, auch ohne Neukundenstatus', /Neukunden/],
+    ['Gratis Kaffee nur für Mitglieder.', 'Gratis Kaffee ohne Mitgliedschaft', /Mitglied/],
+    ['Gratis Kaffee nur mit App. Kuchen auch ohne App möglich.', 'Gratis Kaffee ohne App', /App/],
+  ]) assert.match(basicCopyHold({ ...base, title, description: '' }, { caption }), reason);
+  for (const [caption, title] of [
+    ['Gratis Kaffee. App ist nicht erforderlich.', 'Gratis Kaffee ohne App'],
+    ['Gratis Kaffee. Keine App nötig.', 'Gratis Kaffee'],
+    ['Gratis Kaffee. Kein Gutschein erforderlich.', 'Gratis Kaffee ohne Gutschein'],
+    ['Gratis Kaffee. Keine Mitgliedschaft erforderlich.', 'Gratis Kaffee'],
+    ['Gratis Kaffee. Mitgliedschaft ist nicht notwendig.', 'Gratis Kaffee ohne Mitgliedschaft'],
+  ]) assert.equal(basicCopyHold({ ...base, title, description: '' }, { caption }), '', caption);
+});
+
+test('known evidence cannot support newly invented monetary or percentage units', () => {
+  for (const [caption, title] of [
+    ['5 Euro Rabatt in Wien.', '20 % Rabatt'],
+    ['5 Euro Rabatt in Wien.', '5 Prozent Rabatt'],
+    ['20 Prozent Rabatt in Wien.', '20 Euro Rabatt'],
+    ['Gratis Kaffee in Wien.', '5 Euro Rabatt auf Kaffee'],
+    ['Gratis Kaffee in Wien.', '50 Prozent Rabatt auf Kaffee'],
+  ]) assert.match(basicCopyHold({ ...base, title, description: '' }, { caption }), /Grundprüfung/);
+  for (const [caption, title] of [['5 Euro Rabatt.', '5 € Rabatt'], ['25,5 Prozent Rabatt.', '25.5 % Rabatt']])
+    assert.equal(basicCopyHold({ ...base, title, description: '' }, { caption }), '');
+});
+
+test('the exact two-redemption limit accepts equivalent word form without accepting a larger limit', () => {
+  const caption = 'Gratis Donut. Maximal 2 Einlösungen pro Gast.';
+  for (const description of ['Höchstens zweimal pro Gast.', 'Maximal zwei Einlösungen pro Gast.',
+    'Höchstens 2 Mal pro Gast.'])
+    assert.equal(basicCopyHold({ ...base, title: 'Gratis Donut', description }, { caption }), '', description);
+  for (const description of ['Höchstens dreimal pro Gast.', 'Maximal 3 Einlösungen pro Gast.',
+    'Höchstens einmal pro Gast.'])
+    assert.match(basicCopyHold({ ...base, title: 'Gratis Donut', description }, { caption }), /Einlösungslimit/);
+});
+
+test('known missing conditions and conflicting amounts report their concrete reason', () => {
+  const source = '5 Euro Rabatt. Nur für Neukunden in der App. Mindestbestellwert 20 Euro.';
+  const offer = { ...base, title: '5 Euro Rabatt', description: 'Für Neukunden in der App. Mindestbestellwert 20 Euro.' };
+  for (const [description, reason] of [
+    ['Für Neukunden. Mindestbestellwert 20 Euro.', /App/],
+    ['In der App. Mindestbestellwert 20 Euro.', /Neukunden/],
+    ['Für Neukunden in der App.', /Mindest/],
+    ['Für Neukunden in der App. Mindestbestellwert 10 Euro.', /Mindest/],
+  ]) assert.match(basicCopyHold({ ...offer, description }, { caption: source }), reason);
+  assert.match(basicCopyHold({ ...offer, title: '20 Euro Rabatt' }, { caption: source }), /Rabatt/);
+  assert.match(basicCopyHold({ ...base, description: 'Kaffee gratis dienstags von 14 bis 17 Uhr.' },
+    { caption: 'Kaffee gratis nur dienstags von 14 bis 16 Uhr.' }), /Uhrzeit/);
+  assert.match(basicCopyHold({ ...base, description: 'Kaffee gratis mittwochs von 14 bis 16 Uhr.' },
+    { caption: 'Kaffee gratis nur dienstags von 14 bis 16 Uhr.' }), /Wochentag/);
+  assert.match(basicCopyHold({ ...base, description: 'Bei Kauf eines Getränks gibt es Kaffee gratis.' },
+    { caption: 'Kaffee gratis bei Kauf eines Frühstücks.' }), /Kauf/);
+  assert.match(basicCopyHold({ ...base, description: 'Maximal 5 Einlösungen pro Gast.' },
+    { caption: 'Kaffee gratis. Maximal 2 Einlösungen pro Gast.' }), /Einlös/);
+  assert.match(basicCopyHold({ ...base, title: '2 Pasta gratis', description: '' },
+    { caption: '1 Pasta gratis.' }), /Angebotsmenge/);
+  assert.match(basicCopyHold({ ...offer, description: 'Für Neukunden ohne App. Mindestbestellwert 20 Euro.' },
+    { caption: source }), /App/);
+  assert.match(basicCopyHold({ ...offer, description: 'Für Neukunden in der App. MBW: 10 Euro.' },
+    { caption: '5 Euro Rabatt. Nur für Neukunden in der App. Mindestbestellwert: 20 Euro.' }), /Mindestbetrag/);
+  assert.match(basicCopyHold({ ...base, description: '' }, { caption: 'Kaffee für 5 Euro.' }), /Gratis-Titel/);
+  assert.equal(basicCopyHold({ ...base, description: '' }, { caption: 'Kaffee gratis, Croissant für 5 Euro.' }), '');
+  for (const [caption, copy] of [['Kaffee gratis vor 10:30 Uhr.', 'Kaffee gratis bis 10:30 Uhr.'],
+    ['Kaffee gratis nur ab 17 Uhr.', 'Kaffee gratis ab 16 Uhr.']]) {
+    assert.match(basicCopyHold({ ...base, description: '' }, { caption }), /Uhrzeit/);
+    assert.match(basicCopyHold({ ...base, description: copy }, { caption }), /Uhrzeit/);
+    assert.equal(basicCopyHold({ ...base, description: caption }, { caption }), '');
+  }
+  assert.match(basicCopyHold({ ...base, description: '' },
+    { caption: 'Kaffee gratis. Gültig jeweils montags.' }), /Wochentag/);
 });
 
 test('pending projection is idempotent, retains source input privately and updates the same record after completion', () => {
@@ -99,4 +194,12 @@ test('basic title binding preserves complete numbers, decimals and offer operato
     assert.match(basicCopyHold({ ...base, title, description: caption }, { caption }), /Grundprüfung/);
   }
   assert.equal(basicCopyHold({ ...base, title: '5 Euro Rabatt', description: '5 Euro Rabatt. Mit App.' }, { caption: '5 Euro Rabatt. Mit App.' }), '');
+});
+
+
+test('a changed monetary amount cannot hide behind an unclassified price phrase or euro prefix', () => {
+  for (const caption of ['Pizza kostet 4,90 Euro bei Abholung.', 'Pizza €4,90 bei Abholung.', 'Pizza 4,90€ bei Abholung.']) {
+    assert.match(basicCopyHold({ ...base, title: 'Pizza für 19,90 € bei Abholung', description: '' }, { caption }), /Betrag/);
+    assert.equal(basicCopyHold({ ...base, title: 'Pizza für 4,90 € bei Abholung', description: '' }, { caption }), '');
+  }
 });

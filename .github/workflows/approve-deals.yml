@@ -71,7 +71,7 @@ jobs:
           SENTRY_DISABLED=1 node --test scripts/test-approval-current-source.mjs scripts/test-approval-iamstudent-source.mjs
           SENTRY_DISABLED=1 node --test scripts/test-approval-restored-source-retry.mjs
           SENTRY_DISABLED=1 node --test scripts/test-kfc-approval-title.mjs
-          SENTRY_DISABLED=1 node --test scripts/test-current-official-offer-freshness.mjs scripts/test-current-public-voucher.mjs scripts/test-approval-unverified-date-recovery.mjs scripts/test-vapiano-approval-completion.mjs scripts/test-two-stage-approval.mjs
+          SENTRY_DISABLED=1 node --test scripts/test-current-official-offer-freshness.mjs scripts/test-current-public-voucher.mjs scripts/test-approval-unverified-date-recovery.mjs scripts/test-vapiano-approval-completion.mjs scripts/test-two-stage-approval.mjs scripts/test-approval-reviewed-source-copy.mjs scripts/test-donut-approval-completion.mjs
 
       - name: ✅ Read Slack ✅ Reactions & Approve
         id: approval

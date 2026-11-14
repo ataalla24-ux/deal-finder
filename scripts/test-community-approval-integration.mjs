@@ -191,13 +191,18 @@ try {
   const interrupted = await validateApprovalCandidates([reviewNeeded], { ...validationOptions,
     approvalModelRequest: async () => { throw new Error('fixture limit'); },
   });
-  assert.equal(interrupted.allowedDeals.length, 0, 'an interrupted content review must not publish unreviewed copy');
-  assert.match(interrupted.results[0].decision.reasons.join(' '), /Grundprüfung/);
-  assert.equal(interrupted.blockedDeals[0].approvalCopyReview.deferred, true);
-  assert.ok(!read('deal-map-locations.json').locations.some(pin => pin.dealIds.includes(reviewNeeded.id)),
-    'a held copy review must not leave a public map pin');
+  assert.equal(interrupted.allowedDeals.length, 1, 'a failed optional polish attempt must not hold a basic-valid checked offer');
+  assert.deepEqual(interrupted.allowedDeals[0].enrichmentFields, ['description']);
+  assert.equal(interrupted.allowedDeals[0].approvalCopyReview.deferred, true);
+  assert.ok(read('deal-map-locations.json').locations.some(pin => pin.dealIds.includes(reviewNeeded.id)),
+    'already verified location remains usable while optional copy is pending');
+  const contradictory = await validateApprovalCandidates([{ ...reviewNeeded, id: 'wrong-price', title: 'Pizza für 19,90 € bei Abholung', approvalCopyReview: { waitingForSlot: true } }],
+    { ...validationOptions, approvalCachedReviewOnly: true });
+  assert.equal(contradictory.allowedDeals.length, 0, 'a known false price stays held even after an attempted review');
+  assert.match(contradictory.results[0].decision.reasons.join(' '), /Grundprüfung/);
+  assert.ok(!read('deal-map-locations.json').locations.some(pin => pin.dealIds.includes('wrong-price')));
   let retryCalls = 0;
-  const completed = await validateApprovalCandidates(interrupted.blockedDeals, { ...validationOptions,
+  const completed = await validateApprovalCandidates([{ ...reviewNeeded, approvalCopyReview: interrupted.allowedDeals[0].approvalCopyReview }], { ...validationOptions,
     now: new Date(+validationOptions.now + 3600000),
     approvalModelRequest: async () => Response.json({ choices: [{ finish_reason: 'stop', message: { content: JSON.stringify(++retryCalls === 1 ? {
       title: '', quote: '', description: 'Bei Abholung kostet die Pizza 4,90 Euro.',
@@ -217,10 +222,10 @@ try {
     } : { supported: true }) } }] }),
   });
   assert.equal(batchCalls, 2, 'bulk approvals stay within the existing one-candidate review limit');
-  assert.deepEqual(batch.allowedDeals.map(deal => deal.id), ['batch-first']);
-  assert.deepEqual(batch.blockedDeals.map(deal => deal.id), ['batch-second']);
-  assert.equal(batch.blockedDeals[0].approvalCopyReview.waitingForSlot, true);
-  assert.match(batch.results[1].decision.reasons.join(' '), /Grundprüfung/);
+  assert.deepEqual(batch.allowedDeals.map(deal => deal.id), ['batch-first', 'batch-second']);
+  assert.deepEqual(batch.blockedDeals, []);
+  assert.equal(batch.allowedDeals[1].approvalCopyReview.waitingForSlot, true);
+  assert.deepEqual(batch.allowedDeals[1].enrichmentFields, ['description']);
   console.log('Isolated approval workflow: block, retain, notify, edit, approve, deduplicate, reject and scheduled retry passed');
 } finally {
   globalThis.fetch = previousFetch;
