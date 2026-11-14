@@ -1,21 +1,21 @@
 {
-  "generatedAt": "2026-11-14T07:07:52.555Z",
+  "generatedAt": "2026-11-14T07:35:52.423Z",
   "discoveryAvailability": {
     "note": "Transport evidence, not deal yield. Retry eligibility is not recovery. Candidate counts are not Slack deliveries. No extra runs or quota resets.",
     "lanes": [
       {
         "name": "instagram-search",
-        "observedAt": "2026-11-13T20:28:22.713Z",
+        "observedAt": "2026-11-14T07:34:52.057Z",
         "status": "paused",
-        "reason": "search-unavailable",
+        "reason": "search-cooldown",
         "retryAt": "2026-11-14T20:27:59.928Z",
-        "attempted": 1,
+        "attempted": 0,
         "discovered": 0,
         "deliveredToSlack": null
       },
       {
         "name": "instagram-profiles",
-        "observedAt": "2026-11-13T20:28:22.713Z",
+        "observedAt": "2026-11-14T07:34:52.057Z",
         "status": "paused",
         "reason": "web-access-cooldown",
         "retryAt": "2026-11-18T20:10:08.659Z",
@@ -24,7 +24,7 @@
       },
       {
         "name": "instagram-previews",
-        "observedAt": "2026-11-13T20:28:22.713Z",
+        "observedAt": "2026-11-14T07:34:52.057Z",
         "status": "paused",
         "reason": "web-access-cooldown",
         "retryAt": "2026-11-18T20:10:08.659Z",
@@ -54,9 +54,9 @@
   },
   "summary": {
     "filesConsidered": 32,
-    "totalCandidates": 681,
-    "uniqueCandidates": 663,
-    "distinctCandidates": 672,
+    "totalCandidates": 680,
+    "uniqueCandidates": 662,
+    "distinctCandidates": 671,
     "duplicateClusters": 9,
     "topHealthySources": [
       {
@@ -726,56 +726,55 @@
       "sourceKey": "instagram-ai",
       "file": "deals-pending-instagram-ai.json",
       "sourceLabel": "Instagram AI Agent",
-      "totalDeals": 3,
-      "uniqueDeals": 2,
+      "totalDeals": 2,
+      "uniqueDeals": 1,
       "duplicateDeals": 1,
       "duplicateAcrossSources": 1,
-      "fresh1dCount": 1,
-      "fresh7dCount": 3,
-      "viennaCount": 3,
+      "fresh1dCount": 0,
+      "fresh7dCount": 2,
+      "viennaCount": 2,
       "foodDrinkCount": 1,
       "promoCount": 1,
       "missingUrlCount": 0,
       "sampleTitles": [
-        "Mittagsteller für 10,80 € im Restaurant ROTH",
         "Gratis Pepsi zu jeder direkten telefonischen Bestellung",
         "Mittagsmenü mit Salat oder Suppe für 9,99 € in Hietzing"
       ],
       "lastRun": null,
-      "uniqueRate": 0.7,
-      "duplicateRate": 0.3,
-      "fresh1dRate": 0.3,
+      "uniqueRate": 0.5,
+      "duplicateRate": 0.5,
+      "fresh1dRate": 0,
       "fresh7dRate": 1,
       "viennaRate": 1,
-      "foodDrinkRate": 0.3,
-      "promoRate": 0.3,
+      "foodDrinkRate": 0.5,
+      "promoRate": 0.5,
       "missingUrlRate": 0,
-      "averageQualityScore": 97.3,
+      "averageQualityScore": 98,
       "topCategories": [
         {
           "value": "essen & trinken",
-          "count": 3
+          "count": 2
         }
       ],
       "topTypes": [
         {
-          "value": "rabatt",
-          "count": 2
+          "value": "gratis",
+          "count": 1
         },
         {
-          "value": "freebie",
+          "value": "rabatt",
           "count": 1
         }
       ],
       "issues": [
-        "geringe Food-/Drink-Relevanz",
-        "wenige klare Gratis-/Promo-Signale"
+        "wenige Deals sind frischer als 1 Tag",
+        "hohe Überschneidung mit anderen Quellen"
       ],
-      "healthScore": 58,
-      "missionFitScore": 41,
-      "coverageScore": 10,
-      "precisionScore": 57,
-      "sourceWeightScore": 43
+      "healthScore": 57,
+      "missionFitScore": 47,
+      "coverageScore": 11,
+      "precisionScore": 61,
+      "sourceWeightScore": 45
     },
     {
       "sourceKey": "gastro2",
