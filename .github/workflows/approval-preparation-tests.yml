@@ -6,6 +6,7 @@ on:
       - 'scraper/approval-iamstudent-source-evidence.js'
       - 'scraper/approval-restored-source-retry.js'
       - 'scraper/deal-validity-agent.js'
+      - 'scraper/power-food-verification.js'
       - 'scraper/expiry-utils.js'
       - 'scraper/slack-approve.js'
       - 'scripts/automatic-deal-maintenance.mjs'
@@ -13,8 +14,11 @@ on:
       - 'scripts/test-approval-current-source.mjs'
       - 'scripts/test-approval-iamstudent-source.mjs'
       - 'scripts/test-approval-restored-source-retry.mjs'
+      - 'scripts/test-kfc-approval-title.mjs'
       - 'scripts/fixtures/approval-current-source-20261114.json'
+      - 'scripts/fixtures/preisjaeger-donut-dom-20261114.html'
       - 'scripts/fixtures/iamstudent-vapiano-20261114.html'
+      - 'scripts/fixtures/kfc-preiskracher-20261113.html'
       - '.github/workflows/approval-preparation-tests.yml'
   push:
     branches: [main]
@@ -23,6 +27,7 @@ on:
       - 'scraper/approval-iamstudent-source-evidence.js'
       - 'scraper/approval-restored-source-retry.js'
       - 'scraper/deal-validity-agent.js'
+      - 'scraper/power-food-verification.js'
       - 'scraper/expiry-utils.js'
       - 'scraper/slack-approve.js'
       - 'scripts/automatic-deal-maintenance.mjs'
@@ -30,8 +35,11 @@ on:
       - 'scripts/test-approval-current-source.mjs'
       - 'scripts/test-approval-iamstudent-source.mjs'
       - 'scripts/test-approval-restored-source-retry.mjs'
+      - 'scripts/test-kfc-approval-title.mjs'
       - 'scripts/fixtures/approval-current-source-20261114.json'
+      - 'scripts/fixtures/preisjaeger-donut-dom-20261114.html'
       - 'scripts/fixtures/iamstudent-vapiano-20261114.html'
+      - 'scripts/fixtures/kfc-preiskracher-20261113.html'
       - '.github/workflows/approval-preparation-tests.yml'
 permissions:
   contents: read
@@ -51,6 +59,7 @@ jobs:
           node --test scripts/test-approval-source-copy.mjs scripts/test-approved-copy.mjs
           scripts/test-approval-current-source.mjs scripts/test-approval-iamstudent-source.mjs
           scripts/test-approval-restored-source-retry.mjs
+          scripts/test-kfc-approval-title.mjs
           scripts/test-slack-date-pipeline.mjs scripts/test-expiry-observation-date.mjs
           scripts/test-expiry-normalization.mjs scripts/test-slack-approval-validation.mjs
           scripts/test-slack-approval-queue.mjs scripts/test-approval-map-readiness.mjs

@@ -1,8 +1,9 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
-import { readFileSync, mkdtempSync, mkdirSync, writeFileSync, rmSync } from 'node:fs';
+import { readFileSync, mkdtempSync, mkdirSync, writeFileSync, rmSync, cpSync, copyFileSync, symlinkSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
+import { fileURLToPath, pathToFileURL } from 'node:url';
 import { load } from 'cheerio';
 import { isSupportedIamstudentApprovalUrl, extractIamstudentApprovalSourceEvidence, prepareIamstudentApprovalCopy, iamstudentApprovalDateHold } from '../scraper/approval-iamstudent-source-evidence.js';
 
@@ -203,7 +204,8 @@ test('reviewed source template fills only missing copy with all restrictions and
 test('template cannot reuse stale proofs, rewrite manual/live copy or authorize a different offer', () => {
   for (const patch of [{ pipelineLifecycle: {} }, { editedInSlack: true }, { slackEditedAt: '2026-11-13' },
     { slackFormEditTs: '1' }, { liveEditedAt: '2026-11-13' }, { slackEditedFields: ['description'] },
-    { liveEditedFields: ['title'] }, { approvedAt: '2026-11-13' }, { forceKeep: true },
+    { liveEditedFields: ['title'] }, { pipelineLifecycle: { manualDecision: 'approved', publishedAt: '2026-11-13' } },
+    { pipelineLifecycle: { manualDecision: 'approved', stage: 'published' } }, { forceKeep: true },
     { title: 'Gratis Pizza ohne App' }, { url: url + '?other=1' }]) {
     const deal = { ...approvedFixture(), ...patch };
     assert.equal(prepareIamstudentApprovalCopy(deal, extract()), deal);
@@ -226,7 +228,10 @@ test('current source template passes ordinary validation with one normal GET and
     let requests = 0, modelCalls = 0;
     globalThis.fetch = async (requested, init) => { requests++; assert.equal(requested, url);
       assert.equal(init.redirect, 'manual'); return new Response(html, { headers: { 'content-type': 'text/html' } }); };
-    const candidate = approvedFixture();
+    const { advanceDealLifecycle } = await import('../scraper/deal-lifecycle.js');
+    const candidate = { ...advanceDealLifecycle(approvedFixture(), 'manually-approved', {
+      at: new Date('2026-11-14T10:00:00Z'), user: 'U_REVIEWER',
+    }), approvedAt: '2026-11-14T10:00:00.000Z' };
     const result = await validateApprovalCandidates([candidate], {
       now: new Date('2026-11-14T10:00:00Z'), requireMap: false, existingDeals: [], approvalCachedReviewOnly: true,
       approvalModelRequest: async () => { modelCalls++; throw Error('No additional model request'); },
@@ -321,5 +326,96 @@ test('a title outside the fixed template retains the existing independently cach
     globalThis.fetch = previous;
     if (previousReview === undefined) delete process.env.APPROVAL_SOURCE_COPY_REVIEW;
     else process.env.APPROVAL_SOURCE_COPY_REVIEW = previousReview;
+  }
+});
+
+test('targeted and ordinary approval runners prepare source copy before publishing or retaining a date hold', async () => {
+  const root = fileURLToPath(new URL('../', import.meta.url));
+  const temp = mkdtempSync(join(tmpdir(), 'iamstudent-approval-runner-'));
+  const previousFetch = globalThis.fetch;
+  const previousEnv = { ...process.env };
+  const previousLog = console.log;
+  const logs = [];
+  const write = (file, value) => writeFileSync(join(temp, 'docs', file), JSON.stringify(value));
+  const read = file => JSON.parse(readFileSync(join(temp, 'docs', file), 'utf8'));
+  try {
+    for (const dir of ['scraper', 'sentry']) cpSync(join(root, dir), join(temp, dir), { recursive: true });
+    mkdirSync(join(temp, 'scripts'));
+    for (const file of ['deal-map-review.mjs', 'deal-map-enrichment.mjs', 'deal-map-chain-rules.mjs',
+      'deal-map-source-addresses.mjs', 'approval-map-readiness.mjs', 'discover-vienna-merchants.mjs',
+      'automatic-deal-maintenance.mjs', 'automatic-maintenance-review.mjs', 'refresh-maintenance-evidence.mjs',
+      'deal-photo-contract.mjs']) copyFileSync(join(root, 'scripts', file), join(temp, 'scripts', file));
+    copyFileSync(join(root, 'package.json'), join(temp, 'package.json'));
+    symlinkSync(join(root, 'node_modules'), join(temp, 'node_modules'), 'dir');
+    mkdirSync(join(temp, 'docs')); mkdirSync(join(temp, 'reviews'));
+    for (const file of ['restaurant-coupon-documents.json', 'nordsee-coupon-cards-20261113.json'])
+      copyFileSync(join(root, 'reviews', file), join(temp, 'reviews', file));
+    writeFileSync(join(temp, 'reviews/automatic-maintenance-policy.json'), JSON.stringify({ version: 1, enabled: true, maxAiCandidatesPerRun: 4 }));
+    Object.assign(process.env, { SENTRY_DISABLED: '1', SLACK_BOT_TOKEN: 'test-only', SLACK_CHANNEL_ID: 'C_TEST',
+      APPROVE_SLACK_CHANNEL_ID: 'C_TEST', APPROVAL_REQUIRE_MAP: '0', APPROVAL_SOURCE_COPY_REVIEW: '1',
+      APPROVAL_COPY_CACHE_ONLY: '1', OPENAI_API_KEY: 'test-only-no-provider-calls',
+      APPROVAL_MAP_GEOCODE_REQUESTS: '0', APPROVAL_MAP_SOURCE_REQUESTS: '0',
+      APPROVE_FULL_SCAN_MAX_THREADS: '1', APPROVE_FULL_SCAN_MAX_DEALS: '1' });
+    for (const key of ['COMMUNITY_QUEUE_PATH', 'APPROVE_SLACK_REACTION', 'APPROVE_SLACK_REACTION_USER']) delete process.env[key];
+    const ts = Math.floor(Date.now() / 1000);
+    const source = { ...approvedFixture(), sourcePublishedAt: new Date().toISOString(),
+      slackTs: `${ts}.001`, slackThreadTs: `${ts - 3}.001`,
+      approvalBlock: { checkedAt: new Date().toISOString(), reasons: ['Angebotsbeleg ausstehend'] } };
+    const reactions = [{ name: 'white_check_mark', users: ['U_REVIEWER'] }];
+    const message = { ts: source.slackTs, thread_ts: source.slackThreadTs, user: 'BOT', text: 'fixture', reactions };
+    let sourceRequests = 0, modelCalls = 0;
+    globalThis.fetch = async (target, init = {}) => {
+      const parsed = new URL(target);
+      if (target === url) { sourceRequests++; assert.equal(init.redirect, 'manual');
+        return new Response(html, { headers: { 'content-type': 'text/html' } }); }
+      if (parsed.hostname !== 'slack.com') { modelCalls++; throw Error('Unexpected external request'); }
+      if (parsed.pathname.endsWith('/auth.test')) return Response.json({ ok: true, user_id: 'BOT' });
+      if (parsed.pathname.endsWith('/conversations.history')) return Response.json({ ok: true, messages: [] });
+      if (parsed.pathname.endsWith('/conversations.replies')) return Response.json({ ok: true, messages: [message] });
+      if (parsed.pathname.endsWith('/reactions.get')) return Response.json({ ok: true, message });
+      if (/\/chat\.(?:postMessage|update)$/.test(parsed.pathname)) return Response.json({ ok: true, ts: 'mock-notice' });
+      throw Error('Unexpected mocked Slack operation');
+    };
+    console.log = (...args) => logs.push(args.map(String).join(' '));
+    for (const mode of ['targeted', 'ordinary']) {
+      if (mode === 'targeted') process.env.APPROVE_SLACK_MESSAGE_TS = source.slackTs;
+      else delete process.env.APPROVE_SLACK_MESSAGE_TS;
+      const { main } = await import(`${pathToFileURL(join(temp, 'scraper/slack-approve.js'))}?iamstudent-${mode}`);
+      for (const hasCalendarEnd of [false, true]) {
+        sourceRequests = 0; modelCalls = 0; logs.length = 0;
+        const candidate = hasCalendarEnd ? { ...source, expires: '2027-02-28', validUntil: '2027-02-28',
+          expiryKind: 'end', expiresSource: 'deal.structured', dateConfidence: 'medium' } : source;
+        write('deals.json', { deals: [], totalDeals: 0 });
+        write('deals-pending-all.json', { deals: [candidate] });
+        write('deal-review-feedback.json', { events: [] });
+        await main();
+        assert.equal(sourceRequests, 1, `${mode}: one reused source GET`);
+        assert.equal(modelCalls, 0, `${mode}: no model or other provider call`);
+        assert.ok(logs.some(line => line.startsWith('IAMSTUDENT source copy prepared:')), `${mode}: fixed copy really prepared`);
+        if (hasCalendarEnd) {
+          assert.equal(read('deals.json').deals.length, 0);
+          const [pending] = read('deals-pending-all.json').deals;
+          assert.ok(pending.approvalBlock.reasons.some(reason => reason.startsWith('Aktionszeitraum widersprüchlich')));
+          assert.equal(pending.expires, candidate.expires);
+          assert.equal(pending.validUntil, candidate.validUntil);
+          assert.equal(pending.description, '', 'held input never becomes its own proof');
+          assert.equal(pending.pipelineLifecycle.manualDecision, 'approved');
+        } else {
+          const [live] = read('deals.json').deals;
+          assert.ok(live, `${mode}: complete fixture publishes inside temporary directory`);
+          assert.equal(live.description, prepareIamstudentApprovalCopy(source, extract()).description);
+          assert.equal(live.reviewedSourceCopy.method, 'reviewed-source-template-v1');
+          assert.equal(live.pipelineLifecycle.stage, 'published');
+          assert.ok(live.pipelineLifecycle.publishedAt);
+          assert.ok(live.approvedAt);
+          assert.equal(read('deals-pending-all.json').deals.length, 0);
+        }
+      }
+    }
+  } finally {
+    globalThis.fetch = previousFetch; console.log = previousLog;
+    for (const key of Object.keys(process.env)) if (!(key in previousEnv)) delete process.env[key];
+    Object.assign(process.env, previousEnv);
+    rmSync(temp, { recursive: true, force: true });
   }
 });

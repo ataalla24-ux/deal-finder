@@ -70,6 +70,7 @@ jobs:
           SENTRY_DISABLED=1 node --test scripts/test-approval-source-copy.mjs
           SENTRY_DISABLED=1 node --test scripts/test-approval-current-source.mjs scripts/test-approval-iamstudent-source.mjs
           SENTRY_DISABLED=1 node --test scripts/test-approval-restored-source-retry.mjs
+          SENTRY_DISABLED=1 node --test scripts/test-kfc-approval-title.mjs
 
       - name: ✅ Read Slack ✅ Reactions & Approve
         id: approval

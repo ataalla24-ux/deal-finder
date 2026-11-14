@@ -31,8 +31,11 @@ function isReviewedEvidence(deal, evidence) {
 // an AI review memo and is not permission to publish, change dates or add pins.
 // The caller supplies evidence only from this attempt's successful health GET.
 export function prepareIamstudentApprovalCopy(deal, evidence, { existingIds = new Set() } = {}) {
+  // The ordinary reaction runner sets approvedAt before validation. Only live
+  // membership or an actual publication lifecycle marks an already live deal.
   if (!isReviewedEvidence(deal, evidence) || deal.pipelineLifecycle?.manualDecision !== 'approved'
-    || existingIds.has(deal.id) || deal.approvedAt || deal.editedInSlack || deal.slackEditedAt
+    || existingIds.has(deal.id) || deal.pipelineLifecycle.publishedAt || deal.pipelineLifecycle.stage === 'published'
+    || deal.editedInSlack || deal.slackEditedAt
     || deal.slackFormEditTs || deal.liveEditedAt || deal.isBusiness || deal.campaignId || deal.forceKeep
     || [...(deal.slackEditedFields || []), ...(deal.liveEditedFields || [])].length
     || !['', TITLE, QUEUE_TITLE, REVIEWED_TITLE].includes(clean(deal.title))) return deal;

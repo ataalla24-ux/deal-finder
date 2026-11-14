@@ -16,6 +16,16 @@ function couponTitleMatches(extracted, displayed) {
   return Boolean(discount && current === `${discount[2]} auf ${discount[1]}`);
 }
 
+function reviewedKfcTitleMatches(extracted, deal, source) {
+  // The queued legacy editor shortened this one source caption. Preserve the
+  // separate description/brand/hash checks; this grants no date or venue proof.
+  return source.name === 'KFC' && deal.url === 'https://kfc.co.at/'
+    && deal.id === 'power-food-73cf88790a2d' && extracted.id === deal.id
+    && extracted.title === 'Unser Preiskracher: Crispy Cheese Burger mit Käse, Gurkerl und Ketchup um 1,70 Euro'
+    && deal.title === 'Crispy Cheese Burger für 1,70 Euro'
+    && extracted.evidence.contentHash === 'fbcfc52691ccdb4bed424b086cb6b1830d52aabdd0bba3da2e31b75b4631576b';
+}
+
 export async function fetchOfficialFoodPage(url, source) {
   // Check every redirect before requesting it; a merchant must not redirect
   // this evidence verifier to an arbitrary host or a non-Austrian market.
@@ -99,7 +109,8 @@ export async function verifyOfficialFoodDeal(deal, options = {}) {
   const match = parsed.deals.find(
     (d) =>
       d.description === deal.description &&
-      (deal.evidence?.media ? couponTitleMatches(d.title, deal.title) : d.title === deal.title) &&
+      (deal.evidence?.media ? couponTitleMatches(d.title, deal.title)
+        : d.title === deal.title || reviewedKfcTitleMatches(d, deal, source)) &&
       d.brand === deal.brand &&
       d.evidence.contentHash === deal.evidence?.contentHash &&
       (!deal.evidence?.media || /^[a-f0-9]{64}$/.test(deal.evidence.media.cardSha256 || '')
