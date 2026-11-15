@@ -1,14 +1,14 @@
 {
-  "lastUpdated": "2026-11-15T12:43:07.652Z",
+  "lastUpdated": "2026-11-15T21:47:58.240Z",
   "runProvenance": {
     "repository": "ataalla24-ux/deal-finder",
-    "runId": "43715208776",
-    "headSha": "efc84b3005dadf56417afb21a5e3f964d95d3fe2",
-    "checkoutSha": "efc84b3005dadf56417afb21a5e3f964d95d3fe2",
+    "runId": "43765538900",
+    "headSha": "852c22e3528ba203b19361f0acf98f5cae3d63f5",
+    "checkoutSha": "852c22e3528ba203b19361f0acf98f5cae3d63f5",
     "triggeringRun": null,
     "event": "schedule",
     "runAttempt": "1",
-    "url": "https://github.com/ataalla24-ux/deal-finder/actions/runs/43715208776"
+    "url": "https://github.com/ataalla24-ux/deal-finder/actions/runs/43765538900"
   },
   "status": "discovery-degraded",
   "outputPreserved": true,
@@ -122,23 +122,53 @@
   "discovered": 0,
   "apiCandidates": 0,
   "apiDiscovery": {
-    "errors": [],
-    "attemptedRequests": 0,
+    "errors": [
+      {
+        "keyword": "wien gratis essen",
+        "offset": 0,
+        "status": 0,
+        "error": "Empty or non-JSON TikTok response",
+        "code": "transport-unavailable",
+        "transportReason": "request-policy-blocked"
+      }
+    ],
+    "attemptedRequests": 1,
     "emptyResponses": 0,
     "rawItems": 0,
     "normalizedItems": 0,
     "ignoredItems": 0,
-    "stoppedReason": "api-cooldown",
-    "nextRetryAt": "2026-11-15T21:28:08.439Z",
-    "nextKeywordIndex": 4
+    "stoppedReason": "transport-unavailable",
+    "nextRetryAt": "2026-11-16T21:47:44.459Z",
+    "nextKeywordIndex": 5,
+    "transport": "public-browser-search",
+    "navigations": 1,
+    "searchRequests": 0,
+    "blockedExtraRequests": 2,
+    "blockedRequestReasons": {
+      "unexpected-endpoint": 2
+    },
+    "observedSearchEndpoints": {
+      "other-search": 2
+    },
+    "observedSearchPaths": {
+      "[redacted]": 1,
+      "/api/search/user/preview/": 1
+    }
   },
   "searchDiscovery": {
-    "errors": [],
-    "attemptedQueries": 0,
-    "stoppedReason": "search-cooldown",
-    "nextRetryAt": "2026-11-15T21:28:20.546Z",
-    "lastAttemptAt": "2026-11-14T21:28:20.546Z",
-    "nextQueryIndex": 11,
+    "errors": [
+      {
+        "query": "site:tiktok.com wien gratis event",
+        "error": "Search challenge; no bypass attempted",
+        "httpStatus": 403,
+        "retryAt": ""
+      }
+    ],
+    "attemptedQueries": 2,
+    "stoppedReason": "search-unavailable",
+    "nextRetryAt": "2026-11-16T21:47:56.487Z",
+    "lastAttemptAt": "2026-11-15T21:47:56.487Z",
+    "nextQueryIndex": 13,
     "deferredPostVisits": 0
   },
   "accepted": 0,
@@ -221,12 +251,28 @@
     "aiAcceptedUnusable": 0
   },
   "timings": {
-    "apiDiscoveryMs": 29,
-    "searchDiscoveryMs": 0,
-    "mediaRescueMs": 118,
-    "totalScannerMs": 339
+    "apiDiscoveryMs": 12057,
+    "searchDiscoveryMs": 1561,
+    "mediaRescueMs": 169,
+    "totalScannerMs": 15826
   },
-  "discoveryErrors": [],
-  "apiErrors": [],
+  "discoveryErrors": [
+    {
+      "query": "site:tiktok.com wien gratis event",
+      "error": "Search challenge; no bypass attempted",
+      "httpStatus": 403,
+      "retryAt": ""
+    }
+  ],
+  "apiErrors": [
+    {
+      "keyword": "wien gratis essen",
+      "offset": 0,
+      "status": 0,
+      "error": "Empty or non-JSON TikTok response",
+      "code": "transport-unavailable",
+      "transportReason": "request-policy-blocked"
+    }
+  ],
   "rejected": []
 }
