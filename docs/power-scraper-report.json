@@ -1,17 +1,17 @@
 {
   "runProvenance": {
     "repository": "ataalla24-ux/deal-finder",
-    "runId": "43716024163",
-    "headSha": "663056ace635dcbf4a87df3c520bad7823751964",
-    "checkoutSha": "663056ace635dcbf4a87df3c520bad7823751964",
+    "runId": "43752314408",
+    "headSha": "a74b5f7433054046bc1894e74198a0e3c5fcc202",
+    "checkoutSha": "a74b5f7433054046bc1894e74198a0e3c5fcc202",
     "triggeringRun": null,
     "event": "schedule",
     "runAttempt": "1",
-    "url": "https://github.com/ataalla24-ux/deal-finder/actions/runs/43716024163"
+    "url": "https://github.com/ataalla24-ux/deal-finder/actions/runs/43752314408"
   },
-  "startedAt": "2026-11-15T12:53:25.849Z",
-  "finishedAt": "2026-11-15T12:53:49.629Z",
-  "durationMs": 23780,
+  "startedAt": "2026-11-15T19:26:18.193Z",
+  "finishedAt": "2026-11-15T19:26:48.806Z",
+  "durationMs": 30613,
   "config": {
     "includeBaseDeals": false,
     "sourceCount": 59,
@@ -22,13 +22,13 @@
   },
   "summary": {
     "healthySources": 46,
-    "failedSources": 1,
-    "deferredSources": 12,
-    "rawDeals": 42,
-    "acceptedDeals": 42,
+    "failedSources": 0,
+    "deferredSources": 13,
+    "rawDeals": 48,
+    "acceptedDeals": 48,
     "officialFoodSources": 25,
-    "productiveFoodSources": 11,
-    "degradedSources": 1,
+    "productiveFoodSources": 13,
+    "degradedSources": 0,
     "note": "Collector candidates only; publication still requires central validation and manual approval."
   },
   "sources": [
@@ -55,30 +55,17 @@
       "deals": 0,
       "bytes": 20921,
       "browserFallback": false,
-      "durationMs": 772,
+      "durationMs": 889,
       "cooldown": null
     },
     {
       "source": "Mömax Restaurant",
       "url": "https://www.moemax.at/c/unserrestaurant",
-      "status": "error",
-      "operationalStatus": "degraded",
+      "status": "deferred",
+      "operationalStatus": "cooldown",
       "deals": 0,
-      "pages": [
-        {
-          "url": "https://www.moemax.at/c/unserrestaurant",
-          "status": "error",
-          "candidates": 0,
-          "error": "HTTP 403",
-          "httpStatus": 403,
-          "retryAt": ""
-        }
-      ],
-      "rejected": [],
-      "rejectedCount": 0,
+      "durationMs": 0,
       "sourceKind": "official-food",
-      "durationMs": 84,
-      "error": "HTTP 403",
       "cooldown": {
         "consecutiveFailures": 2,
         "lastAttemptAt": "2026-11-15T12:53:25.865Z",
@@ -116,33 +103,28 @@
       ],
       "rejectedCount": 2,
       "sourceKind": "official-food",
-      "durationMs": 3210,
+      "durationMs": 865,
       "cooldown": null
     },
     {
       "source": "Mussty",
       "url": "https://www.mussty.at/spezialangebot/",
       "status": "ok",
-      "operationalStatus": "no-offers",
-      "deals": 0,
+      "operationalStatus": "candidates-found",
+      "deals": 4,
       "pages": [
         {
           "url": "https://www.mussty.at/spezialangebot/",
           "finalUrl": "https://www.mussty.at/spezialangebot/",
           "status": "ok",
-          "candidates": 0,
-          "bytes": 12052
+          "candidates": 4,
+          "bytes": 106919
         }
       ],
-      "rejected": [
-        {
-          "reason": "missing-offer-context",
-          "url": "https://www.mussty.at/spezialangebot/"
-        }
-      ],
-      "rejectedCount": 1,
+      "rejected": [],
+      "rejectedCount": 0,
       "sourceKind": "official-food",
-      "durationMs": 1245,
+      "durationMs": 5901,
       "cooldown": null
     },
     {
@@ -163,7 +145,7 @@
       "rejected": [],
       "rejectedCount": 0,
       "sourceKind": "official-food",
-      "durationMs": 475,
+      "durationMs": 1589,
       "cooldown": null
     },
     {
@@ -190,7 +172,7 @@
       ],
       "rejectedCount": 1,
       "sourceKind": "official-food",
-      "durationMs": 1551,
+      "durationMs": 1806,
       "cooldown": null
     },
     {
@@ -211,7 +193,7 @@
       "rejected": [],
       "rejectedCount": 0,
       "sourceKind": "official-food",
-      "durationMs": 1490,
+      "durationMs": 1832,
       "cooldown": null
     },
     {
@@ -226,7 +208,7 @@
           "finalUrl": "https://cafehummel.at/",
           "status": "ok",
           "candidates": 1,
-          "bytes": 216982
+          "bytes": 216960
         }
       ],
       "rejected": [
@@ -278,7 +260,7 @@
       ],
       "rejectedCount": 9,
       "sourceKind": "official-food",
-      "durationMs": 1862,
+      "durationMs": 2889,
       "cooldown": null
     },
     {
@@ -315,7 +297,7 @@
       ],
       "rejectedCount": 3,
       "sourceKind": "official-food",
-      "durationMs": 683,
+      "durationMs": 1674,
       "cooldown": null
     },
     {
@@ -330,35 +312,35 @@
           "finalUrl": "https://www.ikea.com/at/de/food/",
           "status": "ok",
           "candidates": 0,
-          "bytes": 1006274
+          "bytes": 1006685
         },
         {
           "url": "https://www.ikea.com/at/de/food/salesareas/restaurant/",
           "finalUrl": "https://www.ikea.com/at/de/food/salesareas/restaurant/",
           "status": "ok",
           "candidates": 0,
-          "bytes": 1310012
+          "bytes": 1310423
         },
         {
           "url": "https://www.ikea.com/at/de/food/salesareas/swedish-food-market/",
           "finalUrl": "https://www.ikea.com/at/de/food/salesareas/swedish-food-market/",
           "status": "ok",
           "candidates": 0,
-          "bytes": 1478945
+          "bytes": 1479356
         },
         {
           "url": "https://www.ikea.com/at/de/food/salesareas/bistro/",
           "finalUrl": "https://www.ikea.com/at/de/food/salesareas/bistro/",
           "status": "ok",
           "candidates": 0,
-          "bytes": 1166112
+          "bytes": 1166523
         },
         {
           "url": "https://www.ikea.com/at/de/food/salesareas/swedish-cafe/",
           "finalUrl": "https://www.ikea.com/at/de/food/salesareas/swedish-cafe/",
           "status": "ok",
           "candidates": 0,
-          "bytes": 1149405
+          "bytes": 1149816
         }
       ],
       "rejected": [
@@ -380,7 +362,7 @@
       ],
       "rejectedCount": 3,
       "sourceKind": "official-food",
-      "durationMs": 4129,
+      "durationMs": 3947,
       "cooldown": null
     },
     {
@@ -395,7 +377,7 @@
           "finalUrl": "https://stroeck.at/",
           "status": "ok",
           "candidates": 6,
-          "bytes": 577913
+          "bytes": 577895
         }
       ],
       "rejected": [
@@ -407,7 +389,7 @@
       ],
       "rejectedCount": 1,
       "sourceKind": "official-food",
-      "durationMs": 2078,
+      "durationMs": 1712,
       "cooldown": null
     },
     {
@@ -448,7 +430,7 @@
       ],
       "rejectedCount": 1,
       "sourceKind": "official-food",
-      "durationMs": 3959,
+      "durationMs": 3880,
       "cooldown": null
     },
     {
@@ -475,7 +457,7 @@
       ],
       "rejectedCount": 1,
       "sourceKind": "official-food",
-      "durationMs": 1001,
+      "durationMs": 932,
       "cooldown": null
     },
     {
@@ -502,7 +484,7 @@
       ],
       "rejectedCount": 1,
       "sourceKind": "official-food",
-      "durationMs": 1380,
+      "durationMs": 1168,
       "cooldown": null
     },
     {
@@ -517,7 +499,7 @@
           "finalUrl": "https://www.bswien.at/aktionen",
           "status": "ok",
           "candidates": 4,
-          "bytes": 812934
+          "bytes": 812763
         }
       ],
       "rejected": [
@@ -539,7 +521,7 @@
       ],
       "rejectedCount": 3,
       "sourceKind": "official-food",
-      "durationMs": 445,
+      "durationMs": 469,
       "cooldown": null
     },
     {
@@ -562,7 +544,7 @@
               "status": "ok",
               "bytes": 5347902,
               "cards": 11,
-              "sha256": "20e50fd1efc512eed052b8610466c4fc5546ab05a61f43ab7ac20ba157bfb69d"
+              "sha256": "aa88d2f276720d31cc7a0de9ebf7ce496bef35532581f83e9bb356da8a78a0b5"
             }
           ]
         }
@@ -570,7 +552,7 @@
       "rejected": [],
       "rejectedCount": 0,
       "sourceKind": "official-food",
-      "durationMs": 18414,
+      "durationMs": 23711,
       "cooldown": null
     },
     {
@@ -585,7 +567,7 @@
           "finalUrl": "https://www.mcdonalds.at/",
           "status": "ok",
           "candidates": 3,
-          "bytes": 1573041
+          "bytes": 1573048
         }
       ],
       "rejected": [
@@ -647,7 +629,7 @@
       ],
       "rejectedCount": 11,
       "sourceKind": "official-food",
-      "durationMs": 2313,
+      "durationMs": 2122,
       "cooldown": null
     },
     {
@@ -668,7 +650,7 @@
       "rejected": [],
       "rejectedCount": 0,
       "sourceKind": "official-food",
-      "durationMs": 3677,
+      "durationMs": 3625,
       "cooldown": null
     },
     {
@@ -689,7 +671,7 @@
       "rejected": [],
       "rejectedCount": 0,
       "sourceKind": "official-food",
-      "durationMs": 1290,
+      "durationMs": 1987,
       "cooldown": null
     },
     {
@@ -704,14 +686,14 @@
           "finalUrl": "https://back-werk.at/de/aktuell",
           "status": "ok",
           "candidates": 0,
-          "bytes": 72279
+          "bytes": 71863
         },
         {
           "url": "https://back-werk.at/de/aktuell/es-ist-snackbox-zeit-id2618",
           "finalUrl": "https://back-werk.at/de/aktuell/es-ist-snackbox-zeit-id2618",
           "status": "ok",
           "candidates": 0,
-          "bytes": 53615
+          "bytes": 52340
         }
       ],
       "rejected": [
@@ -723,7 +705,7 @@
       ],
       "rejectedCount": 1,
       "sourceKind": "official-food",
-      "durationMs": 1320,
+      "durationMs": 1838,
       "cooldown": null
     },
     {
@@ -750,7 +732,7 @@
       ],
       "rejectedCount": 1,
       "sourceKind": "official-food",
-      "durationMs": 182,
+      "durationMs": 430,
       "cooldown": null
     },
     {
@@ -777,7 +759,7 @@
       ],
       "rejectedCount": 1,
       "sourceKind": "official-food",
-      "durationMs": 1054,
+      "durationMs": 1024,
       "cooldown": null
     },
     {
@@ -792,7 +774,7 @@
           "finalUrl": "https://buivien-restaurant.at/",
           "status": "ok",
           "candidates": 0,
-          "bytes": 144691
+          "bytes": 144693
         }
       ],
       "rejected": [
@@ -804,7 +786,7 @@
       ],
       "rejectedCount": 1,
       "sourceKind": "official-food",
-      "durationMs": 1104,
+      "durationMs": 1043,
       "cooldown": null
     },
     {
@@ -819,13 +801,51 @@
           "finalUrl": "https://evaundadam.bar/",
           "status": "ok",
           "candidates": 0,
-          "bytes": 12115
+          "bytes": 232899
+        },
+        {
+          "url": "https://evaundadam.bar/happy-hour-cocktailbar-wien/",
+          "finalUrl": "https://evaundadam.bar/happy-hour-cocktailbar-wien/",
+          "status": "ok",
+          "candidates": 0,
+          "bytes": 169099
         }
       ],
-      "rejected": [],
-      "rejectedCount": 0,
+      "rejected": [
+        {
+          "reason": "alcohol-offer",
+          "title": "Cocktail Happy Hour",
+          "text": "Jeden Tag von 16 bis 20 Uhr Cocktail Happy Hour Happy Hour – die beste Zeit des Tages Drei Stunden, in denen der Alltag Pause macht. Täglich von 16:00 bis 20:00 wird jeder Drink zum Statement: alle Cocktails & Mocktails "
+        },
+        {
+          "reason": "alcohol-offer",
+          "title": "Cocktail Happy Hour",
+          "text": "Jeden Tag von 16 bis 20 Uhr Cocktail Happy Hour Happy Hour – die beste Zeit des Tages Drei Stunden, in denen der Alltag Pause macht. Täglich von 16:00 bis 20:00 wird jeder Drink zum Statement: alle Cocktails & Mocktails "
+        },
+        {
+          "reason": "alcohol-offer",
+          "title": "Happy Hour – die beste Zeit des Tages",
+          "text": "Happy Hour – die beste Zeit des Tages Drei Stunden, in denen der Alltag Pause macht. Täglich von 16:00 bis 20:00 wird jeder Drink zum Statement: alle Cocktails & Mocktails um € 9,50. Egal ob klassisch, kreativ oder alkoh"
+        },
+        {
+          "reason": "alcohol-offer",
+          "title": "Cocktial Happy Hour",
+          "text": "Jeden Tag von 16 bis 20 Uhr Cocktial Happy Hour Happy Hour – die beste Zeit des Tages Drei Stunden, in denen der Alltag Pause macht. Täglich von 16:00 bis 20:00 wird jeder Drink zum Statement: alle Cocktails & Mocktails "
+        },
+        {
+          "reason": "alcohol-offer",
+          "title": "Cocktial Happy Hour",
+          "text": "Jeden Tag von 16 bis 20 Uhr Cocktial Happy Hour Happy Hour – die beste Zeit des Tages Drei Stunden, in denen der Alltag Pause macht. Täglich von 16:00 bis 20:00 wird jeder Drink zum Statement: alle Cocktails & Mocktails "
+        },
+        {
+          "reason": "alcohol-offer",
+          "title": "Happy Hour – die beste Zeit des Tages",
+          "text": "Happy Hour – die beste Zeit des Tages Drei Stunden, in denen der Alltag Pause macht. Täglich von 16:00 bis 20:00 wird jeder Drink zum Statement: alle Cocktails & Mocktails um € 9,50. Egal ob klassisch, kreativ oder alkoh"
+        }
+      ],
+      "rejectedCount": 6,
       "sourceKind": "official-food",
-      "durationMs": 701,
+      "durationMs": 7577,
       "cooldown": null
     },
     {
@@ -840,34 +860,94 @@
           "finalUrl": "https://cuadro.at/",
           "status": "ok",
           "candidates": 0,
-          "bytes": 7175
+          "bytes": 21951
         }
       ],
       "rejected": [],
       "rejectedCount": 0,
       "sourceKind": "official-food",
-      "durationMs": 784,
+      "durationMs": 1044,
       "cooldown": null
     },
     {
       "source": "MABEL'S No90",
       "url": "https://mabels.at/",
       "status": "ok",
-      "operationalStatus": "no-offers",
-      "deals": 0,
+      "operationalStatus": "candidates-found",
+      "deals": 2,
       "pages": [
         {
           "url": "https://mabels.at/",
           "finalUrl": "https://mabels.at/",
           "status": "ok",
+          "candidates": 2,
+          "bytes": 128741
+        },
+        {
+          "url": "https://mabels.at/cocktails.html",
+          "finalUrl": "https://mabels.at/cocktails.html",
+          "status": "ok",
           "candidates": 0,
-          "bytes": 11939
+          "bytes": 208293
+        },
+        {
+          "url": "https://mabels.at/cocktails-en.html",
+          "finalUrl": "https://mabels.at/cocktails-en.html",
+          "status": "ok",
+          "candidates": 0,
+          "bytes": 207863
         }
       ],
-      "rejected": [],
-      "rejectedCount": 0,
+      "rejected": [
+        {
+          "reason": "alcohol-offer",
+          "title": "Aus unserer BarTägliche Happy Hour von 18–20 Uhr: Cocktails 4 € und Mocktails 2 € billiger.",
+          "text": "Aus unserer Bar Tägliche Happy Hour von 18–20 Uhr: Cocktails 4 € und Mocktails 2 € billiger."
+        },
+        {
+          "reason": "alcohol-offer",
+          "title": "Tägliche Happy Hour von 18–20 Uhr: Cocktails 4 € und Mocktails 2 € billiger.",
+          "text": "Tägliche Happy Hour von 18–20 Uhr: Cocktails 4 € und Mocktails 2 € billiger."
+        },
+        {
+          "reason": "alcohol-offer",
+          "title": "Happy Hour · täglich 18–20 Uhr · Cocktails −4 €Mocktails −2 €",
+          "text": "Happy Hour · täglich 18–20 Uhr · Cocktails −4 €Mocktails −2 €"
+        },
+        {
+          "reason": "alcohol-offer",
+          "title": "MABEL'S Special",
+          "text": "House Cocktails MABEL'S Special Absolut Vodka · Bailey's · Banane · Cocos · Obers · Ananassaft · Orangensaft 12,90 € Happy Hour 8,90 €Täglich 18–20 Uhr"
+        },
+        {
+          "reason": "alcohol-offer",
+          "title": "Havana Club Especial 3Y · Heidelbeeren · Limette · Minzeblätter · Schweppes Wildberry",
+          "text": "Winter Specials 2026 Rum Blueberry Mosquito Havana Club Especial 3Y · Heidelbeeren · Limette · Minzeblätter · Schweppes Wildberry 11,90 € Happy Hour 7,90 €Täglich 18–20 Uhr"
+        },
+        {
+          "reason": "alcohol-offer",
+          "title": "Happy Hour",
+          "text": "Happy Hour Täglich 18–20 Uhr: Cocktails 4 € günstiger, Mocktails 2 € günstiger."
+        },
+        {
+          "reason": "alcohol-offer",
+          "title": "Happy Hour · daily 6–8 PM · cocktails −€4Mocktails −€2",
+          "text": "Happy Hour · daily 6–8 PM · cocktails −€4Mocktails −€2"
+        },
+        {
+          "reason": "alcohol-offer",
+          "title": "MABEL'S Special",
+          "text": "House Cocktails MABEL'S Special Absolut Vodka · Bailey's · Banana · Coconut · Cream · Pineapple juice · Orange juice 12.90 € Happy Hour 8.90 €Daily, 6–8 PM"
+        },
+        {
+          "reason": "alcohol-offer",
+          "title": "Happy Hour",
+          "text": "Happy Hour Daily, 6–8 PM: €4 off cocktails and €2 off mocktails."
+        }
+      ],
+      "rejectedCount": 9,
       "sourceKind": "official-food",
-      "durationMs": 1024,
+      "durationMs": 1468,
       "cooldown": null
     },
     {
@@ -878,7 +958,7 @@
       "deals": 0,
       "bytes": 95170,
       "browserFallback": false,
-      "durationMs": 1435,
+      "durationMs": 4526,
       "cooldown": null
     },
     {
@@ -887,9 +967,9 @@
       "finalUrl": "https://www.mqw.at/de/programm/events/",
       "status": "ok",
       "deals": 2,
-      "bytes": 176079,
+      "bytes": 175944,
       "browserFallback": false,
-      "durationMs": 4277,
+      "durationMs": 3483,
       "cooldown": null
     },
     {
@@ -900,7 +980,7 @@
       "deals": 0,
       "bytes": 643200,
       "browserFallback": false,
-      "durationMs": 1144,
+      "durationMs": 1484,
       "cooldown": null
     },
     {
@@ -911,7 +991,7 @@
       "deals": 1,
       "bytes": 1109908,
       "browserFallback": false,
-      "durationMs": 1692,
+      "durationMs": 1524,
       "cooldown": null
     },
     {
@@ -922,7 +1002,7 @@
       "deals": 0,
       "bytes": 35530,
       "browserFallback": false,
-      "durationMs": 4507,
+      "durationMs": 2692,
       "cooldown": null
     },
     {
@@ -933,7 +1013,7 @@
       "deals": 0,
       "bytes": 621851,
       "browserFallback": false,
-      "durationMs": 1373,
+      "durationMs": 1833,
       "cooldown": null
     },
     {
@@ -972,9 +1052,9 @@
       "finalUrl": "https://www.gutscheine.at/",
       "status": "ok",
       "deals": 0,
-      "bytes": 909562,
+      "bytes": 908496,
       "browserFallback": false,
-      "durationMs": 1296,
+      "durationMs": 1463,
       "cooldown": null
     },
     {
@@ -985,7 +1065,7 @@
       "deals": 0,
       "bytes": 6286,
       "browserFallback": false,
-      "durationMs": 793,
+      "durationMs": 576,
       "cooldown": null
     },
     {
@@ -1011,7 +1091,7 @@
       "deals": 0,
       "bytes": 11384,
       "browserFallback": false,
-      "durationMs": 319,
+      "durationMs": 1011,
       "cooldown": null
     },
     {
@@ -1037,7 +1117,7 @@
       "deals": 0,
       "bytes": 13740,
       "browserFallback": false,
-      "durationMs": 1046,
+      "durationMs": 1610,
       "cooldown": null
     },
     {
@@ -1048,7 +1128,7 @@
       "deals": 0,
       "bytes": 22020,
       "browserFallback": false,
-      "durationMs": 902,
+      "durationMs": 1182,
       "cooldown": null
     },
     {
@@ -1072,9 +1152,9 @@
       "finalUrl": "https://www.apple.com/at-edu/store",
       "status": "ok",
       "deals": 3,
-      "bytes": 586550,
+      "bytes": 586567,
       "browserFallback": false,
-      "durationMs": 358,
+      "durationMs": 692,
       "cooldown": null
     },
     {
@@ -1098,9 +1178,9 @@
       "finalUrl": "https://www.hervis.com/",
       "status": "ok",
       "deals": 1,
-      "bytes": 343431,
+      "bytes": 342260,
       "browserFallback": false,
-      "durationMs": 884,
+      "durationMs": 756,
       "cooldown": null
     },
     {
@@ -1111,7 +1191,7 @@
       "deals": 1,
       "bytes": 546104,
       "browserFallback": false,
-      "durationMs": 2679,
+      "durationMs": 3569,
       "cooldown": null
     },
     {
@@ -1122,7 +1202,7 @@
       "deals": 1,
       "bytes": 421294,
       "browserFallback": false,
-      "durationMs": 1037,
+      "durationMs": 1389,
       "cooldown": null
     },
     {
@@ -1206,9 +1286,9 @@
       "finalUrl": "https://citybikewien.at/de",
       "status": "ok",
       "deals": 0,
-      "bytes": 107655,
+      "bytes": 107653,
       "browserFallback": false,
-      "durationMs": 1224,
+      "durationMs": 1516,
       "cooldown": null
     },
     {
@@ -1217,9 +1297,9 @@
       "finalUrl": "https://www.wienmobil.at/",
       "status": "ok",
       "deals": 0,
-      "bytes": 59230,
+      "bytes": 59233,
       "browserFallback": false,
-      "durationMs": 1043,
+      "durationMs": 1057,
       "cooldown": null
     },
     {
@@ -1230,7 +1310,7 @@
       "deals": 0,
       "bytes": 137988,
       "browserFallback": false,
-      "durationMs": 1680,
+      "durationMs": 1937,
       "cooldown": null
     },
     {
@@ -1239,9 +1319,9 @@
       "finalUrl": "https://www.erlebniswelt.at/",
       "status": "ok",
       "deals": 0,
-      "bytes": 410377,
+      "bytes": 410366,
       "browserFallback": false,
-      "durationMs": 985,
+      "durationMs": 908,
       "cooldown": null
     },
     {
@@ -1250,9 +1330,9 @@
       "finalUrl": "https://www.zoovienna.at/",
       "status": "ok",
       "deals": 0,
-      "bytes": 105957,
+      "bytes": 105777,
       "browserFallback": false,
-      "durationMs": 1493,
+      "durationMs": 1596,
       "cooldown": null
     },
     {
@@ -1263,7 +1343,7 @@
       "deals": 0,
       "bytes": 652430,
       "browserFallback": false,
-      "durationMs": 1815,
+      "durationMs": 1753,
       "cooldown": null
     }
   ]
