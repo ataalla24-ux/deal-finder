@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-11-15T12:51:47.784Z",
+  "generatedAt": "2026-11-15T12:57:32.941Z",
   "summary": {
     "maxAgeDays": 7,
     "total": 239,
@@ -27,6 +27,7 @@
       "älter als 7 Tage (2026-04-19)": 28,
       "älter als 7 Tage (2016-10-30)": 3,
       "älter als 7 Tage (2023-09-21)": 3,
+      "Quell-/Post-Datum liegt in der Zukunft (2026-11-16)": 3,
       "kostenlose Infrastruktur statt Deal": 3,
       "älter als 7 Tage (2024-03-18)": 3,
       "älter als 7 Tage (2026-11-03)": 1,
@@ -60,6 +61,7 @@
       "ungültige URL": 14,
       "sonstiges": 5,
       "abgelaufen": 8,
+      "Post-Datum in Zukunft": 3,
       "kein echtes Post-Datum": 67,
       "nicht Wien": 8,
       "Gewinnspiel": 1,
@@ -128,6 +130,7 @@
           "Gottesdienste außerhalb Wochenlauf": 35,
           "älter als 7 Tage": 34,
           "ungültige URL": 2,
+          "Post-Datum in Zukunft": 1,
           "sonstiges": 1
         }
       },
@@ -173,6 +176,7 @@
           "ungültige URL": 7,
           "Gottesdienste außerhalb Wochenlauf": 1,
           "sonstiges": 2,
+          "Post-Datum in Zukunft": 2,
           "nicht Wien": 1
         }
       },
@@ -874,7 +878,7 @@
       "warnings": [
         "kein Ablaufdatum gefunden"
       ],
-      "sourceDate": "2026-11-15T12:50:41.669Z",
+      "sourceDate": "2026-11-15T12:56:05.387Z",
       "sourceDateSource": "url.publicationDate",
       "sourceAgeDays": 0,
       "expiryDate": "",
@@ -1425,12 +1429,13 @@
       "url": "https://www.kreuzkirche.at",
       "reasons": [
         "kein konkretes Angebot erkennbar",
-        "Gottesdienste nur im Wochenlauf"
+        "Gottesdienste nur im Wochenlauf",
+        "Quell-/Post-Datum liegt in der Zukunft (2026-11-16)"
       ],
       "warnings": [],
-      "sourceDate": "2026-11-15T09:00:00.000Z",
+      "sourceDate": "2026-11-16T14:00:00.000Z",
       "sourceDateSource": "url.publicationDate",
-      "sourceAgeDays": 0,
+      "sourceAgeDays": null,
       "expiryDate": "",
       "expirySource": "deal.expires",
       "urlStatus": "HTTP 200"
@@ -2066,12 +2071,13 @@
       "source": "Kirchen Verzeichnis",
       "url": "https://www.kreuzkirche.at",
       "reasons": [
-        "kein konkretes Angebot erkennbar"
+        "kein konkretes Angebot erkennbar",
+        "Quell-/Post-Datum liegt in der Zukunft (2026-11-16)"
       ],
       "warnings": [],
-      "sourceDate": "2026-11-15T09:00:00.000Z",
+      "sourceDate": "2026-11-16T14:00:00.000Z",
       "sourceDateSource": "url.publicationDate",
-      "sourceAgeDays": 0,
+      "sourceAgeDays": null,
       "expiryDate": "",
       "expirySource": "deal.expires",
       "urlStatus": "HTTP 200"
@@ -2843,12 +2849,13 @@
       "source": "Kirchen Verzeichnis",
       "url": "https://www.kreuzkirche.at",
       "reasons": [
-        "kein konkretes Angebot erkennbar"
+        "kein konkretes Angebot erkennbar",
+        "Quell-/Post-Datum liegt in der Zukunft (2026-11-16)"
       ],
       "warnings": [],
-      "sourceDate": "2026-11-15T09:00:00.000Z",
+      "sourceDate": "2026-11-16T14:00:00.000Z",
       "sourceDateSource": "url.publicationDate",
-      "sourceAgeDays": 0,
+      "sourceAgeDays": null,
       "expiryDate": "",
       "expirySource": "deal.expires",
       "urlStatus": "HTTP 200"
@@ -3475,9 +3482,9 @@
         "Aktueller Angebotsblock auf offizieller Anbieterseite erneut bestätigt; Abrufdatum ist kein Veröffentlichungsdatum",
         "URL nicht eindeutig prüfbar (www.mcdonalds.at)"
       ],
-      "sourceDate": "2026-11-14T18:47:58.818Z",
+      "sourceDate": "2026-11-15T12:53:31.459Z",
       "sourceDateSource": "deal.discoveredAt",
-      "sourceAgeDays": 1,
+      "sourceAgeDays": 0,
       "expiryDate": "",
       "expirySource": "deal.evidence.offerTiming",
       "urlStatus": "unklar: www.mcdonalds.at"
@@ -4908,23 +4915,23 @@
   ],
   "runProvenance": {
     "repository": "ataalla24-ux/deal-finder",
-    "runId": "43715845011",
-    "headSha": "f47add5904ab0dc6409d8caaa23ae7e8b60ee954",
-    "checkoutSha": "f47add5904ab0dc6409d8caaa23ae7e8b60ee954",
+    "runId": "43716176748",
+    "headSha": "4e253fbe700a28551cba54a8516d66aed53b0367",
+    "checkoutSha": "788b960b56373291606aa673e662ad592d64760f",
     "triggeringRun": {
-      "runId": "43715712675",
-      "headSha": "2cf2abbc20ac3a2de04a3da3d08dd6968e9f350d",
+      "runId": "43716024163",
+      "headSha": "663056ace635dcbf4a87df3c520bad7823751964",
       "event": "schedule",
-      "name": "Firecrawl Daily Sync",
-      "startedAt": "2026-11-15T12:48:27.000Z",
-      "url": "https://github.com/ataalla24-ux/deal-finder/actions/runs/43715712675"
+      "name": "Power Scraper",
+      "startedAt": "2026-11-15T12:52:07.000Z",
+      "url": "https://github.com/ataalla24-ux/deal-finder/actions/runs/43716024163"
     },
     "event": "workflow_run",
     "runAttempt": "1",
-    "url": "https://github.com/ataalla24-ux/deal-finder/actions/runs/43715845011"
+    "url": "https://github.com/ataalla24-ux/deal-finder/actions/runs/43716176748"
   },
   "instagramDelivery": {
-    "checkedAt": "2026-11-15T12:51:47.802Z",
+    "checkedAt": "2026-11-15T12:57:32.955Z",
     "scope": "instagram-ai-agent/standard-slack-lane",
     "extractedCandidates": 1,
     "counts": {
@@ -4949,7 +4956,7 @@
     ]
   },
   "tiktokDelivery": {
-    "checkedAt": "2026-11-15T12:51:47.804Z",
+    "checkedAt": "2026-11-15T12:57:32.957Z",
     "scope": "tiktok-deals-scanner/standard-slack-lane",
     "extractedCandidates": 0,
     "counts": {},
