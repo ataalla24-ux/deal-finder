@@ -1,14 +1,14 @@
 {
-  "lastUpdated": "2026-11-14T21:28:23.763Z",
+  "lastUpdated": "2026-11-15T12:43:07.652Z",
   "runProvenance": {
     "repository": "ataalla24-ux/deal-finder",
-    "runId": "43642892832",
-    "headSha": "9d65ee0ea5ac8574341d7d76c50121e4391d504d",
-    "checkoutSha": "9d65ee0ea5ac8574341d7d76c50121e4391d504d",
+    "runId": "43715208776",
+    "headSha": "efc84b3005dadf56417afb21a5e3f964d95d3fe2",
+    "checkoutSha": "efc84b3005dadf56417afb21a5e3f964d95d3fe2",
     "triggeringRun": null,
     "event": "schedule",
     "runAttempt": "1",
-    "url": "https://github.com/ataalla24-ux/deal-finder/actions/runs/43642892832"
+    "url": "https://github.com/ataalla24-ux/deal-finder/actions/runs/43715208776"
   },
   "status": "discovery-degraded",
   "outputPreserved": true,
@@ -55,8 +55,8 @@
     "wien pizza 1+1",
     "wien gratis essen",
     "vienna free food",
-    "wien gratis 14 november 2026",
-    "wien deal 14 november 2026",
+    "wien gratis 15 november 2026",
+    "wien deal 15 november 2026",
     "wien gratis november 2026",
     "wien aktion november 2026",
     "wien rabatt november 2026",
@@ -122,50 +122,20 @@
   "discovered": 0,
   "apiCandidates": 0,
   "apiDiscovery": {
-    "errors": [
-      {
-        "keyword": "wien pizza 1+1",
-        "offset": 0,
-        "status": 0,
-        "error": "Empty or non-JSON TikTok response",
-        "code": "transport-unavailable",
-        "transportReason": "request-policy-blocked"
-      }
-    ],
-    "attemptedRequests": 1,
+    "errors": [],
+    "attemptedRequests": 0,
     "emptyResponses": 0,
     "rawItems": 0,
     "normalizedItems": 0,
     "ignoredItems": 0,
-    "stoppedReason": "transport-unavailable",
+    "stoppedReason": "api-cooldown",
     "nextRetryAt": "2026-11-15T21:28:08.439Z",
-    "nextKeywordIndex": 4,
-    "transport": "public-browser-search",
-    "navigations": 1,
-    "searchRequests": 0,
-    "blockedExtraRequests": 2,
-    "blockedRequestReasons": {
-      "unexpected-endpoint": 2
-    },
-    "observedSearchEndpoints": {
-      "other-search": 2
-    },
-    "observedSearchPaths": {
-      "[redacted]": 1,
-      "/api/search/user/preview/": 1
-    }
+    "nextKeywordIndex": 4
   },
   "searchDiscovery": {
-    "errors": [
-      {
-        "query": "site:tiktok.com wien gratis eintritt",
-        "error": "Search challenge; no bypass attempted",
-        "httpStatus": 403,
-        "retryAt": ""
-      }
-    ],
-    "attemptedQueries": 3,
-    "stoppedReason": "search-unavailable",
+    "errors": [],
+    "attemptedQueries": 0,
+    "stoppedReason": "search-cooldown",
     "nextRetryAt": "2026-11-15T21:28:20.546Z",
     "lastAttemptAt": "2026-11-14T21:28:20.546Z",
     "nextQueryIndex": 11,
@@ -207,7 +177,7 @@
     "aiAccepted": 0,
     "aiSkippedLowIntent": 0,
     "aiSkippedUnrecoverable": 0,
-    "analysisWallTimeMs": 1,
+    "analysisWallTimeMs": 0,
     "analysisTotalItemTimeMs": 0,
     "analysisMaxItemTimeMs": 0,
     "aiWallTimeMs": 0,
@@ -251,28 +221,12 @@
     "aiAcceptedUnusable": 0
   },
   "timings": {
-    "apiDiscoveryMs": 12143,
-    "searchDiscoveryMs": 3039,
-    "mediaRescueMs": 148,
-    "totalScannerMs": 15563
+    "apiDiscoveryMs": 29,
+    "searchDiscoveryMs": 0,
+    "mediaRescueMs": 118,
+    "totalScannerMs": 339
   },
-  "discoveryErrors": [
-    {
-      "query": "site:tiktok.com wien gratis eintritt",
-      "error": "Search challenge; no bypass attempted",
-      "httpStatus": 403,
-      "retryAt": ""
-    }
-  ],
-  "apiErrors": [
-    {
-      "keyword": "wien pizza 1+1",
-      "offset": 0,
-      "status": 0,
-      "error": "Empty or non-JSON TikTok response",
-      "code": "transport-unavailable",
-      "transportReason": "request-policy-blocked"
-    }
-  ],
+  "discoveryErrors": [],
+  "apiErrors": [],
   "rejected": []
 }
