@@ -1,20 +1,20 @@
 {
-  "generatedAt": "2026-11-14T22:42:14.497Z",
+  "generatedAt": "2026-11-15T07:04:06.025Z",
   "status": "degraded",
   "message": "0 fresh, evidence-checked Graph hashtag deal(s) found; 0 recovered from media.",
   "hashtags": [
-    "wienfood",
-    "wienfoodie",
-    "wienisst",
     "viennafood",
     "viennarestaurants",
-    "wienkaffee",
-    "wienergastro",
+    "wienisst",
+    "wienfoodie",
     "essenwien",
-    "viennaeats"
+    "wienfood",
+    "wienkaffee",
+    "viennaeats",
+    "wienergastro"
   ],
-  "fetchedPosts": 49,
-  "uniquePosts": 45,
+  "fetchedPosts": 51,
+  "uniquePosts": 48,
   "totalDeals": 0,
   "rescueEligible": 0,
   "rescuedDeals": 0,
@@ -38,19 +38,19 @@
   "requestBudget": {
     "requests": 30,
     "maxRequests": 30,
-    "highestUsagePercent": 77,
+    "highestUsagePercent": 22,
     "stopped": true,
     "reason": "request-budget"
   },
   "budgetDeferred": true,
   "sharedQuota": {
-    "limitPerHour": 190,
+    "limitPerHour": 296,
     "usageThreshold": 95,
     "requests": 30,
     "reserved": 30,
     "stopped": false,
     "reason": "",
-    "highestUsagePercent": 77,
+    "highestUsagePercent": 22,
     "waitedMs": 0,
     "pacingMs": 0,
     "retryAt": "",
@@ -60,17 +60,49 @@
   },
   "sources": [
     {
-      "hashtag": "wienfood",
+      "hashtag": "viennafood",
       "status": "ok",
       "coverage": {
-        "pages": 2,
-        "uniquePosts": 9,
-        "newPosts": 2,
-        "stopReason": "exhausted",
-        "incomplete": false,
+        "pages": 3,
+        "uniquePosts": 25,
+        "newPosts": 1,
+        "stopReason": "page-limit",
+        "incomplete": true,
         "resumed": true
       },
-      "fetched": 9,
+      "fetched": 25,
+      "accepted": 0,
+      "mediaFieldMode": "full-media-with-owner",
+      "mediaLimit": 25
+    },
+    {
+      "hashtag": "viennarestaurants",
+      "status": "ok",
+      "coverage": {
+        "pages": 3,
+        "uniquePosts": 7,
+        "newPosts": 1,
+        "stopReason": "exhausted",
+        "incomplete": false,
+        "resumed": false
+      },
+      "fetched": 7,
+      "accepted": 0,
+      "mediaFieldMode": "full-media-with-owner",
+      "mediaLimit": 25
+    },
+    {
+      "hashtag": "wienisst",
+      "status": "ok",
+      "coverage": {
+        "pages": 3,
+        "uniquePosts": 10,
+        "newPosts": 1,
+        "stopReason": "page-limit",
+        "incomplete": true,
+        "resumed": false
+      },
+      "fetched": 10,
       "accepted": 0,
       "mediaFieldMode": "full-media-with-owner",
       "mediaLimit": 25
@@ -92,72 +124,162 @@
       "mediaLimit": 25
     },
     {
-      "hashtag": "wienisst",
+      "hashtag": "essenwien",
       "status": "ok",
       "coverage": {
-        "pages": 3,
-        "uniquePosts": 9,
+        "pages": 1,
+        "uniquePosts": 0,
         "newPosts": 0,
-        "stopReason": "exhausted",
-        "incomplete": false,
-        "resumed": true
-      },
-      "fetched": 9,
-      "accepted": 0,
-      "mediaFieldMode": "full-media-with-owner",
-      "mediaLimit": 25
-    },
-    {
-      "hashtag": "viennafood",
-      "status": "ok",
-      "coverage": {
-        "pages": 3,
-        "uniquePosts": 25,
-        "newPosts": 11,
-        "stopReason": "page-limit",
-        "incomplete": true,
-        "resumed": true
-      },
-      "fetched": 25,
-      "accepted": 0,
-      "mediaFieldMode": "full-media-with-owner",
-      "mediaLimit": 25
-    },
-    {
-      "hashtag": "viennarestaurants",
-      "status": "ok",
-      "coverage": {
-        "pages": 3,
-        "uniquePosts": 6,
-        "newPosts": 1,
         "stopReason": "exhausted",
         "incomplete": false,
         "resumed": false
       },
-      "fetched": 6,
+      "fetched": 0,
       "accepted": 0,
       "mediaFieldMode": "full-media-with-owner",
       "mediaLimit": 25
     },
     {
-      "hashtag": "wienkaffee",
-      "status": "deferred",
-      "fetched": 0,
+      "hashtag": "wienfood",
+      "status": "partial",
+      "coverage": {
+        "pages": 1,
+        "uniquePosts": 9,
+        "newPosts": 0,
+        "stopReason": "request-budget",
+        "incomplete": true,
+        "resumed": false
+      },
+      "error": "Instagram scan paused: request-budget",
+      "fetched": 9,
       "accepted": 0,
-      "error": "Instagram scan paused: request-budget"
+      "mediaFieldMode": "basic",
+      "mediaLimit": 25
     }
   ],
   "rejectionReasons": {
-    "missing-text": 1,
-    "no-concrete-offer": 35,
-    "non-offer-content": 1,
-    "alcohol-offer": 3,
+    "alcohol-offer": 5,
+    "no-concrete-offer": 36,
     "general-recommendation": 2,
     "missing-vienna-evidence": 1,
     "regular-priced-activity": 1,
-    "weak-food-offer": 1
+    "weak-food-offer": 1,
+    "missing-text": 1,
+    "non-offer-content": 1
   },
   "candidateAudit": [
+    {
+      "id": "18134040290496654",
+      "status": "rejected",
+      "url": "https://www.instagram.com/reel/DfwMe3OtNoJ/",
+      "title": "So schön kann der Herbst beim Heurigen sein! 🍂🍷 Guter Wein, gemütliche Stunden und die richtige Gesellschaft – was will man mehr? Wir freuen uns auf euren Besuch! ❤️ #friseurmüll",
+      "text": "So schön kann der Herbst beim Heurigen sein! 🍂🍷 Guter Wein, gemütliche Stunden und die richtige Gesellschaft – was will man mehr? Wir freuen uns auf euren Besuch! ❤️ #friseurmüller #heuriger #food #wienisst #efeucontent",
+      "ownerUsername": "",
+      "ownerRole": "",
+      "scoutUsername": "",
+      "merchantUsername": "",
+      "pubDate": "2026-11-15T07:00:03+0000",
+      "rejectionReason": "alcohol-offer",
+      "qualityScore": 0,
+      "viennaVerified": false,
+      "mediaEvidence": {
+        "analyzedAt": "",
+        "ocrText": "",
+        "assetCount": 0,
+        "imageCount": 0,
+        "videoFrameCount": 0,
+        "downloadRetries": 0,
+        "errors": [],
+        "ai": null
+      },
+      "hashtags": [
+        "wienisst"
+      ]
+    },
+    {
+      "id": "18392075434238415",
+      "status": "rejected",
+      "url": "https://www.instagram.com/p/DfwFirRjZ_T/",
+      "title": "Food that we loved while in Vienna, Austria 1. Apple Strudel 2. Pancake with plum sauce 3. Chicken Schnitzel 4. Absolut Vodka Punch 5. Mulled wine #vienna #viennaaustria #viennanow",
+      "text": "Food that we loved while in Vienna, Austria 1. Apple Strudel 2. Pancake with plum sauce 3. Chicken Schnitzel 4. Absolut Vodka Punch 5. Mulled wine #vienna #viennaaustria #viennanow #viennafood #whattodoinvienna",
+      "ownerUsername": "",
+      "ownerRole": "",
+      "scoutUsername": "",
+      "merchantUsername": "",
+      "pubDate": "2026-11-15T05:59:53+0000",
+      "rejectionReason": "alcohol-offer",
+      "qualityScore": 0,
+      "viennaVerified": false,
+      "mediaEvidence": {
+        "analyzedAt": "",
+        "ocrText": "",
+        "assetCount": 0,
+        "imageCount": 0,
+        "videoFrameCount": 0,
+        "downloadRetries": 0,
+        "errors": [],
+        "ai": null
+      },
+      "hashtags": [
+        "viennafood"
+      ]
+    },
+    {
+      "id": "18450586198133506",
+      "status": "rejected",
+      "url": "https://www.instagram.com/p/DfvijYhiGF1/",
+      "title": "Wien, mit wem gehst du nach dem Ronacher noch auf ein Eis? 🍦🐼 PANDA EIS ist neu im 1. Bezirk! Bei uns gibt’s Eis, warme Crêpes, knusprigen Smash Tost und den Dubai Strawberry Cup",
+      "text": "Wien, mit wem gehst du nach dem Ronacher noch auf ein Eis? 🍦🐼 PANDA EIS ist neu im 1. Bezirk! Bei uns gibt’s Eis, warme Crêpes, knusprigen Smash Tost und den Dubai Strawberry Cup. 🍓 🎉 Unser Eröffnungsangebot gilt bis einschließlich Montag, 16. November! 📍 Seilerstätte 16, 1010 Wien 🕒 Mo–Fr 7:30–14:00 und 16:00–22:00 Uhr 🕒 Sa–So 12:00–22:00 Uhr Schick das der Person, die beim Nachtisch immer „nur einen Bissen“ sagt. 😄 #PandaEis #Wien1010 #WienFood #EisInWien #wieninnenstadt",
+      "ownerUsername": "",
+      "ownerRole": "",
+      "scoutUsername": "",
+      "merchantUsername": "",
+      "pubDate": "2026-11-15T00:54:09+0000",
+      "rejectionReason": "no-concrete-offer",
+      "qualityScore": 0,
+      "viennaVerified": false,
+      "mediaEvidence": {
+        "analyzedAt": "",
+        "ocrText": "",
+        "assetCount": 0,
+        "imageCount": 0,
+        "videoFrameCount": 0,
+        "downloadRetries": 0,
+        "errors": [],
+        "ai": null
+      },
+      "hashtags": [
+        "wienfood"
+      ]
+    },
+    {
+      "id": "18022483178736609",
+      "status": "rejected",
+      "url": "https://www.instagram.com/reel/DfvVH_ysE5K/",
+      "title": "Made with care. Served hot. #PizzaVienna #ItalianRestaurantVienna #ViennaRestaurants #WhereToEatVienna #WienEssen",
+      "text": "Made with care. Served hot. #PizzaVienna #ItalianRestaurantVienna #ViennaRestaurants #WhereToEatVienna #WienEssen",
+      "ownerUsername": "",
+      "ownerRole": "",
+      "scoutUsername": "",
+      "merchantUsername": "",
+      "pubDate": "2026-11-14T22:57:17+0000",
+      "rejectionReason": "no-concrete-offer",
+      "qualityScore": 0,
+      "viennaVerified": false,
+      "mediaEvidence": {
+        "analyzedAt": "",
+        "ocrText": "",
+        "assetCount": 0,
+        "imageCount": 0,
+        "videoFrameCount": 0,
+        "downloadRetries": 0,
+        "errors": [],
+        "ai": null
+      },
+      "hashtags": [
+        "viennarestaurants"
+      ]
+    },
     {
       "id": "18125370449473934",
       "status": "rejected",
@@ -1082,8 +1204,7 @@
         "ai": null
       },
       "hashtags": [
-        "wienisst",
-        "viennafood"
+        "wienisst"
       ]
     },
     {
@@ -1377,34 +1498,6 @@
       "scoutUsername": "",
       "merchantUsername": "",
       "pubDate": "2026-11-14T09:07:17+0000",
-      "rejectionReason": "no-concrete-offer",
-      "qualityScore": 0,
-      "viennaVerified": false,
-      "mediaEvidence": {
-        "analyzedAt": "",
-        "ocrText": "",
-        "assetCount": 0,
-        "imageCount": 0,
-        "videoFrameCount": 0,
-        "downloadRetries": 0,
-        "errors": [],
-        "ai": null
-      },
-      "hashtags": [
-        "wienfood"
-      ]
-    },
-    {
-      "id": "17913514926595375",
-      "status": "rejected",
-      "url": "https://www.instagram.com/reel/Dfs2iZmCM6P/",
-      "title": "🔥 WOCHENENDE. ALLE HABEN HUNGER. UND KEINER WILL KOCHEN? 😅 Dann hat einer die rettende Idee: BLACK SMOKE! 🐂🔥 🥩 Saftige Beef Ribs, butterzartes Pulled Pork und ausgewählte Prem",
-      "text": "🔥 WOCHENENDE. ALLE HABEN HUNGER. UND KEINER WILL KOCHEN? 😅 Dann hat einer die rettende Idee: BLACK SMOKE! 🐂🔥 🥩 Saftige Beef Ribs, butterzartes Pulled Pork und ausgewählte Premium Cuts 🥔 Köstliche Beilagen und BBQ-Saucen 📦 Unsere 4er BBQ-Box für einen richtig guten Abend mit Familie oder Freunden Stundenlang Low & Slow gesmokt. Ihr müsst nur noch genießen. 🚚 Bald mit Lieferung in Wien & Umgebung. BLACK SMOKE. SMOKED BBQ OHNE ARBEIT. NUR GENIESSEN. 🎬 KI-generierter Konzeptspot zur geplanten BBQ-Box. #BlackSmoke #PremiumBBQ #BBQWien #LowAndSlow #BBQBox #BeefRibs #PulledPork #Familienabend #WienFood",
-      "ownerUsername": "",
-      "ownerRole": "",
-      "scoutUsername": "",
-      "merchantUsername": "",
-      "pubDate": "2026-11-13T23:51:34+0000",
       "rejectionReason": "no-concrete-offer",
       "qualityScore": 0,
       "viennaVerified": false,
