@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-11-15T18:37:07.985Z",
+  "generatedAt": "2026-11-15T19:06:19.348Z",
   "discoveryAvailability": {
     "note": "Transport evidence, not deal yield. Retry eligibility is not recovery. Candidate counts are not Slack deliveries. No extra runs or quota resets.",
     "lanes": [
@@ -54,20 +54,14 @@
   },
   "summary": {
     "filesConsidered": 32,
-    "totalCandidates": 649,
-    "uniqueCandidates": 634,
-    "distinctCandidates": 641,
+    "totalCandidates": 648,
+    "uniqueCandidates": 633,
+    "distinctCandidates": 640,
     "duplicateClusters": 7,
     "topHealthySources": [
       {
         "sourceKey": "instagram-ai",
         "sourceLabel": "Instagram AI Agent",
-        "healthScore": 86,
-        "totalDeals": 1
-      },
-      {
-        "sourceKey": "instagram-apify",
-        "sourceLabel": "Apify Instagram",
         "healthScore": 86,
         "totalDeals": 1
       },
@@ -88,18 +82,18 @@
         "sourceLabel": "Instagram",
         "healthScore": 61,
         "totalDeals": 6
+      },
+      {
+        "sourceKey": "firecrawl5",
+        "sourceLabel": "Firecrawl Key 5 - Instagram Gastro",
+        "healthScore": 59,
+        "totalDeals": 3
       }
     ],
     "topMissionSources": [
       {
         "sourceKey": "instagram-ai",
         "sourceLabel": "Instagram AI Agent",
-        "missionFitScore": 78,
-        "totalDeals": 1
-      },
-      {
-        "sourceKey": "instagram-apify",
-        "sourceLabel": "Apify Instagram",
         "missionFitScore": 78,
         "totalDeals": 1
       },
@@ -120,6 +114,12 @@
         "sourceLabel": "Member Benefits",
         "missionFitScore": 63,
         "totalDeals": 110
+      },
+      {
+        "sourceKey": "meta-instagram",
+        "sourceLabel": "Meta Instagram Graph",
+        "missionFitScore": 47,
+        "totalDeals": 44
       }
     ],
     "topCoverageSources": [
@@ -167,12 +167,6 @@
         "totalDeals": 1
       },
       {
-        "sourceKey": "instagram-apify",
-        "sourceLabel": "Apify Instagram",
-        "precisionScore": 88,
-        "totalDeals": 1
-      },
-      {
         "sourceKey": "member-benefits",
         "sourceLabel": "Member Benefits",
         "precisionScore": 72,
@@ -189,6 +183,12 @@
         "sourceLabel": "Meta Instagram Graph",
         "precisionScore": 65,
         "totalDeals": 44
+      },
+      {
+        "sourceKey": "joe",
+        "sourceLabel": "jö Bonus Club",
+        "precisionScore": 64,
+        "totalDeals": 9
       }
     ],
     "topWeightedSources": [
@@ -205,12 +205,6 @@
         "totalDeals": 1
       },
       {
-        "sourceKey": "instagram-apify",
-        "sourceLabel": "Apify Instagram",
-        "sourceWeightScore": 70,
-        "totalDeals": 1
-      },
-      {
         "sourceKey": "meta-instagram",
         "sourceLabel": "Meta Instagram Graph",
         "sourceWeightScore": 54,
@@ -221,6 +215,12 @@
         "sourceLabel": "jö Bonus Club",
         "sourceWeightScore": 54,
         "totalDeals": 9
+      },
+      {
+        "sourceKey": "firecrawl5",
+        "sourceLabel": "Firecrawl Key 5 - Instagram Gastro",
+        "sourceWeightScore": 53,
+        "totalDeals": 3
       }
     ],
     "topSourcesToFix": [
@@ -270,11 +270,10 @@
         "sampleTitles": []
       },
       {
-        "sourceKey": "instagram-apify2",
-        "sourceLabel": "Apify 2 Vienna Food Discovery",
+        "sourceKey": "instagram-apify",
+        "sourceLabel": "Apify Instagram",
         "healthScore": 0,
         "issues": [
-          "letzter Lauf fand Kandidaten, aber akzeptierte keinen Deal",
           "liefert aktuell 0 Deals"
         ],
         "sampleTitles": []
@@ -321,54 +320,6 @@
       "topCategories": [
         {
           "value": "essen & trinken",
-          "count": 1
-        }
-      ],
-      "topTypes": [
-        {
-          "value": "freebie",
-          "count": 1
-        }
-      ],
-      "issues": [
-        "wenige Deals sind frischer als 1 Tag"
-      ],
-      "healthScore": 86,
-      "missionFitScore": 78,
-      "coverageScore": 16,
-      "precisionScore": 88,
-      "sourceWeightScore": 70
-    },
-    {
-      "sourceKey": "instagram-apify",
-      "file": "deals-pending-instagram-apify.json",
-      "sourceLabel": "Apify Instagram",
-      "totalDeals": 1,
-      "uniqueDeals": 1,
-      "duplicateDeals": 0,
-      "duplicateAcrossSources": 0,
-      "fresh1dCount": 0,
-      "fresh7dCount": 0,
-      "viennaCount": 1,
-      "foodDrinkCount": 1,
-      "promoCount": 1,
-      "missingUrlCount": 0,
-      "sampleTitles": [
-        "GOOD PIZZA. FREE PEPSI. 🥤🍕 Warum nur Pizza bestellen, wenn du eine Pepsi GRATIS dazubekommen kannst? 👀 Bei"
-      ],
-      "lastRun": null,
-      "uniqueRate": 1,
-      "duplicateRate": 0,
-      "fresh1dRate": 0,
-      "fresh7dRate": 0,
-      "viennaRate": 1,
-      "foodDrinkRate": 1,
-      "promoRate": 1,
-      "missingUrlRate": 0,
-      "averageQualityScore": 95,
-      "topCategories": [
-        {
-          "value": "essen",
           "count": 1
         }
       ],
@@ -1882,6 +1833,42 @@
       "sourceWeightScore": 0
     },
     {
+      "sourceKey": "instagram-apify",
+      "file": "deals-pending-instagram-apify.json",
+      "sourceLabel": "Apify Instagram",
+      "totalDeals": 0,
+      "uniqueDeals": 0,
+      "duplicateDeals": 0,
+      "duplicateAcrossSources": 0,
+      "fresh1dCount": 0,
+      "fresh7dCount": 0,
+      "viennaCount": 0,
+      "foodDrinkCount": 0,
+      "promoCount": 0,
+      "missingUrlCount": 0,
+      "sampleTitles": [],
+      "lastRun": null,
+      "uniqueRate": 0,
+      "duplicateRate": 0,
+      "fresh1dRate": 0,
+      "fresh7dRate": 0,
+      "viennaRate": 0,
+      "foodDrinkRate": 0,
+      "promoRate": 0,
+      "missingUrlRate": 0,
+      "averageQualityScore": 0,
+      "topCategories": [],
+      "topTypes": [],
+      "issues": [
+        "liefert aktuell 0 Deals"
+      ],
+      "healthScore": 0,
+      "missionFitScore": 0,
+      "coverageScore": 0,
+      "precisionScore": 0,
+      "sourceWeightScore": 0
+    },
+    {
       "sourceKey": "instagram-apify2",
       "file": "deals-pending-instagram-apify2.json",
       "sourceLabel": "Apify 2 Vienna Food Discovery",
@@ -2134,29 +2121,28 @@
       "sampleTitles": [],
       "lastRun": {
         "status": "completed-with-errors",
-        "startedAt": "2026-11-15T07:04:06.025Z",
-        "finishedAt": "2026-11-15T07:05:19.489Z",
-        "durationMs": 73464,
+        "startedAt": "2026-11-15T19:04:18.791Z",
+        "finishedAt": "2026-11-15T19:05:27.558Z",
+        "durationMs": 68767,
         "counts": {
-          "rawCandidates": 51,
+          "rawCandidates": 55,
           "normalizedCandidates": 0,
           "verifiedCandidates": 0,
           "previousDeals": 0,
           "acceptedDeals": 0,
-          "rejectedDeals": 48
+          "rejectedDeals": 50
         },
         "rejectedByReason": {
-          "alcohol-offer": 5,
-          "no-concrete-offer": 36,
-          "general-recommendation": 2,
-          "missing-vienna-evidence": 1,
-          "regular-priced-activity": 1,
+          "no-concrete-offer": 39,
+          "general-recommendation": 5,
+          "excluded-promotion-type": 1,
           "weak-food-offer": 1,
-          "missing-text": 1,
-          "non-offer-content": 1
+          "alcohol-offer": 1,
+          "regular-priced-activity": 2,
+          "non-vienna-location": 1
         },
         "errors": [
-          "#wienfood: Instagram scan paused: request-budget"
+          "#essenwien: Instagram scan paused: request-budget"
         ],
         "reportFile": "deal-pipeline-last-run-wien-combined.json"
       },
