@@ -1,8 +1,8 @@
 {
   "version": 1,
-  "checkedAt": "2026-11-15T17:43:43.038Z",
-  "feedHash": "c98fe367e45a493aa513049391c18e191bc65ba6f0bf980ed39072174b7ef006",
-  "mapContextHash": "1a753bd8cc17d27fb7ba694678696a3d84a56d4b324a09cae7afde1d951ae8ff",
+  "checkedAt": "2026-11-15T19:29:02.422Z",
+  "feedHash": "5fd15a76f2f372b66a5c7ee2ee08daef2537d377165f1c78ca48958b5a19c817",
+  "mapContextHash": "9b87cb3cfc2b24734577e1be2823e9b6ca940a6ec5965404599bcc81478e6528",
   "sourceEvidenceHash": "4de49f82bdef0fcd05f28524077e602f107bda7c2f27487914367d45bd827a65",
   "liveCount": 85,
   "checks": {
@@ -620,7 +620,8 @@
         "status": "symbolic-match",
         "checkedAt": "2026-11-15T17:43:43.038Z",
         "provesMerchantPhoto": false,
-        "automaticReplacement": false
+        "automaticReplacement": false,
+        "cached": true
       },
       "nativePhoto": {
         "status": "feed-changed-recheck-required",
@@ -963,7 +964,8 @@
         "status": "needs-review",
         "checkedAt": "2026-11-15T17:43:43.038Z",
         "provesMerchantPhoto": false,
-        "automaticReplacement": false
+        "automaticReplacement": false,
+        "cached": true
       },
       "nativePhoto": {
         "status": "feed-changed-recheck-required",
@@ -996,7 +998,13 @@
       "websitePhoto": {
         "src": "/assets/blog/photos/family-lunch.webp",
         "key": "family-lunch",
-        "status": "not-reviewed"
+        "matchesProduct": false,
+        "emptyTableOrPackaging": false,
+        "uncertain": true,
+        "status": "needs-review",
+        "checkedAt": "2026-11-15T19:29:02.422Z",
+        "provesMerchantPhoto": false,
+        "automaticReplacement": false
       },
       "nativePhoto": {
         "status": "feed-changed-recheck-required",
@@ -1632,7 +1640,13 @@
       "websitePhoto": {
         "src": "/assets/blog/photos/gift.webp",
         "key": "gift",
-        "status": "not-reviewed"
+        "matchesProduct": false,
+        "emptyTableOrPackaging": false,
+        "uncertain": false,
+        "status": "needs-review",
+        "checkedAt": "2026-11-15T19:29:02.422Z",
+        "provesMerchantPhoto": false,
+        "automaticReplacement": false
       },
       "nativePhoto": {
         "status": "feed-changed-recheck-required",
@@ -3870,8 +3884,8 @@
     }
   ],
   "pending": {
-    "count": 200,
-    "reviewNeeded": 200,
+    "count": 201,
+    "reviewNeeded": 201,
     "rows": [
       {
         "id": "fc4g-zz2f5b",
@@ -8740,6 +8754,23 @@
         "publicationMode": "human-approval",
         "automaticPublicationAllowed": false,
         "fingerprint": "a1e655fd3ad847d05c72ae1d8f3b7be4e2bc335fc79772629400fab456ab0e75"
+      },
+      {
+        "id": "meta-ig-18431609134156985",
+        "issues": [
+          {
+            "code": "upstream-validity-review",
+            "label": "Vorhandene Validierungshinweise vor Freigabe erneut pruefen."
+          },
+          {
+            "code": "map-incomplete",
+            "label": "Einloesestandorte sind noch nicht vollstaendig bestaetigt."
+          }
+        ],
+        "requiresReview": true,
+        "publicationMode": "human-approval",
+        "automaticPublicationAllowed": false,
+        "fingerprint": "3c3326b7dbf053b108bb8dbde6c51431dfb15e6de529430b3d51e59f7a56a543"
       }
     ]
   },
