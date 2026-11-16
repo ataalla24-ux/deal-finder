@@ -107,6 +107,22 @@ function originalDateClauses(value, pattern = originalDatePattern) {
   });
 }
 
+function editorConfirmedSingleDayEnds(value, end) {
+  const dates = literalSourceEnds(value, 'single', end);
+  const text = normalizedDateText(value);
+  const clock = '(?:[01]?\\d|2[0-3]):[0-5]\\d';
+  const window = new RegExp(`\\bam\\s+\\d{1,2}\\.\\d{1,2}\\.20\\d{2}\\s+von\\s+(${clock})\\s+bis\\s+(${clock})\\b`, 'g');
+  const windows = [...text.matchAll(window)];
+  if (!windows.length) return dates;
+  const mentions = originalDateClauses(value, bareDatePattern);
+  if (reuseOrUnclearTiming.test(text) || /\b(?:nicht|not|am nachsten tag|am folgenden tag|uber mitternacht)\b/.test(text)
+    || windows.some(([, start, finish]) => start.padStart(5, '0') >= finish.padStart(5, '0'))
+    || mentions.some(clause => clause.ambiguous || clause.monthDay !== end.slice(5)
+      || clause.year && clause.year !== end.slice(0, 4))) return [...dates, ''];
+  const { validOn } = parseExpiryShape(text);
+  return [...dates, validOn === end ? end : ''];
+}
+
 function inferOriginalPostExpiry(deal, latest, now, texts) {
   const url = deal.evidencePostUrl || deal.url;
   const key = canonicalInstagramPostKey(url);
@@ -246,9 +262,9 @@ export function assessAutomaticExpiry(deal, { now = new Date(), edits = [], poli
     if (confirmed) {
       const legacyOCR = !latestEvidence && canonicalInstagramPostKey(deal.evidencePostUrl || deal.url)
         ? clean(deal.evidence?.mediaEvidence?.ocrText).replace(/\bnurj?am\s+/gi, 'nur am ') : '';
-      const dated = [...texts, legacyOCR].filter(value => literalSourceEnds(value, 'single', end).length > 0);
-      const dates = dated.flatMap(value => literalSourceEnds(value, 'single', end));
-      const editDates = literalSourceEnds(deal.description, 'single', end);
+      const dated = [...texts, legacyOCR].filter(value => editorConfirmedSingleDayEnds(value, end).length > 0);
+      const dates = dated.flatMap(value => editorConfirmedSingleDayEnds(value, end));
+      const editDates = editorConfirmedSingleDayEnds(deal.description, end);
       if (dates.length && dates.every(value => value === end)
         && editDates.every(value => value === end)
         && !/geburtstag|birthday|dauerhaft|unbefristet|verl[aä]ngert|verlaengert|extended|voraussichtlich|bis auf weiteres/i.test(legacyOCR)) {

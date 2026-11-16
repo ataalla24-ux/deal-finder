@@ -95,6 +95,33 @@ function originalPost(timestamp, caption, fields = {}) {
     sourcePublishedAtSource: 'url.instagramShortcode', ...fields };
 }
 
+test('an editor-confirmed date can expire from an explicit one-day time window in the original post', () => {
+  const record = originalPost('2026-11-04T17:34:23Z',
+    'Follower bekommen am 06.11.2026 von 12:00 bis 15:00 einen gratis Semmel-Döner.', {
+      expiryKind: 'single', validFrom: '2026-11-06', validOn: '2026-11-06',
+      validUntil: '2026-11-06', expires: '2026-11-06T14:00:00Z',
+    });
+  const edit = { dealId: record.id, validOn: record.validOn };
+  const afterGrace = new Date('2026-11-07T12:01:00Z');
+  const check = (input = record, edits = [edit], time = afterGrace, latestEvidence) =>
+    assessAutomaticExpiry(input, { policy, edits, now: time, latestEvidence });
+  assert.equal(check().reason, 'editor-confirmed-single-day');
+  assert.equal(check(record, []).eligible, false);
+  assert.equal(check(record, [edit], new Date('2026-11-07T11:59:00Z')).eligible, false);
+  assert.equal(check(record, [edit], afterGrace, { caption: 'Neue Aktion bis 08.11.2026.' }).eligible, false);
+  for (const caption of [
+    'Am 06.11. von 12:00 bis 15:00 gibt es ein Angebot.',
+    'Nicht am 06.11.2026 von 12:00 bis 15:00.',
+    'Am 06.11.2026 von 12:00 bis 15:00 und am 08.11. gibt es ein Angebot.',
+    'Repost: Am 06.11.2026 von 12:00 bis 15:00 gibt es ein Angebot.',
+    'Am 06.11.2026 von 22:00 bis 20:00 gibt es ein Angebot.',
+    'Am 06.11.2026 von 8:00 bis 08:00 gibt es ein Angebot.',
+    'Am 06.11.2026 von 12:00 bis 15:00 am nächsten Tag.',
+  ]) {
+    assert.equal(check({ ...record, caption }).eligible, false, caption);
+  }
+});
+
 test('exact original Instagram publication proves a nearby yearless single day, including original Reel OCR', () => {
   const record = originalPost('2026-11-04T17:34:23Z', '', { url: 'https://www.instagram.com/reel/DfVARy_I2AK/',
     validOn: '2026-11-06', expiryKind: 'single', evidence: { mediaEvidence: { ocrText: 'AKTION IN WIEN Nurjam 06.11. Thaliastraße 25/7' } } });
