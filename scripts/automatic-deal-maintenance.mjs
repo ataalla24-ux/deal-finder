@@ -7,6 +7,8 @@ import { titleClaimGuard } from '../scraper/deal-card-editor.js';
 import { freeCreditOpenAiFetch, modelForTask } from '../scraper/ai-credit-budget.js';
 import { canonicalInstagramPostKey, decodeInstagramShortcodeDate } from '../scraper/deal-evidence-utils.js';
 import { parseExpiryShape } from '../scraper/expiry-utils.js';
+import { assessFixedFlightEnd } from './expiry-fixed-flight.mjs';
+import { assessInstagramFiniteRangeEnd } from './expiry-instagram-finite-range.mjs';
 import { maintenanceEvidenceFor } from './refresh-maintenance-evidence.mjs';
 import { hasOnlyPreviewDescription } from '../scraper/approval-source-evidence.js';
 import { isBenefitOnlyTitle } from '../scraper/offer-title-utils.js';
@@ -246,7 +248,13 @@ export function assessAutomaticExpiry(deal, { now = new Date(), edits = [], poli
     }
   }
   const texts = sourceTexts(deal, latestEvidence);
-  const text = clean([deal.description, deal.expiryDisplayText, ...texts].join(' '));
+  const fixedFlightEnd = assessFixedFlightEnd(deal);
+  // This disclaimer describes the observed fare. It does not change the dates
+  // encoded in the verified itinerary. Other uncertainty still vetoes expiry.
+  const description = fixedFlightEnd
+    ? clean(deal.description).replace(/\bkein fester rabatt oder dauerhaft g(?:ü|ue)ltiger preis zugesagt\b/gi, '')
+    : deal.description;
+  const text = clean([description, deal.expiryDisplayText, ...texts].join(' '));
   if (uncertainExpiry.test(text)) return hold('ongoing-extended-or-uncertain');
   // A structured date alone can be a guessed TTL. Require literal offer wording.
   const hasExplicitEnd = end && ['end', 'range', 'single'].includes(deal.expiryKind);
@@ -275,12 +283,19 @@ export function assessAutomaticExpiry(deal, { now = new Date(), edits = [], poli
     }
   }
   if (!sourceEnds.length || sourceEnds.some(value => value !== end)) {
-    const inferred = inferOriginalPostExpiry(deal, latestEvidence, now, texts);
+    const noConflictingEnd = sourceEnds.every(value => !value || value === end);
+    const boundedInstagram = noConflictingEnd && assessInstagramFiniteRangeEnd(deal, latestEvidence, now);
+    const fixedItinerary = noConflictingEnd && fixedFlightEnd;
+    const inferred = fixedItinerary
+      ? { end: fixedItinerary, evidence: [deal.url] }
+      : boundedInstagram || inferOriginalPostExpiry(deal, latestEvidence, now, texts);
     if (inferred.end && !matchedEdits.some(edit => edit.restoreDeal)) {
       end = inferred.end;
       evidence = inferred.evidence;
       originalPostPublishedAt = inferred.originalPostPublishedAt;
-      reason = 'year-inferred-from-original-post';
+      reason = fixedItinerary ? 'confirmed-fixed-flight-itinerary'
+        : boundedInstagram ? 'confirmed-original-instagram-campaign-range'
+        : 'year-inferred-from-original-post';
     } else if (inferred.review) {
       return hold('original-post-date-needs-manual-review');
     } else {

@@ -344,6 +344,7 @@ test('targeted and ordinary approval runners prepare source copy before publishi
     for (const file of ['deal-map-review.mjs', 'deal-map-enrichment.mjs', 'deal-map-chain-rules.mjs',
       'deal-map-source-addresses.mjs', 'approval-map-readiness.mjs', 'discover-vienna-merchants.mjs',
       'automatic-deal-maintenance.mjs', 'automatic-maintenance-review.mjs', 'refresh-maintenance-evidence.mjs',
+      'expiry-fixed-flight.mjs', 'expiry-instagram-finite-range.mjs',
       'deal-photo-contract.mjs']) copyFileSync(join(root, 'scripts', file), join(temp, 'scripts', file));
     copyFileSync(join(root, 'package.json'), join(temp, 'package.json'));
     symlinkSync(join(root, 'node_modules'), join(temp, 'node_modules'), 'dir');

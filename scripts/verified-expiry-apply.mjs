@@ -6,12 +6,14 @@ import { load } from 'cheerio';
 import robotsParser from 'robots-parser';
 import { fetchMerchantPage, robotsAllowsDiscovery } from './discover-vienna-merchants.mjs';
 import { sourceURL } from './verified-expiry-review.mjs';
+import { assessSparhamsterCouponEnd, supportsSparhamsterCouponExpiry } from './expiry-sparhamster-coupon.mjs';
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const clean = value => String(value || '').replace(/\s+/g, ' ').trim();
 const fold = value => clean(value).normalize('NFKC').toLocaleLowerCase('de');
 const hash = value => createHash('sha256').update(JSON.stringify(value)).digest('hex');
 const hour = 3_600_000;
+const couponCheckSlots = 3;
 const recurring = /geburtstag|birthday|dauerhaft|wöchentlich|woechentlich|monatlich|jeden\b|mitglied|member|laufend|recurring|verlängert|verlaengert|extended|bis auf weiteres|voraussichtlich/i;
 const types = node => [node?.['@type']].flat().filter(Boolean);
 const typeIs = (node, type) => types(node).some(t => String(t).split(/[/#]/).pop() === type);
@@ -21,6 +23,10 @@ function day(value) {
   if (!/^20\d{2}-\d{2}-\d{2}$/.test(value || '')) return null;
   const parsed = new Date(`${value}T12:00:00Z`);
   return Number.isFinite(parsed.getTime()) && parsed.toISOString().slice(0, 10) === value ? value : null;
+}
+
+function expiryGraceElapsed(end, now) {
+  return Boolean(day(end) && +now >= Date.parse(`${end}T23:59:59.999Z`) + 72 * hour);
 }
 
 export function expiryFingerprint(deal) {
@@ -45,6 +51,18 @@ export function assessStructuredExpiry(deal, response, { now = new Date(), edits
   const source = sourceURL(deal);
   if (!source || /(^|\.)(instagram\.com|tiktok\.com|facebook\.com|thefork\.[a-z.]+)$/i.test(new URL(source).hostname)) return review('Keine geeignete unabhängige Originalseite');
   if (response?.status !== 200 || response.url !== source || !/text\/html/i.test(response.headers?.['content-type'] || '')) return review('Quelle nicht direkt und vollständig als HTML erreichbar');
+  if (supportsSparhamsterCouponExpiry(deal)) {
+    const coupon = assessSparhamsterCouponEnd(deal, response, { now });
+    if (!coupon) return review('Coupon und Aktion auf der Originalseite nicht eindeutig als abgelaufen bestätigt');
+    const { end, evidenceText } = coupon;
+    if (!expiryGraceElapsed(end, now)) return review('Enddatum noch nicht mindestens drei Tage vergangen');
+    return {
+      status: 'candidate', reason: 'Konkreter Coupon einer übereinstimmenden abgelaufenen Aktion',
+      automaticRemovalEligible: false, method: 'sparhamster-coupon-round', sourceUrl: source,
+      validUntil: end, title: deal.title, brand: deal.brand, evidenceText, bodyHash: hash(response.body),
+      evidenceHash: hash([source, deal.title, deal.brand, end, evidenceText]), fingerprint: expiryFingerprint(deal),
+    };
+  }
   const $ = load(response.body || '');
   const canonical = $('link[rel="canonical"]').map((_, el) => $(el).attr('href')).get();
   try {
@@ -74,7 +92,7 @@ export function assessStructuredExpiry(deal, response, { now = new Date(), edits
   // A price end date alone does not prove the whole deal expired.
   const storedEnds = [deal.validUntil, deal.validOn].filter(Boolean);
   if (storedEnds.length === 0 || storedEnds.some(value => value !== end)) return review('Bestätigter Angebotszeitraum und Quelle stimmen nicht überein');
-  if (now.getTime() < Date.parse(`${end}T23:59:59.999Z`) + 72 * hour) return review('Enddatum noch nicht mindestens drei Tage vergangen');
+  if (!expiryGraceElapsed(end, now)) return review('Enddatum noch nicht mindestens drei Tage vergangen');
   $('script, style, nav, header, footer, aside, [hidden], [aria-hidden="true"]').remove();
   const main = $('main');
   if (main.length !== 1) return review('Kein einzelner Angebots-Hauptinhalt');
@@ -121,7 +139,16 @@ export async function verifyExpiryBatch(deals, previous = {}, edits = [], { now 
   const removed = [];
   const cap = Math.min(5, Math.max(1, Math.floor(deals.length * .1)));
   const ordered = [...deals].sort((a, b) => (Date.parse(previous.entries?.[a.id]?.checkedAt) || 0) - (Date.parse(previous.entries?.[b.id]?.checkedAt) || 0));
-  for (const deal of ordered.slice(0, budget)) {
+  // A first coupon observation needs a second check within 72 hours. Reserve
+  // part of the existing budget so the ordinary rotation cannot miss this window.
+  const priorCoupon = deal => previous.entries?.[deal.id]?.method === 'sparhamster-coupon-round';
+  const coupons = ordered.filter(deal => !protectedExpiryDeal(deal, edits)
+    && supportsSparhamsterCouponExpiry(deal) && expiryGraceElapsed(deal.validUntil, now))
+    .sort((a, b) => Number(priorCoupon(b)) - Number(priorCoupon(a)))
+    .slice(0, Math.min(couponCheckSlots, budget));
+  const prioritized = new Set(coupons.map(deal => deal.id));
+  const batch = [...coupons, ...ordered.filter(deal => !prioritized.has(deal.id))].slice(0, budget);
+  for (const deal of batch) {
     let assessment;
     try {
       const source = sourceURL(deal);

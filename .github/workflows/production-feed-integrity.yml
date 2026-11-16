@@ -49,6 +49,14 @@ on:
       - "scripts/test-generated-state-merge.mjs"
       - "scraper/ai-credit-budget.js"
       - "scripts/automatic-deal-maintenance.mjs"
+      - "scripts/verified-expiry-apply.mjs"
+      - "scripts/expiry-fixed-flight.mjs"
+      - "scripts/expiry-instagram-finite-range.mjs"
+      - "scripts/expiry-sparhamster-coupon.mjs"
+      - "scripts/test-expiry-fixed-flight.mjs"
+      - "scripts/test-expiry-instagram-finite-range.mjs"
+      - "scripts/test-expiry-sparhamster-coupon.mjs"
+      - "scripts/test-verified-expiry-apply.mjs"
       - "scripts/server-quality-audit.mjs"
       - "scripts/vienna-quality-slot.mjs"
       - "scripts/test-server-quality.mjs"
@@ -147,6 +155,7 @@ jobs:
           node scripts/test-map-location-classification.mjs
           node scripts/test-generated-state-merge.mjs
           node --test scripts/test-ai-credit-budget.mjs scripts/test-automatic-maintenance.mjs
+          node --test scripts/test-expiry-fixed-flight.mjs scripts/test-expiry-instagram-finite-range.mjs scripts/test-expiry-sparhamster-coupon.mjs scripts/test-verified-expiry-apply.mjs
           node --test scripts/test-server-quality.mjs
           node scripts/test-community-extraction.mjs
           node scripts/test-community-card-enrichment.mjs
