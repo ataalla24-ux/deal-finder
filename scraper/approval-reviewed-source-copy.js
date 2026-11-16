@@ -12,6 +12,27 @@ const RANGE_TEXT = 'vom 14.11.2026 bis 17.11.2026';
 const TITLE = 'McDonald’s: Gratis Fußball-Donut per App';
 const DESCRIPTION = 'Gratis Fußball-Donut mit Gutschein in der McDonald’s-App bis einschließlich 17.11.2026 in teilnehmenden Restaurants in Österreich, solange Vorrat reicht. Einmal pro Bestellung, höchstens zweimal pro Gast. Maximal sechs MyMcDonald’s-Gutscheine je Bestellung; weitere Gutscheine mit neuer Bestellung. Kein McDelivery und keine Barauszahlung.';
 const clean = value => typeof value === 'string' ? value.trim() : value == null ? '' : String(value);
+const REVIEWED_RULE = 'mcd-football-donut-2026-11-v1';
+
+// The previous normalizer parsed the first day of this exact source-backed
+// range as the end timestamp. Keep the verified calendar period and instant
+// together at the normal entry point, including on existing published rows.
+export function reconcileReviewedApprovalExpiry(deal) {
+  const review = deal?.reviewedSourceCopy;
+  const period = review?.offerPeriodEvidence;
+  if (deal?.id !== OFFER_ID || deal.url !== SOURCE_URL || hasReviewedOfferPeriod(deal)
+    || review?.rule !== REVIEWED_RULE || review.sourceUrl !== SOURCE_URL || review.contentHash !== CAPTION_HASH
+    || period?.literal !== END_LITERAL || period.normalizedRange !== RANGE_TEXT
+    || deal.expiryKind !== 'range' || deal.validFrom !== '2026-11-14' || deal.validFrom !== period.retainedValidFrom
+    || deal.validUntil !== '2026-11-17' || deal.validUntil !== period.validUntil
+    || deal.expiresOriginal !== RANGE_TEXT || deal.expiryDisplayText !== RANGE_TEXT
+    || deal.validOn || deal.end_date || deal.validity_date
+    || (deal.validity?.expiryDate && deal.validity.expiryDate !== deal.validUntil)
+    || ![END_INSTANT, '2026-11-14T23:59:59.999Z'].includes(deal.expires)) return false;
+  Object.assign(deal, { expires: END_INSTANT, expiresPrecision: 'day', expiresSource: 'url',
+    expiresDetectedFromUrl: true });
+  return true;
+}
 
 // Reviewed fixed wording for one complete source, not an AI approval. Evidence
 // must come from this attempt's successful URL-health read; persisted copy memos
@@ -47,7 +68,7 @@ export function prepareReviewedApprovalCopy(deal, evidence, { existingIds = new 
   Object.assign(result, { validFrom: deal.validFrom, validUntil: '2026-11-17', expiryKind: 'range',
     expires: END_INSTANT, expiresOriginal: RANGE_TEXT, expiryDisplayText: RANGE_TEXT,
     expiresSource: 'url', expirySource: 'url', expiresPrecision: 'day', expiresDetectedFromUrl: true, dateConfidence: 'high' });
-  result.reviewedSourceCopy = { method: 'reviewed-source-template-v1', rule: 'mcd-football-donut-2026-11-v1',
+  result.reviewedSourceCopy = { method: 'reviewed-source-template-v1', rule: REVIEWED_RULE,
     sourceUrl: SOURCE_URL, contentHash: CAPTION_HASH, checkedAt: evidence.checkedAt,
     fields: ['title', 'description', ...offerPeriodFields.filter(field => Object.hasOwn(result, field))],
     offerPeriodEvidence: { literal: END_LITERAL, validUntil: '2026-11-17', retainedValidFrom: deal.validFrom,

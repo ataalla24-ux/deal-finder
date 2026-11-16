@@ -89,6 +89,12 @@ test('actual checked Donut publishes its confirmed terms and deadline before a m
         assert.match(live.description, /McDelivery/);
         assert.equal(live.validFrom, '2026-11-14');
         assert.equal(live.validUntil, '2026-11-17');
+        assert.equal(live.expires?.slice(0, 10), '2026-11-17');
+        const { normalizeDealExpiry } = await import('../scraper/expiry-utils.js');
+        const legacy = { ...live, expires: '2026-11-14T23:59:59.999Z', expiresSource: 'text', expiresDetectedFromUrl: false };
+        const normalized = await normalizeDealExpiry(legacy, { allowUrlLookup: false });
+        assert.equal(normalized.expires, '2026-11-17T22:59:59.999Z');
+        assert.equal(normalized.validUntil, '2026-11-17');
         assert.equal(read('deals-pending-all.json').deals.length, 0);
         const pins = read('deal-map-locations.json').locations.filter(pin => pin.dealIds.includes(live.id));
         assert.equal(pins.length, 0);

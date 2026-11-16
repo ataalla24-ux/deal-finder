@@ -2,6 +2,7 @@ import { load } from 'cheerio';
 import { cardEditorialWhen } from './deal-card-editor.js';
 import { hasReviewedOfferPeriod } from './offer-period-fields.js';
 import { extractApprovalSourceEvidence } from './approval-source-evidence.js';
+import { reconcileReviewedApprovalExpiry } from './approval-reviewed-source-copy.js';
 import { isSupportedIamstudentApprovalUrl, extractIamstudentApprovalSourceEvidence } from './approval-iamstudent-source-evidence.js';
 
 const URL_CHECK_UA = 'Mozilla/5.0 (compatible; FreeFinderBot/1.0; +https://freefinder.wien)';
@@ -1766,6 +1767,7 @@ export function repairStartOnlyExpiry(deal, options = {}) {
 
 export async function normalizeDealExpiry(deal, options = {}) {
   const now = options.now instanceof Date ? options.now : new Date();
+  if (reconcileReviewedApprovalExpiry(deal)) return deal;
   if (repairStartOnlyExpiry(deal, { now })) return deal;
   const literal = cleanText(deal.expiresOriginal || deal.expiryDisplayText || '');
   const literalShape = parseExpiryShape(literal, { now });
