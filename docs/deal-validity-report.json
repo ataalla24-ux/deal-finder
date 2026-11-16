@@ -1,13 +1,13 @@
 {
-  "generatedAt": "2026-11-16T09:14:52.649Z",
+  "generatedAt": "2026-11-16T09:19:03.899Z",
   "summary": {
     "maxAgeDays": 7,
-    "total": 235,
+    "total": 237,
     "allowed": 0,
-    "blocked": 235,
+    "blocked": 237,
     "warnings": 0,
     "reasonCounts": {
-      "kein konkretes Angebot erkennbar": 184,
+      "kein konkretes Angebot erkennbar": 185,
       "älter als 7 Tage (2026-11-02)": 5,
       "älter als 7 Tage (2020-04-25)": 1,
       "älter als 7 Tage (2026-02-22)": 78,
@@ -22,6 +22,7 @@
       "älter als 45 Tage trotz ausdrücklich noch aktive Gültigkeit (2026-08-04)": 4,
       "älter als 7 Tage (2026-08-05)": 1,
       "abgelaufen (2026-07-01)": 1,
+      "abgelaufen (2026-11-13)": 1,
       "älter als 7 Tage (2026-04-19)": 27,
       "älter als 7 Tage (2026-09-23)": 3,
       "älter als 7 Tage (2016-10-30)": 3,
@@ -54,11 +55,11 @@
       "älter als 7 Tage (2019-03-05)": 1
     },
     "reasonCategoryCounts": {
-      "kein konkreter Deal": 184,
+      "kein konkreter Deal": 185,
       "älter als 7 Tage": 146,
       "ungültige URL": 13,
       "sonstiges": 6,
-      "abgelaufen": 9,
+      "abgelaufen": 10,
       "Post-Datum in Zukunft": 3,
       "kein echtes Post-Datum": 67,
       "nicht Wien": 8,
@@ -66,6 +67,16 @@
       "ausgeschlossene Quelle": 12
     },
     "sourceCounts": {
+      "Firecrawl Food #2": {
+        "total": 2,
+        "allowed": 0,
+        "blocked": 2,
+        "warnings": 0,
+        "reasonCategoryCounts": {
+          "kein konkreter Deal": 1,
+          "abgelaufen": 1
+        }
+      },
       "Firecrawl Gastro #2": {
         "total": 15,
         "allowed": 0,
@@ -843,7 +854,7 @@
       "warnings": [
         "kein Ablaufdatum gefunden"
       ],
-      "sourceDate": "2026-11-16T09:12:50.048Z",
+      "sourceDate": "2026-11-16T09:18:03.704Z",
       "sourceDateSource": "url.publicationDate",
       "sourceAgeDays": 0,
       "expiryDate": "",
@@ -1041,6 +1052,44 @@
       "sourceAgeDays": 103,
       "expiryDate": "2026-07-01",
       "expirySource": "deal.expires",
+      "urlStatus": "HTTP 200"
+    },
+    {
+      "id": "food3-4skeoc",
+      "title": "Ristorante Gondola: Tagesgericht, Domenicos Ravioli oder Domenicos Pasta, jeweils mit Tagessuppe oder Salat",
+      "brand": "Ristorante Gondola",
+      "source": "Firecrawl Food #2",
+      "url": "https://www.instagram.com/p/Dfm969VjsTu/",
+      "reasons": [
+        "kein konkretes Angebot erkennbar"
+      ],
+      "warnings": [
+        "Inhalt prüfen: Caption-Reste oder Emoji-Codes im sichtbaren Text"
+      ],
+      "sourceDate": "2026-11-11T17:00:07.000Z",
+      "sourceDateSource": "url.instagramShortcode",
+      "sourceAgeDays": 5,
+      "expiryDate": "",
+      "expirySource": "deal.expires",
+      "urlStatus": "HTTP 200"
+    },
+    {
+      "id": "food3-bbk9cq",
+      "title": "Gel&GÖR Supermarkt: Sesamring (Simit), frische Eier (30er-Packung), weiße Hühnerkeule mit Rücken und weiße Hühnerbrust",
+      "brand": "Gel&GÖR Supermarkt",
+      "source": "Firecrawl Food #2",
+      "url": "https://www.instagram.com/p/DfpTTU0jg4o/",
+      "reasons": [
+        "abgelaufen (2026-11-13)"
+      ],
+      "warnings": [
+        "Inhalt prüfen: Titel zu lang; Angebot kurz benennen, Bedingungen in den Details behalten"
+      ],
+      "sourceDate": "2026-11-12T14:45:26.000Z",
+      "sourceDateSource": "url.instagramShortcode",
+      "sourceAgeDays": 4,
+      "expiryDate": "2026-11-13",
+      "expirySource": "url.contentHints.title",
       "urlStatus": "HTTP 200"
     },
     {
@@ -4772,30 +4821,30 @@
   ],
   "runProvenance": {
     "repository": "ataalla24-ux/deal-finder",
-    "runId": "43837721325",
-    "headSha": "8bc2d3a8d82cc9c1b9dbd78fceafb948468bede6",
-    "checkoutSha": "8bc2d3a8d82cc9c1b9dbd78fceafb948468bede6",
+    "runId": "43838404908",
+    "headSha": "97b85855de605006c309da8a1dc7064276bebd04",
+    "checkoutSha": "97b85855de605006c309da8a1dc7064276bebd04",
     "triggeringRun": {
-      "runId": "43837134447",
-      "headSha": "bd1566315ef67a44f5d2e4269ebc0091884bb1cd",
-      "event": "workflow_dispatch",
-      "name": "Meta Instagram Deal Discovery",
-      "startedAt": "2026-11-16T09:08:55.000Z",
-      "url": "https://github.com/ataalla24-ux/deal-finder/actions/runs/43837134447"
+      "runId": "43837955474",
+      "headSha": "8bc2d3a8d82cc9c1b9dbd78fceafb948468bede6",
+      "event": "schedule",
+      "name": "Firecrawl Key 2 - Food",
+      "startedAt": "2026-11-16T09:14:30.000Z",
+      "url": "https://github.com/ataalla24-ux/deal-finder/actions/runs/43837955474"
     },
     "event": "workflow_run",
     "runAttempt": "1",
-    "url": "https://github.com/ataalla24-ux/deal-finder/actions/runs/43837721325"
+    "url": "https://github.com/ataalla24-ux/deal-finder/actions/runs/43838404908"
   },
   "instagramDelivery": {
-    "checkedAt": "2026-11-16T09:14:52.666Z",
+    "checkedAt": "2026-11-16T09:19:03.919Z",
     "scope": "instagram-ai-agent/standard-slack-lane",
     "extractedCandidates": 0,
     "counts": {},
     "rows": []
   },
   "tiktokDelivery": {
-    "checkedAt": "2026-11-16T09:14:52.668Z",
+    "checkedAt": "2026-11-16T09:19:03.921Z",
     "scope": "tiktok-deals-scanner/standard-slack-lane",
     "extractedCandidates": 0,
     "counts": {},
