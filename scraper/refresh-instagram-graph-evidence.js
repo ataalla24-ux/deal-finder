@@ -9,6 +9,7 @@ import {
   candidateIsFreshForGraph,
   inferInstagramPostingUsername,
   loadInstagramGraphEvidence,
+  loadInstagramGraphEvidenceReferences,
   writeInstagramGraphEvidence,
 } from './instagram-graph-evidence.js';
 import {
@@ -251,6 +252,7 @@ export async function refreshInstagramGraphEvidence(options = {}) {
   const evidence = buildInstagramGraphEvidencePayload(evidenceRows, {
     now,
     previous: previous.payload,
+    references: loadInstagramGraphEvidenceReferences(options.docsDir || path.dirname(evidencePath)),
     retentionDays: 14,
   });
   report.retainedEvidencePosts = evidence.totalPosts;

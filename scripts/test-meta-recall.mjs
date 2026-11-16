@@ -10,6 +10,11 @@ import { buildSocialFoodArtifacts, buildAndWriteSocialFoodAudit } from '../scrap
 import { normalizeSocialAuditCandidate } from '../scraper/social-food-audit-utils.js';
 import { selectSocialFoodReviewDeals, normalizeDeal } from '../scraper/slack-notify.js';
 import { validateDealsForSlack } from '../scraper/deal-validity-agent.js';
+import {
+  buildInstagramGraphEvidencePayload,
+  enrichDealWithInstagramGraphEvidence,
+  loadInstagramGraphEvidenceReferences,
+} from '../scraper/instagram-graph-evidence.js';
 
 const now = new Date('2026-10-07T18:00:00Z');
 const config = buildConfig({ OPENAI_API_KEY: 'test-only', META_INSTAGRAM_MEDIA_MAX_POSTS_PER_RUN: '1',
@@ -96,6 +101,54 @@ assert.equal(selection.deals.length, 119, 'unlimited delivery retains posted-key
 
 const tmp = fs.mkdtempSync(path.join(os.tmpdir(), 'meta-recall-'));
 try {
+  const offerId = '17868632664677829';
+  const offerUrl = 'https://www.instagram.com/p/HotbowlOffer/';
+  const rawCaption = 'Zu jeder Hotbowl gibt es einen Kookie Cat Cookie gratis dazu.';
+  const offerDeal = {id: 'meta-ig-' + offerId, url: offerUrl, evidence: {mediaId: offerId}};
+  const offerEntry = { entry: { item: { id: offerId, permalink: offerUrl, caption: rawCaption,
+    timestamp: '2026-10-07T08:30:00Z' }, context: { sourceType: 'hashtag', sourceName: '#viennafood' } },
+  outcome: { deal: offerDeal } };
+  const noise = Array.from({length: 120}, (_, i) => ({ entry: { item: {
+    id: String(10000000000 + i), permalink: 'https://www.instagram.com/p/NewerNoise' + i + '/',
+    timestamp: '2026-10-07T09:00:00Z', caption: 'Allgemeiner Post ohne Angebot',
+  }, context: { sourceType: 'hashtag' } }, outcome: { rejection: 'no-concrete-offer' } }));
+  const limited = buildInstagramGraphEvidencePayload([offerEntry, ...noise], { now, maxPosts: 100 });
+  assert.equal(limited.posts.length, 100, 'retaining accepted captions keeps the original evidence cap');
+  const evidence = new Map(limited.posts.map(post => [post.postKey, post]));
+  const withCaption = normalizeDeal(enrichDealWithInstagramGraphEvidence(offerDeal, evidence, { now }).deal, 'meta-instagram');
+  assert.equal(withCaption.metaGraphCaption, rawCaption, 'a newer raw observation cannot evict source text before central queueing');
+  assert.equal(withCaption.ownerUsername, '', 'hashtag evidence cannot supply an unknown merchant identity');
+
+  // A subsequent producer can retain an authoritative withdrawal even after its
+  // accepted row is no longer in the upstream outbox and raw postings fill the cap.
+  fs.writeFileSync(path.join(tmp, 'deals.json'), JSON.stringify({ deals: [offerDeal] }));
+  const references = loadInstagramGraphEvidenceReferences(tmp);
+  const later = new Date(+now + 60000);
+  const withdrawn = { ...offerEntry, outcome: { rejection: 'offer-expired' } };
+  const concurrentEvidence = buildInstagramGraphEvidencePayload([withdrawn, ...noise], {
+    now: later, previous: limited, references, maxPosts: 200,
+  });
+  const oldObservation = evidence.get(concurrentEvidence.posts.find(post => post.mediaId === offerId).postKey);
+  assert.ok(concurrentEvidence.posts.length > 100);
+  const retainedEvidence = buildInstagramGraphEvidencePayload([oldObservation], {
+    now: later, previous: concurrentEvidence, references, maxPosts: 100,
+  });
+  assert.equal(retainedEvidence.posts.length, 100, 'the next producer restores the cap after concurrent writes');
+  const blocked = retainedEvidence.posts.find(post => post.mediaId === offerId);
+  assert.equal(blocked?.blockingReason, 'offer-expired');
+  assert.equal(blocked?.graphAccepted, false);
+  assert.equal(blocked?.verifiedAt, later.toISOString());
+  assert.ok(retainedEvidence.posts.every((post, i, allPosts) => i === 0
+    || Date.parse(allPosts[i - 1].sourcePublishedAt) >= Date.parse(post.sourcePublishedAt)));
+  const mismatched = loadInstagramGraphEvidenceReferences(tmp, [{ ...offerDeal, evidence: { mediaId: '17868632664677828' } }]);
+  assert.equal(buildInstagramGraphEvidencePayload([withdrawn, ...noise], {
+    now: later, references: mismatched, maxPosts: 100,
+  }).posts.some(post => post.mediaId === offerId), false, 'a conflicting media identity grants no retention priority');
+  const afterAgeLimit = buildInstagramGraphEvidencePayload([], {
+    now: new Date(+now + 15 * 86400000), previous: retainedEvidence, references, maxPosts: 100,
+  });
+  assert.equal(afterAgeLimit.posts.length, 0, 'references do not extend evidence freshness or the original age limit');
+
   const reviewPath = path.join(tmp, 'review.json');
   fs.writeFileSync(reviewPath, JSON.stringify(all.review));
   const retained = buildAndWriteSocialFoodAudit({ docsDir: tmp, reviewPath, now, sourceSpecs: [], sendAll: true });

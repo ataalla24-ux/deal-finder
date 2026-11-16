@@ -12,6 +12,8 @@ on:
       - 'docs/deals.json'
       - 'docs/live-deal-edits.json'
       - 'scripts/automatic-deal-maintenance.mjs'
+      - 'scripts/original-social-copy.mjs'
+      - 'scripts/test-original-social-copy.mjs'
       - 'scripts/server-quality-audit.mjs'
       - 'scripts/server-operations-report.mjs'
       - 'scripts/vienna-quality-slot.mjs'
@@ -67,6 +69,7 @@ jobs:
         run: |
           node --test scripts/test-ai-credit-budget.mjs scripts/test-automatic-maintenance.mjs scripts/test-live-deal-enrichment.mjs scripts/test-server-quality.mjs scripts/test-server-operations.mjs scripts/test-server-blog.mjs scripts/test-lightweight-state-committer.mjs scripts/test-native-artwork-review.mjs scripts/test-server-quality-publication-workflow.mjs
           node scripts/test-pre-publication-title.mjs
+          node --test scripts/test-original-social-copy.mjs
           node scripts/test-deal-photo-contract.mjs
           node --test scripts/test-original-deal-photos.mjs
           node scripts/validate-original-deal-photos.mjs

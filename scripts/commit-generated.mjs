@@ -33,6 +33,7 @@ const MAP_INPUT_FILES = [
   'reviews/automatic-maintenance-policy.json',
   'reviews/automatic-deal-maintenance-state.json',
   'scripts/automatic-deal-maintenance.mjs',
+  'scripts/original-social-copy.mjs',
   'scripts/expiry-fixed-flight.mjs',
   'scripts/expiry-instagram-finite-range.mjs',
   'scripts/expiry-sparhamster-coupon.mjs',
@@ -42,6 +43,7 @@ const MAP_INPUT_FILES = [
   'reviews/map-addresses.json',
   'reviews/enrichment-inputs.json',
   'scraper/deal-enrichment-state.js',
+  'scraper/offer-period-fields.js',
   'scripts/deals-feed-contract.mjs',
   'reviews/map-chain-rules.json',
   // These are read/modify/write inputs as well as generated outputs.

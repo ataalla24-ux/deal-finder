@@ -1,6 +1,6 @@
 import { load } from 'cheerio';
 import { cardEditorialWhen } from './deal-card-editor.js';
-import { hasReviewedOfferPeriod } from './offer-period-fields.js';
+import { clearReviewExpiry, hasReviewedOfferPeriod } from './offer-period-fields.js';
 import { extractApprovalSourceEvidence } from './approval-source-evidence.js';
 import { reconcileReviewedApprovalExpiry } from './approval-reviewed-source-copy.js';
 import { isSupportedIamstudentApprovalUrl, extractIamstudentApprovalSourceEvidence } from './approval-iamstudent-source-evidence.js';
@@ -1768,6 +1768,8 @@ export function repairStartOnlyExpiry(deal, options = {}) {
 export async function normalizeDealExpiry(deal, options = {}) {
   const now = options.now instanceof Date ? options.now : new Date();
   if (reconcileReviewedApprovalExpiry(deal)) return deal;
+  // The queue's age limit is not a date for the promoted offer.
+  if (clearReviewExpiry(deal)) return deal;
   if (repairStartOnlyExpiry(deal, { now })) return deal;
   const literal = cleanText(deal.expiresOriginal || deal.expiryDisplayText || '');
   const literalShape = parseExpiryShape(literal, { now });

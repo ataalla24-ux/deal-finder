@@ -161,6 +161,25 @@ function mergePostEvidence(previous, next) {
   };
 }
 
+export function loadInstagramGraphEvidenceReferences(docsDir, retainedDeals = []) {
+  const storedDeals = ['deals.json', 'deals-pending-all.json', 'deals-pending-meta-instagram.json']
+    .flatMap(file => {
+      const payload = readJson(path.join(docsDir, file), {});
+      return Array.isArray(payload) ? payload : Array.isArray(payload?.deals) ? payload.deals : [];
+    });
+  const references = new Map();
+  for (const deal of [...storedDeals, ...retainedDeals]) {
+    const postKey = canonicalInstagramPostKey(deal?.url);
+    const ids = [...new Set([deal?.evidence?.mediaId, deal?.metaGraphMediaId].filter(Boolean).map(String))];
+    if (!postKey || !ids.length) continue;
+    const [mediaId] = ids;
+    const conflicting = ids.length !== 1 || !/^\d{8,25}$/.test(mediaId)
+      || (references.has(postKey) && references.get(postKey) !== mediaId);
+    references.set(postKey, conflicting ? '' : mediaId);
+  }
+  return references;
+}
+
 export function buildInstagramGraphEvidencePayload(entries = [], options = {}) {
   const now = options.now instanceof Date ? options.now : new Date(options.now || Date.now());
   const retentionDays = Math.max(7, Number(options.retentionDays) || 14);
@@ -194,9 +213,19 @@ export function buildInstagramGraphEvidencePayload(entries = [], options = {}) {
     byKey.set(post.postKey, mergePostEvidence(byKey.get(post.postKey), post));
   }
 
+  const references = options.references || new Map();
+  const priority = post => {
+    if (post.mediaId && references.get(post.postKey) === post.mediaId) return 2;
+    return Number(post.graphAccepted === true
+      && Array.isArray(post.sourceTypes) && post.sourceTypes.includes('hashtag'));
+  };
+  const byPublication = (left, right) => Date.parse(right.sourcePublishedAt) - Date.parse(left.sourcePublishedAt);
+  // A high-volume hashtag scan must not crowd out the exact captions that
+  // approval and maintenance need. Keep the existing age and size limits.
   const posts = [...byKey.values()]
-    .sort((left, right) => Date.parse(right.sourcePublishedAt) - Date.parse(left.sourcePublishedAt))
-    .slice(0, Math.max(100, Number(options.maxPosts) || 2000));
+    .sort((left, right) => priority(right) - priority(left) || byPublication(left, right))
+    .slice(0, Math.max(100, Number(options.maxPosts) || 2000))
+    .sort(byPublication);
 
   return {
     generatedAt: now.toISOString(),

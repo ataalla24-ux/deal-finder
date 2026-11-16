@@ -9,6 +9,7 @@ import { canonicalInstagramPostKey, decodeInstagramShortcodeDate } from '../scra
 import { parseExpiryShape } from '../scraper/expiry-utils.js';
 import { assessFixedFlightEnd } from './expiry-fixed-flight.mjs';
 import { assessInstagramFiniteRangeEnd } from './expiry-instagram-finite-range.mjs';
+import { assessOriginalSocialCopy } from './original-social-copy.mjs';
 import { maintenanceEvidenceFor } from './refresh-maintenance-evidence.mjs';
 import { hasOnlyPreviewDescription } from '../scraper/approval-source-evidence.js';
 import { isBenefitOnlyTitle } from '../scraper/offer-title-utils.js';
@@ -23,6 +24,7 @@ const dueDescription = (deal, now) => pendingDescription(deal) && !(Date.parse(d
 const completeDescription = (deal, patch, now) => pendingDescription(deal) && clean(patch.description)
   ? projectEnrichmentDeal(updateDealEnrichment(deal, { completedFields: ['description'], now })) : deal;
 const hash = value => createHash('sha256').update(JSON.stringify(value)).digest('hex');
+const originalSocialCopyMethod = 'verified-original-social-copy';
 const read = (file, fallback) => { try { return JSON.parse(fs.readFileSync(file, 'utf8')); } catch (error) { if (error.code === 'ENOENT') return fallback; throw error; } };
 const write = (file, value) => { fs.mkdirSync(path.dirname(file), { recursive: true }); fs.writeFileSync(file, JSON.stringify(value, null, 2) + '\n'); };
 const exactDay = value => {
@@ -335,7 +337,8 @@ export function maintainDeals(deals, { policy = {}, state = {}, edits = [], now 
     }
     let deal = original;
     const fields = protectedFields(deal, edits);
-    const cachedPatch = nextState.corrections.find(entry => entry.id === deal.id && entry.inputHash === fingerprint && entry.patch);
+    const cachedPatch = nextState.corrections.find(entry =>
+      entry.id === deal.id && entry.inputHash === fingerprint && entry.patch && entry.method !== originalSocialCopyMethod);
     if (!protectedDeal(deal, edits, policy) && cachedPatch
       && cachedPatch.sourceHash === hash(sourceTexts(deal, sourceEvidence.get(deal.id)))
       && !Object.keys(cachedPatch.patch).some(key => fields.has(key))) {
@@ -345,7 +348,25 @@ export function maintainDeals(deals, { policy = {}, state = {}, edits = [], now 
         corrected.push({id:deal.id, fields:Object.keys(cachedPatch.patch), method:'verified-correction-replay'});
       }
     }
-    if (!protectedDeal(deal, edits, policy) && !pendingDescription(deal) && policy.automaticLocalCopy === true && !fields.has('title') && !fields.has('description')) {
+    let extracted = null;
+    if (!protectedDeal(deal, edits, policy) && !pendingDescription(deal) && policy.automaticLocalCopy === true
+      && !deal.editedInSlack && !deal.slackEditedAt && !deal.slackFormEditTs && !deal.liveEditedAt
+      && !['title', 'description', 'brand', 'logoUrl'].some(field => fields.has(field))) {
+      extracted = assessOriginalSocialCopy(deal, sourceEvidence.get(deal.id), now);
+    }
+    if (extracted) {
+      const { patch, caption, sentence } = extracted;
+      const inputHash = maintenanceFingerprint(deal);
+      const originalDeal = deal;
+      deal = { ...deal, ...patch };
+      const resultHash = maintenanceFingerprint(deal);
+      if (!nextState.corrections.some(entry => entry.id === deal.id && entry.inputHash === inputHash
+        && entry.resultHash === resultHash && entry.method === originalSocialCopyMethod)) {
+        nextState.corrections.push({ id: deal.id, inputHash, resultHash, at: now.toISOString(),
+          sourceHash: hash(caption), patch, originalDeal, quote: sentence, method: originalSocialCopyMethod });
+      }
+      corrected.push({ id: deal.id, fields: Object.keys(patch), method: originalSocialCopyMethod });
+    } else if (!protectedDeal(deal, edits, policy) && !pendingDescription(deal) && policy.automaticLocalCopy === true && !fields.has('title') && !fields.has('description')) {
       const cached = nextState.corrections.find(entry => entry.id === deal.id && entry.inputHash === fingerprint && !entry.patch);
       if (cached) {
         const replay = { ...deal, title: cached.title, description: cached.description };

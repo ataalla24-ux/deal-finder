@@ -35,6 +35,7 @@ import {
 import {
   buildInstagramGraphEvidencePayload,
   loadInstagramGraphEvidence,
+  loadInstagramGraphEvidenceReferences,
   writeInstagramGraphEvidence,
 } from './instagram-graph-evidence.js';
 import { enrichInstagramGraphMedia } from './instagram-media-evidence.js';
@@ -2474,6 +2475,7 @@ export async function runMetaInstagramCollector(options = {}) {
   const graphEvidence = buildInstagramGraphEvidencePayload(graphEvidenceEntries, {
     now,
     previous: previousGraphEvidence,
+    references: loadInstagramGraphEvidenceReferences(path.dirname(config.graphEvidencePath), lastGoodPayload?.deals),
     retentionDays: Math.max(14, config.maxOrganicAgeWithExpiryDays * 2),
   });
   report.graphEvidence = {

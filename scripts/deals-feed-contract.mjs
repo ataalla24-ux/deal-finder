@@ -5,6 +5,7 @@ import path from 'node:path';
 import { sanitizePublicDealText } from '../scraper/public-deal-text.js';
 import { applyDealRedemptions, loadDealRedemptions } from './deal-redemptions.mjs';
 import { redactPublishedCommunityDraft } from './community-public-boundary.mjs';
+import { clearReviewExpiry, hasReviewExpiry } from '../scraper/offer-period-fields.js';
 
 export const DEALS_FEED_SCHEMA_VERSION = 1;
 
@@ -29,9 +30,14 @@ export function stampDealsFeedBundle(bundle, options = {}) {
   const nowIso = options.nowIso || new Date().toISOString();
   const redemptionManifest = Object.hasOwn(options, 'redemptionManifest')
     ? options.redemptionManifest : loadDealRedemptions(options.redemptionManifestPath);
-  const bindingDeals = bundle.deals.map(redactPublishedCommunityDraft).map(sanitizePublicDealText).map(deal =>
-    deal.approvalPublicationMode === 'two-stage-v1' && deal.enrichmentFields?.includes('description')
-      ? { ...deal, description: stripEnrichmentNotice(deal.description) } : deal);
+  const bindingDeals = bundle.deals.map(redactPublishedCommunityDraft).map(sanitizePublicDealText).map(deal => {
+    const stripNotice = deal.approvalPublicationMode === 'two-stage-v1' && deal.enrichmentFields?.includes('description');
+    if (!stripNotice && !hasReviewExpiry(deal)) return deal;
+    const publicDeal = { ...deal };
+    if (stripNotice) publicDeal.description = stripEnrichmentNotice(deal.description);
+    clearReviewExpiry(publicDeal);
+    return publicDeal;
+  });
   const deals = applyDealRedemptions(bindingDeals, redemptionManifest, Date.parse(nowIso)).map(projectEnrichmentDeal);
   return {
     ...bundle,

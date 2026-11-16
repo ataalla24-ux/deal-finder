@@ -16,3 +16,21 @@ export function copyOfferPeriod(target, source) {
     if (Object.hasOwn(source, field)) target[field] = source[field];
   }
 }
+
+export function isReviewExpirySource(value) {
+  return /^(?:(?:short|post[-_ ]age)[-_ ])?review[-_ ]?ttl$/i.test(String(value || '').trim());
+}
+
+export function hasReviewExpiry(deal = {}) {
+  return [deal.expiryKind, deal.expirySource, deal.expiresSource].some(isReviewExpirySource);
+}
+
+export function clearReviewExpiry(deal) {
+  if (!hasReviewExpiry(deal) || hasReviewedOfferPeriod(deal)
+    || (deal.expiresDetectedFromUrl && !isReviewExpirySource(deal.expiresSource))) return false;
+  copyOfferPeriod(deal, { expires: '', expiryKind: 'unknown' });
+  if (deal.validity) {
+    deal.validity = { ...deal.validity, expiryDate: '', expirySource: '' };
+  }
+  return true;
+}

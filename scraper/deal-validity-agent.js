@@ -14,7 +14,7 @@ import { normalizeDealFacts, locationConflictReason } from './deal-factual-guard
 import { inspectDealContentQuality } from './deal-content-quality-utils.js';
 
 import { inspectDealUrlHealth, isVagueExpiry, parseExpiryShape, parseExplicitOfferPeriod, sparhamsterCouponRoundPath } from './expiry-utils.js';
-import { hasReviewedOfferPeriod } from './offer-period-fields.js';
+import { hasReviewedOfferPeriod, hasReviewExpiry, isReviewExpirySource } from './offer-period-fields.js';
 import { isHumanReviewedCommunity } from './community-review-utils.js';
 import {
   decodeInstagramShortcodeDate,
@@ -708,10 +708,15 @@ function collectExpiryCandidates(deal, health, now) {
     });
   };
 
-  const rawExpiryProvenance = cleanText(deal.expiresSource || deal.expirySource || deal.expiryKind);
-  const weakReviewTtl = /(?:short[-_\s]?review[-_\s]?ttl|review[-_\s]?ttl)/i.test(rawExpiryProvenance)
-    && confidenceRank(deal.dateConfidence) <= 1;
   const rawDealExpiry = deal.expires || deal.expiresOriginal || deal.end_date || deal.validity_date || '';
+  const rawExpiryProvenance = deal.expiresSource || deal.expirySource || deal.expiryKind;
+  const reviewExpiry = hasReviewExpiry(deal) && !reviewedPeriod;
+  const structuredEnd = toIsoDate(deal.validUntil);
+  const matchesStructuredEnd = Boolean(structuredEnd && toIsoDate(rawDealExpiry) === structuredEnd);
+  // Central may replace the source label with deal.structured while retaining
+  // the review-ttl kind. A separately sourced terminal still takes precedence.
+  const weakReviewTtl = reviewExpiry
+    && (isReviewExpirySource(rawExpiryProvenance) || !structuredEnd || matchesStructuredEnd);
   const literal = cleanText(deal.expiresOriginal || deal.expiryDisplayText);
   const literalShape = parseExpiryShape(literal, { now });
   const explicitLiteralYear = /\b20\d{2}\b/.test(literal);
@@ -743,7 +748,10 @@ function collectExpiryCandidates(deal, health, now) {
               contextText: [deal.title, deal.category, deal.type].filter(Boolean).join(' '),
             })
           : null);
-    add('deal.expires', rawDealExpiry, directExpiryShape, weakReviewTtl ? 30 : 50);
+    const rawShape = weakReviewTtl && directExpiryShape
+      ? { ...directExpiryShape, kind: 'review-ttl', confidence: 'low' }
+      : directExpiryShape;
+    add('deal.expires', rawDealExpiry, rawShape, weakReviewTtl ? 30 : 50);
   }
 
   const offerTiming = deal.evidence?.offerTiming;
@@ -758,21 +766,19 @@ function collectExpiryCandidates(deal, health, now) {
   }
 
   if (deal.validOn || deal.validFrom || deal.validUntil) {
-    const structuredProvenance = [deal.expirySource, deal.expiryKind]
-      .map(cleanText)
-      .join(' ');
-    const lowConfidenceReviewTtl = /review[-_\s]?ttl/i.test(structuredProvenance)
-      && confidenceRank(deal.dateConfidence) <= 1;
+    const structuredReviewTtl = reviewExpiry
+      && (matchesStructuredEnd || [deal.expirySource, deal.expiryKind].some(isReviewExpirySource));
+    const structuredKind = deal.expiryKind || (deal.validOn ? 'single' : deal.validUntil ? 'end' : 'start');
     add('deal.structured', deal.expiryDisplayText || deal.expires || '', {
-      kind: deal.expiryKind || (deal.validOn ? 'single' : (deal.validUntil ? 'end' : 'start')),
+      kind: structuredReviewTtl ? 'review-ttl' : structuredKind,
       raw: deal.expiryDisplayText || deal.validUntil || deal.validOn || deal.expires || '',
       validOn: deal.validOn || '',
       validFrom: deal.validFrom || '',
       validUntil: deal.validUntil || '',
-      confidence: deal.dateConfidence || '',
+      confidence: structuredReviewTtl ? 'low' : deal.dateConfidence || '',
       evidenceSource: deal.communityDateReview && deal.expirySource === 'slack.community-human-review'
         ? deal.expirySource : '',
-    }, lowConfidenceReviewTtl ? 40 : 90);
+    }, structuredReviewTtl ? 40 : 90);
   }
 
   const hints = reliableDateHints(health);
@@ -1337,6 +1343,11 @@ async function validateDeal(deal, context) {
   }
 
   if (selectedExpiry?.validOn || selectedExpiry?.validFrom || selectedExpiry?.validUntil || selectedExpiry?.kind === 'recurring') {
+    if (hasReviewExpiry(deal) && !hasReviewedOfferPeriod(deal) && selectedExpiry.kind !== 'review-ttl') {
+      // Do not let the stale review deadline overwrite a newly proven period
+      // when the selected offer is normalized after approval.
+      nextDeal.expiresOriginal = selectedExpiry.raw;
+    }
     nextDeal.expiryKind = selectedExpiry.kind || nextDeal.expiryKind;
     nextDeal.expiryDisplayText = selectedExpiry.raw || nextDeal.expiryDisplayText;
     nextDeal.dateConfidence = selectedExpiry.confidence || nextDeal.dateConfidence;

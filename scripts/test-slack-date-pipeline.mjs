@@ -4,10 +4,11 @@ import { mergeDealEvidence } from '../scraper/deal-evidence-utils.js';
 import { normalizeDealExpiry, parseExpiryShape, parseExpiryDetails } from '../scraper/expiry-utils.js';
 import { normalizeDealRecord } from '../scraper/deal-normalization-utils.js';
 import { validateDealsForSlack } from '../scraper/deal-validity-agent.js';
-import { normalizeDeal, mergeParsedDealsWithQueue } from '../scraper/slack-approve.js';
+import { normalizeDeal, mergeParsedDealsWithQueue, normalizeApprovedDealExpiries } from '../scraper/slack-approve.js';
 import { buildSlackMessage } from '../scraper/slack-notify.js';
 import { parseDigestDealMessage } from '../scraper/slack-digest-utils.js';
 import { prepareCommunityApproval } from '../scraper/community-review-utils.js';
+import { stampDealsFeedBundle } from './deals-feed-contract.mjs';
 import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
@@ -100,6 +101,45 @@ try {
     targetDateEvidence: 'explicit-phrase', targetDateRaw: 'Gültig bis 13.11.2026', targetDateKind: 'end', validUntil: '2026-11-13',
   });
   assert.equal(recurringConflict.decision.allowed, false, 'an explicit new source deadline cannot silently disappear behind a no-end review');
+
+  // Exact expiry and provenance fields from Spacebowls' pre-approval queue row.
+  const reviewAt = new Date('2026-11-16T14:57:47.190Z');
+  const reviewDeadline = '2026-11-19T14:39:53.646Z';
+  const spacebowls = {
+    id: 'meta-ig-17868632664677829', brand: 'foodora', title: 'HOTBOWL + gratis KOOKIE CAT COOKIE',
+    description: 'Zu jeder Hotbowl gibt es einen Kookie Cat Cookie gratis. Pfauengasse 8, 1060 Wien.',
+    source: 'Instagram', originSource: 'Meta Instagram Hashtag API', category: 'essen', type: 'gratis',
+    url: 'https://www.instagram.com/p/DfzZuz8iLNh/', distance: 'Wien',
+    sourcePublishedAt: '2026-11-16T12:54:01.000Z', sourcePublishedAtSource: 'url.instagramShortcode',
+    discoveredAt: '2026-11-16T14:39:53.000Z', expires: reviewDeadline, validUntil: reviewDeadline,
+    expiresOriginal: reviewDeadline, expiryDisplayText: '2026-11-19',
+    expiryKind: 'review-ttl', expirySource: 'deal.structured', expiresSource: 'deal.structured', dateConfidence: 'low',
+  };
+  const checkSpacebowls = async (dateHints = {}) => (await validateDealsForSlack([structuredClone(spacebowls)], {
+    now: reviewAt, concurrency: 1, communityApproval: true,
+    inspectDealUrlHealth: async url => ({ status: 200, finalUrl: url, dateHints, contentHints: {} }),
+  })).results[0];
+  const ttlValidation = await checkSpacebowls();
+  assert.equal(ttlValidation.decision.allowed, true);
+  assert.equal(ttlValidation.deal.expiryKind, 'review-ttl', 'validation preserves the review timer for queue handling');
+  assert.equal(ttlValidation.deal.validUntil, reviewDeadline);
+  const approvedSpacebowls = structuredClone(ttlValidation.deal);
+  await normalizeApprovedDealExpiries([approvedSpacebowls], { now: reviewAt, allowUrlLookup: false });
+  assert.equal(approvedSpacebowls.expiryKind, 'unknown', 'approval never presents a review timer as the merchant expiry');
+  for (const key of ['expires', 'validUntil', 'validOn', 'expiresOriginal', 'expiryDisplayText']) assert.ok(!approvedSpacebowls[key], key);
+  assert.ok(!approvedSpacebowls.validity.expiryDate && !approvedSpacebowls.validity.expirySource);
+  const stamped = stampDealsFeedBundle({ deals: [ttlValidation.deal] }, { nowIso: reviewAt.toISOString(), redemptionManifest: {} });
+  assert.equal(stamped.deals[0].expiryKind, 'unknown', 'direct feed stamping is also a public boundary');
+  assert.ok(!stamped.deals[0].validUntil && !stamped.deals[0].validity.expiryDate);
+  assert.equal(ttlValidation.deal.validUntil, reviewDeadline, 'publication projection does not mutate the queued timer');
+
+  const independentlyConfirmed = await checkSpacebowls({ targetDateEvidence: 'explicit-phrase',
+    targetDateRaw: 'Gültig bis 24.11.2026', targetDateKind: 'end', validUntil: '2026-11-24' });
+  assert.equal(independentlyConfirmed.decision.allowed, true);
+  assert.equal(independentlyConfirmed.decision.expiryDate, '2026-11-24');
+  await normalizeApprovedDealExpiries([independentlyConfirmed.deal], { now: reviewAt, allowUrlLookup: false });
+  assert.equal(independentlyConfirmed.deal.validUntil, '2026-11-24', 'an explicit source replacement survives approval normalization');
+  assert.equal(independentlyConfirmed.deal.validity.expiryDate, '2026-11-24');
 
   const startEnd = { expires: '2026-11-16', expiresOriginal: '2026-11-16',
     validFrom: '2026-11-14', validUntil: '2026-11-16', expiryKind: 'range' };

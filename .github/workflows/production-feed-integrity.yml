@@ -49,6 +49,8 @@ on:
       - "scripts/test-generated-state-merge.mjs"
       - "scraper/ai-credit-budget.js"
       - "scripts/automatic-deal-maintenance.mjs"
+      - "scripts/original-social-copy.mjs"
+      - "scripts/test-original-social-copy.mjs"
       - "scripts/verified-expiry-apply.mjs"
       - "scripts/expiry-fixed-flight.mjs"
       - "scripts/expiry-instagram-finite-range.mjs"
@@ -155,6 +157,7 @@ jobs:
           node scripts/test-map-location-classification.mjs
           node scripts/test-generated-state-merge.mjs
           node --test scripts/test-ai-credit-budget.mjs scripts/test-automatic-maintenance.mjs
+          node --test scripts/test-original-social-copy.mjs
           node --test scripts/test-expiry-fixed-flight.mjs scripts/test-expiry-instagram-finite-range.mjs scripts/test-expiry-sparhamster-coupon.mjs scripts/test-verified-expiry-apply.mjs
           node --test scripts/test-server-quality.mjs
           node scripts/test-community-extraction.mjs
