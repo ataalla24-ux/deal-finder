@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-11-16T16:18:40.034Z",
+  "generatedAt": "2026-11-16T16:40:03.842Z",
   "discoveryAvailability": {
     "note": "Transport evidence, not deal yield. Retry eligibility is not recovery. Candidate counts are not Slack deliveries. No extra runs or quota resets.",
     "lanes": [
@@ -54,9 +54,9 @@
   },
   "summary": {
     "filesConsidered": 32,
-    "totalCandidates": 662,
-    "uniqueCandidates": 646,
-    "distinctCandidates": 653,
+    "totalCandidates": 670,
+    "uniqueCandidates": 654,
+    "distinctCandidates": 661,
     "duplicateClusters": 7,
     "topHealthySources": [
       {
@@ -78,15 +78,15 @@
         "totalDeals": 1
       },
       {
-        "sourceKey": "instagram-verified",
-        "sourceLabel": "Instagram",
-        "healthScore": 61,
-        "totalDeals": 6
+        "sourceKey": "church-events",
+        "sourceLabel": "Freikirchen Wien",
+        "healthScore": 64,
+        "totalDeals": 4
       },
       {
-        "sourceKey": "firecrawl5",
-        "sourceLabel": "Firecrawl Key 5 - Instagram Gastro",
-        "healthScore": 56,
+        "sourceKey": "church-gemeinde",
+        "sourceLabel": "Freikirchen Wien",
+        "healthScore": 64,
         "totalDeals": 4
       }
     ],
@@ -225,15 +225,6 @@
     ],
     "topSourcesToFix": [
       {
-        "sourceKey": "church-gottesdienste",
-        "sourceLabel": "church-gottesdienste",
-        "healthScore": 0,
-        "issues": [
-          "liefert aktuell 0 Deals"
-        ],
-        "sampleTitles": []
-      },
-      {
         "sourceKey": "firecrawl2",
         "sourceLabel": "Firecrawl Key 3 - Consumables",
         "healthScore": 0,
@@ -275,6 +266,16 @@
         "sourceLabel": "Apify Instagram",
         "healthScore": 0,
         "issues": [
+          "liefert aktuell 0 Deals"
+        ],
+        "sampleTitles": []
+      },
+      {
+        "sourceKey": "instagram-apify2",
+        "sourceLabel": "Apify 2 Vienna Food Discovery",
+        "healthScore": 0,
+        "issues": [
+          "letzter Lauf fand Kandidaten, aber akzeptierte keinen Deal",
           "liefert aktuell 0 Deals"
         ],
         "sampleTitles": []
@@ -528,6 +529,159 @@
       "coverageScore": 11,
       "precisionScore": 66,
       "sourceWeightScore": 51
+    },
+    {
+      "sourceKey": "church-events",
+      "file": "deals-pending-church-events.json",
+      "sourceLabel": "Freikirchen Wien",
+      "totalDeals": 4,
+      "uniqueDeals": 4,
+      "duplicateDeals": 0,
+      "duplicateAcrossSources": 0,
+      "fresh1dCount": 4,
+      "fresh7dCount": 4,
+      "viennaCount": 4,
+      "foodDrinkCount": 0,
+      "promoCount": 0,
+      "missingUrlCount": 0,
+      "sampleTitles": [
+        "VCC JesusZentrum Events",
+        "ICF Wien Events",
+        "CIG Wien Events"
+      ],
+      "lastRun": null,
+      "uniqueRate": 1,
+      "duplicateRate": 0,
+      "fresh1dRate": 1,
+      "fresh7dRate": 1,
+      "viennaRate": 1,
+      "foodDrinkRate": 0,
+      "promoRate": 0,
+      "missingUrlRate": 0,
+      "averageQualityScore": 74,
+      "topCategories": [
+        {
+          "value": "events",
+          "count": 4
+        }
+      ],
+      "topTypes": [
+        {
+          "value": "event",
+          "count": 4
+        }
+      ],
+      "issues": [
+        "geringe Food-/Drink-Relevanz",
+        "wenige klare Gratis-/Promo-Signale"
+      ],
+      "healthScore": 64,
+      "missionFitScore": 37,
+      "coverageScore": 9,
+      "precisionScore": 54,
+      "sourceWeightScore": 42
+    },
+    {
+      "sourceKey": "church-gemeinde",
+      "file": "deals-pending-church-gemeinde.json",
+      "sourceLabel": "Freikirchen Wien",
+      "totalDeals": 4,
+      "uniqueDeals": 4,
+      "duplicateDeals": 0,
+      "duplicateAcrossSources": 0,
+      "fresh1dCount": 4,
+      "fresh7dCount": 4,
+      "viennaCount": 4,
+      "foodDrinkCount": 0,
+      "promoCount": 0,
+      "missingUrlCount": 0,
+      "sampleTitles": [
+        "VCC JesusZentrum",
+        "ICF Wien",
+        "CIG Wien"
+      ],
+      "lastRun": null,
+      "uniqueRate": 1,
+      "duplicateRate": 0,
+      "fresh1dRate": 1,
+      "fresh7dRate": 1,
+      "viennaRate": 1,
+      "foodDrinkRate": 0,
+      "promoRate": 0,
+      "missingUrlRate": 0,
+      "averageQualityScore": 72,
+      "topCategories": [
+        {
+          "value": "kirche",
+          "count": 4
+        }
+      ],
+      "topTypes": [
+        {
+          "value": "info",
+          "count": 4
+        }
+      ],
+      "issues": [
+        "geringe Food-/Drink-Relevanz",
+        "wenige klare Gratis-/Promo-Signale"
+      ],
+      "healthScore": 64,
+      "missionFitScore": 37,
+      "coverageScore": 9,
+      "precisionScore": 54,
+      "sourceWeightScore": 42
+    },
+    {
+      "sourceKey": "church-gottesdienste",
+      "file": "deals-pending-church-gottesdienste.json",
+      "sourceLabel": "Freikirchen Wien",
+      "totalDeals": 4,
+      "uniqueDeals": 4,
+      "duplicateDeals": 0,
+      "duplicateAcrossSources": 0,
+      "fresh1dCount": 4,
+      "fresh7dCount": 4,
+      "viennaCount": 4,
+      "foodDrinkCount": 0,
+      "promoCount": 0,
+      "missingUrlCount": 0,
+      "sampleTitles": [
+        "VCC JesusZentrum Gottesdienste",
+        "ICF Wien Gottesdienste",
+        "CIG Wien Gottesdienste"
+      ],
+      "lastRun": null,
+      "uniqueRate": 1,
+      "duplicateRate": 0,
+      "fresh1dRate": 1,
+      "fresh7dRate": 1,
+      "viennaRate": 1,
+      "foodDrinkRate": 0,
+      "promoRate": 0,
+      "missingUrlRate": 0,
+      "averageQualityScore": 78,
+      "topCategories": [
+        {
+          "value": "kirche",
+          "count": 4
+        }
+      ],
+      "topTypes": [
+        {
+          "value": "info",
+          "count": 4
+        }
+      ],
+      "issues": [
+        "geringe Food-/Drink-Relevanz",
+        "wenige klare Gratis-/Promo-Signale"
+      ],
+      "healthScore": 64,
+      "missionFitScore": 37,
+      "coverageScore": 9,
+      "precisionScore": 54,
+      "sourceWeightScore": 42
     },
     {
       "sourceKey": "instagram-verified",
@@ -1057,108 +1211,6 @@
       "sourceWeightScore": 54
     },
     {
-      "sourceKey": "church-gemeinde",
-      "file": "deals-pending-church-gemeinde.json",
-      "sourceLabel": "Freikirchen Wien",
-      "totalDeals": 3,
-      "uniqueDeals": 3,
-      "duplicateDeals": 0,
-      "duplicateAcrossSources": 0,
-      "fresh1dCount": 0,
-      "fresh7dCount": 0,
-      "viennaCount": 3,
-      "foodDrinkCount": 0,
-      "promoCount": 0,
-      "missingUrlCount": 0,
-      "sampleTitles": [
-        "ICF Wien",
-        "CIG Wien",
-        "Hillsong Vienna"
-      ],
-      "lastRun": null,
-      "uniqueRate": 1,
-      "duplicateRate": 0,
-      "fresh1dRate": 0,
-      "fresh7dRate": 0,
-      "viennaRate": 1,
-      "foodDrinkRate": 0,
-      "promoRate": 0,
-      "missingUrlRate": 0,
-      "averageQualityScore": 72,
-      "topCategories": [
-        {
-          "value": "kirche",
-          "count": 3
-        }
-      ],
-      "topTypes": [
-        {
-          "value": "info",
-          "count": 3
-        }
-      ],
-      "issues": [
-        "wenige Deals sind frischer als 1 Tag",
-        "geringe Food-/Drink-Relevanz",
-        "wenige klare Gratis-/Promo-Signale"
-      ],
-      "healthScore": 50,
-      "missionFitScore": 15,
-      "coverageScore": 7,
-      "precisionScore": 42,
-      "sourceWeightScore": 29
-    },
-    {
-      "sourceKey": "church-events",
-      "file": "deals-pending-church-events.json",
-      "sourceLabel": "Freikirchen Wien",
-      "totalDeals": 1,
-      "uniqueDeals": 1,
-      "duplicateDeals": 0,
-      "duplicateAcrossSources": 0,
-      "fresh1dCount": 0,
-      "fresh7dCount": 0,
-      "viennaCount": 1,
-      "foodDrinkCount": 0,
-      "promoCount": 0,
-      "missingUrlCount": 0,
-      "sampleTitles": [
-        "VCC JesusZentrum Events"
-      ],
-      "lastRun": null,
-      "uniqueRate": 1,
-      "duplicateRate": 0,
-      "fresh1dRate": 0,
-      "fresh7dRate": 0,
-      "viennaRate": 1,
-      "foodDrinkRate": 0,
-      "promoRate": 0,
-      "missingUrlRate": 0,
-      "averageQualityScore": 74,
-      "topCategories": [
-        {
-          "value": "events",
-          "count": 1
-        }
-      ],
-      "topTypes": [
-        {
-          "value": "event",
-          "count": 1
-        }
-      ],
-      "issues": [
-        "wenige Deals sind frischer als 1 Tag",
-        "geringe Food-/Drink-Relevanz",
-        "wenige klare Gratis-/Promo-Signale"
-      ],
-      "healthScore": 50,
-      "missionFitScore": 15,
-      "coverageScore": 6,
-      "precisionScore": 42,
-      "sourceWeightScore": 28
-    },
-    {
       "sourceKey": "gutscheine",
       "file": "deals-pending-gutscheine.json",
       "sourceLabel": "Gutscheine.at",
@@ -1645,42 +1697,6 @@
       "coverageScore": 1,
       "precisionScore": 14,
       "sourceWeightScore": 11
-    },
-    {
-      "sourceKey": "church-gottesdienste",
-      "file": "deals-pending-church-gottesdienste.json",
-      "sourceLabel": "church-gottesdienste",
-      "totalDeals": 0,
-      "uniqueDeals": 0,
-      "duplicateDeals": 0,
-      "duplicateAcrossSources": 0,
-      "fresh1dCount": 0,
-      "fresh7dCount": 0,
-      "viennaCount": 0,
-      "foodDrinkCount": 0,
-      "promoCount": 0,
-      "missingUrlCount": 0,
-      "sampleTitles": [],
-      "lastRun": null,
-      "uniqueRate": 0,
-      "duplicateRate": 0,
-      "fresh1dRate": 0,
-      "fresh7dRate": 0,
-      "viennaRate": 0,
-      "foodDrinkRate": 0,
-      "promoRate": 0,
-      "missingUrlRate": 0,
-      "averageQualityScore": 0,
-      "topCategories": [],
-      "topTypes": [],
-      "issues": [
-        "liefert aktuell 0 Deals"
-      ],
-      "healthScore": 0,
-      "missionFitScore": 0,
-      "coverageScore": 0,
-      "precisionScore": 0,
-      "sourceWeightScore": 0
     },
     {
       "sourceKey": "firecrawl2",
