@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-11-16T12:20:18.401Z",
+  "generatedAt": "2026-11-16T12:32:08.670Z",
   "discoveryAvailability": {
     "note": "Transport evidence, not deal yield. Retry eligibility is not recovery. Candidate counts are not Slack deliveries. No extra runs or quota resets.",
     "lanes": [
@@ -86,8 +86,8 @@
       {
         "sourceKey": "firecrawl5",
         "sourceLabel": "Firecrawl Key 5 - Instagram Gastro",
-        "healthScore": 59,
-        "totalDeals": 3
+        "healthScore": 60,
+        "totalDeals": 4
       }
     ],
     "topMissionSources": [
@@ -98,16 +98,16 @@
         "totalDeals": 9
       },
       {
-        "sourceKey": "firecrawl5",
-        "sourceLabel": "Firecrawl Key 5 - Instagram Gastro",
-        "missionFitScore": 65,
-        "totalDeals": 3
-      },
-      {
         "sourceKey": "member-benefits",
         "sourceLabel": "Member Benefits",
         "missionFitScore": 63,
         "totalDeals": 110
+      },
+      {
+        "sourceKey": "firecrawl5",
+        "sourceLabel": "Firecrawl Key 5 - Instagram Gastro",
+        "missionFitScore": 63,
+        "totalDeals": 4
       },
       {
         "sourceKey": "food3",
@@ -126,7 +126,7 @@
       {
         "sourceKey": "member-benefits",
         "sourceLabel": "Member Benefits",
-        "coverageScore": 75,
+        "coverageScore": 76,
         "totalDeals": 110,
         "fresh1dCount": 14
       },
@@ -134,7 +134,7 @@
         "sourceKey": "gastro2",
         "sourceLabel": "Firecrawl Key 1 - Gastro",
         "coverageScore": 69,
-        "totalDeals": 127,
+        "totalDeals": 126,
         "fresh1dCount": 0
       },
       {
@@ -167,12 +167,6 @@
         "totalDeals": 110
       },
       {
-        "sourceKey": "firecrawl5",
-        "sourceLabel": "Firecrawl Key 5 - Instagram Gastro",
-        "precisionScore": 67,
-        "totalDeals": 3
-      },
-      {
         "sourceKey": "food3",
         "sourceLabel": "Firecrawl Key 2 - Food",
         "precisionScore": 66,
@@ -189,6 +183,12 @@
         "sourceLabel": "Meta Instagram Graph",
         "precisionScore": 64,
         "totalDeals": 43
+      },
+      {
+        "sourceKey": "firecrawl5",
+        "sourceLabel": "Firecrawl Key 5 - Instagram Gastro",
+        "precisionScore": 63,
+        "totalDeals": 4
       }
     ],
     "topWeightedSources": [
@@ -213,14 +213,14 @@
       {
         "sourceKey": "firecrawl5",
         "sourceLabel": "Firecrawl Key 5 - Instagram Gastro",
-        "sourceWeightScore": 53,
-        "totalDeals": 3
+        "sourceWeightScore": 52,
+        "totalDeals": 4
       },
       {
         "sourceKey": "gastro2",
         "sourceLabel": "Firecrawl Key 1 - Gastro",
         "sourceWeightScore": 52,
-        "totalDeals": 127
+        "totalDeals": 126
       }
     ],
     "topSourcesToFix": [
@@ -285,6 +285,7 @@
       "failedSources": [],
       "completedWithErrors": [
         "firecrawl2",
+        "firecrawl5",
         "joe",
         "power",
         "wien-combined"
@@ -375,7 +376,7 @@
       ],
       "healthScore": 74,
       "missionFitScore": 63,
-      "coverageScore": 75,
+      "coverageScore": 76,
       "precisionScore": 72,
       "sourceWeightScore": 70
     },
@@ -442,7 +443,7 @@
       ],
       "healthScore": 70,
       "missionFitScore": 50,
-      "coverageScore": 10,
+      "coverageScore": 11,
       "precisionScore": 66,
       "sourceWeightScore": 51
     },
@@ -584,7 +585,7 @@
       ],
       "healthScore": 61,
       "missionFitScore": 46,
-      "coverageScore": 11,
+      "coverageScore": 12,
       "precisionScore": 56,
       "sourceWeightScore": 45
     },
@@ -592,54 +593,55 @@
       "sourceKey": "firecrawl5",
       "file": "deals-pending-firecrawl5.json",
       "sourceLabel": "Firecrawl Key 5 - Instagram Gastro",
-      "totalDeals": 3,
-      "uniqueDeals": 1,
+      "totalDeals": 4,
+      "uniqueDeals": 2,
       "duplicateDeals": 2,
       "duplicateAcrossSources": 2,
-      "fresh1dCount": 0,
-      "fresh7dCount": 3,
+      "fresh1dCount": 1,
+      "fresh7dCount": 4,
       "viennaCount": 2,
-      "foodDrinkCount": 3,
+      "foodDrinkCount": 4,
       "promoCount": 2,
       "missingUrlCount": 0,
       "sampleTitles": [
+        "Lieferando: ⚠️ Wetterwarnung für Wien: Heute regnet es Super Deals! ...",
         "Dancing Noodles: 🎄 Weihnachtszeit bei Dancing Noodles in Wien! 🍜 🎁 Vom 1.",
-        "ciosgrill: Mit 0 € Marketingbudget ganz Wien erobern? Challenge ...",
-        "Döner: 2 + 1 Döner GRATIS✅ egal welche Dönersorten🥙 Das ..."
+        "ciosgrill: Mit 0 € Marketingbudget ganz Wien erobern? Challenge ..."
       ],
       "lastRun": {
-        "status": "completed",
-        "startedAt": "2026-11-15T11:46:21.539Z",
-        "finishedAt": "2026-11-15T11:47:08.355Z",
-        "durationMs": 46816,
+        "status": "completed-with-errors",
+        "startedAt": "2026-11-16T12:28:02.511Z",
+        "finishedAt": "2026-11-16T12:31:12.803Z",
+        "durationMs": 190292,
         "counts": {
-          "rawCandidates": 26,
-          "normalizedCandidates": 25,
+          "rawCandidates": 11,
+          "normalizedCandidates": 11,
           "verifiedCandidates": 4,
-          "previousDeals": 4,
+          "previousDeals": 3,
           "acceptedDeals": 4,
-          "rejectedDeals": 25
+          "rejectedDeals": 10
         },
         "rejectedByReason": {
-          "excluded-giveaway": 1,
-          "post-verification-rejected": 24
+          "post-verification-rejected": 10
         },
-        "errors": [],
+        "errors": [
+          "https://www.instagram.com/mosquito_mexican/: Firecrawl Agent nach 120s abgebrochen"
+        ],
         "reportFile": "deal-pipeline-last-run-firecrawl5.json"
       },
-      "uniqueRate": 0.3,
-      "duplicateRate": 0.7,
-      "fresh1dRate": 0,
+      "uniqueRate": 0.5,
+      "duplicateRate": 0.5,
+      "fresh1dRate": 0.3,
       "fresh7dRate": 1,
-      "viennaRate": 0.7,
+      "viennaRate": 0.5,
       "foodDrinkRate": 1,
-      "promoRate": 0.7,
+      "promoRate": 0.5,
       "missingUrlRate": 0,
       "averageQualityScore": 80,
       "topCategories": [
         {
           "value": "essen",
-          "count": 3
+          "count": 4
         }
       ],
       "topTypes": [
@@ -650,18 +652,21 @@
         {
           "value": "gutschein",
           "count": 1
+        },
+        {
+          "value": "rabatt",
+          "count": 1
         }
       ],
       "issues": [
-        "wenige Deals sind frischer als 1 Tag",
         "Wien-Signal ist zu schwach",
         "hohe Überschneidung mit anderen Quellen"
       ],
-      "healthScore": 59,
-      "missionFitScore": 65,
-      "coverageScore": 13,
-      "precisionScore": 67,
-      "sourceWeightScore": 53
+      "healthScore": 60,
+      "missionFitScore": 63,
+      "coverageScore": 12,
+      "precisionScore": 63,
+      "sourceWeightScore": 52
     },
     {
       "sourceKey": "power",
@@ -775,20 +780,20 @@
       "sourceKey": "gastro2",
       "file": "deals-pending-gastro2.json",
       "sourceLabel": "Firecrawl Key 1 - Gastro",
-      "totalDeals": 127,
-      "uniqueDeals": 120,
+      "totalDeals": 126,
+      "uniqueDeals": 119,
       "duplicateDeals": 7,
       "duplicateAcrossSources": 5,
       "fresh1dCount": 0,
-      "fresh7dCount": 2,
+      "fresh7dCount": 1,
       "viennaCount": 1,
-      "foodDrinkCount": 124,
-      "promoCount": 54,
+      "foodDrinkCount": 123,
+      "promoCount": 53,
       "missingUrlCount": 0,
       "sampleTitles": [
-        "kubbeviyana: 🌱 Wie jedes Jahr haben wir auch heuer als Kubbe Çocuk ...",
         "10 % Rabatt auf die gesamte Bestellung bei telefonischer Bestellung",
-        "1+1: Beim Kauf eines Big Mac oder McChicken über foodora gibt es denselben Burger gratis dazu"
+        "1+1: Beim Kauf eines Big Mac oder McChicken über foodora gibt es denselben Burger gratis dazu",
+        "1+1 Crispy Chicken: ein Crispy Chicken kaufen, ein weiteres gratis erhalten; Originalgutschein erforderlich"
       ],
       "lastRun": {
         "status": "completed",
@@ -817,11 +822,11 @@
       "foodDrinkRate": 1,
       "promoRate": 0.4,
       "missingUrlRate": 0,
-      "averageQualityScore": 64.9,
+      "averageQualityScore": 65,
       "topCategories": [
         {
           "value": "essen",
-          "count": 116
+          "count": 115
         },
         {
           "value": "kaffee",
@@ -839,7 +844,7 @@
       "topTypes": [
         {
           "value": "rabatt",
-          "count": 76
+          "count": 75
         },
         {
           "value": "bogo",
@@ -1094,9 +1099,9 @@
       ],
       "healthScore": 50,
       "missionFitScore": 15,
-      "coverageScore": 6,
+      "coverageScore": 7,
       "precisionScore": 42,
-      "sourceWeightScore": 28
+      "sourceWeightScore": 29
     },
     {
       "sourceKey": "church-events",
@@ -1144,7 +1149,7 @@
       ],
       "healthScore": 50,
       "missionFitScore": 15,
-      "coverageScore": 5,
+      "coverageScore": 6,
       "precisionScore": 42,
       "sourceWeightScore": 28
     },
@@ -1196,7 +1201,7 @@
       ],
       "healthScore": 44,
       "missionFitScore": 28,
-      "coverageScore": 21,
+      "coverageScore": 22,
       "precisionScore": 36,
       "sourceWeightScore": 33
     },
@@ -1300,7 +1305,7 @@
       ],
       "healthScore": 44,
       "missionFitScore": 28,
-      "coverageScore": 19,
+      "coverageScore": 20,
       "precisionScore": 36,
       "sourceWeightScore": 32
     },
@@ -1356,9 +1361,9 @@
       ],
       "healthScore": 43,
       "missionFitScore": 28,
-      "coverageScore": 22,
+      "coverageScore": 23,
       "precisionScore": 35,
-      "sourceWeightScore": 32
+      "sourceWeightScore": 33
     },
     {
       "sourceKey": "gutscheine",
