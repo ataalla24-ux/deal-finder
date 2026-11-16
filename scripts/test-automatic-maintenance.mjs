@@ -117,6 +117,7 @@ test('an editor-confirmed date can expire from an explicit one-day time window i
     'Am 06.11.2026 von 22:00 bis 20:00 gibt es ein Angebot.',
     'Am 06.11.2026 von 8:00 bis 08:00 gibt es ein Angebot.',
     'Am 06.11.2026 von 12:00 bis 15:00 am nächsten Tag.',
+    'Am 06.11.2026 von 12:00 bis 15:00. Die Aktion läuft weiter.',
   ]) {
     assert.equal(check({ ...record, caption }).eligible, false, caption);
   }

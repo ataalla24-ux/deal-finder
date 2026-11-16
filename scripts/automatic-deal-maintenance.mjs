@@ -115,7 +115,7 @@ function editorConfirmedSingleDayEnds(value, end) {
   const windows = [...text.matchAll(window)];
   if (!windows.length) return dates;
   const mentions = originalDateClauses(value, bareDatePattern);
-  if (reuseOrUnclearTiming.test(text) || /\b(?:nicht|not|am nachsten tag|am folgenden tag|uber mitternacht)\b/.test(text)
+  if (reuseOrUnclearTiming.test(text) || /\b(?:nicht|not|am nachsten tag|am folgenden tag|uber mitternacht|lauft weiter|geht weiter|weiterhin|auch morgen|fortgesetzt)\b/.test(text)
     || windows.some(([, start, finish]) => start.padStart(5, '0') >= finish.padStart(5, '0'))
     || mentions.some(clause => clause.ambiguous || clause.monthDay !== end.slice(5)
       || clause.year && clause.year !== end.slice(0, 4))) return [...dates, ''];
