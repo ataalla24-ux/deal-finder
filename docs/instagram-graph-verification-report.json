@@ -1,7 +1,7 @@
 {
-  "generatedAt": "2026-11-16T07:10:05.479Z",
+  "generatedAt": "2026-11-16T07:12:14.217Z",
   "source": "instagram-graph-cross-source-verification",
-  "status": "ok",
+  "status": "failed-preserved",
   "configured": true,
   "scannedFiles": [
     "deals-pending-church-events.json",
@@ -188,10 +188,15 @@
       "candidates": 1
     }
   ],
-  "fetchedPosts": 100,
-  "exactMatches": 4,
+  "fetchedPosts": 0,
+  "exactMatches": 0,
   "retainedEvidencePosts": 2000,
-  "errors": [],
+  "errors": [
+    {
+      "username": "diebowlerei",
+      "message": "Instagram shared quota paused: rolling-hour budget exhausted"
+    }
+  ],
   "accountFailures": {
     "natascha_rapid": {
       "count": 3,
@@ -207,19 +212,25 @@
   "sharedQuota": {
     "limitPerHour": 237,
     "usageThreshold": 95,
-    "requests": 4,
-    "reserved": 5,
-    "stopped": false,
-    "reason": "",
-    "highestUsagePercent": 57,
+    "requests": 0,
+    "reserved": 0,
+    "stopped": true,
+    "reason": "Instagram shared quota paused: rolling-hour budget exhausted",
+    "highestUsagePercent": 0,
     "waitedMs": 0,
     "pacingMs": 0,
-    "retryAt": "",
+    "retryAt": "2026-11-16T07:29:28.997Z",
     "adaptiveSafetyCeiling": 190,
     "adaptiveIncreases": 0,
     "storageFailure": null
   },
+  "globalError": {
+    "username": "diebowlerei",
+    "status": 0,
+    "code": "SCAN_BUDGET",
+    "message": "Instagram shared quota paused: rolling-hour budget exhausted"
+  },
   "blockedEvidencePosts": 55,
-  "unmatchedCandidatePosts": 0,
-  "message": "4/4 fresh cross-source Instagram candidates matched exactly via Graph API."
+  "unmatchedCandidatePosts": 4,
+  "message": "0/4 fresh cross-source Instagram candidates matched exactly via Graph API."
 }
