@@ -51,6 +51,44 @@ test('source reader scopes exact public thread, rejects redirects/inactive/unkno
   assert.match(complete.caption, /App-Coupon/);
 });
 
+test('a complete Firecrawl blurb cannot turn a denied product price into a current offer', async () => {
+  const momaxUrl = 'https://www.preisjaeger.at/deals/essens-im-momax-mia-cucina-blackshopping-party-371883';
+  const historical = 'Schon länger kein Hühner Schnitzel für 5,50€ dort bekommen. Hab den Burger probiert. Den Donat bekommt man umsonst, hab aber nochmal danach gefragt, dachte die Bedienung vergisst es fast. Die Gutscheine liegen immer vor dem Restaurant als Prospekt aus. Das zeigt man dann vor. Geht aber glaub auch ohne. Ihr könnt auch die Gutscheine mit dem Handy vorzeigen. Die bekommt man wenn man in der mailing list drin ist.';
+  const input = {
+    id: 'fc4g-1r04rhe', url: momaxUrl, source: 'Firecrawl Gastro #4', brand: 'mömax Restaurant',
+    title: 'Hühner-Schnitzel für €5,50; außerdem wird ein Burger sowie e',
+    description: 'Hühner-Schnitzel für €5,50; außerdem wird ein Burger sowie ein Gratis-Donut im Dealbericht genannt. Gutschein/Prospekt bzw. Handyvorzeige genügt laut Beitrag.',
+    distance: 'Wien', category: 'essen', type: 'gratis', expires: '2026-11-30', validUntil: '2026-11-30',
+    sourcePublishedAt: '2026-11-04T15:27:13Z', pipelineLifecycle: { manualDecision: 'approved' },
+  };
+  const checkedAt = new Date('2026-11-14T15:56:53.372Z');
+  let reads = 0;
+  const validate = (deal, description) => validateApprovalCandidates([deal], {
+    now: checkedAt, existingDeals: [], requireMap: false, approvalCachedReviewOnly: true,
+    inspectDealUrlHealth: async currentUrl => {
+      reads++;
+      assert.equal(currentUrl, momaxUrl);
+      const html = page(description, { threadId: '371883', canonicalUrl: momaxUrl, title: 'Essens im Mömax Mia Cucina BlackShopping Party' });
+      return { status: 200, checkedAt: checkedAt.toISOString(), finalUrl: currentUrl,
+        approvalSourceEvidence: extractApprovalSourceEvidence(html, currentUrl) };
+    },
+  });
+  const activeBurger = ' Burger mit Pommes und gratis Donut um 5,50 €.';
+  for (const source of [historical, historical + activeBurger,
+    historical + ' Ich wünsche mir wieder Hühnerschnitzel um 5,50 €.',
+    historical.replace('Schon länger kein', 'Es gibt nicht mehr')]) {
+    const blocked = await validate(input, source);
+    assert.equal(blocked.allowedDeals.length, 0);
+    assert.ok(blocked.results[0].decision.reasons.some(reason => /Preis.*ausdrücklich verneint/.test(reason)));
+    assert.equal(blocked.blockedDeals[0].pipelineLifecycle.manualDecision, 'approved');
+  }
+  const correct = { ...input, title: 'Burger-Menü mit Gratis-Donut um 5,50 €',
+    description: 'Burger mit Pommes und gratis Donut um 5,50 € mit Gutschein.', type: 'rabatt' };
+  assert.equal((await validate(correct, historical + activeBurger)).allowedDeals.length, 1);
+  assert.equal((await validate(input, historical + ' Jetzt gibt es das Hühnerschnitzel um 5.50 EUR.')).allowedDeals.length, 1);
+  assert.equal(reads, 6, 'each reconsideration reads only the existing verdict and source');
+});
+
 test('approval reuses one health GET, holds announcement with corrected start, and makes zero AI calls', async () => {
   const originalFetch = globalThis.fetch;
   const oldReview = process.env.APPROVAL_SOURCE_COPY_REVIEW;

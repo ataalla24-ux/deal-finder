@@ -137,6 +137,10 @@ assert.match(key4Source, /MAX_AGENT_FALLBACKS/);
 assert.match(key4Source, /FIRECRAWL4_BROAD_AGENT_PASSES/);
 assert.match(key4Source, /Diese Suche ist absichtlich offen/);
 assert.doesNotMatch(key4Source, /classifyKey4Evidence|dedupeKey4Candidates|FC4_MAX_AGE_DAYS/);
+assert.equal([...key4Source.matchAll(/const title = d\.item_given_away \|\| 'Gastro Deal';/g)].length, 2,
+  'both agent paths keep complete titles, even when character 60 falls inside a word');
+assert.equal([...key4Source.matchAll(/id: agentDealId\(brand, title, targetUrl\),/g)].length, 2,
+  'both paths preserve the established identity independently of the displayed title');
 
 assert.match(workflow, /FIRECRAWL_API_KEY4: \$\{\{ secrets\.FIRECRAWL_API_KEY4 \}\}/);
 assert.doesNotMatch(workflow, /FIRECRAWL_API_KEY(?:1|2|3|5|6):/);

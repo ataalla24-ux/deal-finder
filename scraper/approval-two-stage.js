@@ -7,6 +7,31 @@ const number = value => String(Number(value.replace(',', '.')));
 const values = (text, pattern, convert = match => match[1]) => [...text.matchAll(pattern)].map(convert);
 const missing = (expected, actual) => expected.some(value => !actual.includes(value));
 
+// A price in a past or denied claim cannot prove an active offer for the
+// same item. Match only an explicit product, price and negation in one clause.
+export function contradictedOfferPriceHold(deal, sourceEvidence) {
+  const source = normalized(sourceEvidence?.caption);
+  if (!source) return '';
+  const money = String.raw`(?:\d+(?:[.,]\d{1,2})?\s*(?:€|euros?|eur)|(?:€|euros?|eur)\s*\d+(?:[.,]\d{1,2})?)(?![\p{L}\p{N}]|[.,]\d)`;
+  const denied = new RegExp(String.raw`\b(?:kein(?:e[rmns]?)?|nicht\s+mehr)\s+([\p{L}][\p{L} -]{1,75}?)\s+(?:fur|um)\s+(${money})`, 'gu');
+  const deniedClaims = [...source.matchAll(denied)];
+  if (!deniedClaims.length) return '';
+  const copy = [deal.title, deal.description].map(value => normalized(value).replace(denied, ' '));
+  const remainingSource = source.replace(denied, ' ');
+  const amount = value => number(value.match(/\d+(?:[.,]\d+)?/)[0]);
+  for (const [, product, price] of deniedClaims) {
+    const name = product.split(/[ -]+/).filter(Boolean).join('[ -]*');
+    const claim = String.raw`(?<![\p{L}\p{N}])${name}\s+(?:fur|um)\s+(?:nur\s+)?(${money})`;
+    const priceClaim = new RegExp(claim, 'gu');
+    const currentClaim = new RegExp(String.raw`(?:^|[.!?;\n])\s*(?:jetzt|aktuell|heute|ab sofort)\s+(?:gibt es|bekommt man)\s+(?:wieder\s+)?(?:(?:das|den|die|ein(?:en|e)?)\s+)?${claim}(?!\s+(?:leider\s+)?nicht\b)`, 'gu');
+    const hasPrice = (text, pattern) => values(text, pattern, match => amount(match[1])).includes(amount(price));
+    if (copy.some(text => hasPrice(text, priceClaim)) && !hasPrice(remainingSource, currentClaim)) {
+      return 'Grundprüfung: Preis für dieses Produkt wird im aktuellen Beleg ausdrücklich verneint.';
+    }
+  }
+  return '';
+}
+
 // Deliberately small factual checks, not a semantic proof of an entire article.
 // Keep number punctuation/operators intact and compare monetary roles: a 20 EUR
 // minimum spend is not evidence for a 20 EUR discount.

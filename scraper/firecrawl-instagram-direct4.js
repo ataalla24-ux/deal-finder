@@ -138,6 +138,11 @@ function dealId(prefix, brand, title, url) {
   return prefix + '-' + stableHash(key);
 }
 
+function agentDealId(brand, title, url) {
+  // Keep IDs stable for already-seen offers while displaying the full title.
+  return dealId('fc4g', brand, title.slice(0, 60), url);
+}
+
 async function main() {
   console.log('🍕🔥 FIRECRAWL GASTRO AGENT #4');
   console.log('='.repeat(40));
@@ -351,11 +356,11 @@ async function main() {
 
             const isGratis = /gratis|kostenlos|free|0€|umsonst/i.test(d.item_given_away || '');
             const brand = d.brand_or_store || target.label;
-            const title = d.item_given_away?.substring(0, 60) || 'Gastro Deal';
+            const title = d.item_given_away || 'Gastro Deal';
             const ownerUsername = (d.owner_username || '').replace(/^@/, '').trim().toLowerCase();
 
             allDeals.push({
-              id: dealId('fc4g', brand, title, targetUrl),
+              id: agentDealId(brand, title, targetUrl),
               brand,
               title,
               description: [d.item_given_away, d.location].filter(Boolean).join(' – '),
@@ -498,11 +503,11 @@ async function main() {
 
             const isGratis = /gratis|kostenlos|free|0€|umsonst/i.test(d.item_given_away || '');
             const brand = d.brand_or_store || stat.label;
-            const title = d.item_given_away?.substring(0, 60) || 'Gastro Deal';
+            const title = d.item_given_away || 'Gastro Deal';
             const ownerUsername = (d.owner_username || '').replace(/^@/, '').trim().toLowerCase();
 
             allDeals.push({
-              id: dealId('fc4g', brand, title, targetUrl),
+              id: agentDealId(brand, title, targetUrl),
               brand,
               title,
               description: [d.item_given_away, d.location].filter(Boolean).join(' – '),

@@ -1,5 +1,5 @@
 import { prepareReviewedApprovalCopy } from './approval-reviewed-source-copy.js';
-import { basicCopyHold, prepareTwoStagePublication } from './approval-two-stage.js';
+import { basicCopyHold, contradictedOfferPriceHold, prepareTwoStagePublication } from './approval-two-stage.js';
 import { captureMapEnrichmentInput, projectEnrichmentDeal } from './deal-enrichment-state.js';
 import { officialFoodOfferKey } from './power-food-sources.js';
 import '../sentry/instrument.mjs';
@@ -892,12 +892,13 @@ async function validateApprovalCandidates(deals, options = {}) {
     if (!decision.allowed) continue;
     if (humanApproved(deal) && !existingIds.has(deal.id) && !isCommunitySubmission(deal)) {
       const copyPending = hasOnlyPreviewDescription(deal) || deal.approvalCopyReview?.deferred || deal.approvalCopyReview?.waitingForSlot;
-      const hold = copyPending ? basicCopyHold(deal, sourceEvidence.get(deal.id), { now }) : '';
+      const currentSource = sourceEvidence.get(deal.id);
+      const hold = contradictedOfferPriceHold(deal, currentSource) || (copyPending ? basicCopyHold(deal, currentSource, { now }) : '');
       if (hold) {
         decision.allowed = false;
         decision.reasons.push(hold);
         addedBlock = true;
-      } else Object.assign(deal, prepareTwoStagePublication(deal, { now, sourceEvidence: sourceEvidence.get(deal.id) }));
+      } else Object.assign(deal, prepareTwoStagePublication(deal, { now, sourceEvidence: currentSource }));
     }
     const site = sourceAddresses.get(deal.id);
     if (!decision.allowed || !site || cleanText(deal.address) !== site.address) continue;
