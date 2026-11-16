@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-11-16T09:48:14.975Z",
+  "generatedAt": "2026-11-16T10:26:37.055Z",
   "discoveryAvailability": {
     "note": "Transport evidence, not deal yield. Retry eligibility is not recovery. Candidate counts are not Slack deliveries. No extra runs or quota resets.",
     "lanes": [
@@ -54,9 +54,9 @@
   },
   "summary": {
     "filesConsidered": 32,
-    "totalCandidates": 661,
-    "uniqueCandidates": 645,
-    "distinctCandidates": 652,
+    "totalCandidates": 660,
+    "uniqueCandidates": 644,
+    "distinctCandidates": 651,
     "duplicateClusters": 7,
     "topHealthySources": [
       {
@@ -75,7 +75,7 @@
         "sourceKey": "food3",
         "sourceLabel": "Firecrawl Key 2 - Food",
         "healthScore": 70,
-        "totalDeals": 2
+        "totalDeals": 1
       },
       {
         "sourceKey": "instagram-verified",
@@ -113,7 +113,7 @@
         "sourceKey": "food3",
         "sourceLabel": "Firecrawl Key 2 - Food",
         "missionFitScore": 50,
-        "totalDeals": 2
+        "totalDeals": 1
       },
       {
         "sourceKey": "meta-instagram",
@@ -176,7 +176,7 @@
         "sourceKey": "food3",
         "sourceLabel": "Firecrawl Key 2 - Food",
         "precisionScore": 66,
-        "totalDeals": 2
+        "totalDeals": 1
       },
       {
         "sourceKey": "meta-instagram",
@@ -238,6 +238,7 @@
         "sourceLabel": "Firecrawl Key 3 - Consumables",
         "healthScore": 0,
         "issues": [
+          "letzter Lauf fand Kandidaten, aber akzeptierte keinen Deal",
           "liefert aktuell 0 Deals"
         ],
         "sampleTitles": []
@@ -283,6 +284,7 @@
       "reportedSources": 9,
       "failedSources": [],
       "completedWithErrors": [
+        "firecrawl2",
         "joe",
         "power",
         "wien-combined"
@@ -459,19 +461,18 @@
       "sourceKey": "food3",
       "file": "deals-pending-food3.json",
       "sourceLabel": "Firecrawl Key 2 - Food",
-      "totalDeals": 2,
-      "uniqueDeals": 2,
+      "totalDeals": 1,
+      "uniqueDeals": 1,
       "duplicateDeals": 0,
       "duplicateAcrossSources": 0,
       "fresh1dCount": 0,
-      "fresh7dCount": 2,
-      "viennaCount": 2,
-      "foodDrinkCount": 2,
+      "fresh7dCount": 1,
+      "viennaCount": 1,
+      "foodDrinkCount": 1,
       "promoCount": 0,
       "missingUrlCount": 0,
       "sampleTitles": [
-        "Ristorante Gondola: Tagesgericht, Domenicos Ravioli oder Domenicos Pasta, jeweils mit Tagessuppe oder Salat",
-        "Gel&GÖR Supermarkt: Sesamring (Simit), frische Eier (30er-Packung), weiße Hühnerkeule mit Rücken und weiße Hühnerbrust"
+        "Ristorante Gondola: Tagesgericht, Domenicos Ravioli oder Domenicos Pasta, jeweils mit Tagessuppe oder Salat"
       ],
       "lastRun": {
         "status": "completed",
@@ -505,16 +506,12 @@
         {
           "value": "essen",
           "count": 1
-        },
-        {
-          "value": "supermarkt",
-          "count": 1
         }
       ],
       "topTypes": [
         {
           "value": "rabatt",
-          "count": 2
+          "count": 1
         }
       ],
       "issues": [
@@ -523,7 +520,7 @@
       ],
       "healthScore": 70,
       "missionFitScore": 50,
-      "coverageScore": 11,
+      "coverageScore": 10,
       "precisionScore": 66,
       "sourceWeightScore": 51
     },
@@ -1691,23 +1688,25 @@
       "missingUrlCount": 0,
       "sampleTitles": [],
       "lastRun": {
-        "status": "completed",
-        "startedAt": "2026-11-15T10:10:31.994Z",
-        "finishedAt": "2026-11-15T10:12:37.924Z",
-        "durationMs": 125930,
+        "status": "completed-with-errors",
+        "startedAt": "2026-11-16T10:22:23.082Z",
+        "finishedAt": "2026-11-16T10:25:18.173Z",
+        "durationMs": 175091,
         "counts": {
-          "rawCandidates": 16,
-          "normalizedCandidates": 14,
-          "verifiedCandidates": 1,
-          "previousDeals": 1,
-          "acceptedDeals": 1,
-          "rejectedDeals": 16
+          "rawCandidates": 14,
+          "normalizedCandidates": 12,
+          "verifiedCandidates": 0,
+          "previousDeals": 0,
+          "acceptedDeals": 0,
+          "rejectedDeals": 14
         },
         "rejectedByReason": {
           "missing-concrete-offer": 2,
-          "post-verification-rejected": 14
+          "post-verification-rejected": 12
         },
-        "errors": [],
+        "errors": [
+          "https://www.instagram.com/explore/tags/kostenloswien/: Firecrawl Agent nach 120s abgebrochen"
+        ],
         "reportFile": "deal-pipeline-last-run-firecrawl2.json"
       },
       "uniqueRate": 0,
@@ -1722,6 +1721,7 @@
       "topCategories": [],
       "topTypes": [],
       "issues": [
+        "letzter Lauf fand Kandidaten, aber akzeptierte keinen Deal",
         "liefert aktuell 0 Deals"
       ],
       "healthScore": 0,
