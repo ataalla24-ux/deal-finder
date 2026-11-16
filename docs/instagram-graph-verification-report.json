@@ -1,7 +1,7 @@
 {
-  "generatedAt": "2026-11-16T08:40:00.384Z",
+  "generatedAt": "2026-11-16T09:13:57.368Z",
   "source": "instagram-graph-cross-source-verification",
-  "status": "ok",
+  "status": "failed-preserved",
   "configured": true,
   "scannedFiles": [
     "deals-pending-church-events.json",
@@ -135,7 +135,7 @@
       "candidates": 0
     },
     "deals-pending-meta-instagram.json": {
-      "deals": 45,
+      "deals": 44,
       "candidates": 3
     },
     "deals-pending-power.json": {
@@ -188,10 +188,15 @@
       "candidates": 1
     }
   ],
-  "fetchedPosts": 100,
-  "exactMatches": 4,
+  "fetchedPosts": 0,
+  "exactMatches": 0,
   "retainedEvidencePosts": 2000,
-  "errors": [],
+  "errors": [
+    {
+      "username": "stroeckfeierabend",
+      "message": "Instagram shared quota paused: shared cooldown"
+    }
+  ],
   "accountFailures": {
     "natascha_rapid": {
       "count": 3,
@@ -207,19 +212,25 @@
   "sharedQuota": {
     "limitPerHour": 190,
     "usageThreshold": 95,
-    "requests": 4,
-    "reserved": 5,
-    "stopped": false,
-    "reason": "",
-    "highestUsagePercent": 64,
+    "requests": 0,
+    "reserved": 0,
+    "stopped": true,
+    "reason": "Instagram shared quota paused: shared cooldown",
+    "highestUsagePercent": 0,
     "waitedMs": 0,
     "pacingMs": 0,
-    "retryAt": "",
+    "retryAt": "2026-11-16T09:21:54.411Z",
     "adaptiveSafetyCeiling": 190,
     "adaptiveIncreases": 0,
     "storageFailure": null
   },
+  "globalError": {
+    "username": "stroeckfeierabend",
+    "status": 0,
+    "code": "SCAN_BUDGET",
+    "message": "Instagram shared quota paused: shared cooldown"
+  },
   "blockedEvidencePosts": 55,
-  "unmatchedCandidatePosts": 0,
-  "message": "4/4 fresh cross-source Instagram candidates matched exactly via Graph API."
+  "unmatchedCandidatePosts": 4,
+  "message": "0/4 fresh cross-source Instagram candidates matched exactly via Graph API."
 }
