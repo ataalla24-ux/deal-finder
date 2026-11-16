@@ -1,11 +1,11 @@
 {
-  "generatedAt": "2026-11-16T13:40:34.564Z",
+  "generatedAt": "2026-11-16T13:44:15.301Z",
   "summary": {
     "maxAgeDays": 7,
-    "total": 237,
-    "allowed": 0,
+    "total": 238,
+    "allowed": 1,
     "blocked": 237,
-    "warnings": 0,
+    "warnings": 1,
     "reasonCounts": {
       "kein konkretes Angebot erkennbar": 184,
       "älter als 7 Tage (2026-11-02)": 5,
@@ -160,10 +160,10 @@
         }
       },
       "member-benefits-scraper": {
-        "total": 2,
-        "allowed": 0,
+        "total": 3,
+        "allowed": 1,
         "blocked": 2,
-        "warnings": 0,
+        "warnings": 1,
         "reasonCategoryCounts": {
           "nicht Wien": 1,
           "kein konkreter Deal": 1
@@ -213,7 +213,26 @@
       }
     }
   },
-  "allowed": [],
+  "allowed": [
+    {
+      "id": "benefit-drei-plus-e2c60b3e94b8cd10",
+      "title": "Drei: 90 Tage lang jede Bestellung mit gratis Lieferung (Lieferando)",
+      "brand": "Lieferando",
+      "source": "member-benefits-scraper",
+      "url": "https://www.drei.at/de/dreiplus/ersparnisse/lieferando/",
+      "reasons": [],
+      "warnings": [
+        "Aktueller Angebotsblock auf offizieller Anbieterseite erneut bestätigt; Abrufdatum ist kein Veröffentlichungsdatum",
+        "kein Quell-/Post-Datum gefunden"
+      ],
+      "sourceDate": "",
+      "sourceDateSource": "",
+      "sourceAgeDays": null,
+      "expiryDate": "2027-01-31",
+      "expirySource": "deal.structured",
+      "urlStatus": "HTTP 200"
+    }
+  ],
   "blocked": [
     {
       "id": "jesuszentrum-events-20261102",
@@ -854,7 +873,7 @@
       "warnings": [
         "kein Ablaufdatum gefunden"
       ],
-      "sourceDate": "2026-11-16T13:39:27.459Z",
+      "sourceDate": "2026-11-16T13:42:59.538Z",
       "sourceDateSource": "url.publicationDate",
       "sourceAgeDays": 0,
       "expiryDate": "",
@@ -4821,30 +4840,30 @@
   ],
   "runProvenance": {
     "repository": "ataalla24-ux/deal-finder",
-    "runId": "43877668362",
-    "headSha": "28c597bcd6ba9c319b410021cd6106933c46a23f",
-    "checkoutSha": "d6e15ac38cecfbc08ea90f7168bdd5f8e480c7c0",
+    "runId": "43878389769",
+    "headSha": "d34e819dafc35250f257e21b76f0ad628a669de6",
+    "checkoutSha": "d34e819dafc35250f257e21b76f0ad628a669de6",
     "triggeringRun": {
-      "runId": "43875361832",
-      "headSha": "39b6679a8ad95404361ef02041154a42c1ed1050",
-      "event": "workflow_dispatch",
-      "name": "Meta Instagram Deal Discovery",
-      "startedAt": "2026-11-16T13:23:55.000Z",
-      "url": "https://github.com/ataalla24-ux/deal-finder/actions/runs/43875361832"
+      "runId": "43878037113",
+      "headSha": "d6e15ac38cecfbc08ea90f7168bdd5f8e480c7c0",
+      "event": "schedule",
+      "name": "Member Benefits Scraper",
+      "startedAt": "2026-11-16T13:40:28.000Z",
+      "url": "https://github.com/ataalla24-ux/deal-finder/actions/runs/43878037113"
     },
     "event": "workflow_run",
     "runAttempt": "1",
-    "url": "https://github.com/ataalla24-ux/deal-finder/actions/runs/43877668362"
+    "url": "https://github.com/ataalla24-ux/deal-finder/actions/runs/43878389769"
   },
   "instagramDelivery": {
-    "checkedAt": "2026-11-16T13:40:34.578Z",
+    "checkedAt": "2026-11-16T13:44:15.696Z",
     "scope": "instagram-ai-agent/standard-slack-lane",
     "extractedCandidates": 0,
     "counts": {},
     "rows": []
   },
   "tiktokDelivery": {
-    "checkedAt": "2026-11-16T13:40:34.580Z",
+    "checkedAt": "2026-11-16T13:44:15.698Z",
     "scope": "tiktok-deals-scanner/standard-slack-lane",
     "extractedCandidates": 0,
     "counts": {},
