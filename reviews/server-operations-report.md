@@ -1,20 +1,20 @@
 # FreeFinder Betriebsbericht
 
-Stand: 2026-11-15T19:29:13.676Z
+Stand: 2026-11-16T15:30:40.601Z
 
-- 85 Live-Angebote; 201 nicht-live Entwuerfe geprueft.
-- 0 neue IDs seit letzter Bestandsaufnahme; keine automatische Erfolgszuordnung.
+- 84 Live-Angebote; 191 nicht-live Entwuerfe geprueft.
+- 1 neue IDs seit letzter Bestandsaufnahme; keine automatische Erfolgszuordnung.
 - 0 Entwuerfe ohne formale Pruefluecke, weiterhin menschliche Freigabe.
 - Pilot: 50 Faelle gesammelt, 0 unabhaengig bewertet, 10 regulaere Qualitaetslaeufe beobachtet. Automatische Freigabe AUS.
 - Neue Slack-Zustellungen: hier nicht nachgewiesen.
-- API: internal-ledger; 0.378413 USD intern gebucht/reserviert in 24 Stunden. Kein Anbieter-Kontostand.
+- API: internal-ledger; 0.351118 USD intern gebucht/reserviert in 24 Stunden. Kein Anbieter-Kontostand.
 
 ## Naechste Schritte
 
-- source-evidence-needed: 89
-- blocked-source: 45
-- venue-verification-needed: 60
-- copy-or-period-review: 7
+- copy-or-period-review: 8
+- source-evidence-needed: 84
+- blocked-source: 41
+- venue-verification-needed: 58
 
 ## Native Bilder
 
@@ -27,19 +27,19 @@ Stand: 2026-11-15T19:29:13.676Z
 
 ## Aktualitaet
 
-- Entwurfsregeln frisch und lokal geprueft, ohne Modell- oder Quellenaufruf. 201 unterschiedliche IDs in 201 Eintraegen; doppelte IDs bleiben Prueffaelle.
-- Live-/Bildpruefstand: current; letzte Pruefung 2026-11-15T19:29:02.422Z. Bei veraltetem Stand sind leere Hinweisliste und Bildzaehler KEIN Entwarnungsnachweis.
+- Entwurfsregeln frisch und lokal geprueft, ohne Modell- oder Quellenaufruf. 191 unterschiedliche IDs in 191 Eintraegen; doppelte IDs bleiben Prueffaelle.
+- Live-/Bildpruefstand: current; letzte Pruefung 2026-11-16T15:30:39.434Z. Bei veraltetem Stand sind leere Hinweisliste und Bildzaehler KEIN Entwarnungsnachweis.
 
 ## Freigabe und Einloesung
 
-- 50 Pilotfaelle aktuell, 740 fruehere Pruefstaende unveraendert archiviert. Keine alten Bewertungen uebernehmen.
+- 50 Pilotfaelle aktuell, 783 fruehere Pruefstaende unveraendert archiviert. Keine alten Bewertungen uebernehmen.
 - Aktueller, unbewerteter Pruefbogen: 50 Faelle; reviews/automatic-publication-review-pack.json. Keine unabhaengige menschliche Bewertung erfunden.
-- Quellengepruefte Einloese-/Buchungswege: 0 von 85; 0 ausdruecklich unbestaetigte, 85 fehlende aktuelle Einloesepruefungen. Besuchsinfos sind keine Gutscheine; ein Buchungslink bestaetigt keinen aktuellen Flugpreis.
-- Karte frisch lokal geprueft: {"online-only":29,"mapped":52,"needs-review":4}.
+- Quellengepruefte Einloese-/Buchungswege: 0 von 84; 0 ausdruecklich unbestaetigte, 84 fehlende aktuelle Einloesepruefungen. Besuchsinfos sind keine Gutscheine; ein Buchungslink bestaetigt keinen aktuellen Flugpreis.
+- Karte frisch lokal geprueft: {"online-only":30,"mapped":49,"needs-review":5}.
 
 ## Quellen
 
 - docs/apify-discovery-report.json: succeeded; {"fetchedRecords":4,"freshAcceptedDeals":0,"pendingDeals":0,"duplicatePosts":0,"unchangedPosts":0,"providerErrors":0}; Slack-Zustellungen nicht aus Kandidaten ableiten.
-- docs/meta-instagram-report.json: ok; {"freshPostsFetched":200,"newDeals":1,"repeatedDeals":43,"totalDeals":44}; Slack-Zustellungen nicht aus Kandidaten ableiten.
-- docs/power-scraper-report.json: see-source-results; {"acceptedDeals":48,"healthySources":46,"failedSources":0,"deferredSources":13,"rawDeals":48}; Slack-Zustellungen nicht aus Kandidaten ableiten.
-- docs/instagram-ai-report.json: see-source-results; {"discoveredCandidates":10,"acceptedDeals":0,"aiRescueCandidates":1,"aiRescued":0}; Slack-Zustellungen nicht aus Kandidaten ableiten.
+- docs/meta-instagram-report.json: degraded; {"freshPostsFetched":1190,"newDeals":1,"repeatedDeals":41,"totalDeals":42}; Slack-Zustellungen nicht aus Kandidaten ableiten.
+- docs/power-scraper-report.json: see-source-results; {"acceptedDeals":47,"healthySources":46,"failedSources":0,"deferredSources":13,"rawDeals":47}; Slack-Zustellungen nicht aus Kandidaten ableiten.
+- docs/instagram-ai-report.json: see-source-results; {"discoveredCandidates":7,"acceptedDeals":0,"aiRescueCandidates":0,"aiRescued":0}; Slack-Zustellungen nicht aus Kandidaten ableiten.
