@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-11-16T05:50:55.885Z",
+  "generatedAt": "2026-11-16T05:52:40.650Z",
   "summary": {
     "maxAgeDays": 7,
     "total": 234,
@@ -15,7 +15,7 @@
       "älter als 7 Tage (2017-04-20)": 1,
       "älter als 7 Tage (2026-10-26)": 1,
       "älter als 7 Tage (2025-07-30)": 1,
-      "URL ungültig (HTTP 404)": 9,
+      "URL ungültig (HTTP 404)": 6,
       "kostenlose Buchung/Kontaktaufnahme statt kostenloser Leistung": 2,
       "älter als 7 Tage (2026-11-06)": 1,
       "älter als 7 Tage (2026-11-01)": 1,
@@ -56,7 +56,7 @@
     "reasonCategoryCounts": {
       "kein konkreter Deal": 184,
       "älter als 7 Tage": 146,
-      "ungültige URL": 13,
+      "ungültige URL": 10,
       "sonstiges": 5,
       "abgelaufen": 8,
       "Post-Datum in Zukunft": 3,
@@ -107,7 +107,7 @@
         "reasonCategoryCounts": {
           "kein konkreter Deal": 34,
           "älter als 7 Tage": 34,
-          "ungültige URL": 2,
+          "ungültige URL": 1,
           "Post-Datum in Zukunft": 1,
           "sonstiges": 1
         }
@@ -142,7 +142,7 @@
         "reasonCategoryCounts": {
           "kein konkreter Deal": 94,
           "älter als 7 Tage": 93,
-          "ungültige URL": 7,
+          "ungültige URL": 5,
           "sonstiges": 2,
           "Post-Datum in Zukunft": 2,
           "nicht Wien": 1
@@ -842,7 +842,7 @@
       "warnings": [
         "kein Ablaufdatum gefunden"
       ],
-      "sourceDate": "2026-11-16T05:49:20.416Z",
+      "sourceDate": "2026-11-16T05:50:09.538Z",
       "sourceDateSource": "url.publicationDate",
       "sourceAgeDays": 0,
       "expiryDate": "",
@@ -1145,17 +1145,18 @@
       "source": "Freikirchen Wien",
       "url": "https://www.baptisten.at/wien",
       "reasons": [
-        "URL ungültig (HTTP 404)",
         "kein konkretes Angebot erkennbar",
         "älter als 7 Tage (2026-04-19)"
       ],
-      "warnings": [],
+      "warnings": [
+        "URL nicht eindeutig prüfbar (temporärer Fehler)"
+      ],
       "sourceDate": "2026-04-19T08:59:47.145Z",
       "sourceDateSource": "deal.pubDate",
       "sourceAgeDays": 211,
       "expiryDate": "",
       "expirySource": "deal.expires",
-      "urlStatus": "ungültig: HTTP 404"
+      "urlStatus": "unklar: temporärer URL-Fehler"
     },
     {
       "id": "freikirche-7-20260419",
@@ -2079,17 +2080,18 @@
       "source": "Kirchen Verzeichnis",
       "url": "https://www.baptisten.at/wien",
       "reasons": [
-        "URL ungültig (HTTP 404)",
         "kein konkretes Angebot erkennbar",
         "älter als 7 Tage (2026-02-22)"
       ],
-      "warnings": [],
+      "warnings": [
+        "URL nicht eindeutig prüfbar (temporärer Fehler)"
+      ],
       "sourceDate": "2026-02-22T21:12:35.964Z",
       "sourceDateSource": "deal.pubDate",
       "sourceAgeDays": 267,
       "expiryDate": "",
       "expirySource": "deal.expires",
-      "urlStatus": "ungültig: HTTP 404"
+      "urlStatus": "unklar: temporärer URL-Fehler"
     },
     {
       "id": "gemeinde-9-20260222",
@@ -2878,17 +2880,18 @@
       "source": "Kirchen Verzeichnis",
       "url": "https://www.baptisten.at/wien",
       "reasons": [
-        "URL ungültig (HTTP 404)",
         "kein konkretes Angebot erkennbar",
         "älter als 7 Tage (2026-02-22)"
       ],
-      "warnings": [],
+      "warnings": [
+        "URL nicht eindeutig prüfbar (temporärer Fehler)"
+      ],
       "sourceDate": "2026-02-22T21:12:35.964Z",
       "sourceDateSource": "deal.pubDate",
       "sourceAgeDays": 267,
       "expiryDate": "",
       "expirySource": "deal.expires",
-      "urlStatus": "ungültig: HTTP 404"
+      "urlStatus": "unklar: temporärer URL-Fehler"
     },
     {
       "id": "gottesdienste-17-20260222",
@@ -3247,7 +3250,7 @@
       "sourceDate": "2026-11-14T20:22:54.000Z",
       "sourceDateSource": "url.instagramShortcode",
       "sourceAgeDays": 2,
-      "expiryDate": "2026-11-19T01:24:51.575Z",
+      "expiryDate": "2026-11-19T05:39:54.197Z",
       "expirySource": "deal.structured",
       "urlStatus": "HTTP 200"
     },
@@ -4754,23 +4757,30 @@
   ],
   "runProvenance": {
     "repository": "ataalla24-ux/deal-finder",
-    "runId": "43812681652",
-    "headSha": "492b569efa0513ed7b5d8295af2840966cee5393",
-    "checkoutSha": "492b569efa0513ed7b5d8295af2840966cee5393",
-    "triggeringRun": null,
-    "event": "schedule",
+    "runId": "43812918179",
+    "headSha": "b4378b41155b6fb6f5de3844e42bdd0d48d9d444",
+    "checkoutSha": "b4378b41155b6fb6f5de3844e42bdd0d48d9d444",
+    "triggeringRun": {
+      "runId": "43811605776",
+      "headSha": "492b569efa0513ed7b5d8295af2840966cee5393",
+      "event": "workflow_dispatch",
+      "name": "Meta Instagram Deal Discovery",
+      "startedAt": "2026-11-16T05:38:54.000Z",
+      "url": "https://github.com/ataalla24-ux/deal-finder/actions/runs/43811605776"
+    },
+    "event": "workflow_run",
     "runAttempt": "1",
-    "url": "https://github.com/ataalla24-ux/deal-finder/actions/runs/43812681652"
+    "url": "https://github.com/ataalla24-ux/deal-finder/actions/runs/43812918179"
   },
   "instagramDelivery": {
-    "checkedAt": "2026-11-16T05:50:55.900Z",
+    "checkedAt": "2026-11-16T05:52:40.663Z",
     "scope": "instagram-ai-agent/standard-slack-lane",
     "extractedCandidates": 0,
     "counts": {},
     "rows": []
   },
   "tiktokDelivery": {
-    "checkedAt": "2026-11-16T05:50:55.902Z",
+    "checkedAt": "2026-11-16T05:52:40.665Z",
     "scope": "tiktok-deals-scanner/standard-slack-lane",
     "extractedCandidates": 0,
     "counts": {},
