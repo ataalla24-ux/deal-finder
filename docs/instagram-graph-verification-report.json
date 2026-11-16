@@ -1,7 +1,7 @@
 {
-  "generatedAt": "2026-11-16T08:00:55.648Z",
+  "generatedAt": "2026-11-16T08:08:23.554Z",
   "source": "instagram-graph-cross-source-verification",
-  "status": "ok",
+  "status": "failed-preserved",
   "configured": true,
   "scannedFiles": [
     "deals-pending-church-events.json",
@@ -84,7 +84,7 @@
     },
     "deals-pending-gastro2.json": {
       "deals": 127,
-      "candidates": 2
+      "candidates": 1
     },
     "deals-pending-gemeinde.json": {
       "deals": 33,
@@ -135,8 +135,8 @@
       "candidates": 0
     },
     "deals-pending-meta-instagram.json": {
-      "deals": 44,
-      "candidates": 3
+      "deals": 45,
+      "candidates": 4
     },
     "deals-pending-power.json": {
       "deals": 48,
@@ -172,7 +172,7 @@
   "skippedAccountCooldowns": 0,
   "selectedAccounts": [
     {
-      "username": "bella.italia1210",
+      "username": "stroeckfeierabend",
       "candidates": 1
     },
     {
@@ -192,10 +192,15 @@
       "candidates": 1
     }
   ],
-  "fetchedPosts": 113,
-  "exactMatches": 5,
+  "fetchedPosts": 0,
+  "exactMatches": 0,
   "retainedEvidencePosts": 2000,
-  "errors": [],
+  "errors": [
+    {
+      "username": "stroeckfeierabend",
+      "message": "Instagram shared quota paused: shared cooldown"
+    }
+  ],
   "accountFailures": {
     "natascha_rapid": {
       "count": 3,
@@ -209,21 +214,27 @@
     }
   },
   "sharedQuota": {
-    "limitPerHour": 237,
+    "limitPerHour": 190,
     "usageThreshold": 95,
-    "requests": 5,
-    "reserved": 5,
-    "stopped": false,
-    "reason": "",
-    "highestUsagePercent": 49,
+    "requests": 0,
+    "reserved": 0,
+    "stopped": true,
+    "reason": "Instagram shared quota paused: shared cooldown",
+    "highestUsagePercent": 0,
     "waitedMs": 0,
     "pacingMs": 0,
-    "retryAt": "",
+    "retryAt": "2026-11-16T08:15:34.422Z",
     "adaptiveSafetyCeiling": 190,
     "adaptiveIncreases": 0,
     "storageFailure": null
   },
+  "globalError": {
+    "username": "stroeckfeierabend",
+    "status": 0,
+    "code": "SCAN_BUDGET",
+    "message": "Instagram shared quota paused: shared cooldown"
+  },
   "blockedEvidencePosts": 55,
-  "unmatchedCandidatePosts": 0,
-  "message": "5/5 fresh cross-source Instagram candidates matched exactly via Graph API."
+  "unmatchedCandidatePosts": 5,
+  "message": "0/5 fresh cross-source Instagram candidates matched exactly via Graph API."
 }
