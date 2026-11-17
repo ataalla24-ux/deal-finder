@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-11-17T12:50:38.813Z",
+  "generatedAt": "2026-11-17T13:24:43.023Z",
   "discoveryAvailability": {
     "note": "Transport evidence, not deal yield. Retry eligibility is not recovery. Candidate counts are not Slack deliveries. No extra runs or quota resets.",
     "lanes": [
@@ -60,12 +60,6 @@
     "duplicateClusters": 11,
     "topHealthySources": [
       {
-        "sourceKey": "wien-combined",
-        "sourceLabel": "Wien Deals Combined Graph",
-        "healthScore": 78,
-        "totalDeals": 1
-      },
-      {
         "sourceKey": "member-benefits",
         "sourceLabel": "Member Benefits",
         "healthScore": 74,
@@ -88,13 +82,19 @@
         "sourceLabel": "Freikirchen Wien",
         "healthScore": 64,
         "totalDeals": 4
+      },
+      {
+        "sourceKey": "church-gottesdienste",
+        "sourceLabel": "Freikirchen Wien",
+        "healthScore": 64,
+        "totalDeals": 4
       }
     ],
     "topMissionSources": [
       {
         "sourceKey": "wien-combined",
         "sourceLabel": "Wien Deals Combined Graph",
-        "missionFitScore": 100,
+        "missionFitScore": 78,
         "totalDeals": 1
       },
       {
@@ -149,7 +149,7 @@
         "sourceLabel": "Meta Instagram Graph",
         "coverageScore": 41,
         "totalDeals": 51,
-        "fresh1dCount": 9
+        "fresh1dCount": 8
       },
       {
         "sourceKey": "firecrawl4",
@@ -163,7 +163,7 @@
       {
         "sourceKey": "wien-combined",
         "sourceLabel": "Wien Deals Combined Graph",
-        "precisionScore": 92,
+        "precisionScore": 80,
         "totalDeals": 1
       },
       {
@@ -193,16 +193,16 @@
     ],
     "topWeightedSources": [
       {
-        "sourceKey": "wien-combined",
-        "sourceLabel": "Wien Deals Combined Graph",
-        "sourceWeightScore": 75,
-        "totalDeals": 1
-      },
-      {
         "sourceKey": "member-benefits",
         "sourceLabel": "Member Benefits",
         "sourceWeightScore": 71,
         "totalDeals": 113
+      },
+      {
+        "sourceKey": "wien-combined",
+        "sourceLabel": "Wien Deals Combined Graph",
+        "sourceWeightScore": 62,
+        "totalDeals": 1
       },
       {
         "sourceKey": "meta-instagram",
@@ -292,80 +292,6 @@
     }
   },
   "sources": [
-    {
-      "sourceKey": "wien-combined",
-      "file": "deals-pending-wien-combined.json",
-      "sourceLabel": "Wien Deals Combined Graph",
-      "totalDeals": 1,
-      "uniqueDeals": 0,
-      "duplicateDeals": 1,
-      "duplicateAcrossSources": 1,
-      "fresh1dCount": 1,
-      "fresh7dCount": 1,
-      "viennaCount": 1,
-      "foodDrinkCount": 1,
-      "promoCount": 1,
-      "missingUrlCount": 0,
-      "sampleTitles": [
-        "🍪🚀 HOTBOWL + GRATIS KOOKIE CAT COOKIE Zu jeder Hotbowl legen wir dir einen Kookie Cat Cookie gratis dazu"
-      ],
-      "lastRun": {
-        "status": "completed-with-errors",
-        "startedAt": "2026-11-17T08:23:27.574Z",
-        "finishedAt": "2026-11-17T08:24:44.295Z",
-        "durationMs": 76721,
-        "counts": {
-          "rawCandidates": 51,
-          "normalizedCandidates": 1,
-          "verifiedCandidates": 1,
-          "previousDeals": 0,
-          "acceptedDeals": 1,
-          "rejectedDeals": 45
-        },
-        "rejectedByReason": {
-          "no-concrete-offer": 35,
-          "excluded-promotion-type": 1,
-          "non-offer-content": 2,
-          "alcohol-offer": 2,
-          "general-recommendation": 3,
-          "missing-vienna-evidence": 1,
-          "regular-priced-activity": 1
-        },
-        "errors": [
-          "#viennafood: Instagram scan paused: request-budget"
-        ],
-        "reportFile": "deal-pipeline-last-run-wien-combined.json"
-      },
-      "uniqueRate": 0,
-      "duplicateRate": 1,
-      "fresh1dRate": 1,
-      "fresh7dRate": 1,
-      "viennaRate": 1,
-      "foodDrinkRate": 1,
-      "promoRate": 1,
-      "missingUrlRate": 0,
-      "averageQualityScore": 81,
-      "topCategories": [
-        {
-          "value": "essen",
-          "count": 1
-        }
-      ],
-      "topTypes": [
-        {
-          "value": "freebie",
-          "count": 1
-        }
-      ],
-      "issues": [
-        "hohe Überschneidung mit anderen Quellen"
-      ],
-      "healthScore": 78,
-      "missionFitScore": 100,
-      "coverageScore": 16,
-      "precisionScore": 92,
-      "sourceWeightScore": 75
-    },
     {
       "sourceKey": "member-benefits",
       "file": "deals-pending-member-benefits.json",
@@ -461,7 +387,7 @@
       "uniqueDeals": 47,
       "duplicateDeals": 4,
       "duplicateAcrossSources": 4,
-      "fresh1dCount": 9,
+      "fresh1dCount": 8,
       "fresh7dCount": 45,
       "viennaCount": 51,
       "foodDrinkCount": 33,
@@ -802,6 +728,81 @@
       "coverageScore": 11,
       "precisionScore": 60,
       "sourceWeightScore": 52
+    },
+    {
+      "sourceKey": "wien-combined",
+      "file": "deals-pending-wien-combined.json",
+      "sourceLabel": "Wien Deals Combined Graph",
+      "totalDeals": 1,
+      "uniqueDeals": 0,
+      "duplicateDeals": 1,
+      "duplicateAcrossSources": 1,
+      "fresh1dCount": 0,
+      "fresh7dCount": 1,
+      "viennaCount": 1,
+      "foodDrinkCount": 1,
+      "promoCount": 1,
+      "missingUrlCount": 0,
+      "sampleTitles": [
+        "🍪🚀 HOTBOWL + GRATIS KOOKIE CAT COOKIE Zu jeder Hotbowl legen wir dir einen Kookie Cat Cookie gratis dazu"
+      ],
+      "lastRun": {
+        "status": "completed-with-errors",
+        "startedAt": "2026-11-17T08:23:27.574Z",
+        "finishedAt": "2026-11-17T08:24:44.295Z",
+        "durationMs": 76721,
+        "counts": {
+          "rawCandidates": 51,
+          "normalizedCandidates": 1,
+          "verifiedCandidates": 1,
+          "previousDeals": 0,
+          "acceptedDeals": 1,
+          "rejectedDeals": 45
+        },
+        "rejectedByReason": {
+          "no-concrete-offer": 35,
+          "excluded-promotion-type": 1,
+          "non-offer-content": 2,
+          "alcohol-offer": 2,
+          "general-recommendation": 3,
+          "missing-vienna-evidence": 1,
+          "regular-priced-activity": 1
+        },
+        "errors": [
+          "#viennafood: Instagram scan paused: request-budget"
+        ],
+        "reportFile": "deal-pipeline-last-run-wien-combined.json"
+      },
+      "uniqueRate": 0,
+      "duplicateRate": 1,
+      "fresh1dRate": 0,
+      "fresh7dRate": 1,
+      "viennaRate": 1,
+      "foodDrinkRate": 1,
+      "promoRate": 1,
+      "missingUrlRate": 0,
+      "averageQualityScore": 81,
+      "topCategories": [
+        {
+          "value": "essen",
+          "count": 1
+        }
+      ],
+      "topTypes": [
+        {
+          "value": "freebie",
+          "count": 1
+        }
+      ],
+      "issues": [
+        "wenige Deals sind frischer als 1 Tag",
+        "hohe Überschneidung mit anderen Quellen"
+      ],
+      "healthScore": 64,
+      "missionFitScore": 78,
+      "coverageScore": 15,
+      "precisionScore": 80,
+      "sourceWeightScore": 62
     },
     {
       "sourceKey": "firecrawl5",
