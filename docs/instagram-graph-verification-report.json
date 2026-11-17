@@ -1,7 +1,7 @@
 {
-  "generatedAt": "2026-11-17T16:23:21.078Z",
+  "generatedAt": "2026-11-17T16:55:16.194Z",
   "source": "instagram-graph-cross-source-verification",
-  "status": "ok",
+  "status": "failed-preserved",
   "configured": true,
   "scannedFiles": [
     "deals-pending-church-events.json",
@@ -60,7 +60,7 @@
     },
     "deals-pending-firecrawl4.json": {
       "deals": 63,
-      "candidates": 0
+      "candidates": 2
     },
     "deals-pending-firecrawl5.json": {
       "deals": 5,
@@ -167,14 +167,28 @@
       "candidates": 0
     }
   },
-  "candidatePosts": 0,
-  "candidateAccounts": 0,
+  "candidatePosts": 2,
+  "candidateAccounts": 2,
   "skippedAccountCooldowns": 0,
-  "selectedAccounts": [],
+  "selectedAccounts": [
+    {
+      "username": "inglekoreansteakhouse",
+      "candidates": 1
+    },
+    {
+      "username": "chezbernardvienna",
+      "candidates": 1
+    }
+  ],
   "fetchedPosts": 0,
   "exactMatches": 0,
-  "retainedEvidencePosts": 2000,
-  "errors": [],
+  "retainedEvidencePosts": 1999,
+  "errors": [
+    {
+      "username": "inglekoreansteakhouse",
+      "message": "Instagram shared quota paused: rolling-hour budget exhausted"
+    }
+  ],
   "accountFailures": {
     "natascha_rapid": {
       "count": 3,
@@ -192,17 +206,23 @@
     "usageThreshold": 95,
     "requests": 0,
     "reserved": 0,
-    "stopped": false,
-    "reason": "",
+    "stopped": true,
+    "reason": "Instagram shared quota paused: rolling-hour budget exhausted",
     "highestUsagePercent": 0,
     "waitedMs": 0,
     "pacingMs": 0,
-    "retryAt": "",
+    "retryAt": "2026-11-17T16:59:22.830Z",
     "adaptiveSafetyCeiling": 190,
     "adaptiveIncreases": 0,
     "storageFailure": null
   },
-  "blockedEvidencePosts": 64,
-  "unmatchedCandidatePosts": 0,
-  "message": "0/0 fresh cross-source Instagram candidates matched exactly via Graph API."
+  "globalError": {
+    "username": "inglekoreansteakhouse",
+    "status": 0,
+    "code": "SCAN_BUDGET",
+    "message": "Instagram shared quota paused: rolling-hour budget exhausted"
+  },
+  "blockedEvidencePosts": 63,
+  "unmatchedCandidatePosts": 2,
+  "message": "0/2 fresh cross-source Instagram candidates matched exactly via Graph API."
 }
