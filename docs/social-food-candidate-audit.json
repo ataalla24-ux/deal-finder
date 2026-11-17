@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "generatedAt": "2026-11-17T09:09:30.784Z",
+  "generatedAt": "2026-11-17T09:11:36.803Z",
   "objective": "Maximize manually approved, current Vienna food and drink deals per review minute.",
   "primaryMetric": "uniqueManuallyApprovedFoodOffersPerDay",
   "guardrails": {
@@ -24,16 +24,16 @@
       "collectorAccepted": 62,
       "collectorRejected": 2432,
       "foodDrinkRejected": 927,
-      "mediaAttempted": 1508,
+      "mediaAttempted": 1507,
       "reviewEligible": 2,
-      "slackSent": 1549,
+      "slackSent": 1553,
       "manuallyApproved": 153,
       "manuallyRejected": 0,
       "published": 134
     },
     "sourceCounts": {
-      "meta-instagram": 2491,
-      "instagram-ai": 2,
+      "meta-instagram": 2489,
+      "instagram-ai": 4,
       "wien-combined": 1
     },
     "foodLossReasons": {
@@ -54,8 +54,8 @@
     "manuallyApproved": 22,
     "manuallyRejected": 0,
     "uniqueApprovedOffers": 22,
-    "sent": 83,
-    "unreviewed": 66,
+    "sent": 87,
+    "unreviewed": 70,
     "reviewed": 22,
     "bySource": {
       "Meta Instagram Graph": {
@@ -125,10 +125,10 @@
         "unreviewed": 7
       },
       "Firecrawl Gastro #2": {
-        "sent": 18,
+        "sent": 22,
         "approved": 4,
         "rejected": 0,
-        "unreviewed": 14
+        "unreviewed": 18
       },
       "Wien Deals Combined Graph": {
         "sent": 1,
@@ -158,7 +158,7 @@
     "averageDecisionLatencyMinutes": 4990.8
   },
   "costMetrics": {
-    "mediaTokensThisSnapshot": 1902,
+    "mediaTokensThisSnapshot": 3171,
     "mediaTokensPerManualApproval7d": null,
     "apiCurrencyCostPerApproval": null,
     "note": "Snapshot tokens and seven-day approvals have different windows; no cost ratio is inferred. Actual review effort is not measured by Slack decision latency."
@@ -166,9 +166,9 @@
   "sourceRuns": [
     {
       "source": "instagram-ai",
-      "generatedAt": "2026-11-16T22:51:55.558Z",
-      "discovered": 9,
-      "collectorAccepted": 0,
+      "generatedAt": "2026-11-17T09:10:16.844Z",
+      "discovered": 10,
+      "collectorAccepted": 2,
       "mediaEligible": 0,
       "mediaSelected": 0,
       "mediaAnalyzed": 0,
@@ -179,10 +179,10 @@
       "mediaOutputTokens": 0,
       "mediaTotalTokens": 0,
       "mediaErrors": [],
-      "classifierInputTokens": 1479,
-      "classifierOutputTokens": 423,
-      "classifierTotalTokens": 1902,
-      "totalAiTokens": 1902
+      "classifierInputTokens": 2150,
+      "classifierOutputTokens": 1021,
+      "classifierTotalTokens": 3171,
+      "totalAiTokens": 3171
     },
     {
       "source": "tiktok",
@@ -246,7 +246,7 @@
     }
   ],
   "observations": {
-    "total": 3149,
+    "total": 3150,
     "uniquePosts": 2494,
     "reviewEligible": 2,
     "reviewSelected": 2
@@ -570,7 +570,7 @@
       "ownerRole": "",
       "merchantUsername": "",
       "pubDate": "2026-11-13T10:15:48.000Z",
-      "ageDays": 3.95,
+      "ageDays": 3.96,
       "rejectionReason": "non-vienna-location",
       "lossCategory": "outside-vienna",
       "collectorScore": null,
@@ -656,7 +656,7 @@
       "ownerRole": "",
       "merchantUsername": "",
       "pubDate": "2026-11-15T16:15:07.000Z",
-      "ageDays": 1.7,
+      "ageDays": 1.71,
       "rejectionReason": "no-concrete-offer",
       "lossCategory": "no-concrete-offer",
       "collectorScore": null,
@@ -1215,7 +1215,7 @@
       "ownerRole": "",
       "merchantUsername": "",
       "pubDate": "2026-11-16T14:05:38.000Z",
-      "ageDays": 0.79,
+      "ageDays": 0.8,
       "rejectionReason": "media-ai-required-for-ocr-offer",
       "lossCategory": "media-access-or-reading",
       "collectorScore": null,
@@ -1516,7 +1516,7 @@
       "ownerRole": "",
       "merchantUsername": "",
       "pubDate": "2026-11-11T14:48:29.000Z",
-      "ageDays": 5.76,
+      "ageDays": 5.77,
       "rejectionReason": "non-offer-content",
       "lossCategory": "other",
       "collectorScore": null,
@@ -1559,7 +1559,7 @@
       "ownerRole": "",
       "merchantUsername": "",
       "pubDate": "2026-11-11T22:16:07.000Z",
-      "ageDays": 5.45,
+      "ageDays": 5.46,
       "rejectionReason": "general-recommendation",
       "lossCategory": "generic-recommendation",
       "collectorScore": null,
@@ -1946,7 +1946,7 @@
       "ownerRole": "",
       "merchantUsername": "",
       "pubDate": "2026-11-13T03:16:45.000Z",
-      "ageDays": 4.24,
+      "ageDays": 4.25,
       "rejectionReason": "alcohol-offer",
       "lossCategory": "other",
       "collectorScore": null,
@@ -1989,7 +1989,7 @@
       "ownerRole": "",
       "merchantUsername": "",
       "pubDate": "2026-11-16T17:27:59.000Z",
-      "ageDays": 0.65,
+      "ageDays": 0.66,
       "rejectionReason": "general-recommendation",
       "lossCategory": "generic-recommendation",
       "collectorScore": null,
@@ -2204,7 +2204,7 @@
       "ownerRole": "merchant",
       "merchantUsername": "vapiano_deutschland",
       "pubDate": "2026-11-14T09:02:48.000Z",
-      "ageDays": 3,
+      "ageDays": 3.01,
       "rejectionReason": "general-recommendation",
       "lossCategory": "generic-recommendation",
       "collectorScore": 0,
@@ -2419,7 +2419,7 @@
       "ownerRole": "",
       "merchantUsername": "",
       "pubDate": "2026-11-12T09:02:36.000Z",
-      "ageDays": 5,
+      "ageDays": 5.01,
       "rejectionReason": "general-recommendation",
       "lossCategory": "generic-recommendation",
       "collectorScore": null,
@@ -2591,7 +2591,7 @@
       "ownerRole": "",
       "merchantUsername": "",
       "pubDate": "2026-11-13T09:31:10.000Z",
-      "ageDays": 3.98,
+      "ageDays": 3.99,
       "rejectionReason": "alcohol-offer",
       "lossCategory": "other",
       "collectorScore": null,
@@ -2677,7 +2677,7 @@
       "ownerRole": "",
       "merchantUsername": "",
       "pubDate": "2026-11-12T09:17:04.000Z",
-      "ageDays": 4.99,
+      "ageDays": 5,
       "rejectionReason": "excluded-promotion-type",
       "lossCategory": "excluded-content",
       "collectorScore": null,
@@ -3236,7 +3236,7 @@
       "ownerRole": "",
       "merchantUsername": "",
       "pubDate": "2026-11-13T13:22:54.000Z",
-      "ageDays": 3.82,
+      "ageDays": 3.83,
       "rejectionReason": "alcohol-offer",
       "lossCategory": "other",
       "collectorScore": null,
