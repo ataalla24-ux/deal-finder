@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-11-17T23:10:28.589Z",
+  "generatedAt": "2026-11-17T23:40:56.340Z",
   "summary": {
     "maxAgeDays": 7,
     "total": 256,
@@ -10,7 +10,7 @@
       "kein konkretes Angebot erkennbar": 187,
       "Gottesdienste nur im Wochenlauf": 36,
       "älter als 7 Tage (2020-04-25)": 1,
-      "älter als 7 Tage (2026-02-22)": 80,
+      "älter als 7 Tage (2026-02-22)": 81,
       "URL ungültig (fehlende Ziel-URL)": 2,
       "älter als 7 Tage (2017-04-20)": 1,
       "älter als 7 Tage (2026-10-26)": 1,
@@ -42,7 +42,6 @@
       "älter als 7 Tage (2023-07-18)": 1,
       "älter als 7 Tage (2009-05-01)": 1,
       "älter als 7 Tage (2014-06-07)": 1,
-      "älter als 7 Tage (2025-12-30)": 1,
       "abgelaufen (2026-11-17)": 1,
       "kein verlässliches Quell-/Post-Datum gefunden": 69,
       "ausgeschlossene Quelle (gastro.news)": 10,
@@ -874,7 +873,7 @@
       "warnings": [
         "kein Ablaufdatum gefunden"
       ],
-      "sourceDate": "2026-11-17T23:08:27.454Z",
+      "sourceDate": "2026-11-17T23:39:49.007Z",
       "sourceDateSource": "url.publicationDate",
       "sourceAgeDays": 0,
       "expiryDate": "",
@@ -3196,15 +3195,17 @@
       "url": "https://www.orthodoxie.at",
       "reasons": [
         "kein konkretes Angebot erkennbar",
-        "älter als 7 Tage (2025-12-30)"
+        "älter als 7 Tage (2026-02-22)"
       ],
-      "warnings": [],
-      "sourceDate": "2025-12-30T14:00:40.000Z",
-      "sourceDateSource": "url.publicationDate",
-      "sourceAgeDays": 322,
+      "warnings": [
+        "URL nicht eindeutig prüfbar (temporärer Fehler)"
+      ],
+      "sourceDate": "2026-02-22T21:12:35.964Z",
+      "sourceDateSource": "deal.pubDate",
+      "sourceAgeDays": 268,
       "expiryDate": "",
       "expirySource": "deal.expires",
-      "urlStatus": "HTTP 200"
+      "urlStatus": "unklar: temporärer URL-Fehler"
     },
     {
       "id": "gottesdienste-24-20260222",
@@ -3634,7 +3635,7 @@
       "sourceDate": "2026-11-17T16:01:06.000Z",
       "sourceDateSource": "url.instagramShortcode",
       "sourceAgeDays": 0,
-      "expiryDate": "2026-11-20T19:40:02.862Z",
+      "expiryDate": "2026-11-20T23:24:56.715Z",
       "expirySource": "deal.structured",
       "urlStatus": "HTTP 200"
     },
@@ -4931,6 +4932,7 @@
         "kein verlässliches Quell-/Post-Datum gefunden"
       ],
       "warnings": [
+        "URL nicht eindeutig prüfbar (HTTP 429)",
         "kein Ablaufdatum gefunden"
       ],
       "sourceDate": "",
@@ -4938,7 +4940,7 @@
       "sourceAgeDays": null,
       "expiryDate": "",
       "expirySource": "",
-      "urlStatus": "HTTP 200"
+      "urlStatus": "unklar: HTTP 429"
     },
     {
       "id": "vpr-1nrhs2a",
@@ -5217,16 +5219,23 @@
   ],
   "runProvenance": {
     "repository": "ataalla24-ux/deal-finder",
-    "runId": "44196750433",
-    "headSha": "5f9ec5b4a4ae2ab2817236279bdf7c16514de09f",
-    "checkoutSha": "5f9ec5b4a4ae2ab2817236279bdf7c16514de09f",
-    "triggeringRun": null,
-    "event": "workflow_dispatch",
+    "runId": "44201252911",
+    "headSha": "8af48e47b0024a1c5affb592ed0c133f59673bf4",
+    "checkoutSha": "8af48e47b0024a1c5affb592ed0c133f59673bf4",
+    "triggeringRun": {
+      "runId": "44199014728",
+      "headSha": "3d26f4b91b0d6bcef1c0dc879ff12040fe9b4822",
+      "event": "workflow_dispatch",
+      "name": "Meta Instagram Deal Discovery",
+      "startedAt": "2026-11-17T23:23:55.000Z",
+      "url": "https://github.com/ataalla24-ux/deal-finder/actions/runs/44199014728"
+    },
+    "event": "workflow_run",
     "runAttempt": "1",
-    "url": "https://github.com/ataalla24-ux/deal-finder/actions/runs/44196750433"
+    "url": "https://github.com/ataalla24-ux/deal-finder/actions/runs/44201252911"
   },
   "instagramDelivery": {
-    "checkedAt": "2026-11-17T23:10:28.603Z",
+    "checkedAt": "2026-11-17T23:40:56.355Z",
     "scope": "instagram-ai-agent/standard-slack-lane",
     "extractedCandidates": 1,
     "counts": {
@@ -5251,7 +5260,7 @@
     ]
   },
   "tiktokDelivery": {
-    "checkedAt": "2026-11-17T23:10:28.605Z",
+    "checkedAt": "2026-11-17T23:40:56.357Z",
     "scope": "tiktok-deals-scanner/standard-slack-lane",
     "extractedCandidates": 0,
     "counts": {},
