@@ -1,14 +1,14 @@
 {
-  "lastUpdated": "2026-11-17T00:48:28.812Z",
+  "lastUpdated": "2026-11-17T14:22:21.066Z",
   "runProvenance": {
     "repository": "ataalla24-ux/deal-finder",
-    "runId": "43990423609",
-    "headSha": "b7aa9152a216463ca22530d5aafca7289524a552",
-    "checkoutSha": "b7aa9152a216463ca22530d5aafca7289524a552",
+    "runId": "44102166149",
+    "headSha": "8590674a2ca83825fd2c1fb743fc7ee1ca57c944",
+    "checkoutSha": "8590674a2ca83825fd2c1fb743fc7ee1ca57c944",
     "triggeringRun": null,
     "event": "schedule",
     "runAttempt": "1",
-    "url": "https://github.com/ataalla24-ux/deal-finder/actions/runs/43990423609"
+    "url": "https://github.com/ataalla24-ux/deal-finder/actions/runs/44102166149"
   },
   "status": "discovery-degraded",
   "outputPreserved": true,
@@ -122,50 +122,20 @@
   "discovered": 0,
   "apiCandidates": 0,
   "apiDiscovery": {
-    "errors": [
-      {
-        "keyword": "vienna free food",
-        "offset": 0,
-        "status": 0,
-        "error": "Empty or non-JSON TikTok response",
-        "code": "transport-unavailable",
-        "transportReason": "request-policy-blocked"
-      }
-    ],
-    "attemptedRequests": 1,
+    "errors": [],
+    "attemptedRequests": 0,
     "emptyResponses": 0,
     "rawItems": 0,
     "normalizedItems": 0,
     "ignoredItems": 0,
-    "stoppedReason": "transport-unavailable",
+    "stoppedReason": "api-cooldown",
     "nextRetryAt": "2026-11-18T00:48:14.973Z",
-    "nextKeywordIndex": 6,
-    "transport": "public-browser-search",
-    "navigations": 1,
-    "searchRequests": 0,
-    "blockedExtraRequests": 2,
-    "blockedRequestReasons": {
-      "unexpected-endpoint": 2
-    },
-    "observedSearchEndpoints": {
-      "other-search": 2
-    },
-    "observedSearchPaths": {
-      "[redacted]": 1,
-      "/api/search/user/preview/": 1
-    }
+    "nextKeywordIndex": 6
   },
   "searchDiscovery": {
-    "errors": [
-      {
-        "query": "site:tiktok.com vienna free drinks",
-        "error": "Search challenge; no bypass attempted",
-        "httpStatus": 403,
-        "retryAt": ""
-      }
-    ],
-    "attemptedQueries": 2,
-    "stoppedReason": "search-unavailable",
+    "errors": [],
+    "attemptedQueries": 0,
+    "stoppedReason": "search-cooldown",
     "nextRetryAt": "2026-11-18T00:48:27.003Z",
     "lastAttemptAt": "2026-11-17T00:48:27.003Z",
     "nextQueryIndex": 15,
@@ -207,7 +177,7 @@
     "aiAccepted": 0,
     "aiSkippedLowIntent": 0,
     "aiSkippedUnrecoverable": 0,
-    "analysisWallTimeMs": 1,
+    "analysisWallTimeMs": 0,
     "analysisTotalItemTimeMs": 0,
     "analysisMaxItemTimeMs": 0,
     "aiWallTimeMs": 0,
@@ -251,28 +221,12 @@
     "aiAcceptedUnusable": 0
   },
   "timings": {
-    "apiDiscoveryMs": 12068,
-    "searchDiscoveryMs": 1589,
-    "mediaRescueMs": 186,
-    "totalScannerMs": 14908
+    "apiDiscoveryMs": 40,
+    "searchDiscoveryMs": 0,
+    "mediaRescueMs": 103,
+    "totalScannerMs": 405
   },
-  "discoveryErrors": [
-    {
-      "query": "site:tiktok.com vienna free drinks",
-      "error": "Search challenge; no bypass attempted",
-      "httpStatus": 403,
-      "retryAt": ""
-    }
-  ],
-  "apiErrors": [
-    {
-      "keyword": "vienna free food",
-      "offset": 0,
-      "status": 0,
-      "error": "Empty or non-JSON TikTok response",
-      "code": "transport-unavailable",
-      "transportReason": "request-policy-blocked"
-    }
-  ],
+  "discoveryErrors": [],
+  "apiErrors": [],
   "rejected": []
 }
