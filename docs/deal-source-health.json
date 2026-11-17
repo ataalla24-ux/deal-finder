@@ -1,21 +1,21 @@
 {
-  "generatedAt": "2026-11-17T21:20:27.369Z",
+  "generatedAt": "2026-11-17T21:45:49.645Z",
   "discoveryAvailability": {
     "note": "Transport evidence, not deal yield. Retry eligibility is not recovery. Candidate counts are not Slack deliveries. No extra runs or quota resets.",
     "lanes": [
       {
         "name": "instagram-search",
-        "observedAt": "2026-11-17T09:10:16.844Z",
+        "observedAt": "2026-11-17T21:44:49.523Z",
         "status": "paused",
-        "reason": "search-unavailable",
+        "reason": "search-cooldown",
         "retryAt": "2026-11-18T09:09:53.925Z",
-        "attempted": 1,
+        "attempted": 0,
         "discovered": 0,
         "deliveredToSlack": null
       },
       {
         "name": "instagram-profiles",
-        "observedAt": "2026-11-17T09:10:16.844Z",
+        "observedAt": "2026-11-17T21:44:49.523Z",
         "status": "paused",
         "reason": "web-access-cooldown",
         "retryAt": "2026-11-18T20:10:08.659Z",
@@ -24,7 +24,7 @@
       },
       {
         "name": "instagram-previews",
-        "observedAt": "2026-11-17T09:10:16.844Z",
+        "observedAt": "2026-11-17T21:44:49.523Z",
         "status": "paused",
         "reason": "web-access-cooldown",
         "retryAt": "2026-11-18T20:10:08.659Z",
@@ -54,7 +54,7 @@
   },
   "summary": {
     "filesConsidered": 32,
-    "totalCandidates": 703,
+    "totalCandidates": 702,
     "uniqueCandidates": 681,
     "distinctCandidates": 690,
     "duplicateClusters": 9,
@@ -72,6 +72,12 @@
         "totalDeals": 113
       },
       {
+        "sourceKey": "instagram-ai",
+        "sourceLabel": "Instagram AI Agent",
+        "healthScore": 70,
+        "totalDeals": 1
+      },
+      {
         "sourceKey": "meta-instagram",
         "sourceLabel": "Meta Instagram Graph",
         "healthScore": 69,
@@ -82,12 +88,6 @@
         "sourceLabel": "Firecrawl Key 3 - Consumables",
         "healthScore": 64,
         "totalDeals": 1
-      },
-      {
-        "sourceKey": "firecrawl5",
-        "sourceLabel": "Firecrawl Key 5 - Instagram Gastro",
-        "healthScore": 63,
-        "totalDeals": 5
       }
     ],
     "topMissionSources": [
@@ -185,10 +185,10 @@
         "totalDeals": 5
       },
       {
-        "sourceKey": "joe",
-        "sourceLabel": "jö Bonus Club",
-        "precisionScore": 64,
-        "totalDeals": 9
+        "sourceKey": "instagram-ai",
+        "sourceLabel": "Instagram AI Agent",
+        "precisionScore": 66,
+        "totalDeals": 1
       }
     ],
     "topWeightedSources": [
@@ -449,6 +449,55 @@
       "coverageScore": 82,
       "precisionScore": 72,
       "sourceWeightScore": 72
+    },
+    {
+      "sourceKey": "instagram-ai",
+      "file": "deals-pending-instagram-ai.json",
+      "sourceLabel": "Instagram AI Agent",
+      "totalDeals": 1,
+      "uniqueDeals": 1,
+      "duplicateDeals": 0,
+      "duplicateAcrossSources": 0,
+      "fresh1dCount": 0,
+      "fresh7dCount": 1,
+      "viennaCount": 1,
+      "foodDrinkCount": 1,
+      "promoCount": 0,
+      "missingUrlCount": 0,
+      "sampleTitles": [
+        "Wochen-Mittagsmenüs mit Tagessuppe ab 9,90 €"
+      ],
+      "lastRun": null,
+      "uniqueRate": 1,
+      "duplicateRate": 0,
+      "fresh1dRate": 0,
+      "fresh7dRate": 1,
+      "viennaRate": 1,
+      "foodDrinkRate": 1,
+      "promoRate": 0,
+      "missingUrlRate": 0,
+      "averageQualityScore": 94,
+      "topCategories": [
+        {
+          "value": "essen & trinken",
+          "count": 1
+        }
+      ],
+      "topTypes": [
+        {
+          "value": "rabatt",
+          "count": 1
+        }
+      ],
+      "issues": [
+        "wenige Deals sind frischer als 1 Tag",
+        "wenige klare Gratis-/Promo-Signale"
+      ],
+      "healthScore": 70,
+      "missionFitScore": 50,
+      "coverageScore": 11,
+      "precisionScore": 66,
+      "sourceWeightScore": 51
     },
     {
       "sourceKey": "meta-instagram",
@@ -846,56 +895,6 @@
       "coverageScore": 41,
       "precisionScore": 51,
       "sourceWeightScore": 51
-    },
-    {
-      "sourceKey": "instagram-ai",
-      "file": "deals-pending-instagram-ai.json",
-      "sourceLabel": "Instagram AI Agent",
-      "totalDeals": 2,
-      "uniqueDeals": 1,
-      "duplicateDeals": 1,
-      "duplicateAcrossSources": 1,
-      "fresh1dCount": 0,
-      "fresh7dCount": 2,
-      "viennaCount": 2,
-      "foodDrinkCount": 1,
-      "promoCount": 1,
-      "missingUrlCount": 0,
-      "sampleTitles": [
-        "Super Deals in Wien: bis zu 50 % Rabatt",
-        "Mittagsmenüs mit Tagessuppe ab 9,90 €"
-      ],
-      "lastRun": null,
-      "uniqueRate": 0.5,
-      "duplicateRate": 0.5,
-      "fresh1dRate": 0,
-      "fresh7dRate": 1,
-      "viennaRate": 1,
-      "foodDrinkRate": 0.5,
-      "promoRate": 0.5,
-      "missingUrlRate": 0,
-      "averageQualityScore": 80.5,
-      "topCategories": [
-        {
-          "value": "essen & trinken",
-          "count": 2
-        }
-      ],
-      "topTypes": [
-        {
-          "value": "rabatt",
-          "count": 2
-        }
-      ],
-      "issues": [
-        "wenige Deals sind frischer als 1 Tag",
-        "hohe Überschneidung mit anderen Quellen"
-      ],
-      "healthScore": 57,
-      "missionFitScore": 47,
-      "coverageScore": 11,
-      "precisionScore": 61,
-      "sourceWeightScore": 45
     },
     {
       "sourceKey": "power",
