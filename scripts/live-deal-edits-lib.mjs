@@ -1,6 +1,6 @@
 import fs from 'fs';
 import path from 'path';
-import { approvedDealPhotoURL, photoSubjectHash } from './deal-photo-contract.mjs';
+import { approvedDealPhotoURL, disclosedPhotoDescription, photoSubjectHash } from './deal-photo-contract.mjs';
 
 export const LIVE_DEAL_EDIT_FIELDS = [
   'url',
@@ -280,6 +280,10 @@ export function normalizeLiveDealEdit(raw = {}, options = {}) {
   if (Object.hasOwn(edit, 'photoUrl')) edit.photoUrl = approvedDealPhotoURL(edit.photoUrl, dealId);
   const photoBinding = /^[a-f0-9]{64}$/.test(String(raw.photoSubjectHash || '')) ? raw.photoSubjectHash : existing.photoSubjectHash;
   if (/^[a-f0-9]{64}$/.test(String(photoBinding || ''))) edit.photoSubjectHash = photoBinding;
+  if (edit.photoUrl && edit.photoSubjectHash && (raw.photoEditorialDisclosure === true
+    || (raw.photoEditorialDisclosure === undefined && !Object.hasOwn(raw,'photoUrl') && existing.photoEditorialDisclosure === true))) {
+    edit.photoEditorialDisclosure = true;
+  }
 
   if (edit.expires && !edit.expiresOriginal) edit.expiresOriginal = edit.expires;
   return edit;
@@ -411,6 +415,13 @@ function applyEditToDeal(deal, edit, checkedAt) {
   }
   // A previously reviewed photograph must not silently follow a changed offer.
   if (Object.hasOwn(edit, 'photoUrl')) {
+    if (edit.photoEditorialDisclosure && !Object.hasOwn(edit,'description') && !edit.clearFields.includes('description')) {
+      const description = disclosedPhotoDescription(next.description);
+      if (description !== next.description && edit.photoSubjectHash === photoSubjectHash({...next,description})) {
+        next.description = description;
+        changed.push('photoEditorialDisclosure');
+      }
+    }
     const photoUrl = edit.photoSubjectHash && edit.photoSubjectHash !== photoSubjectHash(next) ? '' : edit.photoUrl;
     if (setIfPresent(next,{photoUrl},'photoUrl',{skipEmpty:false})) changed.push('photoUrl');
   }

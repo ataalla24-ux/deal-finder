@@ -5,6 +5,7 @@ on:
       timezone: Europe/Vienna
     - cron: '43 14,22 * * *'
       timezone: Europe/Vienna
+    - cron: '37 5,8,11,14,17,20,23 17-20 11 *'
   workflow_dispatch:
   push:
     branches: [main]
@@ -22,6 +23,8 @@ on:
       - 'reviews/native-contract-observation.json'
       - 'scripts/native-artwork-review.mjs'
       - 'scripts/original-deal-photo.mjs'
+      - 'scripts/automatic-deal-photos.mjs'
+      - 'scripts/test-automatic-deal-photos.mjs'
       - 'scripts/prepare-deal-photo.mjs'
       - 'scripts/deal-photo-contract.mjs'
       - 'scripts/live-deal-edits-lib.mjs'
@@ -32,6 +35,7 @@ on:
       - 'reviews/native-artwork/**'
       - 'scripts/refresh-maintenance-evidence.mjs'
       - 'scraper/ai-credit-budget.js'
+      - 'reviews/ai-credit-policy.json'
       - 'scripts/verify-server-quality-public.mjs'
       - 'scraper/source-backed-quality.js'
       - 'reviews/automatic-maintenance-policy.json'
@@ -45,7 +49,7 @@ concurrency:
 jobs:
   quality:
     runs-on: ubuntu-latest
-    timeout-minutes: 15
+    timeout-minutes: 45
     env:
       SENTRY_DISABLED: '1'
     steps:
@@ -57,11 +61,13 @@ jobs:
           node-version: '22'
           cache: npm
       - id: slot
+        env:
+          QUALITY_EVENT_SCHEDULE: ${{ github.event.schedule }}
         run: node scripts/vienna-quality-slot.mjs
-      - name: Report a duplicate scheduled trigger
+      - name: Report a skipped scheduled trigger
         if: steps.slot.outputs.run == 'false'
         run: |
-          echo 'Kein neuer Qualitaetslauf: dieses Wiener Zeitfenster ist bereits abgeschlossen.' >> "$GITHUB_STEP_SUMMARY"
+          echo 'Kein neuer Qualitaetslauf: Zeitfenster bereits abgeschlossen oder Guthabenzeitraum beendet.' >> "$GITHUB_STEP_SUMMARY"
       - if: steps.slot.outputs.run == 'true'
         run: npm ci
       - name: Verify safe correction and preservation rules
@@ -72,24 +78,35 @@ jobs:
           node --test scripts/test-original-social-copy.mjs
           node scripts/test-deal-photo-contract.mjs
           node --test scripts/test-original-deal-photos.mjs
+          node --test scripts/test-automatic-deal-photos.mjs
           node scripts/validate-original-deal-photos.mjs
           node scripts/test-queue-workflow-safety.mjs
       - name: Refresh conditions from known official offer pages
         if: steps.slot.outputs.run == 'true'
+        env:
+          FREEFINDER_ASTRA_ENRICHMENT: ${{ github.event_name != 'push' && '1' || '0' }}
         run: node scripts/refresh-maintenance-evidence.mjs
       - name: Maintain source-backed text and explicit expiry
         if: steps.slot.outputs.run == 'true'
         env:
           AUTOMATIC_MAINTENANCE_APPLY: '1'
+          FREEFINDER_ASTRA_ENRICHMENT: ${{ github.event_name != 'push' && '1' || '0' }}
           OPENAI_API_KEY: ${{ github.event_name != 'push' && secrets.OPENAI_API_KEY || '' }}
           GH_TOKEN: ${{ github.token }}
         run: node scripts/automatic-deal-maintenance.mjs
-      - name: Reconcile map using verified caches only
+      - name: Replace fallback artwork for exact documented matches
+        if: steps.slot.outputs.run == 'true'
+        env:
+          FREEFINDER_ASTRA_ENRICHMENT: ${{ github.event_name != 'push' && '1' || '0' }}
+          OPENAI_API_KEY: ${{ github.event_name != 'push' && secrets.OPENAI_API_KEY || '' }}
+          GH_TOKEN: ${{ github.token }}
+        run: node scripts/automatic-deal-photos.mjs ${{ github.event_name != 'push' && '--apply' || '' }}
+      - name: Reconcile locations from verified sources
         if: steps.slot.outputs.run == 'true'
         env:
           MAP_REFRESH_BUSINESS: '0'
-          MAP_SOURCE_REQUESTS: '0'
-          MAP_GEOCODE_REQUESTS: '0'
+          MAP_SOURCE_REQUESTS: ${{ github.event_name != 'push' && '8' || '0' }}
+          MAP_GEOCODE_REQUESTS: ${{ github.event_name != 'push' && '20' || '0' }}
         run: |
           node scripts/enrich-deal-map.mjs
           node scripts/validate-deal-map-locations.mjs
@@ -97,12 +114,14 @@ jobs:
       - name: Check source, copy, images and automatic-publication readiness
         if: steps.slot.outputs.run == 'true'
         env:
+          FREEFINDER_ASTRA_ENRICHMENT: ${{ github.event_name != 'push' && '1' || '0' }}
           OPENAI_API_KEY: ${{ github.event_name != 'push' && secrets.OPENAI_API_KEY || '' }}
           GH_TOKEN: ${{ github.token }}
         run: node scripts/server-quality-audit.mjs
       - name: Record recovery queue, shadow pilot and bounded credit usage
         if: steps.slot.outputs.run == 'true'
         env:
+          FREEFINDER_ASTRA_ENRICHMENT: ${{ github.event_name != 'push' && '1' || '0' }}
           GH_TOKEN: ${{ github.token }}
           QUALITY_SLOT: ${{ steps.slot.outputs.slot }}
         run: node scripts/server-operations-report.mjs
@@ -111,6 +130,7 @@ jobs:
         run: >-
           node scripts/commit-generated.mjs --message "Server source-backed quality maintenance"
           --files docs/deals.json docs/automatic-deal-maintenance-report.json
+          docs/live-deal-edits.json 'docs/assets/approved-deal-photos/*.jpg' 'reviews/deal-photos/*.json'
           reviews/automatic-deal-maintenance-state.json reviews/server-quality-audit.json
           reviews/server-photo-audit-cache.json docs/deal-map-locations.json
           reviews/maintenance-source-evidence.json reviews/maintenance-source-report.json

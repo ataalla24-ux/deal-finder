@@ -5,6 +5,10 @@ export function photoSubjectHash(deal) {
   return photoDigest(JSON.stringify(['original-photo-subject-v1',
     ...['id','title','brand','description','category','url'].map(field=>String(deal?.[field]||'').trim())]));
 }
+export function disclosedPhotoDescription(description) {
+  const text = String(description || '').trim();
+  return /\bSymbol(?:bild|foto)\b/i.test(text) ? text : `${text} Symbolbild.`.trim();
+}
 export function approvedDealPhotoURL(value, dealId) {
   if (!dealId || typeof value !== 'string') return '';
   const owner = photoDigest(String(dealId)).slice(0, 16);

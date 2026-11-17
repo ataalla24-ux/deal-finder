@@ -45,6 +45,33 @@ export async function normalizeOriginalPhoto(bytes) {
   return {bytes:normalized,card,size:normalizedSize,crop};
 }
 
+export async function prepareOriginalPhoto(deal, request, sourceBytes, now = new Date()) {
+  validatePhotoPermission(request);
+  if (request.dealId !== deal.id) throw Error('Photo request does not match the deal');
+  const {bytes,card,size,crop} = await normalizeOriginalPhoto(sourceBytes);
+  const filename = `${photoDigest(deal.id).slice(0, 16)}-${photoDigest(bytes)}.jpg`;
+  const photoUrl = `https://freefinder.at/assets/approved-deal-photos/${filename}`;
+  const review = {version:2,dealId:deal.id,file:filename,sourceURL:request.sourceURL,
+    rights:request.rights,rightsEvidence:request.rightsEvidence,reviewedBy:request.reviewedBy,
+    matchesOffer:true,cropChecked:true,
+    ...(request.kind==='editorial-illustration'?{kind:request.kind,showsActualProduct:false,showsIllustratedProduct:true}:{showsActualProduct:true}),
+    titleAtReview:deal.title,brandAtReview:deal.brand,subjectHash:photoSubjectHash(deal),
+    photoUrl,...size,crop,sha256:photoDigest(bytes),cardSha256:photoDigest(card),
+    originalSha256:photoDigest(sourceBytes),reviewedAt:now.toISOString()};
+  return {bytes,card,size,crop,review};
+}
+
+export function writePreparedOriginalPhoto(root, {bytes,review}) {
+  const directory = path.join(root, 'docs/assets/approved-deal-photos');
+  fs.mkdirSync(directory, {recursive: true});
+  const destination = path.join(directory, review.file);
+  if (fs.existsSync(destination) && !fs.readFileSync(destination).equals(bytes)) throw Error('Existing immutable photo differs');
+  if (!fs.existsSync(destination)) fs.writeFileSync(destination, bytes, {flag: 'wx'});
+  const reviewDir = path.join(root, 'reviews/deal-photos');
+  fs.mkdirSync(reviewDir, {recursive: true});
+  fs.writeFileSync(path.join(reviewDir, `${review.file}.json`), JSON.stringify(review, null, 2) + '\n');
+}
+
 export function readBoundPhotoSnapshot(deal,{root=process.cwd()}={}) {
   if (!deal.photoUrl) return null;
   const url = approvedDealPhotoURL(deal.photoUrl,deal.id);
