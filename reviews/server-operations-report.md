@@ -1,6 +1,6 @@
 # FreeFinder Betriebsbericht
 
-Stand: 2026-11-17T07:51:14.509Z
+Stand: 2026-11-17T07:56:11.244Z
 
 - 91 Live-Angebote; 193 nicht-live Entwuerfe geprueft.
 - 0 neue IDs seit letzter Bestandsaufnahme; keine automatische Erfolgszuordnung.
@@ -28,7 +28,7 @@ Stand: 2026-11-17T07:51:14.509Z
 ## Aktualitaet
 
 - Entwurfsregeln frisch und lokal geprueft, ohne Modell- oder Quellenaufruf. 193 unterschiedliche IDs in 193 Eintraegen; doppelte IDs bleiben Prueffaelle.
-- Live-/Bildpruefstand: current; letzte Pruefung 2026-11-17T07:51:11.485Z. Bei veraltetem Stand sind leere Hinweisliste und Bildzaehler KEIN Entwarnungsnachweis.
+- Live-/Bildpruefstand: current; letzte Pruefung 2026-11-17T07:56:10.054Z. Bei veraltetem Stand sind leere Hinweisliste und Bildzaehler KEIN Entwarnungsnachweis.
 
 ## Freigabe und Einloesung
 
