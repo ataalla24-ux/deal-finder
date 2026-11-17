@@ -2,18 +2,31 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { createHash } from 'node:crypto';
-import { extractApprovalSourceEvidence, preisjaegerThreadId } from '../scraper/approval-source-evidence.js';
+import { extractApprovalSourceEvidence, hasOnlyPreviewDescription, preisjaegerThreadId } from '../scraper/approval-source-evidence.js';
 import { extractIamstudentApprovalSourceEvidence, isSupportedIamstudentApprovalUrl, isReviewedIamstudentApprovalEvidence } from '../scraper/approval-iamstudent-source-evidence.js';
+import { extractMarktguruCashbackEvidence, isSupportedMarktguruUrl, reviewedMarktguruCopy } from '../scraper/marktguru-cashback-evidence.js';
+import { needsSourceBackedTitle } from '../scraper/offer-title-utils.js';
 
 const read = (root, file, fallback) => { try { return JSON.parse(fs.readFileSync(path.join(root, file), 'utf8')); } catch (e) { if (e.code === 'ENOENT') return fallback; throw e; } };
 const digest = value => createHash('sha256').update(value).digest('hex');
 const clean = value => String(value || '').replace(/\s+/g, ' ').trim();
 const identity = value => clean(value).toLowerCase().replace(/[^\p{L}\p{N}]/gu, '');
 const carrierSupported = url => /^https:\/\/www\.drei\.at\/de\/dreiplus\/ersparnisse\/[a-z0-9-]+\/$/.test(url || '');
-const publicSupported = url => isSupportedIamstudentApprovalUrl(url) || Boolean(preisjaegerThreadId(url)) && !/[?#]/.test(url);
+const publicSupported = url => isSupportedIamstudentApprovalUrl(url) || isSupportedMarktguruUrl(url)
+  || Boolean(preisjaegerThreadId(url)) && !/[?#]/.test(url);
 const supported = url => carrierSupported(url) || publicSupported(url);
 const pendingDescription = deal => deal.enrichmentPending === true && deal.enrichmentFields?.includes('description');
 const dueDescription = (deal, now) => pendingDescription(deal) && !(Date.parse(deal.enrichmentNextReviewAt) > +now);
+const reviewablePublicCopy = (deal, now) => {
+  if (pendingDescription(deal) && !dueDescription(deal, now)) return false;
+  if (deal.forceKeep || deal.campaignId || deal.isBusiness || deal.isBusinessAdvertisement
+    || deal.editedInSlack || deal.slackEditedAt || deal.slackFormEditTs || deal.liveEditedAt) return false;
+  const fields = [...(deal.liveEditedFields || []), ...(deal.slackEditedFields || [])];
+  return !fields.includes('title') && needsSourceBackedTitle(deal.title)
+    || !fields.includes('description') && (dueDescription(deal, now) || hasOnlyPreviewDescription(deal))
+    || !fields.some(key => key.startsWith('valid') || key.startsWith('expir'))
+      && ![deal.expires, deal.validOn, deal.validUntil, deal.expiresOriginal].some(clean);
+};
 const sameMerchant = (left, right, url) => identity(left) === identity(right)
   || url === 'https://www.drei.at/de/dreiplus/ersparnisse/madame-tussauds/'
     && [left, right].every(value => ['madametussauds', 'madametussaudswien'].includes(identity(value)));
@@ -24,6 +37,7 @@ export function createMaintenanceSourceEntry(deal, evidence, now = new Date()) {
   if (!publicSupported(deal?.url) || evidence?.sourceUrl !== deal.url || evidence.blockingReason
     || typeof evidence.caption !== 'string' || !evidence.caption.trim() || evidence.caption.length > 16000
     || isSupportedIamstudentApprovalUrl(deal.url) && !isReviewedIamstudentApprovalEvidence(deal, evidence)
+    || isSupportedMarktguruUrl(deal.url) && !reviewedMarktguruCopy(deal, evidence)
     || !Number.isFinite(+now)) return null;
   return { url: deal.url, brand: deal.brand, status: 'verified', text: evidence.caption, hash: digest(evidence.caption),
     checkedAt: now.toISOString(), nextAttemptAt: new Date(+now + 86400000).toISOString(), parserVersion: 4,
@@ -87,8 +101,9 @@ export async function refreshMaintenanceEvidence({ root = process.cwd(), now = n
     for await (const part of response.body) { size += part.length; if (size > 4000000) throw Error('Public source HTML limit'); chunks.push(part); }
     return { html: Buffer.concat(chunks).toString('utf8'), finalUrl: url, status: 200 };
   };
-  const missing = deals.filter(d => !clean(d.description) || pendingDescription(d));
-  const selected = [...new Map(deals.filter(d => carrierSupported(d.url) || publicSupported(d.url) && dueDescription(d, now)).map(d => [d.url, d])).values()]
+  const missing = deals.filter(d => hasOnlyPreviewDescription(d) || pendingDescription(d));
+  const candidates = deals.filter(d => carrierSupported(d.url) || publicSupported(d.url) && reviewablePublicCopy(d, now));
+  const selected = [...new Map(candidates.map(d => [d.url, d])).values()]
     .sort((a, b) => Number(dueDescription(b, now)) - Number(dueDescription(a, now))
       || (requireSameDay ? Number(b.category === 'essen') - Number(a.category === 'essen') : 0)
       || (Date.parse(cache.entries[a.url]?.checkedAt) || 0) - (Date.parse(cache.entries[b.url]?.checkedAt) || 0));
@@ -115,7 +130,8 @@ export async function refreshMaintenanceEvidence({ root = process.cwd(), now = n
       if (publicSupported(deal.url)) {
         const evidence = isSupportedIamstudentApprovalUrl(deal.url)
           ? extractIamstudentApprovalSourceEvidence(page.html, deal.url, page.finalUrl)
-          : extractApprovalSourceEvidence(page.html, deal.url, page.finalUrl);
+          : isSupportedMarktguruUrl(deal.url) ? extractMarktguruCashbackEvidence(page.html, deal.url, page.finalUrl)
+            : extractApprovalSourceEvidence(page.html, deal.url, page.finalUrl);
         const entry = createMaintenanceSourceEntry(deal, evidence, now);
         next = entry || { ...next, reason: evidence?.blockingReason || 'source-not-confirmed' };
       } else {

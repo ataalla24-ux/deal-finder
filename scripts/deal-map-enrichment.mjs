@@ -72,6 +72,18 @@ export function extractAddresses(value) {
   return [...String(value || '').matchAll(pattern)].map(m => ({ street: m[1], number: m[2], postalCode: m[3] || '' }));
 }
 
+function addressSourceDescription(deal) {
+  const { description, metaGraphCaption } = deal;
+  if (deal.metaGraphVerified !== true || !description || typeof description !== 'string'
+    || typeof metaGraphCaption !== 'string' || !metaGraphCaption.endsWith(description)
+    || [...(deal.slackEditedFields || []), ...(deal.liveEditedFields || [])].includes('description')) return description;
+  const offset = metaGraphCaption.length - description.length;
+  // Older generated previews can start in the middle of a street name. The full
+  // verified caption still supplies every address, including genuine conflicts.
+  return offset > 0 && /\p{L}/u.test(metaGraphCaption[offset - 1]) && /^\p{L}/u.test(description)
+    ? '' : description;
+}
+
 function hasOnsiteRedemption(deal, place) {
   const text = normalize([deal.title, deal.description, deal.metaGraphCaption,
     deal.viennaEvidence?.verified === true ? deal.viennaEvidence.detail : ''].filter(Boolean).join(' '));
@@ -152,7 +164,7 @@ export function candidatesFor(deal, reviewed, today) {
   const unique = [...new Map(candidates.map(x => [normalize(`${x.street} ${x.number}`), x])).values()];
   // A caption can contain different conditions per branch; it must be reviewed first.
   const sourceText = deal.viennaEvidence?.verified === true ? deal.viennaEvidence.detail : '';
-  const caption = [deal.brand, deal.description, deal.metaGraphCaption, sourceText].flatMap(extractAddresses);
+  const caption = [deal.brand, addressSourceDescription(deal), deal.metaGraphCaption, sourceText].flatMap(extractAddresses);
   const allKeys = new Set([...unique, ...caption].map(x => normalize(`${x.street} ${x.number}`)));
   if (allKeys.size > 1) return { reason: 'multiple-branches-need-review', addresses: [] };
   const placeContext = [deal.address, deal.location, deal.distance].filter(Boolean).join(' ');
@@ -224,7 +236,7 @@ export function inspectDealLocation(deal, { map = {}, catalog = {}, reviewed = {
     && location.dealIds?.includes(deal.id) && location.managedBy !== manager
     && !location.automaticDealIds?.includes(deal.id));
   if (candidates.reason === 'multiple-branches-need-review' && approved.length && !reviewed[deal.id]) {
-    const mentioned = [deal.address, deal.location, deal.distance, deal.brand, deal.description, deal.metaGraphCaption,
+    const mentioned = [deal.address, deal.location, deal.distance, deal.brand, addressSourceDescription(deal), deal.metaGraphCaption,
       deal.viennaEvidence?.verified === true ? deal.viennaEvidence.detail : ''].flatMap(extractAddresses);
     if (mentioned.length && mentioned.every(address => approved.some(location => matchesAddress(location, address)))) {
       return { ...base, status: 'mapped', reason: 'existing-registry', locationIds: approved.map(x => x.id) };

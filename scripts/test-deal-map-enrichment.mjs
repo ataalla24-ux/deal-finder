@@ -17,6 +17,24 @@ assert.equal(candidatesFor({ id: 'other', description: 'Hauptstraße 1, Graz' },
 assert.equal(candidatesFor({ id: 'papa', distance: '1060 Wien', viennaEvidence: { verified: true, detail: 'Nur bei Papa Duck, Barnabitengasse 1, 1060 Wien' } }, {}, '2026-10-09').addresses[0].street, 'Barnabitengasse');
 assert.equal(candidatesFor({ id: 'unverified', distance: 'Wien', viennaEvidence: { verified: false, detail: 'Barnabitengasse 1, 1060 Wien' } }, {}, '2026-10-09').addresses.length, 0);
 assert.equal(candidatesFor({ ...deal, description: 'Nur Sonntag: Wagramer Straße 126' }, {}, '2026-09-30').reason, 'multiple-branches-need-review');
+const clippedCaption = {
+  id: 'verified-caption-tail',
+  distance: 'Wien',
+  metaGraphVerified: true,
+  metaGraphCaption: 'Gratis am Dienstag. 📍Favoritenstraße 94, 1100 Wien',
+  description: 'ritenstraße 94, 1100 Wien',
+};
+assert.deepEqual(candidatesFor(clippedCaption, {}, '2026-11-17').addresses,
+  [{ street: 'Favoritenstraße', number: '94', postalCode: '1100' }]);
+for (const changed of [
+  { metaGraphVerified: false },
+  { liveEditedFields: ['description'] },
+  { description: 'ritenstraße 94, 1100 Wien, Angebot verlängert' },
+  { metaGraphCaption: 'Braunhubergasse 19, 1110 Wien oder 📍Favoritenstraße 94, 1100 Wien' },
+  { address: 'Braunhubergasse 19, 1110 Wien' },
+]) {
+  assert.equal(candidatesFor({ ...clippedCaption, ...changed }, {}, '2026-11-17').reason, 'multiple-branches-need-review');
+}
 const reviewed = { test: { locations: [{ street: 'A', number: '1', validUntil: '2026-09-27' }, { street: 'B', number: '2', validUntil: '2026-10-04' }] } };
 assert.equal(candidatesFor(deal, reviewed, '2026-09-30').addresses.length, 1);
 const feature = { id: '1', properties: { NAME_STR: 'Braunhubergasse', NAME_ONR: '19', PLZ: '1110' }, geometry: { type: 'Point', coordinates: [16.41565621, 48.17024268] } };

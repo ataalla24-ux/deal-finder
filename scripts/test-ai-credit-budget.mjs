@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
-import { createCreditBudget, loadAiCreditPolicy, modelForTask, prepareBudgetedRequest, validateCreditPolicy } from '../scraper/ai-credit-budget.js';
+import { createCreditBudget, isAstraEnrichmentActive, loadAiCreditPolicy, modelForTask, prepareBudgetedRequest, validateCreditPolicy } from '../scraper/ai-credit-budget.js';
 import { requestOpenAi } from '../scraper/instagram-media-evidence.js';
 import { githubQuotaStore } from '../scraper/instagram-shared-quota.js';
 import { classifyWithOpenAi } from '../scraper/instagram-ai-agent.js';
@@ -100,6 +100,62 @@ test('GPT-6 request parameters are bounded and use standard processing only', ()
   assert.throws(() => prepareBudgetedRequest('https://example.com', init()));
 });
 
+test('Astra uses max effort and reserves room for reasoning and bounded high-detail images', () => {
+  const source = 'data:image/jpeg;base64,AA==';
+  const withPhoto = init('gpt-6-astra', {
+    messages: [{ role: 'user', content: [{ type: 'image_url', image_url: { url: source, detail: 'original' } }] }],
+  });
+  const prepared = prepareBudgetedRequest(url, withPhoto);
+  const body = JSON.parse(prepared.init.body);
+  assert.equal(body.reasoning_effort, 'max');
+  assert.equal(body.max_completion_tokens, 8192);
+  assert.equal(body.messages[0].content[0].image_url.detail, 'high');
+  assert.equal(body.messages[0].content[0].image_url.url, source);
+  assert.ok(prepared.reservedUsd >= 0.4496 && prepared.reservedUsd < policy.requestLimitUsd);
+  const responses = prepareBudgetedRequest('https://api.openai.com/v1/responses', init('gpt-6-astra', {
+    input: [{ role: 'user', content: [{ type: 'input_image', image_url: source }] }],
+    reasoning: { effort: 'low' },
+  }));
+  const responseBody = JSON.parse(responses.init.body);
+  assert.deepEqual(responseBody.reasoning, { effort: 'max' });
+  assert.equal(responseBody.input[0].content[0].detail, 'high');
+});
+
+test('Astra uplift is confined to the approved enrichment window and shares the overall cap', async () => {
+  const campaign = Date.parse(policy.astraEnrichment.notBefore) + 60000;
+  const deadline = Date.parse(policy.expiresAt) - 120000;
+  const store = memory({ version: 1, creditPeriod: policy.periodId, pausedUntil: 0, reservations: [
+    { at: campaign - 1, usd: 3, model: 'gpt-6-astra', profile: 'astra-deal-enrichment', status: 'settled' },
+  ] });
+  const finished = async () => successful();
+  const ordinary = createCreditBudget({ store, policy, clock: () => campaign, request: finished });
+  const active = createCreditBudget({ store, policy, clock: () => campaign, request: finished, allowAstraEnrichment: true });
+  assert.equal(isAstraEnrichmentActive({ enabled: true, now: campaign, policy }), true);
+  assert.equal(isAstraEnrichmentActive({ enabled: true, now: deadline, policy }), false);
+  await assert.rejects(ordinary(url, init('gpt-6-astra')), /model-outside-active-profile/);
+  await assert.rejects(active(url, init('gpt-6.1-sol')), /model-outside-active-profile/);
+  assert.equal((await ordinary(url, init())).status, 200);
+  assert.equal((await active(url, init('gpt-6-astra'))).status, 200);
+  assert.equal(store.state.reservations.at(-1).profile, 'astra-deal-enrichment');
+  const capped = createCreditBudget({ store, policy: { ...policy, periodLimitUsd: 3.1,
+    astraEnrichment: { ...policy.astraEnrichment, rollingDayLimitUsd: 3.1 } },
+    clock: () => campaign, request: () => assert.fail('period cap must be enforced'), allowAstraEnrichment: true });
+  await assert.rejects(capped(url, init('gpt-6-astra')), /shared-spend-limit/);
+});
+
+test('Astra model denial is recorded without pausing ordinary jobs or retrying Astra', async () => {
+  const campaign = Date.parse(policy.astraEnrichment.notBefore) + 60000;
+  const store = memory();
+  let calls = 0;
+  const options = { store, policy, clock: () => campaign, allowAstraEnrichment: true,
+    request: async () => { calls++; return Response.json({ error: { code: 'model_not_found' } }, { status: 404 }); } };
+  assert.equal((await createCreditBudget(options)(url, init('gpt-6-astra'))).status, 404);
+  await assert.rejects(createCreditBudget(options)(url, init('gpt-6-astra')), /astra-provider-pause/);
+  assert.equal(calls, 1);
+  assert.equal(store.state.pausedUntil, 0);
+  assert.equal((await createCreditBudget({ ...options, allowAstraEnrichment: false, request: successful })(url, init())).status, 200);
+});
+
 test('a reservation must be durably committed before a provider request; usage releases unused reservation', async () => {
   const store = memory();
   let calls = 0;
@@ -119,7 +175,8 @@ test('a reservation must be durably committed before a provider request; usage r
 test('parallel runners cannot spend the same capacity', async () => {
   const store = memory();
   const cost = prepareBudgetedRequest(url, init()).reservedUsd;
-  const constrained = { ...policy, periodLimitUsd: cost * 2.1, rollingDayLimitUsd: cost * 2.1 };
+  const { astraEnrichment, ...ordinaryPolicy } = policy;
+  const constrained = { ...ordinaryPolicy, periodLimitUsd: cost * 2.1, rollingDayLimitUsd: cost * 2.1 };
   let calls = 0;
   const transport = async () => { calls++; await new Promise(resolve => setTimeout(resolve, 20)); return Response.json({}); };
   const requests = Array.from({ length: 12 }, () => createCreditBudget({ store, policy: constrained, clock: () => now, request: transport }));

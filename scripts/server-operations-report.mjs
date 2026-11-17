@@ -3,7 +3,7 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { createHash } from 'node:crypto';
 import { duplicateDealKey } from '../scraper/deal-evidence-utils.js';
-import { loadAiCreditPolicy, modelForTask } from '../scraper/ai-credit-budget.js';
+import { isAstraEnrichmentActive, loadAiCreditPolicy, modelForTask } from '../scraper/ai-credit-budget.js';
 import { inspectSourceBackedQuality } from '../scraper/source-backed-quality.js';
 import { loadDealMapReviewContext, reviewDealMap } from './deal-map-review.mjs';
 import { maintenanceEvidenceFor } from './refresh-maintenance-evidence.mjs';
@@ -145,10 +145,16 @@ export function creditSnapshot(ledger, policy, now = new Date()) {
   }
   const all = ledger.reservations, recent = all.filter(r => r.at > +now - 86400000);
   const sum = values => Number(values.reduce((total,r) => total + r.usd, 0).toFixed(6));
+  const astra = all.filter(r => r.profile === 'astra-deal-enrichment');
+  const astraOpen = isAstraEnrichmentActive({ enabled: true, now: +now, policy });
   return { status: 'internal-ledger', observedAt: now.toISOString(), providerBalanceKnown: false,
     periodId: policy.periodId, periodLimitUsd: policy.periodLimitUsd, rollingDayLimitUsd: policy.rollingDayLimitUsd,
     periodReservedOrSettledUsd: sum(all), rollingDayReservedOrSettledUsd: sum(recent),
     unsettledReservations: all.filter(r => r.status !== 'settled').length,
+    ...(policy.astraEnrichment ? { astraEnrichment: { active: astraOpen,
+      rollingDayLimitUsd: policy.astraEnrichment.rollingDayLimitUsd,
+      reservedOrSettledUsd: sum(astra), settledCalls: astra.filter(r => r.status === 'settled').length,
+      regularRollingDayReservedOrSettledUsd: sum(recent.filter(r => r.profile !== 'astra-deal-enrichment')) } } : {}),
     expiresAt: policy.expiresAt, expired: +now >= Date.parse(policy.expiresAt),
     modelsLast24Hours: countBy(recent.map(r => r.model || 'unknown')) };
 }

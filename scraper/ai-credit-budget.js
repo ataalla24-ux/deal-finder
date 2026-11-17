@@ -3,10 +3,14 @@ import { randomUUID } from 'node:crypto';
 import { githubQuotaStore } from './instagram-shared-quota.js';
 
 const DAY = 86400000;
+const ASTRA = 'gpt-6-astra';
+const ASTRA_PROFILE = 'astra-deal-enrichment';
 const RATES = {
   'gpt-6-luna': [0.1, 0.5],
   'gpt-6.1-terra': [1, 5],
   'gpt-6.1-sol': [2, 10],
+  // Reserve all input at the higher cache-write rate. Standard output includes reasoning.
+  [ASTRA]: [12.5, 50],
 };
 const SAFE_ERRORS = ['insufficient_quota', 'credit_balance_exhausted', 'billing_hard_limit_reached', 'billing_not_active',
   'organization_spend_limit_exceeded', 'project_spend_limit_exceeded', 'organization_usage_limit_exceeded',
@@ -30,15 +34,30 @@ export function loadAiCreditPolicy() {
   catch { throw paused('missing-or-invalid-policy'); }
 }
 
+export function isAstraEnrichmentActive({ enabled = process.env.FREEFINDER_ASTRA_ENRICHMENT === '1',
+  now = Date.now(), policy } = {}) {
+  if (!enabled) return false;
+  policy ??= loadAiCreditPolicy();
+  const profile = policy.astraEnrichment;
+  return profile?.rollingDayLimitUsd > 0 && now >= Date.parse(profile.notBefore)
+    && now + 120000 < Date.parse(policy.expiresAt);
+}
+
 export function modelForTask(task, override) {
   const model = String(override || defaults[task] || defaults.review).trim();
   if (!Object.hasOwn(RATES, model)) throw paused('unpriced-model');
+  if (isAstraEnrichmentActive()) return ASTRA;
   return model;
+}
+
+export function dealEnrichmentModelTimeoutMs() {
+  return isAstraEnrichmentActive() ? 110000 : 45000;
 }
 
 export function validateCreditPolicy(policy, now = Date.now()) {
   const start = Date.parse(policy?.notBefore), end = Date.parse(policy?.expiresAt);
   const guard = policy?.providerGuard;
+  const astra = policy?.astraEnrichment;
   if (policy?.version !== 1 || policy.mode !== 'free-credit-only' || !policy.periodId
     || policy.paidFallback !== false || policy.automaticRenewalAssumed !== false
     || !Number.isFinite(start) || !Number.isFinite(end) || now < start || now + 120000 >= end
@@ -49,7 +68,11 @@ export function validateCreditPolicy(policy, now = Date.now()) {
     || !Number.isFinite(Date.parse(guard.verifiedAt)) || Date.parse(guard.verifiedAt) > now
     || ![policy.periodLimitUsd, policy.rollingDayLimitUsd, policy.requestLimitUsd, guard.monthlyLimitUsd]
       .every(value => Number.isFinite(value) && value > 0)
-    || policy.periodLimitUsd >= guard.monthlyLimitUsd || policy.rollingDayLimitUsd > policy.periodLimitUsd) {
+    || policy.periodLimitUsd >= guard.monthlyLimitUsd || policy.rollingDayLimitUsd > policy.periodLimitUsd
+    || (astra !== undefined && (!Number.isFinite(Date.parse(astra?.notBefore))
+      || Date.parse(astra.notBefore) < start || Date.parse(astra.notBefore) >= end
+      || !Number.isFinite(astra.rollingDayLimitUsd) || astra.rollingDayLimitUsd <= 0
+      || astra.rollingDayLimitUsd > policy.periodLimitUsd))) {
     throw paused('unverified-expired-or-unsafe-credit-policy');
   }
   return policy;
@@ -63,14 +86,17 @@ export function prepareBudgetedRequest(url, init) {
   if (!rates || body.tools?.length || body.previous_response_id || body.conversation || body.background || body.stream
     || body.n && body.n !== 1 || body.service_tier && body.service_tier !== 'default') throw paused('unbounded-or-unpriced-request');
   const responses = String(url).endsWith('/responses');
-  const outputTokens = Number(body.max_output_tokens ?? body.max_completion_tokens ?? body.max_tokens ?? 4096);
-  if (!Number.isInteger(outputTokens) || outputTokens < 1 || outputTokens > 8192) throw paused('output-limit');
+  const requestedOutput = Number(body.max_output_tokens ?? body.max_completion_tokens ?? body.max_tokens ?? 4096);
+  if (!Number.isInteger(requestedOutput) || requestedOutput < 1 || requestedOutput > 8192) throw paused('output-limit');
+  const astra = body.model === ASTRA;
+  const outputTokens = astra ? 8192 : requestedOutput;
   if (body.model.startsWith('gpt-6')) {
     delete body.temperature;
     delete body.top_p;
-    if (responses) body.reasoning = { effort: body.model === 'gpt-6.1-sol' ? 'low' : 'none' };
+    const effort = astra ? 'max' : body.model === 'gpt-6.1-sol' ? 'low' : 'none';
+    if (responses) body.reasoning = { effort };
     else {
-      body.reasoning_effort = body.model === 'gpt-6.1-sol' ? 'low' : 'none';
+      body.reasoning_effort = effort;
       delete body.max_tokens;
       body.max_completion_tokens = outputTokens;
     }
@@ -83,6 +109,15 @@ export function prepareBudgetedRequest(url, init) {
   const serializedText = JSON.stringify(body, (key, value) => {
     if (value && typeof value === 'object' && ['input_image', 'image_url'].includes(value.type)) {
       images++;
+      if (astra) {
+        if (value.type === 'input_image') {
+          if (typeof value.image_url !== 'string' || value.file_id) throw paused('unsupported-image-input');
+          value.detail = 'high';
+        } else {
+          if (typeof value.image_url?.url !== 'string') throw paused('unsupported-image-input');
+          value.image_url.detail = 'high';
+        }
+      }
       return '[bounded image]';
     }
     if (value && typeof value === 'object' && /audio|video|file/.test(String(value.type || ''))) throw paused('unsupported-modality');
@@ -90,14 +125,15 @@ export function prepareBudgetedRequest(url, init) {
   });
   const bytes = Buffer.byteLength(serializedText, 'utf8');
   if (bytes > 80000 || images > 3 || Buffer.byteLength(init.body, 'utf8') > 20 * 1024 * 1024) throw paused('input-limit');
-  // UTF-8 bytes conservatively bound text tokens. Image reservations deliberately
-  // exceed supported patch budgets; only verified response usage releases slack.
-  const inputTokens = bytes + 1024 + images * 200000;
+  // Astra high detail is bounded to 2500 patches at 1.2 tokens each. The extra
+  // margin covers rounding and framing and keeps the request below long-context pricing.
+  const inputTokens = bytes + 1024 + images * (astra ? 3200 : 200000);
   return { init: { ...init, body: JSON.stringify(body) }, model: body.model,
     reservedUsd: money((inputTokens * rates[0] + outputTokens * rates[1]) / 1000000) };
 }
 
-export function createCreditBudget({ store, policy, clock = Date.now, request = fetch } = {}) {
+export function createCreditBudget({ store, policy, clock = Date.now, request = fetch,
+  allowAstraEnrichment = false } = {}) {
   let stopped = false;
   const update = async transform => {
     for (let attempt = 0; attempt < 8; attempt++) {
@@ -119,25 +155,37 @@ export function createCreditBudget({ store, policy, clock = Date.now, request = 
     if (stopped) throw paused('runner-paused');
     validateCreditPolicy(policy, clock());
     const prepared = prepareBudgetedRequest(url, init);
+    const astra = prepared.model === ASTRA;
+    const profileActive = isAstraEnrichmentActive({ enabled: allowAstraEnrichment, now: clock(), policy });
+    if (astra !== profileActive) throw paused('model-outside-active-profile');
     if (prepared.reservedUsd > policy.requestLimitUsd) throw paused('request-cost-limit');
     const id = randomUUID(), at = clock();
     await update(state => {
       const total = rows => money(rows.reduce((sum, row) => sum + row.usd, 0));
+      const rollingLimit = astra ? policy.astraEnrichment.rollingDayLimitUsd : policy.rollingDayLimitUsd;
+      const daily = state.reservations.filter(row => row.at > at - DAY && (astra || row.profile !== ASTRA_PROFILE));
+      if (astra && Number(state.astraPausedUntil) > at) throw paused('astra-provider-pause');
       if (total(state.reservations) + prepared.reservedUsd > policy.periodLimitUsd
-        || total(state.reservations.filter(row => row.at > at - DAY)) + prepared.reservedUsd > policy.rollingDayLimitUsd) throw paused('shared-spend-limit');
+        || total(daily) + prepared.reservedUsd > rollingLimit) throw paused('shared-spend-limit');
       return { ...state, reservations: [...state.reservations, { id, at, usd: prepared.reservedUsd,
-        model: prepared.model, count: 1, expiresAt: Date.parse(policy.expiresAt), status: 'reserved' }] };
+        model: prepared.model, ...(astra ? { profile: ASTRA_PROFILE } : {}),
+        count: 1, expiresAt: Date.parse(policy.expiresAt), status: 'reserved' }] };
     });
     // Never send an unreserved call, including after slow storage crosses expiry.
     validateCreditPolicy(policy, clock());
     let response, payload;
     try {
       response = await request(url, { ...prepared.init,
-        signal: AbortSignal.any([...(prepared.init.signal ? [prepared.init.signal] : []), AbortSignal.timeout(45000)]) });
+        signal: AbortSignal.any([...(prepared.init.signal ? [prepared.init.signal] : []), AbortSignal.timeout(astra ? 110000 : 45000)]) });
       payload = await response.clone().json().catch(() => ({}));
       const codes = [payload.error?.code, payload.error?.type];
       const billingFailure = codes.some(code => /quota|billing|credit_balance|spend_limit|usage_limit/.test(String(code || '')));
-      if (billingFailure || [401, 403].includes(response.status)) {
+      const astraAccessFailure = astra && !billingFailure
+        && ([403, 404].includes(response.status) || codes.includes('model_not_found'));
+      if (astraAccessFailure) {
+        stopped = true;
+        await update(state => ({ ...state, astraPausedUntil: Math.max(state.astraPausedUntil || 0, clock() + 6 * 3600000) }));
+      } else if (billingFailure || [401, 403].includes(response.status)) {
         stopped = true;
         await update(state => ({ ...state, pausedUntil: Math.max(state.pausedUntil || 0, clock() + 6 * 3600000) }));
       } else if (response.ok) {
@@ -170,7 +218,8 @@ export async function freeCreditOpenAiFetch(url, init) {
     try { store = githubQuotaStore(process.env, globalThis.fetch, {
       branch: 'automation/openai-free-credit-budget', file: 'openai-free-credit-budget.json', initialPauseMs: 0,
     }); } catch { throw paused('shared-github-storage-unavailable'); }
-    productionRequest = createCreditBudget({ store, policy: loadAiCreditPolicy() });
+    productionRequest = createCreditBudget({ store, policy: loadAiCreditPolicy(),
+      allowAstraEnrichment: process.env.FREEFINDER_ASTRA_ENRICHMENT === '1' });
   }
   return productionRequest(url, init);
 }

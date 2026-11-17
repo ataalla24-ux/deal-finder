@@ -8,6 +8,7 @@ import { copyReviewReasons, maintainFeedFile, maintainDeals } from './automatic-
 import { createMaintenanceSourceEntry, maintenanceEvidenceFor, refreshMaintenanceEvidence } from './refresh-maintenance-evidence.mjs';
 import { extractIamstudentApprovalSourceEvidence, reviewedIamstudentCopy } from '../scraper/approval-iamstudent-source-evidence.js';
 import { projectEnrichmentDeal } from '../scraper/deal-enrichment-state.js';
+import { extractMarktguruCashbackEvidence, MARKTGURU_NESCAFE_URL } from '../scraper/marktguru-cashback-evidence.js';
 
 const now = new Date('2026-11-14T12:00:00Z');
 const policy = { version: 1, enabled: true, automaticLocalCopy: true, automaticExpiry: false, maxAiCandidatesPerRun: 4 };
@@ -130,6 +131,74 @@ test('current Preisjaeger full-body evidence replaces its stale preview within o
   assert(current.includes('Nicht über McDelivery'));
   assert(!current.includes('morgen wissen wir mehr'));
   assert.equal(result.report.sourceRequests, 1);
+}));
+
+test('title-only review fetches the exact source and corrects that live row without buffering a second fetch or touching approved fields', () => fixture(async ({ root, put }) => {
+  const sourceUrl = 'https://www.preisjaeger.at/deals/mcdonalds-gratis-fussball-donut-zum-osterreich-match-372365';
+  const source = fs.readFileSync(fileURLToPath(new URL('./fixtures/preisjaeger-donut-dom-20261114.html', import.meta.url)), 'utf8');
+  const deal = {
+    id: 'title-only', url: sourceUrl, brand: "McDonald's", title: 'Instagram Deal mit viel Text ohne eine klare Überschrift zum Speiseangebot',
+    description: 'Ein Donut mit der App, gültig am 17.11.2026.', expiryKind: 'single',
+    validOn: '2026-11-17', expires: '2026-11-17T23:59:59.999Z', votes: 11, liveEditedFields: ['description', 'validOn'],
+  };
+  put('docs/deals.json', { deals: [deal] });
+  let reads = 0;
+  const result = await refreshMaintenanceEvidence({ root, now, fetchPage: async currentUrl => {
+    assert.equal(currentUrl, sourceUrl);
+    reads++;
+    return { html: source, finalUrl: currentUrl, status: 200 };
+  } });
+  assert.equal(reads, 1);
+  const captured = maintenanceEvidenceFor([deal], result.cache, now).get(deal.id).officialText.replace(/\s+/g, ' ');
+  assert.match(captured, /gratis Fußball Donut/);
+  let reviews = 0;
+  const edited = await maintainFeedFile({ cwd: root, now, allowAi: true, request: async (_url, init) => {
+    reviews++;
+    const payload = JSON.parse(JSON.parse(init.body).messages[1].content);
+    const content = Object.hasOwn(payload, 'patch') ? { supported: true }
+      : { title: 'Gratis Fußball-Donut', quote: 'gratis Fußball Donut', description: '', conditionsQuote: '', dateQuote: '' };
+    assert.ok(payload.evidence.includes(captured));
+    return Response.json({ choices: [{ finish_reason: 'stop', message: { content: JSON.stringify(content) } }] });
+  } });
+  assert.equal(reviews, 2);
+  assert.deepEqual(edited.deals, [{ ...deal, title: 'Gratis Fußball-Donut' }]);
+  const reviewed = { ...deal, liveEditedFields: ['title', 'description', 'validOn'] };
+  put('docs/deals.json', { deals: [reviewed] });
+  put('reviews/maintenance-source-evidence.json', { entries: {} });
+  const manual = await refreshMaintenanceEvidence({ root, now, fetchPage: () => assert.fail('protected title is not fetched') });
+  assert.equal(manual.report.sourceRequests, 0);
+}));
+
+test('published marktguru terms complete the same NESCAFÉ text without a model or guessed expiry or map points', () => fixture(async ({ root, put }) => {
+  const source = fs.readFileSync(fileURLToPath(new URL('./fixtures/marktguru-nescafe-20261117.html', import.meta.url)), 'utf8');
+  const deal = { ...pending('fc4g-w3wqsu'), url: MARKTGURU_NESCAFE_URL, brand: 'BILLA',
+    title: '1+1 gratis beim Kauf von zwei NESCAFÉ Espresso Concentrate', distance: 'Wien · Standort folgt', expiryKind: 'start',
+    validFrom: '2026-11-06', expiresOriginal: 'ab 06.11.2026 ab 09:00 Uhr' };
+  for (const changed of [source.replace('61% verfügbar', '0% verfügbar'), source.replace('"workflowState":"published"', '"workflowState":"expired"'),
+    source.replace('"id":6566', '"id":6567'), source.replace('Eurospar', 'Andere Händler'),
+    source.replace('class="desc"', 'class="desc" hidden'), source.replace('"cutoffDate":null', '"cutoffDate":"2026-11-30"')]) {
+    assert.match(extractMarktguruCashbackEvidence(changed, deal.url).blockingReason, /nicht/);
+  }
+  put('docs/deals.json', { deals: [deal] });
+  const result = await refreshMaintenanceEvidence({ root, now, fetchPage: async currentUrl => {
+    assert.equal(currentUrl, deal.url);
+    return { html: source, finalUrl: currentUrl, status: 200 };
+  } });
+  assert.equal(result.report.sourceRequests, 1);
+  assert.equal(result.cache.entries[deal.url].status, 'verified');
+  const completed = await maintainFeedFile({ cwd: root, now, allowAi: true, request: () => assert.fail('reviewed fixed copy requires no model') });
+  const row = completed.deals[0];
+  assert.equal(row.id, deal.id);
+  assert.equal(row.title, deal.title);
+  assert.equal(row.distance, deal.distance);
+  assert.equal(row.validFrom, deal.validFrom);
+  assert.equal(row.expiresOriginal, deal.expiresOriginal);
+  assert.equal(row.validUntil, undefined);
+  assert.match(row.description, /günstigeren Produkts/);
+  assert.match(row.description, /drei Einlösungen pro Person/);
+  assert.match(row.description, /Click & Collect/);
+  assert.deepEqual(row.enrichmentFields, ['map']);
+  assert.equal(completed.report.ai.attempted, 0);
 }));
 
 test('source refresh prioritizes due public originals inside the same four offer attempts and caches the response', () => fixture(async ({ root, put }) => {

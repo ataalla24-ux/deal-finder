@@ -173,6 +173,15 @@ test('Vienna schedule recovers a late or missing trigger only once per due slot,
   assert.deepEqual(viennaQualitySlot({event:'push',now}),{run:true,slot:'',reason:'on-change-or-manual'});
 });
 
+test('the extra quality schedule skips absent or expired free-credit windows',()=>{
+  const schedule='37 5,8,11,14,17,20,23 17-20 11 *';
+  const run=iso=>viennaQualitySlot({event:'schedule',schedule,now:new Date(iso)});
+  assert.deepEqual(run('2026-11-17T05:37:00Z'),{run:false,slot:'',reason:'grant-window-ended'});
+  assert.deepEqual(run('2026-11-17T08:37:00Z'),{run:true,slot:'',reason:'astra-enrichment'});
+  assert.deepEqual(run('2026-11-20T08:37:00Z'),{run:false,slot:'',reason:'grant-window-ended'});
+  assert.equal(run('2027-11-17T08:37:00Z').run,false);
+});
+
 test('quality checks are advisory and never grant approval based on model or map success',()=>{
   const deal={id:'test',title:'Gratis Kaffee mit Gutschein',brand:'Cafe',description:'Nur mit Gutschein',validOn:'2026-11-07',caption:'Gratis Kaffee mit Gutschein am 07.11.2026'};
   const before=JSON.stringify(deal);

@@ -33,6 +33,12 @@ export function isBenefitOnlyTitle(value = '') {
   return /^(?:(?:jetzt|bis zu|ab)\s+)?(?:\d+(?:[,.]\d+)?\s*(?:%|prozent|€|euro)\s*(?:rabatt|sparen|ersparnis|preisvorteil)?|[12]\s*\+\s*1(?:\s+gratis)?|gratis|kostenlos)(?:\s+(?:mit|für|fuer)\s+.+)?[.!]*$/iu.test(title);
 }
 
+export function needsSourceBackedTitle(value = '') {
+  const title = String(value || '').replace(/\s+/g, ' ').trim();
+  return title.length > 50 || !title || isBenefitOnlyTitle(title)
+    || /^(?:Instagram|TikTok|Community[- ]Deal)|gemeinsam schmeckt|jetzt sichern|mega deal/i.test(title);
+}
+
 // Rewrite only complete, evidenced patterns. Unknown or ambiguous copy stays for review.
 export function polishOfferTitle(value = '', description = '') {
   const original = String(value).trim();

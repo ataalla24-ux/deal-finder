@@ -1,8 +1,10 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { isAstraEnrichmentActive } from '../scraper/ai-credit-budget.js';
 
 const noon = '12:13', evening = '20:13';
+const enrichmentSchedule = '37 5,8,11,14,17,20,23 17-20 11 *';
 const clock = new Intl.DateTimeFormat('en-GB', { timeZone: 'Europe/Vienna', year: 'numeric', month: '2-digit',
   day: '2-digit', hour: '2-digit', minute: '2-digit', hourCycle: 'h23' });
 
@@ -22,7 +24,11 @@ export function qualitySlotReceipt(previous, assigned, now) {
     && /^\d{4}-\d{2}-\d{2}T(?:12:13|20:13)$/.test(value) && value <= due).sort().at(-1) || '';
 }
 
-export function viennaQualitySlot({now = new Date(), event = '', lastCompleted = ''} = {}) {
+export function viennaQualitySlot({now = new Date(), event = '', lastCompleted = '', schedule = ''} = {}) {
+  if (event === 'schedule' && schedule === enrichmentSchedule) {
+    const active = isAstraEnrichmentActive({ enabled: true, now: +now });
+    return { run: active, slot: '', reason: active ? 'astra-enrichment' : 'grant-window-ended' };
+  }
   if (event !== 'schedule') return {run:true,slot:'',reason:'on-change-or-manual'};
   const slot = latestQualitySlot(now);
   const complete = qualitySlotReceipt(lastCompleted, '', now) === slot;
@@ -37,7 +43,8 @@ if (process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.me
       lastCompleted = JSON.parse(fs.readFileSync('reviews/server-operations-report.json', 'utf8')).lastScheduledQualitySlot;
     } catch (error) { if (error.code !== 'ENOENT') throw error; }
   }
-  const result = viennaQualitySlot({event:process.env.GITHUB_EVENT_NAME,lastCompleted});
+  const event = process.env.GITHUB_EVENT_NAME;
+  const result = viennaQualitySlot({event,lastCompleted,schedule:process.env.QUALITY_EVENT_SCHEDULE});
   if(process.env.GITHUB_OUTPUT) fs.appendFileSync(process.env.GITHUB_OUTPUT,`run=${result.run}\nslot=${result.slot}\n`);
   console.log(JSON.stringify(result));
 }
