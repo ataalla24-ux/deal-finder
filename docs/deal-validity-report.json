@@ -1,11 +1,11 @@
 {
-  "generatedAt": "2026-11-17T14:48:17.284Z",
+  "generatedAt": "2026-11-17T14:54:01.579Z",
   "summary": {
     "maxAgeDays": 7,
-    "total": 253,
-    "allowed": 0,
+    "total": 254,
+    "allowed": 1,
     "blocked": 253,
-    "warnings": 0,
+    "warnings": 1,
     "reasonCounts": {
       "kein konkretes Angebot erkennbar": 188,
       "Gottesdienste nur im Wochenlauf": 36,
@@ -14,8 +14,8 @@
       "URL ungültig (fehlende Ziel-URL)": 2,
       "älter als 7 Tage (2017-04-20)": 1,
       "älter als 7 Tage (2026-10-26)": 1,
+      "URL ungültig (HTTP 404)": 13,
       "älter als 7 Tage (2025-07-30)": 1,
-      "URL ungültig (HTTP 404)": 12,
       "URL ungültig (Inhalt nicht mehr verfügbar)": 4,
       "kostenlose Buchung/Kontaktaufnahme statt kostenloser Leistung": 2,
       "älter als 7 Tage (2026-11-06)": 1,
@@ -60,7 +60,7 @@
       "kein konkreter Deal": 188,
       "Gottesdienste außerhalb Wochenlauf": 36,
       "älter als 7 Tage": 149,
-      "ungültige URL": 18,
+      "ungültige URL": 19,
       "sonstiges": 8,
       "abgelaufen": 17,
       "nicht Wien": 10,
@@ -186,7 +186,7 @@
         "reasonCategoryCounts": {
           "kein konkreter Deal": 94,
           "älter als 7 Tage": 96,
-          "ungültige URL": 7,
+          "ungültige URL": 8,
           "Gottesdienste außerhalb Wochenlauf": 1,
           "sonstiges": 2,
           "nicht Wien": 1
@@ -214,10 +214,10 @@
         }
       },
       "Meta Instagram Hashtag API": {
-        "total": 1,
-        "allowed": 0,
+        "total": 2,
+        "allowed": 1,
         "blocked": 1,
-        "warnings": 0,
+        "warnings": 1,
         "reasonCategoryCounts": {
           "kein konkreter Deal": 1
         }
@@ -238,7 +238,26 @@
       }
     }
   },
-  "allowed": [],
+  "allowed": [
+    {
+      "id": "meta-ig-18128195611901514",
+      "title": "🎭🍽️⁠ ⁠ Die ersten 1.000 Bestellungen für das Wiener Kabarettfestival 2027 erhalten jeweils ein Signature Gourmetbuch 2027 GRATIS dazu!",
+      "brand": "Wiener Kabarettfestival",
+      "source": "Meta Instagram Hashtag API",
+      "url": "https://www.instagram.com/p/Df2KewonAS2/",
+      "reasons": [],
+      "warnings": [
+        "Inhalt prüfen: Titel zu lang; Angebot kurz benennen, Bedingungen in den Details behalten; Caption-Reste oder Emoji-Codes im sichtbaren Text",
+        "startet am 2027-01-01"
+      ],
+      "sourceDate": "2026-11-17T14:38:28.000Z",
+      "sourceDateSource": "url.instagramShortcode",
+      "sourceAgeDays": 0,
+      "expiryDate": "2027-01-31",
+      "expirySource": "url.contentHints.title",
+      "urlStatus": "HTTP 200"
+    }
+  ],
   "blocked": [
     {
       "id": "jesuszentrum-events-20261116",
@@ -670,18 +689,17 @@
       "source": "Kirchen Verzeichnis",
       "url": "https://www.brot-fuer-die-welt.at",
       "reasons": [
+        "URL ungültig (HTTP 404)",
         "kein konkretes Angebot erkennbar",
         "älter als 7 Tage (2026-02-22)"
       ],
-      "warnings": [
-        "URL nicht eindeutig prüfbar (temporärer Fehler)"
-      ],
+      "warnings": [],
       "sourceDate": "2026-02-22T21:12:35.964Z",
       "sourceDateSource": "deal.pubDate",
       "sourceAgeDays": 268,
       "expiryDate": "",
       "expirySource": "deal.expires",
-      "urlStatus": "unklar: temporärer URL-Fehler"
+      "urlStatus": "ungültig: HTTP 404"
     },
     {
       "id": "extra-20-20260222",
@@ -884,7 +902,7 @@
       "warnings": [
         "kein Ablaufdatum gefunden"
       ],
-      "sourceDate": "2026-11-17T14:46:41.522Z",
+      "sourceDate": "2026-11-17T14:52:54.873Z",
       "sourceDateSource": "url.publicationDate",
       "sourceAgeDays": 0,
       "expiryDate": "",
@@ -3533,7 +3551,7 @@
       "sourceDate": "2026-11-15T15:00:10.000Z",
       "sourceDateSource": "url.instagramShortcode",
       "sourceAgeDays": 2,
-      "expiryDate": "2026-11-20T09:54:43.728Z",
+      "expiryDate": "2026-11-20T14:39:50.764Z",
       "expirySource": "deal.structured",
       "urlStatus": "HTTP 200"
     },
@@ -3572,7 +3590,7 @@
       "sourceDate": "2026-11-16T18:12:23.000Z",
       "sourceDateSource": "url.instagramShortcode",
       "sourceAgeDays": 1,
-      "expiryDate": "2026-11-20T09:54:43.728Z",
+      "expiryDate": "2026-11-20T14:39:50.764Z",
       "expirySource": "deal.structured",
       "urlStatus": "HTTP 200"
     },
@@ -5187,23 +5205,23 @@
   ],
   "runProvenance": {
     "repository": "ataalla24-ux/deal-finder",
-    "runId": "44106811259",
-    "headSha": "c04f3df0078ad872477aa482dd616ff1a9e09db5",
-    "checkoutSha": "c04f3df0078ad872477aa482dd616ff1a9e09db5",
+    "runId": "44107926512",
+    "headSha": "e163bb1ff1d730a35c1f048bc001c7414707cd0b",
+    "checkoutSha": "e163bb1ff1d730a35c1f048bc001c7414707cd0b",
     "triggeringRun": {
-      "runId": "44106294370",
-      "headSha": "69ba996663d17db85ca16bf7bf1683ed7798887b",
-      "event": "schedule",
-      "name": "Power Scraper",
-      "startedAt": "2026-11-17T14:43:48.000Z",
-      "url": "https://github.com/ataalla24-ux/deal-finder/actions/runs/44106294370"
+      "runId": "44105409030",
+      "headSha": "1007798c8f83e5a3ef3a600b8a9b3e19b04ba1fa",
+      "event": "workflow_dispatch",
+      "name": "Meta Instagram Deal Discovery",
+      "startedAt": "2026-11-17T14:38:55.000Z",
+      "url": "https://github.com/ataalla24-ux/deal-finder/actions/runs/44105409030"
     },
     "event": "workflow_run",
     "runAttempt": "1",
-    "url": "https://github.com/ataalla24-ux/deal-finder/actions/runs/44106811259"
+    "url": "https://github.com/ataalla24-ux/deal-finder/actions/runs/44107926512"
   },
   "instagramDelivery": {
-    "checkedAt": "2026-11-17T14:48:17.297Z",
+    "checkedAt": "2026-11-17T14:54:01.852Z",
     "scope": "instagram-ai-agent/standard-slack-lane",
     "extractedCandidates": 2,
     "counts": {
@@ -5243,7 +5261,7 @@
     ]
   },
   "tiktokDelivery": {
-    "checkedAt": "2026-11-17T14:48:17.298Z",
+    "checkedAt": "2026-11-17T14:54:01.853Z",
     "scope": "tiktok-deals-scanner/standard-slack-lane",
     "extractedCandidates": 0,
     "counts": {},
