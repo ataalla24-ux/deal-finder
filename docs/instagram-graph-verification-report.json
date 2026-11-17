@@ -1,7 +1,7 @@
 {
-  "generatedAt": "2026-11-17T11:22:48.296Z",
+  "generatedAt": "2026-11-17T11:24:38.230Z",
   "source": "instagram-graph-cross-source-verification",
-  "status": "ok",
+  "status": "failed-preserved",
   "configured": true,
   "scannedFiles": [
     "deals-pending-church-events.json",
@@ -55,8 +55,8 @@
       "candidates": 0
     },
     "deals-pending-firecrawl2.json": {
-      "deals": 0,
-      "candidates": 0
+      "deals": 1,
+      "candidates": 1
     },
     "deals-pending-firecrawl4.json": {
       "deals": 64,
@@ -167,14 +167,24 @@
       "candidates": 0
     }
   },
-  "candidatePosts": 0,
-  "candidateAccounts": 0,
+  "candidatePosts": 1,
+  "candidateAccounts": 1,
   "skippedAccountCooldowns": 0,
-  "selectedAccounts": [],
+  "selectedAccounts": [
+    {
+      "username": "info.at2026",
+      "candidates": 1
+    }
+  ],
   "fetchedPosts": 0,
   "exactMatches": 0,
   "retainedEvidencePosts": 1999,
-  "errors": [],
+  "errors": [
+    {
+      "username": "info.at2026",
+      "message": "Instagram shared quota paused: rolling-hour budget exhausted"
+    }
+  ],
   "accountFailures": {
     "natascha_rapid": {
       "count": 3,
@@ -192,17 +202,23 @@
     "usageThreshold": 95,
     "requests": 0,
     "reserved": 0,
-    "stopped": false,
-    "reason": "",
+    "stopped": true,
+    "reason": "Instagram shared quota paused: rolling-hour budget exhausted",
     "highestUsagePercent": 0,
     "waitedMs": 0,
     "pacingMs": 0,
-    "retryAt": "",
+    "retryAt": "2026-11-17T12:14:23.529Z",
     "adaptiveSafetyCeiling": 190,
     "adaptiveIncreases": 0,
     "storageFailure": null
   },
+  "globalError": {
+    "username": "info.at2026",
+    "status": 0,
+    "code": "SCAN_BUDGET",
+    "message": "Instagram shared quota paused: rolling-hour budget exhausted"
+  },
   "blockedEvidencePosts": 62,
-  "unmatchedCandidatePosts": 0,
-  "message": "0/0 fresh cross-source Instagram candidates matched exactly via Graph API."
+  "unmatchedCandidatePosts": 1,
+  "message": "0/1 fresh cross-source Instagram candidates matched exactly via Graph API."
 }
