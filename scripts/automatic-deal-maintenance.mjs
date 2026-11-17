@@ -16,6 +16,8 @@ import { needsSourceBackedTitle } from '../scraper/offer-title-utils.js';
 import { reviewedIamstudentCopy } from '../scraper/approval-iamstudent-source-evidence.js';
 import { reviewedMarktguruCopy } from '../scraper/marktguru-cashback-evidence.js';
 import { contradictedOfferPriceHold } from '../scraper/approval-two-stage.js';
+import { reconcileReviewedApprovalExpiry } from '../scraper/approval-reviewed-source-copy.js';
+import { offerPeriodFields } from '../scraper/offer-period-fields.js';
 import { projectEnrichmentDeal, stripEnrichmentNotice, updateDealEnrichment } from '../scraper/deal-enrichment-state.js';
 import {photoSubjectHash} from './deal-photo-contract.mjs';
 export { automaticMaintenanceReviewCandidates } from './automatic-maintenance-review.mjs';
@@ -62,7 +64,7 @@ function literalSourceEnds(value, kind, confirmedDay = '') {
   const text = normalizedDateText(value);
   const date = `(?:20\\d{2}-\\d{2}-\\d{2}|\\d{1,2}[./]\\d{1,2}(?:[./]20\\d{2})?|\\d{1,2}\\.?\\s+(?:${Object.keys(months).join('|')})\\.?(?:\\s+20\\d{2})?)`;
   const marker = kind === 'single' ? 'bis|until|ends(?: on)?|nur am|ausschliesslich am|only on|gultig am|gueltig am' : 'bis|until|ends(?: on)?';
-  const regex = new RegExp(`\\b(?:${marker})(?:\\s+(?:einschliesslich|inklusive|zum))?\\s*:?\\s*(${date})\\b`, 'g');
+  const regex = new RegExp(`\\b(?:${marker})(?:\\s+(?:einschliesslich|inklusive|inkl\\.|zum))?\\s*:?\\s*(${date})\\b`, 'g');
   return [...text.matchAll(regex)].map(match => {
     let value = match[1];
     const numeric = value.match(/^(\d{1,2})[./](\d{1,2})[./](20\d{2})$/);
@@ -333,19 +335,34 @@ export function maintainDeals(deals, { policy = {}, state = {}, edits = [], now 
   const maxHides = Math.min(5, Math.max(0, Number(policy.maxNewHidesPerRun) || 0));
   let newHides = 0;
   for (const original of deals) {
-    const fingerprint = maintenanceFingerprint(original);
-    const expiry = assessAutomaticExpiry(original, { policy, edits, now, latestEvidence: sourceEvidence.get(original.id) });
-    const previousHide = nextState.hidden.find(entry => entry.id === original.id && entry.fingerprint === fingerprint);
-    if (policy.automaticExpiry === true && expiry.eligible && (previousHide || newHides < maxHides)) {
-      if (!previousHide) {
-        nextState.hidden.push({ id: original.id, fingerprint, hiddenAt: now.toISOString(), ...expiry, originalDeal: original });
-        newHides++;
-      }
-      hidden.push({ id: original.id, validUntil: expiry.validUntil, reason: expiry.reason, replay: Boolean(previousHide) });
-      continue;
-    }
     let deal = original;
     const fields = protectedFields(deal, edits);
+    const latestEvidence = sourceEvidence.get(deal.id);
+    if (deal.reviewedSourceCopy?.offerPeriodEvidence && !protectedDeal(deal, edits, policy)
+      && !latestEvidence?.blockingReason && latestEvidence?.graphAccepted !== false
+      && !fields.has('validity') && !offerPeriodFields.some(field => fields.has(field))
+      && ![deal.expiresSource, deal.expirySource, deal.validity?.expirySource].includes('manual')
+      && !matchingEdits(deal, edits).some(edit => edit.restoreDeal)) {
+      const normalized = { ...deal };
+      if (reconcileReviewedApprovalExpiry(normalized)) {
+        const reconciled = offerPeriodFields.filter(field => normalized[field] !== deal[field]);
+        if (reconciled.length) {
+          deal = normalized;
+          corrected.push({ id: deal.id, fields: reconciled, method: 'reviewed-source-period-reconciliation' });
+        }
+      }
+    }
+    const fingerprint = maintenanceFingerprint(deal);
+    const expiry = assessAutomaticExpiry(deal, { policy, edits, now, latestEvidence });
+    const previousHide = nextState.hidden.find(entry => entry.id === deal.id && entry.fingerprint === fingerprint);
+    if (policy.automaticExpiry === true && expiry.eligible && (previousHide || newHides < maxHides)) {
+      if (!previousHide) {
+        nextState.hidden.push({ id: deal.id, fingerprint, hiddenAt: now.toISOString(), ...expiry, originalDeal: deal });
+        newHides++;
+      }
+      hidden.push({ id: deal.id, validUntil: expiry.validUntil, reason: expiry.reason, replay: Boolean(previousHide) });
+      continue;
+    }
     const cachedPatch = nextState.corrections.find(entry =>
       entry.id === deal.id && entry.inputHash === fingerprint && entry.patch && entry.method !== originalSocialCopyMethod);
     if (!protectedDeal(deal, edits, policy) && cachedPatch

@@ -156,6 +156,40 @@ test('Astra model denial is recorded without pausing ordinary jobs or retrying A
   assert.equal((await createCreditBudget({ ...options, allowAstraEnrichment: false, request: successful })(url, init())).status, 200);
 });
 
+test('Astra Responses preserves strict copy and vision schemas and returns the existing caller shape', async () => {
+  const campaign = Date.parse(policy.astraEnrichment.notBefore) + 60000;
+  const store = memory();
+  const schema = { type: 'object', additionalProperties: false, required: ['ok'], properties: { ok: { type: 'boolean' } } };
+  const photo = 'data:image/jpeg;base64,AA==';
+  const request = createCreditBudget({ store, policy, clock: () => campaign, allowAstraEnrichment: true,
+    request: async (endpoint, prepared) => {
+      assert.equal(endpoint, 'https://api.openai.com/v1/responses');
+      const body = JSON.parse(prepared.body);
+      assert.deepEqual(body.reasoning, { effort: 'max' });
+      assert.deepEqual(body.text.format, { type: 'json_schema', name: 'fixture', strict: true, schema });
+      assert.deepEqual(body.input[0], { role: 'system', content: 'Check this sample' });
+      assert.deepEqual(body.input[1].content, [
+        { type: 'input_text', text: 'Is this the right image?' },
+        { type: 'input_image', image_url: photo, detail: 'high' },
+      ]);
+      assert.equal(store.state.reservations[0].status, 'reserved');
+      return Response.json({ model: 'gpt-6-astra', status: 'completed',
+        output: [{ type: 'reasoning' }, { type: 'message', content: [{ type: 'output_text', text: '{"ok":true}' }] }],
+        usage: { input_tokens: 512, output_tokens: 20, total_tokens: 532 } });
+    } });
+  const response = await request(url, init('gpt-6-astra', {
+    response_format: { type: 'json_schema', json_schema: { name: 'fixture', schema, strict: true } },
+    messages: [{ role: 'system', content: 'Check this sample' }, { role: 'user', content: [
+      { type: 'text', text: 'Is this the right image?' }, { type: 'image_url', image_url: { url: photo } },
+    ] }],
+  }));
+  const result = await response.json();
+  assert.equal(result.choices[0].finish_reason, 'stop');
+  assert.deepEqual(JSON.parse(result.choices[0].message.content), { ok: true });
+  assert.deepEqual(result.usage, { prompt_tokens: 512, completion_tokens: 20, total_tokens: 532 });
+  assert.equal(store.state.reservations[0].status, 'settled');
+});
+
 test('a reservation must be durably committed before a provider request; usage releases unused reservation', async () => {
   const store = memory();
   let calls = 0;

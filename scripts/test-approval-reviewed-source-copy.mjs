@@ -5,7 +5,7 @@ import { fileURLToPath } from 'node:url';
 import { extractApprovalSourceEvidence } from '../scraper/approval-source-evidence.js';
 import { prepareReviewedApprovalCopy } from '../scraper/approval-reviewed-source-copy.js';
 import { normalizeDealExpiry } from '../scraper/expiry-utils.js';
-import { copyReviewReasons } from './automatic-deal-maintenance.mjs';
+import { copyReviewReasons, maintainDeals } from './automatic-deal-maintenance.mjs';
 
 const now = new Date('2026-11-14T12:00:00Z');
 // Minimal public-offer fields copied from actual pending queue on 14 November.
@@ -51,6 +51,47 @@ test('complete period survives ordinary offline expiry normalization atomically'
   assert.deepEqual(result, before);
   await normalizeDealExpiry(result, { now: new Date('2026-11-16T19:00:00Z'), allowUrlLookup: false });
   assert.deepEqual(result, before, 'read date never moves the offer period');
+});
+
+test('server maintenance restores the exact approved range before expiry and respects protected periods', () => {
+  const evidence = proof();
+  const approved = prepareReviewedApprovalCopy(original, evidence, { now });
+  const published = {
+    ...approved,
+    pipelineLifecycle: { manualDecision: 'approved', stage: 'published', publishedAt: now.toISOString() },
+    expires: '2026-11-14T23:59:59.999Z', expiresSource: 'text', expirySource: 'deal.structured',
+    validity: { expiryDate: '2026-11-17', expirySource: 'deal.structured' },
+  };
+  delete published.expiresDetectedFromUrl;
+  const before = structuredClone(published);
+  const run = (deal = published, options = {}) => maintainDeals([deal], {
+    now: new Date('2026-11-17T07:45:00Z'),
+    policy: { version: 1, enabled: true, automaticExpiry: true, maxNewHidesPerRun: 5 },
+    sourceEvidence: new Map([[published.id, evidence]]), ...options,
+  });
+  const repaired = run();
+  assert.deepEqual(published, before, 'normalization never mutates the caller row');
+  assert.deepEqual(repaired.deals, [{
+    ...published, expires: approved.expires, expiresSource: 'url', expiresDetectedFromUrl: true,
+  }]);
+  assert.deepEqual(repaired.report.hidden, []);
+  assert.equal(repaired.report.corrected[0]?.method, 'reviewed-source-period-reconciliation');
+  const repeated = run(repaired.deals[0], { state: repaired.state });
+  assert.equal(repeated.changed, false);
+  assert.deepEqual(repeated.report.corrected, []);
+  assert.equal(run(published, { now: new Date('2026-11-18T12:01:00Z') }).deals.length, 0);
+  for (const [row, options] of [
+    [{ ...published, liveEditedFields: ['expires'] }, {}],
+    [{ ...published, expiresSource: 'manual' }, {}],
+    [{ ...published, reviewedSourceCopy: { ...published.reviewedSourceCopy, contentHash: 'other' } }, {}],
+    [published, { edits: [{ dealId: published.id, validUntil: '2026-11-18' }] }],
+    [published, { edits: [{ dealId: published.id, clearFields: ['expires'] }] }],
+    [published, { edits: [{ dealId: published.id, restoreDeal: published }] }],
+    [published, { sourceEvidence: new Map([[published.id, { blockingReason: 'withdrawn' }]]) }],
+  ]) {
+    assert.deepEqual(run(row, options).deals, [row]);
+    assert.deepEqual(run(row, options).report.corrected, []);
+  }
 });
 
 test('changed identity/title/description/amount cannot inherit the reviewed offer', () => {
