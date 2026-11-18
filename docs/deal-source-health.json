@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-11-18T07:24:36.807Z",
+  "generatedAt": "2026-11-18T07:55:26.775Z",
   "discoveryAvailability": {
     "note": "Transport evidence, not deal yield. Retry eligibility is not recovery. Candidate counts are not Slack deliveries. No extra runs or quota resets.",
     "lanes": [
@@ -54,17 +54,11 @@
   },
   "summary": {
     "filesConsidered": 32,
-    "totalCandidates": 699,
-    "uniqueCandidates": 676,
+    "totalCandidates": 698,
+    "uniqueCandidates": 677,
     "distinctCandidates": 686,
-    "duplicateClusters": 10,
+    "duplicateClusters": 9,
     "topHealthySources": [
-      {
-        "sourceKey": "wien-combined",
-        "sourceLabel": "Wien Deals Combined Graph",
-        "healthScore": 78,
-        "totalDeals": 1
-      },
       {
         "sourceKey": "member-benefits",
         "sourceLabel": "Member Benefits",
@@ -88,15 +82,15 @@
         "sourceLabel": "Firecrawl Key 3 - Consumables",
         "healthScore": 64,
         "totalDeals": 1
+      },
+      {
+        "sourceKey": "firecrawl5",
+        "sourceLabel": "Firecrawl Key 5 - Instagram Gastro",
+        "healthScore": 63,
+        "totalDeals": 5
       }
     ],
     "topMissionSources": [
-      {
-        "sourceKey": "wien-combined",
-        "sourceLabel": "Wien Deals Combined Graph",
-        "missionFitScore": 100,
-        "totalDeals": 1
-      },
       {
         "sourceKey": "joe",
         "sourceLabel": "jö Bonus Club",
@@ -120,6 +114,12 @@
         "sourceLabel": "Firecrawl Key 5 - Instagram Gastro",
         "missionFitScore": 58,
         "totalDeals": 5
+      },
+      {
+        "sourceKey": "food3",
+        "sourceLabel": "Firecrawl Key 2 - Food",
+        "missionFitScore": 57,
+        "totalDeals": 4
       }
     ],
     "topCoverageSources": [
@@ -161,12 +161,6 @@
     ],
     "topPrecisionSources": [
       {
-        "sourceKey": "wien-combined",
-        "sourceLabel": "Wien Deals Combined Graph",
-        "precisionScore": 92,
-        "totalDeals": 1
-      },
-      {
         "sourceKey": "member-benefits",
         "sourceLabel": "Member Benefits",
         "precisionScore": 72,
@@ -189,15 +183,15 @@
         "sourceLabel": "Instagram AI Agent",
         "precisionScore": 66,
         "totalDeals": 1
+      },
+      {
+        "sourceKey": "joe",
+        "sourceLabel": "jö Bonus Club",
+        "precisionScore": 64,
+        "totalDeals": 9
       }
     ],
     "topWeightedSources": [
-      {
-        "sourceKey": "wien-combined",
-        "sourceLabel": "Wien Deals Combined Graph",
-        "sourceWeightScore": 75,
-        "totalDeals": 1
-      },
       {
         "sourceKey": "member-benefits",
         "sourceLabel": "Member Benefits",
@@ -221,6 +215,12 @@
         "sourceLabel": "Firecrawl Key 3 - Consumables",
         "sourceWeightScore": 52,
         "totalDeals": 1
+      },
+      {
+        "sourceKey": "firecrawl5",
+        "sourceLabel": "Firecrawl Key 5 - Instagram Gastro",
+        "sourceWeightScore": 52,
+        "totalDeals": 5
       }
     ],
     "topSourcesToFix": [
@@ -292,79 +292,6 @@
     }
   },
   "sources": [
-    {
-      "sourceKey": "wien-combined",
-      "file": "deals-pending-wien-combined.json",
-      "sourceLabel": "Wien Deals Combined Graph",
-      "totalDeals": 1,
-      "uniqueDeals": 0,
-      "duplicateDeals": 1,
-      "duplicateAcrossSources": 1,
-      "fresh1dCount": 1,
-      "fresh7dCount": 1,
-      "viennaCount": 1,
-      "foodDrinkCount": 1,
-      "promoCount": 1,
-      "missingUrlCount": 0,
-      "sampleTitles": [
-        "😉 Unser Free Breakfast gibt’s weiterhin von 8-9 Uhr im November, also komm vorbei, solange die Aktion noch läuft"
-      ],
-      "lastRun": {
-        "status": "completed-with-errors",
-        "startedAt": "2026-11-17T21:15:56.985Z",
-        "finishedAt": "2026-11-17T21:16:51.594Z",
-        "durationMs": 54609,
-        "counts": {
-          "rawCandidates": 31,
-          "normalizedCandidates": 1,
-          "verifiedCandidates": 1,
-          "previousDeals": 0,
-          "acceptedDeals": 1,
-          "rejectedDeals": 28
-        },
-        "rejectedByReason": {
-          "no-concrete-offer": 19,
-          "general-recommendation": 3,
-          "missing-vienna-evidence": 1,
-          "non-offer-content": 3,
-          "alcohol-offer": 1,
-          "excluded-promotion-type": 1
-        },
-        "errors": [
-          "#wienfood: Instagram scan paused: request-budget"
-        ],
-        "reportFile": "deal-pipeline-last-run-wien-combined.json"
-      },
-      "uniqueRate": 0,
-      "duplicateRate": 1,
-      "fresh1dRate": 1,
-      "fresh7dRate": 1,
-      "viennaRate": 1,
-      "foodDrinkRate": 1,
-      "promoRate": 1,
-      "missingUrlRate": 0,
-      "averageQualityScore": 91,
-      "topCategories": [
-        {
-          "value": "essen",
-          "count": 1
-        }
-      ],
-      "topTypes": [
-        {
-          "value": "rabatt",
-          "count": 1
-        }
-      ],
-      "issues": [
-        "hohe Überschneidung mit anderen Quellen"
-      ],
-      "healthScore": 78,
-      "missionFitScore": 100,
-      "coverageScore": 16,
-      "precisionScore": 92,
-      "sourceWeightScore": 75
-    },
     {
       "sourceKey": "member-benefits",
       "file": "deals-pending-member-benefits.json",
@@ -506,9 +433,9 @@
       "file": "deals-pending-meta-instagram.json",
       "sourceLabel": "Meta Instagram Graph",
       "totalDeals": 54,
-      "uniqueDeals": 50,
-      "duplicateDeals": 4,
-      "duplicateAcrossSources": 4,
+      "uniqueDeals": 51,
+      "duplicateDeals": 3,
+      "duplicateAcrossSources": 3,
       "fresh1dCount": 11,
       "fresh7dCount": 46,
       "viennaCount": 54,
@@ -2237,6 +2164,68 @@
       "topCategories": [],
       "topTypes": [],
       "issues": [
+        "liefert aktuell 0 Deals"
+      ],
+      "healthScore": 0,
+      "missionFitScore": 0,
+      "coverageScore": 0,
+      "precisionScore": 0,
+      "sourceWeightScore": 0
+    },
+    {
+      "sourceKey": "wien-combined",
+      "file": "deals-pending-wien-combined.json",
+      "sourceLabel": "Wien Deals Combined Graph",
+      "totalDeals": 0,
+      "uniqueDeals": 0,
+      "duplicateDeals": 0,
+      "duplicateAcrossSources": 0,
+      "fresh1dCount": 0,
+      "fresh7dCount": 0,
+      "viennaCount": 0,
+      "foodDrinkCount": 0,
+      "promoCount": 0,
+      "missingUrlCount": 0,
+      "sampleTitles": [],
+      "lastRun": {
+        "status": "completed-with-errors",
+        "startedAt": "2026-11-18T07:53:17.114Z",
+        "finishedAt": "2026-11-18T07:54:16.831Z",
+        "durationMs": 59717,
+        "counts": {
+          "rawCandidates": 41,
+          "normalizedCandidates": 0,
+          "verifiedCandidates": 0,
+          "previousDeals": 0,
+          "acceptedDeals": 0,
+          "rejectedDeals": 37
+        },
+        "rejectedByReason": {
+          "no-concrete-offer": 26,
+          "non-offer-content": 1,
+          "alcohol-offer": 1,
+          "general-recommendation": 6,
+          "missing-vienna-evidence": 1,
+          "missing-text": 2
+        },
+        "errors": [
+          "#wienfood: Instagram scan paused: request-budget"
+        ],
+        "reportFile": "deal-pipeline-last-run-wien-combined.json"
+      },
+      "uniqueRate": 0,
+      "duplicateRate": 0,
+      "fresh1dRate": 0,
+      "fresh7dRate": 0,
+      "viennaRate": 0,
+      "foodDrinkRate": 0,
+      "promoRate": 0,
+      "missingUrlRate": 0,
+      "averageQualityScore": 0,
+      "topCategories": [],
+      "topTypes": [],
+      "issues": [
+        "letzter Lauf fand Kandidaten, aber akzeptierte keinen Deal",
         "liefert aktuell 0 Deals"
       ],
       "healthScore": 0,
