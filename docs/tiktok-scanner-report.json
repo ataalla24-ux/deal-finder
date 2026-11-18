@@ -1,14 +1,14 @@
 {
-  "lastUpdated": "2026-11-17T23:51:06.130Z",
+  "lastUpdated": "2026-11-18T13:56:10.839Z",
   "runProvenance": {
     "repository": "ataalla24-ux/deal-finder",
-    "runId": "44202794180",
-    "headSha": "93a668e6a1d6d2de70c802dfed567984241e1473",
-    "checkoutSha": "93a668e6a1d6d2de70c802dfed567984241e1473",
+    "runId": "44318644832",
+    "headSha": "7c5fd23485d18a0c75d0565bb217afc22d1992ca",
+    "checkoutSha": "7c5fd23485d18a0c75d0565bb217afc22d1992ca",
     "triggeringRun": null,
     "event": "schedule",
     "runAttempt": "1",
-    "url": "https://github.com/ataalla24-ux/deal-finder/actions/runs/44202794180"
+    "url": "https://github.com/ataalla24-ux/deal-finder/actions/runs/44318644832"
   },
   "status": "discovery-degraded",
   "outputPreserved": true,
@@ -122,23 +122,53 @@
   "discovered": 0,
   "apiCandidates": 0,
   "apiDiscovery": {
-    "errors": [],
-    "attemptedRequests": 0,
+    "errors": [
+      {
+        "keyword": "wien gratis 18 november 2026",
+        "offset": 0,
+        "status": 0,
+        "error": "Empty or non-JSON TikTok response",
+        "code": "transport-unavailable",
+        "transportReason": "request-policy-blocked"
+      }
+    ],
+    "attemptedRequests": 1,
     "emptyResponses": 0,
     "rawItems": 0,
     "normalizedItems": 0,
     "ignoredItems": 0,
-    "stoppedReason": "api-cooldown",
-    "nextRetryAt": "2026-11-18T00:48:14.973Z",
-    "nextKeywordIndex": 6
+    "stoppedReason": "transport-unavailable",
+    "nextRetryAt": "2026-11-19T13:55:56.825Z",
+    "nextKeywordIndex": 7,
+    "transport": "public-browser-search",
+    "navigations": 1,
+    "searchRequests": 0,
+    "blockedExtraRequests": 2,
+    "blockedRequestReasons": {
+      "unexpected-endpoint": 2
+    },
+    "observedSearchEndpoints": {
+      "other-search": 2
+    },
+    "observedSearchPaths": {
+      "[redacted]": 1,
+      "/api/search/user/preview/": 1
+    }
   },
   "searchDiscovery": {
-    "errors": [],
-    "attemptedQueries": 0,
-    "stoppedReason": "search-cooldown",
-    "nextRetryAt": "2026-11-18T00:48:27.003Z",
-    "lastAttemptAt": "2026-11-17T00:48:27.003Z",
-    "nextQueryIndex": 15,
+    "errors": [
+      {
+        "query": "site:tiktok.com wien neueröffnung gratis",
+        "error": "Search challenge; no bypass attempted",
+        "httpStatus": 403,
+        "retryAt": ""
+      }
+    ],
+    "attemptedQueries": 2,
+    "stoppedReason": "search-unavailable",
+    "nextRetryAt": "2026-11-19T13:56:08.865Z",
+    "lastAttemptAt": "2026-11-18T13:56:08.865Z",
+    "nextQueryIndex": 17,
     "deferredPostVisits": 0
   },
   "accepted": 0,
@@ -221,12 +251,28 @@
     "aiAcceptedUnusable": 0
   },
   "timings": {
-    "apiDiscoveryMs": 37,
-    "searchDiscoveryMs": 0,
-    "mediaRescueMs": 418,
-    "totalScannerMs": 903
+    "apiDiscoveryMs": 12081,
+    "searchDiscoveryMs": 1575,
+    "mediaRescueMs": 361,
+    "totalScannerMs": 14294
   },
-  "discoveryErrors": [],
-  "apiErrors": [],
+  "discoveryErrors": [
+    {
+      "query": "site:tiktok.com wien neueröffnung gratis",
+      "error": "Search challenge; no bypass attempted",
+      "httpStatus": 403,
+      "retryAt": ""
+    }
+  ],
+  "apiErrors": [
+    {
+      "keyword": "wien gratis 18 november 2026",
+      "offset": 0,
+      "status": 0,
+      "error": "Empty or non-JSON TikTok response",
+      "code": "transport-unavailable",
+      "transportReason": "request-policy-blocked"
+    }
+  ],
   "rejected": []
 }
