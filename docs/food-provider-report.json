@@ -1,7 +1,7 @@
 {
-  "runId": "44133150341",
+  "runId": "44219078793",
   "mode": "scan",
-  "createdAt": "2026-11-17T17:06:04.313Z",
+  "createdAt": "2026-11-18T01:52:39.289Z",
   "usage": {
     "scrapingbee": {
       "provider": "scrapingbee",
@@ -45,26 +45,50 @@
   },
   "tasks": [
     {
-      "source": "IKEA Food",
-      "url": "https://www.ikea.com/at/de/food/salesareas/swedish-food-market/PRF13803325/",
+      "source": "NORDSEE",
+      "url": "https://www.nordsee.com/at/coupons/pazifisches_schollen__filet_vom_grill__beilage__softdrink_02l__garnelenspie?pdf=true",
       "provider": "zyte",
       "cap": 0.02
     },
     {
       "source": "IKEA Food",
-      "url": "https://www.ikea.com/at/de/food/salesareas/swedish-food-market/PRF13307715/",
+      "url": "https://www.ikea.com/at/de/food/salesareas/swedish-food-market/PRF13733401/",
       "provider": "scraperapi",
       "cap": 10
     },
     {
-      "source": "IKEA Food",
-      "url": "https://www.ikea.com/at/de/food/salesareas/swedish-food-market/PRF13740818/",
+      "source": "NORDSEE",
+      "url": "https://www.nordsee.com/at/coupons/2_classic_fish_burger__pommes_frites__1_softdrink_05l_pet?pdf=true",
       "provider": "zyte",
       "cap": 0.02
     },
     {
       "source": "IKEA Food",
-      "url": "https://www.ikea.com/at/de/food/salesareas/swedish-food-market/PRF13749381/",
+      "url": "https://www.ikea.com/at/de/food/salesareas/swedish-food-market/PRF13749351/",
+      "provider": "scraperapi",
+      "cap": 10
+    },
+    {
+      "source": "NORDSEE",
+      "url": "https://www.nordsee.com/at/coupons/groer_hunger?pdf=true",
+      "provider": "zyte",
+      "cap": 0.02
+    },
+    {
+      "source": "IKEA Food",
+      "url": "https://www.ikea.com/at/de/food/salesareas/swedish-food-market/PRF13733504/",
+      "provider": "scraperapi",
+      "cap": 10
+    },
+    {
+      "source": "NORDSEE",
+      "url": "https://www.nordsee.com/at/coupons/garnelen_box?pdf=true",
+      "provider": "zyte",
+      "cap": 0.02
+    },
+    {
+      "source": "IKEA Food",
+      "url": "https://www.ikea.com/at/de/food/salesareas/swedish-food-market/PRF13748996/",
       "provider": "scraperapi",
       "cap": 10
     }
@@ -75,54 +99,85 @@
       "reason": "scrapingbee-trial-unverified-or-expired"
     }
   ],
-  "eligiblePages": 4,
-  "finishedAt": "2026-11-17T17:06:10.829Z",
-  "status": "completed",
+  "eligiblePages": 8,
+  "finishedAt": "2026-11-18T01:52:48.018Z",
+  "status": "partial",
   "results": [
     {
       "provider": "zyte",
-      "source": "IKEA Food",
-      "url": "https://www.ikea.com/at/de/food/salesareas/swedish-food-market/PRF13803325/",
+      "source": "NORDSEE",
+      "url": "https://www.nordsee.com/at/coupons/pazifisches_schollen__filet_vom_grill__beilage__softdrink_02l__garnelenspie?pdf=true",
       "reserved": 0.02,
-      "directCandidates": 0,
-      "directRejected": [],
-      "directVisibleTextCharacters": 1666,
-      "status": "direct-no-offer",
-      "reason": "readable-page-without-extractable-offer",
-      "note": "No browser credit spent; image/PDF-only offers are not established by this HTML check."
+      "status": "failed",
+      "reason": "source-or-processing-error",
+      "httpStatus": 0,
+      "retryAt": "2026-11-19T01:52:43.146Z"
     },
     {
       "provider": "scraperapi",
       "source": "IKEA Food",
-      "url": "https://www.ikea.com/at/de/food/salesareas/swedish-food-market/PRF13307715/",
+      "url": "https://www.ikea.com/at/de/food/salesareas/swedish-food-market/PRF13733401/",
       "reserved": 10,
       "directCandidates": 0,
       "directRejected": [],
-      "directVisibleTextCharacters": 1051,
+      "directVisibleTextCharacters": 1876,
       "status": "direct-no-offer",
       "reason": "readable-page-without-extractable-offer",
       "note": "No browser credit spent; image/PDF-only offers are not established by this HTML check."
     },
     {
       "provider": "zyte",
-      "source": "IKEA Food",
-      "url": "https://www.ikea.com/at/de/food/salesareas/swedish-food-market/PRF13740818/",
+      "source": "NORDSEE",
+      "url": "https://www.nordsee.com/at/coupons/2_classic_fish_burger__pommes_frites__1_softdrink_05l_pet?pdf=true",
       "reserved": 0.02,
+      "status": "source-paused"
+    },
+    {
+      "provider": "scraperapi",
+      "source": "IKEA Food",
+      "url": "https://www.ikea.com/at/de/food/salesareas/swedish-food-market/PRF13749351/",
+      "reserved": 10,
       "directCandidates": 0,
       "directRejected": [],
-      "directVisibleTextCharacters": 1619,
+      "directVisibleTextCharacters": 1698,
       "status": "direct-no-offer",
       "reason": "readable-page-without-extractable-offer",
       "note": "No browser credit spent; image/PDF-only offers are not established by this HTML check."
     },
     {
+      "provider": "zyte",
+      "source": "NORDSEE",
+      "url": "https://www.nordsee.com/at/coupons/groer_hunger?pdf=true",
+      "reserved": 0.02,
+      "status": "source-paused"
+    },
+    {
       "provider": "scraperapi",
       "source": "IKEA Food",
-      "url": "https://www.ikea.com/at/de/food/salesareas/swedish-food-market/PRF13749381/",
+      "url": "https://www.ikea.com/at/de/food/salesareas/swedish-food-market/PRF13733504/",
       "reserved": 10,
       "directCandidates": 0,
       "directRejected": [],
-      "directVisibleTextCharacters": 1628,
+      "directVisibleTextCharacters": 1708,
+      "status": "direct-no-offer",
+      "reason": "readable-page-without-extractable-offer",
+      "note": "No browser credit spent; image/PDF-only offers are not established by this HTML check."
+    },
+    {
+      "provider": "zyte",
+      "source": "NORDSEE",
+      "url": "https://www.nordsee.com/at/coupons/garnelen_box?pdf=true",
+      "reserved": 0.02,
+      "status": "source-paused"
+    },
+    {
+      "provider": "scraperapi",
+      "source": "IKEA Food",
+      "url": "https://www.ikea.com/at/de/food/salesareas/swedish-food-market/PRF13748996/",
+      "reserved": 10,
+      "directCandidates": 0,
+      "directRejected": [],
+      "directVisibleTextCharacters": 1468,
       "status": "direct-no-offer",
       "reason": "readable-page-without-extractable-offer",
       "note": "No browser credit spent; image/PDF-only offers are not established by this HTML check."
@@ -130,10 +185,13 @@
   ],
   "funnel": {
     "pagesBySource": {
+      "NORDSEE": 4,
       "IKEA Food": 4
     },
     "statuses": {
-      "direct-no-offer": 4
+      "failed": 1,
+      "direct-no-offer": 4,
+      "source-paused": 3
     },
     "rejectionReasons": {},
     "verificationReasons": {},
