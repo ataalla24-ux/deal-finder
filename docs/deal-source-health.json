@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-11-18T07:55:26.775Z",
+  "generatedAt": "2026-11-18T07:57:32.299Z",
   "discoveryAvailability": {
     "note": "Transport evidence, not deal yield. Retry eligibility is not recovery. Candidate counts are not Slack deliveries. No extra runs or quota resets.",
     "lanes": [
@@ -54,9 +54,9 @@
   },
   "summary": {
     "filesConsidered": 32,
-    "totalCandidates": 698,
-    "uniqueCandidates": 677,
-    "distinctCandidates": 686,
+    "totalCandidates": 700,
+    "uniqueCandidates": 679,
+    "distinctCandidates": 688,
     "duplicateClusters": 9,
     "topHealthySources": [
       {
@@ -64,6 +64,12 @@
         "sourceLabel": "Member Benefits",
         "healthScore": 74,
         "totalDeals": 113
+      },
+      {
+        "sourceKey": "instagram-apify",
+        "sourceLabel": "Apify Instagram",
+        "healthScore": 71,
+        "totalDeals": 2
       },
       {
         "sourceKey": "instagram-ai",
@@ -82,15 +88,15 @@
         "sourceLabel": "Firecrawl Key 3 - Consumables",
         "healthScore": 64,
         "totalDeals": 1
-      },
-      {
-        "sourceKey": "firecrawl5",
-        "sourceLabel": "Firecrawl Key 5 - Instagram Gastro",
-        "healthScore": 63,
-        "totalDeals": 5
       }
     ],
     "topMissionSources": [
+      {
+        "sourceKey": "instagram-apify",
+        "sourceLabel": "Apify Instagram",
+        "missionFitScore": 74,
+        "totalDeals": 2
+      },
       {
         "sourceKey": "joe",
         "sourceLabel": "jö Bonus Club",
@@ -114,12 +120,6 @@
         "sourceLabel": "Firecrawl Key 5 - Instagram Gastro",
         "missionFitScore": 58,
         "totalDeals": 5
-      },
-      {
-        "sourceKey": "food3",
-        "sourceLabel": "Firecrawl Key 2 - Food",
-        "missionFitScore": 57,
-        "totalDeals": 4
       }
     ],
     "topCoverageSources": [
@@ -173,6 +173,12 @@
         "totalDeals": 54
       },
       {
+        "sourceKey": "instagram-apify",
+        "sourceLabel": "Apify Instagram",
+        "precisionScore": 66,
+        "totalDeals": 2
+      },
+      {
         "sourceKey": "firecrawl5",
         "sourceLabel": "Firecrawl Key 5 - Instagram Gastro",
         "precisionScore": 66,
@@ -183,12 +189,6 @@
         "sourceLabel": "Instagram AI Agent",
         "precisionScore": 66,
         "totalDeals": 1
-      },
-      {
-        "sourceKey": "joe",
-        "sourceLabel": "jö Bonus Club",
-        "precisionScore": 64,
-        "totalDeals": 9
       }
     ],
     "topWeightedSources": [
@@ -197,6 +197,12 @@
         "sourceLabel": "Member Benefits",
         "sourceWeightScore": 72,
         "totalDeals": 113
+      },
+      {
+        "sourceKey": "instagram-apify",
+        "sourceLabel": "Apify Instagram",
+        "sourceWeightScore": 59,
+        "totalDeals": 2
       },
       {
         "sourceKey": "meta-instagram",
@@ -215,12 +221,6 @@
         "sourceLabel": "Firecrawl Key 3 - Consumables",
         "sourceWeightScore": 52,
         "totalDeals": 1
-      },
-      {
-        "sourceKey": "firecrawl5",
-        "sourceLabel": "Firecrawl Key 5 - Instagram Gastro",
-        "sourceWeightScore": 52,
-        "totalDeals": 5
       }
     ],
     "topSourcesToFix": [
@@ -236,15 +236,6 @@
       {
         "sourceKey": "google",
         "sourceLabel": "Google Deals",
-        "healthScore": 0,
-        "issues": [
-          "liefert aktuell 0 Deals"
-        ],
-        "sampleTitles": []
-      },
-      {
-        "sourceKey": "instagram-apify",
-        "sourceLabel": "Apify Instagram",
         "healthScore": 0,
         "issues": [
           "liefert aktuell 0 Deals"
@@ -273,6 +264,15 @@
       {
         "sourceKey": "instagram-web",
         "sourceLabel": "Daily Sync Instagram Web",
+        "healthScore": 0,
+        "issues": [
+          "liefert aktuell 0 Deals"
+        ],
+        "sampleTitles": []
+      },
+      {
+        "sourceKey": "telegram",
+        "sourceLabel": "telegram",
         "healthScore": 0,
         "issues": [
           "liefert aktuell 0 Deals"
@@ -378,6 +378,55 @@
       "coverageScore": 82,
       "precisionScore": 72,
       "sourceWeightScore": 72
+    },
+    {
+      "sourceKey": "instagram-apify",
+      "file": "deals-pending-instagram-apify.json",
+      "sourceLabel": "Apify Instagram",
+      "totalDeals": 2,
+      "uniqueDeals": 2,
+      "duplicateDeals": 0,
+      "duplicateAcrossSources": 0,
+      "fresh1dCount": 1,
+      "fresh7dCount": 2,
+      "viennaCount": 0,
+      "foodDrinkCount": 2,
+      "promoCount": 2,
+      "missingUrlCount": 0,
+      "sampleTitles": [
+        "3 € SmashBurger bei Peter Pane in Wien🍔| Anzeige Mit könnt ihr euch bei Peter Pane in Wien & Deutschland anläs",
+        "Eine ungewöhnliche Kreation sorgt in Wien für Aufsehen: Lidl Österreich und FERHAT Döner machen gemeinsame Sac"
+      ],
+      "lastRun": null,
+      "uniqueRate": 1,
+      "duplicateRate": 0,
+      "fresh1dRate": 0.5,
+      "fresh7dRate": 1,
+      "viennaRate": 0,
+      "foodDrinkRate": 1,
+      "promoRate": 1,
+      "missingUrlRate": 0,
+      "averageQualityScore": 95,
+      "topCategories": [
+        {
+          "value": "essen",
+          "count": 2
+        }
+      ],
+      "topTypes": [
+        {
+          "value": "gratis",
+          "count": 2
+        }
+      ],
+      "issues": [
+        "Wien-Signal ist zu schwach"
+      ],
+      "healthScore": 71,
+      "missionFitScore": 74,
+      "coverageScore": 12,
+      "precisionScore": 66,
+      "sourceWeightScore": 59
     },
     {
       "sourceKey": "instagram-ai",
@@ -1871,42 +1920,6 @@
       "sourceKey": "google",
       "file": "deals-pending-google.json",
       "sourceLabel": "Google Deals",
-      "totalDeals": 0,
-      "uniqueDeals": 0,
-      "duplicateDeals": 0,
-      "duplicateAcrossSources": 0,
-      "fresh1dCount": 0,
-      "fresh7dCount": 0,
-      "viennaCount": 0,
-      "foodDrinkCount": 0,
-      "promoCount": 0,
-      "missingUrlCount": 0,
-      "sampleTitles": [],
-      "lastRun": null,
-      "uniqueRate": 0,
-      "duplicateRate": 0,
-      "fresh1dRate": 0,
-      "fresh7dRate": 0,
-      "viennaRate": 0,
-      "foodDrinkRate": 0,
-      "promoRate": 0,
-      "missingUrlRate": 0,
-      "averageQualityScore": 0,
-      "topCategories": [],
-      "topTypes": [],
-      "issues": [
-        "liefert aktuell 0 Deals"
-      ],
-      "healthScore": 0,
-      "missionFitScore": 0,
-      "coverageScore": 0,
-      "precisionScore": 0,
-      "sourceWeightScore": 0
-    },
-    {
-      "sourceKey": "instagram-apify",
-      "file": "deals-pending-instagram-apify.json",
-      "sourceLabel": "Apify Instagram",
       "totalDeals": 0,
       "uniqueDeals": 0,
       "duplicateDeals": 0,
