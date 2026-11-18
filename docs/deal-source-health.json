@@ -1,34 +1,34 @@
 {
-  "generatedAt": "2026-11-18T21:10:29.042Z",
+  "generatedAt": "2026-11-18T21:37:02.202Z",
   "discoveryAvailability": {
     "note": "Transport evidence, not deal yield. Retry eligibility is not recovery. Candidate counts are not Slack deliveries. No extra runs or quota resets.",
     "lanes": [
       {
         "name": "instagram-search",
-        "observedAt": "2026-11-18T08:30:35.968Z",
-        "status": "awaiting-post-cooldown-run",
-        "reason": "search-cooldown",
-        "retryAt": "2026-11-18T09:09:53.925Z",
-        "attempted": 0,
+        "observedAt": "2026-11-18T21:36:10.789Z",
+        "status": "paused",
+        "reason": "search-unavailable",
+        "retryAt": "2026-11-19T21:24:41.978Z",
+        "attempted": 1,
         "discovered": 0,
         "deliveredToSlack": null
       },
       {
         "name": "instagram-profiles",
-        "observedAt": "2026-11-18T08:30:35.968Z",
-        "status": "awaiting-post-cooldown-run",
-        "reason": "web-access-cooldown",
-        "retryAt": "2026-11-18T20:10:08.659Z",
-        "attempted": 0,
+        "observedAt": "2026-11-18T21:36:10.789Z",
+        "status": "no-block-reported",
+        "reason": "",
+        "retryAt": "",
+        "attempted": 20,
         "deliveredToSlack": null
       },
       {
         "name": "instagram-previews",
-        "observedAt": "2026-11-18T08:30:35.968Z",
-        "status": "awaiting-post-cooldown-run",
-        "reason": "web-access-cooldown",
-        "retryAt": "2026-11-18T20:10:08.659Z",
-        "attempted": 0,
+        "observedAt": "2026-11-18T21:36:10.789Z",
+        "status": "no-block-reported",
+        "reason": "",
+        "retryAt": "",
+        "attempted": 100,
         "deliveredToSlack": null
       },
       {
@@ -66,6 +66,12 @@
         "totalDeals": 1
       },
       {
+        "sourceKey": "instagram-ai",
+        "sourceLabel": "Instagram AI Agent",
+        "healthScore": 77,
+        "totalDeals": 2
+      },
+      {
         "sourceKey": "member-benefits",
         "sourceLabel": "Member Benefits",
         "healthScore": 74,
@@ -80,12 +86,6 @@
       {
         "sourceKey": "firecrawl2",
         "sourceLabel": "Firecrawl Key 3 - Consumables",
-        "healthScore": 64,
-        "totalDeals": 2
-      },
-      {
-        "sourceKey": "instagram-apify",
-        "sourceLabel": "Apify Instagram",
         "healthScore": 64,
         "totalDeals": 2
       }
@@ -173,6 +173,12 @@
         "totalDeals": 113
       },
       {
+        "sourceKey": "instagram-ai",
+        "sourceLabel": "Instagram AI Agent",
+        "precisionScore": 72,
+        "totalDeals": 2
+      },
+      {
         "sourceKey": "firecrawl2",
         "sourceLabel": "Firecrawl Key 3 - Consumables",
         "precisionScore": 70,
@@ -183,12 +189,6 @@
         "sourceLabel": "Meta Instagram Graph",
         "precisionScore": 70,
         "totalDeals": 66
-      },
-      {
-        "sourceKey": "joe",
-        "sourceLabel": "jö Bonus Club",
-        "precisionScore": 64,
-        "totalDeals": 9
       }
     ],
     "topWeightedSources": [
@@ -211,16 +211,16 @@
         "totalDeals": 66
       },
       {
+        "sourceKey": "instagram-ai",
+        "sourceLabel": "Instagram AI Agent",
+        "sourceWeightScore": 58,
+        "totalDeals": 2
+      },
+      {
         "sourceKey": "firecrawl2",
         "sourceLabel": "Firecrawl Key 3 - Consumables",
         "sourceWeightScore": 57,
         "totalDeals": 2
-      },
-      {
-        "sourceKey": "joe",
-        "sourceLabel": "jö Bonus Club",
-        "sourceWeightScore": 54,
-        "totalDeals": 9
       }
     ],
     "topSourcesToFix": [
@@ -363,6 +363,55 @@
       "coverageScore": 16,
       "precisionScore": 100,
       "sourceWeightScore": 83
+    },
+    {
+      "sourceKey": "instagram-ai",
+      "file": "deals-pending-instagram-ai.json",
+      "sourceLabel": "Instagram AI Agent",
+      "totalDeals": 2,
+      "uniqueDeals": 2,
+      "duplicateDeals": 0,
+      "duplicateAcrossSources": 0,
+      "fresh1dCount": 1,
+      "fresh7dCount": 2,
+      "viennaCount": 2,
+      "foodDrinkCount": 2,
+      "promoCount": 0,
+      "missingUrlCount": 0,
+      "sampleTitles": [
+        "Pizza-Mittagsmenü mit Suppe oder Salat um 11,90 €",
+        "Wochen-Mittagsmenü mit Tagessuppe ab 9,90 €"
+      ],
+      "lastRun": null,
+      "uniqueRate": 1,
+      "duplicateRate": 0,
+      "fresh1dRate": 0.5,
+      "fresh7dRate": 1,
+      "viennaRate": 1,
+      "foodDrinkRate": 1,
+      "promoRate": 0,
+      "missingUrlRate": 0,
+      "averageQualityScore": 97,
+      "topCategories": [
+        {
+          "value": "essen & trinken",
+          "count": 2
+        }
+      ],
+      "topTypes": [
+        {
+          "value": "rabatt",
+          "count": 2
+        }
+      ],
+      "issues": [
+        "wenige klare Gratis-/Promo-Signale"
+      ],
+      "healthScore": 77,
+      "missionFitScore": 61,
+      "coverageScore": 12,
+      "precisionScore": 72,
+      "sourceWeightScore": 58
     },
     {
       "sourceKey": "member-benefits",
@@ -716,56 +765,6 @@
       "coverageScore": 11,
       "precisionScore": 56,
       "sourceWeightScore": 45
-    },
-    {
-      "sourceKey": "instagram-ai",
-      "file": "deals-pending-instagram-ai.json",
-      "sourceLabel": "Instagram AI Agent",
-      "totalDeals": 2,
-      "uniqueDeals": 2,
-      "duplicateDeals": 0,
-      "duplicateAcrossSources": 0,
-      "fresh1dCount": 0,
-      "fresh7dCount": 2,
-      "viennaCount": 2,
-      "foodDrinkCount": 1,
-      "promoCount": 0,
-      "missingUrlCount": 0,
-      "sampleTitles": [
-        "Wochen-Mittagsmenü mit Tagessuppe ab 9,90 €",
-        "Lieferando Super Deals: bis zu 50 % Rabatt in Wien"
-      ],
-      "lastRun": null,
-      "uniqueRate": 1,
-      "duplicateRate": 0,
-      "fresh1dRate": 0,
-      "fresh7dRate": 1,
-      "viennaRate": 1,
-      "foodDrinkRate": 0.5,
-      "promoRate": 0,
-      "missingUrlRate": 0,
-      "averageQualityScore": 88,
-      "topCategories": [
-        {
-          "value": "essen & trinken",
-          "count": 2
-        }
-      ],
-      "topTypes": [
-        {
-          "value": "rabatt",
-          "count": 2
-        }
-      ],
-      "issues": [
-        "wenige Deals sind frischer als 1 Tag",
-        "wenige klare Gratis-/Promo-Signale"
-      ],
-      "healthScore": 60,
-      "missionFitScore": 33,
-      "coverageScore": 8,
-      "precisionScore": 54,
-      "sourceWeightScore": 40
     },
     {
       "sourceKey": "firecrawl5",
