@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-11-18T07:58:17.245Z",
+  "generatedAt": "2026-11-18T08:09:35.472Z",
   "summary": {
     "maxAgeDays": 7,
     "total": 257,
@@ -16,7 +16,7 @@
       "älter als 7 Tage (2026-10-26)": 1,
       "älter als 7 Tage (2026-11-10)": 1,
       "älter als 7 Tage (2025-07-30)": 1,
-      "URL ungültig (HTTP 404)": 18,
+      "URL ungültig (HTTP 404)": 21,
       "älter als 7 Tage (2026-10-28)": 1,
       "URL ungültig (Inhalt nicht mehr verfügbar)": 4,
       "kostenlose Buchung/Kontaktaufnahme statt kostenloser Leistung": 2,
@@ -56,7 +56,7 @@
       "kein konkreter Deal": 187,
       "Gottesdienste außerhalb Wochenlauf": 36,
       "älter als 7 Tage": 145,
-      "ungültige URL": 24,
+      "ungültige URL": 27,
       "sonstiges": 9,
       "abgelaufen": 15,
       "nicht Wien": 6,
@@ -147,7 +147,7 @@
           "kein konkreter Deal": 34,
           "Gottesdienste außerhalb Wochenlauf": 35,
           "älter als 7 Tage": 33,
-          "ungültige URL": 1,
+          "ungültige URL": 2,
           "sonstiges": 1
         }
       },
@@ -190,7 +190,7 @@
         "reasonCategoryCounts": {
           "kein konkreter Deal": 94,
           "älter als 7 Tage": 96,
-          "ungültige URL": 5,
+          "ungültige URL": 7,
           "Gottesdienste außerhalb Wochenlauf": 1,
           "sonstiges": 2,
           "nicht Wien": 1
@@ -886,7 +886,7 @@
       "warnings": [
         "kein Ablaufdatum gefunden"
       ],
-      "sourceDate": "2026-11-18T07:56:04.338Z",
+      "sourceDate": "2026-11-18T08:07:54.007Z",
       "sourceDateSource": "url.publicationDate",
       "sourceAgeDays": 0,
       "expiryDate": "",
@@ -1294,6 +1294,7 @@
       "source": "Freikirchen Wien",
       "url": "https://www.baptisten.at/wien",
       "reasons": [
+        "URL ungültig (HTTP 404)",
         "kein konkretes Angebot erkennbar",
         "Gottesdienste nur im Wochenlauf",
         "älter als 7 Tage (2026-04-19)"
@@ -1304,7 +1305,7 @@
       "sourceAgeDays": 213,
       "expiryDate": "",
       "expirySource": "deal.expires",
-      "urlStatus": "HTTP 200"
+      "urlStatus": "ungültig: HTTP 404"
     },
     {
       "id": "freikirche-7-20260419",
@@ -2275,6 +2276,7 @@
       "source": "Kirchen Verzeichnis",
       "url": "https://www.baptisten.at/wien",
       "reasons": [
+        "URL ungültig (HTTP 404)",
         "kein konkretes Angebot erkennbar",
         "älter als 7 Tage (2026-02-22)"
       ],
@@ -2284,7 +2286,7 @@
       "sourceAgeDays": 269,
       "expiryDate": "",
       "expirySource": "deal.expires",
-      "urlStatus": "HTTP 200"
+      "urlStatus": "ungültig: HTTP 404"
     },
     {
       "id": "gemeinde-9-20260222",
@@ -3073,6 +3075,7 @@
       "source": "Kirchen Verzeichnis",
       "url": "https://www.baptisten.at/wien",
       "reasons": [
+        "URL ungültig (HTTP 404)",
         "kein konkretes Angebot erkennbar",
         "älter als 7 Tage (2026-02-22)"
       ],
@@ -3082,7 +3085,7 @@
       "sourceAgeDays": 269,
       "expiryDate": "",
       "expirySource": "deal.expires",
-      "urlStatus": "HTTP 200"
+      "urlStatus": "ungültig: HTTP 404"
     },
     {
       "id": "gottesdienste-17-20260222",
@@ -4370,6 +4373,7 @@
         "kein verlässliches Quell-/Post-Datum gefunden"
       ],
       "warnings": [
+        "URL nicht eindeutig prüfbar (HTTP 429)",
         "kein Ablaufdatum gefunden"
       ],
       "sourceDate": "",
@@ -4377,7 +4381,7 @@
       "sourceAgeDays": null,
       "expiryDate": "",
       "expirySource": "",
-      "urlStatus": "HTTP 200"
+      "urlStatus": "unklar: HTTP 429"
     },
     {
       "id": "vpr-fwwi5t",
@@ -4471,6 +4475,7 @@
       ],
       "warnings": [
         "Inhalt prüfen: Titel zu lang; Angebot kurz benennen, Bedingungen in den Details behalten",
+        "URL nicht eindeutig prüfbar (HTTP 429)",
         "kein Ablaufdatum gefunden"
       ],
       "sourceDate": "",
@@ -4478,7 +4483,7 @@
       "sourceAgeDays": null,
       "expiryDate": "",
       "expirySource": "",
-      "urlStatus": "HTTP 200"
+      "urlStatus": "unklar: HTTP 429"
     },
     {
       "id": "vpr-kfg2yz",
@@ -4878,6 +4883,7 @@
         "kein verlässliches Quell-/Post-Datum gefunden"
       ],
       "warnings": [
+        "URL nicht eindeutig prüfbar (HTTP 429)",
         "kein Ablaufdatum gefunden"
       ],
       "sourceDate": "",
@@ -4885,7 +4891,7 @@
       "sourceAgeDays": null,
       "expiryDate": "",
       "expirySource": "",
-      "urlStatus": "HTTP 200"
+      "urlStatus": "unklar: HTTP 429"
     },
     {
       "id": "vpr-y652b9",
@@ -5244,23 +5250,23 @@
   ],
   "runProvenance": {
     "repository": "ataalla24-ux/deal-finder",
-    "runId": "44262705980",
-    "headSha": "40b85d6ca57bc981be61bd3c2d3e56605600dcd4",
-    "checkoutSha": "b71df2153bdac1d46357339060db96ade8744913",
+    "runId": "44264399639",
+    "headSha": "6dacb14cb829b76ed7e9ec1a29a1164e893de47b",
+    "checkoutSha": "6dacb14cb829b76ed7e9ec1a29a1164e893de47b",
     "triggeringRun": {
-      "runId": "44262592977",
-      "headSha": "cdb4d9a3cfe064e9bbcdb1cc753758fc79382b37",
-      "event": "schedule",
-      "name": "Apify Instagram Fresh Scan",
-      "startedAt": "2026-11-18T07:54:54.000Z",
-      "url": "https://github.com/ataalla24-ux/deal-finder/actions/runs/44262592977"
+      "runId": "44262466071",
+      "headSha": "2b2427701e10ee2e962452d6b80e0d5c0771b90c",
+      "event": "workflow_dispatch",
+      "name": "Meta Instagram Deal Discovery",
+      "startedAt": "2026-11-18T07:53:55.000Z",
+      "url": "https://github.com/ataalla24-ux/deal-finder/actions/runs/44262466071"
     },
     "event": "workflow_run",
     "runAttempt": "1",
-    "url": "https://github.com/ataalla24-ux/deal-finder/actions/runs/44262705980"
+    "url": "https://github.com/ataalla24-ux/deal-finder/actions/runs/44264399639"
   },
   "instagramDelivery": {
-    "checkedAt": "2026-11-18T07:58:17.258Z",
+    "checkedAt": "2026-11-18T08:09:35.488Z",
     "scope": "instagram-ai-agent/standard-slack-lane",
     "extractedCandidates": 1,
     "counts": {
@@ -5285,7 +5291,7 @@
     ]
   },
   "tiktokDelivery": {
-    "checkedAt": "2026-11-18T07:58:17.260Z",
+    "checkedAt": "2026-11-18T08:09:35.490Z",
     "scope": "tiktok-deals-scanner/standard-slack-lane",
     "extractedCandidates": 0,
     "counts": {},
