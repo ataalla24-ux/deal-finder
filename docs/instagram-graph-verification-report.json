@@ -1,7 +1,7 @@
 {
-  "generatedAt": "2026-11-18T08:31:11.641Z",
+  "generatedAt": "2026-11-18T08:33:00.526Z",
   "source": "instagram-graph-cross-source-verification",
-  "status": "ok",
+  "status": "failed-preserved",
   "configured": true,
   "scannedFiles": [
     "deals-pending-church-events.json",
@@ -84,7 +84,7 @@
     },
     "deals-pending-gastro2.json": {
       "deals": 131,
-      "candidates": 2
+      "candidates": 0
     },
     "deals-pending-gemeinde.json": {
       "deals": 33,
@@ -103,7 +103,7 @@
       "candidates": 0
     },
     "deals-pending-instagram-ai.json": {
-      "deals": 1,
+      "deals": 2,
       "candidates": 0
     },
     "deals-pending-instagram-apify.json": {
@@ -167,27 +167,24 @@
       "candidates": 0
     }
   },
-  "candidatePosts": 3,
-  "candidateAccounts": 3,
+  "candidatePosts": 1,
+  "candidateAccounts": 1,
   "skippedAccountCooldowns": 0,
   "selectedAccounts": [
-    {
-      "username": "1000thingsinvienna",
-      "candidates": 1
-    },
-    {
-      "username": "only.pizza.vienna",
-      "candidates": 1
-    },
     {
       "username": "chezbernardvienna",
       "candidates": 1
     }
   ],
-  "fetchedPosts": 75,
-  "exactMatches": 3,
+  "fetchedPosts": 0,
+  "exactMatches": 0,
   "retainedEvidencePosts": 2000,
-  "errors": [],
+  "errors": [
+    {
+      "username": "chezbernardvienna",
+      "message": "Instagram shared quota paused: rolling-hour budget exhausted"
+    }
+  ],
   "accountFailures": {
     "natascha_rapid": {
       "count": 3,
@@ -203,19 +200,25 @@
   "sharedQuota": {
     "limitPerHour": 237,
     "usageThreshold": 95,
-    "requests": 3,
-    "reserved": 5,
-    "stopped": false,
-    "reason": "",
-    "highestUsagePercent": 55,
+    "requests": 0,
+    "reserved": 0,
+    "stopped": true,
+    "reason": "Instagram shared quota paused: rolling-hour budget exhausted",
+    "highestUsagePercent": 0,
     "waitedMs": 0,
     "pacingMs": 0,
-    "retryAt": "",
+    "retryAt": "2026-11-18T08:58:18.350Z",
     "adaptiveSafetyCeiling": 190,
     "adaptiveIncreases": 0,
     "storageFailure": null
   },
+  "globalError": {
+    "username": "chezbernardvienna",
+    "status": 0,
+    "code": "SCAN_BUDGET",
+    "message": "Instagram shared quota paused: rolling-hour budget exhausted"
+  },
   "blockedEvidencePosts": 67,
-  "unmatchedCandidatePosts": 0,
-  "message": "3/3 fresh cross-source Instagram candidates matched exactly via Graph API."
+  "unmatchedCandidatePosts": 1,
+  "message": "0/1 fresh cross-source Instagram candidates matched exactly via Graph API."
 }
