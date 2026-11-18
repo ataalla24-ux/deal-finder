@@ -1,12 +1,12 @@
 {
-  "generatedAt": "2026-11-18T08:35:55.971Z",
+  "generatedAt": "2026-11-18T09:09:58.350Z",
   "discoveryAvailability": {
     "note": "Transport evidence, not deal yield. Retry eligibility is not recovery. Candidate counts are not Slack deliveries. No extra runs or quota resets.",
     "lanes": [
       {
         "name": "instagram-search",
         "observedAt": "2026-11-18T08:30:35.968Z",
-        "status": "paused",
+        "status": "awaiting-post-cooldown-run",
         "reason": "search-cooldown",
         "retryAt": "2026-11-18T09:09:53.925Z",
         "attempted": 0,
@@ -66,16 +66,16 @@
         "totalDeals": 113
       },
       {
-        "sourceKey": "instagram-apify",
-        "sourceLabel": "Apify Instagram",
-        "healthScore": 71,
-        "totalDeals": 2
-      },
-      {
         "sourceKey": "meta-instagram",
         "sourceLabel": "Meta Instagram Graph",
         "healthScore": 69,
         "totalDeals": 54
+      },
+      {
+        "sourceKey": "instagram-apify",
+        "sourceLabel": "Apify Instagram",
+        "healthScore": 64,
+        "totalDeals": 2
       },
       {
         "sourceKey": "firecrawl2",
@@ -92,12 +92,6 @@
     ],
     "topMissionSources": [
       {
-        "sourceKey": "instagram-apify",
-        "sourceLabel": "Apify Instagram",
-        "missionFitScore": 74,
-        "totalDeals": 2
-      },
-      {
         "sourceKey": "joe",
         "sourceLabel": "jö Bonus Club",
         "missionFitScore": 73,
@@ -108,6 +102,12 @@
         "sourceLabel": "Member Benefits",
         "missionFitScore": 63,
         "totalDeals": 113
+      },
+      {
+        "sourceKey": "instagram-apify",
+        "sourceLabel": "Apify Instagram",
+        "missionFitScore": 63,
+        "totalDeals": 2
       },
       {
         "sourceKey": "firecrawl2",
@@ -133,9 +133,9 @@
       {
         "sourceKey": "gastro2",
         "sourceLabel": "Firecrawl Key 1 - Gastro",
-        "coverageScore": 70,
+        "coverageScore": 69,
         "totalDeals": 131,
-        "fresh1dCount": 1
+        "fresh1dCount": 0
       },
       {
         "sourceKey": "meta-instagram",
@@ -154,9 +154,9 @@
       {
         "sourceKey": "vienna-promo-radar",
         "sourceLabel": "Vienna Promo Radar",
-        "coverageScore": 39,
+        "coverageScore": 38,
         "totalDeals": 70,
-        "fresh1dCount": 1
+        "fresh1dCount": 0
       }
     ],
     "topPrecisionSources": [
@@ -173,12 +173,6 @@
         "totalDeals": 54
       },
       {
-        "sourceKey": "instagram-apify",
-        "sourceLabel": "Apify Instagram",
-        "precisionScore": 66,
-        "totalDeals": 2
-      },
-      {
         "sourceKey": "joe",
         "sourceLabel": "jö Bonus Club",
         "precisionScore": 64,
@@ -189,6 +183,12 @@
         "sourceLabel": "Firecrawl Key 5 - Instagram Gastro",
         "precisionScore": 64,
         "totalDeals": 5
+      },
+      {
+        "sourceKey": "instagram-apify",
+        "sourceLabel": "Apify Instagram",
+        "precisionScore": 60,
+        "totalDeals": 2
       }
     ],
     "topWeightedSources": [
@@ -197,12 +197,6 @@
         "sourceLabel": "Member Benefits",
         "sourceWeightScore": 71,
         "totalDeals": 113
-      },
-      {
-        "sourceKey": "instagram-apify",
-        "sourceLabel": "Apify Instagram",
-        "sourceWeightScore": 59,
-        "totalDeals": 2
       },
       {
         "sourceKey": "meta-instagram",
@@ -215,6 +209,12 @@
         "sourceLabel": "jö Bonus Club",
         "sourceWeightScore": 54,
         "totalDeals": 9
+      },
+      {
+        "sourceKey": "instagram-apify",
+        "sourceLabel": "Apify Instagram",
+        "sourceWeightScore": 52,
+        "totalDeals": 2
       },
       {
         "sourceKey": "firecrawl2",
@@ -380,55 +380,6 @@
       "sourceWeightScore": 71
     },
     {
-      "sourceKey": "instagram-apify",
-      "file": "deals-pending-instagram-apify.json",
-      "sourceLabel": "Apify Instagram",
-      "totalDeals": 2,
-      "uniqueDeals": 2,
-      "duplicateDeals": 0,
-      "duplicateAcrossSources": 0,
-      "fresh1dCount": 1,
-      "fresh7dCount": 2,
-      "viennaCount": 0,
-      "foodDrinkCount": 2,
-      "promoCount": 2,
-      "missingUrlCount": 0,
-      "sampleTitles": [
-        "3 € SmashBurger bei Peter Pane in Wien🍔| Anzeige Mit könnt ihr euch bei Peter Pane in Wien & Deutschland anläs",
-        "Eine ungewöhnliche Kreation sorgt in Wien für Aufsehen: Lidl Österreich und FERHAT Döner machen gemeinsame Sac"
-      ],
-      "lastRun": null,
-      "uniqueRate": 1,
-      "duplicateRate": 0,
-      "fresh1dRate": 0.5,
-      "fresh7dRate": 1,
-      "viennaRate": 0,
-      "foodDrinkRate": 1,
-      "promoRate": 1,
-      "missingUrlRate": 0,
-      "averageQualityScore": 95,
-      "topCategories": [
-        {
-          "value": "essen",
-          "count": 2
-        }
-      ],
-      "topTypes": [
-        {
-          "value": "gratis",
-          "count": 2
-        }
-      ],
-      "issues": [
-        "Wien-Signal ist zu schwach"
-      ],
-      "healthScore": 71,
-      "missionFitScore": 74,
-      "coverageScore": 12,
-      "precisionScore": 66,
-      "sourceWeightScore": 59
-    },
-    {
       "sourceKey": "meta-instagram",
       "file": "deals-pending-meta-instagram.json",
       "sourceLabel": "Meta Instagram Graph",
@@ -507,6 +458,56 @@
       "coverageScore": 43,
       "precisionScore": 67,
       "sourceWeightScore": 58
+    },
+    {
+      "sourceKey": "instagram-apify",
+      "file": "deals-pending-instagram-apify.json",
+      "sourceLabel": "Apify Instagram",
+      "totalDeals": 2,
+      "uniqueDeals": 2,
+      "duplicateDeals": 0,
+      "duplicateAcrossSources": 0,
+      "fresh1dCount": 0,
+      "fresh7dCount": 2,
+      "viennaCount": 0,
+      "foodDrinkCount": 2,
+      "promoCount": 2,
+      "missingUrlCount": 0,
+      "sampleTitles": [
+        "3 € SmashBurger bei Peter Pane in Wien🍔| Anzeige Mit könnt ihr euch bei Peter Pane in Wien & Deutschland anläs",
+        "Eine ungewöhnliche Kreation sorgt in Wien für Aufsehen: Lidl Österreich und FERHAT Döner machen gemeinsame Sac"
+      ],
+      "lastRun": null,
+      "uniqueRate": 1,
+      "duplicateRate": 0,
+      "fresh1dRate": 0,
+      "fresh7dRate": 1,
+      "viennaRate": 0,
+      "foodDrinkRate": 1,
+      "promoRate": 1,
+      "missingUrlRate": 0,
+      "averageQualityScore": 95,
+      "topCategories": [
+        {
+          "value": "essen",
+          "count": 2
+        }
+      ],
+      "topTypes": [
+        {
+          "value": "gratis",
+          "count": 2
+        }
+      ],
+      "issues": [
+        "wenige Deals sind frischer als 1 Tag",
+        "Wien-Signal ist zu schwach"
+      ],
+      "healthScore": 64,
+      "missionFitScore": 63,
+      "coverageScore": 11,
+      "precisionScore": 60,
+      "sourceWeightScore": 52
     },
     {
       "sourceKey": "firecrawl2",
@@ -992,7 +993,7 @@
       "uniqueDeals": 120,
       "duplicateDeals": 11,
       "duplicateAcrossSources": 9,
-      "fresh1dCount": 1,
+      "fresh1dCount": 0,
       "fresh7dCount": 8,
       "viennaCount": 6,
       "foodDrinkCount": 129,
@@ -1077,7 +1078,7 @@
       ],
       "healthScore": 52,
       "missionFitScore": 46,
-      "coverageScore": 70,
+      "coverageScore": 69,
       "precisionScore": 46,
       "sourceWeightScore": 52
     },
@@ -1628,7 +1629,7 @@
       "uniqueDeals": 70,
       "duplicateDeals": 0,
       "duplicateAcrossSources": 0,
-      "fresh1dCount": 1,
+      "fresh1dCount": 0,
       "fresh7dCount": 5,
       "viennaCount": 0,
       "foodDrinkCount": 34,
@@ -1696,7 +1697,7 @@
       ],
       "healthScore": 43,
       "missionFitScore": 26,
-      "coverageScore": 39,
+      "coverageScore": 38,
       "precisionScore": 33,
       "sourceWeightScore": 35
     },
