@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-11-18T21:37:02.202Z",
+  "generatedAt": "2026-11-18T21:50:56.519Z",
   "discoveryAvailability": {
     "note": "Transport evidence, not deal yield. Retry eligibility is not recovery. Candidate counts are not Slack deliveries. No extra runs or quota resets.",
     "lanes": [
@@ -54,15 +54,15 @@
   },
   "summary": {
     "filesConsidered": 32,
-    "totalCandidates": 726,
-    "uniqueCandidates": 695,
+    "totalCandidates": 727,
+    "uniqueCandidates": 694,
     "distinctCandidates": 707,
-    "duplicateClusters": 12,
+    "duplicateClusters": 13,
     "topHealthySources": [
       {
         "sourceKey": "wien-combined",
         "sourceLabel": "Wien Deals Combined Graph",
-        "healthScore": 100,
+        "healthScore": 78,
         "totalDeals": 1
       },
       {
@@ -80,8 +80,8 @@
       {
         "sourceKey": "meta-instagram",
         "sourceLabel": "Meta Instagram Graph",
-        "healthScore": 73,
-        "totalDeals": 66
+        "healthScore": 71,
+        "totalDeals": 67
       },
       {
         "sourceKey": "firecrawl2",
@@ -140,9 +140,9 @@
       {
         "sourceKey": "meta-instagram",
         "sourceLabel": "Meta Instagram Graph",
-        "coverageScore": 51,
-        "totalDeals": 66,
-        "fresh1dCount": 13
+        "coverageScore": 52,
+        "totalDeals": 67,
+        "fresh1dCount": 15
       },
       {
         "sourceKey": "gutscheine",
@@ -163,7 +163,7 @@
       {
         "sourceKey": "wien-combined",
         "sourceLabel": "Wien Deals Combined Graph",
-        "precisionScore": 100,
+        "precisionScore": 92,
         "totalDeals": 1
       },
       {
@@ -187,15 +187,15 @@
       {
         "sourceKey": "meta-instagram",
         "sourceLabel": "Meta Instagram Graph",
-        "precisionScore": 70,
-        "totalDeals": 66
+        "precisionScore": 69,
+        "totalDeals": 67
       }
     ],
     "topWeightedSources": [
       {
         "sourceKey": "wien-combined",
         "sourceLabel": "Wien Deals Combined Graph",
-        "sourceWeightScore": 83,
+        "sourceWeightScore": 75,
         "totalDeals": 1
       },
       {
@@ -208,7 +208,7 @@
         "sourceKey": "meta-instagram",
         "sourceLabel": "Meta Instagram Graph",
         "sourceWeightScore": 62,
-        "totalDeals": 66
+        "totalDeals": 67
       },
       {
         "sourceKey": "instagram-ai",
@@ -298,9 +298,9 @@
       "file": "deals-pending-wien-combined.json",
       "sourceLabel": "Wien Deals Combined Graph",
       "totalDeals": 1,
-      "uniqueDeals": 1,
-      "duplicateDeals": 0,
-      "duplicateAcrossSources": 0,
+      "uniqueDeals": 0,
+      "duplicateDeals": 1,
+      "duplicateAcrossSources": 1,
       "fresh1dCount": 1,
       "fresh7dCount": 1,
       "viennaCount": 1,
@@ -336,8 +336,8 @@
         ],
         "reportFile": "deal-pipeline-last-run-wien-combined.json"
       },
-      "uniqueRate": 1,
-      "duplicateRate": 0,
+      "uniqueRate": 0,
+      "duplicateRate": 1,
       "fresh1dRate": 1,
       "fresh7dRate": 1,
       "viennaRate": 1,
@@ -357,12 +357,14 @@
           "count": 1
         }
       ],
-      "issues": [],
-      "healthScore": 100,
+      "issues": [
+        "hohe Überschneidung mit anderen Quellen"
+      ],
+      "healthScore": 78,
       "missionFitScore": 100,
       "coverageScore": 16,
-      "precisionScore": 100,
-      "sourceWeightScore": 83
+      "precisionScore": 92,
+      "sourceWeightScore": 75
     },
     {
       "sourceKey": "instagram-ai",
@@ -504,35 +506,35 @@
       "sourceKey": "meta-instagram",
       "file": "deals-pending-meta-instagram.json",
       "sourceLabel": "Meta Instagram Graph",
-      "totalDeals": 66,
+      "totalDeals": 67,
       "uniqueDeals": 63,
-      "duplicateDeals": 3,
-      "duplicateAcrossSources": 3,
-      "fresh1dCount": 13,
-      "fresh7dCount": 57,
-      "viennaCount": 66,
-      "foodDrinkCount": 45,
-      "promoCount": 27,
+      "duplicateDeals": 4,
+      "duplicateAcrossSources": 4,
+      "fresh1dCount": 15,
+      "fresh7dCount": 59,
+      "viennaCount": 67,
+      "foodDrinkCount": 47,
+      "promoCount": 28,
       "missingUrlCount": 0,
       "sampleTitles": [
-        "Eintritt frei!",
-        "Gratis-Eintritt zum Event bei Angewandte Interdisciplinary Lab (AIL)",
-        "🍕 Monday to Friday our lunch menu includes a pizza of your choice, giallo style – Caprese, Salame or Regina – for 11,90 €"
+        "🎁❤️ Ab jetzt bis Ende des Jahres gibt’s jeden Donnerstag: 1+1 GRATIS – Pizza kaufen, eine gratis dazu!",
+        "Ab nur 5 € ist alles möglich: ein kleiner Gruß, ein liebevoller Wunsch oder ein Dankeschön, das wirklich von Herzen kommt",
+        "Eintritt frei!"
       ],
       "lastRun": null,
-      "uniqueRate": 1,
-      "duplicateRate": 0,
+      "uniqueRate": 0.9,
+      "duplicateRate": 0.1,
       "fresh1dRate": 0.2,
       "fresh7dRate": 0.9,
       "viennaRate": 1,
       "foodDrinkRate": 0.7,
       "promoRate": 0.4,
       "missingUrlRate": 0,
-      "averageQualityScore": 86.4,
+      "averageQualityScore": 86.3,
       "topCategories": [
         {
           "value": "essen",
-          "count": 26
+          "count": 28
         },
         {
           "value": "shopping",
@@ -558,22 +560,26 @@
       "topTypes": [
         {
           "value": "rabatt",
-          "count": 46
+          "count": 47
         },
         {
           "value": "gratis",
-          "count": 16
+          "count": 15
         },
         {
           "value": "freebie",
           "count": 4
+        },
+        {
+          "value": "bogo",
+          "count": 1
         }
       ],
       "issues": [],
-      "healthScore": 73,
+      "healthScore": 71,
       "missionFitScore": 55,
-      "coverageScore": 51,
-      "precisionScore": 70,
+      "coverageScore": 52,
+      "precisionScore": 69,
       "sourceWeightScore": 62
     },
     {
