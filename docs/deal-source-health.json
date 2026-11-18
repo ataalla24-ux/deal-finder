@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-11-18T22:39:39.547Z",
+  "generatedAt": "2026-11-18T23:24:08.104Z",
   "discoveryAvailability": {
     "note": "Transport evidence, not deal yield. Retry eligibility is not recovery. Candidate counts are not Slack deliveries. No extra runs or quota resets.",
     "lanes": [
@@ -33,21 +33,21 @@
       },
       {
         "name": "tiktok-public-search",
-        "observedAt": "2026-11-18T13:56:10.839Z",
+        "observedAt": "2026-11-18T23:23:15.374Z",
         "status": "paused",
-        "reason": "transport-unavailable",
+        "reason": "api-cooldown",
         "retryAt": "2026-11-19T13:55:56.825Z",
-        "attempted": 1,
+        "attempted": 0,
         "rawItems": 0,
         "deliveredToSlack": null
       },
       {
         "name": "tiktok-web-search",
-        "observedAt": "2026-11-18T13:56:10.839Z",
+        "observedAt": "2026-11-18T23:23:15.374Z",
         "status": "paused",
-        "reason": "search-unavailable",
+        "reason": "search-cooldown",
         "retryAt": "2026-11-19T13:56:08.865Z",
-        "attempted": 2,
+        "attempted": 0,
         "deliveredToSlack": null
       }
     ]
@@ -1119,14 +1119,14 @@
       "topCategories": [
         {
           "value": "essen",
-          "count": 118
-        },
-        {
-          "value": "kaffee",
-          "count": 5
+          "count": 117
         },
         {
           "value": "supermarkt",
+          "count": 6
+        },
+        {
+          "value": "kaffee",
           "count": 5
         },
         {
@@ -1722,7 +1722,7 @@
       "duplicateDeals": 0,
       "duplicateAcrossSources": 0,
       "fresh1dCount": 0,
-      "fresh7dCount": 7,
+      "fresh7dCount": 5,
       "viennaCount": 0,
       "foodDrinkCount": 32,
       "promoCount": 22,
