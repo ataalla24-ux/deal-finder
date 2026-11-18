@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-11-18T06:09:50.114Z",
+  "generatedAt": "2026-11-18T06:52:07.533Z",
   "discoveryAvailability": {
     "note": "Transport evidence, not deal yield. Retry eligibility is not recovery. Candidate counts are not Slack deliveries. No extra runs or quota resets.",
     "lanes": [
@@ -54,15 +54,15 @@
   },
   "summary": {
     "filesConsidered": 32,
-    "totalCandidates": 698,
-    "uniqueCandidates": 677,
+    "totalCandidates": 699,
+    "uniqueCandidates": 676,
     "distinctCandidates": 686,
-    "duplicateClusters": 9,
+    "duplicateClusters": 10,
     "topHealthySources": [
       {
         "sourceKey": "wien-combined",
         "sourceLabel": "Wien Deals Combined Graph",
-        "healthScore": 100,
+        "healthScore": 78,
         "totalDeals": 1
       },
       {
@@ -81,7 +81,7 @@
         "sourceKey": "meta-instagram",
         "sourceLabel": "Meta Instagram Graph",
         "healthScore": 69,
-        "totalDeals": 53
+        "totalDeals": 54
       },
       {
         "sourceKey": "firecrawl2",
@@ -140,9 +140,9 @@
       {
         "sourceKey": "meta-instagram",
         "sourceLabel": "Meta Instagram Graph",
-        "coverageScore": 44,
-        "totalDeals": 53,
-        "fresh1dCount": 10
+        "coverageScore": 45,
+        "totalDeals": 54,
+        "fresh1dCount": 11
       },
       {
         "sourceKey": "vienna-promo-radar",
@@ -163,7 +163,7 @@
       {
         "sourceKey": "wien-combined",
         "sourceLabel": "Wien Deals Combined Graph",
-        "precisionScore": 100,
+        "precisionScore": 92,
         "totalDeals": 1
       },
       {
@@ -176,7 +176,7 @@
         "sourceKey": "meta-instagram",
         "sourceLabel": "Meta Instagram Graph",
         "precisionScore": 67,
-        "totalDeals": 53
+        "totalDeals": 54
       },
       {
         "sourceKey": "firecrawl5",
@@ -195,7 +195,7 @@
       {
         "sourceKey": "wien-combined",
         "sourceLabel": "Wien Deals Combined Graph",
-        "sourceWeightScore": 83,
+        "sourceWeightScore": 75,
         "totalDeals": 1
       },
       {
@@ -208,7 +208,7 @@
         "sourceKey": "meta-instagram",
         "sourceLabel": "Meta Instagram Graph",
         "sourceWeightScore": 58,
-        "totalDeals": 53
+        "totalDeals": 54
       },
       {
         "sourceKey": "joe",
@@ -297,9 +297,9 @@
       "file": "deals-pending-wien-combined.json",
       "sourceLabel": "Wien Deals Combined Graph",
       "totalDeals": 1,
-      "uniqueDeals": 1,
-      "duplicateDeals": 0,
-      "duplicateAcrossSources": 0,
+      "uniqueDeals": 0,
+      "duplicateDeals": 1,
+      "duplicateAcrossSources": 1,
       "fresh1dCount": 1,
       "fresh7dCount": 1,
       "viennaCount": 1,
@@ -335,8 +335,8 @@
         ],
         "reportFile": "deal-pipeline-last-run-wien-combined.json"
       },
-      "uniqueRate": 1,
-      "duplicateRate": 0,
+      "uniqueRate": 0,
+      "duplicateRate": 1,
       "fresh1dRate": 1,
       "fresh7dRate": 1,
       "viennaRate": 1,
@@ -356,12 +356,14 @@
           "count": 1
         }
       ],
-      "issues": [],
-      "healthScore": 100,
+      "issues": [
+        "hohe Überschneidung mit anderen Quellen"
+      ],
+      "healthScore": 78,
       "missionFitScore": 100,
       "coverageScore": 16,
-      "precisionScore": 100,
-      "sourceWeightScore": 83
+      "precisionScore": 92,
+      "sourceWeightScore": 75
     },
     {
       "sourceKey": "member-benefits",
@@ -503,35 +505,35 @@
       "sourceKey": "meta-instagram",
       "file": "deals-pending-meta-instagram.json",
       "sourceLabel": "Meta Instagram Graph",
-      "totalDeals": 53,
+      "totalDeals": 54,
       "uniqueDeals": 50,
-      "duplicateDeals": 3,
-      "duplicateAcrossSources": 3,
-      "fresh1dCount": 10,
-      "fresh7dCount": 45,
-      "viennaCount": 53,
-      "foodDrinkCount": 33,
-      "promoCount": 22,
+      "duplicateDeals": 4,
+      "duplicateAcrossSources": 4,
+      "fresh1dCount": 11,
+      "fresh7dCount": 46,
+      "viennaCount": 54,
+      "foodDrinkCount": 34,
+      "promoCount": 23,
       "missingUrlCount": 0,
       "sampleTitles": [
+        "😉 Unser Free Breakfast gibt’s weiterhin von 8-9 Uhr im November, also komm vorbei, solange die Aktion noch läuft",
         "🍷❤️ Unser Punschstand ist eröffnet und damit startet auch unsere Charity-Aktion BE A PART ✨ Für jeden verkauften Punsch spenden wir 1 € für",
-        "ltbauwohnung in Wien-Margareten 📍 Hohe Decken, ein Rundbogen und wenig Platz – genau dort zeigt sich, was gute Immobilienfotos ausmachen",
-        "1 + 1 Döner GRATIS!"
+        "ltbauwohnung in Wien-Margareten 📍 Hohe Decken, ein Rundbogen und wenig Platz – genau dort zeigt sich, was gute Immobilienfotos ausmachen"
       ],
       "lastRun": null,
       "uniqueRate": 0.9,
       "duplicateRate": 0.1,
       "fresh1dRate": 0.2,
-      "fresh7dRate": 0.8,
+      "fresh7dRate": 0.9,
       "viennaRate": 1,
       "foodDrinkRate": 0.6,
       "promoRate": 0.4,
       "missingUrlRate": 0,
-      "averageQualityScore": 86,
+      "averageQualityScore": 86.1,
       "topCategories": [
         {
           "value": "essen",
-          "count": 22
+          "count": 23
         },
         {
           "value": "kaffee",
@@ -557,7 +559,7 @@
       "topTypes": [
         {
           "value": "rabatt",
-          "count": 36
+          "count": 37
         },
         {
           "value": "gratis",
@@ -575,7 +577,7 @@
       "issues": [],
       "healthScore": 69,
       "missionFitScore": 52,
-      "coverageScore": 44,
+      "coverageScore": 45,
       "precisionScore": 67,
       "sourceWeightScore": 58
     },
