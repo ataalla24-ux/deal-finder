@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-11-19T21:38:51.146Z",
+  "generatedAt": "2026-11-19T21:58:19.380Z",
   "summary": {
     "maxAgeDays": 7,
     "total": 241,
@@ -44,6 +44,7 @@
       "ausgeschlossene Quelle (gastro.news)": 11,
       "Ortswiderspruch: Originalangebot nennt einen Standort ausserhalb Wiens": 1,
       "ausgeschlossene Quelle (TheFork)": 1,
+      "älter als 7 Tage (2025-10-12)": 1,
       "älter als 7 Tage (2020-06-10)": 1,
       "relative Kurz-Aktion abgelaufen (2020-06-10)": 1,
       "kostenlose Buchung/Kontaktaufnahme statt kostenloser Leistung": 1
@@ -51,7 +52,7 @@
     "reasonCategoryCounts": {
       "kein konkreter Deal": 195,
       "Gottesdienste außerhalb Wochenlauf": 36,
-      "älter als 7 Tage": 137,
+      "älter als 7 Tage": 138,
       "ungültige URL": 16,
       "abgelaufen": 9,
       "Post-Datum in Zukunft": 3,
@@ -225,7 +226,7 @@
         "warnings": 0,
         "reasonCategoryCounts": {
           "ausgeschlossene Quelle": 1,
-          "älter als 7 Tage": 1,
+          "älter als 7 Tage": 2,
           "abgelaufen": 1,
           "nicht Wien": 1,
           "sonstiges": 1,
@@ -878,7 +879,7 @@
       "warnings": [
         "kein Ablaufdatum gefunden"
       ],
-      "sourceDate": "2026-11-19T21:38:25.619Z",
+      "sourceDate": "2026-11-19T21:56:03.527Z",
       "sourceDateSource": "url.publicationDate",
       "sourceAgeDays": 0,
       "expiryDate": "",
@@ -3307,7 +3308,7 @@
       "sourceDateSource": "url.instagramShortcode",
       "sourceAgeDays": 1,
       "expiryDate": "2026-11-27",
-      "expirySource": "deal.evidence.offerTiming",
+      "expirySource": "url.contentHints.title",
       "urlStatus": "HTTP 200"
     },
     {
@@ -3400,7 +3401,7 @@
       "sourceDate": "2026-11-19T17:41:21.000Z",
       "sourceDateSource": "url.instagramShortcode",
       "sourceAgeDays": 0,
-      "expiryDate": "2026-11-22T17:55:20.226Z",
+      "expiryDate": "2026-11-22T21:34:37.538Z",
       "expirySource": "deal.structured",
       "urlStatus": "HTTP 200"
     },
@@ -3446,7 +3447,7 @@
     {
       "id": "meta-ig-17978540795937001",
       "title": "Mittagsmenü: 2 Gänge (Suppe + Hauptspeise) für 12,90 €.",
-      "brand": "DASKOLIN",
+      "brand": "Das Kolin",
       "source": "Meta Instagram Business Discovery",
       "url": "https://www.instagram.com/p/DfyxOrMIb0n/",
       "reasons": [
@@ -3457,7 +3458,7 @@
       "sourceDateSource": "url.instagramShortcode",
       "sourceAgeDays": 3,
       "expiryDate": "2026-11-20",
-      "expirySource": "deal.caption.offer-window",
+      "expirySource": "url.contentHints.title",
       "urlStatus": "HTTP 200"
     },
     {
@@ -3477,7 +3478,7 @@
       "sourceDateSource": "url.instagramShortcode",
       "sourceAgeDays": 1,
       "expiryDate": "2026-11-27",
-      "expirySource": "deal.caption.offer-window",
+      "expirySource": "url.contentHints.title",
       "urlStatus": "HTTP 200"
     },
     {
@@ -4901,17 +4902,16 @@
       "source": "vienna-merchant-website",
       "url": "https://hari1090.com/gutschein-und-aktionsbon-konditionen/",
       "reasons": [
-        "ausgeschlossene Quelle (TheFork)"
+        "ausgeschlossene Quelle (TheFork)",
+        "älter als 7 Tage (2025-10-12)"
       ],
-      "warnings": [
-        "URL nicht eindeutig prüfbar (temporärer Fehler)"
-      ],
-      "sourceDate": "2026-11-19T11:30:11.494Z",
-      "sourceDateSource": "deal.discoveredAt",
-      "sourceAgeDays": 0,
+      "warnings": [],
+      "sourceDate": "2025-10-12T21:13:46.000Z",
+      "sourceDateSource": "url.publicationDate",
+      "sourceAgeDays": 403,
       "expiryDate": "",
       "expirySource": "deal.expires",
-      "urlStatus": "unklar: temporärer URL-Fehler"
+      "urlStatus": "HTTP 200"
     },
     {
       "id": "merchant-web-11e347b371afa3e70917",
@@ -4969,23 +4969,23 @@
   ],
   "runProvenance": {
     "repository": "ataalla24-ux/deal-finder",
-    "runId": "44620647705",
-    "headSha": "070161f12926283550b9a45fed3c2305a1758d40",
-    "checkoutSha": "070161f12926283550b9a45fed3c2305a1758d40",
+    "runId": "44622799465",
+    "headSha": "f3946666fab7f0a9147ead6031cfb243e19b45db",
+    "checkoutSha": "020b0dcd166a01fdfcfeb1bde0ebc8078a09284a",
     "triggeringRun": {
-      "runId": "44618817285",
+      "runId": "44619984069",
       "headSha": "519fd803dc178b4481ca422799af4a46756b77d6",
       "event": "schedule",
-      "name": "Instagram AI Agent",
-      "startedAt": "2026-11-19T21:26:38.000Z",
-      "url": "https://github.com/ataalla24-ux/deal-finder/actions/runs/44618817285"
+      "name": "Meta Instagram Deal Discovery",
+      "startedAt": "2026-11-19T21:33:39.000Z",
+      "url": "https://github.com/ataalla24-ux/deal-finder/actions/runs/44619984069"
     },
     "event": "workflow_run",
     "runAttempt": "1",
-    "url": "https://github.com/ataalla24-ux/deal-finder/actions/runs/44620647705"
+    "url": "https://github.com/ataalla24-ux/deal-finder/actions/runs/44622799465"
   },
   "instagramDelivery": {
-    "checkedAt": "2026-11-19T21:38:51.160Z",
+    "checkedAt": "2026-11-19T21:58:19.392Z",
     "scope": "instagram-ai-agent/standard-slack-lane",
     "extractedCandidates": 4,
     "counts": {
@@ -5055,7 +5055,7 @@
     ]
   },
   "tiktokDelivery": {
-    "checkedAt": "2026-11-19T21:38:51.162Z",
+    "checkedAt": "2026-11-19T21:58:19.394Z",
     "scope": "tiktok-deals-scanner/standard-slack-lane",
     "extractedCandidates": 0,
     "counts": {},
