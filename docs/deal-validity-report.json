@@ -1,11 +1,11 @@
 {
-  "generatedAt": "2026-11-19T09:28:36.242Z",
+  "generatedAt": "2026-11-19T09:46:47.510Z",
   "summary": {
     "maxAgeDays": 7,
-    "total": 244,
-    "allowed": 0,
+    "total": 245,
+    "allowed": 1,
     "blocked": 244,
-    "warnings": 0,
+    "warnings": 1,
     "reasonCounts": {
       "kein konkretes Angebot erkennbar": 192,
       "Gottesdienste nur im Wochenlauf": 36,
@@ -214,10 +214,10 @@
         }
       },
       "Meta Instagram Hashtag API": {
-        "total": 3,
-        "allowed": 0,
+        "total": 4,
+        "allowed": 1,
         "blocked": 3,
-        "warnings": 0,
+        "warnings": 1,
         "reasonCategoryCounts": {
           "kein konkreter Deal": 3
         }
@@ -238,7 +238,26 @@
       }
     }
   },
-  "allowed": [],
+  "allowed": [
+    {
+      "id": "meta-ig-17896655550435933",
+      "title": "20 % MwSt",
+      "brand": "Welttoilettentag",
+      "source": "Meta Instagram Hashtag API",
+      "url": "https://www.instagram.com/p/Df6uhamRGrN/",
+      "reasons": [],
+      "warnings": [
+        "Inhalt prüfen: Caption-Reste oder Emoji-Codes im sichtbaren Text; Gültigkeitszeitraum nicht belegt; nicht als unbegrenzt gültig behandeln",
+        "kein Ablaufdatum gefunden"
+      ],
+      "sourceDate": "2026-11-19T09:10:22.000Z",
+      "sourceDateSource": "url.instagramShortcode",
+      "sourceAgeDays": 0,
+      "expiryDate": "",
+      "expirySource": "",
+      "urlStatus": "HTTP 200"
+    }
+  ],
   "blocked": [
     {
       "id": "jesuszentrum-events-20261116",
@@ -882,7 +901,7 @@
       "warnings": [
         "kein Ablaufdatum gefunden"
       ],
-      "sourceDate": "2026-11-19T09:26:39.757Z",
+      "sourceDate": "2026-11-19T09:45:00.439Z",
       "sourceDateSource": "url.publicationDate",
       "sourceAgeDays": 0,
       "expiryDate": "",
@@ -5032,16 +5051,23 @@
   ],
   "runProvenance": {
     "repository": "ataalla24-ux/deal-finder",
-    "runId": "44496040278",
-    "headSha": "ba2f7be578131cca728a1905e49d6279f1b4ac16",
-    "checkoutSha": "dcef2f805e0ae7a8a630197ea8f3fae4d2b816f8",
-    "triggeringRun": null,
-    "event": "workflow_dispatch",
+    "runId": "44499336523",
+    "headSha": "cc2d3843d6b74683975badec7e6acd48ccf10150",
+    "checkoutSha": "cc2d3843d6b74683975badec7e6acd48ccf10150",
+    "triggeringRun": {
+      "runId": "44496034713",
+      "headSha": "ba2f7be578131cca728a1905e49d6279f1b4ac16",
+      "event": "workflow_dispatch",
+      "name": "Meta Instagram Deal Discovery",
+      "startedAt": "2026-11-19T09:23:55.000Z",
+      "url": "https://github.com/ataalla24-ux/deal-finder/actions/runs/44496034713"
+    },
+    "event": "workflow_run",
     "runAttempt": "1",
-    "url": "https://github.com/ataalla24-ux/deal-finder/actions/runs/44496040278"
+    "url": "https://github.com/ataalla24-ux/deal-finder/actions/runs/44499336523"
   },
   "instagramDelivery": {
-    "checkedAt": "2026-11-19T09:28:36.255Z",
+    "checkedAt": "2026-11-19T09:46:47.963Z",
     "scope": "instagram-ai-agent/standard-slack-lane",
     "extractedCandidates": 3,
     "counts": {
@@ -5096,7 +5122,7 @@
     ]
   },
   "tiktokDelivery": {
-    "checkedAt": "2026-11-19T09:28:36.257Z",
+    "checkedAt": "2026-11-19T09:46:47.965Z",
     "scope": "tiktok-deals-scanner/standard-slack-lane",
     "extractedCandidates": 0,
     "counts": {},
