@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-11-19T16:58:26.615Z",
+  "generatedAt": "2026-11-19T17:39:56.138Z",
   "discoveryAvailability": {
     "note": "Transport evidence, not deal yield. Retry eligibility is not recovery. Candidate counts are not Slack deliveries. No extra runs or quota resets.",
     "lanes": [
@@ -68,7 +68,7 @@
       {
         "sourceKey": "meta-instagram",
         "sourceLabel": "Meta Instagram Graph",
-        "healthScore": 73,
+        "healthScore": 72,
         "totalDeals": 76
       },
       {
@@ -135,7 +135,7 @@
         "sourceLabel": "Meta Instagram Graph",
         "coverageScore": 59,
         "totalDeals": 76,
-        "fresh1dCount": 12
+        "fresh1dCount": 11
       },
       {
         "sourceKey": "gutscheine",
@@ -175,7 +175,7 @@
       {
         "sourceKey": "meta-instagram",
         "sourceLabel": "Meta Instagram Graph",
-        "precisionScore": 70,
+        "precisionScore": 69,
         "totalDeals": 76
       },
       {
@@ -201,7 +201,7 @@
       {
         "sourceKey": "meta-instagram",
         "sourceLabel": "Meta Instagram Graph",
-        "sourceWeightScore": 64,
+        "sourceWeightScore": 63,
         "totalDeals": 76
       },
       {
@@ -368,7 +368,7 @@
       "uniqueDeals": 73,
       "duplicateDeals": 3,
       "duplicateAcrossSources": 3,
-      "fresh1dCount": 12,
+      "fresh1dCount": 11,
       "fresh7dCount": 68,
       "viennaCount": 76,
       "foodDrinkCount": 56,
@@ -382,7 +382,7 @@
       "lastRun": null,
       "uniqueRate": 1,
       "duplicateRate": 0,
-      "fresh1dRate": 0.2,
+      "fresh1dRate": 0.1,
       "fresh7dRate": 0.9,
       "viennaRate": 1,
       "foodDrinkRate": 0.7,
@@ -433,12 +433,14 @@
           "count": 1
         }
       ],
-      "issues": [],
-      "healthScore": 73,
-      "missionFitScore": 55,
+      "issues": [
+        "wenige Deals sind frischer als 1 Tag"
+      ],
+      "healthScore": 72,
+      "missionFitScore": 53,
       "coverageScore": 59,
-      "precisionScore": 70,
-      "sourceWeightScore": 64
+      "precisionScore": 69,
+      "sourceWeightScore": 63
     },
     {
       "sourceKey": "instagram-apify",
@@ -926,57 +928,6 @@
       "coverageScore": 12,
       "precisionScore": 60,
       "sourceWeightScore": 46
-    },
-    {
-      "sourceKey": "instagram-ai",
-      "file": "deals-pending-instagram-ai.json",
-      "sourceLabel": "Instagram AI Agent",
-      "totalDeals": 3,
-      "uniqueDeals": 2,
-      "duplicateDeals": 1,
-      "duplicateAcrossSources": 1,
-      "fresh1dCount": 1,
-      "fresh7dCount": 3,
-      "viennaCount": 3,
-      "foodDrinkCount": 1,
-      "promoCount": 0,
-      "missingUrlCount": 0,
-      "sampleTitles": [
-        "Pizza-Mittagsmenü mit Suppe oder Salat um 11,90 €",
-        "Schnitzelmenü um 11,90 € vom 23. bis 27. November",
-        "Lieferando Super Deals in Wien: bis zu 50 % Rabatt"
-      ],
-      "lastRun": null,
-      "uniqueRate": 0.7,
-      "duplicateRate": 0.3,
-      "fresh1dRate": 0.3,
-      "fresh7dRate": 1,
-      "viennaRate": 1,
-      "foodDrinkRate": 0.3,
-      "promoRate": 0,
-      "missingUrlRate": 0,
-      "averageQualityScore": 91.3,
-      "topCategories": [
-        {
-          "value": "essen & trinken",
-          "count": 3
-        }
-      ],
-      "topTypes": [
-        {
-          "value": "rabatt",
-          "count": 3
-        }
-      ],
-      "issues": [
-        "geringe Food-/Drink-Relevanz",
-        "wenige klare Gratis-/Promo-Signale"
-      ],
-      "healthScore": 54,
-      "missionFitScore": 32,
-      "coverageScore": 9,
-      "precisionScore": 50,
-      "sourceWeightScore": 37
     },
     {
       "sourceKey": "gastro2",
@@ -1483,6 +1434,58 @@
       "coverageScore": 33,
       "precisionScore": 38,
       "sourceWeightScore": 39
+    },
+    {
+      "sourceKey": "instagram-ai",
+      "file": "deals-pending-instagram-ai.json",
+      "sourceLabel": "Instagram AI Agent",
+      "totalDeals": 3,
+      "uniqueDeals": 2,
+      "duplicateDeals": 1,
+      "duplicateAcrossSources": 1,
+      "fresh1dCount": 0,
+      "fresh7dCount": 3,
+      "viennaCount": 3,
+      "foodDrinkCount": 1,
+      "promoCount": 0,
+      "missingUrlCount": 0,
+      "sampleTitles": [
+        "Pizza-Mittagsmenü mit Suppe oder Salat um 11,90 €",
+        "Schnitzelmenü um 11,90 € vom 23. bis 27. November",
+        "Lieferando Super Deals in Wien: bis zu 50 % Rabatt"
+      ],
+      "lastRun": null,
+      "uniqueRate": 0.7,
+      "duplicateRate": 0.3,
+      "fresh1dRate": 0,
+      "fresh7dRate": 1,
+      "viennaRate": 1,
+      "foodDrinkRate": 0.3,
+      "promoRate": 0,
+      "missingUrlRate": 0,
+      "averageQualityScore": 91.3,
+      "topCategories": [
+        {
+          "value": "essen & trinken",
+          "count": 3
+        }
+      ],
+      "topTypes": [
+        {
+          "value": "rabatt",
+          "count": 3
+        }
+      ],
+      "issues": [
+        "wenige Deals sind frischer als 1 Tag",
+        "geringe Food-/Drink-Relevanz",
+        "wenige klare Gratis-/Promo-Signale"
+      ],
+      "healthScore": 49,
+      "missionFitScore": 26,
+      "coverageScore": 8,
+      "precisionScore": 47,
+      "sourceWeightScore": 33
     },
     {
       "sourceKey": "gutscheine",
