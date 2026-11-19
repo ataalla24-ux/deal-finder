@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-11-19T10:52:22.502Z",
+  "generatedAt": "2026-11-19T11:00:21.792Z",
   "discoveryAvailability": {
     "note": "Transport evidence, not deal yield. Retry eligibility is not recovery. Candidate counts are not Slack deliveries. No extra runs or quota resets.",
     "lanes": [
@@ -286,6 +286,7 @@
         "wien-combined"
       ],
       "completedWithErrors": [
+        "firecrawl2",
         "firecrawl5",
         "food3",
         "instagram-apify2",
@@ -600,22 +601,25 @@
         "BILLA: ... aktion - @BILLA on November 13, 2026. ... @billa_at ab 08.10 - 14.10 Anzeige/Werbung. Die Menschen in Österreich kauf"
       ],
       "lastRun": {
-        "status": "completed",
-        "startedAt": "2026-11-18T10:53:43.577Z",
-        "finishedAt": "2026-11-18T10:56:34.143Z",
-        "durationMs": 170566,
+        "status": "completed-with-errors",
+        "startedAt": "2026-11-19T10:56:09.145Z",
+        "finishedAt": "2026-11-19T10:59:34.322Z",
+        "durationMs": 205177,
         "counts": {
-          "rawCandidates": 9,
-          "normalizedCandidates": 9,
+          "rawCandidates": 6,
+          "normalizedCandidates": 5,
           "verifiedCandidates": 2,
-          "previousDeals": 1,
+          "previousDeals": 2,
           "acceptedDeals": 2,
-          "rejectedDeals": 8
+          "rejectedDeals": 6
         },
         "rejectedByReason": {
-          "post-verification-rejected": 8
+          "missing-concrete-offer": 1,
+          "post-verification-rejected": 5
         },
-        "errors": [],
+        "errors": [
+          "https://www.instagram.com/lidl_oesterreich/: Firecrawl Agent nach 120s abgebrochen"
+        ],
         "reportFile": "deal-pipeline-last-run-firecrawl2.json"
       },
       "uniqueRate": 0.5,
