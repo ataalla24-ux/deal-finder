@@ -1,10 +1,10 @@
 {
-  "generatedAt": "2026-11-19T07:24:31.532Z",
+  "generatedAt": "2026-11-19T07:59:50.551Z",
   "summary": {
     "maxAgeDays": 7,
-    "total": 248,
+    "total": 249,
     "allowed": 0,
-    "blocked": 248,
+    "blocked": 249,
     "warnings": 0,
     "reasonCounts": {
       "kein konkretes Angebot erkennbar": 193,
@@ -17,7 +17,7 @@
       "älter als 7 Tage (2026-11-10)": 1,
       "älter als 7 Tage (2025-07-30)": 1,
       "URL ungültig (HTTP 404)": 9,
-      "relative Kurz-Aktion abgelaufen (2026-11-17)": 3,
+      "relative Kurz-Aktion abgelaufen (2026-11-17)": 4,
       "älter als 7 Tage (2026-10-28)": 1,
       "URL ungültig (Inhalt nicht mehr verfügbar)": 5,
       "kostenlose Buchung/Kontaktaufnahme statt kostenloser Leistung": 2,
@@ -57,7 +57,7 @@
       "Gottesdienste außerhalb Wochenlauf": 36,
       "älter als 7 Tage": 142,
       "ungültige URL": 16,
-      "abgelaufen": 15,
+      "abgelaufen": 16,
       "sonstiges": 5,
       "Post-Datum in Zukunft": 3,
       "nicht Wien": 6,
@@ -65,6 +65,15 @@
       "ausgeschlossene Quelle": 12
     },
     "sourceCounts": {
+      "Apify Instagram Vienna Food Offers": {
+        "total": 1,
+        "allowed": 0,
+        "blocked": 1,
+        "warnings": 0,
+        "reasonCategoryCounts": {
+          "abgelaufen": 1
+        }
+      },
       "Firecrawl Food #2": {
         "total": 1,
         "allowed": 0,
@@ -876,7 +885,7 @@
       "warnings": [
         "kein Ablaufdatum gefunden"
       ],
-      "sourceDate": "2026-11-19T07:23:58.979Z",
+      "sourceDate": "2026-11-19T07:57:28.979Z",
       "sourceDateSource": "url.publicationDate",
       "sourceAgeDays": 0,
       "expiryDate": "",
@@ -3419,6 +3428,23 @@
       "urlStatus": "HTTP 200"
     },
     {
+      "id": "igap-1x0vpn8",
+      "title": "Döner-Croissants heute gratis in Wien! Was als Aprilscherz begonnen hat, gibt’s jetzt tatsächlich: Lidl und Fe",
+      "brand": "1000things to do in Vienna on Instagram",
+      "source": "Apify Instagram Vienna Food Offers",
+      "url": "https://www.instagram.com/p/Df1kBPtglHl/",
+      "reasons": [
+        "relative Kurz-Aktion abgelaufen (2026-11-17)"
+      ],
+      "warnings": [],
+      "sourceDate": "2026-11-17T09:02:24.000Z",
+      "sourceDateSource": "url.instagramShortcode",
+      "sourceAgeDays": 2,
+      "expiryDate": "2026-11-22T07:56:28.889Z",
+      "expirySource": "deal.structured",
+      "urlStatus": "HTTP 200"
+    },
+    {
       "id": "benefit-drei-plus-bc9830c4ee323086",
       "title": "Drei: 50 % Rabatt von 6.11.2026 bis 6.1.2027 (Eislaufplatz Schönbrunn)",
       "brand": "Eislaufplatz Schönbrunn",
@@ -5098,23 +5124,23 @@
   ],
   "runProvenance": {
     "repository": "ataalla24-ux/deal-finder",
-    "runId": "44479175220",
-    "headSha": "06fbd4f57479b59b5b1cbf02787010356cd496ed",
-    "checkoutSha": "06fbd4f57479b59b5b1cbf02787010356cd496ed",
+    "runId": "44483500398",
+    "headSha": "342a21f7a29e941390467a900c3898f51b894431",
+    "checkoutSha": "342a21f7a29e941390467a900c3898f51b894431",
     "triggeringRun": {
-      "runId": "44476380638",
-      "headSha": "a313ef1bc8186353e3630f528b7a431a84a583ee",
-      "event": "workflow_dispatch",
-      "name": "Meta Instagram Deal Discovery",
-      "startedAt": "2026-11-19T07:01:02.000Z",
-      "url": "https://github.com/ataalla24-ux/deal-finder/actions/runs/44476380638"
+      "runId": "44483135441",
+      "headSha": "adab73c05e6cdb024acfe6923b37c85d1e4bd248",
+      "event": "schedule",
+      "name": "Apify Instagram Fresh Scan",
+      "startedAt": "2026-11-19T07:53:46.000Z",
+      "url": "https://github.com/ataalla24-ux/deal-finder/actions/runs/44483135441"
     },
     "event": "workflow_run",
     "runAttempt": "1",
-    "url": "https://github.com/ataalla24-ux/deal-finder/actions/runs/44479175220"
+    "url": "https://github.com/ataalla24-ux/deal-finder/actions/runs/44483500398"
   },
   "instagramDelivery": {
-    "checkedAt": "2026-11-19T07:24:31.552Z",
+    "checkedAt": "2026-11-19T07:59:50.565Z",
     "scope": "instagram-ai-agent/standard-slack-lane",
     "extractedCandidates": 2,
     "counts": {
@@ -5154,7 +5180,7 @@
     ]
   },
   "tiktokDelivery": {
-    "checkedAt": "2026-11-19T07:24:31.554Z",
+    "checkedAt": "2026-11-19T07:59:50.571Z",
     "scope": "tiktok-deals-scanner/standard-slack-lane",
     "extractedCandidates": 0,
     "counts": {},
