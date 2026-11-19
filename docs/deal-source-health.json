@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-11-19T16:01:36.808Z",
+  "generatedAt": "2026-11-19T16:32:06.750Z",
   "discoveryAvailability": {
     "note": "Transport evidence, not deal yield. Retry eligibility is not recovery. Candidate counts are not Slack deliveries. No extra runs or quota resets.",
     "lanes": [
@@ -54,9 +54,9 @@
   },
   "summary": {
     "filesConsidered": 32,
-    "totalCandidates": 639,
-    "uniqueCandidates": 603,
-    "distinctCandidates": 617,
+    "totalCandidates": 634,
+    "uniqueCandidates": 598,
+    "distinctCandidates": 612,
     "duplicateClusters": 14,
     "topHealthySources": [
       {
@@ -68,7 +68,7 @@
       {
         "sourceKey": "meta-instagram",
         "sourceLabel": "Meta Instagram Graph",
-        "healthScore": 73,
+        "healthScore": 72,
         "totalDeals": 76
       },
       {
@@ -133,9 +133,9 @@
       {
         "sourceKey": "meta-instagram",
         "sourceLabel": "Meta Instagram Graph",
-        "coverageScore": 60,
+        "coverageScore": 59,
         "totalDeals": 76,
-        "fresh1dCount": 13
+        "fresh1dCount": 11
       },
       {
         "sourceKey": "gutscheine",
@@ -145,18 +145,18 @@
         "fresh1dCount": 34
       },
       {
-        "sourceKey": "firecrawl4",
-        "sourceLabel": "Firecrawl Key 4 - Instagram Direct",
-        "coverageScore": 41,
-        "totalDeals": 63,
-        "fresh1dCount": 0
-      },
-      {
         "sourceKey": "vienna-promo-radar",
         "sourceLabel": "Vienna Promo Radar",
         "coverageScore": 40,
         "totalDeals": 65,
         "fresh1dCount": 1
+      },
+      {
+        "sourceKey": "firecrawl4",
+        "sourceLabel": "Firecrawl Key 4 - Instagram Direct",
+        "coverageScore": 38,
+        "totalDeals": 58,
+        "fresh1dCount": 0
       }
     ],
     "topPrecisionSources": [
@@ -175,7 +175,7 @@
       {
         "sourceKey": "meta-instagram",
         "sourceLabel": "Meta Instagram Graph",
-        "precisionScore": 70,
+        "precisionScore": 69,
         "totalDeals": 76
       },
       {
@@ -201,7 +201,7 @@
       {
         "sourceKey": "meta-instagram",
         "sourceLabel": "Meta Instagram Graph",
-        "sourceWeightScore": 64,
+        "sourceWeightScore": 63,
         "totalDeals": 76
       },
       {
@@ -368,8 +368,8 @@
       "uniqueDeals": 73,
       "duplicateDeals": 3,
       "duplicateAcrossSources": 3,
-      "fresh1dCount": 13,
-      "fresh7dCount": 68,
+      "fresh1dCount": 11,
+      "fresh7dCount": 67,
       "viennaCount": 76,
       "foodDrinkCount": 56,
       "promoCount": 30,
@@ -382,7 +382,7 @@
       "lastRun": null,
       "uniqueRate": 1,
       "duplicateRate": 0,
-      "fresh1dRate": 0.2,
+      "fresh1dRate": 0.1,
       "fresh7dRate": 0.9,
       "viennaRate": 1,
       "foodDrinkRate": 0.7,
@@ -433,12 +433,14 @@
           "count": 1
         }
       ],
-      "issues": [],
-      "healthScore": 73,
-      "missionFitScore": 55,
-      "coverageScore": 60,
-      "precisionScore": 70,
-      "sourceWeightScore": 64
+      "issues": [
+        "wenige Deals sind frischer als 1 Tag"
+      ],
+      "healthScore": 72,
+      "missionFitScore": 53,
+      "coverageScore": 59,
+      "precisionScore": 69,
+      "sourceWeightScore": 63
     },
     {
       "sourceKey": "instagram-apify",
@@ -635,107 +637,56 @@
       "sourceWeightScore": 45
     },
     {
-      "sourceKey": "instagram-ai",
-      "file": "deals-pending-instagram-ai.json",
-      "sourceLabel": "Instagram AI Agent",
-      "totalDeals": 3,
-      "uniqueDeals": 2,
-      "duplicateDeals": 1,
-      "duplicateAcrossSources": 1,
-      "fresh1dCount": 2,
-      "fresh7dCount": 3,
-      "viennaCount": 3,
-      "foodDrinkCount": 1,
-      "promoCount": 0,
-      "missingUrlCount": 0,
-      "sampleTitles": [
-        "Pizza-Mittagsmenü mit Suppe oder Salat um 11,90 €",
-        "Schnitzelmenü um 11,90 € vom 23. bis 27. November",
-        "Lieferando Super Deals in Wien: bis zu 50 % Rabatt"
-      ],
-      "lastRun": null,
-      "uniqueRate": 0.7,
-      "duplicateRate": 0.3,
-      "fresh1dRate": 0.7,
-      "fresh7dRate": 1,
-      "viennaRate": 1,
-      "foodDrinkRate": 0.3,
-      "promoRate": 0,
-      "missingUrlRate": 0,
-      "averageQualityScore": 91.3,
-      "topCategories": [
-        {
-          "value": "essen & trinken",
-          "count": 3
-        }
-      ],
-      "topTypes": [
-        {
-          "value": "rabatt",
-          "count": 3
-        }
-      ],
-      "issues": [
-        "geringe Food-/Drink-Relevanz",
-        "wenige klare Gratis-/Promo-Signale"
-      ],
-      "healthScore": 59,
-      "missionFitScore": 41,
-      "coverageScore": 9,
-      "precisionScore": 55,
-      "sourceWeightScore": 42
-    },
-    {
       "sourceKey": "firecrawl4",
       "file": "deals-pending-firecrawl4.json",
       "sourceLabel": "Firecrawl Key 4 - Instagram Direct",
-      "totalDeals": 63,
-      "uniqueDeals": 54,
+      "totalDeals": 58,
+      "uniqueDeals": 49,
       "duplicateDeals": 9,
       "duplicateAcrossSources": 9,
       "fresh1dCount": 0,
       "fresh7dCount": 9,
       "viennaCount": 8,
-      "foodDrinkCount": 61,
-      "promoCount": 36,
+      "foodDrinkCount": 56,
+      "promoCount": 32,
       "missingUrlCount": 0,
       "sampleTitles": [
-        "Lidl: Döner-Croissants heute gratis in Wien! Was als Aprilscherz begonnen hat ...",
-        "🍪🚀 HOTBOWL + GRATIS KOOKIE CAT COOKIE Zu jeder ...",
-        "foodora: 🍕 Jetzt anrufen oder vorbei kommen! 🍕 Täglich von 16:00 bis 02:00 Uhr für ..."
+        "Helden-Aktion Wien -25% bei Sajado",
+        "1+1 Schnitzel gratis: Bei Konsumation im Restaurant gibt es ein zweites Schnitzel gratis.",
+        "10 € Rabatt ab einer Konsumation von 40 € bei HITOMI Francis."
       ],
       "lastRun": {
         "status": "completed",
-        "startedAt": "2026-11-18T16:14:17.584Z",
-        "finishedAt": "2026-11-18T16:21:40.377Z",
-        "durationMs": 442793,
+        "startedAt": "2026-11-19T16:22:26.039Z",
+        "finishedAt": "2026-11-19T16:28:47.410Z",
+        "durationMs": 381371,
         "counts": {
-          "rawCandidates": 29,
-          "normalizedCandidates": 29,
-          "verifiedCandidates": 64,
-          "previousDeals": 61,
-          "acceptedDeals": 64,
-          "rejectedDeals": 17
+          "rawCandidates": 17,
+          "normalizedCandidates": 17,
+          "verifiedCandidates": 59,
+          "previousDeals": 63,
+          "acceptedDeals": 59,
+          "rejectedDeals": 11
         },
         "rejectedByReason": {
-          "post-verification-rejected": 17
+          "post-verification-rejected": 11
         },
         "errors": [],
         "reportFile": "deal-pipeline-last-run-firecrawl4.json"
       },
-      "uniqueRate": 0.9,
-      "duplicateRate": 0.1,
+      "uniqueRate": 0.8,
+      "duplicateRate": 0.2,
       "fresh1dRate": 0,
-      "fresh7dRate": 0.1,
+      "fresh7dRate": 0.2,
       "viennaRate": 0.1,
       "foodDrinkRate": 1,
       "promoRate": 0.6,
       "missingUrlRate": 0,
-      "averageQualityScore": 64.2,
+      "averageQualityScore": 64.1,
       "topCategories": [
         {
           "value": "essen",
-          "count": 59
+          "count": 54
         },
         {
           "value": "fitness",
@@ -757,15 +708,15 @@
       "topTypes": [
         {
           "value": "rabatt",
-          "count": 28
+          "count": 27
         },
         {
           "value": "bogo",
-          "count": 19
+          "count": 15
         },
         {
           "value": "gratis",
-          "count": 12
+          "count": 11
         },
         {
           "value": "freebie",
@@ -773,18 +724,18 @@
         },
         {
           "value": "gutschein",
-          "count": 1
+          "count": 2
         }
       ],
       "issues": [
         "wenige Deals sind frischer als 1 Tag",
         "Wien-Signal ist zu schwach"
       ],
-      "healthScore": 58,
+      "healthScore": 55,
       "missionFitScore": 53,
-      "coverageScore": 41,
-      "precisionScore": 53,
-      "sourceWeightScore": 52
+      "coverageScore": 38,
+      "precisionScore": 52,
+      "sourceWeightScore": 50
     },
     {
       "sourceKey": "power",
@@ -977,6 +928,57 @@
       "coverageScore": 12,
       "precisionScore": 60,
       "sourceWeightScore": 46
+    },
+    {
+      "sourceKey": "instagram-ai",
+      "file": "deals-pending-instagram-ai.json",
+      "sourceLabel": "Instagram AI Agent",
+      "totalDeals": 3,
+      "uniqueDeals": 2,
+      "duplicateDeals": 1,
+      "duplicateAcrossSources": 1,
+      "fresh1dCount": 1,
+      "fresh7dCount": 3,
+      "viennaCount": 3,
+      "foodDrinkCount": 1,
+      "promoCount": 0,
+      "missingUrlCount": 0,
+      "sampleTitles": [
+        "Pizza-Mittagsmenü mit Suppe oder Salat um 11,90 €",
+        "Schnitzelmenü um 11,90 € vom 23. bis 27. November",
+        "Lieferando Super Deals in Wien: bis zu 50 % Rabatt"
+      ],
+      "lastRun": null,
+      "uniqueRate": 0.7,
+      "duplicateRate": 0.3,
+      "fresh1dRate": 0.3,
+      "fresh7dRate": 1,
+      "viennaRate": 1,
+      "foodDrinkRate": 0.3,
+      "promoRate": 0,
+      "missingUrlRate": 0,
+      "averageQualityScore": 91.3,
+      "topCategories": [
+        {
+          "value": "essen & trinken",
+          "count": 3
+        }
+      ],
+      "topTypes": [
+        {
+          "value": "rabatt",
+          "count": 3
+        }
+      ],
+      "issues": [
+        "geringe Food-/Drink-Relevanz",
+        "wenige klare Gratis-/Promo-Signale"
+      ],
+      "healthScore": 54,
+      "missionFitScore": 32,
+      "coverageScore": 9,
+      "precisionScore": 50,
+      "sourceWeightScore": 37
     },
     {
       "sourceKey": "gastro2",
