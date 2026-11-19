@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-11-19T14:34:00.062Z",
+  "generatedAt": "2026-11-19T14:41:14.194Z",
   "discoveryAvailability": {
     "note": "Transport evidence, not deal yield. Retry eligibility is not recovery. Candidate counts are not Slack deliveries. No extra runs or quota resets.",
     "lanes": [
@@ -54,9 +54,9 @@
   },
   "summary": {
     "filesConsidered": 32,
-    "totalCandidates": 648,
-    "uniqueCandidates": 612,
-    "distinctCandidates": 626,
+    "totalCandidates": 644,
+    "uniqueCandidates": 608,
+    "distinctCandidates": 622,
     "duplicateClusters": 14,
     "topHealthySources": [
       {
@@ -98,6 +98,12 @@
         "totalDeals": 1
       },
       {
+        "sourceKey": "joe",
+        "sourceLabel": "jö Bonus Club",
+        "missionFitScore": 73,
+        "totalDeals": 9
+      },
+      {
         "sourceKey": "firecrawl2",
         "sourceLabel": "Firecrawl Key 3 - Consumables",
         "missionFitScore": 71,
@@ -114,12 +120,6 @@
         "sourceLabel": "Firecrawl Key 2 - Food",
         "missionFitScore": 65,
         "totalDeals": 4
-      },
-      {
-        "sourceKey": "joe",
-        "sourceLabel": "jö Bonus Club",
-        "missionFitScore": 57,
-        "totalDeals": 9
       }
     ],
     "topCoverageSources": [
@@ -145,18 +145,18 @@
         "fresh1dCount": 38
       },
       {
-        "sourceKey": "vienna-promo-radar",
-        "sourceLabel": "Vienna Promo Radar",
-        "coverageScore": 42,
-        "totalDeals": 69,
-        "fresh1dCount": 0
-      },
-      {
         "sourceKey": "firecrawl4",
         "sourceLabel": "Firecrawl Key 4 - Instagram Direct",
         "coverageScore": 41,
         "totalDeals": 63,
         "fresh1dCount": 0
+      },
+      {
+        "sourceKey": "vienna-promo-radar",
+        "sourceLabel": "Vienna Promo Radar",
+        "coverageScore": 40,
+        "totalDeals": 65,
+        "fresh1dCount": 1
       }
     ],
     "topPrecisionSources": [
@@ -185,10 +185,10 @@
         "totalDeals": 3
       },
       {
-        "sourceKey": "food3",
-        "sourceLabel": "Firecrawl Key 2 - Food",
-        "precisionScore": 62,
-        "totalDeals": 4
+        "sourceKey": "joe",
+        "sourceLabel": "jö Bonus Club",
+        "precisionScore": 64,
+        "totalDeals": 9
       }
     ],
     "topWeightedSources": [
@@ -217,10 +217,10 @@
         "totalDeals": 2
       },
       {
-        "sourceKey": "firecrawl4",
-        "sourceLabel": "Firecrawl Key 4 - Instagram Direct",
-        "sourceWeightScore": 52,
-        "totalDeals": 63
+        "sourceKey": "joe",
+        "sourceLabel": "jö Bonus Club",
+        "sourceWeightScore": 54,
+        "totalDeals": 9
       }
     ],
     "topSourcesToFix": [
@@ -288,7 +288,6 @@
       "completedWithErrors": [
         "firecrawl2",
         "food3",
-        "instagram-apify2",
         "joe",
         "power"
       ]
@@ -808,9 +807,9 @@
       ],
       "lastRun": {
         "status": "completed-with-errors",
-        "startedAt": "2026-11-18T14:23:14.533Z",
-        "finishedAt": "2026-11-18T14:23:38.259Z",
-        "durationMs": 23726,
+        "startedAt": "2026-11-19T14:34:56.406Z",
+        "finishedAt": "2026-11-19T14:35:23.074Z",
+        "durationMs": 26668,
         "counts": {
           "rawCandidates": 45,
           "normalizedCandidates": 45,
@@ -821,14 +820,14 @@
         },
         "rejectedByReason": {},
         "errors": [
-          "Too Good To Go: deferred until 2026-11-18T20:17:10.489Z",
+          "Too Good To Go: HTTP 429",
           "Mömax Restaurant: deferred until 2026-11-21T12:53:25.865Z",
-          "MediaMarkt: deferred until 2026-11-19T13:55:07.773Z",
+          "MediaMarkt: HTTP 404",
           "Saturn: deferred until 2026-11-20T13:18:33.566Z",
           "Spar: deferred until 2026-11-20T13:18:34.492Z",
           "Müller: deferred until 2026-11-19T20:35:00.373Z",
-          "Conrad: deferred until 2026-11-19T13:55:09.883Z",
-          "Decathlon: deferred until 2026-11-19T13:55:10.089Z"
+          "Conrad: HTTP 403",
+          "Decathlon: HTTP 403"
         ],
         "reportFile": "deal-pipeline-last-run-power.json"
       },
@@ -1084,7 +1083,7 @@
       "uniqueDeals": 9,
       "duplicateDeals": 0,
       "duplicateAcrossSources": 0,
-      "fresh1dCount": 0,
+      "fresh1dCount": 6,
       "fresh7dCount": 6,
       "viennaCount": 0,
       "foodDrinkCount": 9,
@@ -1097,9 +1096,9 @@
       ],
       "lastRun": {
         "status": "completed-with-errors",
-        "startedAt": "2026-11-18T14:16:05.035Z",
-        "finishedAt": "2026-11-18T14:16:29.288Z",
-        "durationMs": 24253,
+        "startedAt": "2026-11-19T14:33:21.329Z",
+        "finishedAt": "2026-11-19T14:33:42.575Z",
+        "durationMs": 21246,
         "counts": {
           "rawCandidates": 9,
           "normalizedCandidates": 9,
@@ -1116,7 +1115,7 @@
       },
       "uniqueRate": 1,
       "duplicateRate": 0,
-      "fresh1dRate": 0,
+      "fresh1dRate": 0.7,
       "fresh7dRate": 0.7,
       "viennaRate": 0,
       "foodDrinkRate": 1,
@@ -1149,14 +1148,13 @@
       ],
       "issues": [
         "jö-Zugriff oder OMV-Quelle nur teilweise geprüft; Details im Pipeline-Laufbericht",
-        "wenige Deals sind frischer als 1 Tag",
         "Wien-Signal ist zu schwach"
       ],
       "healthScore": 50,
-      "missionFitScore": 57,
-      "coverageScore": 14,
-      "precisionScore": 56,
-      "sourceWeightScore": 46
+      "missionFitScore": 73,
+      "coverageScore": 18,
+      "precisionScore": 64,
+      "sourceWeightScore": 54
     },
     {
       "sourceKey": "church-events",
@@ -1722,15 +1720,15 @@
       "sourceKey": "vienna-promo-radar",
       "file": "deals-pending-vienna-promo-radar.json",
       "sourceLabel": "Vienna Promo Radar",
-      "totalDeals": 69,
-      "uniqueDeals": 69,
+      "totalDeals": 65,
+      "uniqueDeals": 65,
       "duplicateDeals": 0,
       "duplicateAcrossSources": 0,
-      "fresh1dCount": 0,
-      "fresh7dCount": 4,
+      "fresh1dCount": 1,
+      "fresh7dCount": 5,
       "viennaCount": 0,
-      "foodDrinkCount": 32,
-      "promoCount": 22,
+      "foodDrinkCount": 31,
+      "promoCount": 19,
       "missingUrlCount": 0,
       "sampleTitles": [
         "GRATIS: Gratis-Kaffee bei AÏDA: Dieses Kennwort macht’s möglich",
@@ -1746,11 +1744,11 @@
       "foodDrinkRate": 0.5,
       "promoRate": 0.3,
       "missingUrlRate": 0,
-      "averageQualityScore": 45.3,
+      "averageQualityScore": 45.2,
       "topCategories": [
         {
           "value": "kaffee",
-          "count": 20
+          "count": 19
         },
         {
           "value": "essen",
@@ -1770,17 +1768,17 @@
         },
         {
           "value": "technik",
-          "count": 5
+          "count": 3
         }
       ],
       "topTypes": [
         {
           "value": "rabatt",
-          "count": 47
+          "count": 46
         },
         {
           "value": "gratis",
-          "count": 21
+          "count": 18
         },
         {
           "value": "freebie",
@@ -1794,7 +1792,7 @@
       ],
       "healthScore": 43,
       "missionFitScore": 26,
-      "coverageScore": 42,
+      "coverageScore": 40,
       "precisionScore": 33,
       "sourceWeightScore": 35
     },
@@ -2067,19 +2065,23 @@
       "missingUrlCount": 0,
       "sampleTitles": [],
       "lastRun": {
-        "status": "completed-with-errors",
-        "startedAt": "2026-11-17T00:55:20.918Z",
-        "finishedAt": "2026-11-17T00:55:37.234Z",
-        "durationMs": 16316,
+        "status": "completed",
+        "startedAt": "2026-11-19T14:34:53.436Z",
+        "finishedAt": "2026-11-19T14:35:29.069Z",
+        "durationMs": 35633,
         "counts": {
           "rawCandidates": 4,
-          "normalizedCandidates": 0,
+          "normalizedCandidates": 3,
           "verifiedCandidates": 0,
           "previousDeals": 0,
           "acceptedDeals": 0,
-          "rejectedDeals": 0
+          "rejectedDeals": 3
         },
-        "rejectedByReason": {},
+        "rejectedByReason": {
+          "non-food-ad": 1,
+          "no-consumer-food-benefit": 1,
+          "post-older-than-seven-days": 1
+        },
         "errors": [],
         "reportFile": "deal-pipeline-last-run-instagram-apify2.json"
       },
