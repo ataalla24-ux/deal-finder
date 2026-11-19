@@ -2,9 +2,135 @@
   "schemaVersion": 1,
   "sourceKey": "food3",
   "sourceLabel": "Firecrawl Key 2 - Food",
-  "updatedAt": "2026-11-18T09:55:44.939Z",
+  "updatedAt": "2026-11-19T10:09:49.634Z",
   "runCount": 90,
   "runs": [
+    {
+      "schemaVersion": 1,
+      "runProvenance": {
+        "repository": "ataalla24-ux/deal-finder",
+        "runId": "44501668796",
+        "headSha": "024e9f8059a4d9cbc7aed1054561bcd465a8c8bf",
+        "checkoutSha": "024e9f8059a4d9cbc7aed1054561bcd465a8c8bf",
+        "triggeringRun": null,
+        "event": "schedule",
+        "runAttempt": "1",
+        "url": "https://github.com/ataalla24-ux/deal-finder/actions/runs/44501668796"
+      },
+      "runId": "food3-2026-11-19T10:09:49.634Z",
+      "sourceKey": "food3",
+      "sourceLabel": "Firecrawl Key 2 - Food",
+      "status": "completed-with-errors",
+      "startedAt": "2026-11-19T10:01:16.007Z",
+      "finishedAt": "2026-11-19T10:09:49.634Z",
+      "durationMs": 513627,
+      "outputFile": "docs/deals-pending-food3.json",
+      "counts": {
+        "rawCandidates": 4,
+        "normalizedCandidates": 4,
+        "verifiedCandidates": 4,
+        "previousDeals": 3,
+        "acceptedDeals": 4,
+        "rejectedDeals": 3
+      },
+      "rejectedByReason": {
+        "post-verification-rejected": 3
+      },
+      "rejectedSamples": [
+        {
+          "reason": "post-verification-rejected",
+          "deal": {
+            "id": "food3-1yvjivr",
+            "title": "Instagram: ÜBER 350 GRATIS SEMMELDÖNER! 🥙🔥😍 Was war das ...",
+            "brand": "Instagram",
+            "url": "https://www.instagram.com/p/DfuyGT8CFgI/",
+            "source": "Firecrawl Food #2",
+            "pubDate": "",
+            "expires": "",
+            "postVerificationStatus": ""
+          }
+        },
+        {
+          "reason": "post-verification-rejected",
+          "deal": {
+            "id": "food3-17q9tkz",
+            "title": "Instagram: Na wer freut sich auch schon auf morgen? 🎮 Falls ihr vor ...",
+            "brand": "Instagram",
+            "url": "https://www.instagram.com/p/Df4qKOlgPxu/",
+            "source": "Firecrawl Food #2",
+            "pubDate": "",
+            "expires": "",
+            "postVerificationStatus": ""
+          }
+        },
+        {
+          "reason": "post-verification-rejected",
+          "deal": {
+            "id": "food3-1cdfmng",
+            "title": "Instagram: Die erste Kaffeehauskette der Welt. Seit 1913. 27 ...",
+            "brand": "Instagram",
+            "url": "https://www.instagram.com/p/Df2hHNLjAYs/",
+            "source": "Firecrawl Food #2",
+            "pubDate": "",
+            "expires": "",
+            "postVerificationStatus": ""
+          }
+        }
+      ],
+      "diagnostics": {
+        "agentStatus": "completed-with-errors",
+        "creditsUsed": 0,
+        "configuredSources": 6,
+        "attemptedSources": 3,
+        "completedSources": 1,
+        "targetsPerRun": 3,
+        "agentTimeoutSeconds": 120,
+        "maxCreditsPerTarget": 300,
+        "sourceStats": [
+          {
+            "url": "https://www.instagram.com/explore/tags/wienessen/",
+            "status": "failed",
+            "rawCandidates": 0,
+            "searchCandidates": 0,
+            "creditsUsed": 0,
+            "searchError": "timeout of 35000ms exceeded",
+            "error": "Firecrawl Agent nach 120s abgebrochen"
+          },
+          {
+            "url": "https://www.instagram.com/explore/tags/viennafood/",
+            "status": "completed-search",
+            "rawCandidates": 4,
+            "searchCandidates": 4,
+            "creditsUsed": 0
+          },
+          {
+            "url": "https://www.instagram.com/explore/tags/fooddealsvienna/",
+            "status": "failed",
+            "rawCandidates": 0,
+            "searchCandidates": 0,
+            "creditsUsed": 0,
+            "error": "timeout of 300000ms exceeded"
+          }
+        ],
+        "retainedPreviousDeals": 3,
+        "prunedPreviousDeals": 0,
+        "duplicateCandidatesMerged": 0,
+        "verifier": {
+          "statusCounts": {
+            "verified-meta-graph": 4
+          },
+          "verifiedOriginalPosts": 0,
+          "timestampOnlyPosts": 0,
+          "unavailableOriginalPosts": 0,
+          "registryViennaEvidence": 0
+        }
+      },
+      "constraints": {},
+      "errors": [
+        "https://www.instagram.com/explore/tags/wienessen/: Firecrawl Agent nach 120s abgebrochen",
+        "https://www.instagram.com/explore/tags/fooddealsvienna/: timeout of 300000ms exceeded"
+      ]
+    },
     {
       "schemaVersion": 1,
       "runProvenance": {
@@ -15322,72 +15448,6 @@
             "verified-original-post": 5
           },
           "verifiedOriginalPosts": 5,
-          "timestampOnlyPosts": 0,
-          "unavailableOriginalPosts": 0,
-          "registryViennaEvidence": 0
-        }
-      },
-      "constraints": {},
-      "errors": []
-    },
-    {
-      "schemaVersion": 1,
-      "runId": "food3-2026-08-20T03:06:00.224Z",
-      "sourceKey": "food3",
-      "sourceLabel": "Firecrawl Key 2 - Food",
-      "status": "completed",
-      "startedAt": "2026-08-20T03:00:07.434Z",
-      "finishedAt": "2026-08-20T03:06:00.224Z",
-      "durationMs": 352790,
-      "outputFile": "docs/deals-pending-food3.json",
-      "counts": {
-        "rawCandidates": 64,
-        "normalizedCandidates": 62,
-        "verifiedCandidates": 62,
-        "previousDeals": 0,
-        "acceptedDeals": 62,
-        "rejectedDeals": 2
-      },
-      "rejectedByReason": {
-        "invalid-original-post-url": 2
-      },
-      "rejectedSamples": [
-        {
-          "reason": "invalid-original-post-url",
-          "deal": {
-            "id": "",
-            "title": "Chicken/Hendl - Essen",
-            "brand": "Eat Hendl",
-            "url": "https://www.instagram.com/lechicguide/reel/DcI4oB3tyrE/",
-            "source": "",
-            "pubDate": "",
-            "expires": "",
-            "postVerificationStatus": ""
-          }
-        },
-        {
-          "reason": "invalid-original-post-url",
-          "deal": {
-            "id": "",
-            "title": "1 pistachio affogato + date for 2",
-            "brand": "Grey Kaffee",
-            "url": "https://www.facebook.com/100067514743839/posts/giveawaygewinnspielwin-1-pistachio-affogato-date-for-2-this-is-your-chance-to-tr/1354904043436741/",
-            "source": "",
-            "pubDate": "",
-            "expires": "",
-            "postVerificationStatus": ""
-          }
-        }
-      ],
-      "diagnostics": {
-        "agentStatus": "completed",
-        "creditsUsed": 0,
-        "verifier": {
-          "statusCounts": {
-            "timestamp-derived": 49,
-            "verified-original-post": 13
-          },
-          "verifiedOriginalPosts": 13,
           "timestampOnlyPosts": 0,
           "unavailableOriginalPosts": 0,
           "registryViennaEvidence": 0
