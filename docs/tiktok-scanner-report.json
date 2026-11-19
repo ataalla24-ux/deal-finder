@@ -1,14 +1,14 @@
 {
-  "lastUpdated": "2026-11-19T14:24:55.034Z",
+  "lastUpdated": "2026-11-19T23:34:25.374Z",
   "runProvenance": {
     "repository": "ataalla24-ux/deal-finder",
-    "runId": "44543280096",
-    "headSha": "194fd1507e2af3010b809cc3541dc1077ac463db",
-    "checkoutSha": "194fd1507e2af3010b809cc3541dc1077ac463db",
+    "runId": "44638691539",
+    "headSha": "99937e6df00aed1901ea83dde0b32a8f4d8ed6d8",
+    "checkoutSha": "99937e6df00aed1901ea83dde0b32a8f4d8ed6d8",
     "triggeringRun": null,
     "event": "schedule",
     "runAttempt": "1",
-    "url": "https://github.com/ataalla24-ux/deal-finder/actions/runs/44543280096"
+    "url": "https://github.com/ataalla24-ux/deal-finder/actions/runs/44638691539"
   },
   "status": "discovery-degraded",
   "outputPreserved": true,
@@ -55,8 +55,8 @@
     "wien pizza 1+1",
     "wien gratis essen",
     "vienna free food",
-    "wien gratis 19 november 2026",
-    "wien deal 19 november 2026",
+    "wien gratis 20 november 2026",
+    "wien deal 20 november 2026",
     "wien gratis november 2026",
     "wien aktion november 2026",
     "wien rabatt november 2026",
@@ -122,50 +122,20 @@
   "discovered": 0,
   "apiCandidates": 0,
   "apiDiscovery": {
-    "errors": [
-      {
-        "keyword": "wien deal 19 november 2026",
-        "offset": 0,
-        "status": 0,
-        "error": "Empty or non-JSON TikTok response",
-        "code": "transport-unavailable",
-        "transportReason": "request-policy-blocked"
-      }
-    ],
-    "attemptedRequests": 1,
+    "errors": [],
+    "attemptedRequests": 0,
     "emptyResponses": 0,
     "rawItems": 0,
     "normalizedItems": 0,
     "ignoredItems": 0,
-    "stoppedReason": "transport-unavailable",
+    "stoppedReason": "api-cooldown",
     "nextRetryAt": "2026-11-20T14:24:41.136Z",
-    "nextKeywordIndex": 8,
-    "transport": "public-browser-search",
-    "navigations": 1,
-    "searchRequests": 0,
-    "blockedExtraRequests": 2,
-    "blockedRequestReasons": {
-      "unexpected-endpoint": 2
-    },
-    "observedSearchEndpoints": {
-      "other-search": 2
-    },
-    "observedSearchPaths": {
-      "[redacted]": 1,
-      "/api/search/user/preview/": 1
-    }
+    "nextKeywordIndex": 8
   },
   "searchDiscovery": {
-    "errors": [
-      {
-        "query": "site:tiktok.com wien döner 1+1",
-        "error": "Search challenge; no bypass attempted",
-        "httpStatus": 403,
-        "retryAt": ""
-      }
-    ],
-    "attemptedQueries": 2,
-    "stoppedReason": "search-unavailable",
+    "errors": [],
+    "attemptedQueries": 0,
+    "stoppedReason": "search-cooldown",
     "nextRetryAt": "2026-11-20T14:24:53.169Z",
     "lastAttemptAt": "2026-11-19T14:24:53.169Z",
     "nextQueryIndex": 19,
@@ -251,28 +221,12 @@
     "aiAcceptedUnusable": 0
   },
   "timings": {
-    "apiDiscoveryMs": 12074,
-    "searchDiscoveryMs": 1735,
-    "mediaRescueMs": 91,
-    "totalScannerMs": 14195
+    "apiDiscoveryMs": 28,
+    "searchDiscoveryMs": 0,
+    "mediaRescueMs": 167,
+    "totalScannerMs": 397
   },
-  "discoveryErrors": [
-    {
-      "query": "site:tiktok.com wien döner 1+1",
-      "error": "Search challenge; no bypass attempted",
-      "httpStatus": 403,
-      "retryAt": ""
-    }
-  ],
-  "apiErrors": [
-    {
-      "keyword": "wien deal 19 november 2026",
-      "offset": 0,
-      "status": 0,
-      "error": "Empty or non-JSON TikTok response",
-      "code": "transport-unavailable",
-      "transportReason": "request-policy-blocked"
-    }
-  ],
+  "discoveryErrors": [],
+  "apiErrors": [],
   "rejected": []
 }
