@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-11-19T20:40:17.826Z",
+  "generatedAt": "2026-11-19T20:56:36.809Z",
   "discoveryAvailability": {
     "note": "Transport evidence, not deal yield. Retry eligibility is not recovery. Candidate counts are not Slack deliveries. No extra runs or quota resets.",
     "lanes": [
@@ -54,17 +54,11 @@
   },
   "summary": {
     "filesConsidered": 32,
-    "totalCandidates": 599,
-    "uniqueCandidates": 565,
-    "distinctCandidates": 579,
+    "totalCandidates": 598,
+    "uniqueCandidates": 564,
+    "distinctCandidates": 578,
     "duplicateClusters": 14,
     "topHealthySources": [
-      {
-        "sourceKey": "wien-combined",
-        "sourceLabel": "Wien Deals Combined Graph",
-        "healthScore": 86,
-        "totalDeals": 1
-      },
       {
         "sourceKey": "instagram-apify",
         "sourceLabel": "Apify Instagram",
@@ -88,15 +82,15 @@
         "sourceLabel": "Instagram",
         "healthScore": 61,
         "totalDeals": 6
+      },
+      {
+        "sourceKey": "power",
+        "sourceLabel": "Power Scraper",
+        "healthScore": 58,
+        "totalDeals": 42
       }
     ],
     "topMissionSources": [
-      {
-        "sourceKey": "wien-combined",
-        "sourceLabel": "Wien Deals Combined Graph",
-        "missionFitScore": 78,
-        "totalDeals": 1
-      },
       {
         "sourceKey": "joe",
         "sourceLabel": "jö Bonus Club",
@@ -120,6 +114,12 @@
         "sourceLabel": "Meta Instagram Graph",
         "missionFitScore": 59,
         "totalDeals": 73
+      },
+      {
+        "sourceKey": "food3",
+        "sourceLabel": "Firecrawl Key 2 - Food",
+        "missionFitScore": 59,
+        "totalDeals": 3
       }
     ],
     "topCoverageSources": [
@@ -161,12 +161,6 @@
     ],
     "topPrecisionSources": [
       {
-        "sourceKey": "wien-combined",
-        "sourceLabel": "Wien Deals Combined Graph",
-        "precisionScore": 88,
-        "totalDeals": 1
-      },
-      {
         "sourceKey": "instagram-apify",
         "sourceLabel": "Apify Instagram",
         "precisionScore": 74,
@@ -189,15 +183,15 @@
         "sourceLabel": "Firecrawl Key 3 - Consumables",
         "precisionScore": 60,
         "totalDeals": 1
+      },
+      {
+        "sourceKey": "instagram-verified",
+        "sourceLabel": "Instagram",
+        "precisionScore": 56,
+        "totalDeals": 6
       }
     ],
     "topWeightedSources": [
-      {
-        "sourceKey": "wien-combined",
-        "sourceLabel": "Wien Deals Combined Graph",
-        "sourceWeightScore": 70,
-        "totalDeals": 1
-      },
       {
         "sourceKey": "meta-instagram",
         "sourceLabel": "Meta Instagram Graph",
@@ -221,6 +215,12 @@
         "sourceLabel": "Firecrawl Key 3 - Consumables",
         "sourceWeightScore": 52,
         "totalDeals": 1
+      },
+      {
+        "sourceKey": "gastro2",
+        "sourceLabel": "Firecrawl Key 1 - Gastro",
+        "sourceWeightScore": 52,
+        "totalDeals": 114
       }
     ],
     "topSourcesToFix": [
@@ -282,85 +282,17 @@
     ],
     "pipelineRuns": {
       "reportedSources": 9,
-      "failedSources": [
-        "wien-combined"
-      ],
+      "failedSources": [],
       "completedWithErrors": [
         "firecrawl2",
         "food3",
         "joe",
-        "power"
+        "power",
+        "wien-combined"
       ]
     }
   },
   "sources": [
-    {
-      "sourceKey": "wien-combined",
-      "file": "deals-pending-wien-combined.json",
-      "sourceLabel": "Wien Deals Combined Graph",
-      "totalDeals": 1,
-      "uniqueDeals": 1,
-      "duplicateDeals": 0,
-      "duplicateAcrossSources": 0,
-      "fresh1dCount": 0,
-      "fresh7dCount": 1,
-      "viennaCount": 1,
-      "foodDrinkCount": 1,
-      "promoCount": 1,
-      "missingUrlCount": 0,
-      "sampleTitles": [
-        "Ab nur 5 € ist alles möglich: ein kleiner Gruß, ein liebevoller Wunsch oder ein Dankeschön, das wirklich von Herzen kommt"
-      ],
-      "lastRun": {
-        "status": "failed",
-        "startedAt": "2026-11-19T07:49:51.021Z",
-        "finishedAt": "2026-11-19T07:49:52.074Z",
-        "durationMs": 1053,
-        "counts": {
-          "rawCandidates": 0,
-          "normalizedCandidates": 0,
-          "verifiedCandidates": 0,
-          "previousDeals": 0,
-          "acceptedDeals": 0,
-          "rejectedDeals": 0
-        },
-        "rejectedByReason": {},
-        "errors": [
-          "No Graph hashtag source completed successfully; last-good output was preserved. #wienergastro: Instagram shared quota paused: rolling-hour budget exhausted"
-        ],
-        "reportFile": "deal-pipeline-last-run-wien-combined.json"
-      },
-      "uniqueRate": 1,
-      "duplicateRate": 0,
-      "fresh1dRate": 0,
-      "fresh7dRate": 1,
-      "viennaRate": 1,
-      "foodDrinkRate": 1,
-      "promoRate": 1,
-      "missingUrlRate": 0,
-      "averageQualityScore": 78,
-      "topCategories": [
-        {
-          "value": "essen",
-          "count": 1
-        }
-      ],
-      "topTypes": [
-        {
-          "value": "rabatt",
-          "count": 1
-        }
-      ],
-      "issues": [
-        "letzter Pipeline-Lauf ist fehlgeschlagen",
-        "wenige Deals sind frischer als 1 Tag"
-      ],
-      "healthScore": 86,
-      "missionFitScore": 78,
-      "coverageScore": 16,
-      "precisionScore": 88,
-      "sourceWeightScore": 70
-    },
     {
       "sourceKey": "instagram-apify",
       "file": "deals-pending-instagram-apify.json",
@@ -2221,6 +2153,65 @@
       "topCategories": [],
       "topTypes": [],
       "issues": [
+        "liefert aktuell 0 Deals"
+      ],
+      "healthScore": 0,
+      "missionFitScore": 0,
+      "coverageScore": 0,
+      "precisionScore": 0,
+      "sourceWeightScore": 0
+    },
+    {
+      "sourceKey": "wien-combined",
+      "file": "deals-pending-wien-combined.json",
+      "sourceLabel": "Wien Deals Combined Graph",
+      "totalDeals": 0,
+      "uniqueDeals": 0,
+      "duplicateDeals": 0,
+      "duplicateAcrossSources": 0,
+      "fresh1dCount": 0,
+      "fresh7dCount": 0,
+      "viennaCount": 0,
+      "foodDrinkCount": 0,
+      "promoCount": 0,
+      "missingUrlCount": 0,
+      "sampleTitles": [],
+      "lastRun": {
+        "status": "completed-with-errors",
+        "startedAt": "2026-11-19T20:55:22.965Z",
+        "finishedAt": "2026-11-19T20:55:39.751Z",
+        "durationMs": 16786,
+        "counts": {
+          "rawCandidates": 9,
+          "normalizedCandidates": 0,
+          "verifiedCandidates": 0,
+          "previousDeals": 0,
+          "acceptedDeals": 0,
+          "rejectedDeals": 9
+        },
+        "rejectedByReason": {
+          "no-concrete-offer": 7,
+          "excluded-promotion-type": 1,
+          "general-recommendation": 1
+        },
+        "errors": [
+          "#wienisst: Instagram shared quota paused: rolling-hour budget exhausted"
+        ],
+        "reportFile": "deal-pipeline-last-run-wien-combined.json"
+      },
+      "uniqueRate": 0,
+      "duplicateRate": 0,
+      "fresh1dRate": 0,
+      "fresh7dRate": 0,
+      "viennaRate": 0,
+      "foodDrinkRate": 0,
+      "promoRate": 0,
+      "missingUrlRate": 0,
+      "averageQualityScore": 0,
+      "topCategories": [],
+      "topTypes": [],
+      "issues": [
+        "letzter Lauf fand Kandidaten, aber akzeptierte keinen Deal",
         "liefert aktuell 0 Deals"
       ],
       "healthScore": 0,
