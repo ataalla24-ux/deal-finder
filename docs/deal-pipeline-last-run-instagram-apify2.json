@@ -2,74 +2,118 @@
   "schemaVersion": 1,
   "runProvenance": {
     "repository": "ataalla24-ux/deal-finder",
-    "runId": "43991464753",
-    "headSha": "3075417678ad540434d11cd418ad509be32b1301",
-    "checkoutSha": "34d655b2b72693bd0f1c4b5832b7512251fac1de",
+    "runId": "44545194120",
+    "headSha": "ecfbb9f9e5e00a51376db7a2eb76d8030a8049e5",
+    "checkoutSha": "dd0035236cd4244f8990f0677a09bb050c1fbd62",
     "triggeringRun": null,
     "event": "schedule",
     "runAttempt": "1",
-    "url": "https://github.com/ataalla24-ux/deal-finder/actions/runs/43991464753"
+    "url": "https://github.com/ataalla24-ux/deal-finder/actions/runs/44545194120"
   },
-  "runId": "instagram-apify2-2026-11-17T00:55:37.234Z",
+  "runId": "instagram-apify2-2026-11-19T14:35:29.069Z",
   "sourceKey": "instagram-apify2",
   "sourceLabel": "Apify 2 Vienna Food Discovery",
-  "status": "completed-with-errors",
-  "startedAt": "2026-11-17T00:55:20.918Z",
-  "finishedAt": "2026-11-17T00:55:37.234Z",
-  "durationMs": 16316,
+  "status": "completed",
+  "startedAt": "2026-11-19T14:34:53.436Z",
+  "finishedAt": "2026-11-19T14:35:29.069Z",
+  "durationMs": 35633,
   "outputFile": "docs/deals-pending-instagram-apify2.json",
   "counts": {
     "rawCandidates": 4,
-    "normalizedCandidates": 0,
+    "normalizedCandidates": 3,
     "verifiedCandidates": 0,
     "previousDeals": 0,
     "acceptedDeals": 0,
-    "rejectedDeals": 0
+    "rejectedDeals": 3
   },
-  "rejectedByReason": {},
-  "rejectedSamples": [],
+  "rejectedByReason": {
+    "non-food-ad": 1,
+    "no-consumer-food-benefit": 1,
+    "post-older-than-seven-days": 1
+  },
+  "rejectedSamples": [
+    {
+      "reason": "non-food-ad",
+      "deal": {
+        "id": "",
+        "title": "",
+        "brand": "",
+        "url": "https://www.instagram.com/p/Df7DwIcN5_-/",
+        "source": "",
+        "pubDate": "",
+        "expires": "",
+        "postVerificationStatus": ""
+      }
+    },
+    {
+      "reason": "no-consumer-food-benefit",
+      "deal": {
+        "id": "",
+        "title": "",
+        "brand": "",
+        "url": "https://www.instagram.com/p/Df7SgzyT2kP/",
+        "source": "",
+        "pubDate": "",
+        "expires": "",
+        "postVerificationStatus": ""
+      }
+    },
+    {
+      "reason": "post-older-than-seven-days",
+      "deal": {
+        "id": "",
+        "title": "",
+        "brand": "",
+        "url": "https://www.instagram.com/p/De6vjz_oeuv/",
+        "source": "",
+        "pubDate": "",
+        "expires": "",
+        "postVerificationStatus": ""
+      }
+    }
+  ],
   "diagnostics": {
     "pendingDeals": 0,
     "unchangedPosts": 0,
     "providerErrors": 0,
-    "emptySourceRecords": 4,
-    "ocrCalls": 0,
+    "emptySourceRecords": 0,
+    "ocrCalls": 2,
     "sources": [
       {
         "key": "hashtag:esseninwien",
-        "lastAttemptAt": "2026-11-17T00:55:20.918Z",
-        "status": "no-items",
-        "postsReturned": 0,
+        "lastAttemptAt": "2026-11-19T14:34:53.436Z",
+        "status": "stale-results",
+        "postsReturned": 1,
         "consecutiveFailures": 0,
-        "consecutiveEmpty": 1,
-        "retryAt": "2026-11-19T00:55:20.918Z"
+        "consecutiveEmpty": 2,
+        "retryAt": "2026-11-23T14:34:53.436Z"
       },
       {
         "key": "hashtag:viennafood",
-        "lastAttemptAt": "2026-11-17T00:55:20.918Z",
-        "postsReturned": 0,
-        "status": "no-items",
+        "lastAttemptAt": "2026-11-19T14:34:53.436Z",
+        "postsReturned": 1,
+        "status": "posts-returned",
         "consecutiveFailures": 0,
-        "retryAt": "2026-11-19T00:55:20.918Z",
-        "consecutiveEmpty": 1
+        "retryAt": "",
+        "consecutiveEmpty": 0
       },
       {
         "key": "hashtag:wienfood",
-        "lastAttemptAt": "2026-11-17T00:55:20.918Z",
-        "postsReturned": 0,
-        "status": "no-items",
+        "lastAttemptAt": "2026-11-19T14:34:53.436Z",
+        "postsReturned": 1,
+        "status": "posts-returned",
         "consecutiveFailures": 0,
-        "retryAt": "2026-11-19T00:55:20.918Z",
-        "consecutiveEmpty": 1
+        "retryAt": "",
+        "consecutiveEmpty": 0
       },
       {
         "key": "hashtag:wienisst",
-        "lastAttemptAt": "2026-11-17T00:55:20.918Z",
-        "postsReturned": 0,
-        "status": "no-items",
+        "lastAttemptAt": "2026-11-19T14:34:53.436Z",
+        "postsReturned": 1,
+        "status": "posts-returned",
         "consecutiveFailures": 0,
-        "retryAt": "2026-11-19T00:55:20.918Z",
-        "consecutiveEmpty": 1
+        "retryAt": "",
+        "consecutiveEmpty": 0
       }
     ]
   },
