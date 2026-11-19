@@ -1,14 +1,14 @@
 {
-  "lastUpdated": "2026-11-18T23:23:15.374Z",
+  "lastUpdated": "2026-11-19T14:24:55.034Z",
   "runProvenance": {
     "repository": "ataalla24-ux/deal-finder",
-    "runId": "44420162397",
-    "headSha": "4d2d18b57d3dbfd8bb92c9b53df09e745fb5ffca",
-    "checkoutSha": "4d2d18b57d3dbfd8bb92c9b53df09e745fb5ffca",
+    "runId": "44543280096",
+    "headSha": "194fd1507e2af3010b809cc3541dc1077ac463db",
+    "checkoutSha": "194fd1507e2af3010b809cc3541dc1077ac463db",
     "triggeringRun": null,
     "event": "schedule",
     "runAttempt": "1",
-    "url": "https://github.com/ataalla24-ux/deal-finder/actions/runs/44420162397"
+    "url": "https://github.com/ataalla24-ux/deal-finder/actions/runs/44543280096"
   },
   "status": "discovery-degraded",
   "outputPreserved": true,
@@ -122,23 +122,53 @@
   "discovered": 0,
   "apiCandidates": 0,
   "apiDiscovery": {
-    "errors": [],
-    "attemptedRequests": 0,
+    "errors": [
+      {
+        "keyword": "wien deal 19 november 2026",
+        "offset": 0,
+        "status": 0,
+        "error": "Empty or non-JSON TikTok response",
+        "code": "transport-unavailable",
+        "transportReason": "request-policy-blocked"
+      }
+    ],
+    "attemptedRequests": 1,
     "emptyResponses": 0,
     "rawItems": 0,
     "normalizedItems": 0,
     "ignoredItems": 0,
-    "stoppedReason": "api-cooldown",
-    "nextRetryAt": "2026-11-19T13:55:56.825Z",
-    "nextKeywordIndex": 7
+    "stoppedReason": "transport-unavailable",
+    "nextRetryAt": "2026-11-20T14:24:41.136Z",
+    "nextKeywordIndex": 8,
+    "transport": "public-browser-search",
+    "navigations": 1,
+    "searchRequests": 0,
+    "blockedExtraRequests": 2,
+    "blockedRequestReasons": {
+      "unexpected-endpoint": 2
+    },
+    "observedSearchEndpoints": {
+      "other-search": 2
+    },
+    "observedSearchPaths": {
+      "[redacted]": 1,
+      "/api/search/user/preview/": 1
+    }
   },
   "searchDiscovery": {
-    "errors": [],
-    "attemptedQueries": 0,
-    "stoppedReason": "search-cooldown",
-    "nextRetryAt": "2026-11-19T13:56:08.865Z",
-    "lastAttemptAt": "2026-11-18T13:56:08.865Z",
-    "nextQueryIndex": 17,
+    "errors": [
+      {
+        "query": "site:tiktok.com wien döner 1+1",
+        "error": "Search challenge; no bypass attempted",
+        "httpStatus": 403,
+        "retryAt": ""
+      }
+    ],
+    "attemptedQueries": 2,
+    "stoppedReason": "search-unavailable",
+    "nextRetryAt": "2026-11-20T14:24:53.169Z",
+    "lastAttemptAt": "2026-11-19T14:24:53.169Z",
+    "nextQueryIndex": 19,
     "deferredPostVisits": 0
   },
   "accepted": 0,
@@ -221,12 +251,28 @@
     "aiAcceptedUnusable": 0
   },
   "timings": {
-    "apiDiscoveryMs": 39,
-    "searchDiscoveryMs": 0,
-    "mediaRescueMs": 94,
-    "totalScannerMs": 420
+    "apiDiscoveryMs": 12074,
+    "searchDiscoveryMs": 1735,
+    "mediaRescueMs": 91,
+    "totalScannerMs": 14195
   },
-  "discoveryErrors": [],
-  "apiErrors": [],
+  "discoveryErrors": [
+    {
+      "query": "site:tiktok.com wien döner 1+1",
+      "error": "Search challenge; no bypass attempted",
+      "httpStatus": 403,
+      "retryAt": ""
+    }
+  ],
+  "apiErrors": [
+    {
+      "keyword": "wien deal 19 november 2026",
+      "offset": 0,
+      "status": 0,
+      "error": "Empty or non-JSON TikTok response",
+      "code": "transport-unavailable",
+      "transportReason": "request-policy-blocked"
+    }
+  ],
   "rejected": []
 }
