@@ -1,4 +1,5 @@
 import { photoDefinitions, photoKey } from './deal-photos.mjs';
+import { november20Guides } from './blog-backfill-20261120.mjs';
 
 // Generic editorial photographs, never evidence of a merchant's exact product.
 export const photoRecipes = {
@@ -59,6 +60,7 @@ export const photoRecipes = {
 
 // Match the benefit, not a merchant word in the URL (Pizza Rando offers döner).
 export const articlePhotos = {
+  ...Object.fromEntries(november20Guides.map(guide => [guide.slug, guide.photo])),
   'napoleon-kinder-happy-hour-wien': 'family-lunch',
   'dancing-noodles-20-euro-gutschein-wien': 'vegetable-noodles',
   'fat-monk-dc-tower-wien-lieferando-rabatt': 'bowl',

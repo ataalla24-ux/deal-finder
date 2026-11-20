@@ -2,13 +2,14 @@ import { load } from 'cheerio';
 import { backfillCovers } from './blog-backfill-20261018.mjs';
 import { catchupCovers } from './blog-backfill-20261030.mjs';
 import { novemberGuides, heldRecheckGuides } from './blog-backfill-20261105.mjs';
+import { november20Guides } from './blog-backfill-20261120.mjs';
 import { photoVisual } from './blog-photo-catalog.mjs';
 
 // Editorial subject metadata is retained for generators; images are photographs.
 export const covers = {
   ...backfillCovers,
   ...catchupCovers,
-  ...Object.fromEntries([...novemberGuides, ...heldRecheckGuides].map(guide => [guide.slug, { lines: [guide.title], topic: guide.eyebrow, tone: 'yellow' }])),
+  ...Object.fromEntries([...novemberGuides, ...heldRecheckGuides, ...november20Guides].map(guide => [guide.slug, { lines: [guide.title], topic: guide.eyebrow, tone: 'yellow' }])),
   'napoleon-kinder-happy-hour-wien': { lines: ['Napoleon Kinder-Happy-Hour'], topic: 'Familienessen in Kagran', tone: 'green' },
   'dancing-noodles-20-euro-gutschein-wien': { lines: ['Dancing Noodles'], topic: 'Essen in Margareten', tone: 'green' },
   'gratis-omv-kaffee': { lines: ['OMV VIVA', 'Winterkaffee mit jö.'], topic: 'Kaffee & Getränke', tone: 'yellow' },

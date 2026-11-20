@@ -33,7 +33,7 @@ function fixture() {
   for (const dir of ['docs/blog', 'reviews', 'scripts']) fs.mkdirSync(path.join(root, dir), { recursive: true });
   const files = ['scripts/generate-topic-guides.mjs', 'scripts/polish-website.mjs', 'scripts/blog-visuals.mjs',
     'scripts/blog-photo-catalog.mjs', 'scripts/deal-photos.mjs', 'scripts/original-deal-photo.mjs', 'scripts/deal-photo-contract.mjs', 'scripts/server-blog-content.mjs',
-    'scripts/blog-backfill-20261018.mjs', 'scripts/blog-backfill-20261030.mjs', 'scripts/blog-backfill-20261105.mjs',
+    'scripts/blog-backfill-20261018.mjs', 'scripts/blog-backfill-20261030.mjs', 'scripts/blog-backfill-20261105.mjs', 'scripts/blog-backfill-20261120.mjs',
     'reviews/deal-guides.json', 'docs/blog/index.html', 'docs/sitemap.xml'];
   for (const file of files) fs.copyFileSync(path.join(repo, file), path.join(root, file));
   fs.symlinkSync(path.join(repo, 'node_modules'), path.join(root, 'node_modules'), 'dir');

@@ -20,6 +20,7 @@ fs.copyFileSync(path.join(ROOT, 'scripts/blog-photo-catalog.mjs'), path.join(fix
 fs.copyFileSync(path.join(ROOT, 'scripts/blog-backfill-20261018.mjs'), path.join(fixtureRoot, 'scripts/blog-backfill-20261018.mjs'));
 fs.copyFileSync(path.join(ROOT, 'scripts/blog-backfill-20261030.mjs'), path.join(fixtureRoot, 'scripts/blog-backfill-20261030.mjs'));
 fs.copyFileSync(path.join(ROOT, 'scripts/blog-backfill-20261105.mjs'), path.join(fixtureRoot, 'scripts/blog-backfill-20261105.mjs'));
+fs.copyFileSync(path.join(ROOT, 'scripts/blog-backfill-20261120.mjs'), path.join(fixtureRoot, 'scripts/blog-backfill-20261120.mjs'));
 fs.copyFileSync(path.join(ROOT, 'scripts/deal-photos.mjs'), path.join(fixtureRoot, 'scripts/deal-photos.mjs'));
 for (const file of ['original-deal-photo.mjs','deal-photo-contract.mjs'])
   fs.copyFileSync(path.join(ROOT,'scripts',file),path.join(fixtureRoot,'scripts',file));
