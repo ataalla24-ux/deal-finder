@@ -163,6 +163,16 @@ function responsesRequest(init) {
   return { ...init, body: JSON.stringify({ model: body.model, input, text, max_output_tokens: body.max_completion_tokens }) };
 }
 
+// Admission and offline batch sizing must price the identical Responses body,
+// including the serialized prompt/schema and both input-encoding passes.
+export function prepareFreeCreditCall(url, init) {
+  const original = prepareBudgetedRequest(url, init);
+  const adaptChat = String(url) === CHAT;
+  const providerUrl = adaptChat ? RESPONSES : url;
+  const prepared = adaptChat ? prepareBudgetedRequest(providerUrl, responsesRequest(original.init)) : original;
+  return { ...prepared, adaptChat, providerUrl };
+}
+
 function asChatResponse(response, result) {
   const content = (result.output || []).flatMap(item => item.type === 'message' ? item.content || [] : []);
   const refusal = content.some(part => part.type === 'refusal');
@@ -208,13 +218,11 @@ export function createCreditBudget({ store, policy, clock = Date.now, request = 
   return async (url, init) => {
     if (stopped) throw paused('runner-paused');
     validateCreditPolicy(policy, clock());
-    const original = prepareBudgetedRequest(url, init);
-    const astra = original.model === ASTRA;
+    const prepared = prepareFreeCreditCall(url, init);
+    const astra = prepared.model === ASTRA;
     const profileActive = isAstraEnrichmentActive({ enabled: allowAstraEnrichment, now: clock(), policy });
     if (astra !== profileActive) throw paused('model-outside-active-profile');
-    const adaptChat = String(url) === CHAT;
-    const providerUrl = adaptChat ? RESPONSES : url;
-    const prepared = adaptChat ? prepareBudgetedRequest(providerUrl, responsesRequest(original.init)) : original;
+    const { adaptChat, providerUrl } = prepared;
     if (prepared.reservedUsd > policy.requestLimitUsd) throw paused('request-cost-limit');
     const id = randomUUID(), at = clock();
     await update(state => {

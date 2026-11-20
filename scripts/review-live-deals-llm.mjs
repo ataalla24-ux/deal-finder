@@ -5,7 +5,7 @@ import { fileURLToPath } from 'node:url';
 import { canonicalDealUrl } from '../scraper/deal-evidence-utils.js';
 import { inspectDealUrlHealth } from '../scraper/expiry-utils.js';
 import { sanitizeLlmProposedPatch } from './live-deal-llm-patch-utils.mjs';
-import { freeCreditOpenAiFetch, modelForTask } from '../scraper/ai-credit-budget.js';
+import { freeCreditOpenAiFetch, loadAiCreditPolicy, modelForTask, prepareFreeCreditCall } from '../scraper/ai-credit-budget.js';
 import { cachedSourceReview, loadSourceReviewCache, rememberSourceReview, reviewClockContext,
   reviewFingerprint, saveSourceReviewCache } from '../scraper/source-review-cache.js';
 
@@ -563,15 +563,12 @@ function shouldRemove(review) {
     && review.confidence >= MIN_REMOVE_CONFIDENCE;
 }
 
-async function requestLiveDealChunk(deals, referenceDate, duplicateCandidates) {
-  const response = await freeCreditOpenAiFetch('https://api.openai.com/v1/chat/completions', {
-    method: 'POST',
-    headers: {
-      'content-type': 'application/json',
-      authorization: `Bearer ${process.env.OPENAI_API_KEY}`,
-    },
+const CHAT_COMPLETIONS_URL = 'https://api.openai.com/v1/chat/completions';
+
+export function liveReviewRequest(deals, referenceDate, duplicateCandidates, model) {
+  return {
     body: JSON.stringify({
-      model: MODEL,
+      model,
       response_format: {
         type: 'json_schema',
         json_schema: {
@@ -688,6 +685,17 @@ async function requestLiveDealChunk(deals, referenceDate, duplicateCandidates) {
         },
       ],
     }),
+  };
+}
+
+async function requestLiveDealChunk(deals, referenceDate, duplicateCandidates, model = MODEL) {
+  const response = await freeCreditOpenAiFetch(CHAT_COMPLETIONS_URL, {
+    method: 'POST',
+    headers: {
+      'content-type': 'application/json',
+      authorization: `Bearer ${process.env.OPENAI_API_KEY}`,
+    },
+    ...liveReviewRequest(deals, referenceDate, duplicateCandidates, model),
   });
 
   const text = await response.text();
@@ -746,15 +754,27 @@ export async function reviewLiveDealBatches(compactDeals, { cache, originals = c
   const comparisons = duplicateIndex(compactDeals);
   const today = new Intl.DateTimeFormat('en-CA', { timeZone: 'Europe/Vienna',
     year: 'numeric', month: '2-digit', day: '2-digit' }).format(now);
-  const policyKey = reviewFingerprint({ kind: 'live-review-per-deal-v1', model, prompt: requestLiveDealChunk.toString(),
+  const policyKey = reviewFingerprint({ kind: 'live-review-per-deal-v1', model, prompt: liveReviewRequest.toString(),
     minConfidence: MIN_REMOVE_CONFIDENCE, reasons: [...AUTO_REMOVE_REASONS] });
   const reviews = new Map();
   const errors = [];
   const pending = [];
+  const referenceDate = now.toISOString();
+  const { requestLimitUsd } = loadAiCreditPolicy();
+  function sizeIssue(inputs, peers) {
+    try {
+      const request = liveReviewRequest(inputs, referenceDate, peers, model);
+      const prepared = prepareFreeCreditCall(CHAT_COMPLETIONS_URL, request);
+      return prepared.reservedUsd > requestLimitUsd ? 'request-cost-limit' : '';
+    } catch (error) {
+      if (error.budgetReason === 'input-limit') return error.budgetReason;
+      throw error;
+    }
+  }
   const maxBatch = Math.max(1, Math.min(CHUNK_SIZE, Math.trunc(chunkSize) || CHUNK_SIZE));
   const usage = { prompt_tokens: 0, completion_tokens: 0, total_tokens: 0 };
   const stats = { aiCalls: 0, aiReviewedDeals: 0, cachedDeals: 0, cachedGroups: 0, uncachedIncompleteGroups: 0,
-    maxReviewAgeHours: 72, requiresMatchingInputEvidence: true, reusedReviews: [] };
+    deferredDuplicateDealIDs: [], maxReviewAgeHours: 72, requiresMatchingInputEvidence: true, reusedReviews: [] };
   for (const deal of compactDeals) {
     const peers = comparisons.get(deal.id);
     const input = { ...deal, duplicateCandidateIDs: peers.map(other => other.id) };
@@ -775,18 +795,32 @@ export async function reviewLiveDealBatches(compactDeals, { cache, originals = c
   // input ceiling. Preserve the review chunk cap and never drop peer evidence.
   for (let start = 0; start < pending.length;) {
     let end = Math.min(start + maxBatch, pending.length);
-    let batch, inputs, peers;
+    let batch, inputs, peers, issue;
     do {
       batch = pending.slice(start, end);
       end--;
       inputs = batch.map(item => item.input);
       peers = [...new Map(batch.flatMap(item => item.peers).map(peer => [peer.id, peer])).values()];
-    } while (batch.length > 1 && Buffer.byteLength(JSON.stringify([inputs, peers])) > 60000);
+      issue = sizeIssue(inputs, peers);
+    } while (batch.length > 1 && issue);
     start += batch.length;
+    // A single offer with unusually many comparison candidates still gets a
+    // factual review. Report the outstanding comparison and never cache it.
+    const incompleteComparison = Boolean(issue && peers.length);
+    if (incompleteComparison) {
+      stats.deferredDuplicateDealIDs.push(inputs[0].id);
+      inputs = [{ ...inputs[0], duplicateCandidateIDs: [] }];
+      peers = [];
+      issue = sizeIssue(inputs, peers);
+    }
+    if (issue) {
+      errors.push(`Review input deferred for ${inputs[0].id}: ${issue}`);
+      continue;
+    }
     try {
       stats.aiCalls++;
       stats.aiReviewedDeals += inputs.length;
-      const result = await classify(inputs, now.toISOString(), peers);
+      const result = await classify(inputs, referenceDate, peers, model);
       for (const field of Object.keys(usage)) usage[field] += Number(result.usage?.[field] || 0);
       if (!completeReviews(result.parsed, inputs)) {
         stats.uncachedIncompleteGroups++;
@@ -805,7 +839,7 @@ export async function reviewLiveDealBatches(compactDeals, { cache, originals = c
       const keyById = new Map(batch.map(({ input, key }) => [input.id, key]));
       for (const row of result.parsed.reviews) {
         reviews.set(row.dealID, row);
-        rememberSourceReview(store, keyById.get(row.dealID), row, now);
+        if (!incompleteComparison) rememberSourceReview(store, keyById.get(row.dealID), row, now);
       }
     } catch (error) {
       errors.push(cleanText(error?.message || error, 500));

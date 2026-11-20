@@ -5,7 +5,8 @@ import path from 'node:path';
 import { test } from 'node:test';
 import { cachedSourceReview, loadSourceReviewCache, rememberSourceReview, reviewClockContext,
   reviewFingerprint, saveSourceReviewCache } from '../scraper/source-review-cache.js';
-import { reviewLiveDealBatches } from './review-live-deals-llm.mjs';
+import { prepareFreeCreditCall, loadAiCreditPolicy } from '../scraper/ai-credit-budget.js';
+import { liveReviewRequest, reviewLiveDealBatches } from './review-live-deals-llm.mjs';
 import { getFeaturedDealEligibility } from '../scraper/set-daily-deal.js';
 
 const now = new Date('2026-10-23T10:00:00Z');
@@ -52,7 +53,7 @@ test('changed copy, source evidence, model and original untruncated terms invali
   const store = cache(); let calls = 0;
   const classify = async rows => { calls++; return response(rows); };
   await reviewLiveDealBatches([row('a')], { cache: store, now, classify });
-  await reviewLiveDealBatches([row('a')], { cache: store, now, classify, model: 'different-model' });
+  await reviewLiveDealBatches([row('a')], { cache: store, now, classify, model: 'gpt-6.2-astra' });
   await reviewLiveDealBatches([row('a')], { cache: store, now, classify, originals: [{ ...row('a'), description: 'Changed full condition beyond the compact preview' }] });
   assert.equal(calls, 3);
   const dated = cache(); let dateCalls = 0;
@@ -239,4 +240,45 @@ test('live cache keeps generic current copy and young posts but rechecks actual 
   for (const description of ['Nur diesen Monat', 'Noch 2 Tage', 'Heute gratis', 'Jeden Dienstag']) {
     assert.notDeepEqual(clock({ ...base, description }, first), clock({ ...base, description }, later));
   }
+});
+
+
+test('real schema, escaped target evidence and the actual per-model reservation determine review batch size', async () => {
+  const items = Array.from({ length: 24 }, (_, i) => ({
+    ...row('escaped-' + i), description: 'Ü"'.repeat(155), targetEvidence: { status: 'ok',
+      page: { title: 'Zitat', textSnippet: 'Ü"'.repeat(380), description: 'Ü'.repeat(310) } },
+  }));
+  const endpoint = 'https://api.openai.com/v1/chat/completions';
+  const policy = loadAiCreditPolicy();
+  for (const model of ['gpt-6.2-astra', 'gpt-6.2-sol']) {
+    const sizes = [];
+    const output = await reviewLiveDealBatches(items, { now, model, classify: async (batch, date, candidates, chosenModel) => {
+      const request = liveReviewRequest(batch, date, candidates, chosenModel);
+      const { reservedUsd, init } = prepareFreeCreditCall(endpoint, request);
+      assert.equal(chosenModel, model);
+      assert.ok(reservedUsd <= policy.requestLimitUsd);
+      assert.ok(Buffer.byteLength(init.body) <= 80000);
+      sizes.push(batch.length);
+      return response(batch);
+    } });
+    assert.deepEqual(output.errors, []);
+    assert.equal(output.reviews.length, items.length);
+    assert.ok(sizes.length > 1);
+  }
+});
+
+test('oversize comparison neighbourhoods preserve factual reviews and disclose unmatched duplicate context', async () => {
+  const items = Array.from({ length: 64 }, (_, i) => ({ ...row('peer-' + i), title: 'Ö'.repeat(180),
+    brand: 'Ä'.repeat(85), location: 'Ö'.repeat(150), description: 'Ü'.repeat(350) }));
+  const store = cache();
+  const result = await reviewLiveDealBatches(items, { cache: store, now, model: 'gpt-6.2-astra',
+    chunkSize: 1, classify: async (batch, _date, peers) => {
+      assert.equal(peers.length, 0);
+      assert.deepEqual(batch[0].duplicateCandidateIDs, []);
+      return response(batch);
+    } });
+  assert.equal(result.errors.length, 0);
+  assert.equal(result.reviews.length, items.length);
+  assert.equal(result.stats.deferredDuplicateDealIDs.length, items.length);
+  assert.equal(Object.keys(store.entries).length, 0);
 });
