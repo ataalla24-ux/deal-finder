@@ -23,26 +23,53 @@ function matchesOfficialCard(row, candidate) {
     && Number.isFinite(Date.parse(rule.endExclusive));
 }
 
-// Reuse only a newer official observation of the identical reviewed offer, never the Power run time.
-export function refreshFoodRedemptions(manifest, live, pending, now = Date.now()) {
+function observationFor(row, pending, pages) {
+  const rule = row.recheck;
+  if (rule.kind === 'official-food-page') {
+    const proof = pages[row.dealId];
+    if (!proof || proof.url !== rule.url || proof.status === 'unavailable'
+      || proof.status === 'matched' && proof.contentHash !== rule.contentHash) return null;
+    return proof;
+  }
+  if (rule.kind === 'official-coupon-pdf') {
+    const cards = pending.filter(d => d.url === row.sourceUrl && d.originSource === 'power-official-food'
+      && d.brand === rule.merchant && d.evidence?.source === 'official-merchant-page'
+      && d.evidence.sourceUrl === row.sourceUrl && d.evidence.merchantSourceKey === rule.merchant
+      && d.evidence.media?.kind === 'pdf' && d.evidence.media.url === row.url);
+    // Partial or mixed observations are inconclusive. Check every card from the same fresh document.
+    if (cards.length !== rule.cardHashes.length || !cards[0]?.evidence.media.sha256) return null;
+    const proof = cards[0].evidence;
+    if (!cards.every(d => d.evidence.checkedAt === proof.checkedAt && d.evidence.media.sha256 === proof.media.sha256)) return null;
+    cards.sort((a,b) => a.evidence.media.index - b.evidence.media.index);
+    const match = cards.every((d,i) => d.evidence.media.index === i && d.evidence.media.cardSha256 === rule.cardHashes[i]
+      && d.evidence.offerTiming?.validUntil === rule.validUntil);
+    return { checkedAt: proof.checkedAt, status: match ? 'matched' : 'changed' };
+  }
+  if (rule.kind !== 'official-food-card') return null;
+  const matches = pending.filter(d => d.id === row.dealId);
+  if (matches.length !== 1) return null;
+  return { checkedAt: matches[0].evidence?.checkedAt, status: matchesOfficialCard(row, matches[0]) ? 'matched' : 'changed' };
+}
+
+// Reuse only a newer official observation of the identical reviewed offer, never the runner clock.
+export function refreshFoodRedemptions(manifest, live, pending, now = Date.now(), pages = {}) {
   const liveById = new Map(live.map(d => [d.id, d]));
   const reviews = manifest.reviews.map(row => {
-    if (row.recheck?.kind !== 'official-food-card') return row;
+    if (!row.recheck) return row;
     const deal = liveById.get(row.dealId);
-    if (!deal || deal.title !== row.expectedTitle || deal.description !== row.expectedDescription
-      || deal.url !== row.sourceUrl || deal.brand !== row.recheck.merchant || !matchesReviewedPeriod(deal, row)) return row;
-    const matches = pending.filter(d => d.id === row.dealId);
-    if (matches.length !== 1) return row;
-    const candidate = matches[0];
-    const checkedAt = Date.parse(candidate.evidence?.checkedAt);
+    if (!deal || deal.title !== row.expectedTitle || deal.description !== row.expectedDescription || deal.url !== row.sourceUrl
+      || (row.recheck.merchant && deal.brand !== row.recheck.merchant) || !matchesReviewedPeriod(deal, row)) return row;
+    const proof = observationFor(row, pending, pages);
+    const checkedAt = Date.parse(proof?.checkedAt);
     if (!Number.isFinite(checkedAt) || checkedAt > now || checkedAt + DAY <= now
       || checkedAt <= Date.parse(row.verifiedAt) || checkedAt <= Date.parse(row.recheck.lastMismatchAt)) return row;
-    if (!matchesOfficialCard(row, candidate)) {
-      return checkedAt < Date.parse(row.reviewUntil) ? { ...row, reviewUntil: new Date(checkedAt).toISOString(),
-        recheck: { ...row.recheck, lastMismatchAt: new Date(checkedAt).toISOString() } } : row;
+    if (proof.status === 'changed') {
+      return { ...row, reviewUntil: new Date(Math.min(Date.parse(row.reviewUntil), checkedAt)).toISOString(),
+        recheck: { ...row.recheck, lastMismatchAt: new Date(checkedAt).toISOString() } };
     }
+    if (proof.status !== 'matched') return row;
     const end = Math.min(checkedAt + DAY, row.recheck.endExclusive ? Date.parse(row.recheck.endExclusive) : Infinity);
-    if (end <= now) return row;
+    if (end <= now || !Number.isFinite(end)) return row;
     return { ...row, verifiedAt: new Date(checkedAt).toISOString(), reviewUntil: new Date(end).toISOString() };
   });
   return { ...manifest, reviews };
@@ -54,7 +81,9 @@ export function syncFoodRedemptions(root = process.cwd(), now = Date.now()) {
   const read = name => JSON.parse(fs.readFileSync(name, 'utf8'));
   const manifest = read(manifestFile), feed = read(feedFile);
   const pending = read(path.join(root, 'docs/deals-pending-power.json'));
-  const result = refreshFoodRedemptions(manifest, feed.deals, pending.deals, now);
+  const sourceFile = path.join(root, 'reviews/maintenance-source-evidence.json');
+  const pages = fs.existsSync(sourceFile) ? read(sourceFile).foodRedemptions?.pages || {} : {};
+  const result = refreshFoodRedemptions(manifest, feed.deals, pending.deals, now, pages);
   const changed = result.reviews.filter((row, index) => row !== manifest.reviews[index]).length;
   if (changed) {
     const tmp = manifestFile + '.' + randomUUID() + '.tmp';

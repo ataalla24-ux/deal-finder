@@ -450,6 +450,26 @@
         "validFrom": "",
         "validUntil": "",
         "expires": ""
+      },
+      "recheck": {
+        "kind": "official-coupon-pdf",
+        "url": "https://www.nordsee.com/at/coupons/pdf",
+        "merchant": "NORDSEE",
+        "validUntil": "2026-11-30",
+        "endExclusive": "2026-11-30T23:00:00.000Z",
+        "cardHashes": [
+          "29b74e102a61fe45165539abbbe60cf97b35170f8d51322d25d1181863f85c7d",
+          "f693c3384b1639562cfeb571cc4e01c947954f56f21fafd1a668ed0273fae769",
+          "35f880efc01aeb59a9c4df6091c8361eb547ede6afc2fd9ea16e7c8c7c4931b2",
+          "374bddc7fd65169f221ce3cd960f2dad0c016d4db313c13194b9e220cd0aa413",
+          "c9169cf037f4b1045b5d763c2bb1e93755a1bf96f26d864258e733f091584bed",
+          "657dafbff35ea024c8c4bd08d9c576f881714ae1b8c8219673e67489b8426ac9",
+          "8255529f2c44e0a6a859d7dde49088a40eafc012f943b3bcad43b9a7b0dc698e",
+          "332dc4863ae95f13a629a72d72b4ea376ebcb779d4be1c0eb287b005271e6189",
+          "ac3813b125b5f4de8f89c7d66b1bd33609ccc12c6bb5a064bd171b540372c1a6",
+          "c036701a6e0a2850b683f52ad4910cde848d7ae8aa81121116a13e4ef604dce1",
+          "3d0cecdaed0fa9b08588c5187befc82a13daafa86aa8b4b40b870b59136d68fe"
+        ]
       }
     },
     {
@@ -492,6 +512,11 @@
         "validFrom": "",
         "validUntil": "",
         "expires": ""
+      },
+      "recheck": {
+        "kind": "official-food-page",
+        "url": "https://www.ikea.com/at/de/ikea-family/benefits/",
+        "contentHash": "d3a71f3b55ba0e6275821ca301b31409cdd21c6e2093ced074ec1e8935762344"
       }
     },
     {
@@ -516,6 +541,12 @@
         "validFrom": "",
         "validUntil": "2026-12-31",
         "expires": "2026-12-31T23:59:59.999Z"
+      },
+      "recheck": {
+        "kind": "official-food-page",
+        "url": "https://www.ikea.com/at/de/stores/wien-westbahnhof/ikea-wien-westbahnhof-angebote-pub1aba7a60/",
+        "contentHash": "3faaf6dd124a18cc8d61bdeec683ee483573d961c7be3fb16b7a168e7dd2a8e6",
+        "endExclusive": "2026-12-31T23:00:00.000Z"
       }
     },
     {
@@ -1233,20 +1264,30 @@
       "expectedTitle": "Gratis Pizza Margherita ab 20 € Bestellwert",
       "expectedDescription": "Authentische Küche aus dem Herzen Wiens – Döner, Pizza, Burger, Pasta & mehr",
       "sourceUrl": "https://wienerlazizfood.com/",
-      "method": "onsite",
-      "instructions": "Bei Wiener Laziz Food ab 20 € Bestellwert die kostenlose Pizza Margherita ansprechen. Die offizielle Website nennt Ratschkygasse 22, 1120 Wien; weitere Bestellungskonditionen und Aktionsverfügbarkeit vor dem Bezahlen beim Lokal klären. Kein fixes Enddatum oder öffentlicher Kopiercode auf der Angebotsseite genannt. Andere dort genannte Extras sind eigenständige Angebote.",
-      "verifiedAt": "2026-11-06T22:44:59.358Z",
-      "reviewUntil": "2026-11-07T22:44:59.358Z",
+      "method": "external",
+      "instructions": "Ab 20 € Bestellwert gibt es bei Wiener Laziz Food eine Pizza Margherita gratis dazu. Über „Bestellen“ gelangst du zu den Telefonnummern des Lokals. Sprich die Aktion bei der Bestellung an und kläre die Verfügbarkeit.",
+      "verifiedAt": "2026-11-20T13:48:14.582Z",
+      "reviewUntil": "2026-11-21T13:48:14.582Z",
       "evidence": [
         {
           "url": "https://wienerlazizfood.com/",
-          "verifiedAt": "2026-11-06T22:30:53.764Z",
+          "verifiedAt": "2026-11-20T13:48:14.582Z",
           "sha256": "4e2fb222e997e8c43c431c5b368119586fb2f7287f80a6469d620ab56143492f",
-          "method": "public-source-read",
-          "status": 200,
-          "scope": "Public-source/actual exact-post review. No purchase, account activation, successful redemption or present fare certified. Review TTL is not offer expiry."
+          "scope": "Offizielle Angebotskarte, Bestellen-Schaltfläche und verknüpfte Kontaktdaten geprüft."
         }
-      ]
+      ],
+      "url": "https://wienerlazizfood.com/#kontakt",
+      "recheck": {
+        "kind": "official-food-page",
+        "url": "https://wienerlazizfood.com/",
+        "contentHash": "b285d3b283dff0fc26035c445b01d1176e46ea3adb12ffe8a943157686538e9b"
+      },
+      "expectedPeriod": {
+        "validOn": "",
+        "validFrom": "",
+        "validUntil": "",
+        "expires": ""
+      }
     },
     {
       "dealId": "benefit-drei-plus-1g2bha9",
@@ -1427,6 +1468,12 @@
         "validFrom": "",
         "validUntil": "2027-01-02",
         "expires": "2027-01-02T09:30:00.000Z"
+      },
+      "recheck": {
+        "kind": "official-food-page",
+        "url": "https://www.ikea.com/at/de/stores/wien-nord/",
+        "contentHash": "0acb51daa8cb4867d545794039a3df7182f2488c48074c19d8e99e104e66b93b",
+        "endExclusive": "2027-01-02T09:30:00.000Z"
       }
     },
     {
@@ -1451,6 +1498,11 @@
         "validFrom": "",
         "validUntil": "",
         "expires": ""
+      },
+      "recheck": {
+        "kind": "official-food-page",
+        "url": "https://www.napoleon.wien/",
+        "contentHash": "9805ea558660a08dcbd19a59fc03ff568f7dca9c3b520e30a6467d89bd5779b2"
       }
     },
     {
@@ -1476,6 +1528,11 @@
         "validFrom": "",
         "validUntil": "",
         "expires": ""
+      },
+      "recheck": {
+        "kind": "official-food-page",
+        "url": "https://www.iamstudent.at/g/vapiano-gutschein-mit-50-prozent-studentenrabatt-gsh-wise26",
+        "contentHash": "78eb8feac3d6ec7106841a64606100ba60da5ac93452b56700ae7d3076892033"
       }
     }
   ]

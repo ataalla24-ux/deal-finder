@@ -66,7 +66,7 @@ export function maintenanceEvidenceFor(deals, cache, now = new Date()) {
 
 // Refresh only already known offer pages through the existing robots/cooldown
 // aware adapter. This does not crawl listings, approve deals or invent codes.
-export async function refreshMaintenanceEvidence({ root = process.cwd(), now = new Date(), fetchPage, fetchImpl = fetch, apply = true, offline = false, requireSameDay = false } = {}) {
+export async function refreshMaintenanceEvidence({ root = process.cwd(), now = new Date(), fetchPage, fetchImpl = fetch, apply = true, offline = false, requireSameDay = false, renewRedemptions = false } = {}) {
   const localDay = date => new Intl.DateTimeFormat('sv-SE', { timeZone: 'Europe/Vienna' }).format(date);
   if (requireSameDay && fs.existsSync(path.join(root, `reviews/${localDay(now)}-daily-blog.json`))) {
     return { report: { checkedAt: now.toISOString(), status: 'existing-daily-blog', sourceRequests: 0, offerPageAttempts: 0 } };
@@ -101,13 +101,51 @@ export async function refreshMaintenanceEvidence({ root = process.cwd(), now = n
     for await (const part of response.body) { size += part.length; if (size > 4000000) throw Error('Public source HTML limit'); chunks.push(part); }
     return { html: Buffer.concat(chunks).toString('utf8'), finalUrl: url, status: 200 };
   };
+  let checkedRouteUrls = [];
+  const readRouteUrls = new Set();
+  if (renewRedemptions && !offline) {
+    const { checkDueRedemptionPages } = await import('./food-redemption-sources.mjs');
+    const { merchantOfferHostPaused } = await import('../scraper/merchant-offer-discovery.js');
+    const states = [read(root, 'reviews/vienna-merchant-website-state.json', {}), read(root, 'reviews/vienna-merchant-offer-state.json', {})];
+    const power = read(root, 'docs/power-scraper-report.json', {});
+    const socialPause = read(root, 'docs/reviewed-social-source-pause.json', {});
+    const paused = url => {
+      const origin = new URL(url).origin;
+      if ([pauseState, socialPause].some(state => state[origin]?.retryAt
+        && !(Date.parse(state[origin].retryAt) <= +now))) return true;
+      if (Object.values(cache.entries).some(entry => entry.url && new URL(entry.url).origin === origin
+        && [401, 403, 429].includes(entry.httpStatus) && !(Date.parse(entry.nextAttemptAt) <= +now))) return true;
+      return states.some(state => merchantOfferHostPaused(url, state, now, power));
+    };
+    const getRobots = async url => {
+      const response = await boundedFetch(url, { redirect: 'manual', signal: AbortSignal.timeout(9000),
+        headers: { 'user-agent': 'FreeFinderWien/1.0 (public offer maintenance)', accept: 'text/plain' } });
+      if (response.status === 404) { await response.body?.cancel(); return ''; }
+      if (response.status !== 200 || response.url && response.url !== url || !/text\/(?:plain|html)/i.test(response.headers.get('content-type') || '')) {
+        await response.body?.cancel();
+        throw Object.assign(Error('robots-unavailable'), { httpStatus: response.status, retryAfter: response.headers.get('retry-after') });
+      }
+      let size = 0; const chunks = [];
+      for await (const part of response.body) { size += part.length; if (size > 512000) throw Error('robots-limit'); chunks.push(part); }
+      const text = Buffer.concat(chunks).toString('utf8');
+      // Some servers return valid robots directives with an HTML media type.
+      if (/<(?:!doctype|html|body|form|script)\b/i.test(text) || /text\/html/i.test(response.headers.get('content-type') || '') && !/^\s*user-agent\s*:/im.test(text))
+        throw Error('robots-not-readable');
+      return text;
+    };
+    cache.foodRedemptions ||= {};
+    const manifest = read(root, 'reviews/deal-redemptions.json', { reviews: [] });
+    for (const row of manifest.reviews) if (row.recheck?.kind === 'official-food-page') readRouteUrls.add(row.recheck.url);
+    checkedRouteUrls = await checkDueRedemptionPages({ manifest,
+      live: deals, state: cache.foodRedemptions, now, getPage: get, getRobots, remaining: () => 5 - sourceRequests, paused });
+  }
   const missing = deals.filter(d => hasOnlyPreviewDescription(d) || pendingDescription(d));
   const candidates = deals.filter(d => carrierSupported(d.url) || publicSupported(d.url) && reviewablePublicCopy(d, now));
   const selected = [...new Map(candidates.map(d => [d.url, d])).values()]
     .sort((a, b) => Number(dueDescription(b, now)) - Number(dueDescription(a, now))
       || (requireSameDay ? Number(b.category === 'essen') - Number(a.category === 'essen') : 0)
       || (Date.parse(cache.entries[a.url]?.checkedAt) || 0) - (Date.parse(cache.entries[b.url]?.checkedAt) || 0));
-  let requests = 0;
+  let requests = checkedRouteUrls.length;
   for (const deal of selected) {
     const previous = cache.entries[deal.url];
     const freshDayNeeded = requireSameDay && previous?.status === 'verified'
@@ -117,8 +155,15 @@ export async function refreshMaintenanceEvidence({ root = process.cwd(), now = n
       try { return new URL(row.url).origin === new URL(deal.url).origin && [401, 403, 429].includes(row.httpStatus)
         && (!Number.isFinite(Date.parse(row.nextAttemptAt)) || Date.parse(row.nextAttemptAt) > +now); } catch { return false; }
     });
-    const originPause = pauseState[new URL(deal.url).origin]?.retryAt;
-    if (offline || requests >= 4 || sourceRequests >= 5 || paused
+    const origin = new URL(deal.url).origin;
+    const routePause = cache.foodRedemptions?.pauses?.[origin];
+    const routeRobots = cache.foodRedemptions?.robots?.[origin];
+    const knownRoute = Object.values(cache.foodRedemptions?.pages || {}).some(proof => proof.url === deal.url)
+      || readRouteUrls.has(deal.url);
+    const routeBlocked = Date.parse(routePause) > +now || knownRoute && Date.parse(routeRobots?.expiresAt) > +now
+      && !routeRobots.paths.includes(deal.url);
+    const originPause = pauseState[origin]?.retryAt;
+    if (offline || routeBlocked || checkedRouteUrls.includes(deal.url) || requests >= 4 || sourceRequests >= 5 || paused
       || originPause && (!Number.isFinite(Date.parse(originPause)) || Date.parse(originPause) > +now)
       || previous?.parserVersion === parserVersion && Date.parse(previous?.nextAttemptAt) > +now && !freshDayNeeded) continue;
     requests++;
@@ -168,6 +213,6 @@ export async function refreshMaintenanceEvidence({ root = process.cwd(), now = n
 }
 
 if (process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.meta.url)) {
-  const { report } = await refreshMaintenanceEvidence({ offline: process.argv.includes('--offline'), apply: !process.argv.includes('--read-only'), requireSameDay: process.argv.includes('--blog-day') });
+  const { report } = await refreshMaintenanceEvidence({ offline: process.argv.includes('--offline'), apply: !process.argv.includes('--read-only'), requireSameDay: process.argv.includes('--blog-day'), renewRedemptions: process.argv.includes('--food-redemptions') });
   console.log(JSON.stringify(report, null, 2));
 }

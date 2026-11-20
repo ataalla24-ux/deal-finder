@@ -36,7 +36,9 @@ on:
       - 'reviews/native-artwork/**'
       - 'scripts/refresh-maintenance-evidence.mjs'
       - 'scripts/refresh-food-redemptions.mjs'
+      - 'scripts/food-redemption-sources.mjs'
       - 'scripts/test-food-redemption-refresh.mjs'
+      - 'scripts/test-food-redemption-sources.mjs'
       - 'reviews/deal-redemptions.json'
       - 'scraper/ai-credit-budget.js'
       - 'reviews/ai-credit-policy.json'
@@ -79,7 +81,7 @@ jobs:
         run: |
           node --test scripts/test-ai-credit-budget.mjs scripts/test-automatic-maintenance.mjs scripts/test-live-deal-enrichment.mjs scripts/test-server-quality.mjs scripts/test-server-operations.mjs scripts/test-source-publication-yield.mjs scripts/test-server-blog.mjs scripts/test-lightweight-state-committer.mjs scripts/test-native-artwork-review.mjs scripts/test-server-quality-publication-workflow.mjs
           node scripts/test-pre-publication-title.mjs
-          node --test scripts/test-original-social-copy.mjs scripts/test-food-redemption-refresh.mjs
+          node --test scripts/test-original-social-copy.mjs scripts/test-food-redemption-refresh.mjs scripts/test-food-redemption-sources.mjs
           node scripts/test-deal-photo-contract.mjs
           node --test scripts/test-original-deal-photos.mjs
           node --test scripts/test-automatic-deal-photos.mjs
@@ -89,7 +91,7 @@ jobs:
         if: steps.slot.outputs.run == 'true'
         env:
           FREEFINDER_ASTRA_ENRICHMENT: ${{ github.event_name != 'push' && '1' || '0' }}
-        run: node scripts/refresh-maintenance-evidence.mjs
+        run: node scripts/refresh-maintenance-evidence.mjs --food-redemptions
       - name: Maintain source-backed text and explicit expiry
         if: steps.slot.outputs.run == 'true'
         env:
