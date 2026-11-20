@@ -1,5 +1,6 @@
 import assert from 'node:assert/strict';
 import { applyExtraction, extractCommunityDeal, extractionKey } from '../scraper/community-extraction.js';
+import { modelForTask } from '../scraper/ai-credit-budget.js';
 const base = { id: 'community:a', submissionId: 'a', originSource: 'community-submission',
   title: 'Community-Deal prüfen', brand: 'Community Fund', description: '', distance: 'Wien', expires: '', url: 'https://www.instagram.com/p/test/' };
 const text = 'Box 16: Chicken Döner 3,50 Euro. Nur am 04.10.2026, Testgasse 9, 1160 Wien. Nur mit Gutschein.';
@@ -34,7 +35,12 @@ assert.strictEqual(await extractCommunityDeal(base,protectedDeal,{fetch:()=>asse
 assert.equal(applyExtraction(base,{validity:{value:'Veroeffentlicht am 04.10.2026',quote:'Veroeffentlicht am 04.10.2026'}},'Veroeffentlicht am 04.10.2026').validOn,undefined);
 let calls = 0;
 const extracted = await extractCommunityDeal({ ...base, description: text }, base, {
-  apiKey: 'test', crawlerKey: '', fetch: async () => { calls++; return {
+  apiKey: 'test', crawlerKey: '', fetch: async (_url, init) => {
+    calls++;
+    const body = JSON.parse(init.body);
+    assert.equal(body.model, modelForTask('extract'));
+    assert.equal(body.temperature, undefined);
+    return {
     ok: true, json: async () => ({ choices: [{ finish_reason: 'stop', message: { content: JSON.stringify(result) } }] }) }; },
 });
 assert.equal(calls, 1);

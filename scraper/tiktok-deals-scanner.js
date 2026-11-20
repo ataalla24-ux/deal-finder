@@ -1,5 +1,5 @@
 import '../sentry/instrument.mjs';
-import { modelForTask } from './ai-credit-budget.js';
+import { modelForTask, OPENAI_MODEL_TIMEOUT_MS } from './ai-credit-budget.js';
 
 import fs from 'fs';
 import { githubRunProvenance } from './pipeline-run-report-utils.js';
@@ -411,12 +411,12 @@ export function buildTikTokMediaConfig(env = process.env) {
     mediaVisionDetail: ['low', 'high', 'auto'].includes(cleanText(env.TIKTOK_MEDIA_VISION_DETAIL, 20).toLowerCase())
       ? cleanText(env.TIKTOK_MEDIA_VISION_DETAIL, 20).toLowerCase()
       : 'high',
-    mediaLlmModel: modelForTask('vision', env.TIKTOK_MEDIA_LLM_MODEL),
+    mediaLlmModel: modelForTask('vision'),
     mediaLlmMaxCallsPerRun: boundedNumber(env.TIKTOK_MEDIA_LLM_MAX_CALLS_PER_RUN, 12, 0, 20),
     mediaLlmConcurrency: boundedNumber(env.TIKTOK_MEDIA_LLM_CONCURRENCY, 2, 1, 4),
     mediaLlmMinOcrChars: boundedNumber(env.TIKTOK_MEDIA_LLM_MIN_OCR_CHARS, 12, 5, 200),
     mediaLlmMinConfidence: boundedNumber(env.TIKTOK_MEDIA_LLM_MIN_CONFIDENCE, 0.84, 0.5, 1),
-    mediaLlmTimeoutMs: boundedNumber(env.TIKTOK_MEDIA_LLM_TIMEOUT_MS, 30000, 5000, 90000),
+    mediaLlmTimeoutMs: boundedNumber(env.TIKTOK_MEDIA_LLM_TIMEOUT_MS, OPENAI_MODEL_TIMEOUT_MS, 5000, 120000),
     mediaRequestHeaders: {
       referer: 'https://www.tiktok.com/',
       'user-agent': 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 Chrome/122.0.0.0 Safari/537.36',

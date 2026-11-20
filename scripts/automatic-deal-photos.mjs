@@ -114,7 +114,8 @@ export async function maintainDealPhotos({root=process.cwd(),now=new Date(),appl
           allowNew:() => apply && allowNewVision && modelCalls < 2 && !deferred});
       } catch {deferred = true;result.status = 'visual-review-deferred';continue;}
       if (verdict.status !== 'visual-match') {result.status = verdict.status;continue;}
-      prepared.review.visualValidation = {model:modelForTask('vision'),status:verdict.status,checkedAt:verdict.checkedAt};
+      prepared.review.visualValidation = {model:verdict.model,reasoningEffort:verdict.reasoningEffort,reasoningMode:verdict.reasoningMode,
+        status:verdict.status,checkedAt:verdict.checkedAt};
     }
     result.status = 'eligible';
     if (!apply || updated.size >= 4) continue;

@@ -38,10 +38,16 @@ test('native observation requires exact current inventory and artwork inputs',()
 }));
 
 test('two native views are checked together; identical platform pixels reuse one review without rights or recipient claims',()=>fixture(async({root,row})=>{
-  let calls=0;const cache={};
-  const request=async(_url,init)=>{calls++;const body=JSON.parse(init.body);assert.equal(body.model,'gpt-6.1-terra');assert.equal(body.max_tokens,700);assert.equal(body.messages[1].content.filter(r=>r.type==='image_url').length,2);return response(good);};
+  let calls=0;
+  const context={title:row.ios.title,brand:row.ios.brand,rawTitle:deal.title,category:deal.category,description:deal.description};
+  const legacyKey=hash(JSON.stringify(['native-artwork-v1',row.ios.asset.full.sha256,row.ios.asset.card.sha256,context]));
+  const historical={status:'symbolic-match',model:'gpt-6.1-terra',checkedAt:now.toISOString()};
+  const cache={[legacyKey]:historical};
+  const request=async(_url,init)=>{calls++;const body=JSON.parse(init.body);assert.equal(body.model,'gpt-6.2-sol');assert.equal(body.reasoning_effort,'max');assert.equal(body.max_completion_tokens,8192);assert.equal(body.messages[1].content.filter(r=>r.type==='image_url').length,2);return response(good);};
   const result=await reviewNativeArtwork(deal,row,{root,cache,now,allowNew:()=>true,request});
   assert.equal(calls,1);assert.equal(result.platforms.ios.status,'symbolic-match');assert.equal(result.platforms.android.cached,true);
+  assert.equal(result.platforms.ios.model,'gpt-6.2-sol');assert.equal(result.platforms.ios.reasoningEffort,'max');
+  assert.equal(Object.keys(cache).length,2);assert.deepEqual(cache[legacyKey],historical);
   assert.equal(result.platforms.ios.provesMerchantPhoto,false);assert.equal(result.platforms.ios.automaticReplacement,false);
   assert.equal(result.recipientUiTest,false);assert.equal(result.nativeAppLaunched,false);
   await reviewNativeArtwork(deal,row,{root,cache,now,request:()=>assert.fail('cached')});

@@ -8,7 +8,7 @@ import { extractLowFoodPrice, isFoodDrinkSource } from './food-discovery-utils.j
 import { mergeMediaBacklog, saveMediaBacklog } from './instagram-media-backlog.js';
 import { extractActiveOfferWindow } from './instagram-ai-validity-utils.js';
 import { discoveryRejection, foodDiscoveryPriority } from './deal-discovery-policy.js';
-import { freeCreditOpenAiFetch } from './ai-credit-budget.js';
+import { freeCreditOpenAiFetch, OPENAI_MODEL_TIMEOUT_MS } from './ai-credit-budget.js';
 
 const execFileAsync = promisify(execFile);
 const DAY_MS = 24 * 60 * 60 * 1000;
@@ -530,7 +530,7 @@ export async function classifySocialMediaEvidenceWithOpenAI(input, config, optio
   if (!config.openAiApiKey || !config.mediaLlmEnabled) return null;
   const platform = cleanText(input?.platform, 40).toLowerCase() === 'tiktok' ? 'TikTok' : 'Instagram';
   const controller = new AbortController();
-  const timeout = setTimeout(() => controller.abort(), config.mediaLlmTimeoutMs);
+  const timeout = setTimeout(() => controller.abort(), config.mediaLlmTimeoutMs ?? OPENAI_MODEL_TIMEOUT_MS);
   try {
     const visionImages = (Array.isArray(input.visionImages) ? input.visionImages : [])
       .map(safeInputImage)

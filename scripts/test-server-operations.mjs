@@ -113,6 +113,8 @@ test('operations rechecks current drafts, withholds stale live/image audits and 
     put('reviews/server-quality-audit.json',quality);
     const report=async(options={})=>writeOperationsReport({root,now,apply:false,request:async()=>new Response('',{status:503}),...options});
     const current=await report();
+    assert.deepEqual(current.routing,{extract:'gpt-6.2-sol',vision:'gpt-6.2-sol',editor:'gpt-6.2-sol',review:'gpt-6.2-sol'});
+    assert.equal(current.routingReasoningEffort,'max');assert.equal(current.routingReasoningMode,'pro');assert.equal(current.routingScope,'new-requests');
     assert.equal(current.qualitySnapshot.status,'current');
     assert.deepEqual(current.images.review,['live']);
     assert.equal(current.images.native.status,'fixture-current');
@@ -176,6 +178,7 @@ test('credit summary includes unsettled charges, reports missing data honestly a
   const report=creditSnapshot(ledger,policy,now);
   assert.equal(report.periodReservedOrSettledUsd,0.05);assert.equal(report.rollingDayReservedOrSettledUsd,0.02);
   assert.equal(report.unsettledReservations,1);assert.equal(report.providerBalanceKnown,false);
+  assert.deepEqual(report.modelsLast24Hours,{'gpt-6.1-terra':1},'historical ledger retains the model actually requested');
   assert.equal(creditSnapshot({...ledger,creditPeriod:'old'},policy,now).status,'unavailable-or-invalid');
 });
 

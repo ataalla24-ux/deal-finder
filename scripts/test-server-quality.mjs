@@ -3,7 +3,8 @@ import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
-import { copyReviewReasons, groundedDatePatch, groundedMaintenanceDescription, maintainFeedFile, maintainDeals } from './automatic-deal-maintenance.mjs';
+import { copyReviewReasons, groundedDatePatch, groundedMaintenanceDescription, maintainFeedFile, maintainDeals, maintenanceFingerprint, protectedFields } from './automatic-deal-maintenance.mjs';
+import {photoDigest} from './deal-photo-contract.mjs';
 import { verifyOfficialFoodDeal } from '../scraper/power-food-verification.js';
 import { extractCouponMediaOffers } from '../scraper/official-coupon-media.js';
 import { qualitySlotReceipt, viennaQualitySlot } from './vienna-quality-slot.mjs';
@@ -96,7 +97,8 @@ async function fixture(callback) {
 }
 const mock=(draft, approve=true)=>async(_url,init)=>{
   const body=JSON.parse(init.body);
-  return Response.json({choices:[{finish_reason:'stop',message:{content:JSON.stringify(body.model==='gpt-6.1-sol'?{supported:approve}:draft)}}]});
+  const verification=body.response_format.json_schema.schema.required.includes('supported');
+  return Response.json({choices:[{finish_reason:'stop',message:{content:JSON.stringify(verification?{supported:approve}:draft)}}]});
 };
 
 test('missing conditions and date can be completed without rewriting a protected title; replay is exact',()=>fixture(async({cwd,put})=>{
@@ -111,7 +113,10 @@ test('missing conditions and date can be completed without rewriting a protected
   assert.equal(result.state.corrections[0].conditionsQuote,quote,'source passage remains audit evidence');
   assert.equal(result.deals[0].validOn,'2026-11-07');
   assert.equal(result.deals[0].votes,12);
-  assert.deepEqual(maintainDeals([deal],{policy,now,state:result.state}).deals,result.deals);
+  const historical=structuredClone(result.state);
+  historical.corrections[0].method='source-grounded-terra-draft-sol-verification';
+  historical.corrections[0].models={editor:'gpt-6.1-terra',review:'gpt-6.1-sol'};
+  assert.deepEqual(maintainDeals([deal],{policy,now,state:historical}).deals,result.deals);
   const changedEvidence=new Map([['test',{caption:'Nur am 20.11.2026'}]]);
   assert.deepEqual(maintainDeals([deal],{policy,now,state:result.state,sourceEvidence:changedEvidence}).deals,[deal]);
 }));
@@ -128,6 +133,25 @@ test('manual clears stay empty, second review can veto, unchanged failed review 
   assert.equal(calls,2);
   await maintainFeedFile({cwd,now,apply:true,allowAi:true,request});
   assert.equal(calls,2,'same evidence must not spend again every dispatch');
+}));
+
+test('a legacy failed copy check cannot suppress the GPT-6.2 review of unchanged source evidence',()=>fixture(async({cwd,put})=>{
+  const quote='Gratis Kaffee mit Gutschein.';
+  const deal={id:'legacy',title:'Die allerbeste neue fantastische Kaffeeaktion mit besonders vielen Worten und mehr',description:'',metaGraphCaption:quote};
+  const edits=[{dealId:deal.id,clearFields:['description','validUntil']}];
+  const fields=protectedFields(deal,edits);
+  const oldHash=photoDigest(JSON.stringify([maintenanceFingerprint(deal),sourceTexts(deal),[...fields].sort(),3]));
+  const historicalCheck={id:deal.id,hash:oldHash,at:now.toISOString(),outcome:'no-safe-patch'};
+  put('docs/deals.json',{deals:[deal]});
+  put('docs/live-deal-edits.json',{edits});
+  put('reviews/automatic-deal-maintenance-state.json',{corrections:[],hidden:[],checks:[historicalCheck]});
+  let calls=0;
+  const draft=mock({title:'Gratis Kaffee mit Gutschein',quote},false);
+  const result=await maintainFeedFile({cwd,now,apply:true,allowAi:true,request:(...args)=>{calls++;return draft(...args);}});
+  assert.equal(calls,2);
+  assert.deepEqual(result.state.checks[0],historicalCheck);
+  assert.equal(result.state.checks.length,2);
+  assert.deepEqual(result.state.checks[1].models,{editor:'gpt-6.2-sol',review:'gpt-6.2-sol'});
 }));
 
 test('description proposals reject copied source blocks and unsupported numbers before independent review',()=>{
@@ -199,10 +223,16 @@ test('quality checks are advisory and never grant approval based on model or map
 test('image reviews are content-addressed, bounded and cannot claim photo rights or change photos',()=>fixture(async({cwd})=>{
   fs.mkdirSync(path.join(cwd,'docs/assets'),{recursive:true});
   fs.writeFileSync(path.join(cwd,'docs/assets/fixture.webp'),Buffer.from('offline-image-fixture'));
-  const cache={},deal={title:'Burger',brand:'Test'},photo={src:'/assets/fixture.webp',alt:'Symbolfoto: Burger'};
+  const deal={title:'Burger',brand:'Test'},photo={src:'/assets/fixture.webp',alt:'Symbolfoto: Burger'};
+  const legacyKey=photoDigest(JSON.stringify([3,photoDigest(Buffer.from('offline-image-fixture')),
+    {...deal,category:'',description:'',alt:photo.alt}]));
+  const historical={status:'symbolic-match',model:'gpt-6.1-terra',checkedAt:now.toISOString()};
+  const cache={[legacyKey]:historical};
   let calls=0;
-  const request=async(_url,init)=>{calls++;const body=JSON.parse(init.body);assert.equal(body.model,'gpt-6.1-terra');assert.equal(body.max_tokens,700);const context=JSON.parse(body.messages[1].content[0].text);assert('description' in context);assert('category' in context);return Response.json({choices:[{finish_reason:'stop',message:{content:JSON.stringify({matchesProduct:true,emptyTableOrPackaging:false,uncertain:false})}}]});};
+  const request=async(_url,init)=>{calls++;const body=JSON.parse(init.body);assert.equal(body.model,'gpt-6.2-sol');assert.equal(body.reasoning_effort,'max');assert.equal(body.max_completion_tokens,8192);const context=JSON.parse(body.messages[1].content[0].text);assert('description' in context);assert('category' in context);return Response.json({choices:[{finish_reason:'stop',message:{content:JSON.stringify({matchesProduct:true,emptyTableOrPackaging:false,uncertain:false})}}]});};
   const result=await reviewPhoto(deal,photo,{root:cwd,cache,now,request});
+  assert.equal(result.model,'gpt-6.2-sol');assert.equal(result.reasoningEffort,'max');
+  assert.deepEqual(cache[legacyKey],historical);assert.equal(Object.keys(cache).length,2);
   assert.equal(result.provesMerchantPhoto,false);assert.equal(result.automaticReplacement,false);
   await reviewPhoto(deal,photo,{root:cwd,cache,now,request});assert.equal(calls,1);
   await reviewPhoto({...deal,title:'Pizza'},photo,{root:cwd,cache,now,request});assert.equal(calls,2);

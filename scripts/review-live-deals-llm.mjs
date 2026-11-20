@@ -16,7 +16,7 @@ const DEALS_PATH = path.join(DOCS_DIR, 'deals.json');
 const REPORT_PATH = path.join(DOCS_DIR, 'live-deal-llm-review.json');
 const CACHE_PATH = path.join(DOCS_DIR, 'source-review-cache.json');
 
-const MODEL = modelForTask('review', process.env.DEAL_REVIEW_MODEL);
+const MODEL = modelForTask('review');
 const MAX_DEALS = numberEnv('DEAL_REVIEW_MAX_DEALS', 160);
 const CHUNK_SIZE = Math.max(1, Math.min(32, numberEnv('DEAL_REVIEW_CHUNK_SIZE', 24)));
 const MIN_REMOVE_CONFIDENCE = Math.max(0, Math.min(1, numberEnv('DEAL_REVIEW_MIN_REMOVE_CONFIDENCE', 0.86)));
@@ -579,7 +579,6 @@ async function requestLiveDealChunk(deals, referenceDate) {
     },
     body: JSON.stringify({
       model: MODEL,
-      temperature: 0,
       response_format: {
         type: 'json_schema',
         json_schema: {

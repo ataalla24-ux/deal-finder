@@ -125,13 +125,23 @@ test('image binding survives edit-store replay and disables image on changed dea
 });
 
 test('visual review sees real full/crop bytes and cache cannot override changed permission',()=>fixture(async root=>{
-  const {deal,review,filename,asset}=await bound(root);const cache={};let calls=0;
+  const {deal,review,filename,asset}=await bound(root);
+  const historicalValidation={model:'gpt-6-astra',status:'visual-match',checkedAt:now.toISOString()};
+  write(root,'reviews/deal-photos/'+filename+'.json',{...review,visualValidation:historicalValidation});
+  const context={id:deal.id,title:deal.title,brand:deal.brand,category:deal.category,description:deal.description,
+    imageKind:'merchant-photo',subjectHash:review.subjectHash};
+  const legacyKey=photoDigest(JSON.stringify(['bound-original-photo-v2:gpt-6-astra:max',photoDigest(asset.bytes),photoDigest(asset.card),context]));
+  const historical={...verdict,status:'visual-match',...historicalValidation};
+  const cache={[legacyKey]:historical};let calls=0;
   const request=async(url,options)=>{calls++;const body=JSON.parse(options.body);assert.equal(body.store,false);
     const imgs=body.messages[1].content.slice(1).map(i=>Buffer.from(i.image_url.url.split(',')[1],'base64'));
     assert.ok(imgs[0].equals(asset.bytes));assert.ok(imgs[1].equals(asset.card));
     return {ok:true,json:async()=>({choices:[{finish_reason:'stop',message:{content:JSON.stringify(verdict)}}]})};};
   const first=await reviewBoundOriginalPhoto(deal,{root,cache,now,allowNew:()=>true,request});
   assert.equal(first.status,'visual-match');assert.equal(first.provesMerchantPhoto,false);assert.equal(first.automaticReplacement,false);
+  assert.equal(first.model,'gpt-6.2-sol');assert.equal(first.reasoningEffort,'max');assert.equal(first.reasoningMode,'pro');
+  assert.deepEqual(cache[legacyKey],historical);assert.equal(Object.keys(cache).length,2);
+  assert.deepEqual((await inspectBoundOriginalPhoto(deal,{root})).review.visualValidation,historicalValidation);
   assert.equal((await reviewBoundOriginalPhoto(deal,{root,cache,now,request})).cached,true);assert.equal(calls,1);
   write(root,'reviews/deal-photos/'+filename+'.json',{...review,revoked:true});
   assert.equal((await reviewBoundOriginalPhoto(deal,{root,cache,now,request})).status,'needs-review');assert.equal(calls,1);

@@ -354,7 +354,7 @@ const merchantWorker = {
       }
 
       if (request.method === "POST" && url.pathname === "/api/deals/review") {
-        return reviewDeals(request, env);
+        return reviewDeals(request);
       }
 
       if (request.method === "GET" && url.pathname === "/api/deals/interactions") {
@@ -979,15 +979,14 @@ function applyInteractionIntent(record, action, deviceId, payload) {
   return record;
 }
 
-async function reviewDeals(request, env) {
+async function reviewDeals(request) {
   const payload = await readPayload(request);
   const deals = Array.isArray(payload.deals) ? payload.deals.slice(0, 160) : [];
   if (!deals.length) {
     return json({ ok: true, issues: [], fixes: [], removedDealIDs: [] });
   }
 
-  const llmIssues = await reviewDealsWithLLM(deals, env);
-  const issues = llmIssues && llmIssues.length ? llmIssues : heuristicDealIssues(deals);
+  const issues = heuristicDealIssues(deals);
   const corrections = automaticDealCorrections(deals);
   return json({
     ok: true,
@@ -995,87 +994,6 @@ async function reviewDeals(request, env) {
     fixes: corrections.fixes,
     removedDealIDs: corrections.removedDealIDs,
   });
-}
-
-async function reviewDealsWithLLM(deals, env) {
-  if (!env.OPENAI_API_KEY) return null;
-
-  const compactDeals = deals.map((deal) => ({
-    id: cleanText(deal.id, 120),
-    brand: cleanText(deal.brand, 90),
-    title: cleanText(deal.title, 180),
-    description: cleanText(deal.description, 300),
-    category: cleanText(deal.category, 60),
-    type: cleanText(deal.type, 60),
-    expires: cleanText(deal.expires, 120),
-    location: cleanText(deal.location || deal.distance, 140),
-    url: cleanURL(deal.url),
-  }));
-
-  const body = {
-    model: env.OPENAI_MODEL || "gpt-4.1-mini",
-    temperature: 0,
-    response_format: {
-      type: "json_schema",
-      json_schema: {
-        name: "freefinder_deal_review",
-        strict: true,
-        schema: {
-          type: "object",
-          additionalProperties: false,
-          properties: {
-            issues: {
-              type: "array",
-              maxItems: 16,
-              items: {
-                type: "object",
-                additionalProperties: false,
-                properties: {
-                  id: { type: "string" },
-                  dealID: { type: "string" },
-                  severity: { type: "string", enum: ["low", "medium", "high"] },
-                  message: { type: "string" },
-                  suggestion: { type: "string" },
-                },
-                required: ["id", "dealID", "severity", "message", "suggestion"],
-              },
-            },
-          },
-          required: ["issues"],
-        },
-      },
-    },
-    messages: [
-      {
-        role: "system",
-        content:
-          "Du bist der FreeFinder Deal-Check-Agent. Prüfe Deals auf falsche Kategorie, unklare Quelle, fehlenden Link, unplausible Laufzeit, doppelte IDs und offensichtliche Textfehler. Gib nur wichtige, konkrete Hinweise zurück. Flüge sind nur echte Flug-/Airline-Angebote; OMV/Tankstelle/TopWash/MaxxMotion sind keine Flüge.",
-      },
-      {
-        role: "user",
-        content: JSON.stringify({ deals: compactDeals }),
-      },
-    ],
-  };
-
-  try {
-    const response = await fetch("https://api.openai.com/v1/chat/completions", {
-      method: "POST",
-      headers: {
-        "content-type": "application/json",
-        authorization: `Bearer ${env.OPENAI_API_KEY}`,
-      },
-      body: JSON.stringify(body),
-    });
-    if (!response.ok) return null;
-    const data = await response.json();
-    const content = data?.choices?.[0]?.message?.content;
-    if (!content) return null;
-    const parsed = JSON.parse(content);
-    return normalizeDealIssues(parsed.issues, deals);
-  } catch {
-    return null;
-  }
 }
 
 function instagramAgentHealth(env) {
@@ -1105,8 +1023,7 @@ async function discoverInstagramDeals(request, env) {
   const config = instagramAgentConfig(env);
   const graphMedia = config.accessToken && config.userId ? await fetchInstagramGraphMedia(config) : [];
   const media = uniqueInstagramMedia(manualMedia.concat(graphMedia)).slice(0, INSTAGRAM_MAX_MEDIA);
-  const llmDeals = await instagramDealsWithLLM(media, env, startedAt);
-  const deals = normalizeInstagramDeals(llmDeals && llmDeals.length ? llmDeals : heuristicInstagramDeals(media, startedAt), media, startedAt);
+  const deals = normalizeInstagramDeals(heuristicInstagramDeals(media, startedAt), media, startedAt);
   const response = {
     ok: true,
     generatedAt: startedAt.toISOString(),
@@ -1203,122 +1120,6 @@ async function fetchInstagramAccountMedia(account, config) {
   const payload = await response.json();
   const media = payload?.business_discovery?.media?.data || [];
   return normalizeInstagramMedia(media, "account", `@${account}`, payload?.business_discovery?.username || account);
-}
-
-async function instagramDealsWithLLM(media, env, referenceDate) {
-  if (!env.OPENAI_API_KEY || !media.length) return null;
-
-  const compactMedia = media.slice(0, INSTAGRAM_MAX_MEDIA).map((item) => ({
-    id: cleanText(item.id, 100),
-    caption: cleanText(item.caption, 1800),
-    permalink: cleanURL(item.permalink),
-    timestamp: cleanText(item.timestamp, 80),
-    sourceType: cleanText(item.sourceType, 30),
-    sourceName: cleanText(item.sourceName, 80),
-    username: cleanText(item.username, 80),
-    likeCount: Number(item.likeCount || 0),
-    commentsCount: Number(item.commentsCount || 0),
-  }));
-
-  const body = {
-    model: env.OPENAI_MODEL || "gpt-4.1-mini",
-    temperature: 0,
-    response_format: {
-      type: "json_schema",
-      json_schema: {
-        name: "freefinder_instagram_deals",
-        strict: true,
-        schema: {
-          type: "object",
-          additionalProperties: false,
-          properties: {
-            deals: {
-              type: "array",
-              maxItems: 24,
-              items: {
-                type: "object",
-                additionalProperties: false,
-                properties: {
-                  id: { type: "string" },
-                  brand: { type: "string" },
-                  title: { type: "string" },
-                  description: { type: "string" },
-                  type: { type: "string", enum: ["gratis", "rabatt", "testabo", "event", "deal"] },
-                  category: { type: "string" },
-                  source: { type: "string" },
-                  url: { type: "string" },
-                  expires: { type: "string" },
-                  distance: { type: "string" },
-                  location: { type: "string" },
-                  hot: { type: "boolean" },
-                  isNew: { type: "boolean" },
-                  priority: { type: "integer" },
-                  votes: { type: "integer" },
-                  confidence: { type: "number" },
-                  evidence: { type: "string" },
-                },
-                required: [
-                  "id",
-                  "brand",
-                  "title",
-                  "description",
-                  "type",
-                  "category",
-                  "source",
-                  "url",
-                  "expires",
-                  "distance",
-                  "location",
-                  "hot",
-                  "isNew",
-                  "priority",
-                  "votes",
-                  "confidence",
-                  "evidence",
-                ],
-              },
-            },
-          },
-          required: ["deals"],
-        },
-      },
-    },
-    messages: [
-      {
-        role: "system",
-        content:
-          "Du bist der FreeFinder Instagram-Deal-Agent fuer Wien. Extrahiere nur echte, einloesbare Angebote, Gratisaktionen, Rabatte, Gewinnspiele oder Events aus Instagram-Captions. Nimm nur Deals fuer Wien/Vienna oder online nutzbare Deals fuer Wien. Nimm nur aktuelle oder zukuenftige Deals; abgelaufene Aktionen werden verworfen. Wenn ein Datum ohne Jahr genannt wird, nutze das naheliegende Jahr relativ zum Referenzdatum. Keine allgemeinen Werbeposts, keine reinen Restaurantfotos ohne Angebot. Antworte nur als JSON.",
-      },
-      {
-        role: "user",
-        content: JSON.stringify({
-          referenceDate: referenceDate.toISOString(),
-          timezone: "Europe/Vienna",
-          outputShape: "NativeDeal[]",
-          media: compactMedia,
-        }),
-      },
-    ],
-  };
-
-  try {
-    const response = await fetch("https://api.openai.com/v1/chat/completions", {
-      method: "POST",
-      headers: {
-        "content-type": "application/json",
-        authorization: `Bearer ${env.OPENAI_API_KEY}`,
-      },
-      body: JSON.stringify(body),
-    });
-    if (!response.ok) return null;
-    const data = await response.json();
-    const content = data?.choices?.[0]?.message?.content;
-    if (!content) return null;
-    const parsed = JSON.parse(content);
-    return Array.isArray(parsed.deals) ? parsed.deals : null;
-  } catch {
-    return null;
-  }
 }
 
 function heuristicInstagramDeals(media, referenceDate) {
@@ -1826,20 +1627,6 @@ function monthNumber(value) {
     november: 11,
     dezember: 12,
   }[value];
-}
-
-function normalizeDealIssues(issues, deals) {
-  if (!Array.isArray(issues)) return [];
-  const validIDs = new Set(deals.map((deal) => cleanText(deal.id, 120)).filter(Boolean));
-  return issues
-    .map((issue, index) => ({
-      id: cleanText(issue.id, 160) || `issue-${index}`,
-      dealID: cleanText(issue.dealID, 120),
-      severity: ["low", "medium", "high"].includes(issue.severity) ? issue.severity : "medium",
-      message: cleanText(issue.message, 260),
-      suggestion: cleanText(issue.suggestion, 320),
-    }))
-    .filter((issue) => issue.dealID && validIDs.has(issue.dealID) && issue.message && issue.suggestion);
 }
 
 function dealIssue(deal, severity, message, suggestion) {

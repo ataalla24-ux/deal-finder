@@ -14,7 +14,7 @@ import {
 import { normalizeCategoryForScraper } from './category-utils.js';
 import { discoveryRejection } from './deal-discovery-policy.js';
 import { requestOpenAi } from './instagram-media-evidence.js';
-import { modelForTask } from './ai-credit-budget.js';
+import { modelForTask, OPENAI_MODEL_TIMEOUT_MS } from './ai-credit-budget.js';
 import { createInstagramWebAccess } from './instagram-web-access-policy.js';
 import { instagramPageHasAccessWall } from './instagram-page-access.js';
 import { githubRunProvenance } from './pipeline-run-report-utils.js';
@@ -100,7 +100,7 @@ const CONFIG = {
   previewFetchEnabled: process.env.INSTAGRAM_AI_FETCH_PAGES !== '0',
   renderFetchEnabled: process.env.INSTAGRAM_AI_RENDER_PAGES !== '0',
   aiEnabled: process.env.INSTAGRAM_AI_DISABLE_AI !== '1',
-  model: modelForTask('review', process.env.INSTAGRAM_AI_MODEL),
+  model: modelForTask('review'),
 };
 
 const INSTAGRAM_COOKIE_HINTS = loadInstagramCookieHints();
@@ -2255,7 +2255,6 @@ async function classifyAiBatch(candidates, options = {}) {
   const body = {
     model: CONFIG.model,
     max_tokens: 4096,
-    temperature: 0.1,
     response_format: {
       type: 'json_schema',
       json_schema: {
@@ -2314,7 +2313,7 @@ async function classifyAiBatch(candidates, options = {}) {
   try {
     const response = await requestOpenAi('https://api.openai.com/v1/chat/completions', {
       method: 'POST',
-      signal: AbortSignal.timeout(45000),
+      signal: AbortSignal.timeout(OPENAI_MODEL_TIMEOUT_MS),
       headers: {
         authorization: `Bearer ${apiKey}`,
         'content-type': 'application/json',

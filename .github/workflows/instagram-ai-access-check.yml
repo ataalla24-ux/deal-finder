@@ -3,6 +3,10 @@ name: Instagram AI Access Check
 on:
   workflow_dispatch:
     inputs:
+      models_only:
+        description: Verify GPT-6.2 Sol and Astra without running Instagram recovery
+        type: boolean
+        default: false
       recover:
         description: Retry failed Meta Instagram AI evidence after a successful access check
         type: boolean
@@ -18,7 +22,7 @@ permissions:
 jobs:
   check:
     runs-on: ubuntu-latest
-    timeout-minutes: 5
+    timeout-minutes: 15
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -28,13 +32,15 @@ jobs:
       - name: Test recovery safety without API requests
         env:
           SENTRY_DISABLED: '1'
-        run: node scripts/test-instagram-ai-access.mjs
+        run: |
+          node scripts/test-instagram-ai-access.mjs
+          node --test scripts/test-ai-model-routing.mjs
       - name: Verify one synthetic image request without Slack delivery
+        if: ${{ !inputs.models_only }}
         env:
           SENTRY_DISABLED: '1'
           OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
           GH_TOKEN: ${{ github.token }}
-          OPENAI_MODEL: ${{ secrets.OPENAI_MODEL }}
           RECOVER: ${{ inputs.recover }}
         run: |
           if [ "$RECOVER" = "true" ]; then
@@ -42,12 +48,19 @@ jobs:
           else
             node scripts/check-instagram-ai-access.mjs
           fi
-      - name: Verify task models through the shared free-credit budget
+      - name: Verify GPT-6.2 Sol with the production key
+        env:
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+          GH_TOKEN: ${{ github.token }}
+          FREEFINDER_ASTRA_ENRICHMENT: '0'
+        run: node scripts/check-ai-model-routing.mjs --verify-model sol
+      - name: Verify GPT-6.2 Astra with the production key
         env:
           SENTRY_DISABLED: '1'
           OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
           GH_TOKEN: ${{ github.token }}
-        run: node scripts/check-ai-model-routing.mjs
+          FREEFINDER_ASTRA_ENRICHMENT: '1'
+        run: node scripts/check-ai-model-routing.mjs --verify-model astra
       - name: Persist successfully recovered evidence state
-        if: inputs.recover
+        if: ${{ inputs.recover && !inputs.models_only }}
         run: node scripts/commit-generated.mjs --message "Recover Instagram AI evidence after successful access check" --files docs/meta-instagram-state.json

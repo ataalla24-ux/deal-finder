@@ -1,6 +1,6 @@
 import { sharedInstagramFetch } from './instagram-shared-quota.js';
 import { currentOriginalOffer, graphOriginalRecord } from './current-original-offer.js';
-import { modelForTask } from './ai-credit-budget.js';
+import { modelForTask, OPENAI_MODEL_TIMEOUT_MS } from './ai-credit-budget.js';
 import { scanAdLibraryCoverage, hasFreshActiveAdEvidence, isAdPayloadTooLarge, smallerAdPageSize } from './meta-ad-library-coverage.js';
 import { selectDiscoveryAccounts } from './vienna-merchant-discovery.js';
 import { selectCoverageAccounts, selectCoverageHashtags, accountCoverageSummary } from './instagram-source-scheduler.js';
@@ -336,12 +336,12 @@ export function buildConfig(env = process.env, now = new Date()) {
     mediaVisionDetail: ['low', 'high', 'auto'].includes(cleanText(env.META_INSTAGRAM_MEDIA_VISION_DETAIL, 20).toLowerCase())
       ? cleanText(env.META_INSTAGRAM_MEDIA_VISION_DETAIL, 20).toLowerCase()
       : 'high',
-    mediaLlmModel: modelForTask('vision', env.META_INSTAGRAM_MEDIA_LLM_MODEL),
+    mediaLlmModel: modelForTask('vision'),
     mediaLlmMaxCallsPerRun: numberEnv(env, 'META_INSTAGRAM_MEDIA_LLM_MAX_CALLS_PER_RUN', 8, 0, 30),
     mediaLlmConcurrency: numberEnv(env, 'META_INSTAGRAM_MEDIA_LLM_CONCURRENCY', 2, 1, 4),
     mediaLlmMinOcrChars: numberEnv(env, 'META_INSTAGRAM_MEDIA_LLM_MIN_OCR_CHARS', 20, 5, 500),
     mediaLlmMinConfidence: numberEnv(env, 'META_INSTAGRAM_MEDIA_LLM_MIN_CONFIDENCE', 0.82, 0.5, 1),
-    mediaLlmTimeoutMs: numberEnv(env, 'META_INSTAGRAM_MEDIA_LLM_TIMEOUT_MS', 30000, 5000, 120000),
+    mediaLlmTimeoutMs: numberEnv(env, 'META_INSTAGRAM_MEDIA_LLM_TIMEOUT_MS', OPENAI_MODEL_TIMEOUT_MS, 5000, 120000),
     openAiApiKey: cleanText(env.OPENAI_API_KEY, 700),
     outputPath: cleanText(env.META_INSTAGRAM_OUTPUT_PATH, 500) || DEFAULT_OUTPUT_PATH,
     reportPath: cleanText(env.META_INSTAGRAM_REPORT_PATH, 500) || DEFAULT_REPORT_PATH,

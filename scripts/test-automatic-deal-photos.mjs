@@ -148,6 +148,9 @@ test('visual validation requires clear exact product and crop within its existin
   const live = readJson(path.join(root,'docs/deals.json')).deals;
   const {review} = await inspectBoundOriginalPhoto(live.find(deal => deal.id === 'abby'),{root});
   assert.equal(review.visualValidation.status,'visual-match');
+  assert.equal(review.visualValidation.model,'gpt-6.2-sol');
+  assert.equal(review.visualValidation.reasoningEffort,'max');
+  assert.equal(review.visualValidation.reasoningMode,'pro');
   assert.equal(live.find(deal => deal.id === 'tuna').photoUrl,undefined);
   seen = [];
   const second = await maintainDealPhotos({...options,request});

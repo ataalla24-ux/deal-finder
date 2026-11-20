@@ -4,7 +4,7 @@ import { fileURLToPath } from 'node:url';
 import { createHash } from 'node:crypto';
 import { load } from 'cheerio';
 import { maintenanceEvidenceFor } from './refresh-maintenance-evidence.mjs';
-import { freeCreditOpenAiFetch, modelForTask } from '../scraper/ai-credit-budget.js';
+import { freeCreditOpenAiFetch, modelForTask, OPENAI_MODEL_TIMEOUT_MS } from '../scraper/ai-credit-budget.js';
 import { validateBlogDraft, blogDigest, inspectBlogArticle, inspectBlogRevision, blogIndexCardFingerprint } from './server-blog-content.mjs';
 export { validateBlogDraft } from './server-blog-content.mjs';
 
@@ -72,7 +72,7 @@ export async function prepareServerBlog({root=process.cwd(),now=new Date(),allow
         state.attempts.push(attempt);
         async function complete(role,schema,prompt,input){
           report.modelCalls++;
-          const response=await request('https://api.openai.com/v1/chat/completions',{method:'POST',signal:AbortSignal.timeout(45000),
+          const response=await request('https://api.openai.com/v1/chat/completions',{method:'POST',signal:AbortSignal.timeout(OPENAI_MODEL_TIMEOUT_MS),
             headers:{authorization:`Bearer ${process.env.OPENAI_API_KEY}`,'content-type':'application/json'},
             body:JSON.stringify({model:modelForTask(role),store:false,max_tokens:3500,
               response_format:{type:'json_schema',json_schema:{name:'grounded_blog_draft',strict:true,schema}},

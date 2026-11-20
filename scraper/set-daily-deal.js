@@ -23,7 +23,7 @@ const REVIEW_CACHE_PATH = path.join(__dirname, '..', 'docs', 'source-review-cach
 
 const SLACK_BOT_TOKEN = process.env.SLACK_BOT_TOKEN || '';
 const SLACK_CHANNEL_ID = process.env.SLACK_CHANNEL_ID || '';
-const FEATURED_LLM_MODEL = modelForTask('review', process.env.FEATURED_DEAL_REVIEW_MODEL || process.env.DEAL_REVIEW_MODEL);
+const FEATURED_LLM_MODEL = modelForTask('review');
 const FEATURED_WEEKLY_LLM_REQUIRED = process.env.FEATURED_WEEKLY_LLM_REQUIRED === '1';
 const FEATURED_WEEKLY_LLM_MIN_CONFIDENCE = Math.max(0, Math.min(1, Number(process.env.FEATURED_WEEKLY_LLM_MIN_CONFIDENCE || 0.55)));
 const FEATURED_TARGET_TIMEOUT_MS = Number(process.env.FEATURED_DEAL_TARGET_TIMEOUT_MS || process.env.URL_CHECK_TIMEOUT_MS || 7000);
@@ -513,7 +513,6 @@ async function reviewWeeklyDealActiveWithLLM(deal, options = {}) {
             },
             body: JSON.stringify({
                 model: FEATURED_LLM_MODEL,
-                temperature: 0,
                 response_format: {
                     type: 'json_schema',
                     json_schema: {

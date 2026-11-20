@@ -16,6 +16,7 @@ import {
   selectHashtagShard,
 } from '../scraper/meta-instagram-deals.js';
 import { runCheck as runMetaInstagramGraphHealthCheck } from './check-meta-instagram-graph.mjs';
+import { modelForTask, OPENAI_MODEL_TIMEOUT_MS } from '../scraper/ai-credit-budget.js';
 
 const now = new Date('2026-07-17T10:00:00.000Z');
 const config = buildConfig({
@@ -25,6 +26,10 @@ const config = buildConfig({
   META_AD_LIBRARY_MAX_AGE_DAYS: '30',
 }, now);
 const hardAgeConfig = buildConfig({ META_INSTAGRAM_MAX_POST_AGE_WITH_EXPIRY_DAYS: '30' }, now);
+assert.equal(config.mediaLlmTimeoutMs, OPENAI_MODEL_TIMEOUT_MS);
+assert.equal(buildConfig({ META_INSTAGRAM_MEDIA_LLM_MODEL: 'gpt-6-luna' }, now).mediaLlmModel, modelForTask('vision'));
+assert.equal(buildConfig({ META_INSTAGRAM_MEDIA_LLM_TIMEOUT_MS: '30000' }, now).mediaLlmTimeoutMs, 30000,
+  'explicit media model deadlines remain bounded configuration');
 assert.equal(hardAgeConfig.maxOrganicAgeWithExpiryDays, 7, 'Meta configuration cannot widen social-post age beyond seven days');
 const boundedHashtagConfig = buildConfig({ META_INSTAGRAM_MAX_HASHTAGS_PER_RUN: '99' }, now);
 assert.equal(boundedHashtagConfig.maxHashtagsPerRun, 30, 'Meta hashtag selection stays within the platform search ceiling');

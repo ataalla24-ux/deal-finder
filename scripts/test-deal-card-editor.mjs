@@ -1,6 +1,7 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { applyCardEditorial, createCardEditor as optionalCardEditor, editorialKey } from '../scraper/deal-card-editor.js';
+import { modelForTask, OPENAI_MODEL_TIMEOUT_MS } from '../scraper/ai-credit-budget.js';
 
 const createCardEditor = options => optionalCardEditor({ enabled: true, ...options });
 
@@ -51,6 +52,8 @@ test('cache avoids repeat API calls, changed evidence invalidates cache', async 
     calls++;
     const body = JSON.parse(options.body);
     assert.equal(body.store, false);
+    assert.equal(body.temperature, undefined);
+    assert.equal(body.model, modelForTask('editor'));
     assert.equal(body.response_format.type, 'json_schema');
     return reply(body.response_format.json_schema.name === 'deal_card_editor' ? proposal : { supported: true, whenSupported: true, reason: 'Supported' });
   }, onCache: () => { saves++; } });
@@ -86,4 +89,26 @@ test('dispatch time budget defers AI without blocking delivery', async () => {
   const next = await edit(deal);
   assert.equal(next.id, deal.id);
   assert.equal(next.cardEditorial.status, 'time-budget-deferred');
+});
+test('two model passes receive the central timeout while explicit card deadlines retain priority', async () => {
+  const timeout = AbortSignal.timeout;
+  const timeouts = [];
+  AbortSignal.timeout = milliseconds => {
+    timeouts.push(milliseconds);
+    return new AbortController().signal;
+  };
+  try {
+    const request = async (_url, options) => {
+      const body = JSON.parse(options.body);
+      return reply(body.response_format.json_schema.name === 'deal_card_title_check'
+        ? { supported: true, whenSupported: true, reason: '' } : proposal);
+    };
+    await createCardEditor({ apiKey: 'test', request, clock: () => 0 })(deal);
+    assert.deepEqual(timeouts, [OPENAI_MODEL_TIMEOUT_MS, OPENAI_MODEL_TIMEOUT_MS]);
+    timeouts.length = 0;
+    await createCardEditor({ apiKey: 'test', request, clock: () => 0, maxDurationMs: 90_000 })(deal);
+    assert.deepEqual(timeouts, [90_000, 90_000], 'an explicit dispatch deadline may shorten each model call');
+  } finally {
+    AbortSignal.timeout = timeout;
+  }
 });

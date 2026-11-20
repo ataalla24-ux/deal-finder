@@ -3,7 +3,8 @@ import { test } from 'node:test';
 import { mkdir, mkdtemp, rm, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
-import { reviewApprovedCopy } from './automatic-deal-maintenance.mjs';
+import { copyReviewReasons,maintenanceFingerprint,reviewApprovedCopy,sourceTexts } from './automatic-deal-maintenance.mjs';
+import {photoDigest} from './deal-photo-contract.mjs';
 
 test('grounded Slack approval copy uses both roles once, respects edits and does not invent conditions', async () => {
   const cwd = await mkdtemp(join(tmpdir(), 'approved-copy-'));
@@ -19,11 +20,14 @@ test('grounded Slack approval copy uses both roles once, respects edits and does
       assert.equal(url, 'https://api.openai.com/v1/chat/completions');
       const body = JSON.parse(init.body);
       assert.equal(body.store, false);
+      assert.equal(body.model,'gpt-6.2-sol');
+      assert.equal(body.reasoning_effort,'max');
       assert.ok(!JSON.stringify(body).includes('not model input'));
       calls++;
-      const content = calls % 2 === 1 ? { title: 'Pizza für 7,90 € bei Abholung', quote,
+      const verification=body.response_format.json_schema.schema.required.includes('supported');
+      const content = verification ? { supported: true } : { title: 'Pizza für 7,90 € bei Abholung', quote,
         description: 'Bei Abholung kostet die Pizza 7,90 Euro. Nur am 13.11.2026.', conditionsQuote: conditions,
-        dateQuote: 'Gilt nur am 13.11.2026.' } : { supported: true };
+        dateQuote: 'Gilt nur am 13.11.2026.' };
       return Response.json({ choices: [{ finish_reason: 'stop', message: { content: JSON.stringify(content) } }] });
     };
     const [result] = await reviewApprovedCopy([deal], { cwd, now, request });
@@ -34,12 +38,19 @@ test('grounded Slack approval copy uses both roles once, respects edits and does
     const [replayed] = await reviewApprovedCopy([{ ...deal, approvalCopyReview: result.approvalCopyReview }], { cwd, now, request });
     assert.equal(calls, 2);
     assert.deepEqual(replayed, result);
+    const historicalHash=photoDigest(JSON.stringify([1,maintenanceFingerprint({...deal,approvedAt:''}),copyReviewReasons(deal),sourceTexts(deal)]));
+    const historicalMemo={...result.approvalCopyReview,hash:historicalHash,models:{editor:'gpt-6.1-terra',review:'gpt-6.1-sol'}};
+    const [historical]=await reviewApprovedCopy([{...deal,approvalCopyReview:historicalMemo}],{cwd,now,
+      request:()=>assert.fail('an exact positive historical patch remains usable')});
+    assert.equal(historical.title,result.title);
+    assert.deepEqual(historical.approvalCopyReview,historicalMemo);
     const skipped = [ { ...deal, editedInSlack: true }, { ...deal, id: 'existing' }, { ...deal, metaGraphCaption: '' } ];
     assert.deepEqual(await reviewApprovedCopy(skipped, { cwd, now, request, existingIds: new Set(['existing']) }), skipped);
     assert.equal(calls, 2);
     const rejected = async (url, init) => {
       const response = await request(url, init);
-      return calls % 2 ? response : Response.json({ choices: [{ finish_reason: 'stop', message: { content: '{"supported":false}' } }] });
+      const verification=JSON.parse(init.body).response_format.json_schema.schema.required.includes('supported');
+      return verification ? Response.json({ choices: [{ finish_reason: 'stop', message: { content: '{"supported":false}' } }] }) : response;
     };
     const [unverified] = await reviewApprovedCopy([deal], { cwd, now, request: rejected });
     assert.equal(unverified.title, deal.title);

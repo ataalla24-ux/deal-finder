@@ -3,24 +3,23 @@ import { randomUUID } from 'node:crypto';
 import { githubQuotaStore } from './instagram-shared-quota.js';
 
 const DAY = 86400000;
-const ASTRA = 'gpt-6-astra';
+const ASTRA = 'gpt-6.2-astra';
+const SOL = 'gpt-6.2-sol';
 const ASTRA_PROFILE = 'astra-deal-enrichment';
 const CHAT = 'https://api.openai.com/v1/chat/completions';
 const RESPONSES = 'https://api.openai.com/v1/responses';
+export const OPENAI_MODEL_TIMEOUT_MS = 110000;
 const RATES = {
-  'gpt-6-luna': [0.1, 0.5],
-  'gpt-6.1-terra': [1, 5],
-  'gpt-6.1-sol': [2, 10],
-  // Reserve all input at the higher cache-write rate. Standard output includes reasoning.
-  [ASTRA]: [12.5, 50],
+  // Price all input at the maximum 30-minute cache-write rate for Standard requests.
+  [SOL]: [2.5, 10],
+  [ASTRA]: [10, 40],
 };
 const SAFE_ERRORS = ['insufficient_quota', 'credit_balance_exhausted', 'billing_hard_limit_reached', 'billing_not_active',
   'organization_spend_limit_exceeded', 'project_spend_limit_exceeded', 'organization_usage_limit_exceeded',
   'usage_limit_reached', 'rate_limit_exceeded', 'rate_limit_error', 'slow_down', 'invalid_api_key', 'model_not_found',
   'invalid_request_error', 'invalid_value', 'unsupported_parameter', 'unsupported_value', 'invalid_image', 'invalid_json_schema'];
 const SAFE_PARAMETERS = ['model', 'reasoning_effort', 'reasoning.effort', 'reasoning.mode', 'service_tier', 'response_format',
-  'text.format', 'max_completion_tokens', 'max_output_tokens', 'messages', 'input'];
-const defaults = { extract: 'gpt-6-luna', vision: 'gpt-6.1-terra', editor: 'gpt-6.1-terra', review: 'gpt-6.1-sol' };
+  'text.format', 'max_completion_tokens', 'max_output_tokens', 'messages', 'input', 'prompt_cache_options'];
 const paused = reason => Object.assign(new Error(`AI free-credit budget deferred: ${reason}`), {
   code: 'free_credit_budget_deferred', budgetReason: reason, haltBatch: true, retryAfterMs: 3600000,
 });
@@ -48,15 +47,15 @@ export function isAstraEnrichmentActive({ enabled = process.env.FREEFINDER_ASTRA
     && now + 120000 < Date.parse(policy.expiresAt);
 }
 
-export function modelForTask(task, override) {
-  const model = String(override || defaults[task] || defaults.review).trim();
+export function modelForTask(_task, override) {
+  const model = String(override || SOL).trim();
   if (!Object.hasOwn(RATES, model)) throw paused('unpriced-model');
   if (isAstraEnrichmentActive()) return ASTRA;
   return model;
 }
 
 export function dealEnrichmentModelTimeoutMs() {
-  return isAstraEnrichmentActive() ? 110000 : 45000;
+  return OPENAI_MODEL_TIMEOUT_MS;
 }
 
 // A confirmed new grant can release completed prior-period spend for its own
@@ -94,41 +93,39 @@ export function prepareBudgetedRequest(url, init) {
   if (![CHAT, RESPONSES].includes(String(url))) throw paused('unsupported-endpoint');
   let body;
   try { body = JSON.parse(init.body); } catch { throw paused('invalid-request'); }
-  const rates = RATES[body.model];
-  if (!rates || body.tools?.length || body.previous_response_id || body.conversation || body.background || body.stream
+  if (!body || !Object.hasOwn(RATES, body.model) || body.tools?.length || body.functions?.length
+    || body.function_call || body.previous_response_id || body.conversation || body.background || body.stream
     || body.n && body.n !== 1 || body.service_tier && body.service_tier !== 'default') throw paused('unbounded-or-unpriced-request');
-  const responses = String(url).endsWith('/responses');
+  const rates = RATES[body.model];
+  const responses = String(url) === RESPONSES;
   const requestedOutput = Number(body.max_output_tokens ?? body.max_completion_tokens ?? body.max_tokens ?? 4096);
   if (!Number.isInteger(requestedOutput) || requestedOutput < 1 || requestedOutput > 8192) throw paused('output-limit');
-  const astra = body.model === ASTRA;
-  const outputTokens = astra ? 8192 : requestedOutput;
-  if (body.model.startsWith('gpt-6')) {
-    delete body.temperature;
-    delete body.top_p;
-    const effort = astra ? 'max' : body.model === 'gpt-6.1-sol' ? 'low' : 'none';
-    if (responses) body.reasoning = { effort };
-    else {
-      body.reasoning_effort = effort;
-      delete body.max_tokens;
-      body.max_completion_tokens = outputTokens;
-    }
+  // Both models share the upper bound for visible output plus reasoning tokens.
+  const outputTokens = 8192;
+  for (const key of ['temperature', 'top_p', 'logprobs', 'top_logprobs', 'prompt_cache_retention', 'prompt_cache_options']) {
+    delete body[key];
   }
-  if (responses) body.max_output_tokens = outputTokens;
-  else if (!body.max_completion_tokens) body.max_tokens = outputTokens;
+  if (responses) {
+    body.reasoning = { effort: 'max', mode: 'pro' };
+    body.prompt_cache_options = { ttl: '30m' };
+    body.max_output_tokens = outputTokens;
+  } else {
+    body.reasoning_effort = 'max';
+    delete body.max_tokens;
+    body.max_completion_tokens = outputTokens;
+  }
   body.store = false;
   body.service_tier = 'default';
   let images = 0;
   const serializedText = JSON.stringify(body, (key, value) => {
     if (value && typeof value === 'object' && ['input_image', 'image_url'].includes(value.type)) {
       images++;
-      if (astra) {
-        if (value.type === 'input_image') {
-          if (typeof value.image_url !== 'string' || value.file_id) throw paused('unsupported-image-input');
-          value.detail = 'high';
-        } else {
-          if (typeof value.image_url?.url !== 'string') throw paused('unsupported-image-input');
-          value.image_url.detail = 'high';
-        }
+      if (value.type === 'input_image') {
+        if (typeof value.image_url !== 'string' || value.file_id) throw paused('unsupported-image-input');
+        value.detail = 'high';
+      } else {
+        if (typeof value.image_url?.url !== 'string') throw paused('unsupported-image-input');
+        value.image_url.detail = 'high';
       }
       return '[bounded image]';
     }
@@ -137,33 +134,33 @@ export function prepareBudgetedRequest(url, init) {
   });
   const bytes = Buffer.byteLength(serializedText, 'utf8');
   if (bytes > 80000 || images > 3 || Buffer.byteLength(init.body, 'utf8') > 20 * 1024 * 1024) throw paused('input-limit');
-  // Astra high detail is bounded to 2500 patches at 1.2 tokens each. The extra
-  // margin covers rounding and framing and keeps the request below long-context pricing.
-  const inputTokens = bytes + 1024 + images * (astra ? 3200 : 200000);
+  // Reserve well above the previous generation's documented high-detail image size.
+  // The text and image ceilings keep the request below long-context pricing.
+  const inputTokens = bytes + 1024 + images * 25000;
   return { init: { ...init, body: JSON.stringify(body) }, model: body.model,
     reservedUsd: money((inputTokens * rates[0] + outputTokens * rates[1]) / 1000000) };
 }
 
-// FreeFinder's existing editors consume Chat Completions output. Use the
-// Responses transport for Astra, preserving the same strict schema and caller contract.
-function astraResponsesRequest(init) {
+// FreeFinder's existing editors consume Chat Completions output. Responses
+// preserves their schemas and enables the same reasoning mode for both models.
+function responsesRequest(init) {
   const body = JSON.parse(init.body);
   const input = body.messages.map(({ role, content }) => {
-    if (!['system', 'developer', 'user', 'assistant'].includes(role)) throw paused('unsupported-astra-input');
+    if (!['system', 'developer', 'user', 'assistant'].includes(role)) throw paused('unsupported-model-input');
     if (typeof content === 'string') return { role, content };
-    if (role !== 'user' || !Array.isArray(content)) throw paused('unsupported-astra-input');
+    if (role !== 'user' || !Array.isArray(content)) throw paused('unsupported-model-input');
     return { role, content: content.map(part => {
       if (part.type === 'text') return { type: 'input_text', text: part.text };
       if (part.type === 'image_url') return { type: 'input_image', image_url: part.image_url.url, detail: part.image_url.detail };
-      throw paused('unsupported-astra-input');
+      throw paused('unsupported-model-input');
     }) };
   });
   const format = body.response_format;
   let text;
   if (format?.type === 'json_schema') text = { format: { ...format.json_schema, type: 'json_schema' } };
   else if (format?.type === 'json_object') text = { format: { type: 'json_object' } };
-  else if (format && format.type !== 'text') throw paused('unsupported-astra-output');
-  return { ...init, body: JSON.stringify({ model: ASTRA, input, text, max_output_tokens: body.max_completion_tokens }) };
+  else if (format && format.type !== 'text') throw paused('unsupported-model-output');
+  return { ...init, body: JSON.stringify({ model: body.model, input, text, max_output_tokens: body.max_completion_tokens }) };
 }
 
 function asChatResponse(response, result) {
@@ -211,9 +208,9 @@ export function createCreditBudget({ store, policy, clock = Date.now, request = 
     const astra = original.model === ASTRA;
     const profileActive = isAstraEnrichmentActive({ enabled: allowAstraEnrichment, now: clock(), policy });
     if (astra !== profileActive) throw paused('model-outside-active-profile');
-    const adaptChat = astra && String(url) === CHAT;
+    const adaptChat = String(url) === CHAT;
     const providerUrl = adaptChat ? RESPONSES : url;
-    const prepared = adaptChat ? prepareBudgetedRequest(providerUrl, astraResponsesRequest(original.init)) : original;
+    const prepared = adaptChat ? prepareBudgetedRequest(providerUrl, responsesRequest(original.init)) : original;
     if (prepared.reservedUsd > policy.requestLimitUsd) throw paused('request-cost-limit');
     const id = randomUUID(), at = clock();
     await update(state => {
@@ -224,7 +221,7 @@ export function createCreditBudget({ store, policy, clock = Date.now, request = 
       if (total(creditPeriodExposure(state.reservations, policy.periodId)) + prepared.reservedUsd > policy.periodLimitUsd
         || total(daily) + prepared.reservedUsd > rollingLimit) throw paused('shared-spend-limit');
       return { ...state, reservations: [...state.reservations, { id, at, usd: prepared.reservedUsd, creditPeriod: policy.periodId,
-        model: prepared.model, ...(astra ? { profile: ASTRA_PROFILE } : {}),
+        model: prepared.model, reasoningEffort: 'max', reasoningMode: 'pro', ...(astra ? { profile: ASTRA_PROFILE } : {}),
         count: 1, expiresAt: Date.parse(policy.expiresAt), status: 'reserved' }] };
     });
     // Never send an unreserved call, including after slow storage crosses expiry.
@@ -232,10 +229,10 @@ export function createCreditBudget({ store, policy, clock = Date.now, request = 
     let response, payload;
     try {
       response = await request(providerUrl, { ...prepared.init,
-        signal: AbortSignal.any([...(prepared.init.signal ? [prepared.init.signal] : []), AbortSignal.timeout(astra ? 110000 : 45000)]) });
+        signal: AbortSignal.any([...(prepared.init.signal ? [prepared.init.signal] : []), AbortSignal.timeout(OPENAI_MODEL_TIMEOUT_MS)]) });
       payload = await response.clone().json().catch(() => ({}));
       const codes = [payload.error?.code, payload.error?.type];
-      if (astra && !response.ok) console.warn(JSON.stringify({ model: ASTRA, status: response.status,
+      if (!response.ok) console.warn(JSON.stringify({ model: prepared.model, status: response.status,
         code: codes.find(value => SAFE_ERRORS.includes(value)) || 'unclassified',
         parameter: SAFE_PARAMETERS.includes(payload.error?.param) ? payload.error.param : null }));
       const billingFailure = codes.some(code => /quota|billing|credit_balance|spend_limit|usage_limit/.test(String(code || '')));
@@ -264,7 +261,7 @@ export function createCreditBudget({ store, policy, clock = Date.now, request = 
     } catch (error) {
       stopped = true;
       // Ambiguous failure remains fully charged; never persist credentials or payloads.
-      if (response?.ok && adaptChat) throw paused('astra-response-unavailable');
+      if (response?.ok && adaptChat) throw paused('model-response-unavailable');
       if (response) return safeResponse(response, payload);
       throw paused('request-or-ledger-unavailable');
     }

@@ -296,16 +296,21 @@ test('a grounded automatic AI title uses two roles and preserves all original co
     const models = [];
     const request = async (_url, init) => {
       const body = JSON.parse(init.body); models.push(body.model);
-      return Response.json({ choices: [{ finish_reason: 'stop', message: { content: JSON.stringify(models.length === 1
-        ? { title: 'Gratis Kaffee mit Gutschein', quote: input.metaGraphCaption } : { supported: true }) } }] });
+      assert.equal(body.reasoning_effort,'max');
+      assert.equal(body.max_completion_tokens,8192);
+      const verification = body.response_format.json_schema.schema.required.includes('supported');
+      return Response.json({ choices: [{ finish_reason: 'stop', message: { content: JSON.stringify(verification
+        ? { supported: true } : { title: 'Gratis Kaffee mit Gutschein', quote: input.metaGraphCaption }) } }] });
     };
     const result = await maintainFeedFile({ cwd: root, now, apply: true, allowAi: true, request });
-    assert.deepEqual(models, ['gpt-6.1-terra', 'gpt-6.1-sol']);
+    assert.deepEqual(models, ['gpt-6.2-sol', 'gpt-6.2-sol']);
     assert.equal(result.deals[0].title, 'Gratis Kaffee mit Gutschein');
     assert.equal(result.deals[0].description,input.description,'title-only patch must not append unreviewed text');
     assert.equal(result.deals[0].votes, 17);
     assert.equal(result.deals[0].approvedAt, input.approvedAt);
     assert.equal(result.state.corrections[0].originalTitle, input.title);
+    assert.deepEqual(result.state.corrections[0].models,{editor:'gpt-6.2-sol',review:'gpt-6.2-sol'});
+    assert.equal(result.state.corrections[0].reasoningEffort,'max');
   } finally {
     if (savedKey === undefined) delete process.env.OPENAI_API_KEY; else process.env.OPENAI_API_KEY = savedKey;
     fs.rmSync(root, { recursive: true, force: true });

@@ -7,11 +7,15 @@ import {
   dedupeTikTokDeals,
   rescueTikTokMediaCandidates,
 } from '../scraper/tiktok-deals-scanner.js';
+import { modelForTask, OPENAI_MODEL_TIMEOUT_MS } from '../scraper/ai-credit-budget.js';
 
 const REFERENCE_NOW = new Date('2026-08-26T12:00:00.000Z');
 
 assert.equal(buildTikTokMediaConfig({}).mediaTesseractTimeoutMs, 8000);
 assert.equal(buildTikTokMediaConfig({}).mediaMaxVideoFrames, 2);
+assert.equal(buildTikTokMediaConfig({}).mediaLlmTimeoutMs, OPENAI_MODEL_TIMEOUT_MS);
+assert.equal(buildTikTokMediaConfig({ TIKTOK_MEDIA_LLM_MODEL: 'gpt-6-luna' }).mediaLlmModel, modelForTask('vision'));
+assert.equal(buildTikTokMediaConfig({ TIKTOK_MEDIA_LLM_TIMEOUT_MS: '30000' }).mediaLlmTimeoutMs, 30000);
 assert.equal(buildTikTokMediaConfig({
   TIKTOK_MEDIA_TESSERACT_TIMEOUT_MS: '12000',
 }).mediaTesseractTimeoutMs, 12000);
