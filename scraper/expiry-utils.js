@@ -773,9 +773,12 @@ export function parseExpiryShape(value, options = {}) {
     };
   }
 
-  const hasStrongEndSignal = /\b(gültig bis|gueltig bis|endet|endet am|letzter tag|deadline|frist|einlösbar bis|einloesbar bis|aktion bis|läuft bis|laeuft bis|nur bis|bis)\b/.test(signalText);
-  const hasEndSignal = hasStrongEndSignal || (/\bbis\b/.test(text) && (!hasSingleExplicitDate || hasDateRange || !hasTimeOnlyEndSignal));
   const hasBareDateStart = new RegExp(`\\bab\\s+(?:20\\d{2}-\\d{1,2}-\\d{1,2}|\\d{1,2}\\.\\s*\\d{1,2}(?:\\.|\\b)|\\d{1,2}\\.?\\s+(?:${monthPattern})\\b)`, 'i').test(raw);
+  // An explicit date-associated start belongs to this literal. Redemption
+  // prose such as "bis zu drei Einlösungen" cannot supply a different role.
+  const endSignalText = hasBareDateStart ? text : signalText;
+  const hasStrongEndSignal = /\b(gültig bis|gueltig bis|endet|endet am|letzter tag|deadline|frist|einlösbar bis|einloesbar bis|aktion bis|läuft bis|laeuft bis|nur bis|bis)\b/.test(endSignalText);
+  const hasEndSignal = hasStrongEndSignal || (/\bbis\b/.test(text) && (!hasSingleExplicitDate || hasDateRange || !hasTimeOnlyEndSignal));
   const hasRealStartSignal = hasBareDateStart || /\b(gültig ab|gueltig ab|startet|startet am|abholung ab|verfügbar ab|verfuegbar ab|ab eröffnung|ab eroeffnung|öffnet am|oeffnet am)\b/.test(signalText);
   const hasTimeOnlyStartSignal = /\bab\s+\d{1,2}:\d{2}\b/.test(signalText);
   const hasStartSignal = !hasEndSignal && (hasRealStartSignal || (hasTimeOnlyStartSignal && !hasSingleExplicitDate));

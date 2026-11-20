@@ -24,9 +24,9 @@ export function qualitySlotReceipt(previous, assigned, now) {
     && /^\d{4}-\d{2}-\d{2}T(?:12:13|20:13)$/.test(value) && value <= due).sort().at(-1) || '';
 }
 
-export function viennaQualitySlot({now = new Date(), event = '', lastCompleted = '', schedule = ''} = {}) {
+export function viennaQualitySlot({now = new Date(), event = '', lastCompleted = '', schedule = '', creditPolicy} = {}) {
   if (event === 'schedule' && schedule === enrichmentSchedule) {
-    const active = isAstraEnrichmentActive({ enabled: true, now: +now });
+    const active = isAstraEnrichmentActive({ enabled: true, now: +now, policy: creditPolicy });
     return { run: active, slot: '', reason: active ? 'astra-enrichment' : 'grant-window-ended' };
   }
   if (event !== 'schedule') return {run:true,slot:'',reason:'on-change-or-manual'};

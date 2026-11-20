@@ -175,7 +175,9 @@ test('Vienna schedule recovers a late or missing trigger only once per due slot,
 
 test('the extra quality schedule skips absent or expired free-credit windows',()=>{
   const schedule='37 5,8,11,14,17,20,23 17-20 11 *';
-  const run=iso=>viennaQualitySlot({event:'schedule',schedule,now:new Date(iso)});
+  const creditPolicy={astraEnrichment:{notBefore:'2026-11-17T07:30:00Z',rollingDayLimitUsd:38},
+    expiresAt:'2026-11-20T08:10:11Z'};
+  const run=iso=>viennaQualitySlot({event:'schedule',schedule,creditPolicy,now:new Date(iso)});
   assert.deepEqual(run('2026-11-17T05:37:00Z'),{run:false,slot:'',reason:'grant-window-ended'});
   assert.deepEqual(run('2026-11-17T08:37:00Z'),{run:true,slot:'',reason:'astra-enrichment'});
   assert.deepEqual(run('2026-11-20T08:37:00Z'),{run:false,slot:'',reason:'grant-window-ended'});

@@ -1,13 +1,17 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
-import { createCreditBudget, isAstraEnrichmentActive, loadAiCreditPolicy, modelForTask, prepareBudgetedRequest, validateCreditPolicy } from '../scraper/ai-credit-budget.js';
+import { createCreditBudget, creditPeriodExposure, isAstraEnrichmentActive, loadAiCreditPolicy, modelForTask, prepareBudgetedRequest, validateCreditPolicy } from '../scraper/ai-credit-budget.js';
 import { requestOpenAi } from '../scraper/instagram-media-evidence.js';
 import { githubQuotaStore } from '../scraper/instagram-shared-quota.js';
 import { classifyWithOpenAi } from '../scraper/instagram-ai-agent.js';
 
 const now = Date.parse('2026-11-06T12:00:00Z');
-const policy = loadAiCreditPolicy();
+const configured = loadAiCreditPolicy();
+const policy = { ...configured, periodId: 'fixture-grant', rolloverFrom: undefined,
+  notBefore: '2026-11-05T23:20:00Z', expiresAt: '2026-11-20T08:10:11Z',
+  astraEnrichment: { ...configured.astraEnrichment, notBefore: '2026-11-17T07:30:00Z' },
+  providerGuard: { ...configured.providerGuard, monthlyLimitUsd: 40, verifiedAt: '2026-11-05T23:20:00Z' } };
 const url = 'https://api.openai.com/v1/chat/completions';
 const init = (model = 'gpt-6-luna', changes = {}) => ({ method: 'POST', headers: {}, body: JSON.stringify({ model,
   max_tokens: 600, temperature: 0, messages: [{ role: 'user', content: 'synthetic test' }], ...changes }) });
@@ -82,6 +86,44 @@ test('free-only policy rejects expiry, paid fallback, unsafe provider state and 
     { rollingDayLimitUsd: 0 }, { periodLimitUsd: 40 },
   ]) assert.throws(() => validateCreditPolicy({ ...policy, ...change }, now), JSON.stringify(change));
   assert.throws(() => validateCreditPolicy(policy, Date.parse(policy.expiresAt)));
+});
+
+test('a verified grant can cross a calendar month without assuming another renewal', () => {
+  const inside = Date.parse(configured.notBefore) + 60000;
+  assert.equal(validateCreditPolicy(configured, inside), configured);
+  const cycleEnd = Date.parse(configured.expiresAt);
+  assert.equal(validateCreditPolicy(configured, cycleEnd - 120001), configured);
+  assert.throws(() => validateCreditPolicy(configured, cycleEnd - 120000));
+});
+
+test('grant rollover preserves every prior reservation and still charges unknown usage', async () => {
+  const start = Date.parse(configured.notBefore);
+  const earlier = { at: start - 4 * 86400000, expiresAt: start - 3600000, model: 'gpt-6-luna', count: 1 };
+  const previous = [{ ...earlier, id: 'known', status: 'settled', usd: 37 },
+    { ...earlier, id: 'unclear', status: 'reserved', usd: 2 }];
+  const oldLedger = { version: 1, creditPeriod: configured.rolloverFrom, pausedUntil: 0, reservations: previous };
+  const store = memory(oldLedger);
+  const clock = () => start + 60000;
+  const request = createCreditBudget({ store, policy: configured, clock, request: async () => {
+    assert.equal(store.state.creditPeriod, configured.periodId);
+    assert.deepEqual(store.state.reservations.slice(0, 2),
+      previous.map(row => ({ ...row, creditPeriod: configured.rolloverFrom })));
+    assert.equal(store.state.reservations[2].status, 'reserved');
+    assert.equal(store.state.reservations[2].creditPeriod, configured.periodId);
+    return successful();
+  } });
+  assert.equal((await request(url, init())).status, 200);
+  assert.equal(store.state.reservations[2].status, 'settled');
+  assert.deepEqual(creditPeriodExposure(store.state.reservations, configured.periodId).map(row => row.status),
+    ['reserved', 'settled']);
+  for (const ledger of [
+    { ...oldLedger, creditPeriod: 'unverified-predecessor' },
+    { ...oldLedger, reservations: [{ ...previous[0], expiresAt: start + 1000 }] },
+  ]) {
+    const reject = createCreditBudget({ store: memory(ledger), policy: configured, clock,
+      request: () => assert.fail('unverified rollover must not call OpenAI') });
+    await assert.rejects(reject(url, init()), /new-grant-requires-explicit-reset/);
+  }
 });
 
 test('GPT-6 request parameters are bounded and use standard processing only', () => {

@@ -76,6 +76,48 @@ assert.equal(
   'the same bilingual calendar date must collapse to one event day despite German part-of-day prose',
 );
 
+const nescafeStart = 'ab 06.11.2026 ab 09:00 Uhr';
+const nescafeDescription = 'Kaufe zwei NESCAFÉ Espresso Concentrate und reiche den Kassenbon in der marktguru-App ein. '
+  + 'Du bekommst den Preis des günstigeren Produkts nach Abzug aller Rabatte zurück. Bis zu drei Einlösungen pro Person, mit jeweils einer Rechnung. '
+  + 'Der ganze Kassenbon muss vollständig und scharf lesbar sein. Gefaltete Bons und Rechnungsduplikate werden abgelehnt. '
+  + 'Die Aktion gilt bei Käufen in Österreich. Erhältlich ist das Produkt bei Billa, Billa Plus, Interspar und Eurospar, je nach Filiale. '
+  + 'Onlinekäufe sind mit österreichischer Lieferadresse möglich. Amazon, die Onlineshops von dm und Bipa, Zooplus und Zooroyal sind auch bei Click & Collect oder Expressabholung ausgeschlossen. '
+  + 'Das Produkt muss auf dem Beleg richtig bezeichnet sein. Die Aktion gilt, solange Vorrat und Aktionsbudget reichen. '
+  + 'Einlösungen zählen nicht für andere NESCAFÉ-Aktionen.';
+const nescafeNow = new Date('2026-11-20T10:00:00Z');
+const startShape = parseExpiryShape(nescafeStart, { now: nescafeNow, contextText: nescafeDescription });
+assert.equal(startShape.kind, 'start', 'a quantity limit in the recovered conditions cannot turn an explicit start date into an end');
+assert.equal(startShape.validFrom, '2026-11-06');
+assert.equal(startShape.validUntil, undefined);
+const nescafe = {
+  id: 'fc4g-w3wqsu', title: '1+1 gratis beim Kauf von zwei NESCAFÉ Espresso Concentrate',
+  description: nescafeDescription, expires: '', expiryKind: 'end', validUntil: '2026-11-06',
+  expiresOriginal: nescafeStart, expiryDisplayText: nescafeStart,
+};
+await normalizeDealExpiry(nescafe, { now: nescafeNow, allowUrlLookup: false });
+assert.equal(nescafe.expiryKind, 'start', 'the normal entry point repairs the already published false end');
+assert.equal(nescafe.validFrom, '2026-11-06');
+assert.ok(!nescafe.validUntil && !nescafe.validOn && !nescafe.expires);
+assert.equal(nescafe.description, nescafeDescription);
+const repairedNescafe = structuredClone(nescafe);
+await normalizeDealExpiry(nescafe, { now: nescafeNow, allowUrlLookup: false });
+assert.deepEqual(nescafe, repairedNescafe, 'repeated live normalization keeps the same open period');
+for (const protection of [
+  { validUntil: '2026-11-30', expires: '2026-11-30T23:59:59.999Z' },
+  { validUntil: '2026-11-06', expiresSource: 'manual' },
+  { validUntil: '2026-11-06', slackFormEditTs: '123', slackEditedFields: ['validUntil'] },
+]) {
+  const protectedPeriod = { ...repairedNescafe, ...protection };
+  await normalizeDealExpiry(protectedPeriod, { now: nescafeNow, allowUrlLookup: false });
+  assert.equal(protectedPeriod.validUntil, protection.validUntil, 'independent and reviewed periods survive the repair');
+}
+assert.equal(parseExpiryShape('ab 06.11.2026 bis 30.11.2026', {
+  now: nescafeNow, contextText: nescafeDescription,
+}).validUntil, '2026-11-30', 'a real end in the date literal remains an end');
+assert.equal(parseExpiryShape('30.11.2026', {
+  now: nescafeNow, contextText: 'Einlösbar bis 30.11.2026.',
+}).kind, 'end', 'context still clarifies a date with no explicit start marker');
+
 const broadPageDate = extractTargetPageDateHints(`
   <html><head><meta property="og:title" content="1+1 jeden Mittwoch"></head>
   <body><footer>Zuletzt aktualisiert am 3. Juli 2026</footer></body></html>

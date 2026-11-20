@@ -59,6 +59,12 @@ export function dealEnrichmentModelTimeoutMs() {
   return isAstraEnrichmentActive() ? 110000 : 45000;
 }
 
+// A confirmed new grant can release completed prior-period spend for its own
+// limit. Keep unknown charges and all still-recent usage in the admission checks.
+export function creditPeriodExposure(reservations, periodId) {
+  return reservations.filter(row => !row.creditPeriod || row.creditPeriod === periodId || row.status !== 'settled');
+}
+
 export function validateCreditPolicy(policy, now = Date.now()) {
   const start = Date.parse(policy?.notBefore), end = Date.parse(policy?.expiresAt);
   const guard = policy?.providerGuard;
@@ -66,8 +72,9 @@ export function validateCreditPolicy(policy, now = Date.now()) {
   if (policy?.version !== 1 || policy.mode !== 'free-credit-only' || !policy.periodId
     || policy.paidFallback !== false || policy.automaticRenewalAssumed !== false
     || !Number.isFinite(start) || !Number.isFinite(end) || now < start || now + 120000 >= end
-    || new Date(start).getUTCMonth() !== new Date(end).getUTCMonth()
-    || new Date(start).getUTCFullYear() !== new Date(end).getUTCFullYear()
+    || end - start > 32 * DAY
+    || (policy.rolloverFrom !== undefined
+      && (typeof policy.rolloverFrom !== 'string' || !policy.rolloverFrom || policy.rolloverFrom === policy.periodId))
     || guard?.enforced !== true || guard.scope !== 'organization'
     || guard.autoReload !== false || guard.paidBalanceAvailable !== false
     || !Number.isFinite(Date.parse(guard.verifiedAt)) || Date.parse(guard.verifiedAt) > now
@@ -180,10 +187,18 @@ export function createCreditBudget({ store, policy, clock = Date.now, request = 
       const { state, revision } = snapshot;
       if (state.version !== 1 || !Array.isArray(state.reservations) || !Number.isFinite(state.pausedUntil)
         || state.pausedUntil > clock()) throw paused('storage-or-provider-pause');
-      if (state.creditPeriod && state.creditPeriod !== policy.periodId) throw paused('new-grant-requires-explicit-reset');
       if (!state.creditPeriod && state.reservations.length) throw paused('unattributed-spend');
       if (state.reservations.some(row => !Number.isFinite(row.usd) || row.usd < 0 || !Number.isFinite(row.at))) throw paused('invalid-spend-ledger');
-      const next = transform({ ...state, creditPeriod: policy.periodId });
+      let { reservations } = state;
+      if (state.creditPeriod && state.creditPeriod !== policy.periodId) {
+        const start = Date.parse(policy.notBefore);
+        if (state.creditPeriod !== policy.rolloverFrom
+          || reservations.some(row => !Number.isFinite(row.expiresAt) || row.expiresAt > start || row.at >= start)) {
+          throw paused('new-grant-requires-explicit-reset');
+        }
+        reservations = reservations.map(row => row.creditPeriod ? row : { ...row, creditPeriod: state.creditPeriod });
+      }
+      const next = transform({ ...state, reservations, creditPeriod: policy.periodId });
       try { if (await store.compareAndSwap(revision, next)) return; }
       catch { throw paused('shared-storage-unavailable'); }
     }
@@ -206,9 +221,9 @@ export function createCreditBudget({ store, policy, clock = Date.now, request = 
       const rollingLimit = astra ? policy.astraEnrichment.rollingDayLimitUsd : policy.rollingDayLimitUsd;
       const daily = state.reservations.filter(row => row.at > at - DAY && (astra || row.profile !== ASTRA_PROFILE));
       if (astra && Number(state.astraPausedUntil) > at) throw paused('astra-provider-pause');
-      if (total(state.reservations) + prepared.reservedUsd > policy.periodLimitUsd
+      if (total(creditPeriodExposure(state.reservations, policy.periodId)) + prepared.reservedUsd > policy.periodLimitUsd
         || total(daily) + prepared.reservedUsd > rollingLimit) throw paused('shared-spend-limit');
-      return { ...state, reservations: [...state.reservations, { id, at, usd: prepared.reservedUsd,
+      return { ...state, reservations: [...state.reservations, { id, at, usd: prepared.reservedUsd, creditPeriod: policy.periodId,
         model: prepared.model, ...(astra ? { profile: ASTRA_PROFILE } : {}),
         count: 1, expiresAt: Date.parse(policy.expiresAt), status: 'reserved' }] };
     });
