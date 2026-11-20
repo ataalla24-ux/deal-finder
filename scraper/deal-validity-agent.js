@@ -13,7 +13,7 @@ import { discoveryRejection } from './deal-discovery-policy.js';
 import { normalizeDealFacts, locationConflictReason } from './deal-factual-guards.js';
 import { inspectDealContentQuality } from './deal-content-quality-utils.js';
 
-import { inspectDealUrlHealth, isVagueExpiry, parseExpiryShape, parseExplicitOfferPeriod, sparhamsterCouponRoundPath } from './expiry-utils.js';
+import { inspectDealUrlHealth, isVagueExpiry, parseExpiryShape, parseExplicitOfferPeriod, repairObservationExpiry, sparhamsterCouponRoundPath } from './expiry-utils.js';
 import { hasReviewedOfferPeriod, hasReviewExpiry, isReviewExpirySource } from './offer-period-fields.js';
 import { isHumanReviewedCommunity } from './community-review-utils.js';
 import {
@@ -1109,8 +1109,9 @@ function buildPublicValidationMeta(decision) {
 }
 
 async function validateDeal(deal, context) {
-  deal = normalizeDealFacts(deal);
   const now = context.now;
+  deal = normalizeDealFacts(deal);
+  repairObservationExpiry(deal, { now });
   const checkedAt = new Date().toISOString();
   const url = normalizeUrl(deal.url);
   const reviewedCommunity = context.communityApproval === true && isHumanReviewedCommunity(deal);

@@ -55,3 +55,16 @@ test('legacy structured dates clear only when derived from the same observation'
     assert.equal(repairObservationExpiry({ ...legacy, ...patch }, { now }), false);
   }
 });
+
+test('central validation also repairs an already-normalized old queue entry without refreshing its source date', async () => {
+  const { validateDealsForSlack } = await import('../scraper/deal-validity-agent.js');
+  const result = await validateDealsForSlack([{ id:'menu', title:'1+1 Burger', description:'Zwei Burger zum Preis von einem.',
+    brand:'Gasthaus', category:'essen', type:'bogo', url:'https://example.org/menue', source:'Firecrawl Gastro', distance:'Wien',
+    pubDate:'2026-11-19T10:00:00Z', validOn:'2026-11-17', expires:'2026-11-17T23:59:59.999Z', expiryKind:'single',
+    expiresOriginal:'am 17. November 2026 auf der Speisekarte sichtbar' }], { now:new Date('2026-11-20T13:20:00Z'),
+      inspectDealUrlHealth:async url=>({ok:true,status:200,finalUrl:url,dateHints:{},contentHints:{}}) });
+  const row=result.results[0];
+  assert.equal(row.deal.validOn, undefined);
+  assert.equal(row.decision.expiryDate, '');
+  assert.equal(row.deal.pubDate, '2026-11-19T10:00:00Z');
+});

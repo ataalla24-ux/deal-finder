@@ -13,7 +13,7 @@ import {
   loadDealModeration,
   moderationCounts,
 } from './deal-moderation-utils.js';
-import { inspectDealUrlHealth, isVagueExpiry, normalizeDealExpiry, parseExpiryDetails, repairStartOnlyExpiry } from './expiry-utils.js';
+import { inspectDealUrlHealth, isVagueExpiry, normalizeDealExpiry, parseExpiryDetails, repairObservationExpiry, repairStartOnlyExpiry } from './expiry-utils.js';
 import { offerPeriodFields } from './offer-period-fields.js';
 import { hasOnlyPreviewDescription, preisjaegerThreadId } from './approval-source-evidence.js';
 import { isSupportedIamstudentApprovalUrl, isReviewedIamstudentApprovalEvidence, iamstudentApprovalDateHold, prepareIamstudentApprovalCopy, prepareIamstudentApprovalPeriod } from './approval-iamstudent-source-evidence.js';
@@ -785,6 +785,7 @@ async function validateApprovalCandidates(deals, options = {}) {
   } : null;
   const inputs = ensureArray(deals).map(deal => {
     const input = { ...deal };
+    repairObservationExpiry(input, { now });
     repairStartOnlyExpiry(input, { now });
     return input;
   });
