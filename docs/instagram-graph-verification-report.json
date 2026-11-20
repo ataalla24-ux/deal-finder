@@ -1,7 +1,7 @@
 {
-  "generatedAt": "2026-11-20T19:09:40.565Z",
+  "generatedAt": "2026-11-20T19:33:29.333Z",
   "source": "instagram-graph-cross-source-verification",
-  "status": "ok",
+  "status": "failed-preserved",
   "configured": true,
   "scannedFiles": [
     "deals-pending-church-events.json",
@@ -135,7 +135,7 @@
       "candidates": 0
     },
     "deals-pending-meta-instagram.json": {
-      "deals": 80,
+      "deals": 79,
       "candidates": 0
     },
     "deals-pending-power.json": {
@@ -184,10 +184,15 @@
       "candidates": 1
     }
   ],
-  "fetchedPosts": 69,
-  "exactMatches": 3,
+  "fetchedPosts": 0,
+  "exactMatches": 0,
   "retainedEvidencePosts": 2000,
-  "errors": [],
+  "errors": [
+    {
+      "username": "restaurantvienne_onurchefs",
+      "message": "Instagram shared quota paused: rolling-hour budget exhausted"
+    }
+  ],
   "accountFailures": {
     "natascha_rapid": {
       "count": 3,
@@ -201,21 +206,27 @@
     }
   },
   "sharedQuota": {
-    "limitPerHour": 190,
+    "limitPerHour": 365,
     "usageThreshold": 95,
-    "requests": 3,
-    "reserved": 5,
-    "stopped": false,
-    "reason": "",
-    "highestUsagePercent": 2,
+    "requests": 0,
+    "reserved": 0,
+    "stopped": true,
+    "reason": "Instagram shared quota paused: rolling-hour budget exhausted",
+    "highestUsagePercent": 0,
     "waitedMs": 0,
     "pacingMs": 0,
-    "retryAt": "",
+    "retryAt": "2026-11-20T20:14:21.684Z",
     "adaptiveSafetyCeiling": 190,
     "adaptiveIncreases": 0,
     "storageFailure": null
   },
+  "globalError": {
+    "username": "restaurantvienne_onurchefs",
+    "status": 0,
+    "code": "SCAN_BUDGET",
+    "message": "Instagram shared quota paused: rolling-hour budget exhausted"
+  },
   "blockedEvidencePosts": 72,
-  "unmatchedCandidatePosts": 0,
-  "message": "3/3 fresh cross-source Instagram candidates matched exactly via Graph API."
+  "unmatchedCandidatePosts": 3,
+  "message": "0/3 fresh cross-source Instagram candidates matched exactly via Graph API."
 }
