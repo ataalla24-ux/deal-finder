@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-11-20T23:09:57.817Z",
+  "generatedAt": "2026-11-20T23:54:53.022Z",
   "discoveryAvailability": {
     "note": "Transport evidence, not deal yield. Retry eligibility is not recovery. Candidate counts are not Slack deliveries. No extra runs or quota resets.",
     "lanes": [
@@ -282,11 +282,11 @@
     "pipelineRuns": {
       "reportedSources": 9,
       "failedSources": [
+        "instagram-apify2",
         "wien-combined"
       ],
       "completedWithErrors": [
         "firecrawl5",
-        "instagram-apify2",
         "joe",
         "power"
       ]
@@ -1347,22 +1347,22 @@
         "Authentische neapolitanische Pizza für unter 6 € in Wien"
       ],
       "lastRun": {
-        "status": "completed-with-errors",
-        "startedAt": "2026-11-20T14:12:53.874Z",
-        "finishedAt": "2026-11-20T14:13:25.110Z",
-        "durationMs": 31236,
+        "status": "failed",
+        "startedAt": "2026-11-20T23:13:46.194Z",
+        "finishedAt": "2026-11-20T23:13:47.026Z",
+        "durationMs": 832,
         "counts": {
-          "rawCandidates": 4,
-          "normalizedCandidates": 3,
+          "rawCandidates": 0,
+          "normalizedCandidates": 0,
           "verifiedCandidates": 0,
           "previousDeals": 0,
-          "acceptedDeals": 1,
-          "rejectedDeals": 2
+          "acceptedDeals": 0,
+          "rejectedDeals": 0
         },
-        "rejectedByReason": {
-          "no-consumer-food-benefit": 2
-        },
-        "errors": [],
+        "rejectedByReason": {},
+        "errors": [
+          "apify-http-403"
+        ],
         "reportFile": "deal-pipeline-last-run-instagram-apify2.json"
       },
       "uniqueRate": 1,
@@ -1387,6 +1387,7 @@
         }
       ],
       "issues": [
+        "letzter Pipeline-Lauf ist fehlgeschlagen",
         "wenige Deals sind frischer als 1 Tag",
         "wenige klare Gratis-/Promo-Signale",
         "Wien-Signal ist zu schwach"
