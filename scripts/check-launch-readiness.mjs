@@ -31,7 +31,7 @@ export function inspectFeed(body) {
   return { status: 'ok', dealCount: deals.length };
 }
 
-export async function probeLiveFeed(fetchImpl = fetch) {
+export async function probeLiveFeed(fetchImpl = fetch, { includeReceipts = false } = {}) {
   const controller = new AbortController();
   const timer = setTimeout(() => controller.abort(), 8000);
   let reader;
@@ -48,7 +48,12 @@ export async function probeLiveFeed(fetchImpl = fetch) {
       if (bytes > MAX_BYTES) return { status: 'error', reason: 'feed-too-large' };
       chunks.push(value);
     }
-    return { ...inspectFeed(JSON.parse(Buffer.concat(chunks).toString('utf8'))), bytes };
+    const feed = JSON.parse(Buffer.concat(chunks).toString('utf8'));
+    const result = { ...inspectFeed(feed), bytes };
+    if (includeReceipts && result.status === 'ok') {
+      result.receipts = feed.deals.map(({ id, slackTs }) => ({ id, slackTs }));
+    }
+    return result;
   } catch {
     return { status: 'error', reason: 'feed-unreachable-or-invalid-json' };
   } finally {

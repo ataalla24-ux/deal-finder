@@ -8,6 +8,8 @@ import { inspectSourceBackedQuality } from '../scraper/source-backed-quality.js'
 import { loadDealMapReviewContext, reviewDealMap } from './deal-map-review.mjs';
 import { maintenanceEvidenceFor } from './refresh-maintenance-evidence.mjs';
 import { applyDealRedemptions } from './deal-redemptions.mjs';
+import { probeLiveFeed } from './check-launch-readiness.mjs';
+import { sourcePublicationYield, formatSourcePublicationYield } from './source-publication-yield.mjs';
 import { qualitySlotReceipt } from './vienna-quality-slot.mjs';
 
 const read = (root, file, fallback) => { try { return JSON.parse(fs.readFileSync(path.join(root, file), 'utf8')); } catch(e) { if(e.code === 'ENOENT') return fallback; throw e; } };
@@ -215,6 +217,9 @@ export async function writeOperationsReport({ root = process.cwd(), now = new Da
   const pilot = updatePublicationPilot(read(root,'reviews/automatic-publication-pilot.json',null),queue,
     {now,event,runId:process.env.GITHUB_RUN_ID,sha:process.env.GITHUB_SHA});
   const prior = read(root,'reviews/server-operations-report.json',null);
+  const feedback = read(root,'docs/deal-review-feedback.json',null);
+  const publicFeed = feedback ? await probeLiveFeed(request, { includeReceipts:true }) : { status:'not-checked' };
+  const sourceYield = sourcePublicationYield(feedback, publicFeed, prior?.sourceYield, now);
   const added = prior?.liveIds ? live.filter(d => !prior.liveIds.includes(d.id)).map(d => d.id) : null;
   const maintenance = read(root,'docs/automatic-deal-maintenance-report.json',{});
   const reviewPack=buildPublicationReviewPack(live,pending,queue,{now});
@@ -246,8 +251,9 @@ export async function writeOperationsReport({ root = process.cwd(), now = new Da
     credits:creditSnapshot(await readCreditLedger(request),loadAiCreditPolicy(),now),
     routing:Object.fromEntries(['extract','vision','editor','review'].map(role=>[role,modelForTask(role)])),
     routingReasoningEffort:'max',routingReasoningMode:'pro',routingScope:'new-requests',
+    sourceYield,
     slack:{ newlyDelivered:null, status:'not-proven-by-this-report', reason:'Only actual message IDs/run-linked receipts count, never candidate counts.' } };
-  const markdown = `# FreeFinder Betriebsbericht\n\nStand: ${report.checkedAt}\n\n- ${live.length} Live-Angebote; ${queue.length} nicht-live Entwuerfe geprueft.\n- ${added === null ? 'Erste Bestandsaufnahme' : added.length+' neue IDs seit letzter Bestandsaufnahme'}; keine automatische Erfolgszuordnung.\n- ${queue.filter(r=>r.priority==='human-review-ready').length} Entwuerfe ohne formale Pruefluecke, weiterhin menschliche Freigabe.\n- Pilot: ${pilot.samples.length} Faelle gesammelt, ${pilot.evaluatedCases} unabhaengig bewertet, ${pilot.regularRuns.length} regulaere Qualitaetslaeufe beobachtet. Automatische Freigabe AUS.\n- Neue Slack-Zustellungen: hier nicht nachgewiesen.\n- API: ${report.credits.status}; ${report.credits.rollingDayReservedOrSettledUsd ?? 'unbekannt'} USD intern gebucht/reserviert in 24 Stunden. Kein Anbieter-Kontostand.\n\n## Naechste Schritte\n\n${Object.entries(report.sourceRecovery.byPriority).map(([key,n])=>'- '+key+': '+n).join('\n')}\n`;
+  const markdown = `# FreeFinder Betriebsbericht\n\nStand: ${report.checkedAt}\n\n- ${live.length} Live-Angebote; ${queue.length} nicht-live Entwuerfe geprueft.\n- ${added === null ? 'Erste Bestandsaufnahme' : added.length+' neue IDs seit letzter Bestandsaufnahme'}; keine automatische Erfolgszuordnung.\n- ${queue.filter(r=>r.priority==='human-review-ready').length} Entwuerfe ohne formale Pruefluecke, weiterhin menschliche Freigabe.\n- Pilot: ${pilot.samples.length} Faelle gesammelt, ${pilot.evaluatedCases} unabhaengig bewertet, ${pilot.regularRuns.length} regulaere Qualitaetslaeufe beobachtet. Automatische Freigabe AUS.\n- Zugestellte und veröffentlichte Angebote nach Quelle stehen unten im Abschnitt Ertrag je Quelle.\n- API: ${report.credits.status}; ${report.credits.rollingDayReservedOrSettledUsd ?? 'unbekannt'} USD intern gebucht/reserviert in 24 Stunden. Kein Anbieter-Kontostand.\n\n## Naechste Schritte\n\n${Object.entries(report.sourceRecovery.byPriority).map(([key,n])=>'- '+key+': '+n).join('\n')}\n`;
   if(apply) {
     for(const [file,value] of [['server-operations-report.json',report],['automatic-publication-pilot.json',pilot],
       ['automatic-publication-review-pack.json',reviewPack]]) fs.writeFileSync(path.join(root,'reviews',file),JSON.stringify(value,null,2)+'\n');
@@ -257,8 +263,8 @@ export async function writeOperationsReport({ root = process.cwd(), now = new Da
       : '\n## Native Bilder\n\n- Aktueller Pruefstand fehlt; historische Bildzaehler werden nicht als heutiges Ergebnis ausgegeben. Keine Entwarnung oder bestaetigte Bildqualitaet.\n';
     const freshnessSummary=`\n## Aktualitaet\n\n- Entwurfsregeln frisch und lokal geprueft, ohne Modell- oder Quellenaufruf. ${report.sourceRecovery.uniqueIds} unterschiedliche IDs in ${queue.length} Eintraegen; doppelte IDs bleiben Prueffaelle.\n- Live-/Bildpruefstand: ${qualitySnapshot.status}; letzte Pruefung ${qualitySnapshot.checkedAt || 'unbekannt'}. Bei veraltetem Stand sind leere Hinweisliste und Bildzaehler KEIN Entwarnungsnachweis.\n`;
     const readinessSummary=`\n## Freigabe und Einloesung\n\n- ${pilot.evaluation.currentSamples} Pilotfaelle aktuell, ${pilot.evaluation.archivedSamples} fruehere Pruefstaende unveraendert archiviert. Keine alten Bewertungen uebernehmen.\n- Aktueller, unbewerteter Pruefbogen: ${reviewPack.cases.length} Faelle; reviews/automatic-publication-review-pack.json. Keine unabhaengige menschliche Bewertung erfunden.\n- Quellengepruefte Einloese-/Buchungswege: ${report.redemptions.sourceReviewedRoutes} von ${live.length}; ${report.redemptions.unconfirmedReviews} ausdruecklich unbestaetigte, ${report.redemptions.missingReviews} fehlende aktuelle Einloesepruefungen. Besuchsinfos sind keine Gutscheine; ein Buchungslink bestaetigt keinen aktuellen Flugpreis.\n- Karte frisch lokal geprueft: ${JSON.stringify(report.map.byStatus)}.\n\n## Quellen\n\n${report.sources.map(s=>'- '+s.file+': '+s.status+'; '+JSON.stringify(s.counts||{})+'; Slack-Zustellungen nicht aus Kandidaten ableiten.').join('\n')}\n`;
-    fs.writeFileSync(path.join(root,'reviews/server-operations-report.md'),markdown+imageSummary+freshnessSummary+readinessSummary);
-    if(process.env.GITHUB_STEP_SUMMARY)fs.appendFileSync(process.env.GITHUB_STEP_SUMMARY,markdown+imageSummary+freshnessSummary+readinessSummary);
+    fs.writeFileSync(path.join(root,'reviews/server-operations-report.md'),markdown+imageSummary+freshnessSummary+readinessSummary+formatSourcePublicationYield(sourceYield));
+    if(process.env.GITHUB_STEP_SUMMARY)fs.appendFileSync(process.env.GITHUB_STEP_SUMMARY,markdown+imageSummary+freshnessSummary+readinessSummary+formatSourcePublicationYield(sourceYield));
   }
   return report;
 }

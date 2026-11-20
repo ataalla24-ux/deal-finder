@@ -382,10 +382,10 @@ function sortedCounts(counts) {
   return Object.fromEntries(Object.entries(counts).sort((left, right) => right[1] - left[1] || left[0].localeCompare(right[0])));
 }
 
-function isFoodDrinkFeedbackEvent(event = {}) {
+export function isFoodDrinkFeedbackEvent(event = {}) {
   const category = cleanText(event.category, 80).toLowerCase();
   return event.socialFoodReview === true
-    || ['essen', 'kaffee', 'food', 'food & drink', 'restaurant'].includes(category);
+    || ['essen', 'kaffee', 'trinken', 'essen & trinken', 'food', 'food & drink', 'restaurant'].includes(category);
 }
 
 export function buildSocialFoodFunnel(rows, feedbackEvents = []) {
