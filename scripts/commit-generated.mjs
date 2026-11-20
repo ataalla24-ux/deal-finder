@@ -651,6 +651,17 @@ async function main() {
         const filename=path.basename(new URL(deal.photoUrl).pathname);
         inputs.add(`docs/assets/approved-deal-photos/${filename}`);
         inputs.add(`reviews/deal-photos/${filename}.json`);
+        const review=JSON.parse(fs.readFileSync(`reviews/deal-photos/${filename}.json`,'utf8'));
+        if (review.renderedDisclosure) {
+          // Pixel disclosure is valid only for the same immutable catalogue
+          // asset verified with this receipt. A concurrent source edit must
+          // not invalidate that verification between assembly and push.
+          const catalogPath='docs/assets/deal-image-pilot/catalog.json';
+          const catalog=JSON.parse(fs.readFileSync(catalogPath,'utf8'));
+          const asset=catalog.assets[review.renderedDisclosure.assetKey];
+          inputs.add(catalogPath);
+          inputs.add(`docs/assets/deal-image-pilot/${asset.file}`);
+        }
       }
       photoConsistency=[...inputs].map(file=>({path:file,baseHash:contentHash(remoteFileContent(baseRef,file)),hash:localFileHash(file)}));
     }

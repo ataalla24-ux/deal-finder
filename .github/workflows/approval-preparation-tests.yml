@@ -2,6 +2,17 @@ name: Approval Preparation Tests
 on:
   pull_request:
     paths:
+      - 'scraper/deal-image-pilot.js'
+      - 'scraper/slack-notify.js'
+      - 'scripts/build-deal-image-pilot.mjs'
+      - 'scripts/original-deal-photo.mjs'
+      - 'scripts/commit-generated.mjs'
+      - 'scripts/test-deal-image-pilot*.mjs'
+      - 'docs/assets/deal-image-pilot/**'
+      - 'docs/assets/blog/photos/sources.json'
+      - 'docs/assets/blog/photos/coffee.jpg'
+      - 'docs/assets/blog/photos/pizza.jpg'
+      - 'docs/assets/blog/photos/double-smashburger.jpg'
       - 'scraper/approval-source-evidence.js'
       - 'scraper/approval-iamstudent-source-evidence.js'
       - 'scraper/approval-restored-source-retry.js'
@@ -40,6 +51,17 @@ on:
   push:
     branches: [main]
     paths:
+      - 'scraper/deal-image-pilot.js'
+      - 'scraper/slack-notify.js'
+      - 'scripts/build-deal-image-pilot.mjs'
+      - 'scripts/original-deal-photo.mjs'
+      - 'scripts/commit-generated.mjs'
+      - 'scripts/test-deal-image-pilot*.mjs'
+      - 'docs/assets/deal-image-pilot/**'
+      - 'docs/assets/blog/photos/sources.json'
+      - 'docs/assets/blog/photos/coffee.jpg'
+      - 'docs/assets/blog/photos/pizza.jpg'
+      - 'docs/assets/blog/photos/double-smashburger.jpg'
       - 'scraper/approval-source-evidence.js'
       - 'scraper/approval-iamstudent-source-evidence.js'
       - 'scraper/approval-restored-source-retry.js'
@@ -102,3 +124,4 @@ jobs:
           scripts/test-current-official-offer-freshness.mjs scripts/test-current-public-voucher.mjs
           scripts/test-approval-unverified-date-recovery.mjs scripts/test-deals-feed-contract.mjs
           scripts/test-approval-reviewed-source-copy.mjs scripts/test-donut-approval-completion.mjs
+          scripts/test-deal-image-pilot.mjs scripts/test-deal-image-pilot-approval.mjs

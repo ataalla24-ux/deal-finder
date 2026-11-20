@@ -18,6 +18,7 @@ import { sourceQualitySlackText } from './source-backed-quality.js';
 import crypto from 'node:crypto';
 import path from 'path';
 import { fileURLToPath } from 'url';
+import {createDealImagePreviewCheck,prepareDealImagePreview,dealImagePreviewBlock,markDealImagePreviewSent} from './deal-image-pilot.js';
 
 import {
   DEFAULT_REPORT_PATH,
@@ -941,6 +942,7 @@ function markDealSlackSent(deal, slackTs, slackThreadTs, at = new Date()) {
     slackThreadTs,
   }, 'slack-sent', { at });
   Object.assign(deal, sent);
+  markDealImagePreviewSent(deal,slackTs,at);
   return deal;
 }
 
@@ -948,7 +950,7 @@ async function sleep(ms) {
   await new Promise((resolve) => setTimeout(resolve, ms));
 }
 
-function pendingEditBlocks(text) {
+function pendingEditBlocks(text, deal) {
   text = String(text).toWellFormed();
   const dealId = text.match(/Deal-ID:\s*([^\s]+)/)?.[1];
   const secret = process.env.DEAL_REMOVE_LINK_SECRET;
@@ -958,6 +960,8 @@ function pendingEditBlocks(text) {
     ...(body.match(/[\s\S]{1,2900}/gu) || []).map(part => ({ type: 'section', text: { type: 'mrkdwn', text: part } })),
     ...mapNotes.map(note => ({ type: 'context', elements: [{ type: 'mrkdwn', text: note }] })),
   ];
+  const image = dealImagePreviewBlock(deal);
+  if (image) blocks.push(image);
   if (dealId && secret) {
     const signed = Buffer.from(JSON.stringify({ dealId, scope: 'pending-edit' })).toString('base64url');
     const sig = crypto.createHmac('sha256', secret).update(signed).digest('hex');
@@ -968,12 +972,12 @@ function pendingEditBlocks(text) {
         url: `https://freefinder-referrals.freefinder-stefan.workers.dev/api/deals/admin/pending-edit?payload=${signed}&sig=${sig}` }] },
     ];
   }
-  return mapNotes.length ? blocks : undefined;
+  return mapNotes.length || image ? blocks : undefined;
 }
 
-async function postSlackMessage(text, threadTs = null, attempt = 0) {
+async function postSlackMessage(text, threadTs = null, attempt = 0, deal) {
   text = String(text).toWellFormed();
-  const payload = { channel: SLACK_CHANNEL_ID, text, blocks: pendingEditBlocks(text) };
+  const payload = { channel: SLACK_CHANNEL_ID, text, blocks: pendingEditBlocks(text,deal) };
   if (threadTs) payload.thread_ts = threadTs;
 
   const response = await fetch('https://slack.com/api/chat.postMessage', {
@@ -987,12 +991,16 @@ async function postSlackMessage(text, threadTs = null, attempt = 0) {
 
   const data = await response.json();
   if (data.ok) return data.ts;
+  if (dealImagePreviewBlock(deal) && ['invalid_blocks','invalid_arguments','invalid_attachments','invalid_url','url_not_allowed'].includes(data.error)) {
+    delete deal.pendingDealImage;
+    return postSlackMessage(text,threadTs,attempt);
+  }
 
   if (data.error === 'ratelimited' && attempt < 5) {
     const retryMs = Math.max(1000, Number(response.headers.get('retry-after') || data.retry_after || 2) * 1000);
     console.log(`  ⏳ Rate limited, waiting ${retryMs}ms...`);
     await sleep(retryMs);
-    return postSlackMessage(text, threadTs, attempt + 1);
+    return postSlackMessage(text, threadTs, attempt + 1, deal);
   }
 
   console.log(`❌ Slack post failed: ${data.error || 'unknown_error'}`);
@@ -1126,7 +1134,7 @@ async function updateEditorialMessage(deal) {
   const response = await fetch('https://slack.com/api/chat.update', {
     method: 'POST', signal: AbortSignal.timeout(10000),
     headers: { Authorization: `Bearer ${SLACK_BOT_TOKEN}`, 'Content-Type': 'application/json' },
-    body: JSON.stringify({ channel: SLACK_CHANNEL_ID, ts: deal.slackTs, text, blocks: pendingEditBlocks(text) }),
+    body: JSON.stringify({ channel: SLACK_CHANNEL_ID, ts: deal.slackTs, text, blocks: pendingEditBlocks(text,deal) }),
   });
   return response.ok && (await response.json()).ok === true;
 }
@@ -2022,6 +2030,7 @@ async function main() {
   freshDeals.sort(compareSlackDeals);
 
   const postedDeals = [];
+  const checkImagePreview = createDealImagePreviewCheck();
   if (freshDeals.length > 0) {
     const freeCount = freshDeals.filter((d) => d.type === 'gratis').length;
     const headerTs = await postSlackMessage(
@@ -2039,10 +2048,10 @@ async function main() {
     }
 
     for (let i = 0; i < freshDeals.length; i += 1) {
-      const deal = await editCard(freshDeals[i]);
+      const deal = await prepareDealImagePreview(await editCard(freshDeals[i]),{root:ROOT,now:runNow,checkPreview:checkImagePreview});
       const text = (isCommunitySubmission(deal)
         ? '*Community-Einreichung – noch nicht geprüft*\n' : '') + buildSlackMessage(deal, i + 1);
-      const ts = await postSlackMessage(text, headerTs);
+      const ts = await postSlackMessage(text, headerTs,0,deal);
       if (!ts) continue;
 
       const sentAt = new Date();
@@ -2199,6 +2208,7 @@ export {
   buildSocialFoodReviewMessage,
   buildSlackMessage,
   pendingEditBlocks,
+  postSlackMessage,
   deliverySummary,
   compareSlackDeals,
   filterAlreadyQueuedDeals,

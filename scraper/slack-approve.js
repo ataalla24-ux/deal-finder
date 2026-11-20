@@ -24,6 +24,7 @@ import { canonicalSocialPostKey, mergeDealEvidence, officialOmvVariantKey } from
 import { advanceDealLifecycle } from './deal-lifecycle.js';
 import { isCommunitySubmission, prepareCommunityApproval } from './community-review-utils.js';
 import { preparePublicationTitle } from './pre-publication-title.js';
+import {prepareApprovedDealImage} from './deal-image-pilot.js';
 import { findApprovalAddresses, isApprovalMapReason, requireApprovalMap } from '../scripts/approval-map-readiness.mjs';
 import {
   loadReviewFeedback,
@@ -758,7 +759,7 @@ function normalizePendingDeal(raw) {
 }
 
 function redactPublishedCommunityDraft(deal) {
-  const { approvalCopyReview, ...publicDeal } = deal;
+  const { approvalCopyReview, pendingDealImage, ...publicDeal } = deal;
   if (!isCommunitySubmission(deal)) return publicDeal;
   const { submittedContent, communityExtraction, ...published } = publicDeal;
   return published;
@@ -1485,9 +1486,7 @@ async function runTargetedApproval({ moderation, botUserId }) {
 
   const existingApprovedDeals = loadExistingApprovedDealsForMerge(moderation);
   const publishedAt = new Date();
-  const publishedDeals = approvedModeration.deals.map((deal) => (
-    redactPublishedCommunityDraft(advanceDealLifecycle(deal, 'published', { at: publishedAt }))
-  ));
+  const publishedDeals = await preparePublishedApprovedDeals(approvedModeration.deals,{now:publishedAt,existingDeals:existingApprovedDeals});
   const mergedApproved = mergeApprovedDeals(existingApprovedDeals, publishedDeals);
   saveDealsJson(mergedApproved);
   savePendingRemaining(remainingPending);
@@ -1774,9 +1773,7 @@ async function main() {
   }
 
   const publishedAt = new Date();
-  const publishedDeals = approvedModeration.deals.map((deal) => (
-    redactPublishedCommunityDraft(advanceDealLifecycle(deal, 'published', { at: publishedAt }))
-  ));
+  const publishedDeals = await preparePublishedApprovedDeals(approvedModeration.deals,{now:publishedAt,existingDeals:existingApprovedDeals});
   const mergedApproved = mergeApprovedDeals(existingApprovedDeals, publishedDeals);
 
   saveDealsJson(mergedApproved);
@@ -1795,6 +1792,17 @@ async function main() {
 
   console.log(`✅ deals.json updated with approved-only deals: ${mergedApproved.length}`);
   console.log(`💾 pending queue updated: ${remainingPending.length} deals left`);
+}
+
+export async function preparePublishedApprovedDeals(deals,{root=ROOT,now=new Date(),enabled,existingDeals=[]}={}) {
+  const published = [];
+  const existingKeys = new Set(existingDeals.flatMap(getApprovedMergeKeys));
+  for (const deal of deals) {
+    const alreadyLive = getApprovedMergeKeys(deal).some(key=>existingKeys.has(key));
+    const prepared = await prepareApprovedDealImage(deal,{root,now,enabled:alreadyLive ? false : enabled});
+    published.push(redactPublishedCommunityDraft(advanceDealLifecycle(prepared,'published',{at:now})));
+  }
+  return published;
 }
 
 if (process.argv[1] && path.resolve(process.argv[1]) === __filename) {

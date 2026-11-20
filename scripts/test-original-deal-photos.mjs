@@ -14,6 +14,7 @@ import {validateOriginalDealPhotos} from './validate-original-deal-photos.mjs';
 import {auditServerQuality} from './server-quality-audit.mjs';
 import {maintainFeedFile} from './automatic-deal-maintenance.mjs';
 import {dealPhoto} from './deal-photos.mjs';
+import {prepareDealImagePreview,prepareApprovedDealImage} from '../scraper/deal-image-pilot.js';
 
 const repository=path.resolve(path.dirname(fileURLToPath(import.meta.url)),'..');
 const now=new Date('2026-11-06T14:00:00Z');
@@ -172,24 +173,39 @@ const gitEnv={...Object.fromEntries(Object.entries(process.env).filter(([key])=>
 function git(cwd,...args){return execFileSync('git',args,{cwd,env:gitEnv,encoding:'utf8',stdio:['ignore','pipe','pipe']}).trim();}
 function gitCommit(cwd){git(cwd,'add','.');git(cwd,'commit','-m','offline photo fixture');}
 const photoInputs=['scripts/original-deal-photo.mjs','scripts/deal-photo-contract.mjs','scripts/validate-original-deal-photos.mjs'];
-async function photoGitFixture(root){
+async function photoGitFixture(root,{pilot=false}={}){
   const seed=path.join(root,'seed'),remote=path.join(root,'remote.git'),local=path.join(root,'local'),concurrent=path.join(root,'concurrent');
   fs.mkdirSync(seed);git(seed,'init','--initial-branch=main');
   write(seed,'docs/deals.json',{deals:[baseDeal]});write(seed,'docs/live-deal-edits.json',{edits:[]});
   for(const file of photoInputs){fs.mkdirSync(path.dirname(path.join(seed,file)),{recursive:true});fs.copyFileSync(path.join(repository,file),path.join(seed,file));}
+  if(pilot)for(const directory of ['docs/assets/deal-image-pilot','docs/assets/blog/photos']) {
+    fs.mkdirSync(path.dirname(path.join(seed,directory)),{recursive:true});
+    fs.cpSync(path.join(repository,directory),path.join(seed,directory),{recursive:true});
+  }
   for(const file of ['scripts/enrich-deal-map.mjs','scripts/sync-deal-guides.mjs','scripts/sync-featured-deal-references.mjs','scripts/generate-seo-deals-page.mjs']){
     fs.writeFileSync(path.join(seed,file),'// Offline fixture: no external calls.\n');
   }
   gitCommit(seed);git(root,'init','--bare','--initial-branch=main',remote);git(seed,'remote','add','origin',remote);git(seed,'push','-u','origin','main');
   git(root,'clone','--branch','main',remote,local);git(root,'clone','--branch','main',remote,concurrent);
-  const photo=await bound(local);
+  let photo;
+  if(pilot) {
+    const current=new Date(),validUntil=new Date(+current+30*86400000).toISOString().slice(0,10);
+    const staged=await prepareDealImagePreview({...baseDeal,validUntil,validity:{status:'ok',urlStatus:'HTTP 200',checkedAt:current.toISOString()}},
+      {root:local,now:current,enabled:true,checkPreview:async()=>true});
+    staged.slackTs='offline-delivered';staged.pipelineLifecycle={manualDecision:'approved'};
+    staged.pendingDealImage.slackMessageTs=staged.slackTs;
+    const deal=await prepareApprovedDealImage(staged,{root:local,now:current,enabled:true});
+    assert.ok(deal.photoUrl);
+    const asset=await inspectBoundOriginalPhoto(deal,{root:local});
+    photo={deal,asset,review:asset.review,filename:path.basename(deal.photoUrl)};
+  } else photo=await bound(local);
   write(local,'docs/deals.json',{deals:[photo.deal]});
   write(local,'docs/live-deal-edits.json',{edits:[{dealId:baseDeal.id,photoUrl:photo.deal.photoUrl,photoSubjectHash:photoSubjectHash(baseDeal)}]});
   return {root,remote,local,concurrent,...photo};
 }
-for(const mode of ['full','omit-photo','omit-review','invalid-bytes','remote-revocation']){
+for(const mode of ['full','omit-photo','omit-review','invalid-bytes','remote-revocation','pilot-full','remote-pilot-catalog','remote-pilot-preview']){
   test(`real generated committer enforces original photo atomicity: ${mode}`,()=>fixture(async root=>{
-    const f=await photoGitFixture(root);
+    const f=await photoGitFixture(root,{pilot:mode.includes('pilot')});
     const assetPath='docs/assets/approved-deal-photos/'+f.filename,reviewPath='reviews/deal-photos/'+f.filename+'.json';
     let paths=['docs/deals.json','docs/live-deal-edits.json',assetPath,reviewPath];
     if(mode==='omit-photo')paths=paths.filter(p=>p!==assetPath);
@@ -198,10 +214,20 @@ for(const mode of ['full','omit-photo','omit-review','invalid-bytes','remote-rev
     if(mode==='remote-revocation'){
       write(f.concurrent,reviewPath,{...f.review,revoked:true});gitCommit(f.concurrent);git(f.concurrent,'push','origin','main');
     }
+    if(mode==='remote-pilot-catalog') {
+      const catalog=JSON.parse(fs.readFileSync(path.join(f.concurrent,'docs/assets/deal-image-pilot/catalog.json')));
+      catalog.assets.pizza.label='Changed';write(f.concurrent,'docs/assets/deal-image-pilot/catalog.json',catalog);
+      gitCommit(f.concurrent);git(f.concurrent,'push','origin','main');
+    }
+    if(mode==='remote-pilot-preview') {
+      const catalog=JSON.parse(fs.readFileSync(path.join(f.concurrent,'docs/assets/deal-image-pilot/catalog.json')));
+      write(f.concurrent,'docs/assets/deal-image-pilot/'+catalog.assets.pizza.file,Buffer.from('changed remote preview'));
+      gitCommit(f.concurrent);git(f.concurrent,'push','origin','main');
+    }
     const before=git(f.remote,'rev-parse','main');
     const run=spawnSync(process.execPath,[path.join(repository,'scripts/commit-generated.mjs'),'--message','offline photo batch','--remote','origin','--branch','main','--retries','0','--replace-conflicts','--files',...paths],{cwd:f.local,env:gitEnv,encoding:'utf8'});
     const output=run.stdout+'\n'+run.stderr;
-    if(mode==='full'){
+    if(mode==='full'||mode==='pilot-full'){
       assert.equal(run.status,0,output);assert.notEqual(git(f.remote,'rev-parse','main'),before);
       assert.equal(JSON.parse(git(f.remote,'show','main:docs/deals.json')).deals[0].photoUrl,f.deal.photoUrl);
       assert.equal(JSON.parse(git(f.remote,'show','main:'+reviewPath)).subjectHash,f.review.subjectHash);

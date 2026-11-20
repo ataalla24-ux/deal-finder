@@ -26,7 +26,7 @@ export function validatePhotoPermission(request) {
     throw Error('Review product relevance, visible food and 2.7:1 crop first');
 }
 
-export async function normalizeOriginalPhoto(bytes) {
+export async function normalizeOriginalPhoto(bytes, {reuseNormalizedBytes = false} = {}) {
   if (!Buffer.isBuffer(bytes) || bytes.length > 1_500_000) throw Error('JPEG required, at most 1.5 MB');
   const size = inspectOriginalJPEG(bytes);
   const {default:sharp} = await import('sharp');
@@ -35,7 +35,10 @@ export async function normalizeOriginalPhoto(bytes) {
   if (metadata.format !== 'jpeg' || (metadata.pages||1)!==1 || metadata.width!==size.width || metadata.height!==size.height)
     throw Error('Invalid original photograph');
   // Re-encoding actually decodes the image and removes metadata, including IPTC/comments.
-  const normalized = await sharp(bytes,options).rotate().toColourspace('srgb').jpeg({quality:90}).toBuffer();
+  if (reuseNormalizedBytes && (metadata.orientation || metadata.exif || metadata.iptc || metadata.xmp || metadata.icc))
+    throw Error('Reusable photograph must already be normalized');
+  const normalized = reuseNormalizedBytes ? bytes
+    : await sharp(bytes,options).rotate().toColourspace('srgb').jpeg({quality:90}).toBuffer();
   const normalizedSize = inspectOriginalJPEG(normalized);
   const width = Math.floor(Math.min(normalizedSize.width,normalizedSize.height*2.7));
   const height = Math.floor(width/2.7);
@@ -45,10 +48,10 @@ export async function normalizeOriginalPhoto(bytes) {
   return {bytes:normalized,card,size:normalizedSize,crop};
 }
 
-export async function prepareOriginalPhoto(deal, request, sourceBytes, now = new Date()) {
+export async function prepareOriginalPhoto(deal, request, sourceBytes, now = new Date(), options = {}) {
   validatePhotoPermission(request);
   if (request.dealId !== deal.id) throw Error('Photo request does not match the deal');
-  const {bytes,card,size,crop} = await normalizeOriginalPhoto(sourceBytes);
+  const {bytes,card,size,crop} = await normalizeOriginalPhoto(sourceBytes, options);
   const filename = `${photoDigest(deal.id).slice(0, 16)}-${photoDigest(bytes)}.jpg`;
   const photoUrl = `https://freefinder.at/assets/approved-deal-photos/${filename}`;
   const review = {version:2,dealId:deal.id,file:filename,sourceURL:request.sourceURL,
@@ -87,6 +90,22 @@ export function readBoundPhotoSnapshot(deal,{root=process.cwd()}={}) {
   const bytes = boundedRead(path.join(imageDirectory,filename),imageDirectory,1_500_000);
   if (photoDigest(bytes)!==review.sha256 || filename!==`${photoDigest(deal.id).slice(0,16)}-${review.sha256}.jpg`)
     throw Error('original-photo-integrity-failed');
+  if (Object.hasOwn(review,'renderedDisclosure')) {
+    const disclosure = review.renderedDisclosure;
+    const previewDirectory = path.join(root,'docs/assets/deal-image-pilot');
+    const catalog = JSON.parse(boundedRead(path.join(previewDirectory,'catalog.json'),previewDirectory,20000));
+    const asset = catalog.assets?.[disclosure?.assetKey];
+    if (catalog.version!==1 || review.kind!=='editorial-illustration' || !asset
+      || disclosure.label!=='Symbolbild' || asset.label!=='Symbolbild'
+      || disclosure.imageSha256!==review.sha256 || asset.sha256!==review.sha256
+      || asset.file!==`${disclosure.assetKey}-${review.sha256}.jpg`
+      || review.sourceURL!==`https://freefinder.at/assets/deal-image-pilot/${asset.file}`
+      || JSON.stringify(asset.labelBounds)!==JSON.stringify({left:428,top:320,width:224,height:54})
+      || JSON.stringify(disclosure.bounds)!==JSON.stringify(asset.labelBounds)
+      || asset.width!==1080 || asset.height!==400
+      || photoDigest(boundedRead(path.join(previewDirectory,asset.file),previewDirectory,1_500_000))!==review.sha256)
+      throw Error('original-photo-disclosure-proof-invalid');
+  }
   const size = inspectOriginalJPEG(bytes);
   if (size.width!==review.width || size.height!==review.height) throw Error('original-photo-size-mismatch');
   const width = Math.floor(Math.min(size.width,size.height*2.7)),height=Math.floor(width/2.7);
