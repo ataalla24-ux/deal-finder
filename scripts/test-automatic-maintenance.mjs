@@ -316,3 +316,35 @@ test('a grounded automatic AI title uses two roles and preserves all original co
     fs.rmSync(root, { recursive: true, force: true });
   }
 });
+
+test('a captured coupon end binds to the exact card and allows a correction of obsolete start fields', async () => {
+  const deal = { id:'gs-15', voucherId:'15', brand:'Shop', title:'40 % auf Parkett', description:'40 % auf Parkett.',
+    url:'https://www.gutscheine.at/shop', source:'Gutscheine.at', validUntil:'2026-11-04', expiryKind:'end',
+    approvedAt:'2026-11-02T12:00:00Z' };
+  const card = { voucherId:'15', brand:'Shop', sourceUrl:'https://www.gutscheine.at/beste-gutscheine', offerUrl:deal.url,
+    title:deal.title, quote:'Gültig bis: 04.11.2026', capturedAt:'2026-11-01T11:00:00Z' };
+  const edit = { dealId:deal.id, clearFields:['validFrom','validOn'], validUntil:deal.validUntil };
+  const candidate = { ...deal, evidence:{couponOfferPeriod:card} };
+  const check = (record, edits = [edit], latestEvidence) => assessAutomaticExpiry(record, { policy, edits, latestEvidence, now });
+  assert.equal(check(candidate).reason, 'captured-coupon-offer-end');
+  for (const cardChanges of [{ voucherId:'42' }, { title:'40 % auf Gartenhäuser' }, { quote:'Gültig bis: 12.11.2026' },
+    { sourceUrl:'https://example.org/' }, { capturedAt:'2026-11-03T00:00:00Z' }]) {
+    assert.equal(check({ ...candidate, evidence:{ couponOfferPeriod:{...card,...cardChanges} } }).eligible, false);
+  }
+  for (const changes of [{clearFields:['validUntil']},{validUntil:''},{forceKeep:true},{restoreDeal:deal}]) {
+    assert.equal(check(candidate,[{...edit,...changes}]).eligible,false);
+  }
+  assert.equal(check({...candidate,description:'Angebot gültig bis 25.11.2026.'}).eligible,false);
+  assert.equal(check(candidate,[edit],{blockingReason:'current-coupon-changed'}).eligible,false);
+  assert.equal(check(candidate,[edit],{officialText:'Gültig bis 20.11.2026'}).eligible,false);
+  const cwd=fs.mkdtempSync(path.join(os.tmpdir(),'coupon-renewal-'));
+  try {
+    fs.mkdirSync(path.join(cwd,'docs')); fs.mkdirSync(path.join(cwd,'reviews'));
+    const put=(file,value)=>fs.writeFileSync(path.join(cwd,file),JSON.stringify(value));
+    put('reviews/automatic-maintenance-policy.json',policy);
+    put('docs/deals.json',{deals:[candidate]});
+    put('docs/deals-pending-gutscheine.json',{deals:[{...candidate, pubDate:'2026-11-05T10:00:00Z',
+      evidence:{couponOfferPeriod:{...card,quote:'Gültig bis: 12.11.2026'}}}]});
+    assert.equal((await maintainFeedFile({cwd,now,apply:false})).report.newHides,0);
+  } finally { fs.rmSync(cwd,{recursive:true,force:true}); }
+});

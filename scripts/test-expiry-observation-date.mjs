@@ -27,3 +27,31 @@ test('separate explicit offer periods survive observation metadata', () => {
   }
   assert.equal(parseExpiryShape('Nur am 12. November 2026',{now}).validOn,'2026-11-12');
 });
+
+test('menu sighting alone cannot become a date; mixed offer periods survive', () => {
+  const sighting = 'am 17. November 2026 auf der Speisekarte sichtbar';
+  assert.equal(parseExpiryDetails(sighting, { now }), null);
+  assert.equal(parseExpiryShape('am 17. November auf der Speisekarte sichtbar', { now }).kind, 'unknown');
+  assert.equal(parseExpiryShape(sighting, { now }).kind, 'unknown');
+  assert.equal(parseExpiryShape(sighting + '; gültig bis 29.11.2026', { now }).validUntil, '2026-11-29');
+});
+
+test('legacy structured dates clear only when derived from the same observation', async () => {
+  const { normalizeDealExpiry } = await import('../scraper/expiry-utils.js');
+  const sighting = 'am 17. November 2026 auf der Speisekarte sichtbar';
+  const legacy = { id: 'bk', expiresOriginal: sighting, expiryDisplayText: sighting,
+    expiryKind: 'single', validOn: '2026-11-17', expires: '2026-11-17T23:59:59.999Z', expiresSource: 'text',
+    validity: { status: 'warning', expiryDate: '2026-11-17', expirySource: 'deal.structured' } };
+  const repaired = await normalizeDealExpiry(structuredClone(legacy), { allowUrlLookup: false, now });
+  assert.equal(repaired.expires, '');
+  assert.equal(repaired.expiryKind, 'unknown');
+  assert.equal(repaired.validOn, undefined);
+  assert.equal(repaired.validity.expiryDate, '');
+  assert.equal(repaired.validity.status, 'warning');
+  const { repairObservationExpiry } = await import('../scraper/expiry-utils.js');
+  for (const patch of [{ validUntil: '2026-11-24' }, { expires: '2026-11-24' }, { description:'Aktion gültig bis 24.11.2026' }, { expiryDisplayText: 'Nur am 17.11.2026' },
+    { expiresSource:'manual' }, { expiresDetectedFromUrl:true }, { communityDateReview:{} },
+    { expiresOriginal: sighting + '; gültig bis 24.11.2026' }]) {
+    assert.equal(repairObservationExpiry({ ...legacy, ...patch }, { now }), false);
+  }
+});

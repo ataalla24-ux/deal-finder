@@ -240,3 +240,19 @@ test('image reviews are content-addressed, bounded and cannot claim photo rights
   await reviewPhoto({...deal,description:'Nur veganer Burger'},photo,{root:cwd,cache,now,request,allowNew:false});assert.equal(calls,3,'cached reviews remain usable with model requests disabled');
   assert.equal((await reviewPhoto(deal,{src:'/assets/../../private.webp'},{root:cwd,cache,now,request})).status,'invalid-image-path');
 }));
+
+test('public byte matches still fail if a removed campaign survives in the feed or at a shared map location', () => fixture(async ({ cwd, put }) => {
+  const old = { id:'coupon-old', title:'Angebot', approvedAt:'2026-11-01', validUntil:'2026-11-04' };
+  put('reviews/automatic-deal-maintenance-state.json',{hidden:[{id:old.id,originalDeal:old,validUntil:old.validUntil}]});
+  put('docs/deal-of-the-day.json',{}); put('docs/deal-of-the-week.json',{});
+  const verify = async (deals, ids) => {
+    put('docs/deals.json',{deals});
+    put('docs/deal-map-locations.json',{locations:[{dealIds:['kept'],automaticDealIds:ids}]});
+    return verifyPublicQuality({root:cwd, attempts:1,
+      request:async url => new Response(fs.readFileSync(path.join(cwd,'docs',new URL(url).pathname)))});
+  };
+  assert.equal((await verify([], [old.id])).removals.errors[0].reason, 'removed-deal-on-public-map');
+  assert.equal((await verify([old], [])).status, 'publication-not-confirmed');
+  assert.equal((await verify([], [])).status, 'publicly-verified');
+  assert.equal((await verify([{...old,validUntil:'2026-12-02'}], [old.id])).status, 'publicly-verified');
+}));

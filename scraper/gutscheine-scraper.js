@@ -394,7 +394,8 @@ function parseDeals(html, options = {}) {
     const title = htmlToText(titleMatch?.[1] || '');
     if (!brand || !title || !hasConcreteVoucherSignal(title)) continue;
 
-    const expiryMatch = htmlToText(card.html).match(/Gültig\s+bis:\s*(\d{1,2}\.\d{1,2}\.\d{4})/i);
+    const expiryMatches = [...htmlToText(card.html).matchAll(/Gültig\s+bis:\s*(\d{1,2}\.\d{1,2}\.\d{4})\b/gi)];
+    const expiryMatch = expiryMatches.length === 1 ? expiryMatches[0] : null;
     const expires = expiryMatch ? `Bis ${expiryMatch[1]}` : 'Siehe Website';
     const { category, logo } = getCategory(brand);
     const offer = getOfferValue(title);
@@ -414,6 +415,10 @@ function parseDeals(html, options = {}) {
       source: 'Gutscheine.at',
       url,
       expires,
+      ...(expiryMatch && PAGES_TO_SCRAPE.some(page => page.url === options.sourceUrl) ? { evidence: { couponOfferPeriod: {
+        voucherId: card.voucherId, brand, sourceUrl: options.sourceUrl, offerUrl: url,
+        title: title.substring(0, 120), quote: expiryMatch[0], capturedAt: pubDate,
+      } } } : {}),
       distance: 'Online / Österreich',
       hot: offer.amount >= 20 || (offer.unit === '€' && offer.amount >= 10),
       isNew: true,
@@ -444,7 +449,7 @@ async function main() {
       const html = await fetchPage(page.url);
       console.log(`   📄 ${(html.length / 1024).toFixed(0)} KB geladen`);
 
-      const deals = parseDeals(html, { seenVoucherIds });
+      const deals = parseDeals(html, { seenVoucherIds, sourceUrl: page.url });
       console.log(`   ✅ ${deals.length} Deals extrahiert`);
 
       for (const d of deals) {

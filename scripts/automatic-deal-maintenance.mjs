@@ -6,7 +6,7 @@ import { preparePublicationTitle } from '../scraper/pre-publication-title.js';
 import { titleClaimGuard } from '../scraper/deal-card-editor.js';
 import { dealEnrichmentModelTimeoutMs, freeCreditOpenAiFetch, isAstraEnrichmentActive, modelForTask } from '../scraper/ai-credit-budget.js';
 import { canonicalInstagramPostKey, decodeInstagramShortcodeDate } from '../scraper/deal-evidence-utils.js';
-import { parseExpiryShape } from '../scraper/expiry-utils.js';
+import { parseExpiryShape, repairObservationExpiry } from '../scraper/expiry-utils.js';
 import { assessFixedFlightEnd } from './expiry-fixed-flight.mjs';
 import { assessInstagramFiniteRangeEnd } from './expiry-instagram-finite-range.mjs';
 import { assessOriginalSocialCopy } from './original-social-copy.mjs';
@@ -247,6 +247,24 @@ export function groundedDatePatch(quote, evidence, deal, fields = new Set()) {
     expires: `${shape.validUntil || shape.validOn}T23:59:59.999Z` };
 }
 
+function couponEndEvidence(deal, policy, now) {
+  if (deal.id !== `gs-${deal.voucherId}` || deal.source !== 'Gutscheine.at') return null;
+  const reviewed = policy.reviewedCouponEnds?.[deal.id];
+  if (reviewed) {
+    const campaign = [deal.id, deal.voucherId, deal.brand, deal.url, deal.title, deal.description, deal.approvedAt];
+    if (reviewed.campaignHash === hash(campaign) && reviewed.validUntil === deal.validUntil
+      && Date.parse(reviewed.recheckedAt) <= +now) return { text: reviewed.sourceQuote, url: reviewed.sourceUrl };
+    return null;
+  }
+  const card = deal.evidence?.couponOfferPeriod;
+  if (!card || card.voucherId !== deal.voucherId || card.brand !== deal.brand || card.offerUrl !== deal.url
+    || card.title !== (deal.prePublicationTitleEdit?.originalTitle || deal.title)
+    || !/^https:\/\/www\.gutscheine\.at\/(?:neue|beste|exklusive)-gutscheine$/.test(card.sourceUrl)
+    || !/^Gültig\s+bis:\s*\d{1,2}\.\d{1,2}\.20\d{2}$/i.test(card.quote)
+    || !(Date.parse(card.capturedAt) <= Date.parse(deal.approvedAt) && Date.parse(deal.approvedAt) <= +now)) return null;
+  return { text: card.quote, url: card.sourceUrl };
+}
+
 export function assessAutomaticExpiry(deal, { now = new Date(), edits = [], policy = {}, latestEvidence } = {}) {
   const hold = reason => ({ eligible: false, reason });
   if (protectedDeal(deal, edits, policy)) return hold('protected-or-explicit-owner-keep');
@@ -255,12 +273,23 @@ export function assessAutomaticExpiry(deal, { now = new Date(), edits = [], poli
   let end = ends[0];
   const matchedEdits = matchingEdits(deal, edits);
   for (const edit of matchedEdits) {
-    if ((edit.clearFields || []).some(field => /valid|expir|ablauf/i.test(field))) return hold('manual-period-cleared');
+    if (edit.restoreDeal) return hold('protected-or-explicit-owner-keep');
+    const cleared = (edit.clearFields || []).filter(field => /valid|expir|ablauf/i.test(field));
+    const endCorrection = deal.expiryKind === 'end' && edit.dealId === deal.id && edit.validUntil === end
+      && Boolean(end) && cleared.every(field => ['validOn', 'validFrom'].includes(field) && !deal[field]);
+    if (cleared.length && !endCorrection) return hold('manual-period-cleared');
     for (const field of ['validUntil', 'validOn', 'validFrom', 'expires']) {
       if (Object.hasOwn(edit, field) && clean(edit[field]).slice(0, 10) !== clean(deal[field]).slice(0, 10)) return hold('newer-manual-period-correction');
     }
   }
   const texts = sourceTexts(deal, latestEvidence);
+  // A later source observation always takes precedence, even when it no longer gives a date.
+  const coupon = !latestEvidence && !deal.metaGraphBlockingReason && couponEndEvidence(deal, policy, now);
+  if (coupon) {
+    const otherEnds = [deal.title, deal.description].flatMap(value => literalSourceEnds(value, 'single', end));
+    if (otherEnds.some(value => !value || value !== end)) return hold('conflicting-coupon-copy');
+    texts.push(coupon.text);
+  }
   const fixedFlightEnd = assessFixedFlightEnd(deal);
   // This disclaimer describes the observed fare. It does not change the dates
   // encoded in the verified itinerary. Other uncertainty still vetoes expiry.
@@ -273,7 +302,7 @@ export function assessAutomaticExpiry(deal, { now = new Date(), edits = [], poli
   const hasExplicitEnd = end && ['end', 'range', 'single'].includes(deal.expiryKind);
   let evidence = hasExplicitEnd ? texts.filter(value => literalSourceEnds(value, deal.expiryKind).length > 0) : [];
   let sourceEnds = evidence.flatMap(value => literalSourceEnds(value, deal.expiryKind));
-  let reason = 'literal-source-end-with-year';
+  let reason = coupon ? 'captured-coupon-offer-end' : 'literal-source-end-with-year';
   let originalPostPublishedAt;
   if (hasExplicitEnd && (!sourceEnds.length || sourceEnds.includes('')) && sourceEnds.every(value => !value || value === end)) {
     const confirmed = deal.expiryKind === 'single' && deal.validOn === end
@@ -322,7 +351,7 @@ export function assessAutomaticExpiry(deal, { now = new Date(), edits = [], poli
   if (+now < Date.parse(`${end}T23:59:59.999Z`) + grace) return hold('not-expired-or-safety-grace');
   return { eligible: true, reason, validUntil: end,
     ...(originalPostPublishedAt ? { originalPostPublishedAt } : {}),
-    evidenceHash: hash(evidence), evidence: evidence.map(value => value.slice(0, 1600)) };
+    ...(coupon ? { sourceUrl: coupon.url } : {}), evidenceHash: hash(evidence), evidence: evidence.map(value => value.slice(0, 1600)) };
 }
 
 export function maintainDeals(deals, { policy = {}, state = {}, edits = [], now = new Date(), sourceEvidence = new Map() } = {}) {
@@ -338,6 +367,16 @@ export function maintainDeals(deals, { policy = {}, state = {}, edits = [], now 
     let deal = original;
     const fields = protectedFields(deal, edits);
     const latestEvidence = sourceEvidence.get(deal.id);
+    if (!protectedDeal(deal, edits, policy) && !latestEvidence
+      && !fields.has('validity') && !offerPeriodFields.some(field => fields.has(field))
+      && !matchingEdits(deal, edits).some(edit => edit.restoreDeal)) {
+      const normalized = { ...deal };
+      if (repairObservationExpiry(normalized, { now })) {
+        const cleared = [...offerPeriodFields, 'validity'].filter(field => normalized[field] !== deal[field]);
+        deal = normalized;
+        corrected.push({ id: deal.id, fields: cleared, method: 'observation-is-not-offer-period' });
+      }
+    }
     if (deal.reviewedSourceCopy?.offerPeriodEvidence && !protectedDeal(deal, edits, policy)
       && !latestEvidence?.blockingReason && latestEvidence?.graphAccepted !== false
       && !fields.has('validity') && !offerPeriodFields.some(field => fields.has(field))
@@ -558,6 +597,22 @@ export async function maintainFeedFile({ cwd = process.cwd(), allowAi = false, a
   const sourceEvidence = latestMaintenanceEvidence(deals, read(path.join(cwd, 'docs/instagram-graph-post-evidence.json'), {}).posts || [], now);
   for (const [id, evidence] of maintenanceEvidenceFor(deals, read(path.join(cwd, 'reviews/maintenance-source-evidence.json'), {}), now)) {
     if (!sourceEvidence.has(id)) sourceEvidence.set(id, evidence);
+  }
+  // A newly collected row for this voucher can supersede its captured terms.
+  // Never use a new or undated listing as evidence for an old campaign's removal.
+  const currentCoupons = new Map((read(path.join(cwd, 'docs/deals-pending-gutscheine.json'), {}).deals || [])
+    .map(row => [row.id, row]));
+  for (const deal of deals) {
+    const current = currentCoupons.get(deal.id);
+    if (!current || sourceEvidence.has(deal.id) || deal.source !== 'Gutscheine.at'
+      || !(Date.parse(current.pubDate) > Date.parse(deal.approvedAt))) continue;
+    const seen = current.evidence?.couponOfferPeriod;
+    const prior = deal.evidence?.couponOfferPeriod;
+    const reviewed = policy.reviewedCouponEnds?.[deal.id];
+    if (reviewed && Date.parse(current.pubDate) <= Date.parse(reviewed.recheckedAt)) continue;
+    if (seen && prior && seen.offerUrl === prior.offerUrl && seen.brand === prior.brand
+      && seen.title === prior.title && seen.quote === prior.quote) continue;
+    sourceEvidence.set(deal.id, { blockingReason: 'newer-coupon-listing-needs-review' });
   }
   const beforeState = read(statePath, {});
   const result = maintainDeals(deals, { policy, edits, state: beforeState, now, sourceEvidence });

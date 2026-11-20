@@ -87,3 +87,10 @@ assert.equal(safeGutscheineUrl('https://evil.example/wolt?code=217530'), '');
 assert.equal(safeGutscheineUrl('/wolt?code=217530'), 'https://www.gutscheine.at/wolt?code=217530');
 
 console.log('✅ Gutscheine.at card parser fixture passed');
+
+const sourceUrl = 'https://www.gutscheine.at/neue-gutscheine';
+const capture = parseDeals(fixture, { now, sourceUrl }).find(deal => deal.voucherId === '217530');
+assert.deepEqual(capture.evidence.couponOfferPeriod, {
+  voucherId: capture.voucherId, brand: capture.brand, sourceUrl, offerUrl: capture.url,
+  title: capture.title, quote: 'Gültig bis: 31.07.2026', capturedAt: now.toISOString(),
+});

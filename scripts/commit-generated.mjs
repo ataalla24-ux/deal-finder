@@ -31,6 +31,8 @@ const MAP_INPUT_FILES = [
   'reviews/verified-expiry-archive.json',
   'scripts/verified-expiry-apply.mjs',
   'reviews/automatic-maintenance-policy.json',
+  'docs/deals-pending-gutscheine.json',
+  'scraper/expiry-utils.js',
   'reviews/automatic-deal-maintenance-state.json',
   'scripts/automatic-deal-maintenance.mjs',
   'scripts/original-social-copy.mjs',

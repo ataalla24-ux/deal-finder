@@ -1,6 +1,6 @@
 import { load } from 'cheerio';
 import { cardEditorialWhen } from './deal-card-editor.js';
-import { clearReviewExpiry, hasReviewedOfferPeriod } from './offer-period-fields.js';
+import { clearReviewExpiry, copyOfferPeriod, hasReviewedOfferPeriod } from './offer-period-fields.js';
 import { extractApprovalSourceEvidence } from './approval-source-evidence.js';
 import { reconcileReviewedApprovalExpiry } from './approval-reviewed-source-copy.js';
 import { isSupportedIamstudentApprovalUrl, extractIamstudentApprovalSourceEvidence } from './approval-iamstudent-source-evidence.js';
@@ -500,12 +500,40 @@ function isolateLeadingExpiryToken(text) {
   return normalized;
 }
 
+const observationMonth = '(?:januar|jänner|jaenner|februar|märz|maerz|april|mai|juni|juli|august|september|oktober|november|dezember)';
+const observationDate = `(?:20\\d{2}-\\d{2}-\\d{2}|\\d{1,2}[./]\\d{1,2}(?:[./]20\\d{2}|\\.?)|\\d{1,2}\\.?\\s+${observationMonth}(?:\\s+20\\d{2})?)`;
+const observationPrefix = `\\b(?:(?:aktuell\\s+bei\\s+)?abruf|abgerufen|(?:zuletzt\\s+)?geprüft|(?:zuletzt\\s+)?geprueft|(?:preis)?stand)\\s*(?:am\\s*|vom\\s*|:)?\\s*(${observationDate})(?!\\d)`;
+const observationSuffix = `\\bam\\s+(${observationDate})\\s+(?:(?:auf\\s+der\\s+(?:speisekarte|webseite|website)|im\\s+(?:menü|angebot|shop))\\s+)?(?:sichtbar|gesehen|gesichtet|abgerufen|geprüft|geprueft|beobachtet)\\b`;
+const observationPattern = new RegExp(`${observationPrefix}|${observationSuffix}`, 'gi');
+
 function withoutObservationDates(value) {
-  const month = '(?:januar|jänner|jaenner|februar|märz|maerz|april|mai|juni|juli|august|september|oktober|november|dezember)';
-  const date = `(?:20\\d{2}-\\d{2}-\\d{2}|\\d{1,2}[./]\\d{1,2}[./]20\\d{2}|\\d{1,2}\\.?\\s+${month}\\s+20\\d{2})`;
-  // Retrieval timestamps describe evidence freshness, never the offer period.
-  const observation = new RegExp(`\\b(?:(?:aktuell\\s+bei\\s+)?abruf|abgerufen|(?:zuletzt\\s+)?geprüft|(?:zuletzt\\s+)?geprueft|(?:preis)?stand)\\s*(?:am\\s*|vom\\s*|:)?\\s*${date}(?!\\d)`, 'gi');
-  return cleanText(value.replace(observation, '').replace(/^[\s;,]+|[\s;,]+$/g, ''));
+  return cleanText(value.replace(observationPattern, '').replace(/^[\s;,]+|[\s;,]+$/g, ''));
+}
+
+// Old collectors also stored the observation as ISO expiry. Only clear dates
+// derived from that exact observation, never a different or independently set period.
+export function repairObservationExpiry(deal, options = {}) {
+  const literal = cleanText(deal.expiresOriginal || deal.expiryDisplayText || '');
+  const observed = [...literal.matchAll(observationPattern)];
+  if (!observed.length || hasReviewedOfferPeriod(deal) || deal.expiresDetectedFromUrl
+    || [deal.expirySource, deal.expiresSource, deal.validity?.expirySource].some(s => /^(?:url|slack\.|manual)/i.test(s || ''))
+    || deal.reviewedSourceCopy?.offerPeriodEvidence || deal.validFrom || deal.validUntil
+    || deal.expiryKind && !['single', 'unknown'].includes(deal.expiryKind)) return false;
+  if (parseExpiryShape(withoutObservationDates(literal), options).kind !== 'unknown') return false;
+  const independent = [deal.title, deal.description, deal.caption, deal.evidence?.textSample, deal.evidence?.offerDateSignal];
+  if (independent.some(value => {
+    const text = withoutObservationDates(cleanText(value));
+    return /\b(?:bis|nur am|g[üu]ltig am|vom|until|only on)\s+(?:zum\s+)?\d/i.test(text)
+      && parseExpiryDetails(text, options);
+  })) return false;
+  const days = new Set(observed.map(m => parseExpiryDetails(m[1] || m[2], options)?.date.toISOString().slice(0, 10)));
+  const stored = [deal.validOn, deal.expires, deal.end_date, deal.validity_date, deal.validity?.expiryDate].filter(Boolean);
+  if (days.size !== 1 || days.has(undefined) || !stored.length || stored.some(d => !days.has(String(d).slice(0, 10)))) return false;
+  if (deal.expiryDisplayText && deal.expiryDisplayText !== literal
+    && parseExpiryShape(deal.expiryDisplayText, options).kind !== 'unknown') return false;
+  copyOfferPeriod(deal, { expires: '', expiryKind: 'unknown' });
+  if (deal.validity) deal.validity = { ...deal.validity, expiryDate: '', expirySource: '' };
+  return true;
 }
 
 export function parseExpiryDetails(value, options = {}) {
@@ -1772,7 +1800,7 @@ export async function normalizeDealExpiry(deal, options = {}) {
   const now = options.now instanceof Date ? options.now : new Date();
   if (reconcileReviewedApprovalExpiry(deal)) return deal;
   // The queue's age limit is not a date for the promoted offer.
-  if (clearReviewExpiry(deal)) return deal;
+  if (clearReviewExpiry(deal) || repairObservationExpiry(deal, { now })) return deal;
   if (repairStartOnlyExpiry(deal, { now })) return deal;
   const literal = cleanText(deal.expiresOriginal || deal.expiryDisplayText || '');
   const literalShape = parseExpiryShape(literal, { now });
