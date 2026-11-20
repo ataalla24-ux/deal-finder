@@ -363,3 +363,46 @@ test('failed settlement cannot leak provider text or admit another call', async 
   assert.equal(calls, 1);
   assert.equal(base.state.reservations[0].status, 'reserved');
 });
+
+test('explicit model denial on Sol only pauses Sol, with durable reservations and independent Astra access', async () => {
+  const start = Date.parse(policy.astraEnrichment.notBefore) + 60000;
+  let at = start;
+  let calls = 0;
+  const store = memory();
+  const options = { store, policy, clock: () => at, request: async () => {
+    calls++;
+    return Response.json({ error: { code: 'model_not_found' } }, { status: 403 });
+  } };
+  assert.equal((await createCreditBudget(options)(url, init())).status, 403);
+  assert.equal(store.state.pausedUntil, 0);
+  assert.equal(store.state.modelPausedUntil['gpt-6.2-sol'], start + 6 * 3600000);
+  assert.equal(store.state.reservations[0].status, 'reserved');
+  await assert.rejects(createCreditBudget(options)(url, init()), /model-provider-pause/);
+  assert.equal((await createCreditBudget({ ...options, allowAstraEnrichment: true, request: successful })(url, init('gpt-6.2-astra'))).status, 200);
+  assert.equal(calls, 1);
+  at = start + 6 * 3600000;
+  assert.equal((await createCreditBudget({ ...options, request: successful })(url, init())).status, 200);
+});
+
+test('billing, authentication and unexplained forbidden errors on Astra keep the global hold', async () => {
+  const at = Date.parse(policy.astraEnrichment.notBefore) + 60000;
+  for (const [status, error] of [[403, {}], [403, { code: 'insufficient_quota', type: 'model_not_found' }],
+    [401, { code: 'model_not_found' }], [403, { code: 'invalid_api_key', type: 'model_not_found' }]]) {
+    const store = memory();
+    const options = { store, policy, clock: () => at, allowAstraEnrichment: true,
+      request: async () => Response.json({ error }, { status }) };
+    assert.equal((await createCreditBudget(options)(url, init('gpt-6.2-astra'))).status, status);
+    assert.equal(store.state.pausedUntil, at + 6 * 3600000);
+    await assert.rejects(createCreditBudget({ ...options, allowAstraEnrichment: false, request: successful })(url, init()), /storage-or-provider-pause/);
+  }
+});
+
+test('legacy Astra holds still apply and invalid model pause data cannot admit requests', async () => {
+  const at = Date.parse(policy.astraEnrichment.notBefore) + 60000;
+  for (const [value,reason] of [[{ astraPausedUntil: at + 5000 }, /astra-provider-pause/],
+    [{ modelPausedUntil: { 'gpt-6.2-astra': 'n/a' } }, /invalid-spend-ledger/]]) {
+    const store = memory({ version: 1, reservations: [], pausedUntil: 0, ...value });
+    await assert.rejects(createCreditBudget({ store, policy, clock: () => at, allowAstraEnrichment: true,
+      request: () => assert.fail('no request allowed') })(url, init('gpt-6.2-astra')), reason);
+  }
+});

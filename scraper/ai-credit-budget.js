@@ -186,6 +186,10 @@ export function createCreditBudget({ store, policy, clock = Date.now, request = 
         || state.pausedUntil > clock()) throw paused('storage-or-provider-pause');
       if (!state.creditPeriod && state.reservations.length) throw paused('unattributed-spend');
       if (state.reservations.some(row => !Number.isFinite(row.usd) || row.usd < 0 || !Number.isFinite(row.at))) throw paused('invalid-spend-ledger');
+      if (state.modelPausedUntil !== undefined && (!state.modelPausedUntil || typeof state.modelPausedUntil !== 'object'
+        || Array.isArray(state.modelPausedUntil) || Object.values(state.modelPausedUntil).some(deadline => !Number.isFinite(deadline) || deadline < 0))) {
+        throw paused('invalid-spend-ledger');
+      }
       let { reservations } = state;
       if (state.creditPeriod && state.creditPeriod !== policy.periodId) {
         const start = Date.parse(policy.notBefore);
@@ -218,6 +222,7 @@ export function createCreditBudget({ store, policy, clock = Date.now, request = 
       const rollingLimit = astra ? policy.astraEnrichment.rollingDayLimitUsd : policy.rollingDayLimitUsd;
       const daily = state.reservations.filter(row => row.at > at - DAY && (astra || row.profile !== ASTRA_PROFILE));
       if (astra && Number(state.astraPausedUntil) > at) throw paused('astra-provider-pause');
+      if (state.modelPausedUntil?.[prepared.model] > at) throw paused('model-provider-pause');
       if (total(creditPeriodExposure(state.reservations, policy.periodId)) + prepared.reservedUsd > policy.periodLimitUsd
         || total(daily) + prepared.reservedUsd > rollingLimit) throw paused('shared-spend-limit');
       return { ...state, reservations: [...state.reservations, { id, at, usd: prepared.reservedUsd, creditPeriod: policy.periodId,
@@ -236,12 +241,16 @@ export function createCreditBudget({ store, policy, clock = Date.now, request = 
         code: codes.find(value => SAFE_ERRORS.includes(value)) || 'unclassified',
         parameter: SAFE_PARAMETERS.includes(payload.error?.param) ? payload.error.param : null }));
       const billingFailure = codes.some(code => /quota|billing|credit_balance|spend_limit|usage_limit/.test(String(code || '')));
-      const astraAccessFailure = astra && !billingFailure
-        && ([403, 404].includes(response.status) || codes.includes('model_not_found'));
-      if (astraAccessFailure) {
-        stopped = true;
-        await update(state => ({ ...state, astraPausedUntil: Math.max(state.astraPausedUntil || 0, clock() + 6 * 3600000) }));
-      } else if (billingFailure || [401, 403].includes(response.status)) {
+      const authenticationFailure = response.status === 401 || codes.includes('invalid_api_key');
+      const modelAccessFailure = !response.ok && !billingFailure && !authenticationFailure
+        && [400, 403, 404].includes(response.status) && codes.includes('model_not_found');
+      if (modelAccessFailure) {
+        const until = clock() + 6 * 3600000;
+        await update(state => ({ ...state, modelPausedUntil: { ...state.modelPausedUntil,
+          [prepared.model]: Math.max(state.modelPausedUntil?.[prepared.model] || 0, until) },
+          // Older deployed Astra workers still read this field.
+          ...(astra ? { astraPausedUntil: Math.max(state.astraPausedUntil || 0, until) } : {}) }));
+      } else if (billingFailure || authenticationFailure || response.status === 403) {
         stopped = true;
         await update(state => ({ ...state, pausedUntil: Math.max(state.pausedUntil || 0, clock() + 6 * 3600000) }));
       } else if (response.ok) {
