@@ -1,6 +1,6 @@
 # FreeFinder Betriebsbericht
 
-Stand: 2026-11-20T13:41:36.522Z
+Stand: 2026-11-20T13:43:39.071Z
 
 - 85 Live-Angebote; 212 nicht-live Entwuerfe geprueft.
 - 0 neue IDs seit letzter Bestandsaufnahme; keine automatische Erfolgszuordnung.
@@ -29,7 +29,7 @@ Stand: 2026-11-20T13:41:36.522Z
 ## Aktualitaet
 
 - Entwurfsregeln frisch und lokal geprueft, ohne Modell- oder Quellenaufruf. 212 unterschiedliche IDs in 212 Eintraegen; doppelte IDs bleiben Prueffaelle.
-- Live-/Bildpruefstand: current; letzte Pruefung 2026-11-20T13:41:35.016Z. Bei veraltetem Stand sind leere Hinweisliste und Bildzaehler KEIN Entwarnungsnachweis.
+- Live-/Bildpruefstand: current; letzte Pruefung 2026-11-20T13:43:37.705Z. Bei veraltetem Stand sind leere Hinweisliste und Bildzaehler KEIN Entwarnungsnachweis.
 
 ## Freigabe und Einloesung
 
@@ -47,20 +47,20 @@ Stand: 2026-11-20T13:41:36.522Z
 
 ## Ertrag je Quelle
 
-Jeder Deal zählt ab seiner ersten belegten Slack-Zustellung einmal. Ein Häkchen erfordert eine dokumentierte menschliche Freigabe. Die letzte Stufe zählt freigegebene Deals, die mit derselben Nachrichtenkennung im öffentlichen Feed beobachtet wurden. Bereits verschwundene Angebote vor der ersten Beobachtung können fehlen.
+Jeder Deal zählt ab seiner ersten belegten Slack-Zustellung einmal. Ein Häkchen erfordert eine dokumentierte menschliche Freigabe. Die letzte Stufe zählt freigegebene Deals, die mit derselben Nachrichtenkennung im öffentlichen Feed beobachtet wurden. Kurzzeitig sichtbare Angebote zwischen zwei Beobachtungen und bereits vor der ersten Beobachtung entfernte Einträge können fehlen.
 
-Erste öffentliche Beobachtung: 2026-11-20T13:41:36.522Z. Letzte erfolgreiche Beobachtung: 2026-11-20T13:41:36.522Z.
+Erste öffentliche Beobachtung: 2026-11-06T23:56:26.741Z. Letzte erfolgreiche Beobachtung: 2026-11-20T13:43:39.071Z.
 
 ### 7 Tage
 
 | Quelle | Essen zugestellt | Essen abgehakt | Essen öffentlich belegt | Weitere zugestellt | Weitere abgehakt | Weitere öffentlich belegt |
 |---|---:|---:|---:|---:|---:|---:|
-| Gesamt | 108 | 15 | 8 | 68 | 13 | 13 |
-| Meta Instagram Business Discovery | 15 | 4 | 3 | 18 | 0 | 0 |
+| Gesamt | 108 | 15 | 11 | 68 | 13 | 13 |
+| Meta Instagram Business Discovery | 15 | 4 | 4 | 18 | 0 | 0 |
 | Firecrawl Gastro #2 | 27 | 5 | 2 | 1 | 0 | 0 |
+| Firecrawl Gastro #4 | 9 | 3 | 2 | 1 | 0 | 0 |
 | power-official-food | 8 | 2 | 2 | 0 | 0 | 0 |
-| Firecrawl Gastro #4 | 9 | 3 | 1 | 1 | 0 | 0 |
-| Meta Instagram Hashtag API | 10 | 1 | 0 | 8 | 0 | 0 |
+| Meta Instagram Hashtag API | 10 | 1 | 1 | 8 | 0 | 0 |
 | Gutscheine.at | 0 | 0 | 0 | 26 | 3 | 3 |
 | Meta Instagram Graph | 14 | 0 | 0 | 0 | 0 | 0 |
 | vienna-merchant-website | 12 | 0 | 0 | 0 | 0 | 0 |
@@ -81,26 +81,26 @@ Erste öffentliche Beobachtung: 2026-11-20T13:41:36.522Z. Letzte erfolgreiche Be
 
 | Quelle | Essen zugestellt | Essen abgehakt | Essen öffentlich belegt | Weitere zugestellt | Weitere abgehakt | Weitere öffentlich belegt |
 |---|---:|---:|---:|---:|---:|---:|
-| Gesamt | 580 | 70 | 34 | 376 | 34 | 21 |
-| Firecrawl Gastro #2 | 111 | 23 | 10 | 1 | 0 | 0 |
-| Meta Instagram Business Discovery | 93 | 13 | 7 | 101 | 0 | 0 |
-| Firecrawl Gastro #4 | 34 | 10 | 5 | 1 | 0 | 0 |
-| power-official-food | 31 | 7 | 5 | 0 | 0 | 0 |
+| Gesamt | 580 | 70 | 50 | 376 | 34 | 29 |
+| Firecrawl Gastro #2 | 111 | 23 | 12 | 1 | 0 | 0 |
+| Meta Instagram Business Discovery | 93 | 13 | 11 | 101 | 0 | 0 |
+| Firecrawl Gastro #4 | 34 | 10 | 9 | 1 | 0 | 0 |
+| power-official-food | 31 | 7 | 6 | 0 | 0 | 0 |
+| Meta Instagram Hashtag API | 62 | 6 | 6 | 81 | 2 | 0 |
 | OMV official public promotion | 4 | 3 | 3 | 0 | 0 | 0 |
-| Meta Instagram Hashtag API | 62 | 6 | 2 | 81 | 2 | 0 |
-| Apify 2 Vienna Food Discovery | 4 | 3 | 1 | 0 | 0 | 0 |
+| Apify 2 Vienna Food Discovery | 4 | 3 | 2 | 0 | 0 | 0 |
 | tiktok-deals-scanner | 6 | 1 | 1 | 15 | 0 | 0 |
 | Firecrawl Gastro #4 Search | 12 | 2 | 0 | 5 | 1 | 1 |
 | Meta Instagram Graph | 68 | 1 | 0 | 0 | 0 | 0 |
 | Meta Ad Library API | 6 | 1 | 0 | 1 | 0 | 0 |
-| Gutscheine.at | 0 | 0 | 0 | 110 | 10 | 6 |
+| Gutscheine.at | 0 | 0 | 0 | 110 | 10 | 7 |
 | vienna-food-benefits | 82 | 0 | 0 | 0 | 0 | 0 |
 | vienna-merchant-website | 22 | 0 | 0 | 0 | 0 | 0 |
-| Flights Vienna | 0 | 0 | 0 | 19 | 17 | 11 |
+| Flights Vienna | 0 | 0 | 0 | 19 | 17 | 17 |
 | Wien Deals Combined Graph | 7 | 0 | 0 | 10 | 0 | 0 |
 | instagram-ai-agent | 13 | 0 | 0 | 3 | 0 | 0 |
 | Firecrawl Gastro #2 Search | 6 | 0 | 0 | 5 | 0 | 0 |
-| member-benefits-scraper | 1 | 0 | 0 | 10 | 4 | 3 |
+| member-benefits-scraper | 1 | 0 | 0 | 10 | 4 | 4 |
 | Firecrawl Key 3 - Consumables | 0 | 0 | 0 | 7 | 0 | 0 |
 | Firecrawl Instagram Gastro #5 | 6 | 0 | 0 | 0 | 0 | 0 |
 | Instagram AI Agent | 5 | 0 | 0 | 0 | 0 | 0 |
