@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-11-20T11:59:23.525Z",
+  "generatedAt": "2026-11-20T12:35:16.685Z",
   "discoveryAvailability": {
     "note": "Transport evidence, not deal yield. Retry eligibility is not recovery. Candidate counts are not Slack deliveries. No extra runs or quota resets.",
     "lanes": [
@@ -54,9 +54,9 @@
   },
   "summary": {
     "filesConsidered": 32,
-    "totalCandidates": 614,
-    "uniqueCandidates": 577,
-    "distinctCandidates": 593,
+    "totalCandidates": 615,
+    "uniqueCandidates": 578,
+    "distinctCandidates": 594,
     "duplicateClusters": 16,
     "topHealthySources": [
       {
@@ -135,7 +135,7 @@
         "sourceLabel": "Meta Instagram Graph",
         "coverageScore": 57,
         "totalDeals": 76,
-        "fresh1dCount": 9
+        "fresh1dCount": 8
       },
       {
         "sourceKey": "vienna-promo-radar",
@@ -286,6 +286,7 @@
         "wien-combined"
       ],
       "completedWithErrors": [
+        "firecrawl5",
         "joe",
         "power"
       ]
@@ -417,8 +418,8 @@
       "uniqueDeals": 68,
       "duplicateDeals": 8,
       "duplicateAcrossSources": 4,
-      "fresh1dCount": 9,
-      "fresh7dCount": 67,
+      "fresh1dCount": 8,
+      "fresh7dCount": 66,
       "viennaCount": 76,
       "foodDrinkCount": 57,
       "promoCount": 29,
@@ -919,6 +920,90 @@
       "coverageScore": 70,
       "precisionScore": 48,
       "sourceWeightScore": 54
+    },
+    {
+      "sourceKey": "firecrawl5",
+      "file": "deals-pending-firecrawl5.json",
+      "sourceLabel": "Firecrawl Key 5 - Instagram Gastro",
+      "totalDeals": 4,
+      "uniqueDeals": 1,
+      "duplicateDeals": 3,
+      "duplicateAcrossSources": 3,
+      "fresh1dCount": 0,
+      "fresh7dCount": 4,
+      "viennaCount": 3,
+      "foodDrinkCount": 3,
+      "promoCount": 1,
+      "missingUrlCount": 0,
+      "sampleTitles": [
+        "Zushi Market: 🍣 Zushi Market x Pichelmayergasse 💚 Exklusiv für unsere Schule! 🎓 Wir ...",
+        "neotaste.wien: New on NeoTaste: Neo Foods Vienna ...",
+        "Wiedner Gürtel 14: Wien läuft, weil ihr unterwegs seid. 💛 Ob Frühschicht, ..."
+      ],
+      "lastRun": {
+        "status": "completed-with-errors",
+        "startedAt": "2026-11-20T12:31:52.950Z",
+        "finishedAt": "2026-11-20T12:34:34.546Z",
+        "durationMs": 161596,
+        "counts": {
+          "rawCandidates": 8,
+          "normalizedCandidates": 8,
+          "verifiedCandidates": 4,
+          "previousDeals": 3,
+          "acceptedDeals": 4,
+          "rejectedDeals": 6
+        },
+        "rejectedByReason": {
+          "post-verification-rejected": 6
+        },
+        "errors": [
+          "https://www.instagram.com/mosquito_mexican/: Firecrawl Agent nach 120s abgebrochen"
+        ],
+        "reportFile": "deal-pipeline-last-run-firecrawl5.json"
+      },
+      "uniqueRate": 0.3,
+      "duplicateRate": 0.8,
+      "fresh1dRate": 0,
+      "fresh7dRate": 1,
+      "viennaRate": 0.8,
+      "foodDrinkRate": 0.8,
+      "promoRate": 0.3,
+      "missingUrlRate": 0,
+      "averageQualityScore": 80,
+      "topCategories": [
+        {
+          "value": "kaffee",
+          "count": 2
+        },
+        {
+          "value": "essen",
+          "count": 1
+        },
+        {
+          "value": "shopping",
+          "count": 1
+        }
+      ],
+      "topTypes": [
+        {
+          "value": "rabatt",
+          "count": 3
+        },
+        {
+          "value": "bogo",
+          "count": 1
+        }
+      ],
+      "issues": [
+        "wenige Deals sind frischer als 1 Tag",
+        "wenige klare Gratis-/Promo-Signale",
+        "hohe Überschneidung mit anderen Quellen"
+      ],
+      "healthScore": 51,
+      "missionFitScore": 48,
+      "coverageScore": 11,
+      "precisionScore": 56,
+      "sourceWeightScore": 43
     },
     {
       "sourceKey": "joe",
@@ -1736,83 +1821,6 @@
       "missionFitScore": 28,
       "coverageScore": 16,
       "precisionScore": 35,
-      "sourceWeightScore": 31
-    },
-    {
-      "sourceKey": "firecrawl5",
-      "file": "deals-pending-firecrawl5.json",
-      "sourceLabel": "Firecrawl Key 5 - Instagram Gastro",
-      "totalDeals": 3,
-      "uniqueDeals": 0,
-      "duplicateDeals": 3,
-      "duplicateAcrossSources": 3,
-      "fresh1dCount": 0,
-      "fresh7dCount": 3,
-      "viennaCount": 2,
-      "foodDrinkCount": 2,
-      "promoCount": 0,
-      "missingUrlCount": 0,
-      "sampleTitles": [
-        "Wiedner Gürtel 14: Wien läuft, weil ihr unterwegs seid. 💛 Ob Frühschicht, ...",
-        "Lieferando: ⚠️ Wetterwarnung für Wien: Heute regnet es Super Deals! ...",
-        "Zushi Market: 🍣 Zushi Market x Pichelmayergasse 💚 Exklusiv für unsere Schule! 🎓 Wir ..."
-      ],
-      "lastRun": {
-        "status": "completed",
-        "startedAt": "2026-11-19T12:31:55.721Z",
-        "finishedAt": "2026-11-19T12:34:42.210Z",
-        "durationMs": 166489,
-        "counts": {
-          "rawCandidates": 2,
-          "normalizedCandidates": 2,
-          "verifiedCandidates": 5,
-          "previousDeals": 5,
-          "acceptedDeals": 5,
-          "rejectedDeals": 0
-        },
-        "rejectedByReason": {},
-        "errors": [],
-        "reportFile": "deal-pipeline-last-run-firecrawl5.json"
-      },
-      "uniqueRate": 0,
-      "duplicateRate": 1,
-      "fresh1dRate": 0,
-      "fresh7dRate": 1,
-      "viennaRate": 0.7,
-      "foodDrinkRate": 0.7,
-      "promoRate": 0,
-      "missingUrlRate": 0,
-      "averageQualityScore": 80,
-      "topCategories": [
-        {
-          "value": "essen",
-          "count": 1
-        },
-        {
-          "value": "kaffee",
-          "count": 1
-        },
-        {
-          "value": "shopping",
-          "count": 1
-        }
-      ],
-      "topTypes": [
-        {
-          "value": "rabatt",
-          "count": 3
-        }
-      ],
-      "issues": [
-        "wenige Deals sind frischer als 1 Tag",
-        "wenige klare Gratis-/Promo-Signale",
-        "Wien-Signal ist zu schwach",
-        "hohe Überschneidung mit anderen Quellen"
-      ],
-      "healthScore": 35,
-      "missionFitScore": 35,
-      "coverageScore": 8,
-      "precisionScore": 42,
       "sourceWeightScore": 31
     },
     {
