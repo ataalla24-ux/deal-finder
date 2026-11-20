@@ -11,7 +11,8 @@ function deliveryTime(event, now) {
   const ts = event?.slackTs;
   if (!event?.dealId || !messageTs.test(ts) || ts === event.slackThreadTs) return null;
   const time = Math.trunc(Number(ts) * 1000);
-  return time <= now && Number.isFinite(Date.parse(event.slackSentAt)) ? time : null;
+  // The saved confirmation time must actually belong to this Slack response.
+  return time <= now && Math.abs(Date.parse(event.slackSentAt) - time) <= 300000 ? time : null;
 }
 
 function approved(event, deliveredAt, now) {
@@ -35,19 +36,31 @@ function addDeal(counter, food, hasApproval, isPublic) {
 
 // Cohorts use the first retained confirmed message per deal ID. A retry cannot
 // earn a second discovery. The public stage requires the approved message itself.
-export function sourcePublicationYield(feedback, snapshot, previous, now = new Date()) {
+export function sourcePublicationYield(feedback, snapshot, previous, now = new Date(), baseline = null) {
   const asOf = +now;
   const publicNow = snapshot.status === 'ok';
   const observations = {};
   for (const [key, seen] of Object.entries(previous?.publicObservations || {})) {
     if (/^[a-f\d]{64}$/.test(key) && seen >= asOf - 30 * DAY && seen <= asOf) observations[key] = seen;
   }
+  let firstPublicCheck = previous?.firstPublicCheck || (publicNow ? now.toISOString() : null);
+  let lastPublicCheck = publicNow ? now.toISOString() : previous?.lastPublicCheck || null;
+  // Bootstrap from archived HTTP 200 readbacks whose feed bytes match the
+  // repository document at the recorded commit. Each hash is a deal/message pair.
+  for (const sample of baseline?.samples || []) {
+    const at = Date.parse(sample.checkedAt);
+    if (!Number.isFinite(at) || at < asOf - 30 * DAY || at > asOf || !Array.isArray(sample.receipts)) continue;
+    if (!firstPublicCheck || at < Date.parse(firstPublicCheck)) firstPublicCheck = sample.checkedAt;
+    if (!lastPublicCheck || at > Date.parse(lastPublicCheck)) lastPublicCheck = sample.checkedAt;
+    for (const key of sample.receipts) {
+      if (/^[a-f\d]{64}$/.test(key)) observations[key] = Math.max(at, observations[key] || 0);
+    }
+  }
   const report = {
     asOf: now.toISOString(),
     feedbackAvailable: Array.isArray(feedback?.events),
     publicReadback: snapshot.status,
-    firstPublicCheck: previous?.firstPublicCheck || (publicNow ? now.toISOString() : null),
-    lastPublicCheck: publicNow ? now.toISOString() : previous?.lastPublicCheck || null,
+    firstPublicCheck, lastPublicCheck,
     windows: [], publicObservations: observations,
   };
   if (!report.feedbackAvailable) return report;
@@ -77,7 +90,7 @@ export function sourcePublicationYield(feedback, snapshot, previous, now = new D
     if (!approved(event, time, asOf)) continue;
     const deal = deals.get(event.dealId);
     deal.hasApproval = true;
-    if (observations[receiptKey(event.dealId, event.slackTs)]) deal.isPublic = true;
+    if (observations[receiptKey(event.dealId, event.slackTs)] >= Date.parse(event.decidedAt) - 1000) deal.isPublic = true;
   }
   for (const days of [7, 30]) {
     const totals = breakdown(), bySource = new Map();
@@ -98,7 +111,7 @@ export function sourcePublicationYield(feedback, snapshot, previous, now = new D
 export function formatSourcePublicationYield(report) {
   if (!report.feedbackAvailable) return '\n## Ertrag je Quelle\n\nSlack-Belege fehlen für diese Auswertung.\n';
   const lines = ['','## Ertrag je Quelle','',
-    'Jeder Deal zählt ab seiner ersten belegten Slack-Zustellung einmal. Ein Häkchen erfordert eine dokumentierte menschliche Freigabe. Die letzte Stufe zählt freigegebene Deals, die mit derselben Nachrichtenkennung im öffentlichen Feed beobachtet wurden. Bereits verschwundene Angebote vor der ersten Beobachtung können fehlen.','',
+    'Jeder Deal zählt ab seiner ersten belegten Slack-Zustellung einmal. Ein Häkchen erfordert eine dokumentierte menschliche Freigabe. Die letzte Stufe zählt freigegebene Deals, die mit derselben Nachrichtenkennung im öffentlichen Feed beobachtet wurden. Kurzzeitig sichtbare Angebote zwischen zwei Beobachtungen und bereits vor der ersten Beobachtung entfernte Einträge können fehlen.','',
     'Erste öffentliche Beobachtung: ' + (report.firstPublicCheck || 'ausstehend') +
     '. Letzte erfolgreiche Beobachtung: ' + (report.lastPublicCheck || 'ausstehend') + '.',''];
   for (const window of report.windows) {

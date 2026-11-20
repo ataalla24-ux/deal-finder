@@ -1,5 +1,6 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
+import { createHash } from 'node:crypto';
 import { sourcePublicationYield, formatSourcePublicationYield } from './source-publication-yield.mjs';
 import { probeLiveFeed } from './check-launch-readiness.mjs';
 
@@ -50,4 +51,19 @@ test('public probe only yields matching fields from a validated app feed', async
   assert.deepEqual((await probeLiveFeed(request,{includeReceipts:true})).receipts,[{id:row.id,slackTs:row.slackTs}]);
   assert.equal((await probeLiveFeed(request)).receipts,undefined);
   assert.equal((await probeLiveFeed(async()=>Response.json({deals:[row],totalDeals:2}),{includeReceipts:true})).receipts,undefined);
+});
+
+test('an archived HTTP readback survives expiry, rejects future evidence and predating checkmarks', () => {
+  const old = message('expired', 6, {decidedAt:ago(5).toISOString()});
+  const future = message('future-proof', 4), early = message('early-proof', 3);
+  const key = row => createHash('sha256').update(JSON.stringify([row.dealId,row.slackTs])).digest('hex');
+  const samples=[
+    {checkedAt:ago(4).toISOString(), receipts:[key(old),key(early)]},
+    {checkedAt:ago(-1).toISOString(), receipts:[key(future)]},
+  ];
+  const prior = sourcePublicationYield({events:[old, future, early]},feed([]),null,now,{samples});
+  assert.equal(prior.firstPublicCheck,ago(4).toISOString());
+  assert.deepEqual(prior.windows[0].totals.all,{delivered:3,approved:3,public:1});
+  const mismatchedDelivery={...old,slackSentAt:ago(12).toISOString()};
+  assert.equal(sourcePublicationYield({events:[mismatchedDelivery]},feed([old]),prior,now).windows[0].totals.all.delivered,0);
 });

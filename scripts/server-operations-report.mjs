@@ -219,7 +219,8 @@ export async function writeOperationsReport({ root = process.cwd(), now = new Da
   const prior = read(root,'reviews/server-operations-report.json',null);
   const feedback = read(root,'docs/deal-review-feedback.json',null);
   const publicFeed = feedback ? await probeLiveFeed(request, { includeReceipts:true }) : { status:'not-checked' };
-  const sourceYield = sourcePublicationYield(feedback, publicFeed, prior?.sourceYield, now);
+  const baseline = read(root,'reviews/source-publication-baseline.json',null);
+  const sourceYield = sourcePublicationYield(feedback, publicFeed, prior?.sourceYield, now, baseline);
   const added = prior?.liveIds ? live.filter(d => !prior.liveIds.includes(d.id)).map(d => d.id) : null;
   const maintenance = read(root,'docs/automatic-deal-maintenance-report.json',{});
   const reviewPack=buildPublicationReviewPack(live,pending,queue,{now});
