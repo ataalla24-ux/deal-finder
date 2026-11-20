@@ -3,6 +3,7 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { createHash } from 'node:crypto';
 import { load } from 'cheerio';
+import { maintainFeedFile } from './automatic-deal-maintenance.mjs';
 import { maintenanceEvidenceFor } from './refresh-maintenance-evidence.mjs';
 import { freeCreditOpenAiFetch, modelForTask, OPENAI_MODEL_TIMEOUT_MS } from '../scraper/ai-credit-budget.js';
 import { validateBlogDraft, blogDigest, inspectBlogArticle, inspectBlogRevision, blogIndexCardFingerprint } from './server-blog-content.mjs';
@@ -58,7 +59,7 @@ export async function prepareServerBlog({root=process.cwd(),now=new Date(),allow
   else if(state.attempts.some(row=>row.day===day))report.status='daily-attempt-already-recorded';
   else if(allowAi&&apply&&process.env.OPENAI_API_KEY){
     const candidate=candidates.find(c=>!state.attempts.some(row=>row.fingerprint===c.fingerprint && (row.mode || 'addition')===mode
-      && !['deferred','model-or-budget-deferred'].includes(row.outcome)));
+      && !['deferred','model-or-budget-deferred','pending-deal-correction-priority'].includes(row.outcome)));
     if(candidate){
       const articlePath=path.join(root,'docs/blog',candidate.slug+'.html');
       if(fs.existsSync(articlePath)){
@@ -70,13 +71,23 @@ export async function prepareServerBlog({root=process.cwd(),now=new Date(),allow
         if(existing.length>16000)throw Error('blog-article-too-long-for-complete-review');
         const attempt={day,id:candidate.id,mode,fingerprint:candidate.fingerprint,at:now.toISOString(),outcome:'deferred'};
         state.attempts.push(attempt);
+        // Reuse the production eligibility checks against this checkout. This
+        // preview performs neither model calls nor feed/state writes.
+        let preserveDealCorrectionCapacity = false;
+        try {
+          const maintenance = await maintainFeedFile({ cwd: root, now, allowAi: false, apply: false });
+          preserveDealCorrectionCapacity = (maintenance.report.ai?.readyForModel || 0) > 0;
+        } catch {
+          // Without an established correction backlog the normal limits apply.
+          report.correctionPriorityCheck = 'unavailable';
+        }
         async function complete(role,schema,prompt,input){
           report.modelCalls++;
           const response=await request('https://api.openai.com/v1/chat/completions',{method:'POST',signal:AbortSignal.timeout(OPENAI_MODEL_TIMEOUT_MS),
             headers:{authorization:`Bearer ${process.env.OPENAI_API_KEY}`,'content-type':'application/json'},
             body:JSON.stringify({model:modelForTask(role),store:false,max_tokens:3500,
               response_format:{type:'json_schema',json_schema:{name:'grounded_blog_draft',strict:true,schema}},
-              messages:[{role:'system',content:prompt},{role:'user',content:JSON.stringify(input)}]})});
+              messages:[{role:'system',content:prompt},{role:'user',content:JSON.stringify(input)}]})}, { preserveDealCorrectionCapacity });
           if(!response.ok)throw Error('blog-model-deferred');
           const body=await response.json();if(body.choices?.[0]?.finish_reason!=='stop')throw Error('blog-model-incomplete');
           return JSON.parse(body.choices[0].message.content);
@@ -104,7 +115,12 @@ export async function prepareServerBlog({root=process.cwd(),now=new Date(),allow
               attempt.outcome=report.status='verified-draft-awaiting-publication-pipeline';
             }else attempt.outcome=report.status='independent-review-rejected';
           }
-        }catch{attempt.outcome=report.status='model-or-budget-deferred';}
+        }catch(error){
+          if(error?.budgetReason === 'pending-deal-correction-priority') {
+            report.modelCalls--;
+            attempt.outcome=report.status='pending-deal-correction-priority';
+          } else attempt.outcome=report.status='model-or-budget-deferred';
+        }
       }
     }
   }else if(candidates.length)report.status='offline-or-key-unavailable';

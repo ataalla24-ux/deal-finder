@@ -14,6 +14,9 @@ const RATES = {
   [SOL]: [2.5, 10],
   [ASTRA]: [10, 40],
 };
+const MAX_TEXT_BYTES = 80000;
+const TEXT_TOKEN_OVERHEAD = 1024;
+const MAX_OUTPUT_TOKENS = 8192;
 const SAFE_ERRORS = ['insufficient_quota', 'credit_balance_exhausted', 'billing_hard_limit_reached', 'billing_not_active',
   'organization_spend_limit_exceeded', 'project_spend_limit_exceeded', 'organization_usage_limit_exceeded',
   'usage_limit_reached', 'rate_limit_exceeded', 'rate_limit_error', 'slow_down', 'invalid_api_key', 'model_not_found',
@@ -101,7 +104,7 @@ export function prepareBudgetedRequest(url, init) {
   const requestedOutput = Number(body.max_output_tokens ?? body.max_completion_tokens ?? body.max_tokens ?? 4096);
   if (!Number.isInteger(requestedOutput) || requestedOutput < 1 || requestedOutput > 8192) throw paused('output-limit');
   // Both models share the upper bound for visible output plus reasoning tokens.
-  const outputTokens = 8192;
+  const outputTokens = MAX_OUTPUT_TOKENS;
   for (const key of ['temperature', 'top_p', 'logprobs', 'top_logprobs', 'prompt_cache_retention', 'prompt_cache_options']) {
     delete body[key];
   }
@@ -133,10 +136,10 @@ export function prepareBudgetedRequest(url, init) {
     return value;
   });
   const bytes = Buffer.byteLength(serializedText, 'utf8');
-  if (bytes > 80000 || images > 3 || Buffer.byteLength(init.body, 'utf8') > 20 * 1024 * 1024) throw paused('input-limit');
+  if (bytes > MAX_TEXT_BYTES || images > 3 || Buffer.byteLength(init.body, 'utf8') > 20 * 1024 * 1024) throw paused('input-limit');
   // Reserve well above the previous generation's documented high-detail image size.
   // The text and image ceilings keep the request below long-context pricing.
-  const inputTokens = bytes + 1024 + images * 25000;
+  const inputTokens = bytes + TEXT_TOKEN_OVERHEAD + images * 25000;
   return { init: { ...init, body: JSON.stringify(body) }, model: body.model,
     reservedUsd: money((inputTokens * rates[0] + outputTokens * rates[1]) / 1000000) };
 }
@@ -215,7 +218,7 @@ export function createCreditBudget({ store, policy, clock = Date.now, request = 
     }
     throw paused('reservation-contention');
   };
-  return async (url, init) => {
+  return async (url, init, { preserveDealCorrectionCapacity = false } = {}) => {
     if (stopped) throw paused('runner-paused');
     validateCreditPolicy(policy, clock());
     const prepared = prepareFreeCreditCall(url, init);
@@ -231,8 +234,20 @@ export function createCreditBudget({ store, policy, clock = Date.now, request = 
       const daily = state.reservations.filter(row => row.at > at - DAY && (astra || row.profile !== ASTRA_PROFILE));
       if (astra && Number(state.astraPausedUntil) > at) throw paused('astra-provider-pause');
       if (state.modelPausedUntil?.[prepared.model] > at) throw paused('model-provider-pause');
-      if (total(creditPeriodExposure(state.reservations, policy.periodId)) + prepared.reservedUsd > policy.periodLimitUsd
-        || total(daily) + prepared.reservedUsd > rollingLimit) throw paused('shared-spend-limit');
+      const periodAfter = total(creditPeriodExposure(state.reservations, policy.periodId)) + prepared.reservedUsd;
+      const dayAfter = total(daily) + prepared.reservedUsd;
+      if (periodAfter > policy.periodLimitUsd || dayAfter > rollingLimit) throw paused('shared-spend-limit');
+      if (preserveDealCorrectionCapacity) {
+        // One ordinary grounded text correction may need an editor and a
+        // reviewer. These are the same text-only ceilings used for admission.
+        const [inputRate, outputRate] = RATES[SOL];
+        const textRequest = money(((MAX_TEXT_BYTES + TEXT_TOKEN_OVERHEAD) * inputRate
+          + MAX_OUTPUT_TOKENS * outputRate) / 1000000);
+        const correction = 2 * Math.min(policy.requestLimitUsd, textRequest);
+        if (periodAfter + correction > policy.periodLimitUsd || dayAfter + correction > rollingLimit) {
+          throw paused('pending-deal-correction-priority');
+        }
+      }
       return { ...state, reservations: [...state.reservations, { id, at, usd: prepared.reservedUsd, creditPeriod: policy.periodId,
         model: prepared.model, reasoningEffort: 'max', reasoningMode: 'pro', ...(astra ? { profile: ASTRA_PROFILE } : {}),
         count: 1, expiresAt: Date.parse(policy.expiresAt), status: 'reserved' }] };
@@ -286,7 +301,7 @@ export function createCreditBudget({ store, policy, clock = Date.now, request = 
 }
 
 let productionRequest;
-export async function freeCreditOpenAiFetch(url, init) {
+export async function freeCreditOpenAiFetch(url, init, options) {
   if (!productionRequest) {
     let store;
     try { store = githubQuotaStore(process.env, globalThis.fetch, {
@@ -295,5 +310,5 @@ export async function freeCreditOpenAiFetch(url, init) {
     productionRequest = createCreditBudget({ store, policy: loadAiCreditPolicy(),
       allowAstraEnrichment: process.env.FREEFINDER_ASTRA_ENRICHMENT === '1' });
   }
-  return productionRequest(url, init);
+  return productionRequest(url, init, options);
 }

@@ -406,3 +406,38 @@ test('legacy Astra holds still apply and invalid model pause data cannot admit r
       request: () => assert.fail('no request allowed') })(url, init('gpt-6.2-astra')), reason);
   }
 });
+
+test('optional blog preserves one ordinary editor and review only with actionable work and scarce shared capacity', async () => {
+  const transport = successful;
+  const candidate = 'gpt-6.2-sol';
+  const stateWithSpend = (daily, priorPeriodSpend = 0) => memory({
+    version: 1, pausedUntil: 0, creditPeriod: policy.periodId,
+    reservations: [
+      { id: 'old', at: now - 2 * 86400000, usd: priorPeriodSpend, status: 'settled', creditPeriod: policy.periodId },
+      { id: 'recent', at: now - 60000, usd: daily, status: 'settled', creditPeriod: policy.periodId },
+    ],
+  });
+  for (const store of [stateWithSpend(1.45), stateWithSpend(0, policy.periodLimitUsd - 0.6)]) {
+    const budget = createCreditBudget({ store, policy, clock: () => now, request: transport });
+    const before = store.state;
+    await assert.rejects(budget(url, init(candidate), { preserveDealCorrectionCapacity: true }),
+      error => error.budgetReason === 'pending-deal-correction-priority');
+    assert.deepEqual(store.state, before);
+    assert.equal((await budget(url, init(candidate))).status, 200);
+  }
+  const ample = createCreditBudget({ store: stateWithSpend(0.50), policy, clock: () => now, request: transport });
+  assert.equal((await ample(url, init(candidate), { preserveDealCorrectionCapacity: true })).status, 200);
+});
+
+test('concurrent optional blog requests cannot both consume capacity reserved for a grounded deal', async () => {
+  const store = memory({ version: 1, pausedUntil: 0, creditPeriod: policy.periodId,
+    reservations: [{ id: 'earlier', at: now, usd: 1.30, status: 'settled', creditPeriod: policy.periodId }] });
+  let calls = 0;
+  const budget = () => createCreditBudget({ store, policy, clock: () => now, request: async () => {
+    calls++; return Response.json({});
+  } });
+  const result = await Promise.allSettled([1, 2].map(() =>
+    budget()(url, init(), { preserveDealCorrectionCapacity: true })));
+  assert.equal(calls, 1);
+  assert.equal(result.filter(row => row.reason?.budgetReason === 'pending-deal-correction-priority').length, 1);
+});

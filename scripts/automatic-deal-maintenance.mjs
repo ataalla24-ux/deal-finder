@@ -493,9 +493,14 @@ export function groundedMaintenanceDescription(description, conditionsQuote, evi
   return true;
 }
 
+function admissibleEditorSources(deal, latestEvidence) {
+  const sources = sourceTexts(deal, latestEvidence).filter(text => text.length <= 12000);
+  return sources.join(' ').length <= 18000 ? sources : [];
+}
+
 async function titleProposal(deal, request, now, latestEvidence, fields = new Set(), requested = copyReviewReasons(deal, fields)) {
-  const evidence = sourceTexts(deal, latestEvidence).filter(value => value.length <= 12000);
-  if (!evidence.length || evidence.join(' ').length > 18000) return null;
+  const evidence = admissibleEditorSources(deal, latestEvidence);
+  if (!evidence.length) return null;
   async function complete(model, schema, prompt, data) {
     const response = await request('https://api.openai.com/v1/chat/completions', {
       method: 'POST', signal: AbortSignal.timeout(dealEnrichmentModelTimeoutMs()),
@@ -616,7 +621,7 @@ export async function maintainFeedFile({ cwd = process.cwd(), allowAi = false, a
   }
   const beforeState = read(statePath, {});
   const result = maintainDeals(deals, { policy, edits, state: beforeState, now, sourceEvidence });
-  result.report.ai = { attempted: 0, corrected: 0, deferred: 0,
+  result.report.ai = { attempted: 0, corrected: 0, deferred: 0, readyForModel: 0,
     models:{editor:modelForTask('editor'),review:modelForTask('review')},reasoningEffort:'max',reasoningMode:'pro' };
   result.state.checks ||= [];
   // Prioritize due work without reordering the public feed. A placeholder is
@@ -650,12 +655,21 @@ export async function maintainFeedFile({ cwd = process.cwd(), allowAi = false, a
         reviewed++;
         continue;
       }
-      if (!(allowAi && apply && process.env.OPENAI_API_KEY)) continue;
       const checkHash = hash([inputHash, sourceTexts(deal, sourceEvidence.get(deal.id)), [...fields].sort(),
         'model-reviewed-maintenance-v5', pendingDescription(deal), result.report.ai.models, 'max', 'pro']);
       if (result.state.checks.some(row => row.hash === checkHash && +now - Date.parse(row.at) < 24 * 3600000)) continue;
       const prior = result.state.corrections.find(entry => entry.id === deal.id && entry.inputHash === inputHash);
       if (prior && !pendingDescription(deal)) continue;
+      // Match the evidence actually admissible to the editor; deterministic
+      // fixes and recent reviews have already been accounted for above.
+      const admissible = admissibleEditorSources(deal, sourceEvidence.get(deal.id));
+      if (!admissible.length) continue;
+      const requested = copyReviewReasons(deal, fields);
+      const hasActionableSource = requested.some(field => field === 'title' || field === 'description')
+        ? admissible.some(source => source.length >= 15)
+        : admissible.some(source => Object.keys(groundedDatePatch(source, admissible, deal, fields)).length > 0);
+      if (hasActionableSource) result.report.ai.readyForModel++;
+      if (!(allowAi && apply && process.env.OPENAI_API_KEY)) continue;
       reviewed++;
       result.report.ai.attempted++;
       if (pendingDescription(deal)) {

@@ -47,5 +47,40 @@ test('server blog records at most one daily attempt, writes only review artifact
     assert.equal((await prepareServerBlog({root,now,allowAi:true,request})).status,'existing-editorial-result-needs-no-second-draft');
     assert.equal(fs.readFileSync(path.join(root,'docs/blog/clever-fit-wien.html'),'utf8'),original);
     assert.equal(report.automaticPublicationEnabled,false);
+
+    // Same candidate and same article, with and without an actually due,
+    // source-supported live correction. A missing date alone is not a backlog.
+    fs.unlinkSync(path.join(root, 'reviews/2026-11-06-daily-blog.json'));
+    write('reviews/automatic-maintenance-policy.json', {version:1, enabled:true, maxAiCandidatesPerRun:1});
+    const pending = {id:'live-pizza', brand:'Testlokal', title:'Pizza für 5 Euro', url:'https://example.com/pizza',
+      validUntil:'2026-11-30', description:'Weitere Informationen folgen.', enrichmentPending:true, enrichmentFields:['description']};
+    const sourceCopy = 'Pizza kostet für Mitglieder fünf Euro. Coupon vor der Bestellung aktivieren.';
+    const completeGuideDeal = {...deal, forceKeep:true, description:text, validUntil:'2026-11-30'};
+    const scenarios = [
+      [{...pending}, false],
+      [{...pending, caption:sourceCopy, enrichmentNextReviewAt:'2026-11-08T11:00:00Z'}, false],
+      [{...pending, caption:sourceCopy, forceKeep:true}, false],
+      [{...pending, caption:sourceCopy, description:sourceCopy, validUntil:'', enrichmentPending:false, enrichmentFields:[]}, false],
+      [{...pending, caption:sourceCopy}, true],
+    ];
+    for (const [other, expected] of scenarios) {
+      write('reviews/server-blog-state.json', {version:1, attempts:[]});
+      write('docs/deals.json',{deals:[completeGuideDeal,other]});
+      const beforeFeed=fs.readFileSync(path.join(root,'docs/deals.json'),'utf8');
+      let requests=0, prioritySeen;
+      const priority=await prepareServerBlog({root,now,allowAi:true,request:async (url,init,options)=>{
+        requests++;
+        prioritySeen=options.preserveDealCorrectionCapacity;
+        if (expected) throw Object.assign(Error('priority'),{budgetReason:'pending-deal-correction-priority'});
+        return request(url,init);
+      }});
+      assert.equal(requests,1);
+      assert.equal(prioritySeen,expected,JSON.stringify(other));
+      assert.equal(priority.modelCalls,expected?0:1);
+      assert.equal(priority.status,expected?'pending-deal-correction-priority':'no-safe-substantive-draft');
+      assert.equal(fs.readFileSync(path.join(root,'docs/deals.json'),'utf8'),beforeFeed);
+      assert.equal(fs.existsSync(path.join(root,'reviews/automatic-deal-maintenance-state.json')),false);
+    }
+
   }finally{if(before===undefined)delete process.env.OPENAI_API_KEY;else process.env.OPENAI_API_KEY=before;fs.rmSync(root,{recursive:true,force:true});}
 });
