@@ -13,7 +13,7 @@ on:
         default: false
 
 concurrency:
-  group: meta-instagram-scan
+  group: ${{ inputs.models_only && 'freefinder-model-access-check' || 'meta-instagram-scan' }}
   cancel-in-progress: false
 
 permissions:
