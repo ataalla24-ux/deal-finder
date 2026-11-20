@@ -8,7 +8,7 @@ import { classifyWithOpenAi } from '../scraper/instagram-ai-agent.js';
 
 const now = Date.parse('2026-11-06T12:00:00Z');
 const configured = loadAiCreditPolicy();
-const policy = { ...configured, periodId: 'fixture-grant', rolloverFrom: undefined,
+const policy = { ...configured, periodId: 'fixture-grant', rolloverFrom: undefined, periodLimitUsd: 38,
   notBefore: '2026-11-05T23:20:00Z', expiresAt: '2026-11-20T08:10:11Z',
   astraEnrichment: { ...configured.astraEnrichment, notBefore: '2026-11-17T07:30:00Z' },
   providerGuard: { ...configured.providerGuard, monthlyLimitUsd: 40, verifiedAt: '2026-11-05T23:20:00Z' } };
@@ -83,7 +83,7 @@ test('free-only policy rejects expiry, paid fallback, unsafe provider state and 
     { providerGuard: { ...policy.providerGuard, enforced: false } },
     { providerGuard: { ...policy.providerGuard, autoReload: true } },
     { providerGuard: { ...policy.providerGuard, paidBalanceAvailable: true } },
-    { rollingDayLimitUsd: 0 }, { periodLimitUsd: 40 },
+    { rollingDayLimitUsd: 0 }, { periodLimitUsd: 40.01 },
   ]) assert.throws(() => validateCreditPolicy({ ...policy, ...change }, now), JSON.stringify(change));
   assert.throws(() => validateCreditPolicy(policy, Date.parse(policy.expiresAt)));
 });
@@ -91,6 +91,9 @@ test('free-only policy rejects expiry, paid fallback, unsafe provider state and 
 test('a verified grant can cross a calendar month without assuming another renewal', () => {
   const inside = Date.parse(configured.notBefore) + 60000;
   assert.equal(validateCreditPolicy(configured, inside), configured);
+  const atProviderLimit = { ...configured, periodLimitUsd: configured.providerGuard.monthlyLimitUsd };
+  assert.equal(validateCreditPolicy(atProviderLimit, inside), atProviderLimit);
+  assert.throws(() => validateCreditPolicy({ ...atProviderLimit, periodLimitUsd: atProviderLimit.periodLimitUsd + 0.01 }, inside));
   const cycleEnd = Date.parse(configured.expiresAt);
   assert.equal(validateCreditPolicy(configured, cycleEnd - 120001), configured);
   assert.throws(() => validateCreditPolicy(configured, cycleEnd - 120000));

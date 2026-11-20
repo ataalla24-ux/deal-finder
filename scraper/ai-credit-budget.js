@@ -80,7 +80,7 @@ export function validateCreditPolicy(policy, now = Date.now()) {
     || !Number.isFinite(Date.parse(guard.verifiedAt)) || Date.parse(guard.verifiedAt) > now
     || ![policy.periodLimitUsd, policy.rollingDayLimitUsd, policy.requestLimitUsd, guard.monthlyLimitUsd]
       .every(value => Number.isFinite(value) && value > 0)
-    || policy.periodLimitUsd >= guard.monthlyLimitUsd || policy.rollingDayLimitUsd > policy.periodLimitUsd
+    || policy.periodLimitUsd > guard.monthlyLimitUsd || policy.rollingDayLimitUsd > policy.periodLimitUsd
     || (astra !== undefined && (!Number.isFinite(Date.parse(astra?.notBefore))
       || Date.parse(astra.notBefore) < start || Date.parse(astra.notBefore) >= end
       || !Number.isFinite(astra.rollingDayLimitUsd) || astra.rollingDayLimitUsd <= 0
