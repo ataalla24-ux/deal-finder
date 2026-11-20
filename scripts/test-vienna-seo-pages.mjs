@@ -21,7 +21,7 @@ for (const slug of slugs) {
   assert.equal($('meta[property="og:url"]').attr('content'), canonical);
   const entry = sitemap('url').filter((_, element) => sitemap(element).find('loc').text() === canonical);
   assert.equal(entry.length, 1, `${slug}: one sitemap entry`);
-  const modified = { 'guenstig-essen-wien': '2026-11-14', 'geburtstag-gratis-wien': '2026-11-13', 'kinodonnerstag-wien-drei': '2026-10-30' }[slug];
+  const modified = { 'guenstig-essen-wien': '2026-11-20', 'geburtstag-gratis-wien': '2026-11-13', 'kinodonnerstag-wien-drei': '2026-10-30' }[slug];
   assert.equal(entry.find('lastmod').text(), modified);
   const graph = JSON.parse($('script[type="application/ld+json"]').text())['@graph'];
   const article = graph.find(item => item['@type'] === 'Article');
@@ -48,12 +48,29 @@ for (const slug of slugs) {
   }
 }
 
+const lunch = load(fs.readFileSync(path.join(docs, 'blog', `${slugs[0]}.html`), 'utf8'));
+assert.equal(lunch('.article-body h2').first().attr('id'), 'mittagessen-unter-10');
+const lunchSection = lunch('#mittagessen-unter-10').nextUntil('h2');
+assert.equal(lunchSection.find('time').attr('datetime'), '2026-11-20');
+const venues = lunchSection.find('li');
+assert.deepEqual(venues.map((_, item) => {
+  const [postcode] = lunch(item).find('strong').text().split(' ');
+  const price = lunch(item).find('strong').text().match(/\d+,\d{2} €/u)?.[0];
+  return `${postcode}: ${price}`;
+}).get(), ['1010: 9,50 €', '1040: 8,50 €', '1050: 7,90 €', '1100: 9,20 €', '1160: 7,50 €', '1190: 9,90 €']);
+assert.equal(venues.has('a[href^="https://"]').length, venues.length);
+assert.equal(lunch('#bezirke').length, 1);
+assert.equal(lunch('[id="1220"]').length, 1);
+
 const kino = load(fs.readFileSync(path.join(docs, 'blog', `${slugs[2]}.html`), 'utf8'));
 assert.equal(kino('#wien').nextUntil('h2').find('li').length, 9);
 const birthday = load(fs.readFileSync(path.join(docs, 'blog', `${slugs[1]}.html`), 'utf8'));
 assert.equal(birthday('#adressen').next('.table-scroll').find('tbody tr').length, 12);
 for (const postcode of ['1010', '1020', '1060', '1100', '1110', '1150', '1210', '1220']) assert.ok(birthday('.table-scroll').text().includes(postcode));
 const index = load(fs.readFileSync(path.join(docs, 'blog', 'index.html'), 'utf8'));
+const lunchCard = index('h2 a[href="guenstig-essen-wien.html"]');
+assert.equal(lunchCard.length, 1);
+assert.match(lunchCard.text(), /Mittagessen unter 10 €/u);
 for (const slug of slugs) {
   assert.equal(index(`.topic-nav a[href="${slug}.html"]`).length, 1);
   for (const filename of ['index.html', 'angebote-wien-heute.html']) {
@@ -85,6 +102,7 @@ try {
   assert.deepEqual(fs.readdirSync(path.join(fixture, 'docs/blog')).sort(), ['index.html', ...slugs.slice(0, 2).map(slug => `${slug}.html`)].sort());
   const regeneratedIndex = load(fs.readFileSync(path.join(fixture, 'docs/blog/index.html'), 'utf8'));
   assert.equal(regeneratedIndex('h2 a[href="geburtstag-gratis-wien.html"]').length, 1);
+  assert.equal(regeneratedIndex('h2 a[href="guenstig-essen-wien.html"]').text(), lunchCard.text());
   for (const slug of slugs.slice(0, 2)) {
     assert.equal(fs.readFileSync(path.join(fixture, 'docs/blog', `${slug}.html`), 'utf8'), fs.readFileSync(path.join(docs, 'blog', `${slug}.html`), 'utf8'));
   }
