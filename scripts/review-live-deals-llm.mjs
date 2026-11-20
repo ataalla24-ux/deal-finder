@@ -2,6 +2,7 @@ import { readFile, writeFile } from 'node:fs/promises';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
+import { canonicalDealUrl } from '../scraper/deal-evidence-utils.js';
 import { inspectDealUrlHealth } from '../scraper/expiry-utils.js';
 import { sanitizeLlmProposedPatch } from './live-deal-llm-patch-utils.mjs';
 import { freeCreditOpenAiFetch, modelForTask } from '../scraper/ai-credit-budget.js';
@@ -334,14 +335,6 @@ function compactDeal(deal = {}, targetEvidence = null) {
   };
 }
 
-function chunked(items, size) {
-  const chunks = [];
-  for (let index = 0; index < items.length; index += size) {
-    chunks.push(items.slice(index, index + size));
-  }
-  return chunks;
-}
-
 function normalizeReason(value) {
   const text = cleanText(value, 40).toLowerCase().replace(/[^a-z_]/g, '_');
   if (AUTO_REMOVE_REASONS.has(text)) return text;
@@ -570,7 +563,7 @@ function shouldRemove(review) {
     && review.confidence >= MIN_REMOVE_CONFIDENCE;
 }
 
-async function requestLiveDealChunk(deals, referenceDate) {
+async function requestLiveDealChunk(deals, referenceDate, duplicateCandidates) {
   const response = await freeCreditOpenAiFetch('https://api.openai.com/v1/chat/completions', {
     method: 'POST',
     headers: {
@@ -596,6 +589,7 @@ async function requestLiveDealChunk(deals, referenceDate) {
                   additionalProperties: false,
                   properties: {
                     dealID: { type: 'string' },
+                    duplicateDealID: { type: 'string' },
                     decision: { type: 'string', enum: ['keep', 'flag', 'remove'] },
                     reason: {
                       type: 'string',
@@ -642,7 +636,7 @@ async function requestLiveDealChunk(deals, referenceDate) {
                       ],
                     },
                   },
-                  required: ['dealID', 'decision', 'reason', 'confidence', 'message', 'suggestion', 'proposedPatch'],
+                  required: ['dealID', 'duplicateDealID', 'decision', 'reason', 'confidence', 'message', 'suggestion', 'proposedPatch'],
                 },
               },
             },
@@ -659,6 +653,9 @@ async function requestLiveDealChunk(deals, referenceDate) {
             'Jeder Deal kann targetEvidence von der Zielseite enthalten: Linkstatus, finale URL, Seitentitel, Beschreibung, sichtbarer Text, Datums-Hinweise und einfache Signale.',
             'Vergleiche alle App-Angaben mit der Zielseite: Titel, Marke, Beschreibung, Deal-Vorteil, Gueltigkeit/Ablauf, Wien-Bezug, Quelle und Veroeffentlichungsdatum.',
             'Wenn Slack/App-Daten der Zielseite widersprechen, vertraue der Zielseiten-Evidence staerker.',
+            'Bewerte jeden Eintrag einzeln. Die anderen Pruefauftraege dieser Anfrage sind kein Beleg.',
+            'Vergleiche fuer Duplikate ausschliesslich die fuer diesen Eintrag gelisteten duplicateCandidateIDs aus duplicateCandidates. Gleiche Marke oder URL allein reichen nicht; Produkt, Konditionen, Zeitraum und Einloesung muessen uebereinstimmen.',
+            'Gib nur bei einem belegten Duplikat die ID des anderen, beizubehaltenden Eintrags als duplicateDealID zurueck, sonst einen leeren String. Antworte nur fuer die IDs in deals.',
             'Entferne nur mit hoher Sicherheit: abgelaufen, kein echter Deal, nicht fuer Wien/online fuer Wien, unserioese Quelle oder eindeutiges Duplikat.',
             'Wenn targetEvidence eindeutig zeigt, dass die Zielseite nicht zum Deal passt, nutze bad_source und remove.',
             'Wenn die Zielseite eine andere Stadt/Region ausserhalb von Wien zeigt, nutze not_vienna und remove.',
@@ -686,6 +683,7 @@ async function requestLiveDealChunk(deals, referenceDate) {
               autoRemoveReasons: Array.from(AUTO_REMOVE_REASONS),
             },
             deals,
+            duplicateCandidates,
           }),
         },
       ],
@@ -707,11 +705,12 @@ async function requestLiveDealChunk(deals, referenceDate) {
 }
 
 function completeReviews(value, deals) {
-  const ids = new Set(deals.map(deal => deal.id));
+  const ids = new Map(deals.map(deal => [deal.id, deal.duplicateCandidateIDs]));
   const rows = value?.reviews;
   return Array.isArray(rows) && rows.length === ids.size
     && new Set(rows.map(row => row?.dealID)).size === ids.size
     && rows.every(row => ids.has(row?.dealID)
+      && (row.reason !== 'duplicate' || ids.get(row.dealID)?.includes(row.duplicateDealID))
       && ['keep', 'flag', 'remove'].includes(row.decision)
       && [...AUTO_REMOVE_REASONS, 'ok', 'weak_evidence', 'wrong_category', 'unclear'].includes(row.reason)
       && Number.isFinite(row.confidence) && row.confidence >= 0 && row.confidence <= 1
@@ -720,46 +719,99 @@ function completeReviews(value, deals) {
       && Object.values(row.proposedPatch).every(value => typeof value === 'string'));
 }
 
-// Preserve each original comparison group; a changed member invalidates that
-// group's decisions rather than silently dropping duplicate/context checks.
+// Candidate comparisons span the selected feed and remain stable when the feed
+// is reordered. Keep the other offer's actual conditions in the model input.
+function duplicateIndex(deals) {
+  const normalized = value => String(value || '').toLowerCase().replace(/[^\p{L}\p{N}]+/gu, ' ').trim();
+  const entries = deals.map(deal => ({
+    id: deal.id, brand: normalized(deal.brand), title: normalized(deal.title),
+    url: canonicalDealUrl(deal.url), tokens: new Set(significantTokens(deal.title)),
+    summary: { id: deal.id, brand: deal.brand, title: deal.title, description: deal.description, url: deal.url,
+      location: deal.location, expires: deal.expires, validFrom: deal.validFrom, validUntil: deal.validUntil,
+      sourceStatus: deal.targetEvidence?.status },
+  })).sort((a, b) => a.id.localeCompare(b.id, 'en'));
+  function related(a, b) {
+    if (a.brand && a.brand === b.brand || a.url && a.url === b.url || a.title && a.title === b.title) return true;
+    const shared = [...a.tokens].filter(token => b.tokens.has(token)).length;
+    return shared >= 2 && shared >= Math.min(a.tokens.size, b.tokens.size) / 2;
+  }
+  return new Map(entries.map(entry => [entry.id, entries
+    .filter(other => other.id !== entry.id && related(entry, other)).map(other => other.summary)]));
+}
+
 export async function reviewLiveDealBatches(compactDeals, { cache, originals = compactDeals,
   now = new Date(), model = MODEL, chunkSize = CHUNK_SIZE, classify = requestLiveDealChunk } = {}) {
   const store = cache || { version: 1, entries: {} };
   const originalById = new Map(originals.map(deal => [deal.id, deal]));
-  const reviews = [];
+  const comparisons = duplicateIndex(compactDeals);
+  const today = new Intl.DateTimeFormat('en-CA', { timeZone: 'Europe/Vienna',
+    year: 'numeric', month: '2-digit', day: '2-digit' }).format(now);
+  const policyKey = reviewFingerprint({ kind: 'live-review-per-deal-v1', model, prompt: requestLiveDealChunk.toString(),
+    minConfidence: MIN_REMOVE_CONFIDENCE, reasons: [...AUTO_REMOVE_REASONS] });
+  const reviews = new Map();
   const errors = [];
+  const pending = [];
+  const maxBatch = Math.max(1, Math.min(CHUNK_SIZE, Math.trunc(chunkSize) || CHUNK_SIZE));
   const usage = { prompt_tokens: 0, completion_tokens: 0, total_tokens: 0 };
   const stats = { aiCalls: 0, aiReviewedDeals: 0, cachedDeals: 0, cachedGroups: 0, uncachedIncompleteGroups: 0,
     maxReviewAgeHours: 72, requiresMatchingInputEvidence: true, reusedReviews: [] };
-  for (const chunk of chunked(compactDeals, chunkSize)) {
-    const originalGroup = chunk.map(deal => originalById.get(deal.id));
-    const key = reviewFingerprint({ kind: 'live-review-group', model, policy: requestLiveDealChunk.toString(),
-      minConfidence: MIN_REMOVE_CONFIDENCE, reasons: [...AUTO_REMOVE_REASONS],
-      input: chunk, originals: originalGroup, clock: reviewClockContext({ chunk, originalGroup }, now) });
-    const cached = cachedSourceReview(store, key, { now, validate: value => completeReviews(value, chunk) });
-    if (cached) {
-      reviews.push(...cached.result.reviews);
-      stats.cachedDeals += chunk.length;
-      stats.cachedGroups += 1;
-      stats.reusedReviews.push({ dealIDs: chunk.map(deal => deal.id), reviewedAt: cached.reviewedAt });
-      continue;
-    }
+  for (const deal of compactDeals) {
+    const peers = comparisons.get(deal.id);
+    const input = { ...deal, duplicateCandidateIDs: peers.map(other => other.id) };
+    const evidence = { input, original: originalById.get(deal.id), peers };
+    // A fresh source check with the same unavailable response or unknown end
+    // adds no new evidence for the model. Explicit date/age boundaries and
+    // relative wording still invalidate, and the 72-hour hard TTL remains.
+    const clock = reviewClockContext(evidence, now, { liveFeedReview: true });
+    const key = reviewFingerprint({ policyKey, evidence, clock });
+    const cached = cachedSourceReview(store, key, { now, liveFeedReview: true, validate: row => completeReviews({ reviews: [row] }, [input]) });
+    if (cached && (cached.result.decision !== 'remove' || cached.day === today)) {
+      reviews.set(deal.id, cached.result);
+      stats.cachedDeals++;
+      stats.reusedReviews.push({ dealIDs: [deal.id], reviewedAt: cached.reviewedAt });
+    } else pending.push({ input, peers, key });
+  }
+  // Fit unique peer summaries and new reviews under the existing provider
+  // input ceiling. Preserve the review chunk cap and never drop peer evidence.
+  for (let start = 0; start < pending.length;) {
+    let end = Math.min(start + maxBatch, pending.length);
+    let batch, inputs, peers;
+    do {
+      batch = pending.slice(start, end);
+      end--;
+      inputs = batch.map(item => item.input);
+      peers = [...new Map(batch.flatMap(item => item.peers).map(peer => [peer.id, peer])).values()];
+    } while (batch.length > 1 && Buffer.byteLength(JSON.stringify([inputs, peers])) > 60000);
+    start += batch.length;
     try {
-      stats.aiCalls += 1;
-      stats.aiReviewedDeals += chunk.length;
-      const result = await classify(chunk, now.toISOString());
-      reviews.push(...(Array.isArray(result.parsed?.reviews) ? result.parsed.reviews : []));
+      stats.aiCalls++;
+      stats.aiReviewedDeals += inputs.length;
+      const result = await classify(inputs, now.toISOString(), peers);
       for (const field of Object.keys(usage)) usage[field] += Number(result.usage?.[field] || 0);
-      if (completeReviews(result.parsed, chunk)) rememberSourceReview(store, key, result.parsed, now);
-      else {
-        stats.uncachedIncompleteGroups += 1;
-        errors.push(`Incomplete or invalid AI review group: ${chunk.map(deal => deal.id).join(', ')}`);
+      if (!completeReviews(result.parsed, inputs)) {
+        stats.uncachedIncompleteGroups++;
+        errors.push(`Incomplete or invalid AI review group: ${inputs.map(deal => deal.id).join(', ')}`);
+        // Preserve individually valid suggestions in this run. A partial
+        // response must never become a durable review or a duplicate decision.
+        const partial = Array.isArray(result.parsed?.reviews) ? result.parsed.reviews : [];
+        for (const input of inputs) {
+          const rows = partial.filter(row => row?.dealID === input.id);
+          if (rows.length === 1 && rows[0].reason !== 'duplicate' && completeReviews({ reviews: rows }, [input])) {
+            reviews.set(input.id, rows[0]);
+          }
+        }
+        continue;
+      }
+      const keyById = new Map(batch.map(({ input, key }) => [input.id, key]));
+      for (const row of result.parsed.reviews) {
+        reviews.set(row.dealID, row);
+        rememberSourceReview(store, keyById.get(row.dealID), row, now);
       }
     } catch (error) {
       errors.push(cleanText(error?.message || error, 500));
     }
   }
-  return { reviews, usage, errors, stats, cache: store };
+  return { reviews: compactDeals.map(deal => reviews.get(deal.id)).filter(Boolean), usage, errors, stats, cache: store };
 }
 
 async function writeJson(filePath, value) {
@@ -892,7 +944,8 @@ async function main() {
     removalsPaused: !APPLY,
     minRemoveConfidence: MIN_REMOVE_CONFIDENCE,
     totalDealsBefore: deals.length,
-    reviewedDeals: compactDeals.length,
+    selectedDeals: compactDeals.length,
+    reviewedDeals: finalReviews.length,
     totalDealsAfter: keptDeals.length,
     removedCount: APPLY ? removedDeals.length : 0,
     wouldRemoveCount: removedDeals.length,

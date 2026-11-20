@@ -8,6 +8,10 @@ const dayFormatter = new Intl.DateTimeFormat('en-CA', { timeZone: 'Europe/Vienna
   year: 'numeric', month: '2-digit', day: '2-digit' });
 const relativeWords = /\b(?:heute|morgen|gestern|aktuell|diese[rmns]?|nächste[rmns]?|montag|dienstag|mittwoch|donnerstag|freitag|samstag|sonntag|today|tomorrow|yesterday)\b/iu;
 
+// Common copy such as "aktuelle Angebote" or "dieser Coupon" describes no
+// specific day. A fresh unchanged source can support the same live review.
+const calendarWords = /\b(?:heute|heutige\w*|morgen|morgige\w*|gestern|übermorgen|montag|dienstag|mittwoch|donnerstag|freitag|samstag|sonntag|today|tonight|tomorrow|yesterday)\b|(?:dies|nächst|naechst|kommend|letzt)\w*\s+(?:woche|monat|tag|jahr)|\b(?:noch|in|innerhalb von)\s+\d+\s+(?:stunden?|tagen?|wochen?)\b/iu;
+
 function stable(value) {
   if (Array.isArray(value)) return value.map(stable);
   if (value && typeof value === 'object') return Object.fromEntries(Object.keys(value).sort()
@@ -20,17 +24,17 @@ export function reviewFingerprint(value) {
 }
 
 // Reuse never crosses a date/age boundary relevant to the original decision.
-export function reviewClockContext(value, now = new Date()) {
+export function reviewClockContext(value, now = new Date(), { liveFeedReview = false } = {}) {
   const day = dayFormatter.format(now);
   const dates = [];
   const ages = [];
   let hasValidity = false;
-  let needsDailyReview = relativeWords.test(JSON.stringify(value));
+  let needsDailyReview = (liveFeedReview ? calendarWords : relativeWords).test(JSON.stringify(value));
   function visit(node, key = '') {
     if (Array.isArray(node)) { node.forEach(item => visit(item, key)); return; }
     if (node && typeof node === 'object') {
-      if (node.status && ['blocked', 'transient', 'missing_link', 'not_checked'].includes(node.status)) needsDailyReview = true;
-      if (Object.hasOwn(node, 'targetEvidence') && node.targetEvidence?.status !== 'ok') needsDailyReview = true;
+      if (!liveFeedReview && node.status && ['blocked', 'transient', 'missing_link', 'not_checked'].includes(node.status)) needsDailyReview = true;
+      if (!liveFeedReview && Object.hasOwn(node, 'targetEvidence') && node.targetEvidence?.status !== 'ok') needsDailyReview = true;
       for (const [name, item] of Object.entries(node)) visit(item, name);
       return;
     }
@@ -42,11 +46,16 @@ export function reviewClockContext(value, now = new Date()) {
       const phase = match[0].includes('T') ? (parsed <= now.getTime() ? 'past' : 'future')
         : (match[0] < day ? 'past' : match[0] > day ? 'future' : 'today');
       dates.push([match[0], phase]);
-      if (/pub|created|discovered/i.test(key)) ages.push([match[0], Math.min(8, Math.floor((now.getTime() - parsed) / 86400000))]);
+      if (/pub|created|discovered/i.test(key)) {
+        const days = Math.min(8, Math.floor((now.getTime() - parsed) / 86400000));
+        // Preserve first-day, seven-day freshness, and older-than-seven-day
+        // transitions in the live review. Other consumers keep exact ages.
+        ages.push([match[0], liveFeedReview && days >= 1 && days < 7 ? 1 : days]);
+      }
     }
   }
   visit(value);
-  return { dates, ages, ...(!hasValidity || needsDailyReview ? { day } : {}) };
+  return { dates, ages, ...((!liveFeedReview && !hasValidity) || needsDailyReview ? { day } : {}) };
 }
 
 export function loadSourceReviewCache(filePath) {
@@ -58,13 +67,13 @@ export function loadSourceReviewCache(filePath) {
   return { version: 1, entries: {} };
 }
 
-export function cachedSourceReview(cache, key, { now = new Date(), maxAgeMs = MAX_AGE_MS, validate }) {
+export function cachedSourceReview(cache, key, { now = new Date(), maxAgeMs = MAX_AGE_MS, validate, liveFeedReview = false }) {
   const entry = cache?.entries?.[key];
   const age = now.getTime() - Date.parse(entry?.reviewedAt || '');
   if (!Number.isFinite(age) || age < 0 || age >= Math.min(maxAgeMs, MAX_AGE_MS)
       || !Object.hasOwn(entry, 'result')
       || entry?.resultHash !== reviewFingerprint(entry?.result)
-      || (relativeWords.test(JSON.stringify(entry.result)) && entry.day !== dayFormatter.format(now))) return null;
+      || ((liveFeedReview ? calendarWords : relativeWords).test(JSON.stringify(entry.result)) && entry.day !== dayFormatter.format(now))) return null;
   return validate(entry.result) ? structuredClone(entry) : null;
 }
 
