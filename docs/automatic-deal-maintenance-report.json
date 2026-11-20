@@ -1,10 +1,40 @@
 {
   "mode": "owner-authorized-source-backed",
-  "checkedAt": "2026-11-20T13:43:36.187Z",
+  "checkedAt": "2026-11-20T13:44:58.708Z",
   "beforeCount": 85,
-  "afterCount": 85,
-  "hidden": [],
+  "afterCount": 83,
+  "hidden": [
+    {
+      "id": "gs-581911",
+      "validUntil": "2026-11-18",
+      "reason": "captured-coupon-offer-end",
+      "replay": false
+    },
+    {
+      "id": "gs-574207",
+      "validUntil": "2026-11-19",
+      "reason": "captured-coupon-offer-end",
+      "replay": false
+    }
+  ],
   "corrected": [
+    {
+      "id": "g2-1kg4kae",
+      "fields": [
+        "expires",
+        "expiresOriginal",
+        "expiresSource",
+        "expirySource",
+        "expiryKind",
+        "expiryDisplayText",
+        "validOn",
+        "dateConfidence",
+        "expiresPrecision",
+        "expiresDetectedFromUrl",
+        "validity"
+      ],
+      "method": "observation-is-not-offer-period"
+    },
     {
       "id": "g2-1hlgnly",
       "fields": [
@@ -14,18 +44,6 @@
     }
   ],
   "review": [
-    {
-      "id": "g2-1kg4kae",
-      "reason": "source-year-or-end-not-confirmed"
-    },
-    {
-      "id": "gs-581911",
-      "reason": "manual-period-cleared"
-    },
-    {
-      "id": "gs-574207",
-      "reason": "source-year-or-end-not-confirmed"
-    },
     {
       "id": "g2-oyxgdj",
       "reason": "copy-needs-grounded-review",
@@ -92,13 +110,6 @@
       ]
     },
     {
-      "id": "gs-581911",
-      "reason": "copy-needs-grounded-review",
-      "fields": [
-        "description"
-      ]
-    },
-    {
       "id": "fc4g-eg5ndc",
       "reason": "copy-needs-grounded-review",
       "fields": [
@@ -106,7 +117,7 @@
       ]
     }
   ],
-  "newHides": 0,
+  "newHides": 2,
   "protectedManualFields": true,
   "ai": {
     "attempted": 0,
