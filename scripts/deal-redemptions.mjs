@@ -46,12 +46,18 @@ export function loadDealRedemptions(manifestPath = DEFAULT_MANIFEST_PATH) {
   }
 }
 
+export function matchesReviewedPeriod(deal, review) {
+  return review.expectedPeriod === undefined || (object(review.expectedPeriod)
+    && ['validOn', 'validFrom', 'validUntil', 'expires'].every(key =>
+      typeof review.expectedPeriod[key] === 'string' && review.expectedPeriod[key] === (deal[key] || '')));
+}
+
 function reviewedRedemption(deal, review, now) {
   if (!object(review) || !METHODS.has(review.method) || !Number.isFinite(now)) return null;
   if (!text(deal.id) || !text(deal.title) || typeof deal.description !== 'string'
     || review.dealId !== deal.id || review.expectedTitle !== deal.title
     || review.sourceUrl !== deal.url || review.expectedDescription !== deal.description
-    || !safeUrl(review.sourceUrl) || !hasEvidence(review.evidence)) return null;
+    || !matchesReviewedPeriod(deal, review) || !safeUrl(review.sourceUrl) || !hasEvidence(review.evidence)) return null;
 
   const approvedAt = timestamp(deal.approvedAt, true);
   const verifiedAt = timestamp(review.verifiedAt);

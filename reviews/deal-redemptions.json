@@ -256,17 +256,29 @@
       "expectedDescription": "Beim Kauf von drei Baguettes gibt es ein viertes Baguette gratis dazu. Laut Bäckerei Schwarz umfasst die Auswahl Chili, Nuss, Tomate, Olive, Zwiebel, Kürbis und Classic. Die offizielle Aktionsseite nennt kein Enddatum; Verfügbarkeit vor Ort prüfen. Die Kartenpunkte zeigen die Verkaufsfilialen laut offizieller Standortliste, nicht die Backstube oder die Kontaktadresse.",
       "sourceUrl": "https://www.bswien.at/aktionen",
       "method": "onsite",
-      "instructions": "Drei Baguettes aus der angebotenen Auswahl kaufen und das vierte gratis erhalten. Auswahl und Verfügbarkeit vor dem Bezahlen in der Verkaufsfiliale prüfen. Die offizielle Aktionsseite nennt kein Enddatum.",
-      "verifiedAt": "2026-11-06T19:11:27.671Z",
-      "reviewUntil": "2026-11-07T19:11:27.671Z",
+      "instructions": "In der Bäckerei vier Baguettes aus der Aktionsauswahl nehmen. Beim Kauf von drei Baguettes gibt es das vierte gratis. Vor dem Bezahlen Sorte und Verfügbarkeit klären.",
+      "verifiedAt": "2026-11-20T13:40:20.905Z",
+      "reviewUntil": "2026-11-21T13:40:20.905Z",
       "evidence": [
         {
           "url": "https://www.bswien.at/aktionen",
-          "sha256": "c86cd21d9f748ad5eae6c4b3a884ed2317643573e6ce1f2362e57db1457347f4",
-          "verifiedAt": "2026-11-06T19:11:27.671Z",
-          "scope": "Current official offer and necessary redemption route only. No personal login, coupon activation, purchase, nationwide branch survey or successful redemption claimed. Review TTL is not offer validity."
+          "sha256": "54f66bab8775aba04b4530b59303c130e269651cea1be7f1ccef6b60e2be1114",
+          "verifiedAt": "2026-11-20T13:40:20.905Z",
+          "scope": "Öffentliche Anbieterbedingungen und beschriebener Einlöseweg geprüft."
         }
-      ]
+      ],
+      "recheck": {
+        "kind": "official-food-card",
+        "merchant": "Bäckerei Schwarz",
+        "contentHash": "ab53ffd55fdd616fe02224219394a457cd86dba0cca787609c5e277e76df3902",
+        "extractionMethod": "merchant-card"
+      },
+      "expectedPeriod": {
+        "validOn": "",
+        "validFrom": "",
+        "validUntil": "",
+        "expires": ""
+      }
     },
     {
       "dealId": "joe-omv-current-5044fa7c7e98-60064851e04f",
@@ -331,19 +343,34 @@
       "expectedDescription": "2 Alaska-Seelachsfilets gebacken & Beilage: 1+1 gratis Gutschein. Gültig bis 30.11.2026 in allen teilnehmenden Restaurants in Österreich. Nicht gültig an Autobahnraststätten. Serviervorschlag",
       "sourceUrl": "https://www.nordsee.com/at/coupons",
       "method": "provider_coupon",
-      "instructions": "Den passenden Originalcoupon im verlinkten österreichischen PDF öffnen und bei der Bestellung im teilnehmenden NORDSEE-Restaurant vorzeigen. Die Bedingungen und der Scan-Code stehen auf dem jeweiligen Coupon. Gültig bis 30.11.2026, nicht an Autobahnraststätten. Die gedruckte Scan-Kennung ist kein öffentlicher Rabattcode zum Kopieren.",
+      "instructions": "Das österreichische Coupon-PDF öffnen und bei der Bestellung den Scan-Code auf dem Coupon für zwei gebackene Alaska-Seelachsfilets mit Beilage vorzeigen. In teilnehmenden Restaurants bis einschließlich 30. November 2026 einlösbar. Autobahnraststätten sind ausgenommen.",
       "url": "https://www.nordsee.com/at/coupons/pdf",
-      "verifiedAt": "2026-11-06T19:11:27.671Z",
-      "reviewUntil": "2026-11-07T19:11:27.671Z",
+      "verifiedAt": "2026-11-20T13:39:47.020Z",
+      "reviewUntil": "2026-11-21T13:39:47.020Z",
       "evidence": [
         {
           "url": "https://www.nordsee.com/at/coupons/pdf",
-          "sha256": "603e14de00c0a1caf1dc815079525e1bd981db66fe748b98e9ac996683fb5562",
-          "verifiedAt": "2026-11-06T19:11:27.671Z",
-          "visualCheck": "Actual PDF rendered and visually checked: 30.11.2026, two 1+1 meals, menu prices, participating Austrian restaurants excluding motorway sites. Printed scan identifiers are not public text codes.",
-          "scope": "Current official offer and necessary redemption route only. No personal login, coupon activation, purchase, nationwide branch survey or successful redemption claimed. Review TTL is not offer validity."
+          "sha256": "06eb912963d993f4b6d75664d6f17cb0ab1888719a3963fa13d3311194f6ace2",
+          "verifiedAt": "2026-11-20T13:39:47.020Z",
+          "scope": "Originalcoupon mit Scan-Code und Angebotsbedingungen auf der offiziellen österreichischen PDF-Seite visuell geprüft.",
+          "cardSha256": "c9169cf037f4b1045b5d763c2bb1e93755a1bf96f26d864258e733f091584bed"
         }
-      ]
+      ],
+      "recheck": {
+        "kind": "official-food-card",
+        "merchant": "NORDSEE",
+        "contentHash": "9b81cc0b986bdd56609deb9464a0e1f1ad2d27aed4aba6dcdb170b56de94f1bb",
+        "extractionMethod": "official-coupon-local-ocr",
+        "cardSha256": "c9169cf037f4b1045b5d763c2bb1e93755a1bf96f26d864258e733f091584bed",
+        "validUntil": "2026-11-30",
+        "endExclusive": "2026-11-30T23:00:00.000Z"
+      },
+      "expectedPeriod": {
+        "validOn": "",
+        "validFrom": "",
+        "validUntil": "2026-11-30",
+        "expires": "2026-11-30T23:59:59.999Z"
+      }
     },
     {
       "dealId": "power-food-fea2efd7d1c2",
@@ -351,19 +378,34 @@
       "expectedDescription": "2 Backfisch-Baguettes Kalt oder heiss: 1+1 gratis Gutschein. Gültig bis 30.11.2026 in allen teilnehmenden Restaurants in Österreich. Nicht gültig an Autobahnraststätten. Serviervorschlag",
       "sourceUrl": "https://www.nordsee.com/at/coupons",
       "method": "provider_coupon",
-      "instructions": "Den passenden Originalcoupon im verlinkten österreichischen PDF öffnen und bei der Bestellung im teilnehmenden NORDSEE-Restaurant vorzeigen. Die Bedingungen und der Scan-Code stehen auf dem jeweiligen Coupon. Gültig bis 30.11.2026, nicht an Autobahnraststätten. Die gedruckte Scan-Kennung ist kein öffentlicher Rabattcode zum Kopieren.",
+      "instructions": "Das österreichische Coupon-PDF öffnen und bei der Bestellung den Scan-Code auf dem Coupon für zwei kalte oder heiße Backfisch-Baguettes vorzeigen. In teilnehmenden Restaurants bis einschließlich 30. November 2026 einlösbar. Autobahnraststätten sind ausgenommen.",
       "url": "https://www.nordsee.com/at/coupons/pdf",
-      "verifiedAt": "2026-11-06T19:11:27.671Z",
-      "reviewUntil": "2026-11-07T19:11:27.671Z",
+      "verifiedAt": "2026-11-20T13:39:47.020Z",
+      "reviewUntil": "2026-11-21T13:39:47.020Z",
       "evidence": [
         {
           "url": "https://www.nordsee.com/at/coupons/pdf",
-          "sha256": "603e14de00c0a1caf1dc815079525e1bd981db66fe748b98e9ac996683fb5562",
-          "verifiedAt": "2026-11-06T19:11:27.671Z",
-          "visualCheck": "Actual PDF rendered and visually checked: 30.11.2026, two 1+1 meals, menu prices, participating Austrian restaurants excluding motorway sites. Printed scan identifiers are not public text codes.",
-          "scope": "Current official offer and necessary redemption route only. No personal login, coupon activation, purchase, nationwide branch survey or successful redemption claimed. Review TTL is not offer validity."
+          "sha256": "06eb912963d993f4b6d75664d6f17cb0ab1888719a3963fa13d3311194f6ace2",
+          "verifiedAt": "2026-11-20T13:39:47.020Z",
+          "scope": "Originalcoupon mit Scan-Code und Angebotsbedingungen auf der offiziellen österreichischen PDF-Seite visuell geprüft.",
+          "cardSha256": "3d0cecdaed0fa9b08588c5187befc82a13daafa86aa8b4b40b870b59136d68fe"
         }
-      ]
+      ],
+      "recheck": {
+        "kind": "official-food-card",
+        "merchant": "NORDSEE",
+        "contentHash": "305f97c36162dcf66f83efd65f981e5095f33fe32b3dab88d59e0dbe140378b7",
+        "extractionMethod": "official-coupon-local-ocr",
+        "cardSha256": "3d0cecdaed0fa9b08588c5187befc82a13daafa86aa8b4b40b870b59136d68fe",
+        "validUntil": "2026-11-30",
+        "endExclusive": "2026-11-30T23:00:00.000Z"
+      },
+      "expectedPeriod": {
+        "validOn": "",
+        "validFrom": "",
+        "validUntil": "2026-11-30",
+        "expires": "2026-11-30T23:59:59.999Z"
+      }
     },
     {
       "dealId": "fc4g-eg5ndc",
@@ -391,19 +433,24 @@
       "expectedDescription": "Die aktuellen österreichischen NORDSEE-Coupons gelten bis 30.11.2026 in teilnehmenden Restaurants, nicht an Autobahnraststätten. Auswahl: Garnelen-Box normal 7,49 €; Mix-Box groß 7,49 €; zwei Fish & Chips normal 10,49 €; zwei Classic Fish Burger mit Megafrites und 0,5-l-PET-Softdrink 13,49 € zuzüglich 0,25 € Pfand. Für je 12,99 € gibt es Lachsfilet oder Fischfilet Champignon, jeweils mit Beilage und 0,2-l-Softdrink; ebenfalls 12,99 € kostet das Schollenfilet mit Beilage, 0,2-l-Softdrink und Garnelenspieß. Großer Hunger: zwei Bremer, zwei Backfisch-Baguettes und Fish & Chips normal für 16,99 €. Superfang-Meal: zwei Menüs mit Schollenfilet oder gebackenem Alaska-Seelachsfilet und je 0,2-l-Softdrink für 17,99 €. Der Preisvorteil hängt vom gewählten Coupon ab. Den Originalcoupon mit seinem Scan-Code bei der Bestellung vorzeigen; die PDF-Downloadseite dient der Einlösung, nicht der Suche nach versteckten Bedingungen.",
       "sourceUrl": "https://www.nordsee.com/at/coupons",
       "method": "provider_coupon",
-      "instructions": "Den passenden Originalcoupon im verlinkten österreichischen PDF öffnen und bei der Bestellung im teilnehmenden NORDSEE-Restaurant vorzeigen. Die Bedingungen und der Scan-Code stehen auf dem jeweiligen Coupon. Gültig bis 30.11.2026, nicht an Autobahnraststätten. Die gedruckte Scan-Kennung ist kein öffentlicher Rabattcode zum Kopieren.",
+      "instructions": "Im offiziellen österreichischen PDF den gewünschten Coupon auswählen. Bei der Bestellung den Scan-Code auf dieser Karte im teilnehmenden NORDSEE-Restaurant vorzeigen. Die November-Coupons gelten bis einschließlich 30. November 2026, ausgenommen Autobahnraststätten.",
       "url": "https://www.nordsee.com/at/coupons/pdf",
-      "verifiedAt": "2026-11-06T19:11:27.671Z",
-      "reviewUntil": "2026-11-07T19:11:27.671Z",
+      "verifiedAt": "2026-11-20T13:39:47.020Z",
+      "reviewUntil": "2026-11-21T13:39:47.020Z",
       "evidence": [
         {
           "url": "https://www.nordsee.com/at/coupons/pdf",
-          "sha256": "603e14de00c0a1caf1dc815079525e1bd981db66fe748b98e9ac996683fb5562",
-          "verifiedAt": "2026-11-06T19:11:27.671Z",
-          "visualCheck": "Actual PDF rendered and visually checked: 30.11.2026, two 1+1 meals, menu prices, participating Austrian restaurants excluding motorway sites. Printed scan identifiers are not public text codes.",
-          "scope": "Current official offer and necessary redemption route only. No personal login, coupon activation, purchase, nationwide branch survey or successful redemption claimed. Review TTL is not offer validity."
+          "sha256": "06eb912963d993f4b6d75664d6f17cb0ab1888719a3963fa13d3311194f6ace2",
+          "verifiedAt": "2026-11-20T13:39:47.020Z",
+          "scope": "Öffentliche Anbieterbedingungen und beschriebener Einlöseweg geprüft."
         }
-      ]
+      ],
+      "expectedPeriod": {
+        "validOn": "",
+        "validFrom": "",
+        "validUntil": "",
+        "expires": ""
+      }
     },
     {
       "dealId": "meta-ig-18109413841942940",
@@ -429,17 +476,23 @@
       "expectedDescription": "Als IKEA Family Mitglied erhältst du im Restaurant der teilnehmenden Einrichtungshäuser Kaffee, Tee oder heiße Schokolade gratis. IKEA Family Karte an der Kasse vorzeigen. Ausgenommen IKEA Wien Westbahnhof. Im Kartenbereich sind IKEA Wien Nord und IKEA Vösendorf zugeordnet. Die Verfügbarkeit der Vorteile kann nach Datum, Saison und Region variieren.",
       "sourceUrl": "https://www.ikea.com/at/de/ikea-family/benefits/",
       "method": "onsite",
-      "instructions": "Im Restaurant die IKEA Family Karte an der Kasse vorzeigen. Kaffee, Tee oder heiße Schokolade sind mit dem Vorteil gratis; IKEA Wien Westbahnhof ist ausgenommen. Die Verfügbarkeit kann nach Datum, Saison und Region variieren. Kein zusätzlicher Gutscheincode auf einer anderen Website erforderlich.",
-      "verifiedAt": "2026-11-06T21:54:25.011Z",
-      "reviewUntil": "2026-11-07T21:54:25.011Z",
+      "instructions": "Im teilnehmenden IKEA-Restaurant Kaffee, Tee oder heiße Schokolade wählen und an der Kassa die eigene IKEA Family Karte vorzeigen. IKEA Wien Westbahnhof ist ausgenommen.",
+      "verifiedAt": "2026-11-20T13:40:20.859Z",
+      "reviewUntil": "2026-11-21T13:40:20.859Z",
       "evidence": [
         {
           "url": "https://www.ikea.com/at/de/ikea-family/benefits/",
-          "sha256": "947c61efed2eeb5ddb7232a4d33e8da9cfdb687235edc1a1681c55f4a9962adb",
-          "verifiedAt": "2026-11-06T21:54:25.011Z",
-          "scope": "Current public provider conditions and necessary redemption route, not a purchase or successful redemption. Membership and personal/staff coupon steps retained. Review TTL is not an offer expiry."
+          "sha256": "77b6f970a4f289e5bf556d7abdf8e669af53cc602196678f213edb2ed5721d11",
+          "verifiedAt": "2026-11-20T13:40:20.859Z",
+          "scope": "Öffentliche Anbieterbedingungen und beschriebener Einlöseweg geprüft."
         }
-      ]
+      ],
+      "expectedPeriod": {
+        "validOn": "",
+        "validFrom": "",
+        "validUntil": "",
+        "expires": ""
+      }
     },
     {
       "dealId": "g2-1gkjf0g",
@@ -447,17 +500,23 @@
       "expectedDescription": "Im Schwedischen Restaurant bei IKEA Wien Westbahnhof gibt es bei einer Konsumation ab 10 € einen 10-€-Gutschein für den Einkauf im Einrichtungshaus. Der Gutschein ist nur am selben Tag bei einem Einkaufswert ab 50 € einlösbar. Die Aktion gilt Montag bis Samstag, laut Anbieter vom 30.10. bis 31.12. Es handelt sich um einen Einkaufsgutschein, nicht um kostenloses Essen oder eine Barauszahlung.",
       "sourceUrl": "https://www.ikea.com/at/de/stores/wien-westbahnhof/ikea-wien-westbahnhof-angebote-pub1aba7a60/",
       "method": "onsite",
-      "instructions": "Montag bis Samstag im Schwedischen Restaurant bei IKEA Wien Westbahnhof ab 10 € konsumieren und den 10-€-Einkaufsgutschein erhalten. Diesen am selben Tag ab 50 € Einkaufswert im Einrichtungshaus einlösen. Aktionszeitraum laut Anbieter 30.10. bis 31.12.; kein Gratisessen und keine Barauszahlung. Der ausgegebene Originalgutschein wird benötigt.",
-      "verifiedAt": "2026-11-06T21:54:25.011Z",
-      "reviewUntil": "2026-11-07T21:54:25.011Z",
+      "instructions": "Montag bis Samstag im Restaurant von IKEA Wien Westbahnhof für mindestens 10 € konsumieren und den 10-€-Gutschein mitnehmen. Den Gutschein noch am selben Tag beim Einkauf im Einrichtungshaus ab 50 € vorlegen.",
+      "verifiedAt": "2026-11-20T13:40:20.791Z",
+      "reviewUntil": "2026-11-21T13:40:20.791Z",
       "evidence": [
         {
           "url": "https://www.ikea.com/at/de/stores/wien-westbahnhof/ikea-wien-westbahnhof-angebote-pub1aba7a60/",
-          "sha256": "f8c8c37805e2352cb946c5e6a4309bf50e30b9b1020f67f83a6b08414bb16d70",
-          "verifiedAt": "2026-11-06T21:54:25.011Z",
-          "scope": "Current public provider conditions and necessary redemption route, not a purchase or successful redemption. Membership and personal/staff coupon steps retained. Review TTL is not an offer expiry."
+          "sha256": "fe4544a7a270d1d0ad2300ee755434d65770e6554cb59d52e413dca7d393e3cb",
+          "verifiedAt": "2026-11-20T13:40:20.791Z",
+          "scope": "Öffentliche Anbieterbedingungen und beschriebener Einlöseweg geprüft."
         }
-      ]
+      ],
+      "expectedPeriod": {
+        "validOn": "",
+        "validFrom": "",
+        "validUntil": "2026-12-31",
+        "expires": "2026-12-31T23:59:59.999Z"
+      }
     },
     {
       "dealId": "g2-1ys8kis",
@@ -1310,6 +1369,114 @@
           "scope": "Public-source/actual exact-post review. No purchase, account activation, successful redemption or present fare certified. Review TTL is not offer expiry."
         }
       ]
+    },
+    {
+      "dealId": "power-food-3170830eb029",
+      "expectedTitle": "Über 20 %: 2 Classic Fish Burger + Pommes + Getränk (Coupon)",
+      "expectedDescription": "2 Classic Fish Burger + Megafrites + 1 Softdrink 0,5 l PET: Mehr als 20 % Rabatt Gutschein. Gültig bis 30.11.2026 in allen teilnehmenden Restaurants in Österreich. Nicht gültig an Autobahnraststätten. Serviervorschlag (*zzgl. 0,25 EUR Pfand)",
+      "sourceUrl": "https://www.nordsee.com/at/coupons",
+      "method": "provider_coupon",
+      "instructions": "Das österreichische Coupon-PDF öffnen und bei der Bestellung den Scan-Code auf dem Coupon für zwei Classic Fish Burger mit Megafrites und 0,5-l-Softdrink vorzeigen. In teilnehmenden Restaurants bis einschließlich 30. November 2026 einlösbar. Autobahnraststätten sind ausgenommen.",
+      "url": "https://www.nordsee.com/at/coupons/pdf",
+      "verifiedAt": "2026-11-20T13:39:47.020Z",
+      "reviewUntil": "2026-11-21T13:39:47.020Z",
+      "evidence": [
+        {
+          "url": "https://www.nordsee.com/at/coupons/pdf",
+          "sha256": "06eb912963d993f4b6d75664d6f17cb0ab1888719a3963fa13d3311194f6ace2",
+          "verifiedAt": "2026-11-20T13:39:47.020Z",
+          "scope": "Originalcoupon mit Scan-Code und Angebotsbedingungen auf der offiziellen österreichischen PDF-Seite visuell geprüft.",
+          "cardSha256": "f693c3384b1639562cfeb571cc4e01c947954f56f21fafd1a668ed0273fae769"
+        }
+      ],
+      "recheck": {
+        "kind": "official-food-card",
+        "merchant": "NORDSEE",
+        "contentHash": "03cecc8b1734cd65d01accdb22f3d04bb9006c33f8b90782acfe5011d6d34b31",
+        "extractionMethod": "official-reviewed-coupon-card",
+        "cardSha256": "f693c3384b1639562cfeb571cc4e01c947954f56f21fafd1a668ed0273fae769",
+        "validUntil": "2026-11-30",
+        "endExclusive": "2026-11-30T23:00:00.000Z"
+      },
+      "expectedPeriod": {
+        "validOn": "",
+        "validFrom": "",
+        "validUntil": "2026-11-30",
+        "expires": "2026-11-30T23:59:59.999Z"
+      }
+    },
+    {
+      "dealId": "fc4g-vqsqje",
+      "expectedTitle": "Frühstück für 1 € (Fr–Sa bis 10:30 Uhr)",
+      "expectedDescription": "Frühstück für 1 € statt 2,99 € im Restaurant von IKEA Wien Nord. Jeden Freitag und Samstag von Restaurantöffnung bis 10:30 Uhr, verlängert bis 02.01.2027. Nur solange der Vorrat reicht und nicht mit anderen Aktionen kombinierbar. Adresse: Sverigestraße 1A, 1220 Wien. Abweichende Feiertagsöffnungszeiten beachten.",
+      "sourceUrl": "https://www.ikea.com/at/de/stores/wien-nord/",
+      "method": "onsite",
+      "instructions": "Freitag oder Samstag im Restaurant von IKEA Wien Nord das Aktionsfrühstück bestellen. Es kostet von Restaurantöffnung bis 10:30 Uhr 1 €. Die Aktion läuft bis einschließlich 2. Jänner 2027, solange der Vorrat reicht. Andere Aktionen lassen sich damit nicht kombinieren.",
+      "verifiedAt": "2026-11-20T13:40:20.840Z",
+      "reviewUntil": "2026-11-21T13:40:20.840Z",
+      "evidence": [
+        {
+          "url": "https://www.ikea.com/at/de/stores/wien-nord/",
+          "sha256": "e4bf18c3ccf5a46149284488b9c71f887170f8e8f15ff275d5e70ba0bd1bda2f",
+          "verifiedAt": "2026-11-20T13:40:20.840Z",
+          "scope": "Öffentliche Anbieterbedingungen und beschriebener Einlöseweg geprüft."
+        }
+      ],
+      "expectedPeriod": {
+        "validOn": "",
+        "validFrom": "",
+        "validUntil": "2027-01-02",
+        "expires": "2027-01-02T09:30:00.000Z"
+      }
+    },
+    {
+      "dealId": "meta-ig-18101671448672416",
+      "expectedTitle": "50 % auf Kindergerichte bis 12 Jahre, Mo–Fr 15:30–17:30",
+      "expectedDescription": "Im Gasthaus Napoleon gibt es montags bis freitags von 15:30 bis 17:30 Uhr 50 % Rabatt auf Kindergerichte für Kinder bis 12 Jahre.",
+      "sourceUrl": "https://www.instagram.com/p/DfZ9qMYsGRG/",
+      "method": "onsite",
+      "instructions": "Montag bis Freitag zwischen 15:30 und 17:30 Uhr im Gasthaus Napoleon ein Kindergericht für ein Kind bis 12 Jahre bestellen. Während der Kinder-Happy-Hour kostet es die Hälfte.",
+      "verifiedAt": "2026-11-20T13:40:20.839Z",
+      "reviewUntil": "2026-11-21T13:40:20.839Z",
+      "evidence": [
+        {
+          "url": "https://www.napoleon.wien/",
+          "sha256": "7e87c7bb2541781b22f5605242cdb13386edba0fe0d2efad3ae9bf75179f8f24",
+          "verifiedAt": "2026-11-20T13:40:20.839Z",
+          "scope": "Öffentliche Anbieterbedingungen und beschriebener Einlöseweg geprüft."
+        }
+      ],
+      "expectedPeriod": {
+        "validOn": "",
+        "validFrom": "",
+        "validUntil": "",
+        "expires": ""
+      }
+    },
+    {
+      "dealId": "g2-15kbyb4",
+      "expectedTitle": "VAPIANO: 1+1 Pasta für App-Neukunden",
+      "expectedDescription": "Bei Neuanmeldung in der VAPIANO Lovers App den Joining Code PASTALOVER während der Registrierung eingeben. Für Studierende: Zwei Pasta-Gerichte bestellen, eines gratis (Pomodoro, Carbonara, Bolognese oder Bolognese vegan). Die Prämie unter „Prämien“ in den Warenkorb legen oder einem Vapianisti Bescheid sagen. Binnen 30 Tagen nach Anmeldung einlösen, einmal pro Person. Gültig in allen VAPIANO-Restaurants in Österreich außer Linz.",
+      "sourceUrl": "https://www.iamstudent.at/g/vapiano-gutschein-mit-50-prozent-studentenrabatt-gsh-wise26",
+      "method": "provider_coupon",
+      "instructions": "Als Studentin oder Student bei der Neuanmeldung in der VAPIANO Lovers App PASTALOVER ins Feld „Joining Code“ eingeben. Unter „Prämien“ die 1+1 Pasta auswählen und bei der Bestellung von zwei berechtigten Pasta-Gerichten in den Warenkorb legen oder im Restaurant Bescheid geben. Einmal innerhalb von 30 Tagen nach Anmeldung einlösbar, in Österreich außer Linz.",
+      "url": "https://www.iamstudent.at/g/vapiano-gutschein-mit-50-prozent-studentenrabatt-gsh-wise26",
+      "verifiedAt": "2026-11-20T13:40:21.337Z",
+      "reviewUntil": "2026-11-21T13:40:21.337Z",
+      "evidence": [
+        {
+          "url": "https://www.iamstudent.at/g/vapiano-gutschein-mit-50-prozent-studentenrabatt-gsh-wise26",
+          "sha256": "44c1413888733c5889988e1756c145585c342c11b03cd3e7da1966669c8468b5",
+          "verifiedAt": "2026-11-20T13:40:21.337Z",
+          "scope": "Öffentliche Anbieterbedingungen und beschriebener Einlöseweg geprüft."
+        }
+      ],
+      "expectedPeriod": {
+        "validOn": "",
+        "validFrom": "",
+        "validUntil": "",
+        "expires": ""
+      }
     }
   ]
 }
