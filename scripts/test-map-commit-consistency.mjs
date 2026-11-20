@@ -437,3 +437,14 @@ const text = fs.readFileSync('docs/deals.json', 'utf8');`));
   assert.equal(JSON.parse(feed).deals[0].enrichmentPending, false);
   assert.equal(JSON.parse(remoteText(f, MAP)).feedHash, createHash('sha256').update(feed).digest('hex'));
 });
+
+test('a concurrent redemption correction must survive an unrelated feed update', t => {
+  const f = fixture(t);
+  write(f.local, FEED, {deals:[{id:'local', title:'Updated local deal'}]});
+  publishRemote(f, 'reviews/deal-redemptions.json', {reviews:[]});
+  const before = remoteHead(f);
+  const result = generate(f, [FEED], ['--replace-conflicts']);
+  assert.equal(result.status, 1, result.output);
+  assert.match(result.output, /Redemption consistency failed: remote changed reviews\/deal-redemptions.json/);
+  assert.equal(remoteHead(f), before);
+});

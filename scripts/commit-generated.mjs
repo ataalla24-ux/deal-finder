@@ -625,11 +625,19 @@ async function main() {
   const baseRef = cleanText(gitOutput(['rev-parse', 'HEAD']));
   let mapReadInputs;
   let photoConsistency;
+  let redemptionConsistency;
   const dealsPath = 'docs/deals.json';
   const includesDealsFeed = options.patterns
     .map(normalizeRepoPath)
     .includes(dealsPath);
   if (includesDealsFeed && statusChanged(dealsPath)) {
+    const manifest = 'reviews/deal-redemptions.json';
+    const routeInputs = [manifest, 'scripts/deal-redemptions.mjs'];
+    if (statusChanged(manifest)) routeInputs.push('docs/deals-pending-power.json',
+      'reviews/maintenance-source-evidence.json', 'scripts/refresh-food-redemptions.mjs', 'scripts/food-redemption-sources.mjs');
+    redemptionConsistency = routeInputs.map(file => ({
+      path:file, baseHash:contentHash(remoteFileContent(baseRef, file)), hash:localFileHash(file),
+    }));
     const { maintainFeedFile } = await import('./automatic-deal-maintenance.mjs');
     const maintenance = await maintainFeedFile({ allowAi: false, apply: true });
     if (maintenance.changed) console.log(`Source-backed maintenance: ${maintenance.report.hidden.length} expired, ${maintenance.report.corrected.length} corrected`);
@@ -732,14 +740,15 @@ async function main() {
       }));
       assertPublicationSafe(safeStates);
       assertNoPrivateCommunityOutput(safeStates);
-      if(photoConsistency) {
+      for (const [kind, inputs] of [['Original photo', photoConsistency], ['Redemption', redemptionConsistency]]) {
+        if (!inputs) continue;
         const retained=new Map(safeStates.map(state=>[state.path,state]));
-        for(const input of photoConsistency) {
+        for(const input of inputs) {
           const remoteHash=contentHash(remoteFileContent(headRef,input.path));
-          if(remoteHash!==input.baseHash)throw Error(`Original photo consistency failed: remote changed ${input.path}`);
+          if(remoteHash!==input.baseHash)throw Error(`${kind} consistency failed: remote changed ${input.path}`);
           const state=retained.get(input.path);
           const actual=state?contentHash(state.exists?state.content:null):remoteHash;
-          if(actual!==input.hash)throw Error(`Original photo consistency failed: partial batch omits ${input.path}`);
+          if(actual!==input.hash)throw Error(`${kind} consistency failed: partial batch omits ${input.path}`);
         }
       }
       assertMapInputsRetained(mapConsistency, safeStates, mapRemoteHashes);
