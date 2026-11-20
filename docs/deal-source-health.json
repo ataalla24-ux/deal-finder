@@ -1,21 +1,21 @@
 {
-  "generatedAt": "2026-11-20T08:36:00.628Z",
+  "generatedAt": "2026-11-20T08:37:51.690Z",
   "discoveryAvailability": {
     "note": "Transport evidence, not deal yield. Retry eligibility is not recovery. Candidate counts are not Slack deliveries. No extra runs or quota resets.",
     "lanes": [
       {
         "name": "instagram-search",
-        "observedAt": "2026-11-19T21:37:23.761Z",
+        "observedAt": "2026-11-20T08:37:06.894Z",
         "status": "paused",
-        "reason": "search-unavailable",
+        "reason": "search-cooldown",
         "retryAt": "2026-11-20T21:29:51.211Z",
-        "attempted": 1,
+        "attempted": 0,
         "discovered": 0,
         "deliveredToSlack": null
       },
       {
         "name": "instagram-profiles",
-        "observedAt": "2026-11-19T21:37:23.761Z",
+        "observedAt": "2026-11-20T08:37:06.894Z",
         "status": "no-block-reported",
         "reason": "",
         "retryAt": "",
@@ -24,11 +24,11 @@
       },
       {
         "name": "instagram-previews",
-        "observedAt": "2026-11-19T21:37:23.761Z",
+        "observedAt": "2026-11-20T08:37:06.894Z",
         "status": "no-block-reported",
         "reason": "",
         "retryAt": "",
-        "attempted": 62,
+        "attempted": 60,
         "deliveredToSlack": null
       },
       {
@@ -54,10 +54,10 @@
   },
   "summary": {
     "filesConsidered": 32,
-    "totalCandidates": 610,
+    "totalCandidates": 613,
     "uniqueCandidates": 576,
-    "distinctCandidates": 591,
-    "duplicateClusters": 15,
+    "distinctCandidates": 592,
+    "duplicateClusters": 16,
     "topHealthySources": [
       {
         "sourceKey": "firecrawl2",
@@ -74,14 +74,14 @@
       {
         "sourceKey": "meta-instagram",
         "sourceLabel": "Meta Instagram Graph",
-        "healthScore": 73,
+        "healthScore": 72,
         "totalDeals": 76
       },
       {
         "sourceKey": "instagram-ai",
         "sourceLabel": "Instagram AI Agent",
-        "healthScore": 64,
-        "totalDeals": 4
+        "healthScore": 66,
+        "totalDeals": 7
       },
       {
         "sourceKey": "instagram-verified",
@@ -110,16 +110,16 @@
         "totalDeals": 2
       },
       {
-        "sourceKey": "meta-instagram",
-        "sourceLabel": "Meta Instagram Graph",
-        "missionFitScore": 59,
-        "totalDeals": 76
-      },
-      {
         "sourceKey": "food3",
         "sourceLabel": "Firecrawl Key 2 - Food",
         "missionFitScore": 59,
         "totalDeals": 3
+      },
+      {
+        "sourceKey": "meta-instagram",
+        "sourceLabel": "Meta Instagram Graph",
+        "missionFitScore": 56,
+        "totalDeals": 76
       }
     ],
     "topCoverageSources": [
@@ -133,9 +133,9 @@
       {
         "sourceKey": "meta-instagram",
         "sourceLabel": "Meta Instagram Graph",
-        "coverageScore": 60,
+        "coverageScore": 59,
         "totalDeals": 76,
-        "fresh1dCount": 12
+        "fresh1dCount": 11
       },
       {
         "sourceKey": "vienna-promo-radar",
@@ -175,20 +175,20 @@
       {
         "sourceKey": "meta-instagram",
         "sourceLabel": "Meta Instagram Graph",
-        "precisionScore": 72,
+        "precisionScore": 70,
         "totalDeals": 76
+      },
+      {
+        "sourceKey": "instagram-ai",
+        "sourceLabel": "Instagram AI Agent",
+        "precisionScore": 65,
+        "totalDeals": 7
       },
       {
         "sourceKey": "joe",
         "sourceLabel": "jö Bonus Club",
         "precisionScore": 64,
         "totalDeals": 9
-      },
-      {
-        "sourceKey": "instagram-ai",
-        "sourceLabel": "Instagram AI Agent",
-        "precisionScore": 58,
-        "totalDeals": 4
       }
     ],
     "topWeightedSources": [
@@ -201,7 +201,7 @@
       {
         "sourceKey": "meta-instagram",
         "sourceLabel": "Meta Instagram Graph",
-        "sourceWeightScore": 66,
+        "sourceWeightScore": 64,
         "totalDeals": 76
       },
       {
@@ -418,10 +418,10 @@
       "file": "deals-pending-meta-instagram.json",
       "sourceLabel": "Meta Instagram Graph",
       "totalDeals": 76,
-      "uniqueDeals": 69,
-      "duplicateDeals": 7,
-      "duplicateAcrossSources": 3,
-      "fresh1dCount": 12,
+      "uniqueDeals": 68,
+      "duplicateDeals": 8,
+      "duplicateAcrossSources": 4,
+      "fresh1dCount": 11,
       "fresh7dCount": 67,
       "viennaCount": 76,
       "foodDrinkCount": 57,
@@ -434,8 +434,8 @@
       ],
       "lastRun": null,
       "uniqueRate": 0.9,
-      "duplicateRate": 0,
-      "fresh1dRate": 0.2,
+      "duplicateRate": 0.1,
+      "fresh1dRate": 0.1,
       "fresh7dRate": 0.9,
       "viennaRate": 1,
       "foodDrinkRate": 0.8,
@@ -486,62 +486,72 @@
           "count": 1
         }
       ],
-      "issues": [],
-      "healthScore": 73,
-      "missionFitScore": 59,
-      "coverageScore": 60,
-      "precisionScore": 72,
-      "sourceWeightScore": 66
+      "issues": [
+        "wenige Deals sind frischer als 1 Tag"
+      ],
+      "healthScore": 72,
+      "missionFitScore": 56,
+      "coverageScore": 59,
+      "precisionScore": 70,
+      "sourceWeightScore": 64
     },
     {
       "sourceKey": "instagram-ai",
       "file": "deals-pending-instagram-ai.json",
       "sourceLabel": "Instagram AI Agent",
-      "totalDeals": 4,
-      "uniqueDeals": 4,
-      "duplicateDeals": 0,
-      "duplicateAcrossSources": 0,
-      "fresh1dCount": 1,
-      "fresh7dCount": 4,
-      "viennaCount": 4,
-      "foodDrinkCount": 2,
+      "totalDeals": 7,
+      "uniqueDeals": 5,
+      "duplicateDeals": 2,
+      "duplicateAcrossSources": 2,
+      "fresh1dCount": 2,
+      "fresh7dCount": 7,
+      "viennaCount": 7,
+      "foodDrinkCount": 6,
       "promoCount": 0,
       "missingUrlCount": 0,
       "sampleTitles": [
-        "Char Siu oder Mapo Doufu für 1 €",
-        "Pizza-Mittagsmenü mit Suppe oder Salat um 11,90 €",
-        "Schnitzelmenü um 11,90 €"
+        "Pizza-Mittagsmenü mit Suppe oder Salat um 11,90 € Bei Gondola, Schönbrunner Str",
+        "Und heute im Mittagsmenü: gebackenes Schweinsschnitzerl mit Erdäpfel-Vogerlsalat, mit Suppe um € 9,90. Reservi",
+        "⚠️ Wetterwarnung für Wien: Heute regnet es Super Deals! ☔️🧡 Sichert euch bis zu 50 % Rabatt bei ausgewählten"
       ],
       "lastRun": null,
-      "uniqueRate": 1,
-      "duplicateRate": 0,
+      "uniqueRate": 0.7,
+      "duplicateRate": 0.3,
       "fresh1dRate": 0.3,
       "fresh7dRate": 1,
       "viennaRate": 1,
-      "foodDrinkRate": 0.5,
+      "foodDrinkRate": 0.9,
       "promoRate": 0,
       "missingUrlRate": 0,
-      "averageQualityScore": 95.3,
+      "averageQualityScore": 77.6,
       "topCategories": [
         {
-          "value": "essen & trinken",
-          "count": 4
+          "value": "essen",
+          "count": 5
+        },
+        {
+          "value": "kaffee",
+          "count": 1
+        },
+        {
+          "value": "shopping",
+          "count": 1
         }
       ],
       "topTypes": [
         {
           "value": "rabatt",
-          "count": 4
+          "count": 7
         }
       ],
       "issues": [
         "wenige klare Gratis-/Promo-Signale"
       ],
-      "healthScore": 64,
-      "missionFitScore": 39,
-      "coverageScore": 10,
-      "precisionScore": 58,
-      "sourceWeightScore": 44
+      "healthScore": 66,
+      "missionFitScore": 53,
+      "coverageScore": 14,
+      "precisionScore": 65,
+      "sourceWeightScore": 51
     },
     {
       "sourceKey": "instagram-verified",
