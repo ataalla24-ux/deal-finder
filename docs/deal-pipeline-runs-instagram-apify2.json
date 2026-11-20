@@ -2,9 +2,124 @@
   "schemaVersion": 1,
   "sourceKey": "instagram-apify2",
   "sourceLabel": "Apify 2 Vienna Food Discovery",
-  "updatedAt": "2026-11-19T23:40:46.230Z",
-  "runCount": 52,
+  "updatedAt": "2026-11-20T14:13:25.110Z",
+  "runCount": 53,
   "runs": [
+    {
+      "schemaVersion": 1,
+      "runProvenance": {
+        "repository": "ataalla24-ux/deal-finder",
+        "runId": "44751224878",
+        "headSha": "deedb39d65c0933b90f7160479f5b36d99157e48",
+        "checkoutSha": "7f48b1d3d1854277bb288a1bd008a369fc6d741a",
+        "triggeringRun": null,
+        "event": "schedule",
+        "runAttempt": "1",
+        "url": "https://github.com/ataalla24-ux/deal-finder/actions/runs/44751224878"
+      },
+      "runId": "instagram-apify2-2026-11-20T14:13:25.110Z",
+      "sourceKey": "instagram-apify2",
+      "sourceLabel": "Apify 2 Vienna Food Discovery",
+      "status": "completed-with-errors",
+      "startedAt": "2026-11-20T14:12:53.874Z",
+      "finishedAt": "2026-11-20T14:13:25.110Z",
+      "durationMs": 31236,
+      "outputFile": "docs/deals-pending-instagram-apify2.json",
+      "counts": {
+        "rawCandidates": 4,
+        "normalizedCandidates": 3,
+        "verifiedCandidates": 0,
+        "previousDeals": 0,
+        "acceptedDeals": 1,
+        "rejectedDeals": 2
+      },
+      "rejectedByReason": {
+        "no-consumer-food-benefit": 2
+      },
+      "rejectedSamples": [
+        {
+          "reason": "no-consumer-food-benefit",
+          "deal": {
+            "id": "",
+            "title": "",
+            "brand": "",
+            "url": "https://www.instagram.com/p/Df9o3Z3R-uT/",
+            "source": "",
+            "pubDate": "",
+            "expires": "",
+            "postVerificationStatus": ""
+          }
+        },
+        {
+          "reason": "no-consumer-food-benefit",
+          "deal": {
+            "id": "",
+            "title": "",
+            "brand": "",
+            "url": "https://www.instagram.com/p/Df4i7Ssoj4w/",
+            "source": "",
+            "pubDate": "",
+            "expires": "",
+            "postVerificationStatus": ""
+          }
+        }
+      ],
+      "diagnostics": {
+        "pendingDeals": 1,
+        "unchangedPosts": 0,
+        "providerErrors": 0,
+        "emptySourceRecords": 1,
+        "ocrCalls": 0,
+        "sources": [
+          {
+            "key": "hashtag:wienkaffee",
+            "lastAttemptAt": "2026-11-20T14:12:53.874Z",
+            "postsReturned": 1,
+            "status": "posts-returned",
+            "consecutiveEmpty": 0,
+            "retryAt": "",
+            "consecutiveFailures": 0
+          },
+          {
+            "key": "hashtag:wienpizza",
+            "lastAttemptAt": "2026-11-20T14:12:53.874Z",
+            "postsReturned": 1,
+            "status": "posts-returned",
+            "consecutiveEmpty": 0,
+            "retryAt": "",
+            "consecutiveFailures": 0
+          },
+          {
+            "key": "hashtag:neueroeffnungwien",
+            "lastAttemptAt": "2026-11-20T14:12:53.874Z",
+            "postsReturned": 0,
+            "status": "no-items",
+            "consecutiveFailures": 0,
+            "consecutiveEmpty": 1,
+            "retryAt": "2026-11-22T14:12:53.874Z"
+          },
+          {
+            "key": "hashtag:wienfood",
+            "lastAttemptAt": "2026-11-20T14:12:53.874Z",
+            "postsReturned": 1,
+            "status": "posts-returned",
+            "consecutiveFailures": 0,
+            "retryAt": "",
+            "consecutiveEmpty": 0
+          }
+        ]
+      },
+      "constraints": {
+        "profiles": 22,
+        "hashtags": 4,
+        "perSource": 1,
+        "posts": 26,
+        "ocrPosts": 8,
+        "dailyUsd": 0.15,
+        "cycleUsd": 4.65
+      },
+      "errors": []
+    },
     {
       "schemaVersion": 1,
       "runProvenance": {
