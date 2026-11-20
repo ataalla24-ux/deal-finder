@@ -1,6 +1,6 @@
 # FreeFinder Betriebsbericht
 
-Stand: 2026-11-20T13:45:53.514Z
+Stand: 2026-11-20T13:51:52.206Z
 
 - 83 Live-Angebote; 212 nicht-live Entwuerfe geprueft.
 - 0 neue IDs seit letzter Bestandsaufnahme; keine automatische Erfolgszuordnung.
@@ -22,14 +22,14 @@ Stand: 2026-11-20T13:45:53.514Z
 - Auswahlpruefung: feed-changed-recheck-required; 0 aktuelle Angebote.
 - 0 Plattformbilder inhaltlich geprueft (einschliesslich Cache).
 - 0 Angebote mit zu kleinen gebuendelten Fallback-Motiven.
-- 25 Angebote mit aktuell gebundenem, dokumentiertem primaerem Bild; 0 verbleibende primaere Aufloesungsluecken.
+- 26 Angebote mit aktuell gebundenem, dokumentiertem primaerem Bild; 0 verbleibende primaere Aufloesungsluecken.
 - 0 mehrfach verwendete Fallback-Plattformmotive. Ein neues primaeres Bild vergroessert nicht die alte Fallback-Datei.
 - Kein Nachweis der installierten App-Version oder der Darstellung beim Empfaenger.
 
 ## Aktualitaet
 
 - Entwurfsregeln frisch und lokal geprueft, ohne Modell- oder Quellenaufruf. 212 unterschiedliche IDs in 212 Eintraegen; doppelte IDs bleiben Prueffaelle.
-- Live-/Bildpruefstand: current; letzte Pruefung 2026-11-20T13:45:52.153Z. Bei veraltetem Stand sind leere Hinweisliste und Bildzaehler KEIN Entwarnungsnachweis.
+- Live-/Bildpruefstand: current; letzte Pruefung 2026-11-20T13:51:51.169Z. Bei veraltetem Stand sind leere Hinweisliste und Bildzaehler KEIN Entwarnungsnachweis.
 
 ## Freigabe und Einloesung
 
@@ -49,7 +49,7 @@ Stand: 2026-11-20T13:45:53.514Z
 
 Jeder Deal zählt ab seiner ersten belegten Slack-Zustellung einmal. Ein Häkchen erfordert eine dokumentierte menschliche Freigabe. Die letzte Stufe zählt freigegebene Deals, die mit derselben Nachrichtenkennung im öffentlichen Feed beobachtet wurden. Kurzzeitig sichtbare Angebote zwischen zwei Beobachtungen und bereits vor der ersten Beobachtung entfernte Einträge können fehlen.
 
-Erste öffentliche Beobachtung: 2026-11-06T23:56:26.741Z. Letzte erfolgreiche Beobachtung: 2026-11-20T13:45:53.514Z.
+Erste öffentliche Beobachtung: 2026-11-06T23:56:26.741Z. Letzte erfolgreiche Beobachtung: 2026-11-20T13:51:52.206Z.
 
 ### 7 Tage
 
