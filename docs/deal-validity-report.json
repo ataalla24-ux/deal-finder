@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-11-20T20:10:39.435Z",
+  "generatedAt": "2026-11-20T20:45:56.192Z",
   "summary": {
     "maxAgeDays": 7,
     "total": 287,
@@ -44,7 +44,6 @@
       "allgemeine Empfehlung/Gratis-Event statt konkreter Aktion": 2,
       "kein verlässliches Quell-/Post-Datum gefunden": 104,
       "ausgeschlossene Quelle (gastro.news)": 47,
-      "älter als 7 Tage (2025-10-12)": 1,
       "älter als 7 Tage (2020-06-10)": 1,
       "relative Kurz-Aktion abgelaufen (2020-06-10)": 1,
       "kostenlose Buchung/Kontaktaufnahme statt kostenloser Leistung": 1
@@ -52,7 +51,7 @@
     "reasonCategoryCounts": {
       "kein konkreter Deal": 233,
       "Gottesdienste außerhalb Wochenlauf": 36,
-      "älter als 7 Tage": 137,
+      "älter als 7 Tage": 136,
       "ungültige URL": 15,
       "abgelaufen": 14,
       "sonstiges": 5,
@@ -233,7 +232,7 @@
         "warnings": 0,
         "reasonCategoryCounts": {
           "ausgeschlossene Quelle": 1,
-          "älter als 7 Tage": 2,
+          "älter als 7 Tage": 1,
           "abgelaufen": 1,
           "nicht Wien": 1,
           "sonstiges": 1,
@@ -886,7 +885,7 @@
       "warnings": [
         "kein Ablaufdatum gefunden"
       ],
-      "sourceDate": "2026-11-20T20:08:40.384Z",
+      "sourceDate": "2026-11-20T20:43:25.635Z",
       "sourceDateSource": "url.publicationDate",
       "sourceAgeDays": 0,
       "expiryDate": "",
@@ -5859,16 +5858,17 @@
       "source": "vienna-merchant-website",
       "url": "https://hari1090.com/gutschein-und-aktionsbon-konditionen/",
       "reasons": [
-        "ausgeschlossene Quelle (TheFork)",
-        "älter als 7 Tage (2025-10-12)"
+        "ausgeschlossene Quelle (TheFork)"
       ],
-      "warnings": [],
-      "sourceDate": "2025-10-12T21:13:46.000Z",
-      "sourceDateSource": "url.publicationDate",
-      "sourceAgeDays": 404,
+      "warnings": [
+        "URL nicht eindeutig prüfbar (temporärer Fehler)"
+      ],
+      "sourceDate": "2026-11-19T11:30:11.494Z",
+      "sourceDateSource": "deal.discoveredAt",
+      "sourceAgeDays": 1,
       "expiryDate": "",
       "expirySource": "deal.expires",
-      "urlStatus": "HTTP 200"
+      "urlStatus": "unklar: temporärer URL-Fehler"
     },
     {
       "id": "merchant-web-11e347b371afa3e70917",
@@ -5926,16 +5926,23 @@
   ],
   "runProvenance": {
     "repository": "ataalla24-ux/deal-finder",
-    "runId": "44808697969",
-    "headSha": "6779671950e9eb986b62138471a97b79de33ebc2",
-    "checkoutSha": "6779671950e9eb986b62138471a97b79de33ebc2",
-    "triggeringRun": null,
-    "event": "workflow_dispatch",
+    "runId": "44813969595",
+    "headSha": "c712c7957fd01a952985b1f278f9d84b55e46987",
+    "checkoutSha": "c712c7957fd01a952985b1f278f9d84b55e46987",
+    "triggeringRun": {
+      "runId": "44813724249",
+      "headSha": "00f6411b8c53d22dd53b253b89083d2188df4c4d",
+      "event": "schedule",
+      "name": "Apify Instagram Fresh Scan",
+      "startedAt": "2026-11-20T20:42:08.000Z",
+      "url": "https://github.com/ataalla24-ux/deal-finder/actions/runs/44813724249"
+    },
+    "event": "workflow_run",
     "runAttempt": "1",
-    "url": "https://github.com/ataalla24-ux/deal-finder/actions/runs/44808697969"
+    "url": "https://github.com/ataalla24-ux/deal-finder/actions/runs/44813969595"
   },
   "instagramDelivery": {
-    "checkedAt": "2026-11-20T20:10:39.449Z",
+    "checkedAt": "2026-11-20T20:45:56.207Z",
     "scope": "instagram-ai-agent/standard-slack-lane",
     "extractedCandidates": 7,
     "counts": {
@@ -6050,7 +6057,7 @@
     ]
   },
   "tiktokDelivery": {
-    "checkedAt": "2026-11-20T20:10:39.452Z",
+    "checkedAt": "2026-11-20T20:45:56.210Z",
     "scope": "tiktok-deals-scanner/standard-slack-lane",
     "extractedCandidates": 0,
     "counts": {},
