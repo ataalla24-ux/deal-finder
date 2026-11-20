@@ -12,6 +12,7 @@ const read = file => fs.readFileSync(path.join(root, 'docs', file), 'utf8');
 // Expiry transitions are covered separately by the blog catch-up/status checks.
 const presentationNow = Date.parse('2026-10-07T12:00:00+02:00');
 const home = load(read('index.html'));
+assert.equal(home('.discovery-band .visual-topics a').first().attr('href'), '/blog/gratis-wien-wochenende.html');
 assert.equal(home('link[href="/home-showcase.css?v=20261030"]').length, 1);
 assert.equal(home('.hero-showcase img').length, 3);
 assert.equal(home('.hero-showcase .phone-frame').length, 0, 'Artwork already includes a phone frame');

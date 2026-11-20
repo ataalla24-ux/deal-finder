@@ -55,18 +55,23 @@ assert.match(body('padelzone-wien-rabatt-drei'), /Montag bis Freitag bis 16 Uhr,
 assert.match(body('abby-smashburger-990-wien-rochusmarkt'), /nicht zwei/);
 const updated = ['dahab-doener-1plus1-wien', 'gratis-heissgetraenk-ikea-wien', 'foodsharing-wien-gratis-lebensmittel', 'foodora-60-prozent-rabatt-genuss-wien'];
 const published = ['2026-09-23', '2026-09-01', '2026-10-18', '2026-09-28'];
+const modified = ['2026-11-10', '2026-11-05', '2026-11-05', '2026-11-20'];
 for (const [i, slug] of updated.entries()) {
   const q = load(read(`docs/blog/${slug}.html`));
   const article = JSON.parse(q('script[type="application/ld+json"]').text())['@graph'].find(e => e['@type'] === 'Article');
   assert.equal(article.datePublished, published[i]);
-  assert.equal(article.dateModified, slug === updated[0] ? '2026-11-10' : '2026-11-05');
+  assert.equal(article.dateModified, modified[i]);
   assert.equal(index(`.post-card h2 a[href="${slug}.html"]`).length, 1);
 }
 assert.match(body(updated[0]), /3. bis 30. November/);
 assert.match(body(updated[0]), /Wagramer Straße 126/);
 assert.match(body(updated[1]), /Westbahnhof.*ausgenommen/);
 assert.match(body(updated[2]), /15 zugängliche institutionelle beziehungsweise geschäftliche Wiener Fairteiler/);
-assert.match(load(read(`docs/blog/${updated[3]}.html`))('.hero-copy').text(), /keinen garantierten heutigen Rabatt/);
+const foodora = load(read(`docs/blog/${updated[3]}.html`));
+assert.match(foodora('title').text(), /foodora Gutschein Österreich.*GENUSS/);
+assert.match(foodora('.hero-copy').text(), /keinen festen Rabatt/);
+assert.equal(foodora('#rabatt + .article-note time').attr('datetime'), modified[3]);
+assert.match(foodora('#rabatt + .article-note + p').text(), /60 Prozent.*historischer Wert/);
 assert.equal(index('.post-card').filter((_, e) => index(e).find('h2 a').attr('href') === `${updated[0]}.html`).attr('data-archive'), 'false');
 
 const fixture = fs.mkdtempSync(path.join(root, 'tmp', 'blog-november-'));

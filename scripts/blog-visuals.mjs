@@ -108,7 +108,10 @@ const discoveryGuides = {
 };
 
 function photoTopics(relative = false) {
-  return `<nav class="topic-nav visual-topics" aria-label="Wiener Ratgeber">${discoveryTopics.map(([slug, label, image]) => `<a href="${slug ? `${relative ? '' : '/blog/'}${slug}.html` : '/angebote-wien-heute.html'}">${visualPicture(blogVisual(image), { sizes: '(max-width: 620px) 120px, 180px' })}<span>${escape(label)}</span></a>`).join('')}</nav>`;
+  const topics = relative ? discoveryTopics : [
+    ['gratis-wien-wochenende', 'Gratis am Wochenende', 'wiener-riesenrad-1plus1-gutschein'], ...discoveryTopics.slice(0, -1),
+  ];
+  return `<nav class="topic-nav visual-topics" aria-label="Wiener Ratgeber">${topics.map(([slug, label, image]) => `<a href="${slug ? `${relative ? '' : '/blog/'}${slug}.html` : '/angebote-wien-heute.html'}">${visualPicture(blogVisual(image), { sizes: '(max-width: 620px) 120px, 180px' })}<span>${escape(label)}</span></a>`).join('')}</nav>`;
 }
 
 // Keep the same presentation after future targeted article/feed regeneration.

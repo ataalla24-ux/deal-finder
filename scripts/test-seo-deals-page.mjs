@@ -14,6 +14,7 @@ const fixtureRoot = fs.mkdtempSync(path.join(tempRoot, 'seo-deals-page-'));
 fs.mkdirSync(path.join(fixtureRoot, 'scripts'));
 fs.mkdirSync(path.join(fixtureRoot, 'docs'));
 fs.copyFileSync(path.join(ROOT, 'scripts/generate-seo-deals-page.mjs'), path.join(fixtureRoot, 'scripts/generate-seo-deals-page.mjs'));
+fs.copyFileSync(path.join(ROOT, 'scripts/website-deal-articles.mjs'), path.join(fixtureRoot, 'scripts/website-deal-articles.mjs'));
 fs.copyFileSync(path.join(ROOT, 'scripts/polish-website.mjs'), path.join(fixtureRoot, 'scripts/polish-website.mjs'));
 fs.copyFileSync(path.join(ROOT, 'scripts/blog-visuals.mjs'), path.join(fixtureRoot, 'scripts/blog-visuals.mjs'));
 fs.copyFileSync(path.join(ROOT, 'scripts/blog-photo-catalog.mjs'), path.join(fixtureRoot, 'scripts/blog-photo-catalog.mjs'));
@@ -50,6 +51,7 @@ function generate(deals, now = '2026-10-05T10:00:00Z') {
   assert.equal($('.deals-app-note[hidden], .deals-app-note details').length, 0, 'Subset disclosure is visible without interaction or JS');
   assert.equal($('.deals-app-note a[href^="https://apps.apple.com/"]').length, 1);
   assert.equal($('.deals-app-note a[href^="https://play.google.com/"]').length, 1);
+  assert.equal($('.deals-intro a[href="/blog/gratis-wien-wochenende.html"]').length, 1);
   assert.match($('#dealHubTitle').text(), /Web-Auswahl/);
   assert.equal(schema['@graph'][0].mainEntity.numberOfItems, ids.length, 'Schema and visible card counts must agree');
   return { html, ids, $: load(html) };
@@ -87,6 +89,32 @@ function filterPage(html, now, sort = 'recommended') {
 }
 
 try {
+  const reviewed = {
+    id: 'meta-ig-18358319731269651', brand: 'Hong Kong Cafe', type: 'rabatt', category: 'kaffee',
+    title: 'Mapo Doufu oder Char Siu für 1 € mit Follow + Like',
+    description: 'Am 27. November gibt es bei Hong Kong Cafe Mapo Doufu oder Char Siu für 1 €. Dafür hongkongcafewien auf Instagram folgen, den Originalbeitrag liken und zwischen 13 und 15 Uhr vorbeikommen. Adresse: Wipplingerstraße 32, 1010 Wien. Vergabe nach Ankunft, nur solange der Vorrat reicht.',
+    url: 'https://www.instagram.com/p/DfruFTOta3N/', address: 'Wipplingerstraße 32, 1010 Wien',
+    distance: 'Wipplingerstraße 32, 1010 Wien', location: 'Hong Kong Cafe',
+    validUntil: '2026-11-27', expires: '2026-11-27T23:59:59.999Z', expiryKind: 'end',
+  };
+  const articlePath = '/blog/hong-kong-cafe-wien-1-euro-lunch.html';
+  const articleFile = path.join(fixtureRoot, 'docs', articlePath);
+  const articleHtml = `<!doctype html><html><head><link rel="canonical" href="https://freefinder.at${articlePath}"></head><body><main data-deal-expires="2026-11-27T15:00:00+01:00"><article class="article-body">Reviewed guide</article></main></body></html>`;
+  const before = '2026-11-27T13:30:00+01:00';
+  const card = '#deal-' + reviewed.id;
+  assert.equal(generate([reviewed], before).$(card + ' .live-deal-article').length, 0, 'Missing local article must not link');
+  fs.mkdirSync(path.dirname(articleFile), { recursive: true });
+  fs.writeFileSync(articleFile, articleHtml);
+  const exact = generate([reviewed, { ...reviewed, id: 'similar-offer' }], before).$;
+  assert.equal(exact(card + ' .live-deal-article').attr('href'), articlePath);
+  assert.equal(exact(card + ' .live-deal-source').attr('href'), reviewed.url);
+  assert.equal(exact('#deal-similar-offer .live-deal-article').length, 0);
+  assert.equal(generate([{ ...reviewed, address: 'Andere Gasse 1, 1010 Wien' }], before).$(card + ' .live-deal-article').length, 0);
+  assert.equal(generate([{ ...reviewed, validUntil: '2026-11-30' }], before).$(card + ' .live-deal-article').length, 0);
+  assert.equal(generate([reviewed], '2026-11-27T15:00:00+01:00').$(card + ' .live-deal-article').length, 0);
+  fs.writeFileSync(articleFile, articleHtml.replace('<head>', '<head><meta name="robots" content="noindex">'));
+  assert.equal(generate([reviewed], before).$(card + ' .live-deal-article').length, 0);
+
   const current = generate([
     deal('flight-normalized', { category: 'reisen' }),
     deal('structured-airfare', { category: 'reisen', flight: { outbound: { departureDate: '2026-11-05' } } }),

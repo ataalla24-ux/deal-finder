@@ -2,6 +2,7 @@
 import fs from 'fs';
 import { polishHtml } from './polish-website.mjs';
 import { dealPhoto } from './deal-photos.mjs';
+import { websiteDealArticle } from './website-deal-articles.mjs';
 import path from 'path';
 import { fileURLToPath } from 'url';
 
@@ -9,6 +10,7 @@ const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const INPUT_PATH = path.join(ROOT, 'docs', 'deals.json');
 const OUTPUT_PATH = path.join(ROOT, 'docs', 'angebote-wien-heute.html');
 const SITEMAP_PATH = path.join(ROOT, 'docs', 'sitemap.xml');
+const BLOG_DIR = path.join(ROOT, 'docs', 'blog');
 const EXCLUDED_CATEGORIES = new Set(['events', 'flights', 'gottesdienste', 'kirche']);
 const MAX_DEALS = 24;
 
@@ -244,13 +246,14 @@ function displayDescription(deal) {
     ? caption : description;
 }
 
-function renderDealCard(deal, index) {
+function renderDealCard(deal, index, now) {
   const id = `deal-${safeId(deal.id || `${deal.brand}-${deal.title}`)}`;
   const type = ['gratis', 'bogo', 'rabatt'].includes(deal.type) ? deal.type : 'angebot';
   const logo = localLogo(deal);
   const photo = dealPhoto(deal);
   const initials = String(deal.brand || 'FF').split(/\s+/).filter(Boolean).slice(0, 2).map(word => Array.from(word)[0]).join('').toLocaleUpperCase('de-AT');
   const description = displayDescription(deal);
+  const article = websiteDealArticle(deal, BLOG_DIR, now.getTime());
   const location = /^(?:k\.?\s?a\.?|n\/a|unknown)$/i.test(deal.displayLocation) ? 'Standort beim Anbieter prüfen' : deal.displayLocation;
   const pendingFields = deal.publishedTwoStage && deal.enrichmentPending === true && Array.isArray(deal.enrichmentFields)
     ? deal.enrichmentFields : [];
@@ -275,7 +278,10 @@ function renderDealCard(deal, index) {
             <p>${icon('calendar-days')}<span>${validityText}</span></p>
           </div>
           ${description ? `<details class="deal-conditions"><summary>Details &amp; Bedingungen</summary><p>${escapeHtml(description)}</p></details>` : ''}
-          <a class="live-deal-source" href="${escapeHtml(deal.sourceUrl)}" rel="noopener" data-track="deal_outbound" data-deal-brand="${escapeHtml(deal.brand || '')}" aria-label="Zum Angebot und zu den Bedingungen bei ${escapeHtml(deal.brand || 'Anbieter')}"><span>Zum Angebot</span>${icon('arrow-up-right')}</a>
+          <div class="live-deal-actions">
+            <a class="live-deal-source" href="${escapeHtml(deal.sourceUrl)}" rel="noopener" data-track="deal_outbound" data-deal-brand="${escapeHtml(deal.brand || '')}" aria-label="Zum Angebot und zu den Bedingungen bei ${escapeHtml(deal.brand || 'Anbieter')}"><span>Zum Angebot</span>${icon('arrow-up-right')}</a>
+            ${article ? `<a class="live-deal-article" href="${article}" aria-label="Einlöseguide lesen: ${escapeHtml(deal.displayTitle || deal.brand || 'Angebot')}">Einlöseguide lesen</a>` : ''}
+          </div>
         </article>`;
 }
 
@@ -318,7 +324,7 @@ function renderPage(feed, deals, now) {
       },
     ],
   };
-  const cards = deals.length ? deals.map(renderDealCard).join('') : '<p class="empty-deals">Aktuell gibt es hier keine passenden freigegebenen Angebote. Weitere Wien-Tipps findest du im <a href="/blog/">Blog</a>.</p>';
+  const cards = deals.length ? deals.map((deal, index) => renderDealCard(deal, index, now)).join('') : '<p class="empty-deals">Aktuell gibt es hier keine passenden freigegebenen Angebote. Weitere Wien-Tipps findest du im <a href="/blog/">Blog</a>.</p>';
   const districts = [...new Set(deals.flatMap(districtCodes))].sort();
   const types = [['all', 'Alle'], ['gratis', 'Gratis'], ['bogo', '1+1'], ['rabatt', 'Rabatte']];
   const filters = types.map(([type, label]) => {
@@ -349,7 +355,7 @@ function renderPage(feed, deals, now) {
   <noscript><link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet"></noscript>
   <link rel="stylesheet" href="/consent.css?v=5">
   <link rel="stylesheet" href="/blog/blog.css">
-  <link rel="stylesheet" href="/deals.css?v=4">
+  <link rel="stylesheet" href="/deals.css?v=5">
   <script defer src="/deals.js?v=3"></script>
   <script defer src="/analytics-config.js"></script>
   <script defer src="/consent.js?v=7"></script>
@@ -359,7 +365,7 @@ function renderPage(feed, deals, now) {
   <!-- Generated from docs/deals.json by scripts/generate-seo-deals-page.mjs. -->
   <header class="site-header"><nav class="nav" aria-label="Hauptnavigation"><a class="brand" href="/"><img class="brand-mark" src="/icon-192.svg" alt="" width="38" height="38">FreeFinder</a><div class="nav-links"><a href="/angebote-wien-heute.html" aria-current="page">Deals</a><a href="/blog/">Blog</a><a class="nav-download" href="/#download">App laden</a></div></nav></header>
   <main>
-    <header class="deals-intro"><div class="deals-width"><p class="eyebrow">FreeFinder · Wien</p><h1>Deals in Wien.</h1><p>Gratis-Angebote, 1+1 und Rabatte für deinen Alltag.</p><div class="deals-app-note"><div><strong>Hier eine Auswahl. Alle Deals in der App.</strong><p>Auf der Website zeigen wir ausgewählte freigegebene Wien-Deals. Fehlende Angaben sind gekennzeichnet. Die vollständige Deal-Übersicht findest du in der kostenlosen FreeFinder App.</p></div><nav aria-label="Vollständige Deal-Übersicht in der App"><a href="https://apps.apple.com/app/id6758958213">App Store ${icon('arrow-up-right')}</a><a href="https://play.google.com/store/apps/details?id=com.stefanataalla.freefinderwien">Google Play ${icon('arrow-up-right')}</a></nav></div><div class="deals-updated">Stand der App-Daten: <time datetime="${escapeHtml(modified)}">${escapeHtml(formatDate(updated))}</time></div></div></header>
+    <header class="deals-intro"><div class="deals-width"><p class="eyebrow">FreeFinder · Wien</p><h1>Deals in Wien.</h1><p>Gratis-Angebote, 1+1 und Rabatte für deinen Alltag.</p><a class="deals-weekend" href="/blog/gratis-wien-wochenende.html">Gratis in Wien am Wochenende ${icon('chevron-right')}</a><div class="deals-app-note"><div><strong>Hier eine Auswahl. Alle Deals in der App.</strong><p>Auf der Website zeigen wir ausgewählte freigegebene Wien-Deals. Fehlende Angaben sind gekennzeichnet. Die vollständige Deal-Übersicht findest du in der kostenlosen FreeFinder App.</p></div><nav aria-label="Vollständige Deal-Übersicht in der App"><a href="https://apps.apple.com/app/id6758958213">App Store ${icon('arrow-up-right')}</a><a href="https://play.google.com/store/apps/details?id=com.stefanataalla.freefinderwien">Google Play ${icon('arrow-up-right')}</a></nav></div><div class="deals-updated">Stand der App-Daten: <time datetime="${escapeHtml(modified)}">${escapeHtml(formatDate(updated))}</time></div></div></header>
     <section class="deal-hub" aria-labelledby="dealHubTitle">
       <form class="deal-filters" role="search" aria-label="Angebote filtern" hidden>
         <div class="deal-filter-fields">

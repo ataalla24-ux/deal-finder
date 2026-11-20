@@ -27,6 +27,7 @@ assert.equal(499 * 12 - 3499, 2489);
 assert.match(proSection, /keine Gratisphase/);
 assert.match(proSection, /kein früherer Jahrespreis/);
 assert.match(proSection, /Store-Bestätigung ist maßgeblich/);
+assert.match(proSection, /href="\/plus-gratis\.html">30 Tage Pro per Aktionscode testen<\/a> · Einmal pro Gerät, ohne Zahlungsmethode und ohne automatische Verlängerung/);
 assert.match(proSection, /apps\.apple\.com\/app\/id6758958213/);
 assert.match(proSection, /play\.google\.com\/store\/apps\/details\?id=com\.stefanataalla\.freefinderwien/);
 assert.doesNotMatch(home, /data-checkout-plan|PRO\/PLUS|PRO und PLUS|3,99 €|12,99 €/);
