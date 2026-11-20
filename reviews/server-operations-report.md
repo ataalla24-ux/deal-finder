@@ -1,13 +1,13 @@
 # FreeFinder Betriebsbericht
 
-Stand: 2026-11-20T13:58:32.139Z
+Stand: 2026-11-20T14:21:20.551Z
 
 - 83 Live-Angebote; 212 nicht-live Entwuerfe geprueft.
 - 0 neue IDs seit letzter Bestandsaufnahme; keine automatische Erfolgszuordnung.
 - 0 Entwuerfe ohne formale Pruefluecke, weiterhin menschliche Freigabe.
-- Pilot: 50 Faelle gesammelt, 0 unabhaengig bewertet, 21 regulaere Qualitaetslaeufe beobachtet. Automatische Freigabe AUS.
+- Pilot: 50 Faelle gesammelt, 0 unabhaengig bewertet, 22 regulaere Qualitaetslaeufe beobachtet. Automatische Freigabe AUS.
 - Zugestellte und veröffentlichte Angebote nach Quelle stehen unten im Abschnitt Ertrag je Quelle.
-- API: internal-ledger; 4.908941 USD intern gebucht/reserviert in 24 Stunden. Kein Anbieter-Kontostand.
+- API: internal-ledger; 5.483031 USD intern gebucht/reserviert in 24 Stunden. Kein Anbieter-Kontostand.
 
 ## Naechste Schritte
 
@@ -29,27 +29,27 @@ Stand: 2026-11-20T13:58:32.139Z
 ## Aktualitaet
 
 - Entwurfsregeln frisch und lokal geprueft, ohne Modell- oder Quellenaufruf. 212 unterschiedliche IDs in 212 Eintraegen; doppelte IDs bleiben Prueffaelle.
-- Live-/Bildpruefstand: current; letzte Pruefung 2026-11-20T13:58:31.093Z. Bei veraltetem Stand sind leere Hinweisliste und Bildzaehler KEIN Entwarnungsnachweis.
+- Live-/Bildpruefstand: current; letzte Pruefung 2026-11-20T14:19:37.734Z. Bei veraltetem Stand sind leere Hinweisliste und Bildzaehler KEIN Entwarnungsnachweis.
 
 ## Freigabe und Einloesung
 
-- 50 Pilotfaelle aktuell, 1277 fruehere Pruefstaende unveraendert archiviert. Keine alten Bewertungen uebernehmen.
+- 50 Pilotfaelle aktuell, 1286 fruehere Pruefstaende unveraendert archiviert. Keine alten Bewertungen uebernehmen.
 - Aktueller, unbewerteter Pruefbogen: 50 Faelle; reviews/automatic-publication-review-pack.json. Keine unabhaengige menschliche Bewertung erfunden.
 - Quellengepruefte Einloese-/Buchungswege: 11 von 83; 0 ausdruecklich unbestaetigte, 72 fehlende aktuelle Einloesepruefungen. Besuchsinfos sind keine Gutscheine; ein Buchungslink bestaetigt keinen aktuellen Flugpreis.
 - Karte frisch lokal geprueft: {"online-only":31,"mapped":51,"needs-review":1}.
 
 ## Quellen
 
-- docs/apify-discovery-report.json: succeeded; {"fetchedRecords":4,"freshAcceptedDeals":0,"pendingDeals":0,"duplicatePosts":0,"unchangedPosts":1,"providerErrors":0}; Slack-Zustellungen nicht aus Kandidaten ableiten.
+- docs/apify-discovery-report.json: partial; {"fetchedRecords":4,"freshAcceptedDeals":1,"pendingDeals":1,"duplicatePosts":0,"unchangedPosts":0,"providerErrors":0}; Slack-Zustellungen nicht aus Kandidaten ableiten.
 - docs/meta-instagram-report.json: ok; {"freshPostsFetched":785,"newDeals":0,"repeatedDeals":75,"totalDeals":75}; Slack-Zustellungen nicht aus Kandidaten ableiten.
-- docs/power-scraper-report.json: see-source-results; {"acceptedDeals":45,"healthySources":46,"failedSources":8,"deferredSources":5,"rawDeals":45}; Slack-Zustellungen nicht aus Kandidaten ableiten.
+- docs/power-scraper-report.json: see-source-results; {"acceptedDeals":44,"healthySources":46,"failedSources":3,"deferredSources":10,"rawDeals":44}; Slack-Zustellungen nicht aus Kandidaten ableiten.
 - docs/instagram-ai-report.json: see-source-results; {"discoveredCandidates":75,"acceptedDeals":7,"aiRescueCandidates":0,"aiRescued":0}; Slack-Zustellungen nicht aus Kandidaten ableiten.
 
 ## Ertrag je Quelle
 
 Jeder Deal zählt ab seiner ersten belegten Slack-Zustellung einmal. Die Freigabe zählt, sobald für die betreffende Nachricht ein menschliches Häkchen belegt ist. Die letzte Stufe zählt freigegebene Deals, die mit derselben Nachrichtenkennung im öffentlichen Feed beobachtet wurden. Kurzzeitig sichtbare Angebote zwischen zwei Beobachtungen und bereits vor der ersten Beobachtung entfernte Einträge können fehlen.
 
-Erste öffentliche Beobachtung: 2026-11-06T23:56:26.741Z. Letzte erfolgreiche Beobachtung: 2026-11-20T13:58:32.139Z.
+Erste öffentliche Beobachtung: 2026-11-06T23:56:26.741Z. Letzte erfolgreiche Beobachtung: 2026-11-20T14:21:20.551Z.
 
 ### 7 Tage
 
