@@ -1,6 +1,6 @@
 # FreeFinder Betriebsbericht
 
-Stand: 2026-11-20T13:54:44.742Z
+Stand: 2026-11-20T13:58:32.139Z
 
 - 83 Live-Angebote; 212 nicht-live Entwuerfe geprueft.
 - 0 neue IDs seit letzter Bestandsaufnahme; keine automatische Erfolgszuordnung.
@@ -29,11 +29,11 @@ Stand: 2026-11-20T13:54:44.742Z
 ## Aktualitaet
 
 - Entwurfsregeln frisch und lokal geprueft, ohne Modell- oder Quellenaufruf. 212 unterschiedliche IDs in 212 Eintraegen; doppelte IDs bleiben Prueffaelle.
-- Live-/Bildpruefstand: current; letzte Pruefung 2026-11-20T13:54:43.883Z. Bei veraltetem Stand sind leere Hinweisliste und Bildzaehler KEIN Entwarnungsnachweis.
+- Live-/Bildpruefstand: current; letzte Pruefung 2026-11-20T13:58:31.093Z. Bei veraltetem Stand sind leere Hinweisliste und Bildzaehler KEIN Entwarnungsnachweis.
 
 ## Freigabe und Einloesung
 
-- 50 Pilotfaelle aktuell, 1274 fruehere Pruefstaende unveraendert archiviert. Keine alten Bewertungen uebernehmen.
+- 50 Pilotfaelle aktuell, 1277 fruehere Pruefstaende unveraendert archiviert. Keine alten Bewertungen uebernehmen.
 - Aktueller, unbewerteter Pruefbogen: 50 Faelle; reviews/automatic-publication-review-pack.json. Keine unabhaengige menschliche Bewertung erfunden.
 - Quellengepruefte Einloese-/Buchungswege: 11 von 83; 0 ausdruecklich unbestaetigte, 72 fehlende aktuelle Einloesepruefungen. Besuchsinfos sind keine Gutscheine; ein Buchungslink bestaetigt keinen aktuellen Flugpreis.
 - Karte frisch lokal geprueft: {"online-only":31,"mapped":51,"needs-review":1}.
@@ -49,7 +49,7 @@ Stand: 2026-11-20T13:54:44.742Z
 
 Jeder Deal zählt ab seiner ersten belegten Slack-Zustellung einmal. Die Freigabe zählt, sobald für die betreffende Nachricht ein menschliches Häkchen belegt ist. Die letzte Stufe zählt freigegebene Deals, die mit derselben Nachrichtenkennung im öffentlichen Feed beobachtet wurden. Kurzzeitig sichtbare Angebote zwischen zwei Beobachtungen und bereits vor der ersten Beobachtung entfernte Einträge können fehlen.
 
-Erste öffentliche Beobachtung: 2026-11-06T23:56:26.741Z. Letzte erfolgreiche Beobachtung: 2026-11-20T13:54:44.742Z.
+Erste öffentliche Beobachtung: 2026-11-06T23:56:26.741Z. Letzte erfolgreiche Beobachtung: 2026-11-20T13:58:32.139Z.
 
 ### 7 Tage
 
