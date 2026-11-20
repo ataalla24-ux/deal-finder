@@ -15,10 +15,10 @@ function deliveryTime(event, now) {
   return time <= now && Math.abs(Date.parse(event.slackSentAt) - time) <= 300000 ? time : null;
 }
 
-function approved(event, deliveredAt, now) {
+function approvalTime(event, deliveredAt, now) {
   const decisionAt = Date.parse(event.decidedAt);
   return event.decision === 'approved' && ['targeted-event', 'reaction-scan'].includes(event.decisionSource)
-    && decisionAt >= deliveredAt - 1000 && decisionAt <= now;
+    && decisionAt >= deliveredAt - 1000 && decisionAt <= now ? decisionAt : null;
 }
 
 function sourceOf(event) {
@@ -56,12 +56,16 @@ export function sourcePublicationYield(feedback, snapshot, previous, now = new D
       if (/^[a-f\d]{64}$/.test(key)) observations[key] = Math.max(at, observations[key] || 0);
     }
   }
+  const approvedReceipts = {};
+  for (const [key, at] of Object.entries(previous?.approvedReceipts || {})) {
+    if (/^[a-f\d]{64}$/.test(key) && Number.isFinite(at) && at >= asOf - 30 * DAY && at <= asOf) approvedReceipts[key] = at;
+  }
   const report = {
     asOf: now.toISOString(),
     feedbackAvailable: Array.isArray(feedback?.events),
     publicReadback: snapshot.status,
     firstPublicCheck, lastPublicCheck,
-    windows: [], publicObservations: observations,
+    windows: [], publicObservations: observations, approvedReceipts,
   };
   if (!report.feedbackAvailable) return report;
 
@@ -87,10 +91,14 @@ export function sourcePublicationYield(feedback, snapshot, previous, now = new D
         || (event.category === 'supermarkt' && foodDrinkScore(event.title) > 0),
       hasApproval: false, isPublic: false,
     });
-    if (!approved(event, time, asOf)) continue;
+    if (time < asOf - 30 * DAY) continue;
+    const key = receiptKey(event.dealId, event.slackTs);
+    const at = approvalTime(event, time, asOf);
+    if (at !== null) approvedReceipts[key] = Math.min(at, approvedReceipts[key] ?? at);
+    if (approvedReceipts[key] === undefined) continue;
     const deal = deals.get(event.dealId);
     deal.hasApproval = true;
-    if (observations[receiptKey(event.dealId, event.slackTs)] >= Date.parse(event.decidedAt) - 1000) deal.isPublic = true;
+    if (observations[key] >= approvedReceipts[key] - 1000) deal.isPublic = true;
   }
   for (const days of [7, 30]) {
     const totals = breakdown(), bySource = new Map();
@@ -111,7 +119,7 @@ export function sourcePublicationYield(feedback, snapshot, previous, now = new D
 export function formatSourcePublicationYield(report) {
   if (!report.feedbackAvailable) return '\n## Ertrag je Quelle\n\nSlack-Belege fehlen für diese Auswertung.\n';
   const lines = ['','## Ertrag je Quelle','',
-    'Jeder Deal zählt ab seiner ersten belegten Slack-Zustellung einmal. Ein Häkchen erfordert eine dokumentierte menschliche Freigabe. Die letzte Stufe zählt freigegebene Deals, die mit derselben Nachrichtenkennung im öffentlichen Feed beobachtet wurden. Kurzzeitig sichtbare Angebote zwischen zwei Beobachtungen und bereits vor der ersten Beobachtung entfernte Einträge können fehlen.','',
+    'Jeder Deal zählt ab seiner ersten belegten Slack-Zustellung einmal. Die Freigabe zählt, sobald für die betreffende Nachricht ein menschliches Häkchen belegt ist. Die letzte Stufe zählt freigegebene Deals, die mit derselben Nachrichtenkennung im öffentlichen Feed beobachtet wurden. Kurzzeitig sichtbare Angebote zwischen zwei Beobachtungen und bereits vor der ersten Beobachtung entfernte Einträge können fehlen.','',
     'Erste öffentliche Beobachtung: ' + (report.firstPublicCheck || 'ausstehend') +
     '. Letzte erfolgreiche Beobachtung: ' + (report.lastPublicCheck || 'ausstehend') + '.',''];
   for (const window of report.windows) {

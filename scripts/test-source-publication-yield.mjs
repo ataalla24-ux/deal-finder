@@ -67,3 +67,14 @@ test('an archived HTTP readback survives expiry, rejects future evidence and pre
   const mismatchedDelivery={...old,slackSentAt:ago(12).toISOString()};
   assert.equal(sourcePublicationYield({events:[mismatchedDelivery]},feed([old]),prior,now).windows[0].totals.all.delivered,0);
 });
+
+test('a later decision scan cannot erase an already verified conversion or attach it to another receipt', () => {
+  const original = message('offer',3,{decidedAt:ago(2).toISOString()});
+  const first = sourcePublicationYield({events:[original]},feed([original]),null,now);
+  const changed = {...original, decision:'rejected', decidedAt:now.toISOString()};
+  assert.deepEqual(sourcePublicationYield({events:[changed]},feed([]),first,now).windows[0].totals.food,
+    {delivered:1,approved:1,public:1});
+  const repost = message('offer',1,{decision:''});
+  assert.deepEqual(sourcePublicationYield({events:[repost]},feed([repost]),first,now).windows[0].totals.food,
+    {delivered:1,approved:0,public:0});
+});
