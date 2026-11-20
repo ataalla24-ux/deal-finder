@@ -5,6 +5,7 @@ import path from 'path';
 import { spawnSync } from 'child_process';
 
 import { stampDealsFeedFile } from './deals-feed-contract.mjs';
+import { isViennaFlight, FLIGHT_ALTERNATIVES_PATH } from '../scraper/vienna-flight-offer.js';
 import { mergeSourceOutbox } from './generated-source-merge.mjs';
 import { privateCommunityRow } from './community-public-boundary.mjs';
 import { assertPublicationSafe } from './repository-secret-guard.mjs';
@@ -37,6 +38,10 @@ const MAP_INPUT_FILES = [
   'scripts/automatic-deal-maintenance.mjs',
   'scripts/original-social-copy.mjs',
   'scripts/expiry-fixed-flight.mjs',
+  'scripts/cheapest-city-flights.mjs',
+  'scraper/vienna-flight-offer.js',
+  'docs/deal-moderation.json',
+  FLIGHT_ALTERNATIVES_PATH,
   'scripts/expiry-instagram-finite-range.mjs',
   'scripts/expiry-sparhamster-coupon.mjs',
   'scripts/refresh-maintenance-evidence.mjs',
@@ -626,10 +631,28 @@ async function main() {
   let mapReadInputs;
   let photoConsistency;
   let redemptionConsistency;
+  let flightConsistency;
   const dealsPath = 'docs/deals.json';
   const includesDealsFeed = options.patterns
     .map(normalizeRepoPath)
     .includes(dealsPath);
+  const needsFlightSelection = includesDealsFeed && (fs.existsSync(FLIGHT_ALTERNATIVES_PATH)
+    || (fs.existsSync(dealsPath) && JSON.parse(fs.readFileSync(dealsPath, 'utf8')).deals?.some(isViennaFlight)));
+  if (needsFlightSelection) {
+    const { reconcileCityFlightFeed } = await import('./cheapest-city-flights.mjs');
+    const previous = JSON.parse(remoteFileContent(baseRef, dealsPath) || '{}');
+    const visibleIds = new Set((previous.deals || []).map(deal => deal.id));
+    const flights = reconcileCityFlightFeed({ visibleIds });
+    if (flights && (statusChanged(dealsPath) || statusChanged(FLIGHT_ALTERNATIVES_PATH))) {
+      const paths = [FLIGHT_ALTERNATIVES_PATH, 'docs/deal-moderation.json',
+        'docs/live-deal-edits.json', 'scripts/cheapest-city-flights.mjs', 'scraper/vienna-flight-offer.js'];
+      flightConsistency = paths.map(file => ({
+        path:file, baseHash:contentHash(remoteFileContent(baseRef, file)), hash:localFileHash(file),
+      }));
+      options.patterns.push(FLIGHT_ALTERNATIVES_PATH);
+      if (statusChanged('docs/deal-review-feedback.json')) options.patterns.push('docs/deal-review-feedback.json');
+    }
+  }
   if (includesDealsFeed && statusChanged(dealsPath)) {
     const manifest = 'reviews/deal-redemptions.json';
     const routeInputs = [manifest, 'scripts/deal-redemptions.mjs'];
@@ -740,7 +763,7 @@ async function main() {
       }));
       assertPublicationSafe(safeStates);
       assertNoPrivateCommunityOutput(safeStates);
-      for (const [kind, inputs] of [['Original photo', photoConsistency], ['Redemption', redemptionConsistency]]) {
+      for (const [kind, inputs] of [['Original photo', photoConsistency], ['Redemption', redemptionConsistency], ['Flight selection', flightConsistency]]) {
         if (!inputs) continue;
         const retained=new Map(safeStates.map(state=>[state.path,state]));
         for(const input of inputs) {

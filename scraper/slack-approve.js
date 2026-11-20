@@ -4,6 +4,7 @@ import { captureMapEnrichmentInput, projectEnrichmentDeal } from './deal-enrichm
 import { officialFoodOfferKey } from './power-food-sources.js';
 import '../sentry/instrument.mjs';
 import fs from 'fs';
+import { isViennaFlight } from './vienna-flight-offer.js';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import { cleanText, extractDealsFromThreadMessages, extractSlackMessageText } from './slack-digest-utils.js';
@@ -382,6 +383,7 @@ function getCanonicalUrlBrandKey(deal) {
 }
 
 function getSameUrlVariantKey(deal) {
+  if (isViennaFlight(deal)) return `flight-offer:${deal.id}`;
   const officialKey = officialFoodOfferKey(deal) || officialOmvVariantKey(deal);
   if (officialKey) return officialKey;
   const id = cleanText(deal?.id).toLowerCase();
