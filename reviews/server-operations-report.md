@@ -1,8 +1,8 @@
 # FreeFinder Betriebsbericht
 
-Stand: 2026-11-20T11:16:10.065Z
+Stand: 2026-11-20T11:22:05.211Z
 
-- 85 Live-Angebote; 210 nicht-live Entwuerfe geprueft.
+- 85 Live-Angebote; 211 nicht-live Entwuerfe geprueft.
 - 0 neue IDs seit letzter Bestandsaufnahme; keine automatische Erfolgszuordnung.
 - 0 Entwuerfe ohne formale Pruefluecke, weiterhin menschliche Freigabe.
 - Pilot: 50 Faelle gesammelt, 0 unabhaengig bewertet, 21 regulaere Qualitaetslaeufe beobachtet. Automatische Freigabe AUS.
@@ -14,7 +14,7 @@ Stand: 2026-11-20T11:16:10.065Z
 - copy-or-period-review: 13
 - source-evidence-needed: 78
 - blocked-source: 50
-- venue-verification-needed: 67
+- venue-verification-needed: 68
 - duplicate-review: 2
 
 ## Native Bilder
@@ -28,12 +28,12 @@ Stand: 2026-11-20T11:16:10.065Z
 
 ## Aktualitaet
 
-- Entwurfsregeln frisch und lokal geprueft, ohne Modell- oder Quellenaufruf. 210 unterschiedliche IDs in 210 Eintraegen; doppelte IDs bleiben Prueffaelle.
-- Live-/Bildpruefstand: current; letzte Pruefung 2026-11-20T11:15:13.649Z. Bei veraltetem Stand sind leere Hinweisliste und Bildzaehler KEIN Entwarnungsnachweis.
+- Entwurfsregeln frisch und lokal geprueft, ohne Modell- oder Quellenaufruf. 211 unterschiedliche IDs in 211 Eintraegen; doppelte IDs bleiben Prueffaelle.
+- Live-/Bildpruefstand: current; letzte Pruefung 2026-11-20T11:22:03.805Z. Bei veraltetem Stand sind leere Hinweisliste und Bildzaehler KEIN Entwarnungsnachweis.
 
 ## Freigabe und Einloesung
 
-- 50 Pilotfaelle aktuell, 1263 fruehere Pruefstaende unveraendert archiviert. Keine alten Bewertungen uebernehmen.
+- 50 Pilotfaelle aktuell, 1264 fruehere Pruefstaende unveraendert archiviert. Keine alten Bewertungen uebernehmen.
 - Aktueller, unbewerteter Pruefbogen: 50 Faelle; reviews/automatic-publication-review-pack.json. Keine unabhaengige menschliche Bewertung erfunden.
 - Quellengepruefte Einloese-/Buchungswege: 0 von 85; 0 ausdruecklich unbestaetigte, 85 fehlende aktuelle Einloesepruefungen. Besuchsinfos sind keine Gutscheine; ein Buchungslink bestaetigt keinen aktuellen Flugpreis.
 - Karte frisch lokal geprueft: {"online-only":33,"mapped":51,"needs-review":1}.
