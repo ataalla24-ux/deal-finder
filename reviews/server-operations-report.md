@@ -1,13 +1,13 @@
 # FreeFinder Betriebsbericht
 
-Stand: 2026-11-20T11:03:35.891Z
+Stand: 2026-11-20T11:12:51.975Z
 
 - 85 Live-Angebote; 210 nicht-live Entwuerfe geprueft.
-- 1 neue IDs seit letzter Bestandsaufnahme; keine automatische Erfolgszuordnung.
+- 0 neue IDs seit letzter Bestandsaufnahme; keine automatische Erfolgszuordnung.
 - 0 Entwuerfe ohne formale Pruefluecke, weiterhin menschliche Freigabe.
 - Pilot: 50 Faelle gesammelt, 0 unabhaengig bewertet, 21 regulaere Qualitaetslaeufe beobachtet. Automatische Freigabe AUS.
 - Neue Slack-Zustellungen: hier nicht nachgewiesen.
-- API: internal-ledger; 3.894551 USD intern gebucht/reserviert in 24 Stunden. Kein Anbieter-Kontostand.
+- API: unavailable-or-invalid; unbekannt USD intern gebucht/reserviert in 24 Stunden. Kein Anbieter-Kontostand.
 
 ## Naechste Schritte
 
@@ -29,7 +29,7 @@ Stand: 2026-11-20T11:03:35.891Z
 ## Aktualitaet
 
 - Entwurfsregeln frisch und lokal geprueft, ohne Modell- oder Quellenaufruf. 210 unterschiedliche IDs in 210 Eintraegen; doppelte IDs bleiben Prueffaelle.
-- Live-/Bildpruefstand: current; letzte Pruefung 2026-11-20T11:03:34.460Z. Bei veraltetem Stand sind leere Hinweisliste und Bildzaehler KEIN Entwarnungsnachweis.
+- Live-/Bildpruefstand: current; letzte Pruefung 2026-11-20T11:12:50.557Z. Bei veraltetem Stand sind leere Hinweisliste und Bildzaehler KEIN Entwarnungsnachweis.
 
 ## Freigabe und Einloesung
 
