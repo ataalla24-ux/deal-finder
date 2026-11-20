@@ -253,6 +253,8 @@ test('public byte matches still fail if a removed campaign survives in the feed 
   };
   assert.equal((await verify([], [old.id])).removals.errors[0].reason, 'removed-deal-on-public-map');
   assert.equal((await verify([old], [])).status, 'publication-not-confirmed');
+  assert.equal((await verify([{...old,title:'Nachträglich redigierter Titel'}], [])).status, 'publication-not-confirmed');
+  assert.equal((await verify([{...old,validUntil:'',description:'Alte Kampagne ohne Periodenfeld'}], [])).status, 'publication-not-confirmed');
   assert.equal((await verify([], [])).status, 'publicly-verified');
   assert.equal((await verify([{...old,validUntil:'2026-12-02'}], [old.id])).status, 'publicly-verified');
 }));

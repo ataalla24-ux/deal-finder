@@ -27,12 +27,17 @@ function removalReadback(root, published) {
       if (mapped.has(row.id)) errors.push({ id: row.id, reason: 'removed-deal-on-public-map' });
       continue;
     }
-    const original = row.originalDeal;
-    if (!original || edits.some(edit => edit.dealId === row.id && (edit.forceKeep || edit.restoreDeal))) continue;
-    // Renewals and independently approved new campaigns may legitimately reuse an ID.
-    if (['brand','url','title','description','approvedAt','validOn','validUntil','expires'].every(
-      key => (current[key] ?? '') === (original[key] ?? '')
-    )) errors.push({ id: row.id, reason: 'removed-campaign-in-public-feed' });
+    if (edits.some(edit => edit.dealId === row.id && (edit.forceKeep || edit.restoreDeal))) continue;
+    const original = row.originalDeal || {};
+    const originalEnd = row.validUntil || original.validUntil || original.validOn;
+    const currentEnd = current.validUntil || current.validOn;
+    const isLaterPeriod = /^20\d{2}-\d{2}-\d{2}$/.test(currentEnd)
+      && Date.parse(currentEnd) > Date.parse(originalEnd);
+    const approval = Date.parse(current.approvedAt);
+    const hasNewApproval = approval > Date.parse(row.hiddenAt || row.removedAt)
+      && approval > Date.parse(original.approvedAt)
+      && /^\d{10}\.\d{6}$/.test(current.slackTs) && current.slackTs !== original.slackTs;
+    if (!isLaterPeriod && !hasNewApproval) errors.push({ id: row.id, reason: 'removed-campaign-in-public-feed' });
   }
   return { checked: removed.length, errors };
 }
