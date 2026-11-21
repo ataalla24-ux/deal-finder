@@ -891,7 +891,9 @@ export async function maintainFeedFile({ cwd = process.cwd(), allowAi = false, a
 
 if (process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.meta.url)) {
   const targetDealId = (process.env.MAINTENANCE_TARGET_DEAL_ID || '').trim();
-  const scheduledExpiryOnly = process.argv.includes('--scheduled-expiry-only');
+  // A queued map run can still use the previous command with a fresh checkout.
+  const scheduledExpiryOnly = process.argv.includes('--scheduled-expiry-only')
+    || process.argv.includes('--exact-time-expiry-only');
   const calls = [];
   // Record only provider-returned model identity and usage for the requested deal.
   const observed = transport => async (...args) => {
