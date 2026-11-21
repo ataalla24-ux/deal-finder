@@ -82,9 +82,9 @@
   "search": {
     "attemptedQueries": 1,
     "stoppedReason": "search-unavailable",
-    "nextRetryAt": "2026-11-22T08:16:30.433Z",
-    "lastAttemptAt": "2026-11-21T08:16:30.433Z",
-    "nextQueryIndex": 9,
+    "nextRetryAt": "2026-11-22T13:51:57.556Z",
+    "lastAttemptAt": "2026-11-21T13:51:57.556Z",
+    "nextQueryIndex": 10,
     "enabled": true,
     "queries": [
       "site:instagram.com/p wien mittagsmenü angebot",
@@ -145,12 +145,27 @@
     "discovered": 0,
     "errors": [
       {
-        "query": "site:instagram.com/p wien gratis essen",
+        "query": "site:instagram.com \"cascade_bar_vienna\" gratis OR aktion OR \"1+1\"",
         "error": "Search challenge; no bypass attempted",
         "httpStatus": 403,
-        "retryAt": ""
+        "retryAt": "",
+        "retryAfterProvided": false
       }
-    ]
+    ],
+    "boundedRetry": {
+      "reason": "challenge-without-retry-after",
+      "failures": 2
+    },
+    "checkedBy": {
+      "repository": "ataalla24-ux/deal-finder",
+      "runId": "44910965009",
+      "headSha": "2067fcc57798b4b94e4cb24be9ebe5f9d1966a9e",
+      "checkoutSha": "2067fcc57798b4b94e4cb24be9ebe5f9d1966a9e",
+      "triggeringRun": null,
+      "event": "workflow_dispatch",
+      "runAttempt": "1",
+      "url": "https://github.com/ataalla24-ux/deal-finder/actions/runs/44910965009"
+    }
   },
   "existingCandidates": 304,
   "seedUrls": 0,
