@@ -1,5 +1,39 @@
-// Let the public search page create its own requests. Never synthesize website
-// signatures, replay credentials, or retry a challenge through another endpoint.
+export async function tikTokAccessRefusal(page, document) {
+  if (document && [401, 403, 429, 451].includes(document.status())) {
+    return { status: document.status(), retryAfter: await document.headerValue('retry-after'), transportReason: 'document-http-error' };
+  }
+  const title = await page.title();
+  const body = await page.locator('body').innerText({ timeout: 1000 }).catch(() => '');
+  const finalPath = new URL(page.url()).pathname;
+  const loginForm = await page.locator('form input[type="password"]').first().isVisible().catch(() => false);
+  if (/^\/(?:login|signup|challenge|checkpoint)(?:\/|$)/i.test(finalPath) || loginForm) {
+    return { status: 403, transportReason: 'login-wall' };
+  }
+  if (/verify (?:to continue|you are human)|security check|unusual traffic|too many requests|log in to search|anmelden,? um|sicherheits(?:pruefung|pr\u00fcfung)/i.test(`${title} ${body.slice(0, 1000)}`)) {
+    return { status: 403, transportReason: 'access-challenge' };
+  }
+  return null;
+}
+
+async function visiblePublicVideoLinks(page, keyword, limit) {
+  return page.evaluate(({ keyword, limit }) => {
+    const current = new URL(location.href);
+    if (current.origin !== 'https://www.tiktok.com' || !/^\/search\/?$/.test(current.pathname)
+        || current.searchParams.get('q') !== keyword) return [];
+    const links = new Set();
+    for (const anchor of document.querySelectorAll('main a[href], [role="main"] a[href]')) {
+      if (!anchor.checkVisibility({ checkOpacity: true, checkVisibilityCSS: true })) continue;
+      const url = new URL(anchor.href, current);
+      if (url.origin !== current.origin || !/^\/@[\w.-]{2,40}\/video\/\d{8,30}\/?$/.test(url.pathname)) continue;
+      links.add(`${url.origin}${url.pathname.replace(/\/$/, '')}`);
+      if (links.size >= limit) break;
+    }
+    return [...links];
+  }, { keyword, limit });
+}
+
+// Let the public search page create its own requests. Signatures and credentials
+// belong to the browser, and a refusal ends the scan.
 export async function createTikTokBrowserSearch(page, { pages = 3, count = 30, timeoutMs = 12000 } = {}) {
   let keyword = '', requests = 0, rejectedForKeyword = 0, closed = false, generation = 0;
   let waiting = null;
@@ -7,6 +41,7 @@ export async function createTikTokBrowserSearch(page, { pages = 3, count = 30, t
   const admitted = new Set();
   const stats = { transport: 'public-browser-search', navigations: 0, searchRequests: 0, blockedExtraRequests: 0,
     blockedRequestReasons: {}, observedSearchEndpoints: {}, observedSearchPaths: {} };
+  const publicVideoLinks = [];
   const unavailable = (status = 0, retryAfter = '', transportReason = 'response-unavailable') => ({ ok: false, status, retryAfter, transportReason });
   const deliver = value => {
     if (closed) return;
@@ -41,7 +76,6 @@ export async function createTikTokBrowserSearch(page, { pages = 3, count = 30, t
         : url.searchParams.get('keyword') !== keyword ? 'keyword-mismatch'
         : requests >= pages ? 'request-cap' : 'count-cap';
       stats.blockedRequestReasons[reason] = (stats.blockedRequestReasons[reason] || 0) + 1;
-      if (matching && requests < pages) deliver(unavailable(0, '', 'request-policy-blocked'));
       await route.abort();
       return;
     }
@@ -79,6 +113,7 @@ export async function createTikTokBrowserSearch(page, { pages = 3, count = 30, t
 
   return {
     stats,
+    publicVideoLinks,
     async request({ keyword: nextKeyword, offset }) {
       if (offset === 0) {
         generation++;
@@ -105,22 +140,20 @@ export async function createTikTokBrowserSearch(page, { pages = 3, count = 30, t
             waitUntil: 'domcontentloaded', timeout: timeoutMs,
           });
           if (document && !document.ok()) return unavailable(document.status(), await document.headerValue('retry-after'), 'document-http-error');
-          // A visible challenge is a refusal, not an empty search or a puzzle
-          // for this collector to solve. The caller persists the usual pause.
-          const title = await page.title();
-          const body = await page.locator('body').innerText({ timeout: 1000 }).catch(() => '');
-          const finalPath = new URL(page.url()).pathname;
-          const loginForm = await page.locator('form input[type="password"]').first().isVisible().catch(() => false);
-          if (/^\/(?:login|signup|challenge|checkpoint)(?:\/|$)/i.test(finalPath) || loginForm) {
-            return unavailable(403, '', 'login-wall');
-          }
-          if (/verify (?:to continue|you are human)|security check|unusual traffic|too many requests|log in to search|anmelden,? um|sicherheits(?:pruefung|pr\u00fcfung)/i.test(`${title} ${body.slice(0, 1000)}`)) {
-            return unavailable(403, '', 'access-challenge');
-          }
+          const refusal = await tikTokAccessRefusal(page);
+          if (refusal) return { ok: false, ...refusal };
         } else if (!buffered && requests < pages) {
           await page.evaluate(() => window.scrollTo(0, document.body.scrollHeight));
         }
-        return await responsePromise;
+        const result = await responsePromise;
+        if (offset === 0 && requests === 0 && ['request-policy-blocked', 'no-search-request'].includes(result.transportReason)) {
+          const refusal = await tikTokAccessRefusal(page);
+          if (refusal) return { ok: false, ...refusal };
+          // Read the already-visible results from the successful public page.
+          // The missing API response and its cooldown remain in the report.
+          publicVideoLinks.push(...await visiblePublicVideoLinks(page, keyword, Math.min(count, 30)));
+        }
+        return result;
       } finally {
         clearTimeout(timer);
         if (waiting) { const resolve = waiting; waiting = null; resolve(unavailable()); }

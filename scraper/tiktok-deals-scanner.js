@@ -6,8 +6,8 @@ import { githubRunProvenance } from './pipeline-run-report-utils.js';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import { chromium } from 'playwright';
-import { runTikTokApiDiscovery, tikTokDiscoveryHealth } from './tiktok-search-discovery.js';
-import { createTikTokBrowserSearch } from './tiktok-browser-search.js';
+import { runTikTokApiDiscovery, selectTikTokPostVisits, tikTokDiscoveryHealth, tikTokRetryAt } from './tiktok-search-discovery.js';
+import { createTikTokBrowserSearch, tikTokAccessRefusal } from './tiktok-browser-search.js';
 import { runInstagramSearchQueries } from './instagram-search-discovery.js';
 import { readPublicSearchResponse } from './public-search-response.js';
 
@@ -989,7 +989,7 @@ export async function fetchTikTokApiCandidates(page, options = {}) {
   const transport = await createTikTokBrowserSearch(page, args);
   try {
     const result = await runTikTokApiDiscovery({ ...args, request: transport.request });
-    return { ...result, ...transport.stats };
+    return { ...result, ...transport.stats, publicVideoLinks: transport.publicVideoLinks };
   } finally { await transport.close(); }
 }
 
@@ -1022,8 +1022,15 @@ export async function discoverTikTokLinksViaDuckDuckGo(options = {}) {
 }
 
 async function extractTikTokPostData(page, url) {
-  await page.goto(url, { waitUntil: 'domcontentloaded', timeout: 25000 });
+  const document = await page.goto(url, { waitUntil: 'domcontentloaded', timeout: 25000 });
+  const initialRefusal = await tikTokAccessRefusal(page, document);
+  if (initialRefusal) return { accessRefusal: initialRefusal };
+  if (document && !document.ok()) return {};
   await page.waitForTimeout(1800);
+  const visibleRefusal = await tikTokAccessRefusal(page);
+  if (visibleRefusal) return { accessRefusal: visibleRefusal };
+  const finalUrl = new URL(page.url());
+  if (`${finalUrl.origin}${finalUrl.pathname.replace(/\/$/, '')}` !== url) return {};
 
   return page.evaluate(() => {
     const meta = (selector) => document.querySelector(selector)?.getAttribute('content') || '';
@@ -1661,15 +1668,21 @@ async function main() {
       lastUpdated: previousReport.lastUpdated,
       search: previousReport.searchDiscovery || { errors: previousReport.discoveryErrors || [] },
     } });
-    const knownUrls = new Set(apiDiscovery.rows.map((item) => item.data.url));
-    const availableUrls = discovery.links.filter((url) => !knownUrls.has(url)).slice(0, CONFIG.maxPostsToVisit);
-    const urls = apiDiscovery.nextRetryAt ? [] : availableUrls;
-    discovery.deferredPostVisits = availableUrls.length - urls.length;
-    console.log(`🔎 search-engine videos: ${discovery.links.length}, visiting fallback: ${urls.length}`);
+    const { urls, deferredWebVisits } = selectTikTokPostVisits(apiDiscovery, discovery.links, CONFIG.maxPostsToVisit);
+    discovery.deferredPostVisits = deferredWebVisits;
+    const publicLinkCount = apiDiscovery.publicVideoLinks?.length || 0;
+    console.log(`🔎 public-page videos: ${publicLinkCount}; search-engine videos: ${discovery.links.length}; visiting fallback: ${urls.length}`);
     const page = apiPage;
     for (const url of urls) {
       try {
         const data = await extractTikTokPostData(page, url);
+        if (data.accessRefusal) {
+          const { status, retryAfter, transportReason } = data.accessRefusal;
+          const retryAt = tikTokRetryAt(retryAfter);
+          if (!apiDiscovery.nextRetryAt || retryAt > apiDiscovery.nextRetryAt) apiDiscovery.nextRetryAt = retryAt;
+          discovery.postVisitStop = { status, transportReason, retryAt: apiDiscovery.nextRetryAt };
+          break;
+        }
         const { deal, reason } = buildDealFromPost(url, data);
         if (deal) {
           deals.push(deal);
@@ -1743,7 +1756,10 @@ async function main() {
     apiKeywords: TIKTOK_API_KEYWORDS,
     discovered: discovery.links.length,
     apiCandidates: apiDiscovery.rows.length,
-    apiDiscovery: Object.fromEntries(Object.entries(apiDiscovery).filter(([key]) => key !== 'rows')),
+    apiDiscovery: {
+      ...Object.fromEntries(Object.entries(apiDiscovery).filter(([key]) => !['rows', 'publicVideoLinks'].includes(key))),
+      publicVideoLinks: apiDiscovery.publicVideoLinks?.length || 0,
+    },
     searchDiscovery: Object.fromEntries(Object.entries(discovery).filter(([key]) => key !== 'links')),
     accepted: finalDeals.length,
     initialRejected: rejected.length,

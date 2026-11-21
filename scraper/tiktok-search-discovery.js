@@ -4,6 +4,21 @@ const transportReasons = new Set(['response-unavailable', 'request-policy-blocke
   'response-too-large', 'empty-response', 'non-json-response', 'response-read-failed', 'request-failed', 'response-timeout',
   'no-search-request', 'document-http-error', 'login-wall', 'access-challenge']);
 
+export function tikTokRetryAt(retryAfter, now = new Date()) {
+  return new Date(Math.max(+now + 86400000, Date.parse(retryAfterAt(retryAfter, now)) || 0)).toISOString();
+}
+
+export function selectTikTokPostVisits(api, webLinks, maxPosts) {
+  const knownUrls = new Set(api.rows.map(item => item.data.url));
+  const visibleLinks = (api.publicVideoLinks || []).filter(url => !knownUrls.has(url));
+  const webCandidates = webLinks.filter(url => !knownUrls.has(url));
+  const urls = [...new Set([...visibleLinks, ...(api.nextRetryAt ? [] : webCandidates)])].slice(0, maxPosts);
+  return {
+    urls,
+    deferredWebVisits: api.nextRetryAt ? webCandidates.slice(0, maxPosts).filter(url => !urls.includes(url)).length : 0,
+  };
+}
+
 export function tikTokDiscoveryHealth(api, search, accepted = 0) {
   const unavailable = Boolean(api.errors?.length || search.errors?.length || api.nextRetryAt || search.nextRetryAt);
   return { status: unavailable ? 'discovery-degraded' : 'completed', outputPreserved: unavailable && accepted === 0 };
@@ -55,7 +70,7 @@ export async function runTikTokApiDiscovery({ keywords, request, normalize, wait
           error: parsed.error, code: parsed.code, providerCode: parsed.providerCode,
           ...(parsed.transportReason ? { transportReason: parsed.transportReason } : {}) });
         result.stoppedReason = parsed.code;
-        result.nextRetryAt = new Date(Math.max(+now + 86400000, Date.parse(retryAfterAt(response?.retryAfter, now)) || 0)).toISOString();
+        result.nextRetryAt = tikTokRetryAt(response?.retryAfter, now);
         return result;
       }
       result.rawItems += parsed.batch.length;

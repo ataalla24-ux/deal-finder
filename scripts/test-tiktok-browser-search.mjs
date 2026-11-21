@@ -2,6 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import { chromium } from 'playwright';
 import { fetchTikTokApiCandidates } from '../scraper/tiktok-deals-scanner.js';
+import { selectTikTokPostVisits } from '../scraper/tiktok-search-discovery.js';
 
 const now = new Date('2026-11-11T12:00:00Z');
 const item = id => ({ id:String(id),author:{uniqueId:'vienna.cafe'},desc:'Wien: Gratis Kaffee',createTime:1794340800 });
@@ -152,5 +153,70 @@ test('frontend cannot exceed the existing request cap or substitute another endp
     const result=await scan(page,{pages:1});
     assert.equal(result.rows.length,1);assert.equal(calls.length,1);
     assert.equal(result.searchRequests,1);assert.ok(result.blockedExtraRequests>=2);
+  });
+});
+
+test('a blocked ancillary request cannot mask the allowed search response', async () => {
+  await fixture({html:`<script>
+    const base='/api/search/general/full/?keyword=wien%20gratis%20kaffee';
+    fetch(base+'&count=60').catch(()=>fetch(base+'&count=30'));
+  </script>`}, async(page,calls)=>{
+    const result=await scan(page,{pages:1});
+    assert.equal(result.rows.length,1);
+    assert.equal(calls.length,1);
+    assert.equal(calls[0].searchParams.get('count'),'30');
+    assert.equal(result.blockedRequestReasons['count-cap'],1);
+    assert.equal(result.nextRetryAt,'');
+  });
+});
+
+test('a readable public search page exposes only visible first-party video links', async () => {
+  await fixture({html:`<main>
+    <a href="/@vienna.cafe/video/1234567890123456789?ref=drop-me">Coffee clip</a>
+    <a href="/@vienna.cafe/video/1234567890123456789">Same clip</a>
+    <a href="/@vienna.cafe/video/2345678901234567890" hidden>Hidden clip</a>
+    <a href="https://example.invalid/@vienna.cafe/video/3456789012345678901">Foreign clip</a>
+    <a href="/@vienna.cafe/video/4567890123456789012/other">Inexact path</a>
+  </main><nav><a href="/@vienna.cafe/video/5678901234567890123">Navigation clip</a></nav>
+  <script>fetch('/api/search/user/preview/').catch(()=>{})</script>`}, async(page,calls)=>{
+    const result=await scan(page,{timeoutMs:1000});
+    const visibleUrl='https://www.tiktok.com/@vienna.cafe/video/1234567890123456789';
+    assert.equal(calls.length,0);
+    assert.equal(result.errors[0].transportReason,'request-policy-blocked');
+    assert.ok(result.nextRetryAt);
+    assert.deepEqual(result.publicVideoLinks,[visibleUrl]);
+    assert.deepEqual(selectTikTokPostVisits(result,[visibleUrl,'https://www.tiktok.com/@vienna.cafe/video/6789012345678901234'],2),
+      {urls:[visibleUrl],deferredWebVisits:1});
+  });
+});
+
+test('a public document refusal or challenge never exposes stale links', async () => {
+  const staleLink='<main><a href="/@vienna.cafe/video/1234567890123456789">Old clip</a></main>';
+  for (const config of [
+    {documentStatus:403,html:staleLink},
+    {html:`<body>Verify to continue${staleLink}</body>`},
+    {html:`<body><form><input type="password"></form>${staleLink}</body>`},
+  ]) await fixture(config,async(page,calls)=>{
+    const result=await scan(page);
+    assert.equal(result.errors[0].status,403);
+    assert.ok(result.nextRetryAt);
+    assert.deepEqual(result.publicVideoLinks,[]);
+    assert.equal(calls.length,0);
+    assert.deepEqual(selectTikTokPostVisits(result,['https://www.tiktok.com/@vienna.cafe/video/1234567890123456789'],1),
+      {urls:[],deferredWebVisits:1});
+  });
+});
+
+test('an admitted search API refusal blocks fallback even with visible video links', async () => {
+  await fixture({
+    html:`<main><a href="/@vienna.cafe/video/1234567890123456789">Old clip</a></main>
+      <script>fetch('/api/search/general/full/?keyword=wien%20gratis%20kaffee&count=30')</script>`,
+    api:()=>({status:429,headers:{'Retry-After':'172800'},body:''}),
+  }, async(page,calls)=>{
+    const result=await scan(page);
+    assert.equal(calls.length,1);
+    assert.equal(result.errors[0].status,429);
+    assert.equal(result.nextRetryAt,'2026-11-13T12:00:00.000Z');
+    assert.deepEqual(result.publicVideoLinks,[]);
   });
 });
