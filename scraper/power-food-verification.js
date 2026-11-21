@@ -168,10 +168,12 @@ export async function verifyOfficialFoodDeal(deal, options = {}) {
         // the freshly extracted coupon bytes, not only its container metadata.
         && (deal.evidence.media.kind === 'pdf' || d.evidence.media?.sha256 === deal.evidence.media.sha256)),
   );
+  if (match && source.cashbackCampaigns && (match.id !== deal.id || response.finalUrl !== deal.url || response.status !== 200))
+    return { ok: false, reason: 'cashback-campaign-mismatch' };
   if (!match) return { ok: false, reason: "offer-not-on-current-page" };
   const timing = match.evidence.offerTiming;
   const current =
-    source.currentOffers || Boolean(timing.validUntil || timing.recurring);
+    source.currentOffers || Boolean(timing.validUntil || timing.recurring || (source.cashbackCampaigns && timing.kind === 'ongoing'));
   let viennaBranchEvidence = "";
   if (source.currentOffers && source.branchEvidenceUrl) {
     const locationKey = source.name + "|" + source.branchEvidenceUrl;

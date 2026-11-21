@@ -1,3 +1,4 @@
+import { discoverCashbackLinks, extractCashbackCampaign } from "./power-marktguru-cashback.js";
 import { load } from "cheerio";
 import crypto from "node:crypto";
 import { extractLowFoodPrice } from "./food-discovery-utils.js";
@@ -82,7 +83,9 @@ export function discoverFoodLinks(
   source,
   pageUrl = source.url,
   limit = 4,
+  previousDetailUrl,
 ) {
+  if (source.cashbackCampaigns) return discoverCashbackLinks(html, pageUrl, previousDetailUrl).slice(0, limit);
   const $ = load(html);
   const links = new Set();
   $("a[href]").each((i, e) => {
@@ -160,6 +163,10 @@ export function extractFoodOffers(html, source, options = {}) {
       rejected: [{ reason: "foreign-redirect", url: pageUrl }],
       links: [],
     };
+  if (source.cashbackCampaigns) {
+    const row = extractCashbackCampaign(html, source, pageUrl, now);
+    return { deals: row ? [row] : [], rejected: row || pageUrl === source.url ? [] : [{ reason: 'unconfirmed-cashback', url: pageUrl }], links: [] };
+  }
   if (source.mediaOnly) return {deals:[],rejected:[],links:[]};
   const $ = load(html);
   $("script,style,noscript,nav,footer,header").remove();

@@ -52,7 +52,8 @@ export async function runScheduledPowerSource(source, previousReport, collect, n
   }
   const pageCooldowns = Object.fromEntries(Object.entries(previous?.pageCooldowns || {})
     .filter(([, value]) => timestamp(value.nextRetryAt) > +now));
-  const result = await collect({ ...source, pageCooldowns });
+  const previousDetailUrl = source.cashbackCampaigns ? previous?.pages?.findLast(page => page.url !== source.url)?.url : undefined;
+  const result = await collect({ ...source, pageCooldowns, ...(previousDetailUrl ? { previousDetailUrl } : {}) });
   for (const page of result.pages || []) {
     if (page.status === 'ok') delete pageCooldowns[page.url];
     else if (page.error && page.url !== source.url && ![401, 403, 429].includes(httpStatus(page))) {

@@ -2,6 +2,15 @@
 // proof that every promotion on the domain applies in Vienna.
 export const POWER_FOOD_SOURCES = [
   {
+    name: 'marktguru Cashback', brand: 'marktguru',
+    url: 'https://www.marktguru.at/cashback',
+    allowedHosts: ['www.marktguru.at'],
+    permittedUrl: /^https:\/\/www\.marktguru\.at\/(?:cashback|mb\/[a-z0-9-]+-cashback-\d+)$/,
+    cashbackCampaigns: true,
+    maxPages: 2,
+    category: 'essen',
+  },
+  {
     name: 'Mömax Restaurant',
     brand: 'Mömax',
     url: 'https://www.moemax.at/c/unserrestaurant',
@@ -261,6 +270,7 @@ export function isAllowedFoodUrl(value, source) {
       !u.password &&
       !u.port &&
       source.allowedHosts.includes(u.hostname) &&
+      (!source.permittedUrl || source.permittedUrl.test(u.href)) &&
       (!source.pathPrefix || u.pathname.startsWith(source.pathPrefix)) &&
       !/(?:\.|\/)(?:pdf|jpe?g|png|webp|svg|mp4|zip)\/?$/i.test(u.pathname)
     );
@@ -295,5 +305,8 @@ export function officialFoodOfferKey(deal) {
       s.name === deal.evidence.merchantSourceKey &&
       isAllowedFoodUrl(deal.url, s),
   );
+  // Each cashback detail URL represents one campaign. Use the same URL key
+  // that an existing Firecrawl or community discovery of this campaign uses.
+  if (source?.cashbackCampaigns) return deal.url.replace('https://www.', 'https://');
   return source ? `official-food:${source.name}|${deal.id}` : "";
 }

@@ -1173,7 +1173,8 @@ async function validateDeal(deal, context) {
   const selfSyndicatedSocialDeal = socialPostDeal && isSelfSyndicatedSocialDeal(deal, health);
   const newsAggregatorDeal = isNewsAggregatorDeal(deal);
   const sharedBenefitPageDeal = isSharedBenefitPageDeal(deal);
-  const freshnessSensitive = socialPostDeal || newsAggregatorDeal || isCrawlerDeal(deal);
+  const freshnessSensitive = socialPostDeal || newsAggregatorDeal || isCrawlerDeal(deal)
+    || officialFood?.deal?.evidence?.extractionMethod === 'published-receipt-campaign';
   const expiryCandidates = collectExpiryCandidates(officialFood?.ok ? officialFood.deal : deal, evidenceHealth, now);
   const expiry = getExpiryDecision(expiryCandidates, now);
   const recurring = hasRecurringSchedule(deal, expiryCandidates);

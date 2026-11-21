@@ -9,7 +9,7 @@ import { extractCouponMediaOffers } from './official-coupon-media.js';
 export async function crawlFoodSource(source, options) {
   const now = options.now || new Date();
   const started = Date.now();
-  const maxPages = Math.max(1, Math.min(8, options.maxPages || 5));
+  const maxPages = Math.max(1, Math.min(8, source.maxPages || 8, options.maxPages || 5));
   const queue = [source.url, ...(source.seeds || [])];
   const seen = new Set();
   const pages = [];
@@ -27,7 +27,7 @@ export async function crawlFoodSource(source, options) {
     }
     try {
       let response = await options.fetchPage(url);
-      if (!isAllowedFoodUrl(response.finalUrl || url, source))
+      if (!isAllowedFoodUrl(response.finalUrl || url, source) || (source.cashbackCampaigns && response.finalUrl !== url))
         throw new Error("foreign-redirect");
       seen.add(response.finalUrl || url);
       if (
@@ -36,7 +36,7 @@ export async function crawlFoodSource(source, options) {
         ) &&
         response.html.length < 30000)
       ) {
-        if (options.renderPage) response = await options.renderPage(url);
+        if (options.renderPage && !source.cashbackCampaigns) response = await options.renderPage(url);
         else {
           pages.push({ url, status: "needs-browser", candidates: 0 });
           continue;
@@ -77,6 +77,7 @@ export async function crawlFoodSource(source, options) {
         source,
         response.finalUrl || url,
         maxPages * 2,
+        source.previousDetailUrl,
       ))
         if (!seen.has(link) && !queue.includes(link)) queue.push(link);
     } catch (error) {

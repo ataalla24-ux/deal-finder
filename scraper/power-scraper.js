@@ -372,6 +372,10 @@ const SOURCES = [
 const DISABLED_SOURCE_NAMES = new Set([
   // These endpoints are confirmed dead or persistently blocked in the live
   // report; keep the source list focused on endpoints that can produce data.
+  // Reallocate these generic landing-page slots to the cashback index and one detail.
+  // The dedicated Gutscheine.at scraper retains all its voucher feeds.
+  'Gutscheine.at',
+  'Coupons.at',
   'Foodsharing Wien',
   'KFC',
   'H&M',
