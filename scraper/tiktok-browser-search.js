@@ -61,14 +61,17 @@ export async function createTikTokDirectSearch(page, { timeoutMs = 12000 } = {})
             transportReason: 'document-http-error' };
         }
         await page.waitForTimeout(2200);
+        const home = new URL(page.url());
+        stats.homepageNavigation = home.origin !== publicSearchOrigin ? 'other-origin'
+          : home.pathname === '/' ? 'root' : 'same-origin-redirect';
         const refusal = await tikTokAccessRefusal(page, document);
         if (refusal) return { ok: false, ...refusal };
       }
       expectedUrl = `${publicSearchOrigin}/api/search/general/full/?keyword=${encodeURIComponent(keyword)}&offset=${offset}&count=${count}`;
       try {
         const { evidence, ...result } = await page.evaluate(async ({ url, timeoutMs }) => {
-          if (location.origin !== new URL(url).origin || location.pathname !== '/') {
-            return { ok: false, transportReason: 'request-failed' };
+          if (location.origin !== new URL(url).origin) {
+            return { ok: false, transportReason: 'homepage-origin-mismatch' };
           }
           const response = await fetch(url, {
             headers: { accept: 'application/json,text/plain,*/*' },

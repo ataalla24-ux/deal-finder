@@ -43,13 +43,15 @@ const scan = (page,options={}) => fetchTikTokApiCandidates(page,{keywords:['wien
 
 const scanDirect = (page, options) => scan(page, { ...options, createTransport: undefined });
 
-test('the default scanner starts at the homepage, then sends only the October video searches', async () => {
-  const homepage = '<body>Home<script>fetch("/api/search/suggest/guide/").catch(() => {});</script></body>';
+test('the default scanner accepts the same-origin homepage path and sends only the October video searches', async () => {
+  const homepage = '<body>Home<script>history.replaceState(null, "", "/foryou");'
+    + 'fetch("/api/search/suggest/guide/").catch(() => {});</script></body>';
   await fixture({ homepage, api: (_url, n) => response(body([item(n)], true)) }, async (page, calls, documents) => {
     const result = await scanDirect(page, { pages: 2 });
     assert.deepEqual(documents, ['/']);
     assert.equal(result.transport, 'direct-browser-search');
     assert.equal(result.navigations, 1);
+    assert.equal(result.homepageNavigation, 'same-origin-redirect');
     assert.equal(result.searchRequests, 2);
     assert.equal(result.rows.length, 2);
     assert.deepEqual(calls.map(url => [url.pathname, ...url.searchParams.values()]), [

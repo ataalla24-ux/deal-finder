@@ -5,7 +5,8 @@ const LOCAL_RETRY_MS = 4 * 3600000;
 const LOCAL_RETRY_REASON = 'local-request-policy';
 const transportReasons = new Set(['response-unavailable', 'request-policy-blocked', 'response-http-error',
   'response-too-large', 'empty-response', 'non-json-response', 'response-read-failed', 'request-failed', 'response-timeout',
-  'no-search-request', 'unrecognized-search-request', 'ancillary-search-only', 'document-http-error', 'login-wall', 'access-challenge']);
+  'no-search-request', 'unrecognized-search-request', 'ancillary-search-only', 'document-http-error',
+  'homepage-origin-mismatch', 'login-wall', 'access-challenge']);
 
 export function tikTokRetryAt(retryAfter, now = new Date(), minimumMs = DAY_MS) {
   return new Date(Math.max(+now + minimumMs, Date.parse(retryAfterAt(retryAfter, now)) || 0)).toISOString();
@@ -17,18 +18,21 @@ export function isTikTokLocalRetry(previous = {}) {
 
 export function tikTokDirectProbePrevious(previous, now = new Date()) {
   const failure = previous?.errors?.[0];
-  if (Date.parse(previous?.nextRetryAt) > +now
-      && previous.transport === 'public-browser-search'
-      && isTikTokLocalRetry(previous)
-      && previous.attemptedRequests === 1 && previous.searchRequests === 0
-      && previous.blockedExtraRequests > 0 && previous.lastSearchResponse == null && previous.errors?.length === 1
-      && failure?.status === 0 && failure.transportReason === 'request-policy-blocked'
-      && failure.retryAfter == null && failure.retryAt == null) {
-    // The diagnostic uses the replacement transport. Keep the single-request
-    // retry limit and let the new attempt record any provider deadline.
-    return { ...previous, nextRetryAt: '' };
-  }
-  return previous;
+  if (!(Date.parse(previous?.nextRetryAt) > +now)
+      || !isTikTokLocalRetry(previous) || previous.attemptedRequests !== 1
+      || previous.searchRequests !== 0 || previous.lastSearchResponse != null
+      || previous.errors?.length !== 1 || failure?.status !== 0
+      || failure.retryAfter != null || failure.retryAt != null) return previous;
+
+  const oldBrowserFilter = previous.transport === 'public-browser-search'
+    && previous.blockedExtraRequests > 0 && failure.transportReason === 'request-policy-blocked';
+  // In this diagnostic revision, the local homepage URL check was the only
+  // source of this error code in the direct transport.
+  const oldHomepageCheck = previous.transport === 'direct-browser-search' && previous.navigations === 1
+    && previous.checkedBy?.checkoutSha === '05060c270fa89da1247dd0e4fe206a6323f47bf9'
+    && failure.transportReason === 'request-failed';
+  // Retain the single-request limit and let the new attempt record any provider deadline.
+  return oldBrowserFilter || oldHomepageCheck ? { ...previous, nextRetryAt: '' } : previous;
 }
 
 export function selectTikTokPostVisits(api, webLinks, maxPosts) {

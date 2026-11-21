@@ -117,6 +117,12 @@ test('a direct diagnostic can replace one obsolete browser-filter hold and prese
   assert.equal(result.nextRetryAt, '2026-11-12T20:00:00.000Z');
   const direct = { ...result, transport: 'direct-browser-search' };
   assert.equal(tikTokDirectProbePrevious(direct, now), direct);
+  const oldHomepageCheck = { ...previous, transport: 'direct-browser-search', navigations: 1,
+    checkedBy: { checkoutSha: '05060c270fa89da1247dd0e4fe206a6323f47bf9' },
+    errors: [{ ...failure, transportReason: 'request-failed' }] };
+  assert.equal(tikTokDirectProbePrevious(oldHomepageCheck, now).nextRetryAt, '');
+  const otherRevision = { ...oldHomepageCheck, checkedBy: { checkoutSha: 'a-different-revision' } };
+  assert.equal(tikTokDirectProbePrevious(otherRevision, now), otherRevision);
 });
 
 test('unclassified TikTok failures and legacy holds retain the conservative pause', async () => {
