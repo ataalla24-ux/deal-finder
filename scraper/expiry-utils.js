@@ -1,6 +1,7 @@
 import { load } from 'cheerio';
 import { cardEditorialWhen } from './deal-card-editor.js';
 import { clearReviewExpiry, copyOfferPeriod, hasReviewedOfferPeriod } from './offer-period-fields.js';
+import { readReviewedPizzaPost, reconcileReviewedCampaignExpiry } from './reviewed-pending-campaigns.js';
 import { extractApprovalSourceEvidence } from './approval-source-evidence.js';
 import { reconcileReviewedApprovalExpiry } from './approval-reviewed-source-copy.js';
 import { isSupportedIamstudentApprovalUrl, extractIamstudentApprovalSourceEvidence } from './approval-iamstudent-source-evidence.js';
@@ -1763,7 +1764,7 @@ export async function inspectDealUrlHealth(url, options = {}) {
       contentHints,
       dateHints,
       ...(merchantOffers ? { merchantOffers } : {}),
-      approvalSourceEvidence: iamstudentEvidence || extractApprovalSourceEvidence(html, url, finalUrl),
+      approvalSourceEvidence: iamstudentEvidence || extractApprovalSourceEvidence(html, url, finalUrl) || readReviewedPizzaPost(html, url, finalUrl),
       checkedAt: (options.now instanceof Date && Number.isFinite(+options.now) ? options.now : new Date()).toISOString(),
     };
   } catch {
@@ -1801,7 +1802,7 @@ export function repairStartOnlyExpiry(deal, options = {}) {
 
 export async function normalizeDealExpiry(deal, options = {}) {
   const now = options.now instanceof Date ? options.now : new Date();
-  if (reconcileReviewedApprovalExpiry(deal)) return deal;
+  if (reconcileReviewedApprovalExpiry(deal) || reconcileReviewedCampaignExpiry(deal)) return deal;
   // The queue's age limit is not a date for the promoted offer.
   if (clearReviewExpiry(deal) || repairObservationExpiry(deal, { now })) return deal;
   if (repairStartOnlyExpiry(deal, { now })) return deal;

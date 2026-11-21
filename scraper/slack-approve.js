@@ -1,3 +1,4 @@
+import { pizzaPost, prepareReviewedCampaign, reviewedCampaignHold, isReviewedCampaignRetry } from './reviewed-pending-campaigns.js';
 import { prepareReviewedApprovalCopy } from './approval-reviewed-source-copy.js';
 import { curatedMerchantTask } from './merchant-offer-discovery.js';
 import { basicCopyHold, contradictedOfferPriceHold, prepareTwoStagePublication } from './approval-two-stage.js';
@@ -804,7 +805,7 @@ async function validateApprovalCandidates(deals, options = {}) {
   const sourceEvidence = new Map();
   for (const deal of candidates) {
     if (!humanApproved(deal) || existingIds.has(deal.id)
-      || (!preisjaegerThreadId(deal.url) && !isSupportedIamstudentApprovalUrl(deal.url))
+      || (!preisjaegerThreadId(deal.url) && !isSupportedIamstudentApprovalUrl(deal.url) && deal.url !== pizzaPost)
       || deal.editedInSlack || deal.slackFormEditTs || deal.liveEditedAt || isCommunitySubmission(deal)) continue;
     let health;
     try { health = await inspect(deal.url, { now, timeoutMs: options.timeoutMs }); } catch { health = {}; }
@@ -815,7 +816,8 @@ async function validateApprovalCandidates(deals, options = {}) {
       blockingReason: 'Aktueller Angebotsbeleg nicht eindeutig lesbar.' });
   }
   candidates = candidates.map(deal => {
-    const periodPrepared = prepareIamstudentApprovalPeriod(deal, sourceEvidence.get(deal.id), { existingIds, now });
+    const reviewed = prepareReviewedCampaign(deal, sourceEvidence.get(deal.id), now);
+    const periodPrepared = prepareIamstudentApprovalPeriod(reviewed, sourceEvidence.get(deal.id), { existingIds, now });
     const prepared = prepareReviewedApprovalCopy(prepareIamstudentApprovalCopy(periodPrepared, sourceEvidence.get(deal.id), { existingIds }), sourceEvidence.get(deal.id), { existingIds, now });
     if (prepared !== periodPrepared) console.log(`${isSupportedIamstudentApprovalUrl(deal.url) ? 'IAMSTUDENT' : 'Reviewed'} source copy prepared:`, JSON.stringify({ id: deal.id,
       fields: prepared.reviewedSourceCopy.fields, method: prepared.reviewedSourceCopy.method }));
@@ -828,7 +830,8 @@ async function validateApprovalCandidates(deals, options = {}) {
   candidates = candidates.map(deal => preparePublicationTitle(deal, { existingIds }));
   if (process.env.APPROVAL_SOURCE_COPY_REVIEW === '1' && (options.approvalModelRequest || process.env.OPENAI_API_KEY)) {
     const { reviewApprovedCopy } = await import('../scripts/automatic-deal-maintenance.mjs');
-    const reviewed = await reviewApprovedCopy(candidates.filter(deal => humanApproved(deal) && !isCommunitySubmission(deal)), {
+    const reviewed = await reviewApprovedCopy(candidates.filter(deal => humanApproved(deal) && !isCommunitySubmission(deal)
+      && !(deal.reviewedSourceCopy?.rule === deal.id && sourceEvidence.get(deal.id)?.campaignId === deal.id)), {
       cwd: ROOT, now, existingIds, request: options.approvalModelRequest, sourceEvidence,
       ...(options.approvalCachedReviewOnly || process.env.APPROVAL_COPY_CACHE_ONLY === '1' ? { maxCandidates: 0 } : {}),
     });
@@ -889,7 +892,8 @@ async function validateApprovalCandidates(deals, options = {}) {
       decision.reasons.push(sourceDateHold);
       addedBlock = true;
     }
-    const sourceHold = sourceEvidence.get(deal.id)?.blockingReason;
+    const sourceHold = sourceEvidence.get(deal.id)?.blockingReason
+      || (!existingIds.has(deal.id) && reviewedCampaignHold(originals.get(deal.id), sourceEvidence.get(deal.id), now));
     if (sourceHold) {
       decision.allowed = false;
       decision.reasons.push(`Angebotsbeleg ausstehend: ${sourceHold} Die Freigabe bleibt gespeichert; automatische Nachpruefung folgt.`);
@@ -1534,7 +1538,7 @@ async function main() {
   const queuedDeals = queuedModeration.deals;
   const approvalRetries = queuedDeals.filter(deal => cleanText(deal.slackTs) && cleanText(deal.slackThreadTs)
     && (ensureArray(deal.approvalBlock?.reasons).some(isApprovalRetryReason)
-      || isRestoredIamstudentApprovalRetry(deal)))
+      || isRestoredIamstudentApprovalRetry(deal) || isReviewedCampaignRetry(deal)))
     .sort((left, right) => String(left.approvalBlock.checkedAt || '').localeCompare(String(right.approvalBlock.checkedAt || '')))
     .slice(0, Math.min(4, APPROVE_FULL_SCAN_MAX_THREADS || 4, APPROVE_FULL_SCAN_MAX_DEALS || 4));
   const retryThreads = [...new Set(approvalRetries.map(deal => cleanText(deal.slackThreadTs)))];

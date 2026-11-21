@@ -1,4 +1,5 @@
 import { curatedMerchantTask, extractMerchantOfferCandidates } from './merchant-offer-discovery.js';
+import { currentReviewedCampaign } from './reviewed-pending-campaigns.js';
 import { verifyOfficialFoodDeal } from './power-food-verification.js';
 import { verifyViennaFoodBenefit } from './vienna-food-benefits.js';
 import { verifyCarrierBenefit } from './carrier-benefits.js';
@@ -1181,6 +1182,7 @@ async function validateDeal(deal, context) {
   const activeValidity = hasActiveExplicitValidity(deal, expiry, now);
   const freshlyActiveAd = hasFreshActiveAdEvidence(deal, now);
   const currentOriginal = currentOriginalOffer(deal, now);
+  const reviewedCampaign = context.communityApproval && currentReviewedCampaign(deal, health, now);
   const publicationCandidates = getPublicationCandidates(deal, health, {
     freshnessSensitive,
     ignoreUrlPublicationDate: sharedBenefitPageDeal || officialFood?.current === true || Boolean(merchantMatch),
@@ -1210,12 +1212,12 @@ async function validateDeal(deal, context) {
     // A human-reviewed community offer with a concrete calendar window does
     // not need a platform post timestamp. Old dated social posts stay blocked.
     activeValidity: socialPostDeal
-      ? freshlyActiveAd || Boolean(currentOriginal) || reviewedOfficial?.ok || reviewedCommunity && !publicationCandidates.length && activeValidity
+      ? freshlyActiveAd || Boolean(currentOriginal) || reviewedCampaign || reviewedOfficial?.ok || reviewedCommunity && !publicationCandidates.length && activeValidity
       : activeValidity,
     recurring: socialPostDeal ? false : recurring,
     currentOfficialOffer: !socialPostDeal && !newsAggregatorDeal && (Boolean(merchantMatch) || (deal.originSource === 'power-official-food'
       && officialFood?.ok === true && officialFood.currentOfferVerification?.checkedAt === now.toISOString())),
-    currentPublicVoucher: !socialPostDeal && !newsAggregatorDeal ? currentPublicVoucherEvidence(deal, health, now) : null,
+    currentPublicVoucher: !socialPostDeal && !newsAggregatorDeal ? currentPublicVoucherEvidence(deal, health, now) || reviewedCampaign : null,
     extendedMaxAgeDays: freshlyActiveAd ? 365 : currentOriginal ? 90 : reviewedOfficial?.ok ? 45 : context.extendedMaxAgeDays,
   });
   const relativeOffer = getRelativeOfferDecision(deal, freshness.selected, now, {

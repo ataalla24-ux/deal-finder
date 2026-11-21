@@ -1,3 +1,4 @@
+import { reviewedThreadCampaign } from './reviewed-pending-campaigns.js';
 import { load } from 'cheerio';
 
 const clean = value => typeof value === 'string' ? value.replace(/\s+/g, ' ').trim() : '';
@@ -13,7 +14,7 @@ export function preisjaegerThreadId(value) {
     const url = new URL(value);
     if (url.protocol !== 'https:' || url.port || url.username || url.password
       || !['preisjaeger.at', 'www.preisjaeger.at'].includes(url.hostname)) return '';
-    return url.pathname.match(/^\/deals\/[^/]+-(\d+)\/?$/)?.[1] || '';
+    return url.pathname.match(/^\/(?:deals|gutschein)\/[^/]+-(\d+)\/?$/)?.[1] || '';
   } catch { return ''; }
 }
 
@@ -125,14 +126,17 @@ export function extractApprovalSourceEvidence(html, requestedUrl, finalUrl = req
     if (!match) continue;
     let thread;
     try { thread = JSON.parse(match[1]).threadDetail; } catch { continue; }
-    if (!thread || String(thread.threadId) !== id || thread.type !== 'Deal'
+    const voucher = new URL(finalUrl).pathname.startsWith('/gutschein/');
+    if (!thread || String(thread.threadId) !== id || thread.type !== (voucher ? 'Voucher' : 'Deal')
+      || (voucher && (thread.canonicalUrl !== finalUrl || thread.url !== finalUrl))
       || preisjaegerThreadId(thread.canonicalUrl || thread.url) !== id) return unavailable;
-    if (thread.deletedAt || thread.isExpired === true || thread.status !== 'Activated') {
+    if (thread.deletedAt || thread.isExpired === true || thread.status !== 'Activated'
+      || (voucher && (thread.isExpired !== false || thread.isMaybeExpired || thread.expiryReportStatus !== 'None'))) {
       return { ...unavailable, blockingReason: 'Quelle bestaetigt kein aktives Angebot.' };
     }
     const title = clean(thread.title);
     const description = currentThreadDescription(thread, id);
-    return describeCurrentThread(title, description, requestedUrl, unavailable);
+    return { ...describeCurrentThread(title, description, requestedUrl, unavailable), ...reviewedThreadCampaign(thread, requestedUrl) };
   }
   if (hasInitialState) return unavailable;
   const dom = visibleThread($, id, requestedUrl, finalUrl);
