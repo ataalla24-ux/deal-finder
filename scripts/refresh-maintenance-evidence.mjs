@@ -18,11 +18,13 @@ const publicSupported = url => isSupportedIamstudentApprovalUrl(url) || isSuppor
 const supported = url => carrierSupported(url) || publicSupported(url);
 const pendingDescription = deal => deal.enrichmentPending === true && deal.enrichmentFields?.includes('description');
 const dueDescription = (deal, now) => pendingDescription(deal) && !(Date.parse(deal.enrichmentNextReviewAt) > +now);
+const editedCopyFields = deal => [...(deal.liveEditedFields || []), ...(deal.slackEditedFields || [])];
+const editableSource = deal => !deal.forceKeep && !deal.campaignId && !deal.isBusiness && !deal.isBusinessAdvertisement
+  && !(deal.liveEditedAt && !deal.liveEditedFields?.length)
+  && !((deal.editedInSlack || deal.slackEditedAt || deal.slackFormEditTs) && !deal.slackEditedFields?.length);
 const reviewablePublicCopy = (deal, now) => {
-  if (pendingDescription(deal) && !dueDescription(deal, now)) return false;
-  if (deal.forceKeep || deal.campaignId || deal.isBusiness || deal.isBusinessAdvertisement
-    || deal.editedInSlack || deal.slackEditedAt || deal.slackFormEditTs || deal.liveEditedAt) return false;
-  const fields = [...(deal.liveEditedFields || []), ...(deal.slackEditedFields || [])];
+  if (!editableSource(deal) || pendingDescription(deal) && !dueDescription(deal, now)) return false;
+  const fields = editedCopyFields(deal);
   return !fields.includes('title') && needsSourceBackedTitle(deal.title)
     || !fields.includes('description') && (dueDescription(deal, now) || hasOnlyPreviewDescription(deal))
     || !fields.some(key => key.startsWith('valid') || key.startsWith('expir'))
@@ -149,10 +151,8 @@ export async function refreshMaintenanceEvidence({ root = process.cwd(), now = n
   }
   const missing = deals.filter(d => hasOnlyPreviewDescription(d) || pendingDescription(d));
   const candidates = deals.filter(d => carrierSupported(d.url) || publicSupported(d.url) && reviewablePublicCopy(d, now)
-    || allowDeliveryPage && isReviewedDeliveryMenu(d) && dueDescription(d, now) && !d.forceKeep && !d.campaignId && !d.isBusiness
-      && !d.isBusinessAdvertisement && !(d.liveEditedAt && !d.liveEditedFields?.length)
-      && !((d.editedInSlack || d.slackEditedAt || d.slackFormEditTs) && !d.slackEditedFields?.length)
-      && ![...(d.liveEditedFields || []), ...(d.slackEditedFields || [])].includes('description'));
+    || allowDeliveryPage && isReviewedDeliveryMenu(d) && dueDescription(d, now)
+      && editableSource(d) && !editedCopyFields(d).includes('description'));
   const selected = [...new Map(candidates.map(d => [d.url, d])).values()]
     .sort((a, b) => Number(dueDescription(b, now)) - Number(dueDescription(a, now))
       || (requireSameDay ? Number(b.category === 'essen') - Number(a.category === 'essen') : 0)

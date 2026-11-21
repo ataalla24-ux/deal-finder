@@ -48,7 +48,7 @@ export function matchesDeliveryOffer(deal, text, now = new Date()) {
   const spec = offers[deal.id];
   if (spec) return spec.benefit.test(text) && spec.terms.test(text);
   const title = normalize(deal.title), body = normalize(approvedDescription(deal)), card = normalize(text);
-  return card.startsWith(title + ' ') && card.slice(title.length + 1).includes(body);
+  return card.startsWith(title + ' ' + body);
 }
 export function extractDeliveryOffer(deal, html, finalUrl, now = new Date()) {
   if (!isReviewedDeliveryMenu(deal) || finalUrl !== deal.url || typeof html !== 'string' || Buffer.byteLength(html) > 4000000) return null;

@@ -394,3 +394,13 @@ test('unchanged delivery terms are not repeatedly sent to the editor after a vet
   await refresh(after,source.replace('durch Wolt','durch Wolt, einmal pro Konto'));
   assert.equal((await check(after)).report.ai.attempted,1);
 }));
+
+test('a field-specific title edit permits original coupon terms to be refreshed; unspecified historical edit remains protected', () => fixture(async ({root,put}) => {
+  const manual={...pending(),url,brand:'VAPIANO',title:'Persönlicher, redigierter Titel',liveEditedAt:now.toISOString(),liveEditedFields:['title']};
+  put('docs/deals.json',{deals:[manual]});
+  const calls=[];
+  const result=await refreshMaintenanceEvidence({root,now,fetchPage:async value=>{calls.push(value);return {html,finalUrl:value,status:200};}});
+  assert.deepEqual(calls,[url]); assert.equal(result.cache.entries[url].status,'verified');
+  put('docs/deals.json',{deals:[{...manual,liveEditedFields:[]}]});
+  await refreshMaintenanceEvidence({root,now:new Date(+now+2*86400000),fetchPage:()=>assert.fail('unspecified manual edit')});
+}));
