@@ -1,3 +1,4 @@
+import { curatedMerchantTask, extractMerchantOfferCandidates } from './merchant-offer-discovery.js';
 import { verifyOfficialFoodDeal } from './power-food-verification.js';
 import { verifyViennaFoodBenefit } from './vienna-food-benefits.js';
 import { verifyCarrierBenefit } from './carrier-benefits.js';
@@ -1087,9 +1088,16 @@ async function inspectUrlWithCache(url, cache, options) {
   }
   if (cache.has(url)) return cache.get(url);
   const inspector = options.inspectDealUrlHealth || inspectDealUrlHealth;
-  const health = await inspector(url, options);
-  cache.set(url, health);
-  return health;
+  const pending = Promise.resolve().then(() => inspector(url, options));
+  cache.set(url, pending);
+  try {
+    const health = await pending;
+    cache.set(url, health);
+    return health;
+  } catch (error) {
+    if (cache.get(url) === pending) cache.delete(url);
+    throw error;
+  }
 }
 
 function buildPublicValidationMeta(decision) {
@@ -1131,6 +1139,18 @@ async function validateDeal(deal, context) {
     : verifiedBenefit ? { finalUrl:url,dateHints:{},contentHints:{},...(verifiedBenefit.ok ? {ok:true,status:200} : {}) } : reviewedWithoutLink
     ? { reason: 'Community-Angebot ohne Link manuell freigegeben', dateHints: {}, contentHints: {} }
     : await inspectUrlWithCache(url, context.urlCache, context.urlOptions);
+  const curatedMerchant = deal.originSource === 'vienna-merchant-website'
+    && (curatedMerchantTask(url) || curatedMerchantTask(deal.evidence?.sourceUrl));
+  // Proof must come from this run's exact offer card on the reviewed merchant page.
+  // Neither a saved candidate nor a date elsewhere on the page confirms availability.
+  const merchantMatch = curatedMerchant && health.status === 200 && !health.invalid && !health.transientError
+    && health.finalUrl === url && health.checkedAt === now.toISOString()
+    && deal.evidence?.source === 'official-merchant-page' && deal.evidence.sourceUrl === url
+    && health.merchantOffers?.find(row => row.id === deal.id && row.brand === deal.brand
+      && row.title === deal.title && row.description === deal.description && row.address && row.address === deal.address
+      && row.evidence?.contentHash && row.evidence.contentHash === deal.evidence?.contentHash
+      && row.url === deal.url
+      && ['validOn', 'validFrom', 'validUntil'].every(field => !deal[field] || deal[field] === row[field]));
   const officialFood = verifiedBenefit || await verifyOfficialFoodDeal(deal, { now, cache: context.officialFoodCache, fetchPage: context.fetchOfficialFoodPage });
   if (officialFood?.ok) {
     // Restore extracted facts before checking and forwarding the candidate.
@@ -1147,7 +1167,7 @@ async function validateDeal(deal, context) {
   }
   // A live, exact merchant block supplies its own dates. Page-level dates may
   // refer to a different offer or the original creation of an evergreen page.
-  const evidenceHealth = officialFood?.ok ? { ...health, dateHints: {} } : health;
+  const evidenceHealth = officialFood?.ok || merchantMatch ? { ...health, dateHints: {} } : health;
   const excludedSource = getExcludedSourceMatch(deal, health);
   const socialPostDeal = isSocialPostDeal(deal);
   const selfSyndicatedSocialDeal = socialPostDeal && isSelfSyndicatedSocialDeal(deal, health);
@@ -1162,7 +1182,7 @@ async function validateDeal(deal, context) {
   const currentOriginal = currentOriginalOffer(deal, now);
   const publicationCandidates = getPublicationCandidates(deal, health, {
     freshnessSensitive,
-    ignoreUrlPublicationDate: sharedBenefitPageDeal || officialFood?.current === true,
+    ignoreUrlPublicationDate: sharedBenefitPageDeal || officialFood?.current === true || Boolean(merchantMatch),
     socialPost: socialPostDeal,
   });
   const couponPath = sparhamsterCouponRoundPath(url);
@@ -1192,8 +1212,8 @@ async function validateDeal(deal, context) {
       ? freshlyActiveAd || Boolean(currentOriginal) || reviewedOfficial?.ok || reviewedCommunity && !publicationCandidates.length && activeValidity
       : activeValidity,
     recurring: socialPostDeal ? false : recurring,
-    currentOfficialOffer: !socialPostDeal && !newsAggregatorDeal && deal.originSource === 'power-official-food'
-      && officialFood?.ok === true && officialFood.currentOfferVerification?.checkedAt === now.toISOString(),
+    currentOfficialOffer: !socialPostDeal && !newsAggregatorDeal && (Boolean(merchantMatch) || (deal.originSource === 'power-official-food'
+      && officialFood?.ok === true && officialFood.currentOfferVerification?.checkedAt === now.toISOString())),
     currentPublicVoucher: !socialPostDeal && !newsAggregatorDeal ? currentPublicVoucherEvidence(deal, health, now) : null,
     extendedMaxAgeDays: freshlyActiveAd ? 365 : currentOriginal ? 90 : reviewedOfficial?.ok ? 45 : context.extendedMaxAgeDays,
   });
@@ -1205,7 +1225,8 @@ async function validateDeal(deal, context) {
   let offer = getConcreteOfferDecision(deal, health);
   if (officialFood?.ok && offer.reason === 'kein konkretes Angebot erkennbar') offer = { concrete: true };
   const reasons = [];
-  if (deal.originSource === 'vienna-merchant-website' && !expiryCandidates.length && !recurring) {
+  if (curatedMerchant && !merchantMatch) reasons.push('Offizielle Händleraktion auf der aktuellen Angebotsseite nicht bestätigt');
+  if (deal.originSource === 'vienna-merchant-website' && !merchantMatch && !expiryCandidates.length && !recurring) {
     reasons.push('Aktionszeitraum auf Lokal-Website unklar');
   }
   if (couponRound && !roundMatchesDeal) reasons.push('Ablaufdatum passt nicht zur aktuellen Couponrunde der Quelle');
@@ -1326,7 +1347,7 @@ async function validateDeal(deal, context) {
     ...deal,
     url: url || deal.url,
     validity: buildPublicValidationMeta(decision),
-    ...(officialFood?.ok ? { officialFoodReverifiedAt: now.toISOString() } : {}),
+    ...(officialFood?.ok || merchantMatch ? { officialFoodReverifiedAt: now.toISOString() } : {}),
     ...(reviewedOfficial?.ok ? { officialSourceCorroboration: reviewedOfficial.proof } : {}),
   };
 
@@ -1487,6 +1508,10 @@ async function validateDealsForSlack(deals, options = {}) {
       now,
       timeoutMs,
       inspectDealUrlHealth: options.inspectDealUrlHealth,
+      readCurrentMerchantOffers(html, url) {
+        const task = curatedMerchantTask(url);
+        if (task) return extractMerchantOfferCandidates(html, task, now);
+      },
     },
   };
 

@@ -1,4 +1,5 @@
 import { prepareReviewedApprovalCopy } from './approval-reviewed-source-copy.js';
+import { curatedMerchantTask } from './merchant-offer-discovery.js';
 import { basicCopyHold, contradictedOfferPriceHold, prepareTwoStagePublication } from './approval-two-stage.js';
 import { captureMapEnrichmentInput, projectEnrichmentDeal } from './deal-enrichment-state.js';
 import { officialFoodOfferKey } from './power-food-sources.js';
@@ -821,7 +822,8 @@ async function validateApprovalCandidates(deals, options = {}) {
     return prepared;
   });
   const sourceLookup = mapOptions ? await findApprovalAddresses(candidates.filter(humanApproved), mapOptions) : null;
-  const officialSourceCopy = new Map(candidates.filter(deal => deal.originSource === 'power-official-food')
+  const officialSourceCopy = new Map(candidates.filter(deal => deal.originSource === 'power-official-food'
+    || deal.originSource === 'vienna-merchant-website' && curatedMerchantTask(deal.url, now))
     .map(deal => [deal.id, { title: deal.title, description: deal.description }]));
   candidates = candidates.map(deal => preparePublicationTitle(deal, { existingIds }));
   if (process.env.APPROVAL_SOURCE_COPY_REVIEW === '1' && (options.approvalModelRequest || process.env.OPENAI_API_KEY)) {

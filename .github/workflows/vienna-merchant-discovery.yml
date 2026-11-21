@@ -24,6 +24,7 @@ jobs:
         run: |
           node scripts/test-vienna-merchant-discovery.mjs
           node scripts/test-discovery-recall.mjs
+          node --test scripts/test-curated-merchant-approval.mjs
       - name: Refresh directory and rotate website discovery
         env:
           VIENNA_WEBSITE_BUDGET: '200'

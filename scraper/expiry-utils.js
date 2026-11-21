@@ -1751,6 +1751,8 @@ export async function inspectDealUrlHealth(url, options = {}) {
       };
     }
 
+    const merchantOffers = status === 200 && finalUrl === url
+      ? options.readCurrentMerchantOffers?.(html, url) : undefined;
     const contentHints = extractDealPageHints(html);
     const dateHints = extractTargetPageDateHints(html, { ...options, hostname, sourceUrl: finalUrl });
 
@@ -1760,6 +1762,7 @@ export async function inspectDealUrlHealth(url, options = {}) {
       finalUrl,
       contentHints,
       dateHints,
+      ...(merchantOffers ? { merchantOffers } : {}),
       approvalSourceEvidence: iamstudentEvidence || extractApprovalSourceEvidence(html, url, finalUrl),
       checkedAt: (options.now instanceof Date && Number.isFinite(+options.now) ? options.now : new Date()).toISOString(),
     };
