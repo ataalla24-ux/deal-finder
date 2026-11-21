@@ -1,44 +1,919 @@
 {
-  "generatedAt": "2026-11-21T07:38:07.819Z",
-  "status": "deferred",
-  "message": "No Graph hashtag source completed successfully; last-good output was preserved.",
+  "generatedAt": "2026-11-21T19:41:40.244Z",
+  "status": "degraded",
+  "message": "2 fresh, evidence-checked Graph hashtag deal(s) found; 0 recovered from media.",
   "hashtags": [
+    "wienfood",
     "essenwien",
-    "wienkaffee",
     "wienisst",
+    "wienkaffee",
     "wienergastro",
     "viennarestaurants",
     "viennafood",
-    "wienfoodie",
     "viennaeats",
-    "wienfood"
+    "wienfoodie"
   ],
-  "fetchedPosts": 0,
-  "totalDeals": 0,
+  "fetchedPosts": 27,
+  "cachedGraphPosts": 0,
+  "uniquePosts": 26,
+  "totalDeals": 2,
+  "rescueEligible": 0,
+  "rescuedDeals": 0,
+  "mediaEvidence": {
+    "status": "not-needed",
+    "eligible": 0,
+    "selected": 0,
+    "cached": 0,
+    "analyzed": 0,
+    "withOcrText": 0,
+    "withVisionImages": 0,
+    "aiCalls": 0,
+    "visionCalls": 0,
+    "aiAccepted": 0,
+    "inputTokens": 0,
+    "outputTokens": 0,
+    "totalTokens": 0,
+    "errors": [],
+    "warnings": []
+  },
+  "requestBudget": {
+    "requests": 30,
+    "maxRequests": 30,
+    "highestUsagePercent": 16,
+    "stopped": true,
+    "reason": "request-budget"
+  },
+  "budgetDeferred": true,
+  "sharedQuota": {
+    "limitPerHour": 433,
+    "usageThreshold": 95,
+    "requests": 30,
+    "reserved": 30,
+    "stopped": false,
+    "reason": "",
+    "highestUsagePercent": 16,
+    "waitedMs": 0,
+    "pacingMs": 47116,
+    "retryAt": "",
+    "adaptiveSafetyCeiling": 190,
+    "adaptiveIncreases": 0,
+    "storageFailure": null,
+    "stopKind": ""
+  },
   "sources": [
     {
+      "hashtag": "wienfood",
+      "status": "ok",
+      "coverage": {
+        "pages": 3,
+        "uniquePosts": 14,
+        "newPosts": 12,
+        "stopReason": "page-limit",
+        "incomplete": true,
+        "resumed": false
+      },
+      "fetched": 14,
+      "accepted": 2,
+      "mediaFieldMode": "full-media-with-owner",
+      "mediaLimit": 25
+    },
+    {
       "hashtag": "essenwien",
+      "status": "ok",
+      "coverage": {
+        "pages": 1,
+        "uniquePosts": 0,
+        "newPosts": 0,
+        "stopReason": "exhausted",
+        "incomplete": false,
+        "resumed": false
+      },
+      "fetched": 0,
+      "accepted": 0,
+      "mediaFieldMode": "full-media-with-owner",
+      "mediaLimit": 25
+    },
+    {
+      "hashtag": "wienisst",
+      "status": "ok",
+      "coverage": {
+        "pages": 3,
+        "uniquePosts": 7,
+        "newPosts": 1,
+        "stopReason": "exhausted",
+        "incomplete": false,
+        "resumed": true
+      },
+      "fetched": 7,
+      "accepted": 0,
+      "mediaFieldMode": "full-media-with-owner",
+      "mediaLimit": 25
+    },
+    {
+      "hashtag": "wienkaffee",
+      "status": "ok",
+      "coverage": {
+        "pages": 1,
+        "uniquePosts": 1,
+        "newPosts": 1,
+        "stopReason": "exhausted",
+        "incomplete": false,
+        "resumed": false
+      },
+      "fetched": 1,
+      "accepted": 0,
+      "mediaFieldMode": "basic",
+      "mediaLimit": 25
+    },
+    {
+      "hashtag": "wienergastro",
+      "status": "ok",
+      "coverage": {
+        "pages": 1,
+        "uniquePosts": 0,
+        "newPosts": 0,
+        "stopReason": "exhausted",
+        "incomplete": false,
+        "resumed": false
+      },
+      "fetched": 0,
+      "accepted": 0,
+      "mediaFieldMode": "full-media-with-owner",
+      "mediaLimit": 25
+    },
+    {
+      "hashtag": "viennarestaurants",
+      "status": "ok",
+      "coverage": {
+        "pages": 3,
+        "uniquePosts": 5,
+        "newPosts": 0,
+        "stopReason": "exhausted",
+        "incomplete": false,
+        "resumed": false
+      },
+      "fetched": 5,
+      "accepted": 0,
+      "mediaFieldMode": "full-media-with-owner",
+      "mediaLimit": 25
+    },
+    {
+      "hashtag": "viennafood",
       "status": "deferred",
       "fetched": 0,
       "accepted": 0,
-      "error": "Instagram shared quota paused: rolling-hour budget exhausted"
+      "error": "Instagram scan paused: request-budget"
+    },
+    {
+      "hashtag": "viennaeats",
+      "status": "deferred",
+      "fetched": 0,
+      "accepted": 0,
+      "error": "Instagram scan paused: request-budget"
+    },
+    {
+      "hashtag": "wienfoodie",
+      "status": "deferred",
+      "fetched": 0,
+      "accepted": 0,
+      "error": "Instagram scan paused: request-budget"
     }
   ],
-  "rejectionReasons": {},
-  "budgetDeferred": true,
-  "sharedQuota": {
-    "limitPerHour": 285,
-    "usageThreshold": 95,
-    "requests": 0,
-    "reserved": 0,
-    "stopped": true,
-    "reason": "Instagram shared quota paused: rolling-hour budget exhausted",
-    "highestUsagePercent": 0,
-    "waitedMs": 0,
-    "pacingMs": 0,
-    "retryAt": "2026-11-21T07:44:36.690Z",
-    "adaptiveSafetyCeiling": 190,
-    "adaptiveIncreases": 0,
-    "storageFailure": null
-  }
+  "rejectionReasons": {
+    "excluded-promotion-type": 1,
+    "no-concrete-offer": 21,
+    "offer-expired": 1,
+    "alcohol-offer": 1
+  },
+  "candidateAudit": [
+    {
+      "id": "17920098903539487",
+      "status": "rejected",
+      "url": "https://www.instagram.com/reel/DgA4jrSRmrn/",
+      "title": "🪿🍂 Die Ganslzeit im Klee am Hanslteich endet morgen! Wir hoffen, ihr habt die vergangenen Wochen genauso genossen wie wir! ❤️ Jetzt seid ihr gefragt: Wie hat euch unser Gansl ges",
+      "text": "🪿🍂 Die Ganslzeit im Klee am Hanslteich endet morgen! Wir hoffen, ihr habt die vergangenen Wochen genauso genossen wie wir! ❤️ Jetzt seid ihr gefragt: Wie hat euch unser Gansl geschmeckt? Wir freuen uns auf euer Feedback! 🥰 #kleeamhanslteich #klee #wienisst #wiengenießt #efeucontent",
+      "ownerUsername": "",
+      "ownerRole": "",
+      "scoutUsername": "",
+      "merchantUsername": "",
+      "pubDate": "2026-11-21T18:34:36+0000",
+      "rejectionReason": "no-concrete-offer",
+      "qualityScore": 0,
+      "viennaVerified": false,
+      "mediaEvidence": {
+        "analyzedAt": "",
+        "ocrText": "",
+        "assetCount": 0,
+        "imageCount": 0,
+        "videoFrameCount": 0,
+        "downloadRetries": 0,
+        "errors": [],
+        "ai": null
+      },
+      "hashtags": [
+        "wienisst"
+      ]
+    },
+    {
+      "id": "17924314944450455",
+      "status": "rejected",
+      "url": "https://www.instagram.com/reel/DgAyimUh7ZO/",
+      "title": "🎉 GEWINNSPIEL – Brunch für 2 im Adlerhof Wien! 🥞🍰 Gemeinsam mit adlerhof_wien verlosen wir ein Frühstück für 2 Personen inklusive je einem Frühstücksgericht, einem Getränk und e",
+      "text": "🎉 GEWINNSPIEL – Brunch für 2 im Adlerhof Wien! 🥞🍰 Gemeinsam mit adlerhof_wien verlosen wir ein Frühstück für 2 Personen inklusive je einem Frühstücksgericht, einem Getränk und einem Stück aus der hauseigenen Patisserie! 😍 So machst du mit: • Folge tastytrails.vienna & adlerhof_wien • Like diesen Beitrag ❤️ • Markiere deine Begleitung in den Kommentaren. 📅 Teilnahmeschluss: 05.12.2026, 00:00 Uhr Die Auslosung erfolgt zufällig. Verständigung ausschließlich per DM von tastytrails.vienna. ⚠️ Keine Verbindung zu Instagram. Rechtsweg ausgeschlossen. Keine Barablöse oder Übertragung des Gewinns. ⸻ 🤯 Wiens legendärer Instagram-Brunch-Spot! Der Adlerhof begeistert mit ikonischer Wendeltreppe, Retro-Vibes, ausgefallenen Frühstückskreationen und einer hauseigenen Patisserie mit kreativen Desserts. 🍰✨ 🍽️ Das haben wir probiert: 🥞 Kaviar Pancake mit Räucherlachs & Lachskaviar – 14 € 🍳 Getrüffelte Eierspeise mit Bauernbrot – 13,50 € 🥪 Monte Cristo Sandwich mit Schinken, Bergkäse & Preiselbeer-Chutney – 10,50 € 🍫 Vegan Sacher French Toast mit Marillenkompott & Schokofudge – 12,50 € 🌿 Schnittlauch-Brot – 5 € ☕ Kaffee Verkehrt mit Salzkaramell – 6 € ☕ Café Bonbon mit Kondensmilch – 5 € 🍰 Unser Highlight: die wunderschöne, kreative und richtig leckere Patisserie! 📍 Adlerhof | Burggasse 51, 1070 Wien ➕ Folgt uns für außergewöhnliche Restaurants, die besten Brunch-Spots und kulinarische Geheimtipps in Wien! #tastytrails #Adlerhof #WienFood #BrunchWien #WienRestaurants",
+      "ownerUsername": "",
+      "ownerRole": "",
+      "scoutUsername": "",
+      "merchantUsername": "",
+      "pubDate": "2026-11-21T17:40:08+0000",
+      "rejectionReason": "excluded-promotion-type",
+      "qualityScore": 0,
+      "viennaVerified": false,
+      "mediaEvidence": {
+        "analyzedAt": "",
+        "ocrText": "",
+        "assetCount": 0,
+        "imageCount": 0,
+        "videoFrameCount": 0,
+        "downloadRetries": 0,
+        "errors": [],
+        "ai": null
+      },
+      "hashtags": [
+        "wienfood"
+      ]
+    },
+    {
+      "id": "18389769367236952",
+      "status": "rejected",
+      "url": "https://www.instagram.com/p/DgAvWyYjNbt/",
+      "title": "🌱 Vegan oder nicht, bei uns ist jede Bowl für alle da. schmecken es muss ! 🥩 Weiderind, Kleeschwein oder sous-vide Bio-Hähnchen 🥗 Alle Gerichte gibt es auch vegan, vieles gluten",
+      "text": "🌱 Vegan oder nicht, bei uns ist jede Bowl für alle da. schmecken es muss ! 🥩 Weiderind, Kleeschwein oder sous-vide Bio-Hähnchen 🥗 Alle Gerichte gibt es auch vegan, vieles glutenfrei. 📍 Pfauengasse 8, 1060 Wien, mitten in Mariahilf 🕛 Mo bis Sa, 12:00 bis 21:00 💬 Kommentier uns: Welche Bowl wählst du, vegan oder mit Fleisch? 🛸 Bestellen bei unseren Partnern: Wolt: wolt.com/de/aut/vienna/restaurant/spacebowls-bio-streetfood Foodora: foodora.at/restaurant/kq7w/spacebowls Lieferando: lieferando.at/speisekarte/spacebowls ✨ Sonne. Food. Good Vibes. Mehr brauchst du nicht. May the taste be with you. #spacebowls #spacebowlsvienna #spacebowlsmariahilf #mutterschiff #maythetastebewithyou #hotbowl #bowlwien #lunchwien #mittagspause #mariahilf #wien #wien1060 #1060wien #vienna #wienfood #viennafood #streetfoodwien #bio #biowien #bioessen #vegan #veganwien #glutenfrei #glutenfree #handgemacht #streetfood #samstag #weiderind",
+      "ownerUsername": "",
+      "ownerRole": "",
+      "scoutUsername": "",
+      "merchantUsername": "",
+      "pubDate": "2026-11-21T17:13:15+0000",
+      "rejectionReason": "no-concrete-offer",
+      "qualityScore": 0,
+      "viennaVerified": false,
+      "mediaEvidence": {
+        "analyzedAt": "",
+        "ocrText": "",
+        "assetCount": 0,
+        "imageCount": 0,
+        "videoFrameCount": 0,
+        "downloadRetries": 0,
+        "errors": [],
+        "ai": null
+      },
+      "hashtags": [
+        "wienfood"
+      ]
+    },
+    {
+      "id": "18217452685362661",
+      "status": "rejected",
+      "url": "https://www.instagram.com/reel/DgAuCOyxwPc/",
+      "title": "Willkommen im Stammhaus in Wien-Liesing! 🌿✨ Ob ein entspannter Drink an der Bar oder ein gemütliches Essen im lichtdurchfluteten Wintergarten – bei uns genießt du frische asiatisc",
+      "text": "Willkommen im Stammhaus in Wien-Liesing! 🌿✨ Ob ein entspannter Drink an der Bar oder ein gemütliches Essen im lichtdurchfluteten Wintergarten – bei uns genießt du frische asiatische Küche in einzigartigem Wohlfühlambiente. Komm vorbei und lass dich verwöhnen: Großes Buffet, Live-Teppanyaki Grill & frisches Sushi warten täglich auf dich! 📍 Breitenfurter Straße 472, 1230 Wien 🕚 Täglich geöffnet von 11:00 bis 22:00 Uhr 📞 Tischreservierung: 01 / 888 4257 | online auf stammhaus1230.at Wir freuen uns auf deinen Besuch! 🥢 #stammhaus1230 #wien1230 #liesing #restaurantwien #wienfood #asiabuffet #teppanyakiwien #wienkulinarisch #wintergarten #gemütlichinwien",
+      "ownerUsername": "",
+      "ownerRole": "",
+      "scoutUsername": "",
+      "merchantUsername": "",
+      "pubDate": "2026-11-21T17:02:14+0000",
+      "rejectionReason": "no-concrete-offer",
+      "qualityScore": 0,
+      "viennaVerified": false,
+      "mediaEvidence": {
+        "analyzedAt": "",
+        "ocrText": "",
+        "assetCount": 0,
+        "imageCount": 0,
+        "videoFrameCount": 0,
+        "downloadRetries": 0,
+        "errors": [],
+        "ai": null
+      },
+      "hashtags": [
+        "wienfood"
+      ]
+    },
+    {
+      "id": "18649162705017244",
+      "status": "rejected",
+      "url": "https://www.instagram.com/reel/DgAkBweRTD_/",
+      "title": "No tricks, just treats. 🎃🍔🔥 Halloween schmeckt bei uns einfach besser! 👻🖤 Komm vorbei & gönn dir deinen nächsten Burger! 😈 📍 Kleine Stadtgutgasse 10, 1020 Wien 🕒 Mo – So | ",
+      "text": "No tricks, just treats. 🎃🍔🔥 Halloween schmeckt bei uns einfach besser! 👻🖤 Komm vorbei & gönn dir deinen nächsten Burger! 😈 📍 Kleine Stadtgutgasse 10, 1020 Wien 🕒 Mo – So | 11:00 – 00:00 #burger #wienfood #smashburger #halloween",
+      "ownerUsername": "",
+      "ownerRole": "",
+      "scoutUsername": "",
+      "merchantUsername": "",
+      "pubDate": "2026-11-21T15:35:06+0000",
+      "rejectionReason": "no-concrete-offer",
+      "qualityScore": 0,
+      "viennaVerified": false,
+      "mediaEvidence": {
+        "analyzedAt": "",
+        "ocrText": "",
+        "assetCount": 0,
+        "imageCount": 0,
+        "videoFrameCount": 0,
+        "downloadRetries": 0,
+        "errors": [],
+        "ai": null
+      },
+      "hashtags": [
+        "wienfood"
+      ]
+    },
+    {
+      "id": "17959453881280751",
+      "status": "rejected",
+      "url": "https://www.instagram.com/reel/DgAg8kExeyk/",
+      "title": "#wien #kurdistan #wienfood #kochen #bestellung لای ئێمە تامی تەواوی خواردنە کوردیەکان و خواردنی وڵاتە و کلتورە جیاوازەکانیتر بکە😊بۆ داواکردنی ئۆردەرەکانتان پەیوەندیمان پێوە بکەن☺️",
+      "text": "#wien #kurdistan #wienfood #kochen #bestellung لای ئێمە تامی تەواوی خواردنە کوردیەکان و خواردنی وڵاتە و کلتورە جیاوازەکانیتر بکە😊بۆ داواکردنی ئۆردەرەکانتان پەیوەندیمان پێوە بکەن☺️ Probieren Sie die kurdische Küche und Gerichte aus verschiedenen Ländern und Kulturen 😊 Kontaktieren Sie uns, um Ihre Bestellung aufzugeben ☺️ طعم تمام غذاهای کردی و غذاهای کشورها و فرهنگ‌های مختلف را بچشید😊برای ثبت سفارشات خود با ما تماس بگیرید☺️ Taste all Kurdish food and food of different countries and cultures😊Contact us to order your orders☺️ تذوق جميع أنواع المأكولات الكردية ومأكولات من مختلف البلدان والثقافات 😊 تواصل معنا لطلب طلباتك ☺️",
+      "ownerUsername": "",
+      "ownerRole": "",
+      "scoutUsername": "",
+      "merchantUsername": "",
+      "pubDate": "2026-11-21T15:08:21+0000",
+      "rejectionReason": "no-concrete-offer",
+      "qualityScore": 0,
+      "viennaVerified": false,
+      "mediaEvidence": {
+        "analyzedAt": "",
+        "ocrText": "",
+        "assetCount": 0,
+        "imageCount": 0,
+        "videoFrameCount": 0,
+        "downloadRetries": 0,
+        "errors": [],
+        "ai": null
+      },
+      "hashtags": [
+        "wienfood"
+      ]
+    },
+    {
+      "id": "18472252645191820",
+      "status": "collector-accepted",
+      "url": "https://www.instagram.com/reel/DgAgCVQOtqu/",
+      "title": "10% Rabatt bei Abholung über unseren Online-Shop FoodVienna 1220Wien 1210Wien Tik",
+      "text": "Frische Pasta. Täglich handgemacht. Qualität, die man schmeckt 💙 📍 ADIM’S Pasta & Pizza Tokiostraße 11, 1220 Wien 🚗 Lieferung in 1220 & 1210 Wien 🛍️ 10% Rabatt bei Abholung über unseren Online-Shop #wienfood #FrischePasta #HandgemachtePasta #PastaWien #pasta FoodVienna 1220Wien 1210Wien TikTokFood PastaLove",
+      "ownerUsername": "",
+      "ownerRole": "unknown",
+      "scoutUsername": "",
+      "merchantUsername": "shop",
+      "pubDate": "2026-11-21T15:00:48+0000",
+      "rejectionReason": "",
+      "qualityScore": 88,
+      "viennaVerified": true,
+      "mediaEvidence": {
+        "analyzedAt": "",
+        "ocrText": "",
+        "assetCount": 0,
+        "imageCount": 0,
+        "videoFrameCount": 0,
+        "downloadRetries": 0,
+        "errors": [],
+        "ai": null
+      },
+      "hashtags": [
+        "wienfood"
+      ]
+    },
+    {
+      "id": "17920411518535770",
+      "status": "rejected",
+      "url": "https://www.instagram.com/reel/DgAcQ8RMTVB/",
+      "title": "Türkische Spezialitäten, frisch zubereitet und voller Geschmack. 🇹🇷❤️ Genieße ein Stück Tradition bei Müldür! #türkischeküche #wienisst #müldür",
+      "text": "Türkische Spezialitäten, frisch zubereitet und voller Geschmack. 🇹🇷❤️ Genieße ein Stück Tradition bei Müldür! #türkischeküche #wienisst #müldür",
+      "ownerUsername": "",
+      "ownerRole": "",
+      "scoutUsername": "",
+      "merchantUsername": "",
+      "pubDate": "2026-11-21T14:26:43+0000",
+      "rejectionReason": "no-concrete-offer",
+      "qualityScore": 0,
+      "viennaVerified": false,
+      "mediaEvidence": {
+        "analyzedAt": "",
+        "ocrText": "",
+        "assetCount": 0,
+        "imageCount": 0,
+        "videoFrameCount": 0,
+        "downloadRetries": 0,
+        "errors": [],
+        "ai": null
+      },
+      "hashtags": [
+        "wienisst"
+      ]
+    },
+    {
+      "id": "17911403013325224",
+      "status": "rejected",
+      "url": "https://www.instagram.com/p/Df_-dirCMg4/",
+      "title": "Eight new places to eat and drink in Vienna, all opened this fall. Three of them are about steak, and one doubles as a small gallery → Zur Alten Liebe ( zuraltenliebe ), French bis",
+      "text": "Eight new places to eat and drink in Vienna, all opened this fall. Three of them are about steak, and one doubles as a small gallery → Zur Alten Liebe ( zuraltenliebe ), French bistro food in the old Funkhaus foyer: chicken fricassée, beef tartare. Open since November 4. Argentinierstraße 30A, 1040. Nuje ( nuje.wien ), trattoria meets Beisl by Gaetano Brancato of Il Rione, with ravioli filled with goulash and lunch from €11.90. Open since October 22. Märzstraße 138, 1140. Café Ziege ( cafe_ziege ) sits in a former antiques shop, from the founder of a Naschmarkt coffee bike: own roast, fresh orange juice, homemade cake. Lerchenfelder Straße 108, 1080. LEO am Platz ( leo.am.platz ) took over the old Leopold: brunch by day, comfort food by Martin Löw at night, with murals and light art on the walls. Open since October 15. Große Pfarrgasse 11, 1020. Inigo Asador ( inigoasador.vienna ) cooks Basque-style: large aged cuts over open fire, shared at the table. Johannesgasse 23, 1010 🔥 Mama & der Bulle ( mamaundderbulle ) opened its second location on November 13 in the former Santos: flat iron for €19.90, and a free Brickerl from the ice cream machine 🍦 Siebensterngasse 14, 1070. Māketo ( maketo.vienna ), café, kitchen and Asian grocery from the Liu family, with six living trees and benches made from Vienna’s felled city trees. Open since November 3. Währinger Straße 126, 1180. SOHL ( sohl.restaurant ) replaced the Gasthaus Artner: flat iron from €19, Chateaubriand flambéed with bourbon at the table. Open since November 5. Floragasse 6, 1040. Images: © The Guardians, Yasemin Gezgin | © Zur Alten Liebe | © Nuje | © Café Ziege | © LEO am Platz | © Inigo Asador | © Mama & der Bulle | © James Harris | © D Agency, Hammerer | © SOHL All images remain the property of their respectiv",
+      "ownerUsername": "",
+      "ownerRole": "",
+      "scoutUsername": "",
+      "merchantUsername": "",
+      "pubDate": "2026-11-21T14:05:02+0000",
+      "rejectionReason": "offer-expired",
+      "qualityScore": 0,
+      "viennaVerified": false,
+      "mediaEvidence": {
+        "analyzedAt": "",
+        "ocrText": "",
+        "assetCount": 0,
+        "imageCount": 0,
+        "videoFrameCount": 0,
+        "downloadRetries": 0,
+        "errors": [],
+        "ai": null
+      },
+      "hashtags": [
+        "wienisst",
+        "viennarestaurants"
+      ]
+    },
+    {
+      "id": "17956370598344176",
+      "status": "collector-accepted",
+      "url": "https://www.instagram.com/reel/DgATgxgNNlu/",
+      "title": "30 % RABATT",
+      "text": "🎉 NEUERÖFFNUNG IN WIEN – 30 % RABATT! 🎉 🍣 Frisches Sushi, kreative Special Rolls, knusprige Ente, leckeres Korean Chicken und viele weitere asiatische Köstlichkeiten! 🥢✨ Entdeckt die Vielfalt der asiatischen Küche bei TINMO – frisch, lecker und mit Liebe zubereitet! ❤️ 🔥 Zur Neueröffnung bekommt ihr 30 % Rabatt auf alle Speisen! ⏰ Nur noch bis 29. November 2026! Ausgenommen sind Getränke und Premium-Kuchen. 📍 TINMO Sushi & Asian Cuisine Marc-Aurel-Straße 2a, 1010 Wien Kommt vorbei und genießt eure Lieblingsgerichte zum Aktionspreis! 😍🥢 #TINMO #TINMOWien #NeueröffnungWien #WienEssen #WienFood SushiWien AsianFoodVienna WienRestaurant 1010Wien",
+      "ownerUsername": "",
+      "ownerRole": "unknown",
+      "scoutUsername": "",
+      "merchantUsername": "1010wien",
+      "pubDate": "2026-11-21T13:10:34+0000",
+      "rejectionReason": "",
+      "qualityScore": 88,
+      "viennaVerified": true,
+      "mediaEvidence": {
+        "analyzedAt": "",
+        "ocrText": "",
+        "assetCount": 0,
+        "imageCount": 0,
+        "videoFrameCount": 0,
+        "downloadRetries": 0,
+        "errors": [],
+        "ai": null
+      },
+      "hashtags": [
+        "wienfood"
+      ]
+    },
+    {
+      "id": "18445359790178196",
+      "status": "rejected",
+      "url": "https://www.instagram.com/reel/DgAR0bDIPhj/",
+      "title": "Brooo, diese Mac’n’cheese Combo ist einfach krank! 🔥😭 Crispy Hot Chicken 🍗 + cremige Mac’n’Cheese 🧀 = ABSOLUTER GAMECHANGER! 🤤💯 Ein Bissen und du bist süchtig! 🥵🔥 Markier d",
+      "text": "Brooo, diese Mac’n’cheese Combo ist einfach krank! 🔥😭 Crispy Hot Chicken 🍗 + cremige Mac’n’Cheese 🧀 = ABSOLUTER GAMECHANGER! 🤤💯 Ein Bissen und du bist süchtig! 🥵🔥 Markier deinen Bro, der das unbedingt testen muss! 👀👇 📍 Chickenplus Wien #Chickenplus #MacNCheese #HotChicken #FoodTok #WienFood CrispyChicken FoodieVienna FYP",
+      "ownerUsername": "",
+      "ownerRole": "",
+      "scoutUsername": "",
+      "merchantUsername": "",
+      "pubDate": "2026-11-21T12:56:20+0000",
+      "rejectionReason": "no-concrete-offer",
+      "qualityScore": 0,
+      "viennaVerified": false,
+      "mediaEvidence": {
+        "analyzedAt": "",
+        "ocrText": "",
+        "assetCount": 0,
+        "imageCount": 0,
+        "videoFrameCount": 0,
+        "downloadRetries": 0,
+        "errors": [],
+        "ai": null
+      },
+      "hashtags": [
+        "wienfood"
+      ]
+    },
+    {
+      "id": "18128822491919820",
+      "status": "rejected",
+      "url": "https://www.instagram.com/p/DgAQPcCgG00/",
+      "title": "Time to dip 🤩 📍 Barnabitengasse 1, 1060 Wien 🕒 Mo-So 11:00-22:00 #Koreanfriedchicken #ViennaFoodie #ViennaEats #ViennaRestaurants",
+      "text": "Time to dip 🤩 📍 Barnabitengasse 1, 1060 Wien 🕒 Mo-So 11:00-22:00 #Koreanfriedchicken #ViennaFoodie #ViennaEats #ViennaRestaurants",
+      "ownerUsername": "",
+      "ownerRole": "",
+      "scoutUsername": "",
+      "merchantUsername": "",
+      "pubDate": "2026-11-21T12:41:42+0000",
+      "rejectionReason": "no-concrete-offer",
+      "qualityScore": 0,
+      "viennaVerified": false,
+      "mediaEvidence": {
+        "analyzedAt": "",
+        "ocrText": "",
+        "assetCount": 0,
+        "imageCount": 0,
+        "videoFrameCount": 0,
+        "downloadRetries": 0,
+        "errors": [],
+        "ai": null
+      },
+      "hashtags": [
+        "viennarestaurants"
+      ]
+    },
+    {
+      "id": "18220227235360436",
+      "status": "rejected",
+      "url": "https://www.instagram.com/reel/DgAO3PQOzi2/",
+      "title": "We visited a couple of coffee shops on our coffee day in Vienna. Save it as an inspiration for your next trip. #viennacoffee #specialtycoffee #wienkaffee #coffeeshopsvienna",
+      "text": "We visited a couple of coffee shops on our coffee day in Vienna. Save it as an inspiration for your next trip. #viennacoffee #specialtycoffee #wienkaffee #coffeeshopsvienna",
+      "ownerUsername": "",
+      "ownerRole": "",
+      "scoutUsername": "",
+      "merchantUsername": "",
+      "pubDate": "2026-11-21T12:31:25+0000",
+      "rejectionReason": "no-concrete-offer",
+      "qualityScore": 0,
+      "viennaVerified": false,
+      "mediaEvidence": {
+        "analyzedAt": "",
+        "ocrText": "",
+        "assetCount": 0,
+        "imageCount": 0,
+        "videoFrameCount": 0,
+        "downloadRetries": 0,
+        "errors": [],
+        "ai": null
+      },
+      "hashtags": [
+        "wienkaffee"
+      ]
+    },
+    {
+      "id": "17902760100679452",
+      "status": "rejected",
+      "url": "https://www.instagram.com/p/DgAMAqVHTaQ/",
+      "title": "Polpo, wie er sein soll: zart, lauwarm, mit Tomate, Kartoffel und einem Hauch Basilikum. 🐙 Kein Schnickschnack, nur gute Zutaten und jemand, der weiß, wann Schluss ist. Insalata d",
+      "text": "Polpo, wie er sein soll: zart, lauwarm, mit Tomate, Kartoffel und einem Hauch Basilikum. 🐙 Kein Schnickschnack, nur gute Zutaten und jemand, der weiß, wann Schluss ist. Insalata di polpo bei La Ruffa. Ein Teller Süditalien, mitten in Wien. 📍 La Ruffa Vienna 🍷 Tisch reservieren: Link in Bio #laruffa #laruffavienna #polpo #insalatadipolpo #cucinaitaliana #antipasti #italienerwien #wienisst #viennafood #wienfoodguide",
+      "ownerUsername": "",
+      "ownerRole": "",
+      "scoutUsername": "",
+      "merchantUsername": "",
+      "pubDate": "2026-11-21T12:04:20+0000",
+      "rejectionReason": "no-concrete-offer",
+      "qualityScore": 0,
+      "viennaVerified": false,
+      "mediaEvidence": {
+        "analyzedAt": "",
+        "ocrText": "",
+        "assetCount": 0,
+        "imageCount": 0,
+        "videoFrameCount": 0,
+        "downloadRetries": 0,
+        "errors": [],
+        "ai": null
+      },
+      "hashtags": [
+        "wienisst"
+      ]
+    },
+    {
+      "id": "17979291444139410",
+      "status": "rejected",
+      "url": "https://www.instagram.com/reel/DgAFxrYN3Qq/",
+      "title": "Hernals Kebap – Falafel Teller Knusprige Falafel, frische Zutaten und köstliche Beilagen – alles auf einem Teller! Ein Genuss für alle Falafel-Liebhaber. Schon probiert? #HernalsKe",
+      "text": "Hernals Kebap – Falafel Teller Knusprige Falafel, frische Zutaten und köstliche Beilagen – alles auf einem Teller! Ein Genuss für alle Falafel-Liebhaber. Schon probiert? #HernalsKebap #FalafelTeller #FalafelLovers #WienFood #FoodLovers",
+      "ownerUsername": "",
+      "ownerRole": "",
+      "scoutUsername": "",
+      "merchantUsername": "",
+      "pubDate": "2026-11-21T11:10:41+0000",
+      "rejectionReason": "no-concrete-offer",
+      "qualityScore": 0,
+      "viennaVerified": false,
+      "mediaEvidence": {
+        "analyzedAt": "",
+        "ocrText": "",
+        "assetCount": 0,
+        "imageCount": 0,
+        "videoFrameCount": 0,
+        "downloadRetries": 0,
+        "errors": [],
+        "ai": null
+      },
+      "hashtags": [
+        "wienfood"
+      ]
+    },
+    {
+      "id": "18133589125842089",
+      "status": "rejected",
+      "url": "https://www.instagram.com/p/DgAFF-xjeM1/",
+      "title": "Halbe Sachen machen wir nur so. 🍔 Einmal durchgeschnitten, damit du siehst, was dich erwartet: saftiges Patty, Schwammerl, Röstzwiebeln. Kein Filter, kein Schmäh. Die zweite Hälft",
+      "text": "Halbe Sachen machen wir nur so. 🍔 Einmal durchgeschnitten, damit du siehst, was dich erwartet: saftiges Patty, Schwammerl, Röstzwiebeln. Kein Filter, kein Schmäh. Die zweite Hälfte teilen? Kannst du. Musst du aber nicht. 📍 Rinderwahn Wien 🥡 Auch zum Mitnehmen: Link in Bio #rinderwahn #burgerwien #wienisst #bestburgervienna #burgerlove",
+      "ownerUsername": "",
+      "ownerRole": "",
+      "scoutUsername": "",
+      "merchantUsername": "",
+      "pubDate": "2026-11-21T11:03:52+0000",
+      "rejectionReason": "no-concrete-offer",
+      "qualityScore": 0,
+      "viennaVerified": false,
+      "mediaEvidence": {
+        "analyzedAt": "",
+        "ocrText": "",
+        "assetCount": 0,
+        "imageCount": 0,
+        "videoFrameCount": 0,
+        "downloadRetries": 0,
+        "errors": [],
+        "ai": null
+      },
+      "hashtags": [
+        "wienisst"
+      ]
+    },
+    {
+      "id": "18439505020181610",
+      "status": "rejected",
+      "url": "https://www.instagram.com/p/Df_-51wiLmP/",
+      "title": "🌱 Saturday Bowl: Vegan oder mit Fleisch, du entscheidest. 🥩 Weiderind, Kleeschwein oder sous-vide Bio-Hähnchen 🥗 Alle Gerichte gibt es auch vegan, vieles glutenfrei. 📍 Pfauenga",
+      "text": "🌱 Saturday Bowl: Vegan oder mit Fleisch, du entscheidest. 🥩 Weiderind, Kleeschwein oder sous-vide Bio-Hähnchen 🥗 Alle Gerichte gibt es auch vegan, vieles glutenfrei. 📍 Pfauengasse 8, 1060 Wien, mitten in Mariahilf 🕛 Mo bis Sa, 12:00 bis 21:00 💬 Kommentier uns: Vegan oder mit Fleisch? Schreib's in die Kommentare. 🛸 Bestellen bei unseren Partnern: Wolt: wolt.com/de/aut/vienna/restaurant/spacebowls-bio-streetfood Foodora: foodora.at/restaurant/kq7w/spacebowls Lieferando: lieferando.at/speisekarte/spacebowls ✨ Sonne. Food. Good Vibes. Mehr brauchst du nicht. May the taste be with you. #spacebowls #spacebowlsvienna #spacebowlsmariahilf #mutterschiff #maythetastebewithyou #hotbowl #bowlwien #lunchwien #mittagspause #mariahilf #wien #wien1060 #1060wien #vienna #wienfood #viennafood #streetfoodwien #bio #biowien #bioessen #vegan #veganwien #glutenfrei #glutenfree #handgemacht #streetfood #samstag #weiderind #wochenendefood #saturdaylunch",
+      "ownerUsername": "",
+      "ownerRole": "",
+      "scoutUsername": "",
+      "merchantUsername": "",
+      "pubDate": "2026-11-21T10:09:57+0000",
+      "rejectionReason": "no-concrete-offer",
+      "qualityScore": 0,
+      "viennaVerified": false,
+      "mediaEvidence": {
+        "analyzedAt": "",
+        "ocrText": "",
+        "assetCount": 0,
+        "imageCount": 0,
+        "videoFrameCount": 0,
+        "downloadRetries": 0,
+        "errors": [],
+        "ai": null
+      },
+      "hashtags": [
+        "wienfood"
+      ]
+    },
+    {
+      "id": "18360553450170624",
+      "status": "rejected",
+      "url": "https://www.instagram.com/reel/Df_86B-RkWf/",
+      "title": "New spot alert for your next night out 🍸 Luma just opened right by the Danube: food, cocktails and a lounge vibe made for long catch-ups with friends. 📍 Kafkasteg 91, 1020 Vienna",
+      "text": "New spot alert for your next night out 🍸 Luma just opened right by the Danube: food, cocktails and a lounge vibe made for long catch-ups with friends. 📍 Kafkasteg 91, 1020 Vienna Save this for your next “where should we go tonight?” moment 👀 Who are you taking? 👇 luma.wien | Invite #viennafood #viennafoodguide #viennarestaurants",
+      "ownerUsername": "",
+      "ownerRole": "",
+      "scoutUsername": "",
+      "merchantUsername": "",
+      "pubDate": "2026-11-21T09:54:30+0000",
+      "rejectionReason": "alcohol-offer",
+      "qualityScore": 0,
+      "viennaVerified": false,
+      "mediaEvidence": {
+        "analyzedAt": "",
+        "ocrText": "",
+        "assetCount": 0,
+        "imageCount": 0,
+        "videoFrameCount": 0,
+        "downloadRetries": 0,
+        "errors": [],
+        "ai": null
+      },
+      "hashtags": [
+        "viennarestaurants"
+      ]
+    },
+    {
+      "id": "18127246252796869",
+      "status": "rejected",
+      "url": "https://www.instagram.com/p/Df_8H0huK6D/",
+      "title": "Unser Apfelstrudel. Am liebsten mit Vanillesauce. 🤍 #CafeRathaus #Apfelstrudel #WienerKaffeehaus #WienFood #ViennaFood",
+      "text": "Unser Apfelstrudel. Am liebsten mit Vanillesauce. 🤍 #CafeRathaus #Apfelstrudel #WienerKaffeehaus #WienFood #ViennaFood",
+      "ownerUsername": "",
+      "ownerRole": "",
+      "scoutUsername": "",
+      "merchantUsername": "",
+      "pubDate": "2026-11-21T09:46:34+0000",
+      "rejectionReason": "no-concrete-offer",
+      "qualityScore": 0,
+      "viennaVerified": false,
+      "mediaEvidence": {
+        "analyzedAt": "",
+        "ocrText": "",
+        "assetCount": 0,
+        "imageCount": 0,
+        "videoFrameCount": 0,
+        "downloadRetries": 0,
+        "errors": [],
+        "ai": null
+      },
+      "hashtags": [
+        "wienfood"
+      ]
+    },
+    {
+      "id": "18661806268055749",
+      "status": "rejected",
+      "url": "https://www.instagram.com/reel/Df_7Yl2hkVw/",
+      "title": "A cozy hidden Persian restaurant in Vienna 🇮🇷✨ At Termeh, you’ll find fragrant saffron rice, juicy kebabs and Persian tea in a cozy setting that makes you want to stay a little l",
+      "text": "A cozy hidden Persian restaurant in Vienna 🇮🇷✨ At Termeh, you’ll find fragrant saffron rice, juicy kebabs and Persian tea in a cozy setting that makes you want to stay a little longer. 📍 Termeh, Vienna invitation #ViennaFood #ViennaHiddenGems #WienEssen #ViennaRestaurants #PersianFood",
+      "ownerUsername": "",
+      "ownerRole": "",
+      "scoutUsername": "",
+      "merchantUsername": "",
+      "pubDate": "2026-11-21T09:41:31+0000",
+      "rejectionReason": "no-concrete-offer",
+      "qualityScore": 0,
+      "viennaVerified": false,
+      "mediaEvidence": {
+        "analyzedAt": "",
+        "ocrText": "",
+        "assetCount": 0,
+        "imageCount": 0,
+        "videoFrameCount": 0,
+        "downloadRetries": 0,
+        "errors": [],
+        "ai": null
+      },
+      "hashtags": [
+        "viennarestaurants"
+      ]
+    },
+    {
+      "id": "18126483826901234",
+      "status": "rejected",
+      "url": "https://www.instagram.com/p/Df_3fcLCoUQ/",
+      "title": "Frisch. Bunt. Einfach OTTA! 🥗💚 Knackiges Gemüse, köstliche Zutaten und ganz viel Liebe zum Detail – unsere Bowls bringen nicht nur Farbe auf deinen Teller, sondern auch echten Ge",
+      "text": "Frisch. Bunt. Einfach OTTA! 🥗💚 Knackiges Gemüse, köstliche Zutaten und ganz viel Liebe zum Detail – unsere Bowls bringen nicht nur Farbe auf deinen Teller, sondern auch echten Genuss in deinen Tag! 😍✨ Bei OTTA wird jeder Bissen zum Geschmackserlebnis! ❤️ 🥗 Mit wem würdest du diese Bowl genießen? Markiere deinen Food-Buddy! 👇 📍 OTTA Wien #OTTA #OTTAWien #BowlLovers #FreshFood #WienFood #FoodVienna #WienEssen #FoodieVienna #HealthyFood",
+      "ownerUsername": "",
+      "ownerRole": "",
+      "scoutUsername": "",
+      "merchantUsername": "",
+      "pubDate": "2026-11-21T09:06:32+0000",
+      "rejectionReason": "no-concrete-offer",
+      "qualityScore": 0,
+      "viennaVerified": false,
+      "mediaEvidence": {
+        "analyzedAt": "",
+        "ocrText": "",
+        "assetCount": 0,
+        "imageCount": 0,
+        "videoFrameCount": 0,
+        "downloadRetries": 0,
+        "errors": [],
+        "ai": null
+      },
+      "hashtags": [
+        "wienfood"
+      ]
+    },
+    {
+      "id": "18155960002542678",
+      "status": "rejected",
+      "url": "https://www.instagram.com/reel/Df-2XqkALQ9/",
+      "title": "🔥 شاورما ابن خالتي… نكهة الشام بقلب فيينا! 🇸🇾❤️ شاورما طازجة وطعم بيخلّيك ترجع 😋🌯 📍 Arthaberplatz 5, 1100 Wien 📞 +43 676 4475363 🌯 Lust auf richtig leckere Shawarma in Wien",
+      "text": "🔥 شاورما ابن خالتي… نكهة الشام بقلب فيينا! 🇸🇾❤️ شاورما طازجة وطعم بيخلّيك ترجع 😋🌯 📍 Arthaberplatz 5, 1100 Wien 📞 +43 676 4475363 🌯 Lust auf richtig leckere Shawarma in Wien? Besucht uns in Favoriten! ❤️ اعمل لايك، تابعنا، ومنشن رفيقك اللي لازم يجرّبها! #ابن_خالتي #شاورما #شاورما_سورية #مطاعم_فيينا #فيينا #Wien #WienEssen #WienFood #Favoriten #1100Wien #Shawarma #SyrianFood #HalalFood #FoodVienna",
+      "ownerUsername": "",
+      "ownerRole": "",
+      "scoutUsername": "",
+      "merchantUsername": "",
+      "pubDate": "2026-11-20T23:36:24+0000",
+      "rejectionReason": "no-concrete-offer",
+      "qualityScore": 0,
+      "viennaVerified": false,
+      "mediaEvidence": {
+        "analyzedAt": "",
+        "ocrText": "",
+        "assetCount": 0,
+        "imageCount": 0,
+        "videoFrameCount": 0,
+        "downloadRetries": 0,
+        "errors": [],
+        "ai": null
+      },
+      "hashtags": [
+        "wienfood"
+      ]
+    },
+    {
+      "id": "18108758018566630",
+      "status": "rejected",
+      "url": "https://www.instagram.com/p/Df-tmLmMylm/",
+      "title": "Unsere Ganslwochen sind vorbei und wir möchten DANKE sagen! 🧡🍂 Wart ihr bei uns zu Gast? 🪿 Dann verratet uns doch in den Kommentaren, wie es euch geschmeckt hat! Euer Feedback l",
+      "text": "Unsere Ganslwochen sind vorbei und wir möchten DANKE sagen! 🧡🍂 Wart ihr bei uns zu Gast? 🪿 Dann verratet uns doch in den Kommentaren, wie es euch geschmeckt hat! Euer Feedback liegt uns am Herzen und wir freuen uns über jede Rückmeldung! 🥰 #spfiff #gansl #martinigansl #wienisst #efeucontent",
+      "ownerUsername": "",
+      "ownerRole": "",
+      "scoutUsername": "",
+      "merchantUsername": "",
+      "pubDate": "2026-11-20T22:19:51+0000",
+      "rejectionReason": "no-concrete-offer",
+      "qualityScore": 0,
+      "viennaVerified": false,
+      "mediaEvidence": {
+        "analyzedAt": "",
+        "ocrText": "",
+        "assetCount": 0,
+        "imageCount": 0,
+        "videoFrameCount": 0,
+        "downloadRetries": 0,
+        "errors": [],
+        "ai": null
+      },
+      "hashtags": [
+        "wienisst"
+      ]
+    },
+    {
+      "id": "17888280540690729",
+      "status": "rejected",
+      "url": "https://www.instagram.com/reel/Df-r3SdOf0J/",
+      "title": "EN:✨ Diwali Night in Vienna 🇮🇳 An unforgettable evening celebrating Indian culture, traditions and the festival of lights at namnam_derinder Delicious Indian cuisine, traditional",
+      "text": "EN:✨ Diwali Night in Vienna 🇮🇳 An unforgettable evening celebrating Indian culture, traditions and the festival of lights at namnam_derinder Delicious Indian cuisine, traditional music, dancing and a wonderful atmosphere made this celebration truly special. Thank you for such a beautiful experience! DE:✨ Diwali Night in Vienna 🇮🇳 Ein wunderschöner Abend voller indischer Kultur, Traditionen und festlicher Stimmung bei namnam_derinder Köstliche indische Spezialitäten, traditionelle Musik, Tanz und eine einzigartige Atmosphäre machten das Diwali-Lichterfest zu einem ganz besonderen Erlebnis. Vielen Dank für diesen unvergesslichen Abend!",
+      "ownerUsername": "",
+      "ownerRole": "",
+      "scoutUsername": "",
+      "merchantUsername": "",
+      "pubDate": "2026-11-20T22:05:29+0000",
+      "rejectionReason": "no-concrete-offer",
+      "qualityScore": 0,
+      "viennaVerified": false,
+      "mediaEvidence": {
+        "analyzedAt": "",
+        "ocrText": "",
+        "assetCount": 0,
+        "imageCount": 0,
+        "videoFrameCount": 0,
+        "downloadRetries": 0,
+        "errors": [],
+        "ai": null
+      },
+      "hashtags": [
+        "viennarestaurants"
+      ]
+    },
+    {
+      "id": "17938555926406570",
+      "status": "rejected",
+      "url": "https://www.instagram.com/reel/Df-lIxVRY83/",
+      "title": "Es gibt doch nichts Besseres als ein freundliches Lächeln und einen herzlichen Service! 🥰🍽️ Denn gutes Essen schmeckt gleich noch besser, wenn man sich rundum wohlfühlt. 💚 Wie w",
+      "text": "Es gibt doch nichts Besseres als ein freundliches Lächeln und einen herzlichen Service! 🥰🍽️ Denn gutes Essen schmeckt gleich noch besser, wenn man sich rundum wohlfühlt. 💚 Wie wichtig ist euch ein freundlicher Service beim Restaurantbesuch? 👀 #kleeamhanslteich #klee #wienisst #service #efeucontent",
+      "ownerUsername": "",
+      "ownerRole": "",
+      "scoutUsername": "",
+      "merchantUsername": "",
+      "pubDate": "2026-11-20T21:06:21+0000",
+      "rejectionReason": "no-concrete-offer",
+      "qualityScore": 0,
+      "viennaVerified": false,
+      "mediaEvidence": {
+        "analyzedAt": "",
+        "ocrText": "",
+        "assetCount": 0,
+        "imageCount": 0,
+        "videoFrameCount": 0,
+        "downloadRetries": 0,
+        "errors": [],
+        "ai": null
+      },
+      "hashtags": [
+        "wienisst"
+      ]
+    },
+    {
+      "id": "18082181966558766",
+      "status": "rejected",
+      "url": "https://www.instagram.com/reel/Df-heJetWAD/",
+      "title": "Crispy, juicy & einfach unwiderstehlich! 🤤🍗 Unser Korean Chicken – außen knusprig, innen saftig und umhüllt von einer köstlichen Soße! 😍 Dazu fluffiger Reis und frischer Salat. ",
+      "text": "Crispy, juicy & einfach unwiderstehlich! 🤤🍗 Unser Korean Chicken – außen knusprig, innen saftig und umhüllt von einer köstlichen Soße! 😍 Dazu fluffiger Reis und frischer Salat. 🍚🥢 Klingt gut? Schmeckt noch besser! ❤️ Kommt vorbei und genießt es bei uns im TINMO! ✨ #TINMO #TINMOWien #KoreanChicken #WienFood #WienEssen AsianFood FoodieVienna RestaurantWien",
+      "ownerUsername": "",
+      "ownerRole": "",
+      "scoutUsername": "",
+      "merchantUsername": "",
+      "pubDate": "2026-11-20T20:34:27+0000",
+      "rejectionReason": "no-concrete-offer",
+      "qualityScore": 0,
+      "viennaVerified": false,
+      "mediaEvidence": {
+        "analyzedAt": "",
+        "ocrText": "",
+        "assetCount": 0,
+        "imageCount": 0,
+        "videoFrameCount": 0,
+        "downloadRetries": 0,
+        "errors": [],
+        "ai": null
+      },
+      "hashtags": [
+        "wienfood"
+      ]
+    }
+  ]
 }
