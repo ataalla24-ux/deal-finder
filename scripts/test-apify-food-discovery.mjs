@@ -257,6 +257,37 @@ test('forbidden start reports the exact stage and never switches to another acto
   assert.equal(result.retryAt, new Date(+now + 2 * DAY).toISOString());
   assert.deepEqual([...result.attemptedSources], ['profile:cafe']);
 });
+
+test('only a first documented rate limit without Retry-After uses six hours', async () => {
+  const sources = [{ kind: 'hashtag', key: 'hashtag:wienfood', url: 'https://www.instagram.com/explore/tags/wienfood/' }];
+  const rateLimit = { httpStatus: 429, providerType: 'rate-limit-exceeded', retryAfterStatus: 'absent' };
+  for (const [details, previousCooldown, wait] of [
+    [rateLimit, null, DAY / 4],
+    [rateLimit, { httpStatus: 429 }, DAY],
+    [{ ...rateLimit, retryAfterStatus: 'invalid' }, null, DAY],
+    [{ ...rateLimit, retryAfterStatus: undefined }, null, DAY],
+    [{ ...rateLimit, providerType: undefined }, null, DAY],
+    [{ ...rateLimit, httpStatus: 403 }, null, DAY],
+    [{ ...rateLimit, httpStatus: 401 }, null, DAY],
+    [{ ...rateLimit, uncertainStart: true }, null, DAY],
+    [{ ...rateLimit, retryAfterStatus: 'valid', retryAt: new Date(+now + 2 * DAY).toISOString() }, null, 2 * DAY],
+  ]) {
+    let calls = 0;
+    const result = await collectDiscoveryBatches({
+      preflight: async () => { calls++; throw Object.assign(new Error('apify-request-blocked'), details); },
+    }, sources, { now: () => now, previousCooldown });
+    assert.equal(calls, 1);
+    assert.equal(Date.parse(result.retryAt), +now + wait);
+    assert.equal(result.cooldown.retryAfterStatus, details.retryAfterStatus);
+    assert.equal(result.cooldown.until, result.retryAt);
+    const outcomes = history => discoverySourceOutcomes(sources, [], history, result.failedSources, now,
+      result.cooldown, result.cooldownSources)['hashtag:wienfood'];
+    assert.equal(Date.parse(outcomes({}).retryAt), +now + wait);
+    assert.ok(Date.parse(outcomes({ 'hashtag:wienfood': { consecutiveFailures: 1 } }).retryAt) >= +now + 2 * DAY);
+  }
+  const oldState = { ...emptyState(), retryAt: new Date(+now + 5 * DAY).toISOString() };
+  assert.equal(reservationReason(oldState, budget, 'next', now), 'channel-cooldown');
+});
 test('concrete coffee BOGO is evidenced, not automatically published or fake voted', () => {
   const { deal } = classifyDiscoveryPost(post(), { now });
   assert.ok(deal);

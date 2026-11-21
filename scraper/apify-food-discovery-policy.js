@@ -9,6 +9,7 @@ import { relativeCaptionValidity } from '../apify/instagram-vienna-food-offers/s
 import { concreteFoodOfferTitle, socialOfferDisplayText } from './offer-title-utils.js';
 
 export const DAY = 86_400_000;
+export const MIN_SCAN_SPACING_MS = 6 * 3_600_000;
 export const TAGS = ['wienfood', 'viennafood', 'esseninwien', 'wienisst', 'gratiswien', 'wienkaffee', 'neueroeffnungwien', 'wienpizza'];
 export const LIMITS = Object.freeze({ profiles: 22, hashtags: 4, perSource: 1, posts: 26, ocrPosts: 8, dailyUsd: 0.15, cycleUsd: 4.65 });
 const handle = value => String(value || '').replace(/^@/, '').toLowerCase();
@@ -48,7 +49,7 @@ export function reservationReason(state, budget, runKey, now = new Date(), purpo
   if (purpose === 'hashtag-test') {
     if (budget.runCapUsd !== .01) return 'invalid-validation-cap';
     if (state.hashtagValidationReservedAt) return 'hashtag-validation-already-reserved';
-  } else if (reservations.some(r => +now - Date.parse(r.at) < 6 * 3_600_000)) return 'minimum-six-hour-spacing';
+  } else if (reservations.some(r => +now - Date.parse(r.at) < MIN_SCAN_SPACING_MS)) return 'minimum-six-hour-spacing';
   const day = now.toISOString().slice(0, 10);
   const sum = rows => rows.reduce((n, r) => n + Number(r.capUsd), 0);
   if (reservations.some(r => !Number.isFinite(r.capUsd) || r.capUsd < 0 || !Number.isFinite(Date.parse(r.at)))) return 'invalid-budget-ledger';

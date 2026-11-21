@@ -1,11 +1,18 @@
 import { retryAfterAt } from './source-http-policy.js';
 
+const DAY_MS = 86400000;
+const LOCAL_RETRY_MS = 4 * 3600000;
+const LOCAL_RETRY_REASON = 'local-request-policy';
 const transportReasons = new Set(['response-unavailable', 'request-policy-blocked', 'response-http-error',
   'response-too-large', 'empty-response', 'non-json-response', 'response-read-failed', 'request-failed', 'response-timeout',
   'no-search-request', 'document-http-error', 'login-wall', 'access-challenge']);
 
-export function tikTokRetryAt(retryAfter, now = new Date()) {
-  return new Date(Math.max(+now + 86400000, Date.parse(retryAfterAt(retryAfter, now)) || 0)).toISOString();
+export function tikTokRetryAt(retryAfter, now = new Date(), minimumMs = DAY_MS) {
+  return new Date(Math.max(+now + minimumMs, Date.parse(retryAfterAt(retryAfter, now)) || 0)).toISOString();
+}
+
+export function isTikTokLocalRetry(previous = {}) {
+  return previous.boundedRetry?.reason === LOCAL_RETRY_REASON && previous.boundedRetry.failures >= 1;
 }
 
 export function selectTikTokPostVisits(api, webLinks, maxPosts) {
@@ -40,21 +47,25 @@ export function parseTikTokSearchResponse(result = {}) {
 }
 
 export async function runTikTokApiDiscovery({ keywords, request, normalize, wait = async () => {},
-  previous = {}, now = new Date(), pages = 3, count = 30, maxCandidates = 1200 } = {}) {
+  previous = {}, now, clock = () => now ?? new Date(), pages = 3, count = 30, maxCandidates = 1200 } = {}) {
+  const boundedRetry = isTikTokLocalRetry(previous);
   const result = { rows: [], errors: [], attemptedRequests: 0, emptyResponses: 0,
     rawItems: 0, normalizedItems: 0, ignoredItems: 0, stoppedReason: '', nextRetryAt: '',
     nextKeywordIndex: Math.max(0, Math.floor(Number(previous.nextKeywordIndex) || 0)) };
-  if (Date.parse(previous.nextRetryAt) > +now) {
-    return { ...result, stoppedReason: 'api-cooldown', nextRetryAt: previous.nextRetryAt };
+  if (Date.parse(previous.nextRetryAt) > +clock()) {
+    return { ...result, stoppedReason: 'api-cooldown', nextRetryAt: previous.nextRetryAt,
+      ...(boundedRetry ? { boundedRetry: previous.boundedRetry } : {}) };
   }
   const seen = new Set();
   const start = keywords.length ? result.nextKeywordIndex % keywords.length : 0;
+  const keywordLimit = boundedRetry ? Math.min(keywords.length, 1) : keywords.length;
+  const pageLimit = boundedRetry ? Math.min(pages, 1) : pages;
   let consecutiveEmpty = 0;
-  for (let index = 0; index < keywords.length; index++) {
+  for (let index = 0; index < keywordLimit; index++) {
     const keywordIndex = (start + index) % keywords.length;
     const keyword = keywords[keywordIndex];
     result.nextKeywordIndex = (keywordIndex + 1) % keywords.length;
-    for (let pageIndex = 0; pageIndex < pages; pageIndex++) {
+    for (let pageIndex = 0; pageIndex < pageLimit; pageIndex++) {
       const offset = pageIndex * count;
       if (result.attemptedRequests) await wait(1000);
       result.attemptedRequests++;
@@ -66,11 +77,18 @@ export async function runTikTokApiDiscovery({ keywords, request, normalize, wait
         parsed = { error: 'TikTok search request failed or timed out', code: 'transport-unavailable' };
       }
       if (parsed.error) {
-        result.errors.push({ keyword, offset, status: Number(response?.status || 0),
+        const status = Number(response?.status || 0);
+        const failedAt = clock();
+        const localPolicyBlocked = status === 0 && parsed.transportReason === 'request-policy-blocked'
+          && (response?.retryAfter === '' || response?.retryAfter == null);
+        result.errors.push({ keyword, offset, status,
           error: parsed.error, code: parsed.code, providerCode: parsed.providerCode,
           ...(parsed.transportReason ? { transportReason: parsed.transportReason } : {}) });
         result.stoppedReason = parsed.code;
-        result.nextRetryAt = tikTokRetryAt(response?.retryAfter, now);
+        result.nextRetryAt = tikTokRetryAt(response?.retryAfter, failedAt, localPolicyBlocked && !boundedRetry ? LOCAL_RETRY_MS : DAY_MS);
+        if (localPolicyBlocked || boundedRetry) {
+          result.boundedRetry = { reason: LOCAL_RETRY_REASON, failures: boundedRetry ? 2 : 1, failedAt: failedAt.toISOString() };
+        }
         return result;
       }
       result.rawItems += parsed.batch.length;

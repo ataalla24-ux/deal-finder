@@ -4,7 +4,7 @@ import { pathToFileURL } from 'node:url';
 import { ApifyDiscoveryClient, DISCOVERY_ACTOR, HASHTAG_ACTOR, PROFILE_CAP_USD, HASHTAG_CAP_USD, RUN_CAP_USD,
   apifyErrorDetails, budgetCheck } from './apify-discovery-client.js';
 import {
-  DAY, LIMITS, discoverySources, selectDiscoverySources, reservationReason,
+  DAY, LIMITS, MIN_SCAN_SPACING_MS, discoverySources, selectDiscoverySources, reservationReason,
   postIdentity, postFingerprint, earlyPostRejection, classifyDiscoveryPost, mergeDiscoveryPending,
 } from './apify-food-discovery-policy.js';
 import { analyzeInstagramMediaItem, detectMediaTools, entryMediaPriority } from './instagram-media-evidence.js';
@@ -103,9 +103,21 @@ export async function runBoundedActor(client, sources, {
     reportedChargeUsd: Number.isFinite(run.usageTotalUsd) ? run.usageTotalUsd : null };
 }
 
+function discoveryCooldown(error, now, previous) {
+  const shortRateLimit = error.httpStatus === 429 && error.providerType === 'rate-limit-exceeded'
+    && error.retryAfterStatus === 'absent' && !error.uncertainStart && previous?.httpStatus !== 429;
+  const localWait = shortRateLimit ? MIN_SCAN_SPACING_MS : DAY;
+  return {
+    ...apifyErrorDetails(error),
+    policy: shortRateLimit ? 'first-rate-limit-no-retry-after' : 'conservative',
+    until: new Date(Math.max(+now + localWait, Date.parse(error.retryAt) || 0)).toISOString(),
+  };
+}
+
 export async function collectDiscoveryBatches(client, sources, options = {}) {
   const items = [], runs = [], errors = [], failedSources = new Set(), attemptedSources = new Set();
-  let retryAt = '';
+  const cooldownSources = new Set();
+  let cooldown = null;
   for (const kind of ['profile', 'hashtag']) {
     const selected = sources.filter(s => s.kind === kind);
     if (!selected.length) continue;
@@ -122,12 +134,13 @@ export async function collectDiscoveryBatches(client, sources, options = {}) {
       selected.forEach(s => failedSources.add(s.key));
       errors.push({ kind, ...apifyErrorDetails(error) });
       if (error.uncertainStart || [401, 403, 429].includes(error.httpStatus)) {
-        retryAt = new Date(Math.max(+(options.now?.() || new Date()) + DAY, Date.parse(error.retryAt) || 0)).toISOString();
+        cooldown = discoveryCooldown(error, options.now?.() || new Date(), options.previousCooldown);
+        selected.forEach(source => cooldownSources.add(source.key));
         break;
       }
     }
   }
-  return { items, runs, errors, failedSources, attemptedSources, retryAt };
+  return { items, runs, errors, failedSources, attemptedSources, cooldown, cooldownSources, retryAt: cooldown?.until || '' };
 }
 
 export function safeMediaUrl(value) {
@@ -217,7 +230,7 @@ function sourceUrl(value) {
   } catch { return ''; }
 }
 
-export function discoverySourceOutcomes(sources, items, previous, failedSources, now) {
+export function discoverySourceOutcomes(sources, items, previous, failedSources, now, cooldown = null, cooldownSources = new Set()) {
   return Object.fromEntries(sources.map(source => {
     const expected = sourceUrl(source.url);
     const rows = items.filter(raw => expected && (sourceUrl(raw?.inputUrl) === expected
@@ -236,7 +249,13 @@ export function discoverySourceOutcomes(sources, items, previous, failedSources,
       : stale ? 'stale-results' : posts.length ? 'posts-returned' : 'no-attributed-results';
     if (notFound || failed || entry.status === 'no-attributed-results') {
       entry.consecutiveFailures = Math.min(10, Math.max(0, Math.floor(Number(prior.consecutiveFailures) || 0)) + 1);
-      entry.retryAt = new Date(+now + (notFound ? 30 : Math.min(7, 2 ** Math.min(3, entry.consecutiveFailures - 1))) * DAY).toISOString();
+      const batchCooldown = cooldownSources.has(source.key) ? cooldown : null;
+      const shortFirstFailure = !notFound && entry.consecutiveFailures === 1
+        && batchCooldown?.policy === 'first-rate-limit-no-retry-after';
+      const days = notFound ? 30 : Math.min(7, 2 ** Math.min(3, entry.consecutiveFailures - 1));
+      const localRetry = +now + (shortFirstFailure ? MIN_SCAN_SPACING_MS : days * DAY);
+      entry.retryAt = new Date(Math.max(localRetry, Date.parse(prior.retryAt) || 0,
+        Date.parse(batchCooldown?.until) || 0)).toISOString();
     } else if (empty || stale) {
       // Empty results can mean filters, privacy or a provider limitation. They
       // are unverified coverage, not proof of an inactive or healthy account.
@@ -284,7 +303,8 @@ export async function main(mode = '--plan') {
       await write(FILES.state, state);
     }
     await write(FILES.plan, plan);
-    if (reason) await write(FILES.report, { ...plan, status: 'deferred', freshAcceptedDeals: 0 });
+    if (reason) await write(FILES.report, { ...plan, runProvenance: githubRunProvenance(), status: 'deferred', freshAcceptedDeals: 0,
+      ...(reason === 'channel-cooldown' && { retryAt: state.retryAt, cooldown: state.retryPolicy || null }) });
     if (process.env.GITHUB_OUTPUT) await fs.appendFile(process.env.GITHUB_OUTPUT, `allowed=${!reason}\n`);
     console.log(JSON.stringify({ allowed: !reason, reason, sourceCount: sources.length, budget }));
     return;
@@ -300,7 +320,7 @@ export async function main(mode = '--plan') {
   reservation.status = 'attempted';
   await write(FILES.state, state);
   try {
-    const result = await collectDiscoveryBatches(client, plan.sources, { purpose, onStarted: async id => {
+    const result = await collectDiscoveryBatches(client, plan.sources, { purpose, previousCooldown: state.retryPolicy, onStarted: async id => {
       reservation.runId = id;
       reservation.startedRuns = [...(reservation.startedRuns || []), id];
       await write(FILES.state, state);
@@ -318,13 +338,17 @@ export async function main(mode = '--plan') {
       knownPostKeys: known, ocr: raw => localOcr(raw, tools) });
     state.seen = processed.seen;
     state.retryAt = result.retryAt;
+    if (result.cooldown) state.retryPolicy = result.cooldown;
+    else if (!result.errors.length && result.runs.length) delete state.retryPolicy;
     reservation.status = result.errors.length && !result.runs.length ? 'failed'
       : processed.report.providerErrors || processed.report.emptySourceRecords || result.errors.length ? 'partial' : 'succeeded';
     const attempted = plan.sources.filter(source => result.attemptedSources.has(source.key));
-    Object.assign(state.sources, discoverySourceOutcomes(attempted, result.items, state.sources, result.failedSources, now));
+    Object.assign(state.sources, discoverySourceOutcomes(attempted, result.items, state.sources, result.failedSources, now,
+      result.cooldown, result.cooldownSources));
     const datasetProviderErrors = processed.report.providerErrors;
     const completeCharges = !result.errors.length && result.runs.length && result.runs.every(run => Number.isFinite(run.reportedChargeUsd));
     Object.assign(report, processed.report, { status: reservation.status, actorRuns: result.runs, batchErrors: result.errors,
+      ...(result.cooldown && { retryAt: result.retryAt, cooldown: result.cooldown }),
       datasetProviderErrors, providerErrors: datasetProviderErrors + result.errors.length,
       reportedChargeUsd: completeCharges ? result.runs.reduce((sum, run) => sum + run.reportedChargeUsd, 0) : null,
       tools, sources: plan.sources.map(source => result.attemptedSources.has(source.key)

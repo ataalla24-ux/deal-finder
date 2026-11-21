@@ -66,6 +66,45 @@ test('TikTok stops on refusal, keeps previous discoveries, and honors Retry-Afte
   assert.equal(heldAgain.nextRetryAt,first.nextRetryAt);
 });
 
+test('a local TikTok request-policy rejection gets one probe, then the full pause on repeat', async () => {
+  const denied = {ok:false,status:0,transportReason:'request-policy-blocked'};
+  const args = {keywords:['a','b','c'],normalize:normalizeTikTokApiItem,wait:never};
+  const first = await runTikTokApiDiscovery({...args,now,request:async()=>denied});
+  assert.equal(first.nextRetryAt,'2026-11-11T00:00:00.000Z');
+  assert.deepEqual(first.boundedRetry,{reason:'local-request-policy',failures:1,failedAt:now.toISOString()});
+  const held = await runTikTokApiDiscovery({...args,now:new Date('2026-11-10T23:59:59.999Z'),previous:first,request:never});
+  assert.equal(held.attemptedRequests,0);
+  assert.deepEqual(held.boundedRetry,first.boundedRetry);
+  const probeAt = new Date(held.nextRetryAt);
+  const repeat = await runTikTokApiDiscovery({...args,now:probeAt,previous:held,request:async()=>denied});
+  assert.equal(repeat.attemptedRequests,1);
+  assert.equal(repeat.boundedRetry.failures,2);
+  assert.equal(repeat.nextRetryAt,'2026-11-12T00:00:00.000Z');
+  const recovered = await runTikTokApiDiscovery({...args,now:probeAt,previous:held,
+    request:async()=>({ok:true,status:200,body:{data:[item],has_more:true}})});
+  assert.equal(recovered.attemptedRequests,1);
+  assert.equal(recovered.rows.length,1);
+  assert.equal(recovered.nextRetryAt,'');
+  assert.equal(recovered.boundedRetry,undefined);
+});
+
+test('unclassified TikTok failures and legacy holds retain the conservative pause', async () => {
+  const args = {keywords:['a','b'],normalize:normalizeTikTokApiItem,now,wait:never};
+  const previous = {nextRetryAt:'2026-11-11T20:00:00.000Z',stoppedReason:'api-cooldown',errors:[]};
+  const held = await runTikTokApiDiscovery({...args,previous,request:never});
+  assert.equal(held.nextRetryAt,previous.nextRetryAt);
+  assert.equal(held.boundedRetry,undefined);
+  for (const failure of [
+    {ok:false,status:0,transportReason:'no-search-request'},
+    {ok:false,status:403,transportReason:'access-challenge'},
+    {ok:false,status:0,transportReason:'request-policy-blocked',retryAfter:'invalid supplied value'},
+  ]) {
+    const result = await runTikTokApiDiscovery({...args,request:async()=>failure});
+    assert.equal(result.nextRetryAt,'2026-11-11T20:00:00.000Z');
+    assert.equal(result.boundedRetry,undefined);
+  }
+});
+
 test('empty TikTok sample is bounded and later runs rotate rather than repeat the same keywords', async () => {
   const keywords=Array.from({length:9},(_,i)=>`food${i}`), attempted=[];
   const first=await runTikTokApiDiscovery({keywords,now,normalize:normalizeTikTokApiItem,request:async({keyword})=>{attempted.push(keyword);return valid([]);}});
@@ -91,6 +130,57 @@ test('TikTok HTTP-200 search challenge stops fallback immediately and persists c
   assert.equal(calls,1);assert.equal(result.links.length,0);assert.equal(result.errors.length,1);
   const held=await discoverTikTokLinksViaDuckDuckGo({queries:['a','b'],now,previousReport:{search:result},fetcher:never,sleep:never});
   assert.equal(held.attemptedQueries,0);assert.equal(held.nextRetryAt,result.nextRetryAt);
+});
+
+test('DuckDuckGo challenge with verified absent Retry-After gets one probe after four hours', async () => {
+  const challenge = async () => {
+    throw Object.assign(new Error('Search challenge; no bypass attempted'), {httpStatus:403,retryAt:'',retryAfterProvided:false});
+  };
+  const options = {search:challenge,sleep:never};
+  const queries = ['a','b','c'];
+  const first = await runInstagramSearchQueries(queries,{...options,now});
+  assert.equal(first.nextRetryAt,'2026-11-11T00:00:00.000Z');
+  assert.equal(first.errors[0].retryAfterProvided,false);
+  assert.deepEqual(first.boundedRetry,{reason:'challenge-without-retry-after',failures:1,failedAt:now.toISOString()});
+  const held = await runInstagramSearchQueries(queries,{...options,now:new Date('2026-11-10T23:59:59.999Z'),
+    previousReport:{search:first},search:never});
+  assert.equal(held.attemptedQueries,0);
+  assert.deepEqual(held.boundedRetry,first.boundedRetry);
+  const probeAt = new Date(held.nextRetryAt);
+  const repeat = await runInstagramSearchQueries(queries,{...options,now:probeAt,previousReport:{search:held}});
+  assert.equal(repeat.attemptedQueries,1);
+  assert.equal(repeat.boundedRetry.failures,2);
+  assert.equal(repeat.nextRetryAt,'2026-11-12T00:00:00.000Z');
+  const failedProbe = await runInstagramSearchQueries(queries,{...options,now:probeAt,previousReport:{search:held},
+    search:async()=>{throw new Error('network unavailable');}});
+  assert.equal(failedProbe.attemptedQueries,1);
+  assert.equal(failedProbe.nextRetryAt,'2026-11-12T00:00:00.000Z');
+  const recovered = await runInstagramSearchQueries(queries,{...options,now:probeAt,previousReport:{search:held},search:async query=>[query]});
+  assert.deepEqual(recovered.candidates,['b']);
+  assert.equal(recovered.nextRetryAt,'');
+  assert.equal(recovered.boundedRetry,undefined);
+});
+
+test('DuckDuckGo preserves explicit Retry-After and holds when historical evidence is missing', async () => {
+  const challenge = 'Search challenge; no bypass attempted';
+  const cases = [
+    [{message:challenge,retryAt:'2026-11-12T20:00:00.000Z',retryAfterProvided:true},'2026-11-12T20:00:00.000Z'],
+    [{message:challenge,retryAt:'',retryAfterProvided:true},'2026-11-11T20:00:00.000Z'],
+    [{message:challenge,retryAt:''},'2026-11-11T20:00:00.000Z'],
+    [{message:'HTTP 403',retryAt:'',retryAfterProvided:false},'2026-11-11T20:00:00.000Z'],
+  ];
+  for (const [failure,nextRetryAt] of cases) {
+    const result = await runInstagramSearchQueries(['a','b'],{now,sleep:never,search:async()=>{
+      throw Object.assign(new Error(failure.message),{httpStatus:403,...failure});
+    }});
+    assert.equal(result.nextRetryAt,nextRetryAt);
+    assert.equal(result.boundedRetry,undefined);
+    assert.equal(result.attemptedQueries,1);
+  }
+  const previous = {nextRetryAt:'2026-11-11T20:00:00.000Z',errors:[],stoppedReason:'search-cooldown'};
+  const held = await runInstagramSearchQueries(['a','b'],{now,sleep:never,previousReport:{search:previous},search:never});
+  assert.equal(held.nextRetryAt,previous.nextRetryAt);
+  assert.equal(held.boundedRetry,undefined);
 });
 
 test('TikTok search uses broad site path, deduplicates permalinks and never treats search time as post time', async () => {
@@ -147,7 +237,7 @@ test('Instagram search keeps reviewed food provenance and cannot resurrect moder
 test('Instagram resumes after a blocked query without erasing or extending the pause', async () => {
   const queries=['a','b','c']; const attempts=[];
   const blocked=await runInstagramSearchQueries(queries,{now,sleep:never,search:async q=>{
-    attempts.push(q);return readPublicSearchResponse(new Response('<div class="anomaly-modal">'),now);
+    attempts.push(q);return readPublicSearchResponse(new Response('<div class="anomaly-modal">',{headers:{'Retry-After':'86400'}}),now);
   }});
   assert.equal(blocked.nextQueryIndex,1);
   const held=await runInstagramSearchQueries(queries,{now,previousReport:{search:blocked},search:never,sleep:never});

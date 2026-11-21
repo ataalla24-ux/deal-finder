@@ -101,6 +101,27 @@ test('a 5xx after the start request leaves the charge uncertain', async () => {
   assert.equal(calls, 1);
 });
 
+test('Retry-After provenance distinguishes absent, present and unreadable headers', async () => {
+  const future = 'Sun, 22 Nov 2026 15:00:00 GMT';
+  for (const [header, expectedStatus, expectedTime] of [
+    [null, 'absent', null],
+    [future, 'valid', '2026-11-22T15:00:00.000Z'],
+    ['', 'invalid', null],
+    ['not-a-date', 'invalid', null],
+    ['9999999999999999999999', 'valid', '+275760-09-13T00:00:00.000Z'],
+  ]) {
+    const client = new ApifyDiscoveryClient('private-token', async () => Response.json(
+      { error: { type: 'rate-limit-exceeded' } },
+      { status: 429, headers: header === null ? {} : { 'Retry-After': header } },
+    ));
+    await assert.rejects(client.request(`/acts/${HASHTAG_ACTOR}`), error => {
+      assert.equal(error.retryAfterStatus, expectedStatus);
+      assert.equal(error.retryAt, expectedTime);
+      return true;
+    });
+  }
+});
+
 test('scoped legacy credentials cannot invalidate the independent Apify 2 audit', async () => {
   const scopedPrimary = new ApifyDiscoveryClient('primary-private-token', async url => {
     assert.equal(new URL(url).pathname, '/v2/users/me');

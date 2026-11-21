@@ -105,6 +105,6 @@ for (const search of [
 const recovered = await runInstagramSearchQueries(['food'], {
   now: new Date(repeated.nextRetryAt), search: async () => [], sleep: never, previousReport: { search: repeated },
 });
-assert.equal(recovered.boundedRetry, null);
+assert.equal(recovered.boundedRetry, undefined);
 
 console.log('instagram search discovery tests passed');

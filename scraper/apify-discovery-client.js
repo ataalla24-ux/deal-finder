@@ -21,6 +21,19 @@ const OPERATIONS = new Set([
   'account-read', 'account-limits', 'actor-metadata', 'actor-start',
   'run-status', 'run-abort', 'dataset-read',
 ]);
+const MAXIMUM_DATE_MS = 8_640_000_000_000_000;
+
+function readRetryAfter(headers) {
+  if (!headers.has('retry-after')) return { retryAfterStatus: 'absent', retryAt: null };
+  const value = headers.get('retry-after')?.trim() || '';
+  const time = /^\d+$/.test(value)
+    ? Math.min(MAXIMUM_DATE_MS, Date.now() + Number(value) * 1000)
+    : Date.parse(value);
+  const date = new Date(time);
+  return Number.isFinite(+date)
+    ? { retryAfterStatus: 'valid', retryAt: date.toISOString() }
+    : { retryAfterStatus: 'invalid', retryAt: null };
+}
 
 function requestOperation(route, method) {
   const pathname = route.split('?')[0];
@@ -34,12 +47,16 @@ function requestOperation(route, method) {
 }
 
 export function apifyErrorDetails(error) {
+  const retryAt = Date.parse(error.retryAt);
   return {
     reason: /^(?:apify-|actor-|missing-|invalid-)[a-z0-9-]{1,90}$/.test(error.message)
       ? error.message : 'collector-processing-failed',
     ...(Number.isInteger(error.httpStatus) && { httpStatus: error.httpStatus }),
     ...(OPERATIONS.has(error.operation) && { operation: error.operation }),
     ...(PROVIDER_ERROR_TYPES.has(error.providerType) && { providerType: error.providerType }),
+    ...(['absent', 'valid', 'invalid'].includes(error.retryAfterStatus) && { retryAfterStatus: error.retryAfterStatus }),
+    ...(error.retryAfterStatus === 'valid' && Number.isFinite(retryAt)
+      && { providerRetryAt: new Date(retryAt).toISOString() }),
   };
 }
 
@@ -68,8 +85,7 @@ export class ApifyDiscoveryClient {
       throw Object.assign(new Error('apify-network-error'), { operation, uncertainStart: isStart });
     }
     if (!response.ok) {
-      const retry = response.headers.get('retry-after');
-      const retryAt = /^\d+$/.test(retry || '') ? Date.now() + Number(retry) * 1000 : Date.parse(retry || '');
+      const retryAfter = readRetryAfter(response.headers);
       let providerType;
       if (/^application\/json(?:;|$)/i.test(response.headers.get('content-type') || '')) {
         try {
@@ -82,7 +98,7 @@ export class ApifyDiscoveryClient {
         operation,
         providerType,
         uncertainStart: isStart && response.status >= 500,
-        retryAt: Number.isFinite(retryAt) ? new Date(retryAt).toISOString() : null,
+        ...retryAfter,
       });
     }
     let json;

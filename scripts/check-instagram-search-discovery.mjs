@@ -29,6 +29,7 @@ if (attempt.attemptedQueries) {
     search: {
       ...saved,
       ...attempt,
+      boundedRetry: attempt.boundedRetry || null,
       checkedBy: githubRunProvenance(),
       nextQueryIndex: (index + 1) % queries.length,
       discovered: candidates.length,

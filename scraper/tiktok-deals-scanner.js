@@ -6,7 +6,7 @@ import { githubRunProvenance } from './pipeline-run-report-utils.js';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import { chromium } from 'playwright';
-import { runTikTokApiDiscovery, selectTikTokPostVisits, tikTokDiscoveryHealth, tikTokRetryAt } from './tiktok-search-discovery.js';
+import { isTikTokLocalRetry, runTikTokApiDiscovery, selectTikTokPostVisits, tikTokDiscoveryHealth, tikTokRetryAt } from './tiktok-search-discovery.js';
 import { createTikTokBrowserSearch, tikTokAccessRefusal } from './tiktok-browser-search.js';
 import { runInstagramSearchQueries } from './instagram-search-discovery.js';
 import { readPublicSearchResponse } from './public-search-response.js';
@@ -983,10 +983,10 @@ export async function fetchTikTokApiCandidates(page, options = {}) {
     wait: ms => page.waitForTimeout(ms), ...options,
   };
   // A saved refusal applies to every transport, including a newly deployed one.
-  if (options.request || Date.parse(args.previous?.nextRetryAt) > +(args.now || new Date())) {
+  if (options.request || Date.parse(args.previous?.nextRetryAt) > +(args.clock?.() ?? args.now ?? new Date())) {
     return runTikTokApiDiscovery(args);
   }
-  const transport = await createTikTokBrowserSearch(page, args);
+  const transport = await createTikTokBrowserSearch(page, isTikTokLocalRetry(args.previous) ? { ...args, pages: 1 } : args);
   try {
     const result = await runTikTokApiDiscovery({ ...args, request: transport.request });
     return { ...result, ...transport.stats, publicVideoLinks: transport.publicVideoLinks };
@@ -1021,7 +1021,7 @@ export async function discoverTikTokLinksViaDuckDuckGo(options = {}) {
   return { ...schedule, links: [...links] };
 }
 
-async function extractTikTokPostData(page, url) {
+export async function extractTikTokPostData(page, url) {
   const document = await page.goto(url, { waitUntil: 'domcontentloaded', timeout: 25000 });
   const initialRefusal = await tikTokAccessRefusal(page, document);
   if (initialRefusal) return { accessRefusal: initialRefusal };

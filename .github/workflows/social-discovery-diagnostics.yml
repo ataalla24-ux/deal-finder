@@ -5,7 +5,7 @@ on:
       lane:
         description: TikTok search, Instagram profile read, or one Instagram public search query
         type: choice
-        options: [tiktok, instagram, instagram-search]
+        options: [tiktok, tiktok-direct, instagram, instagram-search]
         default: tiktok
 permissions:
   contents: read
@@ -96,4 +96,39 @@ jobs:
         with:
           name: instagram-search-diagnostics
           path: output/social-discovery/instagram-search.json
+          retention-days: 7
+
+  tiktok-direct:
+    if: ${{ inputs.lane == 'tiktok-direct' }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 6
+    concurrency:
+      group: tiktok-deal-scan
+      cancel-in-progress: false
+    permissions:
+      contents: write
+    env:
+      SENTRY_DISABLED: '1'
+      PLAYWRIGHT_BROWSERS_PATH: '0'
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+      - run: npm ci --no-audit --no-fund
+      - run: npx playwright install --with-deps chromium
+      - name: Search once through TikTok directly
+        id: search
+        run: node scripts/check-tiktok-direct-discovery.mjs
+      - name: Persist the result of the real attempt
+        if: ${{ always() && steps.search.outputs.attempted == 'true' }}
+        run: node scripts/commit-generated.mjs --message "Record bounded TikTok search retry [skip ci]" --files docs/tiktok-scanner-report.json
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: tiktok-direct-diagnostics
+          path: output/social-discovery/tiktok-direct.json
           retention-days: 7

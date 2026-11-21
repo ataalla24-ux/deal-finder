@@ -220,3 +220,21 @@ test('an admitted search API refusal blocks fallback even with visible video lin
     assert.deepEqual(result.publicVideoLinks,[]);
   });
 });
+
+test('the first eligible local retry uses one navigation and one admitted request', async () => {
+  await fixture({html:`<script>
+    const keyword=encodeURIComponent(new URLSearchParams(location.search).get('q'));
+    const base='/api/search/general/full/?keyword='+keyword+'&count=30';
+    fetch(base);
+    fetch(base+'&offset=30').catch(()=>{});
+  </script>`, api:()=>response(body([item(123)],true))}, async(page,calls)=>{
+    const result=await scan(page,{keywords:['a','b'],pages:3,
+      previous:{nextRetryAt:now.toISOString(),boundedRetry:{reason:'local-request-policy',failures:1}}});
+    assert.equal(calls.length,1);
+    assert.equal(result.navigations,1);
+    assert.equal(result.searchRequests,1);
+    assert.equal(result.rows.length,1);
+    assert.equal(result.nextRetryAt,'');
+    assert.equal(result.boundedRetry,undefined);
+  });
+});
