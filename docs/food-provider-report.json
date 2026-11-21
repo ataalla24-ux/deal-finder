@@ -1,7 +1,7 @@
 {
-  "runId": "44772915578",
+  "runId": "44847239769",
   "mode": "scan",
-  "createdAt": "2026-11-20T16:23:49.233Z",
+  "createdAt": "2026-11-21T00:58:49.306Z",
   "usage": {
     "scrapingbee": {
       "provider": "scrapingbee",
@@ -21,7 +21,7 @@
       "provider": "scraperapi",
       "status": "authenticated",
       "maximum": 1000,
-      "used": 200,
+      "used": 210,
       "concurrency": 0,
       "payAsYouGoEnabled": false,
       "autoUpgradeEnabled": false,
@@ -45,14 +45,26 @@
   },
   "tasks": [
     {
-      "source": "BackWerk",
-      "url": "https://back-werk.at/de/aktuell",
-      "provider": "zyte",
-      "cap": 0.02
+      "source": "NORDSEE",
+      "url": "https://www.nordsee.com/at/coupons/pazifisches_schollen__filet_vom_grill__beilage__softdrink_02l__garnelenspie?pdf=true",
+      "provider": "scraperapi",
+      "cap": 10
     },
     {
-      "source": "BackWerk",
-      "url": "https://back-werk.at/de/aktuell/es-ist-snackbox-zeit-id2618",
+      "source": "NORDSEE",
+      "url": "https://www.nordsee.com/at/coupons/2_classic_fish_burger__pommes_frites__1_softdrink_05l_pet?pdf=true",
+      "provider": "scraperapi",
+      "cap": 10
+    },
+    {
+      "source": "NORDSEE",
+      "url": "https://www.nordsee.com/at/coupons/groer_hunger?pdf=true",
+      "provider": "scraperapi",
+      "cap": 10
+    },
+    {
+      "source": "NORDSEE",
+      "url": "https://www.nordsee.com/at/coupons/garnelen_box?pdf=true",
       "provider": "scraperapi",
       "cap": 10
     }
@@ -61,79 +73,57 @@
     {
       "provider": "scrapingbee",
       "reason": "scrapingbee-trial-unverified-or-expired"
-    }
-  ],
-  "eligiblePages": 2,
-  "finishedAt": "2026-11-20T16:24:41.492Z",
-  "status": "completed",
-  "results": [
+    },
     {
       "provider": "zyte",
-      "source": "BackWerk",
-      "url": "https://back-werk.at/de/aktuell",
-      "reserved": 0.02,
-      "directCandidates": 0,
-      "directRejected": [],
-      "directVisibleTextCharacters": 383,
-      "status": "fetched",
-      "bytes": 123520,
-      "visibleTextCharacters": 6372,
-      "reportedCredits": null,
-      "extractedCandidates": 0,
-      "incrementalCandidates": 0,
-      "offerLinks": [
-        "https://back-werk.at/de/aktuell/es-ist-snackbox-zeit-id2618"
-      ],
-      "rejected": [],
-      "verifiedCandidates": 0,
-      "verifiedIncrementalCandidates": 0,
-      "unverifiedCandidates": 0,
-      "candidates": []
+      "reason": "zyte-trial-guard-unverified-or-expired"
+    }
+  ],
+  "eligiblePages": 4,
+  "finishedAt": "2026-11-21T00:58:54.496Z",
+  "status": "partial",
+  "results": [
+    {
+      "provider": "scraperapi",
+      "source": "NORDSEE",
+      "url": "https://www.nordsee.com/at/coupons/pazifisches_schollen__filet_vom_grill__beilage__softdrink_02l__garnelenspie?pdf=true",
+      "reserved": 10,
+      "status": "failed",
+      "reason": "source-or-processing-error",
+      "httpStatus": 0,
+      "retryAt": "2026-11-22T00:58:53.275Z"
     },
     {
       "provider": "scraperapi",
-      "source": "BackWerk",
-      "url": "https://back-werk.at/de/aktuell/es-ist-snackbox-zeit-id2618",
+      "source": "NORDSEE",
+      "url": "https://www.nordsee.com/at/coupons/2_classic_fish_burger__pommes_frites__1_softdrink_05l_pet?pdf=true",
       "reserved": 10,
-      "directCandidates": 0,
-      "directRejected": [
-        {
-          "reason": "offer-expired",
-          "title": "Es ist Snackbox-Zeit - drei belegte Weckerl für 5,90€",
-          "text": "Es ist Snackbox-Zeit - drei belegte Weckerl für 5,90€ Es ist Snackbox-Zeit Die BackWerk-Snackbox ist ideal, um dir einen leckeren Dreierpack für unterwegs zu einem Deal-Preis zu sichern. Bis zum 04. Mai bekommst du die M"
-        }
-      ],
-      "directVisibleTextCharacters": 326,
-      "status": "fetched",
-      "bytes": 53746,
-      "visibleTextCharacters": 793,
-      "reportedCredits": 10,
-      "extractedCandidates": 0,
-      "incrementalCandidates": 0,
-      "offerLinks": [],
-      "rejected": [
-        {
-          "reason": "offer-expired",
-          "title": "Es ist Snackbox-Zeit - drei belegte Weckerl für 5,90€",
-          "text": "Es ist Snackbox-Zeit - drei belegte Weckerl für 5,90€ Es ist Snackbox-Zeit Die BackWerk-Snackbox ist ideal, um dir einen leckeren Dreierpack für unterwegs zu einem Deal-Preis zu sichern. Bis zum 04. Mai bekommst du die M"
-        }
-      ],
-      "verifiedCandidates": 0,
-      "verifiedIncrementalCandidates": 0,
-      "unverifiedCandidates": 0,
-      "candidates": []
+      "status": "source-paused"
+    },
+    {
+      "provider": "scraperapi",
+      "source": "NORDSEE",
+      "url": "https://www.nordsee.com/at/coupons/groer_hunger?pdf=true",
+      "reserved": 10,
+      "status": "source-paused"
+    },
+    {
+      "provider": "scraperapi",
+      "source": "NORDSEE",
+      "url": "https://www.nordsee.com/at/coupons/garnelen_box?pdf=true",
+      "reserved": 10,
+      "status": "source-paused"
     }
   ],
   "funnel": {
     "pagesBySource": {
-      "BackWerk": 2
+      "NORDSEE": 4
     },
     "statuses": {
-      "fetched": 2
+      "failed": 1,
+      "source-paused": 3
     },
-    "rejectionReasons": {
-      "offer-expired": 2
-    },
+    "rejectionReasons": {},
     "verificationReasons": {},
     "directCandidates": 0,
     "renderedCandidates": 0,
