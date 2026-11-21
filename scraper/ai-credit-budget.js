@@ -17,6 +17,11 @@ const RATES = {
 const MAX_TEXT_BYTES = 80000;
 const TEXT_TOKEN_OVERHEAD = 1024;
 const MAX_OUTPUT_TOKENS = 8192;
+// Pro reports aggregated work. One 8192-output request metered 9891 output
+// tokens and 4585 more input tokens than its previous reservation. These
+// buffers cover that receipt; a larger future overrun is still settled and held.
+const PRO_INPUT_HEADROOM = 8192;
+const RESERVED_OUTPUT_TOKENS = MAX_OUTPUT_TOKENS + 2048;
 const SAFE_ERRORS = ['insufficient_quota', 'credit_balance_exhausted', 'billing_hard_limit_reached', 'billing_not_active',
   'organization_spend_limit_exceeded', 'project_spend_limit_exceeded', 'organization_usage_limit_exceeded',
   'usage_limit_reached', 'rate_limit_exceeded', 'rate_limit_error', 'slow_down', 'invalid_api_key', 'model_not_found',
@@ -99,7 +104,6 @@ export function prepareBudgetedRequest(url, init) {
   if (!body || !Object.hasOwn(RATES, body.model) || body.tools?.length || body.functions?.length
     || body.function_call || body.previous_response_id || body.conversation || body.background || body.stream
     || body.n && body.n !== 1 || body.service_tier && body.service_tier !== 'default') throw paused('unbounded-or-unpriced-request');
-  const rates = RATES[body.model];
   const responses = String(url) === RESPONSES;
   const requestedOutput = Number(body.max_output_tokens ?? body.max_completion_tokens ?? body.max_tokens ?? 4096);
   if (!Number.isInteger(requestedOutput) || requestedOutput < 1 || requestedOutput > 8192) throw paused('output-limit');
@@ -139,9 +143,20 @@ export function prepareBudgetedRequest(url, init) {
   if (bytes > MAX_TEXT_BYTES || images > 3 || Buffer.byteLength(init.body, 'utf8') > 20 * 1024 * 1024) throw paused('input-limit');
   // Reserve well above the previous generation's documented high-detail image size.
   // The text and image ceilings keep the request below long-context pricing.
-  const inputTokens = bytes + TEXT_TOKEN_OVERHEAD + images * 25000;
   return { init: { ...init, body: JSON.stringify(body) }, model: body.model,
-    reservedUsd: money((inputTokens * rates[0] + outputTokens * rates[1]) / 1000000) };
+    reservedUsd: reservedRequestUsd(body.model, bytes, images) };
+}
+
+function reservedRequestUsd(model, textBytes, images = 0) {
+  const input = textBytes + TEXT_TOKEN_OVERHEAD + Math.min(textBytes, PRO_INPUT_HEADROOM) + images * 25000;
+  return meteredUsageUsd(model, input, RESERVED_OUTPUT_TOKENS);
+}
+
+export function meteredUsageUsd(model, input, output) {
+  if (!Object.hasOwn(RATES, model) || !Number.isSafeInteger(input) || input < 0
+    || !Number.isSafeInteger(output) || output < 0) return null;
+  const [inputRate, outputRate] = RATES[model];
+  return money((input * inputRate + output * outputRate) / 1000000);
 }
 
 // FreeFinder's existing editors consume Chat Completions output. Responses
@@ -190,13 +205,13 @@ function asChatResponse(response, result) {
 export function createCreditBudget({ store, policy, clock = Date.now, request = fetch,
   allowAstraEnrichment = false } = {}) {
   let stopped = false;
-  const update = async transform => {
+  const update = async (transform, { dispatched = false } = {}) => {
     for (let attempt = 0; attempt < 8; attempt++) {
       let snapshot;
       try { snapshot = await store.read(); } catch { throw paused('shared-storage-unavailable'); }
       const { state, revision } = snapshot;
       if (state.version !== 1 || !Array.isArray(state.reservations) || !Number.isFinite(state.pausedUntil)
-        || state.pausedUntil > clock()) throw paused('storage-or-provider-pause');
+        || (!dispatched && state.pausedUntil > clock())) throw paused('storage-or-provider-pause');
       if (!state.creditPeriod && state.reservations.length) throw paused('unattributed-spend');
       if (state.reservations.some(row => !Number.isFinite(row.usd) || row.usd < 0 || !Number.isFinite(row.at))) throw paused('invalid-spend-ledger');
       if (state.modelPausedUntil !== undefined && (!state.modelPausedUntil || typeof state.modelPausedUntil !== 'object'
@@ -240,9 +255,7 @@ export function createCreditBudget({ store, policy, clock = Date.now, request = 
       if (preserveDealCorrectionCapacity) {
         // One ordinary grounded text correction may need an editor and a
         // reviewer. These are the same text-only ceilings used for admission.
-        const [inputRate, outputRate] = RATES[SOL];
-        const textRequest = money(((MAX_TEXT_BYTES + TEXT_TOKEN_OVERHEAD) * inputRate
-          + MAX_OUTPUT_TOKENS * outputRate) / 1000000);
+        const textRequest = reservedRequestUsd(SOL, MAX_TEXT_BYTES);
         const correction = 2 * Math.min(policy.requestLimitUsd, textRequest);
         if (periodAfter + correction > policy.periodLimitUsd || dayAfter + correction > rollingLimit) {
           throw paused('pending-deal-correction-priority');
@@ -272,21 +285,29 @@ export function createCreditBudget({ store, policy, clock = Date.now, request = 
         await update(state => ({ ...state, modelPausedUntil: { ...state.modelPausedUntil,
           [prepared.model]: Math.max(state.modelPausedUntil?.[prepared.model] || 0, until) },
           // Older deployed Astra workers still read this field.
-          ...(astra ? { astraPausedUntil: Math.max(state.astraPausedUntil || 0, until) } : {}) }));
+          ...(astra ? { astraPausedUntil: Math.max(state.astraPausedUntil || 0, until) } : {}) }), { dispatched: true });
       } else if (billingFailure || authenticationFailure || response.status === 403) {
         stopped = true;
-        await update(state => ({ ...state, pausedUntil: Math.max(state.pausedUntil || 0, clock() + 6 * 3600000) }));
+        await update(state => ({ ...state, pausedUntil: Math.max(state.pausedUntil || 0, clock() + 6 * 3600000) }), { dispatched: true });
       } else if (response.ok) {
         const usage = payload.usage;
         const input = usage?.input_tokens ?? usage?.prompt_tokens, output = usage?.output_tokens ?? usage?.completion_tokens;
-        if (Number.isInteger(input) && input >= 0 && Number.isInteger(output) && output >= 0) {
-          const rates = RATES[prepared.model];
-          const actual = money((input * rates[0] + output * rates[1]) / 1000000);
-          if (actual > prepared.reservedUsd) {
-            stopped = true;
-            await update(state => ({ ...state, pausedUntil: Date.parse(policy.expiresAt) }));
-          } else await update(state => ({ ...state, reservations: state.reservations.map(row => row.id === id
-            ? { ...row, usd: actual, status: 'settled' } : row) }));
+        const actual = meteredUsageUsd(prepared.model, input, output);
+        if (actual !== null) {
+          const overrun = actual > prepared.reservedUsd;
+          if (overrun) stopped = true;
+          await update(state => {
+            // Other workers may have paused new spending after this call was sent.
+            // Always reconcile its own reservation and preserve any existing hold.
+            if (!state.reservations.some(row => row.id === id && row.status === 'reserved')) throw paused('missing-reservation');
+            return {
+              ...state,
+              ...(overrun ? { pausedUntil: Math.max(state.pausedUntil, Date.parse(policy.expiresAt)),
+                costOverrun: state.costOverrun || { reservationId: id, model: prepared.model, reservedUsd: prepared.reservedUsd, actualUsd: actual } } : {}),
+              reservations: state.reservations.map(row => row.id === id
+                ? { ...row, usd: actual, status: 'settled', ...(overrun ? { reservedUsd: prepared.reservedUsd } : {}) } : row),
+            };
+          }, { dispatched: true });
         }
       }
       return adaptChat && response.ok ? asChatResponse(response, payload) : safeResponse(response, payload);
