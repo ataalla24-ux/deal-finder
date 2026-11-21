@@ -12,7 +12,7 @@ import {
 import { isAllowedFoodUrl } from "./power-food-sources.js";
 
 const FOOD =
-  /weckerl|laugenring|mohnschnecke|baguette|dinkel|kornspitz|kaffee|coffee|cappuccino|espresso|melange|matcha|tee\b|kakao|heißgetränk|heissgetraenk|mocktail|cocktail|drink|spritz|bier|beer|wein|limonade|getränk|burger|pizza|pasta|spaghetti|\bsteak\b|pommes|fries|kebab|kebap|döner|doener|schnitzel|hot.?dog|frühstück|breakfast|jause|brot|br[eö]t|breze|gebäck|semmel|knopferl|topfini|croissant|kuchen|strudel|dessert|eis\b|menü|menu|gericht|hauptspeise|teller|bällchen|waffel|sandwich|falafel|sushi|ramen|fish|fisch|backfisch|lachs|schollen|garnelen|chicken|backhuhn|backhendl|snack|minis\s*xxl|schoko|mozartkugel|trüffel|süßwaren|kostprobe|verkostung|mittagsangebot|bowl|cola/i;
+  /weckerl|laugenring|mohnschnecke|baguette|dinkel|kornspitz|kaffee|coffee|cappuccino|espresso|melange|matcha|tee\b|kakao|heißgetränk|heissgetraenk|mocktail|cocktail|drink|spritz|bier|beer|wein|limonade|getränk|burger|pizza|pasta|spaghetti|\bsteak\b|pommes|fries|kebab|kebap|döner|doener|schnitzel|hot.?dog|frühstück|breakfast|jause|brot|br[eö]t|breze|gebäck|semmel|knopferl|topfini|croissant|kuchen|strudel|dessert|eis\b|menü|menu|gericht|hauptspeise|teller|bällchen|waffel|sandwich|falafel|sushi|ramen|fish|fisch|backfisch|lachs|schollen|garnelen|chicken|backhuhn|backhendl|snack|minis\s*xxl|schoko|mozartkugel|trüffel|süßwaren|kostprobe|verkostung|mittagsangebot|bowl|\bcola\b/i;
 export { FOOD as FOOD_PRODUCT };
 const PRICE =
   /(?:€\s*\d{1,3}(?:[,.]\d{1,2})?|\d{1,3}(?:[,.]\d{1,2})?\s*(?:€|EUR\b|Euro\b))/i;

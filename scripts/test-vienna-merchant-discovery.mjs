@@ -1,4 +1,5 @@
 import assert from 'node:assert/strict';
+import { FOOD_PRODUCT } from '../scraper/power-food-extraction.js';
 import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
@@ -176,6 +177,8 @@ assert.doesNotMatch(omnomRows[0].title, /Details ansehen/);
 assert.match(omnomRows[0].title, /Beilage.*Kräuterlimonade gratis/);
 assert.equal(omnomRows[0].evidence.textSample, omnom);
 assert.equal(merchantRows('Jeden Sonntag gibt es unser Kindermenü für nur 5,90 statt 10,90.').length, 1);
+assert.equal(FOOD_PRODUCT.test('Winter Specials Coladas'), false);
+assert.equal(FOOD_PRODUCT.test('0,33 l Cola'), true);
 assert.equal(merchantRows('Jede Pizza/Pasta NUR € 9,50 + 0,33L Dose Cola GRATIS').length, 1);
 
 const sweetsUrl = 'https://viennasweets.com/de/offers';
