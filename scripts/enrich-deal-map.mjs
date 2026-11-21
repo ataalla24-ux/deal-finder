@@ -28,9 +28,12 @@ export function reconcileMapEnrichment(deals, result, { now = new Date() } = {})
     if (complete) {
       const point = points[0];
       // Publish only the verified result, never the original unverified cache.
-      const ready = { ...deal, address: point.address, distance: point.address, location: point.name || 'Wien',
+      const ready = points.length === 1 ? { ...deal, address: point.address, distance: point.address, location: point.name || 'Wien',
         city: 'Wien', postalCode: point.address.match(/\b(1\d{3})\s+(?:Wien|Vienna)\b/i)?.[1] || '',
-        latitude: point.latitude, longitude: point.longitude };
+        latitude: point.latitude, longitude: point.longitude } :
+        { ...deal, city: 'Wien', distance: 'Wien · mehrere Standorte' };
+      // The map associations are authoritative for multi-branch deals.
+      if (points.length > 1) for (const field of ['address', 'location', 'postalCode', 'latitude', 'longitude']) delete ready[field];
       for (const key of ['lat', 'lng', 'lon', 'coordinates']) delete ready[key];
       return projectEnrichmentDeal(updateDealEnrichment(ready, { completedFields: ['map'], now,
         ...(descriptionDeadline ? { nextReviewAt: descriptionDeadline } : {}) }));
@@ -115,8 +118,12 @@ export async function runMapEnrichment({ root = new URL('../', import.meta.url),
   catalog.chainRules = (await optional('reviews/map-chain-rules.json')).rules || [];
   const reviewed = await optional('reviews/map-addresses.json');
   const sourceCache = await optional('reviews/map-source-address-cache.json');
+  const merchantDirectory = (await optional('reviews/vienna-merchant-directory.json')).merchants || [];
+  const [websiteState, offerState, powerReport] = await Promise.all([
+    optional('reviews/vienna-merchant-website-state.json'), optional('reviews/vienna-merchant-offer-state.json'), optional('docs/power-scraper-report.json'),
+  ]);
   const { enrichSourceAddresses } = await import('./deal-map-source-addresses.mjs');
-  const sources = await enrichSourceAddresses({ deals, map, catalog, reviewed, cache: sourceCache, now,
+  const sources = await enrichSourceAddresses({ deals, map, catalog, reviewed, cache: sourceCache, merchantDirectory, websiteState, offerState, powerReport, now,
     maxRequests: Math.max(0, Math.min(20, Number(maxSourceRequests) || 0)), ...(fetchPage ? { fetchPage } : {}) });
   const enriched = await enrichMap({ deals, map, catalog, reviewed: sources.reviewed,
     cache: await optional('reviews/map-geocode-cache.json'), now,

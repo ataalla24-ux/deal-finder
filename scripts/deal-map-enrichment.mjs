@@ -134,17 +134,22 @@ export function candidatesFor(deal, reviewed, today) {
   if (onlineOnly(deal)) return { reason: 'online-only', addresses: [] };
   const override = reviewed[deal.id];
   if (override) {
-    if (override.dealUrl && override.dealUrl !== deal.url) return { reason: 'reviewed-offer-identity-mismatch', addresses: [] };
+    if ((override.dealUrl && override.dealUrl !== deal.url) || (override.brand && normalize(override.brand) !== normalize(deal.brand))) return { reason: 'reviewed-offer-identity-mismatch', addresses: [] };
     if (override.managedBy === 'reviewed-public-voucher-venue-v1') {
       const edited = [...(deal.slackEditedFields || []), ...(deal.liveEditedFields || [])];
-      const explicit = [deal.address, deal.location, deal.ort].filter(Boolean);
       const expected = override.locations || [];
-      const matches = value => extractAddresses(value).length === 1 && expected.some(address =>
-        addressKey(extractAddresses(value)[0]) === addressKey(address)
-        && (!extractAddresses(value)[0].postalCode || extractAddresses(value)[0].postalCode === address.postalCode));
+      const matches = (value, address) => {
+        const parsed = extractAddresses(value);
+        return parsed.length === 1 && addressKey(parsed[0]) === addressKey(address)
+          && (!parsed[0].postalCode || parsed[0].postalCode === address.postalCode);
+      };
+      // A published label belongs to the same independently verified address.
+      const locationLabel = value => ['wien', 'vienna'].includes(normalize(value)) || expected.some(address =>
+        address.venueName && normalize(value) === normalize(address.venueName) && matches(deal.address, address));
+      const explicit = [deal.address, ...[deal.location, deal.ort].filter(value => !locationLabel(value))].filter(Boolean);
       if (deal.editedInSlack || deal.slackFormEditTs || deal.slackEditedAt || deal.liveEditedAt
         || edited.some(key => ['address', 'location', 'ort', 'distance', 'city', 'postalCode'].includes(key))
-        || explicit.some(value => !matches(value))
+        || explicit.some(value => !expected.some(address => matches(value, address)))
         || (deal.city && !['wien', 'vienna'].includes(normalize(deal.city)))
         || (deal.postalCode && !expected.some(address => address.postalCode === deal.postalCode))) {
         return { reason: 'reviewed-offer-location-conflict', addresses: [] };

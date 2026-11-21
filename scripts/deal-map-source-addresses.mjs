@@ -1,9 +1,10 @@
 import { createHash } from 'node:crypto';
 import { setTimeout as pause } from 'node:timers/promises';
+import { merchantOfferHostPaused, retryAfterAt } from '../scraper/source-http-policy.js';
 import { extractAddresses, inspectDealLocation, locationFingerprint, normalize } from './deal-map-enrichment.mjs';
 
 const manager = 'source-address-discovery-v1';
-const policyVersion = 1;
+const policyVersion = 2;
 const userAgent = 'FreeFinder-source-discovery/1.0 (+https://freefinder.at)';
 const dayMs = 86400000;
 const ttl = { positive: 7 * dayMs, negative: dayMs, error: 15 * 60000 };
@@ -155,6 +156,43 @@ export async function inspectSourceAddressPage({ deal, html, url = deal.url, now
   const visible = visibleAddresses(text);
   const candidates = [...new Map(visible.map(address => [addressKey(address), address])).values()].slice(0, 10);
   if (!includesPhrase(text, brand)) return negative('brand-not-corroborated', candidates);
+
+  // A structured Offer can explicitly name multiple eligible outlets. A
+  // LocalBusiness directory, hidden JSON alone or a list of nearby stores cannot.
+  const offers = graph.nodes.filter(node => hasType(node, 'Offer') && normalize(node.name) === title && node.availableAtOrFrom);
+  if (offers.length) {
+    const signal = normalize(text);
+    if (offers.length !== 1 ||
+        !/\b(?:dieses angebot|diese aktion|dieser gutschein|this offer|this deal)\b.{0,80}\b(?:gilt|einlosbar|erhaltlich|valid|redeemable|available)\b/.test(signal) ||
+        /\b(?:nicht|ausgenommen|ausser|except|excluded|not|abgelaufen|beendet|expired|cancelled|ausgewahlte\w*|nur online|online only)\b/.test(signal)) {
+      return negative('ambiguous-offer-membership', candidates);
+    }
+    const offer = offers[0];
+    const places = [offer.availableAtOrFrom].flat().map(graph.resolve);
+    const seller = graph.resolve(offer.seller);
+    const window = validity(deal, today, now, { startDate: offer.validFrom, endDate: offer.validThrough });
+    if (!offer.url || !samePage(offer.url, url) || !samePage(offer.mainEntityOfPage?.['@id'] || offer.mainEntityOfPage, url) ||
+        normalize(seller?.name) !== brand || places.length < 1 || places.length > 10 || window.reason ||
+        /Discontinued|OutOfStock|SoldOut/.test(String(offer.availability || ''))) {
+      return negative('structured-offer-mismatch', candidates);
+    }
+    const visibleBranches = extractAddresses(text).filter(address => address.postalCode);
+    const branchKey = address => `${addressKey(address)}:${address.postalCode}`;
+    const locations = places.map(place => {
+      if (!['Place', 'Store', 'Restaurant', 'LocalBusiness'].some(type => hasType(place, type))) return null;
+      const address = postalAddress(graph.resolve(place.address));
+      return address && { ...address, ...(window.validFrom ? { validFrom: window.validFrom } : {}),
+        ...(window.validUntil ? { validUntil: window.validUntil } : {}) };
+    });
+    if (locations.some(location => !location)) return negative('invalid-offer-branch', candidates);
+    const listed = new Set(locations.map(branchKey)), shown = new Set(visibleBranches.map(branchKey));
+    if (listed.size !== locations.length || listed.size !== shown.size || ![...listed].every(key => shown.has(key))) {
+      return negative('offer-branch-evidence-mismatch', candidates);
+    }
+    return { outcome: 'positive', reason: 'exact-source-offer-address', candidates: locations,
+      evidenceKind: 'jsonld-explicit-offer-branches', evidenceExpiresAt: window.evidenceExpiresAt, locations };
+  }
+
   if (/\b(nicht|ausgenommen|ausser|except|excluded|not|abgelaufen|beendet|expired|cancelled|teilnehmende\w*|filialen|standorte|branches|locations|stores|nur online|online only)\b/.test(normalize(text))) return negative('ambiguous-offer-membership', candidates);
   if (new Set(visible.map(addressKey)).size !== 1) return negative(visible.length ? 'multiple-source-addresses' : 'no-visible-offer-address', candidates);
 
@@ -206,16 +244,33 @@ function inputFingerprint(deal) {
     deal.sourceUrl, deal.originalUrl, deal.cardEditorial?.sourceUrl]));
 }
 
+// The directory supplies only a lookup URL, not a pin or participation proof.
+// Refuse multiple possible official pages rather than choosing a namesake.
+function officialDirectoryPage(deal, directory) {
+  const brand = normalize(deal.brand);
+  if (brand.length < 5 || !Array.isArray(directory)) return '';
+  try {
+    const original = new URL(deal.url);
+    if (original.protocol !== 'https:' || original.username || original.password || !blockedHosts.test(original.hostname)) return '';
+  } catch { return ''; }
+  const postcode = String(deal.postalCode || '').trim();
+  const urls = new Set(directory.filter(merchant => normalize(merchant?.name) === brand
+    && (!postcode || String(merchant.postcode || '').trim() === postcode))
+    .map(merchant => sourceUrl(merchant.website)).filter(Boolean));
+  return urls.size === 1 ? [...urls][0] : '';
+}
+
 function usableCache(entry, deal, url, fingerprint, now, today) {
   if (!entry || entry.policyVersion !== policyVersion || entry.inputFingerprint !== fingerprint || entry.sourceUrl !== url) return false;
   const age = now - new Date(entry.checkedAt);
   if (!(age >= 0 && age < (ttl[entry.outcome] || 0))) return false;
   if (entry.outcome !== 'positive') return true;
-  if (!/^[a-f0-9]{64}$/.test(entry.contentFingerprint || '') || entry.locations?.length !== 1
+  if (!/^[a-f0-9]{64}$/.test(entry.contentFingerprint || '') || !Array.isArray(entry.locations)
+    || entry.locations.length < 1 || entry.locations.length > (entry.evidenceKind === 'jsonld-explicit-offer-branches' ? 10 : 1)
     || (entry.evidenceExpiresAt && !(Date.parse(entry.evidenceExpiresAt) > now.getTime()))) return false;
-  const address = entry.locations[0];
-  if (!postalAddress({ streetAddress: `${address.street} ${address.number}`, postalCode: address.postalCode, addressLocality: 'Wien' })) return false;
-  return !validity(deal, today, now, { startDate: address.validFrom, endDate: address.validUntil }).reason;
+  return entry.locations.every(address => postalAddress({ streetAddress: `${address.street} ${address.number}`,
+    postalCode: address.postalCode, addressLocality: 'Wien' }) &&
+    !validity(deal, today, now, { startDate: address.validFrom, endDate: address.validUntil }).reason);
 }
 
 /**
@@ -225,7 +280,7 @@ function usableCache(entry, deal, url, fingerprint, now, today) {
  * One already-started pinned-DNS call retains the helper's own DNS/HTTP timeouts.
  */
 export async function enrichSourceAddresses({ deals, map, catalog = {}, reviewed = {}, cache = {}, now = new Date(),
-  maxRequests = 8, fetchPage = fetchMerchantPage, maxDurationMs = 30000 }) {
+  merchantDirectory = [], websiteState = {}, offerState = {}, powerReport = {}, maxRequests = 8, fetchPage = fetchMerchantPage, maxDurationMs = 30000 }) {
   const enriched = structuredClone(reviewed);
   const nextCache = structuredClone(cache);
   // A returned auto-entry is not manual authority: revalidate through the cache on every run.
@@ -272,25 +327,52 @@ export async function enrichSourceAddresses({ deals, map, catalog = {}, reviewed
       fingerprint: locationFingerprint(deal), candidates: [] };
     rows.push(row);
     if (assessment.status !== 'needs-review' || assessment.reason !== 'missing-exact-address') continue;
-    const url = sourceUrl(deal.url);
-    if (!url) { row.reason = 'source-url-ineligible'; continue; }
-    row.sourceUrl = url;
-    // Never substitute a homepage, guessed merchant URL, editorial link or final redirect.
-    if ([deal.originalUrl, deal.sourceUrl, deal.cardEditorial?.sourceUrl].filter(Boolean).some(value => sourceUrl(value) !== url)) {
+    const originalUrl = sourceUrl(deal.url);
+    const firstUrl = originalUrl || officialDirectoryPage(deal, merchantDirectory);
+    if (!firstUrl) { row.reason = 'source-url-ineligible'; continue; }
+    const publishedIdentity = value => {
+      try { const normalized = new URL(value); normalized.hash = ''; return normalized.href; } catch { return ''; }
+    };
+    if ([deal.originalUrl, deal.sourceUrl, deal.cardEditorial?.sourceUrl].filter(Boolean)
+      .some(value => originalUrl ? sourceUrl(value) !== originalUrl : publishedIdentity(value) !== publishedIdentity(deal.url))) {
       row.reason = 'original-source-mismatch'; continue;
     }
     const window = validity(deal, today, now);
     if (window.reason) { row.reason = window.reason; continue; }
     const fingerprint = inputFingerprint(deal);
-    const key = `${manager}:${hash(String(deal.id))}`;
-    const result = nextCache[key];
+    const firstKey = `${manager}:${hash(String(deal.id))}`;
+    const urls = new Set([firstUrl]);
+    if (!originalUrl) {
+      if (merchantOfferHostPaused(firstUrl, websiteState, now, powerReport) || merchantOfferHostPaused(firstUrl, offerState, now)) {
+        row.reason = 'merchant-host-paused'; continue;
+      }
+      const site = websiteState[firstUrl];
+      const age = +now - Date.parse(site?.checkedAt);
+      if (site?.status === 'ok' && age >= 0 && age < 30 * dayMs && Array.isArray(site.offerUrls)) {
+        for (const discovered of site.offerUrls) {
+          const offer = sourceUrl(discovered);
+          if (offer && new URL(offer).origin === new URL(firstUrl).origin) urls.add(offer);
+          if (urls.size >= 4) break;
+        }
+      }
+    }
+    // One site per deal per run. A fresh miss on the homepage leaves the next
+    // already-discovered offer page eligible. Each source keeps its own TTL.
+    const sources = [...urls].map(url => {
+      const key = url === firstUrl ? firstKey : `${firstKey}:${hash(url)}`;
+      const result = nextCache[key];
+      const attempted = result?.sourceUrl === url ? Date.parse(result.lastAttemptAt || result.checkedAt) : NaN;
+      const lastAttempt = Number.isFinite(attempted) && attempted <= +now && attempted >= 0 ? attempted : -Infinity;
+      return { url, key, result, lastAttempt, fresh: usableCache(result, deal, url, fingerprint, now, today) };
+    });
+    const { url, key, result, lastAttempt, fresh } = sources.find(source => source.fresh && source.result.outcome === 'positive')
+      || sources.filter(source => !source.fresh).sort((a,b) => a.lastAttempt - b.lastAttempt)[0] || sources[0];
+    row.sourceUrl = url;
     const job = { deal, row, fingerprint, url, key, index: rows.length - 1 };
-    if (usableCache(result, deal, url, fingerprint, now, today)) {
+    if (fresh) {
       row.cacheHit = true;
       applyResult(job, result);
     } else {
-      const attemptedAt = result?.sourceUrl === url ? Date.parse(result.lastAttemptAt || result.checkedAt) : NaN;
-      const lastAttempt = Number.isFinite(attemptedAt) && attemptedAt >= 0 && attemptedAt <= now.getTime() ? attemptedAt : -Infinity;
       // Retain scheduling history, never expired or edited evidence, even on cache-only runs.
       if (Number.isFinite(lastAttempt)) nextCache[key] = { sourceUrl: url, lastAttemptAt: new Date(lastAttempt).toISOString() };
       else delete nextCache[key];
@@ -305,9 +387,17 @@ export async function enrichSourceAddresses({ deals, map, catalog = {}, reviewed
     let result;
     try {
       const origin = new URL(url).origin;
+      if (Date.parse(nextCache.hostPauses?.[origin]) > +now) { row.reason = 'merchant-host-paused'; continue; }
+      const recordDenial = response => {
+        if (![401, 403, 429].includes(response.status)) return;
+        const serverDeadline = Date.parse(retryAfterAt(response.headers?.['retry-after'], now)) || 0;
+        nextCache.hostPauses ||= {};
+        nextCache.hostPauses[origin] = new Date(Math.max(+now + 14 * dayMs, serverDeadline)).toISOString();
+      };
       let robots = robotsByOrigin.get(origin);
       if (!robots) {
         robots = await request(new URL('/robots.txt', url).href, markAttempt);
+        recordDenial(robots);
         robotsByOrigin.set(origin, robots);
       }
       const { robotsAllowsDiscovery, robotsParser } = await discoveryDependencies();
@@ -319,10 +409,12 @@ export async function enrichSourceAddresses({ deals, map, catalog = {}, reviewed
         result = { outcome: 'negative', reason: 'robots-crawl-delay-deferred', candidates: [] };
       } else {
         const page = await request(url, markAttempt);
+        recordDenial(page);
         if (page.status === 404 || page.status === 410) result = { outcome: 'negative', reason: 'source-unavailable', candidates: [] };
         else if (page.status !== 200) throw new Error('source-http-error');
         else if (!/^text\/html(?:;|$)/i.test(page.headers?.['content-type'] || '')) throw new Error('source-not-html');
-        else result = { ...await inspectSourceAddressPage({ deal, html: page.body, url, now }), contentFingerprint: hash(page.body) };
+        else result = { ...await inspectSourceAddressPage({ deal: { ...deal, url }, html: page.body, url, now }),
+          contentFingerprint: hash(page.body) };
       }
     } catch (error) {
       const reason = ['request-budget', 'time-budget', 'redirect-deferred', 'robots-unavailable', 'robots-unreadable', 'source-http-error', 'source-not-html'].includes(error.message)

@@ -80,6 +80,48 @@ test('LocalBusiness requires an explicit offer-membership sentence, not generic 
   assert.equal((await inspect({ graph: null, text: membership })).reason, 'membership-unproven');
 });
 
+const secondPostal = { ...postal, streetAddress: 'Praterstraße 10', postalCode: '1020' };
+const offerBranches = { '@type': 'Offer', name: deal.title, url: deal.url,
+  seller: { '@type': 'Organization', name: deal.brand }, validThrough: '2026-10-31',
+  availableAtOrFrom: [{ '@type': 'Store', address: postal }, { '@type': 'Store', address: secondPostal }] };
+const bothBranches = `${membership} Auch an der Praterstraße 10, 1020 Wien.`;
+
+test('exact official Offer plus visible membership resolves several Vienna branches within the same fetch', async () => {
+  const inspection = await inspect({ graph: offerBranches, text: bothBranches });
+  assert.equal(inspection.evidenceKind, 'jsonld-explicit-offer-branches');
+  assert.deepEqual(inspection.locations.map(x => x.postalCode), ['1010', '1020']);
+  const fixture = fixtures({ html: page({ graph: offerBranches, text: bothBranches }) });
+  const first = await run(fixture, { maxRequests: 2 });
+  assert.equal(first.requests, 2);
+  assert.equal(first.reviewed[deal.id].locations.length, 2);
+  const cached = await run(fixture, { cache: first.cache, maxRequests: 0 });
+  assert.equal(cached.reviewed[deal.id].locations.length, 2);
+  for (const [graph, text] of [
+    [offerBranches, membership], [offerBranches, bothBranches + ' Nicht in der Praterstraße.'],
+    [{ ...offerBranches, seller: { name: 'Cafe Other' } }, bothBranches],
+    [{ ...offerBranches, url: 'https://cafemorgen.at/anderer-deal' }, bothBranches],
+    [{ ...offerBranches, validThrough: '2026-10-09' }, bothBranches],
+    [{ ...offerBranches, availableAtOrFrom: [offerBranches.availableAtOrFrom[0], offerBranches.availableAtOrFrom[0]] }, bothBranches],
+  ]) assert.equal((await inspect({ graph, text })).outcome, 'negative');
+});
+
+test('a third-party deal can try one exact directory website, but only offer proof supplies the pin', async () => {
+  const target = { ...deal, url: 'https://www.instagram.com/p/Fixture/' };
+  const merchantDirectory = [{ name: deal.brand, website: deal.url, address: 'Untrusted contact address' }];
+  const fixture = fixtures({ html: page({ graph: offerBranches, text: bothBranches }) });
+  const runTarget = (fetcher, directory = merchantDirectory) => run(fetcher, {
+    deals: [target], maxRequests: 2, merchantDirectory: directory,
+  });
+  const result = await runTarget(fixture);
+  assert.equal(result.reviewed[deal.id].evidenceUrl, deal.url);
+  assert.equal(result.reviewed[deal.id].locations.length, 2);
+  assert.deepEqual(fixture.calls.map(x => x.url), [new URL('/robots.txt', deal.url).href, deal.url]);
+  const onlyDirectory = await runTarget(fixtures({ html: page({ graph: business, title: 'Unsere Filiale in Wien' }) }));
+  assert.equal(onlyDirectory.reviewed[deal.id], undefined);
+  const ambiguous = await runTarget(fixture, [...merchantDirectory, { name: deal.brand, website: 'https://another.at/offer' }]);
+  assert.equal(ambiguous.requests, 0);
+});
+
 test('Footer, hidden or unrelated addresses cannot establish offer membership', async () => {
   for (const extra of [`<footer><p>${visible}</p></footer>`, `<aside>${visible}</aside>`, `<div hidden>${visible}</div>`,
     `<div class="site-footer">${visible}</div>`, `<div style="display:none">${visible}</div>`]) {
@@ -474,4 +516,39 @@ test('Zero-budget import and eligible-cache reuse require no npm dependencies', 
     console.log('dependency-light cache path passed');`;
   const stdout = execFileSync(process.execPath, ['--no-warnings', '--experimental-loader', `data:text/javascript,${encodeURIComponent(loader)}`, '--input-type=module', '-e', code], { encoding: 'utf8' });
   assert.match(stdout, /dependency-light cache path passed/);
+});
+
+test('a later run tries a known same-site offer after the homepage miss and reuses only its positive proof', async () => {
+  const target = {...deal, url:'https://www.instagram.com/p/TestOffer/'};
+  const home = new URL('/', deal.url).href;
+  const merchantDirectory = [{name:deal.brand,website:home}];
+  const websiteState = {[home]:{status:'ok',checkedAt:now.toISOString(),offerUrls:['https://foreign.at/test',deal.url]}};
+  const calls = [];
+  const fetchPage = async url => {
+    calls.push(url);
+    const body = url.endsWith('/robots.txt') ? 'User-agent: *\nAllow: /'
+      : url === home ? page({graph:business,title:'Kontakt und Speisekarte'}) : page();
+    return {url,status:200,body,headers:{'content-type':url.endsWith('/robots.txt')?'text/plain':'text/html'}};
+  };
+  const inspect = (when, cache = {}, extra = {}) => enrichSourceAddresses({deals:[target],map,now:when,
+    merchantDirectory,websiteState,maxRequests:2,fetchPage,cache,...extra});
+  const first = await inspect(now);
+  assert.equal(first.reviewed[target.id],undefined);
+  assert.deepEqual(calls,[new URL('/robots.txt',home).href,home]);
+  const second = await inspect(new Date(+now+3600000),first.cache);
+  assert.equal(second.reviewed[target.id].evidenceUrl,deal.url);
+  assert.equal(second.requests,2);
+  assert.equal(calls.at(-1),deal.url);
+  const third = await inspect(new Date(+now+7200000),second.cache);
+  assert.equal(third.requests,0);
+  assert.equal(third.reviewed[target.id].evidenceUrl,deal.url);
+  assert(!calls.includes('https://foreign.at/test'));
+  const paused = await inspect(now,{}, {offerState:{[home]:{httpStatus:429,checkedAt:now.toISOString()}}});
+  assert.equal(paused.requests,0);
+  assert.equal(paused.report.deals[0].reason,'merchant-host-paused');
+  const blocked = await inspect(now, {}, { fetchPage: async url => ({ url, status:429,
+    headers:{'content-type':'text/plain','retry-after':'2000000'}, body:'' }) });
+  const afterDenial = await inspect(new Date(+now + 15 * 86400000), blocked.cache);
+  assert.equal(afterDenial.requests, 0, 'the alternate URL respects the same host Retry-After');
+  assert.equal(afterDenial.report.deals[0].reason,'merchant-host-paused');
 });

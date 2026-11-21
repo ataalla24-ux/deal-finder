@@ -122,3 +122,16 @@ for(const changed of [{number:'20'},{postalCode:'1020'},{street:'Othergasse'}]) 
   assert.equal(wrong.map.locations.some(x=>x.dealIds.includes(cinema.id)),false);
 }
 console.log('Reviewed redemption venues keep tenant identity, coordinate provenance and stable IDs without extra lookups.');
+
+const reviewedVenue = {url: 'https://example.at/offer',id:'source-venue',brand:'Testlokal',city:'Wien'};
+const venueProof = {[reviewedVenue.id]:{dealUrl:reviewedVenue.url,brand:reviewedVenue.brand,
+  managedBy:'reviewed-public-voucher-venue-v1',locations:[{street:'Wollzeile',number:'29',postalCode:'1010',venueName:'Testlokal'}]}};
+const verifiedPlace = {address:'Wollzeile 29, 1010 Wien',location:'Testlokal'};
+for (const row of [{location:'Wien'},verifiedPlace]) {
+  assert.equal(candidatesFor({...reviewedVenue,...row},venueProof,'2026-11-21').addresses.length,1);
+}
+for (const row of [{location:'Graz'}, {location:'Unbekannt',address:verifiedPlace.address}, {location:'Testlokal'},
+  {...verifiedPlace,address:'Wollzeile 28, 1010 Wien'}, {...verifiedPlace,brand:'Anderes Lokal'},
+  {...verifiedPlace,slackEditedFields:['address']}]) {
+  assert.equal(candidatesFor({...reviewedVenue,...row},venueProof,'2026-11-21').addresses.length,0);
+}

@@ -20,3 +20,21 @@ export function sourceFailureFields(error) {
     retryAt: error?.retryAt || '',
   };
 }
+
+export function merchantOfferHostPaused(url, state, now, powerReport = {}) {
+  const host = new URL(url).hostname.replace(/^www\./, '');
+  const powerPaused = (powerReport.sources || []).some(source => {
+    try {
+      return new URL(source.url).hostname.replace(/^www\./, '') === host
+        && ['access-denied', 'rate-limited'].includes(source.cooldown?.reason)
+        && Date.parse(source.cooldown.nextRetryAt) > +now;
+    } catch { return false; }
+  });
+  return powerPaused || Object.entries(state).some(([source, row]) => {
+    if (![401, 403, 429].includes(row?.httpStatus)) return false;
+    try {
+      return new URL(source).hostname.replace(/^www\./, '') === host
+        && Math.max(Date.parse(row.checkedAt) + 14 * 86400000, Date.parse(row.retryAt) || 0) > +now;
+    } catch { return false; }
+  });
+}

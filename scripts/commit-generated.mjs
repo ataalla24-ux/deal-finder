@@ -61,6 +61,10 @@ const MAP_INPUT_FILES = [
   'scripts/deal-map-source-addresses.mjs',
   'scripts/deal-map-business.mjs',
   'scripts/sync-deal-map-references.mjs',
+  'reviews/vienna-merchant-directory.json',
+  'reviews/vienna-merchant-website-state.json',
+  'reviews/vienna-merchant-offer-state.json',
+  'docs/power-scraper-report.json',
   'scripts/discover-vienna-merchants.mjs',
   'scraper/vienna-merchant-discovery.js',
 ];

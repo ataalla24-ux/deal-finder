@@ -3,6 +3,8 @@ import { load } from 'cheerio';
 import { merchantWebsite } from './vienna-merchant-discovery.js';
 import { FOOD_PRODUCT, extractFoodOffers } from './power-food-extraction.js';
 import { discoveryRejection } from './deal-discovery-policy.js';
+import { merchantOfferHostPaused } from './source-http-policy.js';
+export { merchantOfferHostPaused };
 
 const DAY = 86400000;
 const OFFER_PATH = /(?:^|[\/\s_.-])(?:aktionen?|aktionsbon|(?:tages|wochen|mittags)?angebote?|specials?|offers?|rabatt|deals?)(?=$|[\/\s_.-])|happy[-_\s]?hour|coupon|mittagsaktion|studentenangebot|geburtstagsangebot/i;
@@ -94,24 +96,6 @@ export function canonicalHomepageUrl(value, website) {
       || /\.(?:pdf|jpe?g|png|webp|gif|mp4)$/i.test(page.pathname)) return '';
     return page.href;
   } catch { return ''; }
-}
-
-export function merchantOfferHostPaused(url, state, now, powerReport = {}) {
-  const host = new URL(url).hostname.replace(/^www\./, '');
-  const powerPaused = (powerReport.sources || []).some(source => {
-    try {
-      return new URL(source.url).hostname.replace(/^www\./, '') === host
-        && ['access-denied', 'rate-limited'].includes(source.cooldown?.reason)
-        && Date.parse(source.cooldown.nextRetryAt) > +now;
-    } catch { return false; }
-  });
-  return powerPaused || Object.entries(state).some(([source, row]) => {
-    if (![401, 403, 429].includes(row?.httpStatus)) return false;
-    try {
-      return new URL(source).hostname.replace(/^www\./, '') === host
-        && Math.max(Date.parse(row.checkedAt) + 14 * DAY, Date.parse(row.retryAt) || 0) > +now;
-    } catch { return false; }
-  });
 }
 
 // Offer pages replace homepage slots; they do not add a second request budget.

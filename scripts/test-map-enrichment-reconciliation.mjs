@@ -72,6 +72,20 @@ test('hourly map retries cannot postpone a due description review past the quali
     unresolved, { now }).deals[0].enrichmentNextReviewAt, future, 'map worker does not change another task deadline');
 });
 
+test('a complete multi-branch offer publishes all links, not a misleading first-store address', () => {
+  const pending = projectEnrichmentDeal(original(['map']));
+  const map = { locations: [point(), { ...point(), id: 'another-pin', address: 'Am Hof 5, 1010 Wien' }] };
+  const basis = mapResult();
+  const result = reconcileMapEnrichment([pending], { ...basis, map, report: {
+    ...basis.report, deals: [{ ...basis.report.deals[0], locationCount: 2 }],
+  } }, { now });
+  const deal = result.deals[0];
+  assert.equal(deal.enrichmentPending, false);
+  assert.equal(deal.distance, 'Wien · mehrere Standorte');
+  for (const field of ['address', 'location', 'latitude', 'longitude', 'postalCode']) assert.equal(deal[field], undefined);
+  assert.equal(result.map.locations.filter(pin => pin.dealIds.includes(deal.id)).length, 2);
+});
+
 test('partial, missing, invalid, expired or wrong-deal points never clear map or leak public pins', () => {
   const pending = projectEnrichmentDeal(original(['map']));
   const variants = [
