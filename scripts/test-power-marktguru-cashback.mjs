@@ -105,3 +105,50 @@ test('withdrawn, foreign, altered and contradictory campaigns never enter the qu
   assert.equal(extract(detail(), url + '?archiv=1').length, 0);
   assert.equal(extract(detail(), other).length, 0);
 });
+
+test('Slack and app retain the food category and mixed redemption when online shops are excluded', async () => {
+  const {normalizeDeal: notify} = await import('../scraper/slack-notify.js');
+  const {normalizeDeal: approve} = await import('../scraper/slack-approve.js');
+  const {normalizeDealRecord} = await import('../scraper/deal-normalization-utils.js');
+  const {onlineOnly} = await import('./deal-map-enrichment.mjs');
+  const original = extract(detail({}, terms.replace('Bestimmte Shops', 'dm und Bipa-Onlineshops')))[0];
+  const misclassified = {...original, category:'beauty'};
+  for (const row of [notify(misclassified, 'power'), approve(misclassified), normalizeDealRecord(misclassified)]) {
+    assert.equal(row.category, 'essen');
+    assert.equal(onlineOnly(row), false);
+    assert.equal(row.address || '', '');
+  }
+});
+
+test('exact label repair keeps the existing Slack button and receipt, and a retry only reads', async () => {
+  const {repairQueuedSlackDeal} = await import('./repair-slack-queued-deal.mjs');
+  const offer = extract(detail())[0];
+  const target = {...offer, category:'essen', slackTs:'1.2', slackThreadTs:'1.0'};
+  const queuePayload = {deals:[target]};
+  const receipt = {dealId:target.id,url:target.url,slackTs:'1.2',slackThreadTs:'1.0',category:'beauty',decision:'',slackSentAt:'2026-11-21T12:00:00Z'};
+  const button = {type:'actions',elements:[{type:'button',action_id:'freefinder_edit_pending',text:{type:'plain_text',text:'Bearbeiten'},url:'https://example.invalid/signed'}]};
+  const labels = 'Kategorie: beauty | Typ: rabatt\nINTERN Karte: [online-only] Reines Online-Angebot. Nur Hinweis, keine Freigabe-/Entfernungsregel.';
+  let message = {ts:target.slackTs,thread_ts:target.slackThreadTs,bot_id:'test-bot',
+    text:target.id + '\n' + target.url + '\n' + labels, blocks:[{type:'section',text:{type:'mrkdwn',text:labels}},button]};
+  const methods = [];
+  const options = {action:'update',channel:'test',expectedDealId:target.id,url:target.url,sourceDeals:[offer],queuePayload,
+    validate:async()=>({allowedDeals:[offer]}),feedbackPayload:{events:[receipt]}, now, slackApi:async(method,payload)=>{
+      methods.push(method);
+      if(method === 'reactions.get') return {ok:true, message};
+      assert.equal(method,'chat.update');
+      assert.equal(payload.ts,target.slackTs);
+      message = {...message,...payload};
+      return {ok:true};
+    }};
+  const result = await repairQueuedSlackDeal(options);
+  assert.deepEqual(methods,['reactions.get','chat.update']);
+  assert.equal(result.slackChanged,true);
+  assert.deepEqual(result.feedbackPayload.events,[{...receipt,category:'essen'}]);
+  assert.deepEqual(message.blocks[1],button);
+  assert.match(message.text,/Kategorie: essen/);
+  assert.match(message.blocks[0].text.text,/INTERN Karte: \[needs-review\]/);
+  const retry = await repairQueuedSlackDeal({...options,feedbackPayload:result.feedbackPayload});
+  assert.equal(retry.slackChanged,false);
+  assert.equal(retry.feedbackPayload,undefined);
+  assert.deepEqual(methods,['reactions.get','chat.update','reactions.get']);
+});

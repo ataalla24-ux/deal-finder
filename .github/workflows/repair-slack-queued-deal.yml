@@ -70,4 +70,4 @@ jobs:
           node scripts/community-private-state.mjs persist
 
       - name: Commit repaired queue
-        run: node scripts/commit-generated.mjs --message "Repair queued Slack deal" --files docs/deals-pending-all.json
+        run: node scripts/commit-generated.mjs --message "Repair queued Slack deal" --files docs/deals-pending-all.json docs/deal-review-feedback.json

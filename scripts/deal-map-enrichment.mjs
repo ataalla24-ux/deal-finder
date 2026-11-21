@@ -98,6 +98,10 @@ function hasOnsiteRedemption(deal, place) {
 }
 
 export function onlineOnly(deal) {
+  // This source records retailers and also allows online purchases. A receipt
+  // uploaded in the app, or an excluded webshop, does not establish online-only.
+  if (deal.evidence?.extractionMethod === 'published-receipt-campaign' && deal.evidence.locationScope === 'austria-wide'
+      && deal.evidence.sourceUrl === deal.url && /^https:\/\/www\.marktguru\.at\/mb\//.test(deal.url)) return false;
   if (/^flight-/.test(deal.id || '')) return true;
   let host = '';
   try { host = new URL(deal.url).hostname; } catch {}

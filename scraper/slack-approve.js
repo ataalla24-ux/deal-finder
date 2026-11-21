@@ -675,7 +675,7 @@ function normalizeDeal(raw, options = {}) {
     type,
     deal.source,
     deal.originSource,
-  ]);
+  ], deal);
   const pubDate = toIsoDate(deal.sourcePublishedAt || deal.postPublishedAt || deal.pubDate);
   const approvedAt = toIsoDate(deal.approvedAt);
   const rawMissing = Array.isArray(deal.missingFields) ? deal.missingFields : [];

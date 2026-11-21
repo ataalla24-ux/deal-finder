@@ -426,7 +426,7 @@ function normalizeDeal(rawDeal, sourceKey) {
     description: cleanText(deal.description),
     url,
     category: protectedTitle || deal.flight ? inferCategory(deal)
-      : normalizeCategoryForScraper(inferCategory(deal), [title, deal.description]),
+      : normalizeCategoryForScraper(inferCategory(deal), [title, deal.description], deal),
     type,
     logo: identity.logo,
     logoUrl: identity.logoUrl,

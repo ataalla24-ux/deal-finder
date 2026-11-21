@@ -179,7 +179,21 @@ function inferCategoryFromText(parts = []) {
   return null;
 }
 
-function normalizeCategoryForScraper(rawCategory, parts = []) {
+// Product, purchase conditions and Austrian store participation were read
+// together from this receipt campaign. Excluded online shops in its full
+// legal text (e.g. dm/BIPA) do not describe the product or redemption channel.
+export function isMarktguruFoodCampaign(deal = {}) {
+  return deal.originSource === 'power-official-food' && /^power-food-[a-f0-9]{12}$/.test(deal.id || '')
+    && /^https:\/\/www\.marktguru\.at\/mb\/[a-z0-9-]+-cashback-\d+$/.test(deal.url || '')
+    && deal.evidence?.source === 'official-merchant-page' && deal.evidence.sourceUrl === deal.url
+    && deal.evidence.merchantSourceKey === 'marktguru Cashback'
+    && deal.evidence.extractionMethod === 'published-receipt-campaign'
+    && /^[0-9a-f]{64}$/.test(deal.evidence.contentHash || '');
+}
+
+function normalizeCategoryForScraper(rawCategory, parts = [], deal = {}) {
+  if (isMarktguruFoodCampaign(deal) && ![deal.slackEditedFields, deal.liveEditedFields].flat()
+    .some(field => /^(?:category|kategorie)$/i.test(field))) return 'essen';
   const original = cleanText(rawCategory).toLowerCase();
   const category = CATEGORY_ALIASES[original] || original;
   const inferred = inferCategoryFromText(parts);

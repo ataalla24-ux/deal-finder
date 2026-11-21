@@ -1170,7 +1170,7 @@ function normalizeDealRecord(deal = {}) {
     type,
     deal.source,
     deal.originSource,
-  ]);
+  ], deal);
 
   if (known?.name === 'Dyson' && /\b(?:hair\s+styled|haare?\s+stylen|haarstyling|styling\s+tour|styling\s+pop[- ]?up)\b/i.test(categorySignal)) {
     category = 'beauty';

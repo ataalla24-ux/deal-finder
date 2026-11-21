@@ -7,6 +7,8 @@ import { canonicalDealUrl, canonicalSocialPostKey } from '../scraper/deal-eviden
 import { normalizeDealRecord } from '../scraper/deal-normalization-utils.js';
 import { buildConfig as buildMetaConfig, normalizeGraphMediaItem } from '../scraper/meta-instagram-deals.js';
 import { buildSlackMessage } from '../scraper/slack-notify.js';
+import { isMarktguruFoodCampaign } from '../scraper/category-utils.js';
+import { reviewDealMap } from './deal-map-review.mjs';
 import { buildDealFromPost } from '../scraper/tiktok-deals-scanner.js';
 
 const __filename = fileURLToPath(import.meta.url);
@@ -200,6 +202,49 @@ function assertSlackResult(result, operation, allowedErrors = []) {
   throw new Error(`Slack ${operation} failed: ${cleanText(result?.error || 'unknown_error')}`);
 }
 
+// A queue revalidation can already have corrected its category while Slack
+// still displays the initial card. Read that exact card and preserve buttons,
+// attachments, decision and receipt time when repairing the two labels.
+async function repairFoodReceiptLabels(options, target, replacement, queuePayload, targetIndex) {
+  if (target.id !== replacement.id || target.evidence?.contentHash !== replacement.evidence?.contentHash
+      || replacement.category !== 'essen') throw new Error('Cashback source identity or conditions changed');
+  const feedback = options.feedbackPayload;
+  const receipts = feedback?.events?.filter(event => event.dealId === target.id && event.url === target.url
+    && event.slackTs === target.slackTs);
+  if (receipts?.length !== 1) throw new Error('Exact cashback delivery receipt missing or ambiguous');
+  const [receipt] = receipts;
+  const payload = { channel: options.channel, timestamp: target.slackTs };
+  const read = await options.slackApi('reactions.get', payload);
+  assertSlackResult(read, 'read cashback deal card');
+  const old = read.message;
+  if (!old?.bot_id || old.ts !== target.slackTs || old.thread_ts !== target.slackThreadTs
+      || !old.text?.includes(target.id) || !old.text.includes(target.url) || !Array.isArray(old.blocks))
+    throw new Error('Could not verify original cashback card');
+  const repaired = { ...target, category: 'essen' };
+  const mapNote = reviewDealMap(repaired).text;
+  if (mapNote.includes('[online-only]')) throw new Error('Cashback store participation is unresolved');
+  const fix = text => text.replace(/Kategorie: beauty \| Typ: rabatt/g, 'Kategorie: essen | Typ: rabatt')
+    .replace(/INTERN Karte: \[online-only\][^\n]*?Nur Hinweis, keine Freigabe-\/Entfernungsregel\./g, mapNote);
+  const text = fix(old.text);
+  if (!text.includes('Kategorie: essen | Typ: rabatt') || text.includes('INTERN Karte: [online-only]'))
+    throw new Error('Unrecognised cashback card format');
+  const blocks = structuredClone(old.blocks);
+  for (const block of blocks) {
+    const fields = [block.text, ...(block.type === 'context' ? block.elements : [])];
+    for (const field of fields) if (field?.type === 'mrkdwn' && typeof field.text === 'string') field.text = fix(field.text);
+  }
+  const slackChanged = text !== old.text || JSON.stringify(blocks) !== JSON.stringify(old.blocks);
+  if (slackChanged) assertSlackResult(await options.slackApi('chat.update', {
+    channel: options.channel, ts: target.slackTs, text, blocks,
+  }), 'correct original cashback card');
+  const changed = target.category !== repaired.category;
+  if (changed) queuePayload.deals[targetIndex] = repaired;
+  const feedbackPayload = receipt.category === 'essen' ? undefined : {
+    ...feedback, events: feedback.events.map(row => row === receipt ? { ...row, category: 'essen' } : row),
+  };
+  return { action: 'update', changed, slackChanged, deal: repaired, queuePayload, feedbackPayload };
+}
+
 export async function repairQueuedSlackDeal(options = {}) {
   const action = cleanText(options.action).toLowerCase();
   const targetUrl = cleanText(options.url);
@@ -319,6 +364,8 @@ export async function repairQueuedSlackDeal(options = {}) {
     throw new Error(`Current source deal failed validation${reasons.length ? `: ${reasons.join('; ')}` : ''}`);
   }
 
+  if (expectedDealId === target.id && isMarktguruFoodCampaign(replacement) && isMarktguruFoodCampaign(target))
+    return repairFoodReceiptLabels(options, target, replacement, queuePayload, targetIndex);
   const repaired = preserveQueueMetadata(target, replacement);
   if (presentationFingerprint(repaired) === presentationFingerprint(target)) {
     return { changed: false, action, deal: target, queuePayload };
@@ -357,6 +404,7 @@ function writeJsonAtomic(filePath, payload) {
 
 function resolveDocsJsonPath(value, fallback, expectedPattern) {
   const resolved = path.resolve(ROOT, value || fallback);
+  if (fallback === DEFAULT_QUEUE_PATH && resolved === path.join(ROOT, '.community-internal', 'queue.json')) return resolved;
   const docsRoot = `${path.join(ROOT, 'docs')}${path.sep}`;
   if (!resolved.startsWith(docsRoot) || !expectedPattern.test(path.basename(resolved))) {
     throw new Error(`Path must be an allowed docs JSON file: ${resolved}`);
@@ -410,13 +458,17 @@ async function main() {
     expectedDealId: process.env.SLACK_QUEUE_REPAIR_DEAL_ID,
     channel,
     queuePayload: readJson(queuePath),
+    feedbackPayload: action === 'update' && process.env.SLACK_QUEUE_REPAIR_DEAL_ID
+      ? readJson(path.join(ROOT, 'docs', 'deal-review-feedback.json')) : undefined,
     sourceDeals: action === 'update' ? readJson(sourcePath) : [],
     slackApi: (method, payload) => callSlackApi(token, method, payload),
   });
+  if (result.feedbackPayload) writeJsonAtomic(path.join(ROOT, 'docs', 'deal-review-feedback.json'), result.feedbackPayload);
   if (result.changed) writeJsonAtomic(queuePath, result.queuePayload);
   console.log(JSON.stringify({
     action: result.action,
     changed: result.changed,
+    ...(result.slackChanged !== undefined ? {slackChanged:result.slackChanged, receiptChanged:Boolean(result.feedbackPayload)} : {}),
     id: cleanText(result.deal?.id),
     title: cleanText(result.deal?.title),
     url: cleanText(result.deal?.url),
