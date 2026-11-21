@@ -25,7 +25,11 @@ test('two real review messages pass, the active coupon alias and expired Novembe
     if (index < 2) {
       assert.equal(deal.validUntil, ['2026-11-30', '2026-12-08'][index]);
       assert.equal(deal.expires, deal.validUntil + 'T22:59:59.999Z');
-      assert.match(deal.description, [/8,50 €.*11,50 €/u, /Gutschein.*ab 16 Uhr.*8 €.*12 €/u][index]);
+      assert.match(deal.description, [/8,50 €.*11,50 €/u, /ab 16 Uhr.*8 €.*12 €.*4 €.*6 €/u][index]);
+      if (index === 1) {
+        assert.doesNotMatch(deal.description, /gutschein/iu);
+        assert.match(deal.description, /2 € mehr.*8\. Dezember.*Vorrat/);
+      }
     } else if (index === 2) {
       assert.ok(evidence.caption.includes('D1001'));
       assert.ok(decision.reasons.some(reason => reason.startsWith('Bereits live:')));

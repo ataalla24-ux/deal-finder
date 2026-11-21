@@ -10,6 +10,8 @@ const pizza = { id: 'social-food-review-vmehme', url: pizzaPost, brand: 'M2 La R
   from: '2026-11-01', until: '2026-11-30',
   title: 'M2 La Romana: Klassische Pizzen ab 8,50 €, Spezialpizzen um 11,50 €',
   description: 'Im November kosten klassische Pizzen bei M2 La Romana in Wien-Meidling ab 8,50 €. Spezialpizzen gibt es um 11,50 €.' };
+// The coupon pointer on the front belongs to the separate Winzer Schnitzel.
+// The Happy Hour panel lists its own pair and single prices.
 const happyHour = { id: 'g2-13q9t1x', thread: '372595',
   url: 'https://www.preisjaeger.at/deals/xxxlutz-restaurant-gutscheine-ab-1711-zb-2x-schnitzel-mit-pommer-fur-8eur-oder-2x-grillteller-fur-12eur-372595',
   brand: 'XXXLutz Restaurant', merchant: 'XXXLutz',
@@ -18,7 +20,7 @@ const happyHour = { id: 'g2-13q9t1x', thread: '372595',
   from: '2026-11-17', until: '2026-12-08', endEpoch: 1796770740,
   reference: 'https://catalog.xxxlutz.at/frontend/catalogs/1420952/1/pdf/complete.pdf',
   title: 'XXXLutz: Zwei Schnitzel um 8 € oder zwei Grillteller um 12 €',
-  description: 'Mit Gutschein gibt es täglich ab 16 Uhr zwei Schweinsschnitzel mit Pommes für insgesamt 8 € oder zwei Grillteller für insgesamt 12 €. Den Gutschein bei der Bestellung abgeben. Gültig bis einschließlich 8. Dezember, solange der Vorrat reicht.' };
+  description: 'Zur Happy Hour gilt täglich ab 16 Uhr „2 für 1“. Zwei Schweinsschnitzel mit Pommes kosten insgesamt 8 €, zwei Grillteller insgesamt 12 €. Einzeln kostet das Schweinsschnitzel 4 € und der Grillteller 6 €. Ein Schnitzel vom Huhn kostet 2 € mehr. Die Aktion gilt vom 17. November bis einschließlich 8. Dezember 2026, solange der Vorrat reicht.' };
 const chickenAliasId = 'fc4g-1569bjd';
 const chickenAliasUrl = 'https://www.preisjaeger.at/deals/gutschein-11-crispychicken-in-ausgewahlten-burger-king-filialen-3x-wien-3x-wien-4x-niederosterreich-und-2x-burgenland-366802';
 const chickenOriginalUrl = 'https://www.gutschein.at/burger-king/1-plus-1-crispy-chicken-gratis';
