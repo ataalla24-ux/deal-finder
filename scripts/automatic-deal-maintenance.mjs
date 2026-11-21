@@ -624,7 +624,9 @@ export async function maintainFeedFile({ cwd = process.cwd(), allowAi = false, a
   }
   const beforeState = read(statePath, {});
   const result = maintainDeals(deals, { policy, edits, state: beforeState, now, sourceEvidence });
-  if (targetDealId && result.report.hidden.length) throw Error('Target deal is no longer eligible for copy review');
+  if (targetDealId && (result.deals.length !== 1 || result.deals[0].id !== targetDealId || result.report.hidden.length)) {
+    throw Error('Target deal is no longer eligible for copy review');
+  }
   result.report.ai = { attempted: 0, corrected: 0, deferred: 0, readyForModel: 0,
     models:{editor:editor?.model || modelForTask('editor'),review:modelForTask('review')},reasoningEffort:'max',reasoningMode:'pro' };
   result.state.checks ||= [];
@@ -752,5 +754,11 @@ if (process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.me
   const result = await maintainFeedFile({ apply: process.env.AUTOMATIC_MAINTENANCE_APPLY === '1', allowAi: true, targetDealId,
     ...(targetDealId ? { editor: { model: 'gpt-6.2-sol', request: observed(createProductionCreditFetch()) },
       request: observed(freeCreditOpenAiFetch) } : {}) });
-  console.log(JSON.stringify({ changed: result.changed, ...result.report, ...(targetDealId ? { targetDealId, calls } : {}) }));
+  if (targetDealId) {
+    const ai = result.report.ai || {};
+    const outcome = ai.deferred ? 'model-deferred' : ai.corrected ? 'verified-patch'
+      : ai.attempted ? 'no-safe-patch' : 'no-model-review-due';
+    console.log(JSON.stringify({ targetDealId, outcome, calls, changed: result.changed, ...result.report }));
+    if (ai.deferred) process.exitCode = 1;
+  } else console.log(JSON.stringify({ changed: result.changed, ...result.report }));
 }
