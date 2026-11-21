@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-11-21T20:07:02.486Z",
+  "generatedAt": "2026-11-21T20:18:21.972Z",
   "discoveryAvailability": {
     "note": "Transport evidence, not deal yield. Retry eligibility is not recovery. Candidate counts are not Slack deliveries. No extra runs or quota resets.",
     "lanes": [
@@ -54,17 +54,11 @@
   },
   "summary": {
     "filesConsidered": 32,
-    "totalCandidates": 626,
-    "uniqueCandidates": 593,
-    "distinctCandidates": 606,
-    "duplicateClusters": 13,
+    "totalCandidates": 627,
+    "uniqueCandidates": 590,
+    "distinctCandidates": 605,
+    "duplicateClusters": 15,
     "topHealthySources": [
-      {
-        "sourceKey": "wien-combined",
-        "sourceLabel": "Wien Deals Combined Graph",
-        "healthScore": 84,
-        "totalDeals": 2
-      },
       {
         "sourceKey": "instagram-apify",
         "sourceLabel": "Apify Instagram",
@@ -75,7 +69,7 @@
         "sourceKey": "meta-instagram",
         "sourceLabel": "Meta Instagram Graph",
         "healthScore": 70,
-        "totalDeals": 81
+        "totalDeals": 82
       },
       {
         "sourceKey": "food3",
@@ -88,6 +82,12 @@
         "sourceLabel": "Wiener Lokal-Angebotsseiten",
         "healthScore": 62,
         "totalDeals": 10
+      },
+      {
+        "sourceKey": "instagram-ai",
+        "sourceLabel": "Instagram AI Agent",
+        "healthScore": 62,
+        "totalDeals": 6
       }
     ],
     "topMissionSources": [
@@ -133,9 +133,9 @@
       {
         "sourceKey": "meta-instagram",
         "sourceLabel": "Meta Instagram Graph",
-        "coverageScore": 54,
-        "totalDeals": 81,
-        "fresh1dCount": 9
+        "coverageScore": 56,
+        "totalDeals": 82,
+        "fresh1dCount": 11
       },
       {
         "sourceKey": "gutscheine",
@@ -161,12 +161,6 @@
     ],
     "topPrecisionSources": [
       {
-        "sourceKey": "wien-combined",
-        "sourceLabel": "Wien Deals Combined Graph",
-        "precisionScore": 78,
-        "totalDeals": 2
-      },
-      {
         "sourceKey": "instagram-apify",
         "sourceLabel": "Apify Instagram",
         "precisionScore": 74,
@@ -179,10 +173,16 @@
         "totalDeals": 4
       },
       {
+        "sourceKey": "wien-combined",
+        "sourceLabel": "Wien Deals Combined Graph",
+        "precisionScore": 70,
+        "totalDeals": 2
+      },
+      {
         "sourceKey": "meta-instagram",
         "sourceLabel": "Meta Instagram Graph",
-        "precisionScore": 69,
-        "totalDeals": 81
+        "precisionScore": 68,
+        "totalDeals": 82
       },
       {
         "sourceKey": "joe",
@@ -193,12 +193,6 @@
     ],
     "topWeightedSources": [
       {
-        "sourceKey": "wien-combined",
-        "sourceLabel": "Wien Deals Combined Graph",
-        "sourceWeightScore": 65,
-        "totalDeals": 2
-      },
-      {
         "sourceKey": "instagram-apify",
         "sourceLabel": "Apify Instagram",
         "sourceWeightScore": 61,
@@ -208,13 +202,19 @@
         "sourceKey": "meta-instagram",
         "sourceLabel": "Meta Instagram Graph",
         "sourceWeightScore": 61,
-        "totalDeals": 81
+        "totalDeals": 82
       },
       {
         "sourceKey": "food3",
         "sourceLabel": "Firecrawl Key 2 - Food",
         "sourceWeightScore": 57,
         "totalDeals": 4
+      },
+      {
+        "sourceKey": "wien-combined",
+        "sourceLabel": "Wien Deals Combined Graph",
+        "sourceWeightScore": 57,
+        "totalDeals": 2
       },
       {
         "sourceKey": "gastro2",
@@ -296,80 +296,6 @@
   },
   "sources": [
     {
-      "sourceKey": "wien-combined",
-      "file": "deals-pending-wien-combined.json",
-      "sourceLabel": "Wien Deals Combined Graph",
-      "totalDeals": 2,
-      "uniqueDeals": 2,
-      "duplicateDeals": 0,
-      "duplicateAcrossSources": 0,
-      "fresh1dCount": 2,
-      "fresh7dCount": 2,
-      "viennaCount": 2,
-      "foodDrinkCount": 2,
-      "promoCount": 0,
-      "missingUrlCount": 0,
-      "sampleTitles": [
-        "10% Rabatt bei Abholung über unseren Online-Shop FoodVienna 1220Wien 1210Wien Tik",
-        "30 % RABATT"
-      ],
-      "lastRun": {
-        "status": "completed-with-errors",
-        "startedAt": "2026-11-21T19:41:40.243Z",
-        "finishedAt": "2026-11-21T19:43:26.858Z",
-        "durationMs": 106615,
-        "counts": {
-          "rawCandidates": 27,
-          "normalizedCandidates": 2,
-          "verifiedCandidates": 2,
-          "previousDeals": 0,
-          "acceptedDeals": 2,
-          "rejectedDeals": 24
-        },
-        "rejectedByReason": {
-          "excluded-promotion-type": 1,
-          "no-concrete-offer": 21,
-          "offer-expired": 1,
-          "alcohol-offer": 1
-        },
-        "errors": [
-          "#viennafood: Instagram scan paused: request-budget",
-          "#viennaeats: Instagram scan paused: request-budget",
-          "#wienfoodie: Instagram scan paused: request-budget"
-        ],
-        "reportFile": "deal-pipeline-last-run-wien-combined.json"
-      },
-      "uniqueRate": 1,
-      "duplicateRate": 0,
-      "fresh1dRate": 1,
-      "fresh7dRate": 1,
-      "viennaRate": 1,
-      "foodDrinkRate": 1,
-      "promoRate": 0,
-      "missingUrlRate": 0,
-      "averageQualityScore": 88,
-      "topCategories": [
-        {
-          "value": "essen",
-          "count": 2
-        }
-      ],
-      "topTypes": [
-        {
-          "value": "rabatt",
-          "count": 2
-        }
-      ],
-      "issues": [
-        "wenige klare Gratis-/Promo-Signale"
-      ],
-      "healthScore": 84,
-      "missionFitScore": 72,
-      "coverageScore": 12,
-      "precisionScore": 78,
-      "sourceWeightScore": 65
-    },
-    {
       "sourceKey": "instagram-apify",
       "file": "deals-pending-instagram-apify.json",
       "sourceLabel": "Apify Instagram",
@@ -423,24 +349,24 @@
       "sourceKey": "meta-instagram",
       "file": "deals-pending-meta-instagram.json",
       "sourceLabel": "Meta Instagram Graph",
-      "totalDeals": 81,
-      "uniqueDeals": 73,
-      "duplicateDeals": 8,
-      "duplicateAcrossSources": 4,
-      "fresh1dCount": 9,
-      "fresh7dCount": 72,
-      "viennaCount": 81,
-      "foodDrinkCount": 60,
+      "totalDeals": 82,
+      "uniqueDeals": 72,
+      "duplicateDeals": 10,
+      "duplicateAcrossSources": 6,
+      "fresh1dCount": 11,
+      "fresh7dCount": 73,
+      "viennaCount": 82,
+      "foodDrinkCount": 61,
       "promoCount": 35,
       "missingUrlCount": 0,
       "sampleTitles": [
-        "🥙 HÜHNER-DÖNER GRATIS 🥩 STEAK-DÖNER GRATIS 🥤 BEY GAZOZ GRATIS ❤️ Gemeinsam Gutes tun!",
-        "Wir schauen kostenlos drauf und geben dir eine erste Einschätzung",
-        "30 % RABATT"
+        "10% Rabatt bei Abholung über unseren Online-Shop FoodVienna 1220Wien 1210Wien Tik",
+        "30 % RABATT",
+        "🥙 HÜHNER-DÖNER GRATIS 🥩 STEAK-DÖNER GRATIS 🥤 BEY GAZOZ GRATIS ❤️ Gemeinsam Gutes tun!"
       ],
       "lastRun": null,
       "uniqueRate": 0.9,
-      "duplicateRate": 0,
+      "duplicateRate": 0.1,
       "fresh1dRate": 0.1,
       "fresh7dRate": 0.9,
       "viennaRate": 1,
@@ -451,7 +377,7 @@
       "topCategories": [
         {
           "value": "essen",
-          "count": 35
+          "count": 36
         },
         {
           "value": "kaffee",
@@ -477,7 +403,7 @@
       "topTypes": [
         {
           "value": "rabatt",
-          "count": 56
+          "count": 57
         },
         {
           "value": "gratis",
@@ -497,8 +423,8 @@
       ],
       "healthScore": 70,
       "missionFitScore": 53,
-      "coverageScore": 54,
-      "precisionScore": 69,
+      "coverageScore": 56,
+      "precisionScore": 68,
       "sourceWeightScore": 61
     },
     {
@@ -704,6 +630,81 @@
       "coverageScore": 12,
       "precisionScore": 61,
       "sourceWeightScore": 47
+    },
+    {
+      "sourceKey": "wien-combined",
+      "file": "deals-pending-wien-combined.json",
+      "sourceLabel": "Wien Deals Combined Graph",
+      "totalDeals": 2,
+      "uniqueDeals": 0,
+      "duplicateDeals": 2,
+      "duplicateAcrossSources": 2,
+      "fresh1dCount": 2,
+      "fresh7dCount": 2,
+      "viennaCount": 2,
+      "foodDrinkCount": 2,
+      "promoCount": 0,
+      "missingUrlCount": 0,
+      "sampleTitles": [
+        "10% Rabatt bei Abholung über unseren Online-Shop FoodVienna 1220Wien 1210Wien Tik",
+        "30 % RABATT"
+      ],
+      "lastRun": {
+        "status": "completed-with-errors",
+        "startedAt": "2026-11-21T19:41:40.243Z",
+        "finishedAt": "2026-11-21T19:43:26.858Z",
+        "durationMs": 106615,
+        "counts": {
+          "rawCandidates": 27,
+          "normalizedCandidates": 2,
+          "verifiedCandidates": 2,
+          "previousDeals": 0,
+          "acceptedDeals": 2,
+          "rejectedDeals": 24
+        },
+        "rejectedByReason": {
+          "excluded-promotion-type": 1,
+          "no-concrete-offer": 21,
+          "offer-expired": 1,
+          "alcohol-offer": 1
+        },
+        "errors": [
+          "#viennafood: Instagram scan paused: request-budget",
+          "#viennaeats: Instagram scan paused: request-budget",
+          "#wienfoodie: Instagram scan paused: request-budget"
+        ],
+        "reportFile": "deal-pipeline-last-run-wien-combined.json"
+      },
+      "uniqueRate": 0,
+      "duplicateRate": 1,
+      "fresh1dRate": 1,
+      "fresh7dRate": 1,
+      "viennaRate": 1,
+      "foodDrinkRate": 1,
+      "promoRate": 0,
+      "missingUrlRate": 0,
+      "averageQualityScore": 88,
+      "topCategories": [
+        {
+          "value": "essen",
+          "count": 2
+        }
+      ],
+      "topTypes": [
+        {
+          "value": "rabatt",
+          "count": 2
+        }
+      ],
+      "issues": [
+        "wenige klare Gratis-/Promo-Signale",
+        "hohe Überschneidung mit anderen Quellen"
+      ],
+      "healthScore": 62,
+      "missionFitScore": 72,
+      "coverageScore": 12,
+      "precisionScore": 70,
+      "sourceWeightScore": 57
     },
     {
       "sourceKey": "instagram-verified",
