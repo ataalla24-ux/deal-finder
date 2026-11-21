@@ -1,6 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
+import { createHash } from 'node:crypto';
 import os from 'node:os';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -282,4 +283,39 @@ test('targeted review passes one real draft to the independent verifier and pres
     await assert.rejects(maintainFeedFile({ cwd: root, now, allowAi: true, targetDealId: 'absent',
       editor, request: modelMock(verifications) }), /exactly one live deal/);
     assert.equal(drafts.length, 1);
+  }));
+
+test('a duplicated benefit badge in verified merchant copy requests a grounded description only', () =>
+  fixture(async ({ root, put }) => {
+    const url = 'https://example.org/aktionen', text = '3+1 3+1 Gratis Aktion. Auf ausgewählte Süßwaren gilt unser 3+1-Angebot. Nur solange der Vorrat reicht!';
+    const evidence = { source: 'official-merchant-page', extractionMethod: 'merchant-card', sourceUrl: url,
+      textSample: text, contentHash: createHash('sha256').update(text).digest('hex') };
+    const row = { id: 'sweets', brand: 'Testladen', url, title: '3+1 auf ausgewählte Süßwaren',
+      description: text, evidence, expiryKind: 'unknown' };
+    assert.deepEqual(copyReviewReasons(row), ['description']);
+    assert.deepEqual(copyReviewReasons(row, new Set(['description'])), []);
+    for (const change of [
+      {description: '3+1 gratis auf ausgewählte Ware.'}, {evidence: {...evidence, contentHash:'outdated'}},
+      {evidence: {...evidence, sourceUrl:'https://example.org/other'}},
+      {evidence: {...evidence, extractionMethod:'news-index'}},
+    ]) assert.deepEqual(copyReviewReasons({...row,...change}), []);
+    put('docs/deals.json', { deals: [row] });
+    const cleanCopy = 'Für ausgewählte Süßwaren gilt die Aktion 3+1, solange der Vorrat reicht.';
+    let editorCalls = 0, verifierCalls = 0;
+    const answer = value => Response.json({ choices: [{finish_reason:'stop',message:{content:JSON.stringify(value)}}] });
+    const result = await maintainFeedFile({ cwd: root, now, allowAi:true, request:async (_url,init) => {
+      const payload=JSON.parse(JSON.parse(init.body).messages[1].content);
+      if (payload.requestedFields) {
+        editorCalls++;
+        assert.deepEqual(payload.requestedFields, ['description']);
+        return answer({title:'',quote:'',description:cleanCopy,conditionsQuote:text,dateQuote:''});
+      }
+      verifierCalls++;
+      assert.deepEqual(payload.patch,{description:cleanCopy});
+      return answer({supported:true});
+    } });
+    assert.equal(editorCalls,1); assert.equal(verifierCalls,1);
+    assert.deepEqual(result.deals[0],{...row,description:cleanCopy});
+    assert.equal(result.report.ai.corrected,1);
+    assert.deepEqual(copyReviewReasons(result.deals[0]), []);
   }));

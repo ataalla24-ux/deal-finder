@@ -213,10 +213,19 @@ export const maintenanceFingerprint = deal => hash(['id', 'url', 'brand', 'title
   'address', 'distance', 'category', 'evidence', 'metaGraphCaption', 'metaGraphOcrText', 'metaGraphBlockingReason',
   'approvedAt', 'forceKeep', 'liveEditedFields', 'slackEditedFields'].map(key => [key, deal[key] ?? null]));
 
+function duplicatedMerchantBenefitBadge(deal) {
+  const evidence = deal.evidence;
+  if (evidence?.source !== 'official-merchant-page' || evidence.extractionMethod !== 'merchant-card'
+    || evidence.sourceUrl !== deal.url || typeof evidence.textSample !== 'string' || evidence.textSample !== deal.description) return false;
+  return /^(\d{1,2}\s*\+\s*\d{1,2}|\d{1,3}\s*%)\s+\1(?=\s)/.test(evidence.textSample)
+    && createHash('sha256').update(evidence.textSample).digest('hex') === evidence.contentHash;
+}
+
 export function copyReviewReasons(deal, fields = new Set()) {
   const reasons = [];
   if (!fields.has('title') && needsSourceBackedTitle(deal.title)) reasons.push('title');
-  if (!fields.has('description') && (pendingDescription(deal) || hasOnlyPreviewDescription(deal))) reasons.push('description');
+  if (!fields.has('description') && (pendingDescription(deal) || hasOnlyPreviewDescription(deal)
+    || duplicatedMerchantBenefitBadge(deal))) reasons.push('description');
   if (!dateFields.some(key => fields.has(key))
     && (!dateFields.some(key => clean(deal[key])) || hasStartWithoutEnd(deal))) reasons.push('dates');
   return reasons;
