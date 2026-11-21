@@ -39,6 +39,16 @@ test('both Instagram runs honor the longest saved pause without navigating or ex
   assert.deepEqual(recovered.snapshot(), {});
 });
 
+test('Instagram reports bounded navigation failures without recording paths or query secrets', async () => {
+  const access = createInstagramWebAccess({ now });
+  const details = [];
+  const refuse = fakePage({ status: 418 });
+  assert.equal(await openInstagramDailyPage(refuse, url, access, 0, detail => details.push(detail)), 'unavailable');
+  const transport = { goto: async () => { throw new Error('page.goto: net::ERR_CONNECTION_RESET at https://example.org?secret=never-log'); } };
+  assert.equal(await openInstagramDailyPage(transport, url, access, 0, detail => details.push(detail)), 'unavailable');
+  assert.deepEqual(details, ['http-418', 'net::ERR_CONNECTION_RESET']);
+});
+
 test('Instagram stops on rate limit, login redirect or blocking form, not on a navigation link', async () => {
   for (const [options, reason] of [
     [{ status: 429 }, 'http-429'],

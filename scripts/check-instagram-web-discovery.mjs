@@ -26,7 +26,7 @@ for (const key of read('slack-seen-posts').seenPostKeys || []) {
 
 const result = spawnSync(process.execPath, ['scraper/instagram-daily-sync.js'], {
   stdio: 'inherit',
-  env: { ...process.env, IG_MAX_PAGE_VISITS: '12', IG_MAX_SOURCES_TOTAL: '8', IG_SOURCE_DELAY_MS: '1800' },
+  env: { ...process.env, IG_MAX_PAGE_VISITS: '12', IG_MAX_SOURCES_TOTAL: '3', IG_SOURCE_DELAY_MS: '1800' },
 });
 const after = read('instagram-discovery-report');
 const ran = after.updatedAt !== before.updatedAt && after.github?.runId === process.env.GITHUB_RUN_ID;
@@ -41,6 +41,7 @@ const evidence = {
   provenance: ran ? after.github : null,
   status: result.status !== 0 ? 'probe-failed' : ran ? after.status : 'deferred-before-navigation',
   visitedProfiles: ran ? after.visitedSources : 0,
+  profileNavigation: ran ? after.profileNavigation : {},
   profilesWithPostLinks: ran ? after.readableProfiles : 0,
   visitedPosts: ran ? after.visitedPosts : 0,
   acceptedFromThisRun: ran ? after.scrapedDealsRaw : 0,

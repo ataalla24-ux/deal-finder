@@ -377,30 +377,39 @@ function deriveBrandFromPostData(data, postUrl) {
   }
 }
 
-export async function openInstagramDailyPage(page, url, access, settleMs = 900) {
-  if (access.pause('profiles')) return 'paused';
-  const response = await page.goto(url, { waitUntil: 'domcontentloaded', timeout: 12000 });
+export async function openInstagramDailyPage(page, url, access, settleMs = 900, record = () => {}) {
+  const outcome = (status, reason) => { record(reason); return status; };
+  if (access.pause('profiles')) return outcome('paused', 'cooldown');
+  let response;
+  try {
+    response = await page.goto(url, { waitUntil: 'domcontentloaded', timeout: 12000 });
+  } catch (error) {
+    const code = /\b(net::ERR_[A-Z_]{4,45})\b/.exec(error.message || '')?.[1];
+    return outcome('unavailable', code || (error.name === 'TimeoutError' ? 'navigation-timeout' : 'navigation-error'));
+  }
   const status = response?.status();
   if ([401, 403, 429].includes(status)) {
     access.failure('all', { status, retryAfter: response.headers()['retry-after'] });
-    return 'blocked';
+    return outcome('blocked', 'http-' + status);
   }
   if (instagramPageHasAccessWall({ finalUrl: page.url() })) {
     access.failure('all', { reason: 'login-wall' });
-    return 'blocked';
+    return outcome('blocked', 'login-wall');
   }
-  if (!response || !response.ok()) return 'unavailable';
+  if (!response || !response.ok()) return outcome('unavailable', status ? 'http-' + status : 'no-response');
   await page.waitForTimeout(settleMs);
   if (instagramPageHasAccessWall({ finalUrl: page.url(), html: await page.content() })) {
     access.failure('all', { reason: 'login-wall' });
-    return 'blocked';
+    return outcome('blocked', 'login-wall');
   }
   const final = new URL(page.url());
   const expected = new URL(url);
   const post = normalizeInstagramPublicPostUrl(url);
   const samePage = post ? normalizeInstagramPublicPostUrl(final.href) === post
     : final.pathname.toLowerCase().replace(/\/$/, '') === expected.pathname.toLowerCase().replace(/\/$/, '');
-  return final.origin === expected.origin && samePage ? 'readable' : 'unavailable';
+  if (final.origin !== expected.origin) return outcome('unavailable', 'unexpected-origin');
+  if (!samePage) return outcome('unavailable', final.pathname === '/' ? 'redirected-to-home' : 'redirected-to-other-page');
+  return outcome('readable', 'http-' + status);
 }
 
 function readJson(filePath) {
@@ -904,6 +913,7 @@ async function main() {
   const sourceQueue = buildSourceQueue(sourceStats);
   const runStats = new Map();
   const rejectionReasons = createRejectionCounters();
+  const profileNavigation = {};
   const candidateSnapshot = [];
   const acceptedDeals = [];
   const seenUrls = new Set();
@@ -969,8 +979,9 @@ async function main() {
       const sourcePerformance = sourcePerformanceScore(sourceStats[source.key]);
       pageVisits += 1;
       const profileUrl = `https://www.instagram.com/${source.username}/`;
-      const profile = await openInstagramDailyPage(page, profileUrl, access)
-        .catch(() => 'unavailable');
+      const recordNavigation = reason => { profileNavigation[reason] = (profileNavigation[reason] || 0) + 1; };
+      const profile = await openInstagramDailyPage(page, profileUrl, access, 900, recordNavigation)
+        .catch(() => { recordNavigation('profile-read-error'); return 'unavailable'; });
       console.log(`Instagram profile ${source.key}: ${profile}`);
       if (access.pause('profiles')) break;
       if (profile !== 'readable') {
@@ -1029,6 +1040,7 @@ async function main() {
       mode: 'profile-dom',
       status: access.pause('profiles') ? 'access-blocked' : readableProfiles ? 'collected' : 'no-readable-profiles',
       visitedSources: runStats.size,
+      profileNavigation,
       readableProfiles,
       pageVisits,
       totalCandidates,
