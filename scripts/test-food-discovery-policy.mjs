@@ -59,6 +59,12 @@ assert.equal(foodDiscoveryPriority({ title: 'Cocktails 50% guenstiger', category
 for (const title of ['Alkoholfreies Bier gratis', 'Non-alcoholic cocktails 50% off', 'Bier 0,0% gratis']) {
   assert.equal(foodDiscoveryPriority({ title }), 1, 'explicit alcohol-free drinks remain food candidates');
 }
+// Two bilingual menu entries for alcoholic mixed drinks reached the food channel.
+for (const title of [
+  'Havana Club 3Y · Havana Club Especial 3Y · Amaretto · Cocos · Obers · Ananassaft',
+  'Havana Club 7Y · Havana Especial · Bacardi · Crème de Cacao · Cane sugar · Orange bitters',
+]) assert.equal(discoveryRejection({ title, category: 'trinken' }), 'alcohol-offer');
+assert.equal(discoveryRejection({ title: 'Gratis Mocktail mit Kokos und Ananassaft' }), '');
 const sorted = [
   { title: 'Gratis Museumseintritt', qualityScore: 99 },
   { title: 'Gratis Kaffee', qualityScore: 80 },

@@ -14,7 +14,7 @@ function offerText(value) {
   return normalize([value.title, value.description, value.promotionEvidence].filter(v => typeof v === 'string').join('\n'));
 }
 
-const ALCOHOL = '(?:biere?n?|beers?|spritzer|spritz(?:getraenke?)?|aperol|campari|wein(?:e|verkostung)?|rotwein|weisswein|wines?|cuvees?|prosecco|rosecco|sekt|champagner|champagne|cocktails?|martinis?|shots?|longdrinks?|vodka|wodka|gin|rum|whisk[ey]+|tequila|likoer|schnaps|spirituosen|radler|gluehwein)';
+const ALCOHOL = '(?:biere?n?|beers?|spritzer|spritz(?:getraenke?)?|aperol|campari|wein(?:e|verkostung)?|rotwein|weisswein|wines?|cuvees?|prosecco|rosecco|sekt|champagner|champagne|cocktails?|martinis?|shots?|longdrinks?|vodka|wodka|gin|rum|havana club (?:especial )?[0-9]{1,2}y|whisk[ey]+|tequila|likoer|schnaps|spirituosen|radler|gluehwein)';
 const ALCOHOL_PATTERN = new RegExp(`\\b${ALCOHOL}\\b`, 'i');
 const NON_ALCOHOLIC = '(?:alkoholfrei(?:e[rmns]?)?|alcohol[- ]free|non[- ]alcoholic|0[.,]0\\s*%)';
 const FOOD = /\b(?:essen|speisen?|gerichte?|food|mahlzeiten?|mittagessen|restaurants?|getraenke?|pizza|burger|kebap|kebab|doener|dueruem|falafel|schnitzel|pasta|nudeln|noodles|ramen|sushi|bowls?|sandwich|wraps?|pommes|menue|mittagsmenue|lunch|brunch|fruehstueck|buffet|croissant|brot|semmel|gebaeck|backwaren|krapfen|topfen|kuchen|torte|desserts?|tiramisu|baklava|eis|gelato|kaffee|coffee|espresso|cappuccino|melange|kakao|latte|matcha|tee|tea|boba|ayran|limonade|softdrinks?|mocktails?|saefte|saft|smoothies?)\b/i;
