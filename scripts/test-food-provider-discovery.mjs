@@ -150,6 +150,18 @@ test('benchmark stays one-shot; scans expand to distinct allowlisted food pages 
   assert.deepEqual(scan.tasks.slice(0, 3).map(t => t.provider), ['scrapingbee', 'zyte', 'scraperapi']);
   assert.ok(scan.tasks.every(t => ['essen', 'kaffee'].includes(POWER_FOOD_SOURCES.find(s => s.name === t.source).category)));
 });
+test('cashback campaigns use direct Power slots even when provider allowance is available', async () => {
+  const source = POWER_FOOD_SOURCES.find(s => s.cashbackCampaigns);
+  const scan = planRequests(empty(), power(), usages, 'scan', now, '125');
+  assert.ok(!scan.tasks.some(task => task.source === source.name));
+  for (const provider of ['scraperapi', 'scrapingbee', 'zyte']) {
+    let calls = 0;
+    const client = new FoodProviderClient(provider, {env: {}, fetchImpl: async () => { calls++; }});
+    await assert.rejects(client.scrape(source), /direct-only-source/);
+    await assert.rejects(client.scrape(source, 'https://www.marktguru.at/mb/coupon-cashback-123'), /direct-only-source/);
+    assert.equal(calls, 0);
+  }
+});
 test('expired trial services leave normal free discovery running; missing guard does not claim success', () => {
   const later = new Date('2026-11-22T10:00:00Z');
   const report = { ...power(), finishedAt: later.toISOString() };

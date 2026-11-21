@@ -81,6 +81,7 @@ export class FoodProviderClient {
     return usageSummary(this.provider, body);
   }
   async scrape(source, target = source.url) {
+    if (source.cashbackCampaigns) throw new ProviderError('direct-only-source');
     if (!isAllowedFoodUrl(target, source)) throw new ProviderError('untrusted-target');
     try {
     let result, html, finalUrl, cost, status = 200;

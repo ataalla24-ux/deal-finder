@@ -120,7 +120,9 @@ export function scanTargets(state, powerReport, now) {
 export function sourceAvailable(source, powerReport, state, now) {
   // HTML-only providers cannot extract reviewed PDF coupons. Keep historical
   // reservations valid, but exclude these sources before any new provider call.
-  if (source.mediaOnly) return false;
+  // The public cashback index and one detail consume two direct Power slots.
+  // Like old media reservations, any earlier ledger allocation remains auditable.
+  if (source.mediaOnly || source.cashbackCampaigns) return false;
   if (!powerReport || !Number.isFinite(Date.parse(powerReport.finishedAt))
       || Date.parse(powerReport.finishedAt) > +now || +now - Date.parse(powerReport.finishedAt) > 2 * DAY) return false;
   const previous = powerReport.sources?.find(row => row.source === source.name && row.url === source.url);
