@@ -106,9 +106,19 @@ try {
   // The ordinary strict approval writer must retain its authoritative output
   // even when the independently rebuilt helper registry changed concurrently.
   writeFixture(localDir, 'approval-checkpoint.json', { confirmed: true });
+  const logoPath = 'docs/assets/brand-logos/xxxlutz-xxxlutz-at.png';
+  const logoBytes = fs.readFileSync(logoPath);
+  fs.mkdirSync(path.dirname(path.join(localDir, logoPath)), { recursive: true });
+  fs.writeFileSync(path.join(localDir, logoPath), logoBytes);
+  const logoPattern = 'docs/assets/brand-logos/*.png';
+  for (const workflow of ['approve-deals', 'live-deal-edit']) {
+    const yaml = fs.readFileSync(`.github/workflows/${workflow}.yml`, 'utf8');
+    const command = yaml.split('\n').find(line => line.includes('scripts/commit-generated.mjs --message'));
+    assert.ok(command.includes(`'${logoPattern}'`), `${workflow} must pass logo files to the publisher`);
+  }
   run(process.execPath, [SCRIPT_PATH, '--message', 'strict approval with registry movement',
     '--files', 'docs/approval-checkpoint.json', 'docs/instagram-merchant-registry.json',
-    'docs/deals-pending-firecrawl2.json'], localDir);
+    'docs/deals-pending-firecrawl2.json', logoPattern], localDir);
   run(process.execPath, [
     SCRIPT_PATH,
     '--skip-conflicts',
@@ -128,6 +138,7 @@ try {
   ], localDir);
 
   run('git', ['clone', '--branch', 'main', remoteDir, verifyDir], tempDir);
+  assert.deepEqual(fs.readFileSync(path.join(verifyDir, logoPath)), logoBytes);
   const payload = JSON.parse(fs.readFileSync(path.join(verifyDir, 'docs/deals-pending-all.json'), 'utf8'));
   assert.deepEqual(payload.deals.map((deal) => deal.id).sort(), ['local-new', 'remote-new']);
   assert.equal(payload.totalDeals, 2);
