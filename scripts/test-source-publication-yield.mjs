@@ -78,3 +78,36 @@ test('a later decision scan cannot erase an already verified conversion or attac
   assert.deepEqual(sourcePublicationYield({events:[repost]},feed([repost]),first,now).windows[0].totals.food,
     {delivered:1,approved:0,public:0});
 });
+
+test('merchant pilot compares equal windows and excludes replays, unrelated sources and prior deliveries', () => {
+  const start = Date.parse('2026-11-21T12:06:17Z');
+  const elapsed = 2 * 3600000, comparison = start - 14 * 86400000;
+  const sample = (id, at, source, url = '') => ({
+    dealId: id, originSource: source, category: 'essen', url,
+    slackTs: (at / 1000).toFixed(6), slackSentAt: new Date(at).toISOString(),
+    decidedAt: new Date(at + 1000).toISOString(), decision: 'approved', decisionSource: 'reaction-scan',
+  });
+  const merchant = 'vienna-merchant-website';
+  const coupon = 'https://www.marktguru.at/mb/test-cashback-100';
+  const prior = sample('old', comparison + 1000, merchant);
+  const recent = sample('new', start + 1000, merchant);
+  const cash = sample('cash', start + 2000, 'power-official-food', coupon);
+  const rows = [prior, recent, cash, sample('old', start + 3000, merchant),
+    sample('late', comparison + elapsed + 1, merchant), sample('other', start + 4000, 'Firecrawl', coupon)];
+  const input = { events: rows };
+  const checkedAt = new Date(start + elapsed);
+  const r = sourcePublicationYield(input, feed([prior, recent]), null, checkedAt);
+  const pilot = r.merchantCouponPilot;
+  assert.equal(pilot.durationHours, 2);
+  assert.deepEqual(pilot.before.food, { delivered:1, approved:1, public:1 });
+  assert.deepEqual(pilot.after.food, { delivered:3, approved:3, public:1 });
+  assert.equal(pilot.after.merchant.delivered, 1);
+  assert.equal(pilot.after.cashback.delivered, 1);
+  assert.equal(pilot.after.cashback.public, 0);
+  assert.match(formatSourcePublicationYield(r), /Händlerseiten und Cashback im Vergleich/);
+  const final = sourcePublicationYield(input, feed([]), r, new Date(start + 15 * 86400000));
+  assert.equal(final.merchantCouponPilot.complete, true);
+  assert.equal(final.merchantCouponPilot.durationHours, 336);
+  const later = sourcePublicationYield({events:[]}, feed([]), final, new Date(start + 50 * 86400000));
+  assert.deepEqual(later.merchantCouponPilot, final.merchantCouponPilot);
+});

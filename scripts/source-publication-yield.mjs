@@ -34,6 +34,36 @@ function addDeal(counter, food, hasApproval, isPublic) {
   }
 }
 
+// Compare the same weekdays and elapsed hours around the November rollout.
+const discoveryPilotStart = Date.parse('2026-11-21T12:06:17Z');
+const pilotDays = 14 * DAY;
+function merchantCouponPilot(deals, asOf, publicNow, prior) {
+  if (prior?.complete || asOf < discoveryPilotStart) return prior;
+  const length = Math.min(pilotDays, asOf - discoveryPilotStart);
+  const groups = () => ({ food: stages(), merchant: stages(), cashback: stages() });
+  const before = groups(), after = groups();
+  for (const deal of deals.values()) {
+    if (!deal.food) continue;
+    const since = deal.time - discoveryPilotStart;
+    const group = since >= 0 && since < length ? after
+      : since >= -pilotDays && since < length - pilotDays ? before : null;
+    if (!group) continue;
+    const counters = [group.food];
+    if (deal.source === 'vienna-merchant-website') counters.push(group.merchant);
+    if (deal.cashback) counters.push(group.cashback);
+    for (const count of counters) {
+      count.delivered++;
+      if (deal.hasApproval) count.approved++;
+      if (deal.isPublic) count.public++;
+    }
+  }
+  return {
+    startedAt: new Date(discoveryPilotStart).toISOString(), priorFrom: new Date(discoveryPilotStart - pilotDays).toISOString(),
+    checkedAt: new Date(asOf).toISOString(), durationHours: length / 3600000, before, after,
+    complete: publicNow && asOf >= discoveryPilotStart + pilotDays + DAY,
+  };
+}
+
 // Cohorts use the first retained confirmed message per deal ID. A retry cannot
 // earn a second discovery. The public stage requires the approved message itself.
 export function sourcePublicationYield(feedback, snapshot, previous, now = new Date(), baseline = null) {
@@ -89,6 +119,8 @@ export function sourcePublicationYield(feedback, snapshot, previous, now = new D
     if (!deals.has(event.dealId)) deals.set(event.dealId, {
       time, source: sourceOf(event), food: isFoodDrinkFeedbackEvent(event)
         || (event.category === 'supermarkt' && foodDrinkScore(event.title) > 0),
+      cashback: sourceOf(event) === 'power-official-food'
+        && /^https:\/\/www\.marktguru\.at\/mb\/[a-z0-9-]+-cashback-\d+$/.test(event.url || ''),
       hasApproval: false, isPublic: false,
     });
     if (time < asOf - 30 * DAY) continue;
@@ -113,6 +145,8 @@ export function sourcePublicationYield(feedback, snapshot, previous, now = new D
         || b.all.delivered - a.all.delivered || a.source.localeCompare(b.source));
     report.windows.push({ days, totals, sources });
   }
+  const pilot = merchantCouponPilot(deals, asOf, publicNow, previous?.merchantCouponPilot);
+  if (pilot) report.merchantCouponPilot = pilot;
   return report;
 }
 
@@ -130,6 +164,18 @@ export function formatSourcePublicationYield(report) {
       lines.push(`| ${source} | ${row.food.delivered} | ${row.food.approved} | ${row.food.public} | ${row.other.delivered} | ${row.other.approved} | ${row.other.public} |`);
     }
     lines.push('');
+  }
+  const pilot = report.merchantCouponPilot;
+  if (pilot) {
+    lines.push('## Händlerseiten und Cashback im Vergleich', '',
+      'Der Test begann am 21. November 2026 um 13:06 Uhr Wiener Zeit. Das Vergleichsfenster beginnt genau zwei Wochen früher. Beide Fenster umfassen dieselben Wochentage und bisher jeweils ' + pilot.durationHours.toFixed(1) + ' Stunden, höchstens 14 Tage.',
+      '', '| Essensangebote | Slack vorher | Slack seit Start | Häkchen vorher | Häkchen seit Start | Öffentlich vorher | Öffentlich seit Start |',
+      '|---|---:|---:|---:|---:|---:|---:|');
+    for (const [key, title] of [['food','Alle Quellen'], ['merchant','Wiener Händlerseiten'], ['cashback','Direkte marktguru-Cashbacks']]) {
+      const a = pilot.before[key], b = pilot.after[key];
+      lines.push(`| ${title} | ${a.delivered} | ${b.delivered} | ${a.approved} | ${b.approved} | ${a.public} | ${b.public} |`);
+    }
+    lines.push('', 'Jeder Deal zählt nach seiner ersten belegten Zustellung. Freigaben und öffentliche Sichtungen werden bis zum Prüfstand nachgetragen. Ältere Nachrichten hatten mehr Zeit für ein Häkchen. Änderungen der Gesamtzahlen können auch von anderen Quellen stammen. Prüfstand ' + pilot.checkedAt + '.', '');
   }
   return lines.join('\n') + '\n';
 }
