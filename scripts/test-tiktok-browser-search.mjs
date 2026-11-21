@@ -2,7 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import { chromium } from 'playwright';
 import { fetchTikTokApiCandidates } from '../scraper/tiktok-deals-scanner.js';
-import { observeTikTokSearchRoutes } from '../scraper/tiktok-browser-search.js';
+import { createTikTokBrowserSearch, observeTikTokSearchRoutes } from '../scraper/tiktok-browser-search.js';
 import { selectTikTokPostVisits } from '../scraper/tiktok-search-discovery.js';
 
 const now = new Date('2026-11-11T12:00:00Z');
@@ -10,15 +10,18 @@ const item = id => ({ id:String(id),author:{uniqueId:'vienna.cafe'},desc:'Wien: 
 const body = (items, more=false) => ({status_code:0,data:items,has_more:more});
 const response = data => ({status:200,contentType:'application/json',body:JSON.stringify(data)});
 
-async function fixture({ documentStatus=200, html, api=()=>response(body([item(123)])) }, run) {
+async function fixture({ documentStatus=200, html, homepage, api=()=>response(body([item(123)])) }, run) {
   const browser=await chromium.launch({headless:true});
   try {
     const context=await browser.newContext({serviceWorkers:'block'});
     const calls=[];
+    const documents=[];
     // Every request is fulfilled or aborted locally; these tests never contact TikTok.
     await context.route('**/*', async route => {
       const url=new URL(route.request().url());
       if (url.origin !== 'https://www.tiktok.com') return route.abort();
+      if (route.request().isNavigationRequest()) documents.push(url.pathname);
+      if (url.pathname === '/' && homepage) return route.fulfill({status:documentStatus,contentType:'text/html',body:homepage});
       if (url.pathname === '/search') return route.fulfill({status:documentStatus,contentType:'text/html',body:html || `
         <body>Search results<script>
         const keyword=new URLSearchParams(location.search).get('q');
@@ -32,11 +35,47 @@ async function fixture({ documentStatus=200, html, api=()=>response(body([item(1
       return route.abort();
     });
     const page=await context.newPage();
-    await run(page,calls);
+    await run(page,calls,documents);
   } finally { await browser.close(); }
 }
 const scan = (page,options={}) => fetchTikTokApiCandidates(page,{keywords:['wien gratis kaffee'],now,
-  wait:async()=>{},timeoutMs:1500,...options});
+  wait:async()=>{},timeoutMs:1500,createTransport:createTikTokBrowserSearch,...options});
+
+const scanDirect = (page, options) => scan(page, { ...options, createTransport: undefined });
+
+test('the default scanner starts at the homepage, then sends only the October video searches', async () => {
+  const homepage = '<body>Home<script>fetch("/api/search/suggest/guide/").catch(() => {});</script></body>';
+  await fixture({ homepage, api: (_url, n) => response(body([item(n)], true)) }, async (page, calls, documents) => {
+    const result = await scanDirect(page, { pages: 2 });
+    assert.deepEqual(documents, ['/']);
+    assert.equal(result.transport, 'direct-browser-search');
+    assert.equal(result.navigations, 1);
+    assert.equal(result.searchRequests, 2);
+    assert.equal(result.rows.length, 2);
+    assert.deepEqual(calls.map(url => [url.pathname, ...url.searchParams.values()]), [
+      ['/api/search/general/full/', 'wien gratis kaffee', '0', '30'],
+      ['/api/search/general/full/', 'wien gratis kaffee', '30', '30'],
+    ]);
+  });
+});
+
+test('the direct homepage search honors refusal and distinguishes a zero-byte response from a result list', async () => {
+  const options = { keywords: ['food', 'coffee'] };
+  for (const [config, status, reason, count] of [
+    [{ homepage: '<form><input type="password"></form>' }, 403, 'login-wall', 0],
+    [{ homepage: '<body>Home</body>', api: () => ({status:429,headers:{'Retry-After':'172800'},body:''}) }, 429, 'response-http-error', 1],
+    [{ homepage: '<body>Home</body>', api: () => ({status:200,headers:{'Content-Length':'0'},body:''}) }, 200, 'empty-response', 1],
+  ]) {
+    await fixture(config, async (page, calls) => {
+      const result = await scanDirect(page, options);
+      assert.equal(calls.length, count);
+      assert.equal(result.rows.length, 0);
+      assert.equal(result.errors[0].status, status);
+      assert.equal(result.errors[0].transportReason, reason);
+      assert.equal(result.nextRetryAt, status === 429 ? '2026-11-13T12:00:00.000Z' : '2026-11-12T12:00:00.000Z');
+    });
+  }
+});
 
 test('the route-only probe blocks all search requests and logs bounded shape information only', async () => {
   await fixture({ html: '<script>fetch("/api/search/suggest/guide/?keyword=known-term&signature=keep-out");'
@@ -113,7 +152,7 @@ test('HTTP refusal, visible challenge, missing data and unrelated responses are 
 test('active pause does not even install a browser transport or navigate', async () => {
   const page=new Proxy({}, {get(){assert.fail('no browser access during saved pause');}});
   const previous={nextRetryAt:'2026-11-11T22:22:04.465Z',nextKeywordIndex:1};
-  const result=await scan(page,{previous});
+  const result=await scanDirect(page,{previous});
   assert.equal(result.nextRetryAt,previous.nextRetryAt);assert.equal(result.attemptedRequests,0);
 });
 

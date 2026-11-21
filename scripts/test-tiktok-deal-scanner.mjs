@@ -24,7 +24,8 @@ assert.equal(buildTikTokMediaConfig({
 }).mediaTesseractTimeoutMs, 30000);
 
 const currentSearchKeywords = buildTikTokApiKeywords(REFERENCE_NOW);
-assert.equal(currentSearchKeywords[0], 'wien gratis kaffee', 'food discovery starts without an over-specific date restriction');
+assert.equal(currentSearchKeywords[0], 'wien gratis 26 august 2026', 'the October order starts with a date-specific query');
+assert.ok(currentSearchKeywords.includes('wien gratis kaffee'));
 assert.ok(currentSearchKeywords.includes('wien gratis 26 august 2026'), 'dated searches remain in the rotation');
 assert.ok(currentSearchKeywords.includes('wien neueröffnung august 2026'));
 assert.ok(currentSearchKeywords.includes('wien gratis september 2026'));

@@ -7,7 +7,7 @@ import path from 'path';
 import { fileURLToPath } from 'url';
 import { chromium } from 'playwright';
 import { isTikTokLocalRetry, runTikTokApiDiscovery, selectTikTokPostVisits, tikTokDiscoveryHealth, tikTokRetryAt } from './tiktok-search-discovery.js';
-import { createTikTokBrowserSearch, tikTokAccessRefusal } from './tiktok-browser-search.js';
+import { createTikTokDirectSearch, tikTokAccessRefusal } from './tiktok-browser-search.js';
 import { runInstagramSearchQueries } from './instagram-search-discovery.js';
 import { readPublicSearchResponse } from './public-search-response.js';
 
@@ -53,13 +53,7 @@ const CONFIG = {
   maxApiCandidates: Number(process.env.TIKTOK_MAX_API_CANDIDATES || 1200),
 };
 
-const SEARCH_QUERIES = [...new Set([
-  'site:tiktok.com wien gratis kaffee',
-  'site:tiktok.com wien gratis kebab',
-  'site:tiktok.com wien 1 euro doener',
-  'site:tiktok.com wien pizza 1+1',
-  'site:tiktok.com wien gratis essen neueröffnung',
-  'site:tiktok.com vienna free food',
+const SEARCH_QUERIES = [
   'site:tiktok.com/@ wien gratis heute',
   'site:tiktok.com/@ wien nur heute gratis',
   'site:tiktok.com/@ wien gratis essen',
@@ -85,7 +79,7 @@ const SEARCH_QUERIES = [...new Set([
   'site:tiktok.com/@ wien gratis goodie bag',
   'site:tiktok.com/@ wien kostenlos aktion',
   'site:tiktok.com/@ tiktok wien gratis',
-].map(query => query.replace('site:tiktok.com/@', 'site:tiktok.com')))].slice(0, 25);
+];
 
 const CORE_TIKTOK_API_KEYWORDS = [
   'wien gratis heute',
@@ -189,11 +183,7 @@ export function buildTikTokApiKeywords(now = new Date()) {
     `vienna deals ${nextEnglishMonth} ${nextYear}`,
     'wien dieses wochenende gratis',
   ];
-  return [...new Set([
-    'wien gratis kaffee', 'wien gratis kebab', 'wien 1 euro döner',
-    'wien pizza 1+1', 'wien gratis essen', 'vienna free food',
-    ...currentQueries, ...CORE_TIKTOK_API_KEYWORDS, ...TIKTOK_SEED_ACCOUNT_KEYWORDS,
-  ])].slice(0, new Set([...currentQueries, ...CORE_TIKTOK_API_KEYWORDS, ...TIKTOK_SEED_ACCOUNT_KEYWORDS]).size);
+  return [...new Set([...currentQueries, ...CORE_TIKTOK_API_KEYWORDS, ...TIKTOK_SEED_ACCOUNT_KEYWORDS])];
 }
 
 const TIKTOK_API_KEYWORDS = buildTikTokApiKeywords();
@@ -986,10 +976,11 @@ export async function fetchTikTokApiCandidates(page, options = {}) {
   if (options.request || Date.parse(args.previous?.nextRetryAt) > +(args.clock?.() ?? args.now ?? new Date())) {
     return runTikTokApiDiscovery(args);
   }
-  const transport = await createTikTokBrowserSearch(page, isTikTokLocalRetry(args.previous) ? { ...args, pages: 1 } : args);
+  const createTransport = options.createTransport || createTikTokDirectSearch;
+  const transport = await createTransport(page, isTikTokLocalRetry(args.previous) ? { ...args, pages: 1 } : args);
   try {
     const result = await runTikTokApiDiscovery({ ...args, request: transport.request });
-    return { ...result, ...transport.stats, publicVideoLinks: transport.publicVideoLinks };
+    return { ...result, ...transport.stats, publicVideoLinks: transport.publicVideoLinks || [] };
   } finally { await transport.close(); }
 }
 

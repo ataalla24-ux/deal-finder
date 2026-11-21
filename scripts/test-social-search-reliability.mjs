@@ -183,14 +183,16 @@ test('DuckDuckGo preserves explicit Retry-After and holds when historical eviden
   assert.equal(held.boundedRetry,undefined);
 });
 
-test('TikTok search uses broad site path, deduplicates permalinks and never treats search time as post time', async () => {
+test('TikTok web search uses the October site path and deduplicates permalinks', async () => {
   const queries=[];
   const url=`https://www.tiktok.com/@vienna.cafe/video/${item.id}`;
   const result=await discoverTikTokLinksViaDuckDuckGo({now,sleep:async()=>{},fetcher:async input=>{
     queries.push(new URL(input).searchParams.get('q'));
     return new Response(`<a class="result__a" href="${url}">food</a><a href="${url}">food</a>`);
   }});
-  assert.equal(queries.length,25);assert.ok(queries.every(q=>!q.includes('site:tiktok.com/@')));
+  assert.equal(queries.length,25);
+  assert.equal(queries[0], 'site:tiktok.com/@ wien gratis heute');
+  assert.ok(queries.every(q => q.startsWith('site:tiktok.com/@ ')));
   assert.equal(new Set(queries).size,25);
   assert.deepEqual(result.links,[url]);
 });

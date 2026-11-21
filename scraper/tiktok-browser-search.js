@@ -37,6 +37,85 @@ const searchRoutePattern = '**/api/search/**';
 const auxiliarySearchPath = /^\/api\/search\/(?:user\/preview|suggest\/guide)\/?$/;
 const publicRouteShape = /^\/api\/search\/(?:general|item|user|suggest|recommend|suggest_words|suggest_guide|live|video|business|multi|aggregate)(?:\/(?:full|preview|guide|stream|list|mixed|v[1-9]\d?)){0,2}\/?$/;
 
+export async function createTikTokDirectSearch(page, { timeoutMs = 12000 } = {}) {
+  const stats = { transport: 'direct-browser-search', navigations: 0, searchRequests: 0, lastSearchResponse: null };
+  let expectedUrl = '';
+  const intercept = async route => {
+    const request = route.request();
+    if (request.url() !== expectedUrl || request.method() !== 'GET' || request.resourceType() !== 'fetch'
+        || request.frame() !== page.mainFrame()) return route.abort();
+    expectedUrl = '';
+    stats.searchRequests++;
+    await route.fallback();
+  };
+  await page.route(searchRoutePattern, intercept);
+
+  return {
+    stats,
+    async request({ keyword, offset, count }) {
+      if (!stats.navigations) {
+        stats.navigations++;
+        const document = await page.goto(publicSearchOrigin + '/', { waitUntil: 'domcontentloaded', timeout: 30000 });
+        if (document && !document.ok()) {
+          return { ok: false, status: document.status(), retryAfter: await document.headerValue('retry-after'),
+            transportReason: 'document-http-error' };
+        }
+        await page.waitForTimeout(2200);
+        const refusal = await tikTokAccessRefusal(page, document);
+        if (refusal) return { ok: false, ...refusal };
+      }
+      expectedUrl = `${publicSearchOrigin}/api/search/general/full/?keyword=${encodeURIComponent(keyword)}&offset=${offset}&count=${count}`;
+      try {
+        const { evidence, ...result } = await page.evaluate(async ({ url, timeoutMs }) => {
+          if (location.origin !== new URL(url).origin || location.pathname !== '/') {
+            return { ok: false, transportReason: 'request-failed' };
+          }
+          const response = await fetch(url, {
+            headers: { accept: 'application/json,text/plain,*/*' },
+            redirect: 'error',
+            signal: AbortSignal.timeout(timeoutMs),
+          });
+          const retryAfter = response.headers.get('retry-after');
+          const status = response.status;
+          const length = response.headers.get('content-length');
+          const declaredBytes = length && /^\d+$/.test(length) ? Number(length) : null;
+          const evidence = { status, declaredBytes, decodedBytes: null, retryAfterProvided: retryAfter !== null };
+          const unavailable = (transportReason, bodyState) => ({
+            ok: false, status, retryAfter, transportReason, evidence: { ...evidence, bodyState },
+          });
+          if (!response.ok) return unavailable('response-http-error', 'http-error');
+          if (declaredBytes > 4_000_000) return unavailable('response-too-large', 'too-large');
+          if (declaredBytes === 0) return unavailable('empty-response', 'declared-empty');
+          const decoder = new TextDecoder();
+          let text = '';
+          let decodedBytes = 0;
+          for await (const chunk of response.body || []) {
+            decodedBytes += chunk.byteLength;
+            if (decodedBytes > 4_000_000) return unavailable('response-too-large', 'too-large');
+            text += decoder.decode(chunk, { stream: true });
+          }
+          evidence.decodedBytes = decodedBytes;
+          if (!decodedBytes) return unavailable('empty-response', 'decoded-empty');
+          try {
+            return { ok: true, status, retryAfter, body: JSON.parse(text + decoder.decode()),
+              evidence: { ...evidence, bodyState: 'json' } };
+          } catch {
+            return unavailable('non-json-response', 'non-json');
+          }
+        }, { url: expectedUrl, timeoutMs });
+        stats.lastSearchResponse = evidence || null;
+        return result;
+      } finally {
+        expectedUrl = '';
+      }
+    },
+    async close() {
+      await page.goto('about:blank').catch(() => {});
+      await page.unroute(searchRoutePattern, intercept);
+    },
+  };
+}
+
 function countBucket(buckets, key, limit = 12) {
   if (Object.hasOwn(buckets, key) || Object.keys(buckets).length < limit) buckets[key] = (buckets[key] || 0) + 1;
 }
