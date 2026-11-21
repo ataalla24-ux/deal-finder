@@ -5,13 +5,13 @@ on:
       lane:
         description: TikTok search, Instagram profile read, or one Instagram public search query
         type: choice
-        options: [tiktok, tiktok-direct, instagram, instagram-search]
+        options: [tiktok, tiktok-direct, tiktok-routes, instagram, instagram-search]
         default: tiktok
 permissions:
   contents: read
 jobs:
   diagnose:
-    if: ${{ inputs.lane == 'tiktok' }}
+    if: ${{ inputs.lane == 'tiktok' || inputs.lane == 'tiktok-routes' }}
     runs-on: ubuntu-latest
     timeout-minutes: 8
     env:
@@ -28,12 +28,18 @@ jobs:
       - name: Verify dependency isolation and search contracts offline
         run: node --test scripts/test-lightweight-state-committer.mjs scripts/test-social-search-reliability.mjs scripts/test-tiktok-browser-search.mjs scripts/test-instagram-delivery-audit.mjs
       - name: Probe at most one TikTok API search and one public search, without secrets
+        if: ${{ inputs.lane == 'tiktok' }}
         run: node scripts/check-social-discovery.mjs
+      - name: Inspect one public search page while blocking all search data calls
+        if: ${{ inputs.lane == 'tiktok-routes' }}
+        run: node scripts/check-tiktok-search-routes.mjs
       - uses: actions/upload-artifact@v4
         if: always()
         with:
           name: social-discovery-diagnostics
-          path: output/social-discovery/probe.json
+          path: |
+            output/social-discovery/probe.json
+            output/social-discovery/tiktok-routes.json
           retention-days: 7
 
   instagram:

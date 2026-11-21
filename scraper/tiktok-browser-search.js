@@ -32,6 +32,62 @@ async function visiblePublicVideoLinks(page, keyword, limit) {
   }, { keyword, limit });
 }
 
+const publicSearchOrigin = 'https://www.tiktok.com';
+const searchRoutePattern = '**/api/search/**';
+const publicRouteShape = /^\/api\/search\/(?:general|item|user|suggest|recommend|suggest_words|suggest_guide|live|video|business|multi|aggregate)(?:\/(?:full|preview|guide|stream|list|mixed|v[1-9]\d?)){0,2}\/?$/;
+
+function countBucket(buckets, key, limit = 12) {
+  if (Object.hasOwn(buckets, key) || Object.keys(buckets).length < limit) buckets[key] = (buckets[key] || 0) + 1;
+}
+
+function countClass(value, limit) {
+  if (value === null) return 'absent';
+  const count = Number(value);
+  if (!/^[1-9]\d*$/.test(value) || !Number.isSafeInteger(count)) return 'invalid';
+  return count > limit ? 'over-cap' : 'within-cap';
+}
+
+function searchRequestShape(request, url, keyword, count) {
+  return {
+    path: url.origin === publicSearchOrigin && publicRouteShape.test(url.pathname) ? url.pathname : '[redacted]',
+    origin: url.origin === publicSearchOrigin ? 'first-party' : 'other',
+    method: request.method() === 'GET' ? 'GET' : 'other',
+    resource: ['fetch', 'xhr'].includes(request.resourceType()) ? request.resourceType() : 'other',
+    keyword: url.searchParams.get('keyword') === keyword ? 'match' : url.searchParams.has('keyword') ? 'mismatch' : 'absent',
+    count: countClass(url.searchParams.get('count'), count),
+  };
+}
+
+export async function observeTikTokSearchRoutes(page, keyword, { waitMs = 6000 } = {}) {
+  const stats = { navigationStatus: null, refusal: null, requests: {}, forwardedSearchRequests: 0, visibleVideoLinks: 0 };
+  const observe = async route => {
+    const request = route.request();
+    const url = new URL(request.url());
+    countBucket(stats.requests, JSON.stringify(searchRequestShape(request, url, keyword, 30)));
+    await route.abort();
+  };
+  await page.route(searchRoutePattern, observe);
+  try {
+    const document = await page.goto(publicSearchOrigin + '/search?q=' + encodeURIComponent(keyword), {
+      waitUntil: 'domcontentloaded', timeout: 15000,
+    });
+    stats.navigationStatus = document?.status() || null;
+    stats.refusal = await tikTokAccessRefusal(page, document);
+    if (document?.ok() && !stats.refusal) {
+      await page.waitForTimeout(waitMs);
+      stats.refusal = await tikTokAccessRefusal(page);
+      if (!stats.refusal) stats.visibleVideoLinks = (await visiblePublicVideoLinks(page, keyword, 30)).length;
+    }
+  } finally {
+    await page.goto('about:blank').catch(() => {});
+    await page.unroute(searchRoutePattern, observe);
+  }
+  return {
+    ...stats,
+    requests: Object.entries(stats.requests).map(([key, seen]) => ({ ...JSON.parse(key), seen })),
+  };
+}
+
 // Let the public search page create its own requests. Signatures and credentials
 // belong to the browser, and a refusal ends the scan.
 export async function createTikTokBrowserSearch(page, { pages = 3, count = 30, timeoutMs = 12000 } = {}) {
@@ -48,7 +104,7 @@ export async function createTikTokBrowserSearch(page, { pages = 3, count = 30, t
     if (waiting) { const resolve = waiting; waiting = null; resolve(value); }
     else responses.push(value);
   };
-  const routePattern = '**/api/search/**';
+  const routePattern = searchRoutePattern;
   const route = async route => {
     const request = route.request();
     const url = new URL(request.url());
@@ -57,14 +113,8 @@ export async function createTikTokBrowserSearch(page, { pages = 3, count = 30, t
       : url.pathname === '/api/search/item/full/' ? 'item-full'
       : url.pathname === '/api/search/user/full/' ? 'user-full' : 'other-search';
     stats.observedSearchEndpoints[endpoint] = (stats.observedSearchEndpoints[endpoint] || 0) + 1;
-    // Retain only short route names, never a query, signature, user ID, or
-    // foreign origin. Unknown paths remain blocked pending a source review.
-    const safePath = url.origin === 'https://www.tiktok.com'
-      && /^\/api\/search\/(?:general|item|user|suggest|recommend|suggest_words|suggest_guide|live|video|business)(?:\/(?:full|preview))?\/?$/.test(url.pathname)
-      ? url.pathname : '[redacted]';
-    if (Object.hasOwn(stats.observedSearchPaths, safePath) || Object.keys(stats.observedSearchPaths).length < 12) {
-      stats.observedSearchPaths[safePath] = (stats.observedSearchPaths[safePath] || 0) + 1;
-    }
+    const shape = searchRequestShape(request, url, keyword, count);
+    countBucket(stats.observedSearchPaths, shape.path);
     const requestCount = Number(url.searchParams.get('count') || count);
     const matching = url.origin === 'https://www.tiktok.com'
       && isGeneralFull

@@ -2,6 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import { chromium } from 'playwright';
 import { fetchTikTokApiCandidates } from '../scraper/tiktok-deals-scanner.js';
+import { observeTikTokSearchRoutes } from '../scraper/tiktok-browser-search.js';
 import { selectTikTokPostVisits } from '../scraper/tiktok-search-discovery.js';
 
 const now = new Date('2026-11-11T12:00:00Z');
@@ -36,6 +37,20 @@ async function fixture({ documentStatus=200, html, api=()=>response(body([item(1
 }
 const scan = (page,options={}) => fetchTikTokApiCandidates(page,{keywords:['wien gratis kaffee'],now,
   wait:async()=>{},timeoutMs:1500,...options});
+
+test('the route-only probe blocks all search requests and logs bounded shape information only', async () => {
+  await fixture({ html: '<script>fetch("/api/search/suggest/guide/?keyword=known-term&signature=keep-out");'
+    + 'fetch("/api/search/user/private_handle/?uid=9876543210");</script>' }, async (page, calls) => {
+    const result = await observeTikTokSearchRoutes(page, 'known-term', { waitMs: 300 });
+    assert.equal(result.navigationStatus, 200);
+    assert.equal(result.forwardedSearchRequests, 0);
+    assert.equal(calls.length, 0);
+    assert.ok(result.requests.some(request => request.path === '/api/search/suggest/guide/'
+      && request.keyword === 'match' && request.origin === 'first-party' && request.count === 'absent'));
+    assert.ok(result.requests.some(request => request.path === '[redacted]'));
+    assert.doesNotMatch(JSON.stringify(result), /known-term|keep-out|private_handle|9876543210/);
+  });
+});
 
 test('public frontend creates its requests; exact search responses yield original IDs and dates', async () => {
   await fixture({},async(page,calls)=>{
