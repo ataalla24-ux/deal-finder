@@ -3,9 +3,11 @@ import { randomUUID } from 'node:crypto';
 const HOUR = 3600000;
 const LEASE = 5 * 60000;
 const LIMIT = 150;
+const WIEN_COMBINED = 'wien-combined';
+const WIEN_COMBINED_RESERVED_SLOTS = 8;
 const BRANCH = 'automation/instagram-quota';
 const FILE = 'instagram-quota.json';
-const pause = (reason) => Object.assign(new Error(`Instagram shared quota paused: ${String(reason).replace(/^(?:Instagram shared quota paused: )+/, '')}`), { code: 'SCAN_BUDGET' });
+const pause = (reason, quotaReason = 'unavailable') => Object.assign(new Error(`Instagram shared quota paused: ${String(reason).replace(/^(?:Instagram shared quota paused: )+/, '')}`), { code: 'SCAN_BUDGET', quotaReason });
 
 function storageFailure(result, operation) {
   const rateLimited = [403, 429].includes(result.status)
@@ -15,7 +17,7 @@ function storageFailure(result, operation) {
   const retryMs = result.retryAfter && Number.isFinite(retrySeconds) ? Date.now() + retrySeconds * 1000 : 0;
   const resetMs = result.remaining === '0' && Number.isFinite(resetSeconds) ? resetSeconds * 1000 : 0;
   const retryAt = rateLimited ? new Date(Math.max(Date.now() + 60000, retryMs, resetMs)).toISOString() : '';
-  return Object.assign(pause(`GitHub quota storage ${operation}: HTTP ${result.status}${rateLimited ? ' (rate limit)' : ''}`), {
+  return Object.assign(pause(`GitHub quota storage ${operation}: HTTP ${result.status}${rateLimited ? ' (rate limit)' : ''}`, rateLimited ? 'storage-rate-limit' : 'unavailable'), {
     storage: { provider: 'github', operation, httpStatus: result.status, rateLimited: Boolean(rateLimited), retryAt },
   });
 }
@@ -141,7 +143,7 @@ export function readMetaRateUsage(headers) {
 
 export function createSharedQuotaFetch(fetchImpl, { store, clock = Date.now, blockSize = 5,
   maxRequestsPerHour = LIMIT, usageThreshold = 85, waitForBudgetMs = 0,
-  minRequestIntervalMs = 0, adaptiveMaxRequestsPerHour = 0,
+  minRequestIntervalMs = 0, adaptiveMaxRequestsPerHour = 0, lane = '',
   sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms)),
 } = {}) {
   let remaining = 0;
@@ -150,17 +152,27 @@ export function createSharedQuotaFetch(fetchImpl, { store, clock = Date.now, blo
   const limit = Math.max(1, Math.min(10000, Math.floor(Number(maxRequestsPerHour)) || LIMIT));
   const threshold = Math.max(20, Math.min(95, Number(usageThreshold) || 85));
   const adaptiveMax = Math.max(limit, Math.min(10000, Math.floor(Number(adaptiveMaxRequestsPerHour)) || limit));
-  const waitBudget = Math.max(0, Math.min(6 * 60000, Number(waitForBudgetMs) || 0));
+  const isWienCombined = lane === WIEN_COMBINED;
+  const waitBudget = Math.max(0, Math.min((isWienCombined ? 8 : 6) * 60000, Number(waitForBudgetMs) || 0));
   const interval = Math.max(0, Math.min(60000, Number(minRequestIntervalMs) || 0));
   let lastRequestAt = null;
+  let priorityWindowStarted = false;
   const stats = { limitPerHour: limit, usageThreshold: threshold, requests: 0, reserved: 0, stopped: false,
     reason: '', highestUsagePercent: 0, waitedMs: 0, pacingMs: 0, retryAt: '',
-    adaptiveSafetyCeiling: adaptiveMax, adaptiveIncreases: 0, storageFailure: null };
+    adaptiveSafetyCeiling: adaptiveMax, adaptiveIncreases: 0, storageFailure: null, stopKind: '' };
   const stopForStorage = (error) => {
     stats.stopped = true;
     stats.reason = error?.code === 'SCAN_BUDGET' ? error.message : 'quota storage unavailable';
+    stats.stopKind = error?.quotaReason || 'unavailable';
     stats.storageFailure = error?.storage || { provider: 'github', operation: 'persist-telemetry', httpStatus: null, rateLimited: false, retryAt: '' };
     if (stats.storageFailure.retryAt) stats.retryAt = stats.storageFailure.retryAt;
+  };
+  const availableSlots = (capacity, reservations, priorityUntil, now) => {
+    const used = reservations.reduce((sum, row) => sum + row.count, 0);
+    const combinedUsed = reservations.reduce((sum, row) => sum + (row.lane === WIEN_COMBINED ? row.count : 0), 0);
+    const held = !isWienCombined && priorityUntil > now
+      ? Math.max(0, Math.min(capacity, WIEN_COMBINED_RESERVED_SLOTS) - combinedUsed) : 0;
+    return capacity - used - held;
   };
   const acquire = async () => {
     for (let attempt = 0; attempt < 8; attempt += 1) {
@@ -168,10 +180,14 @@ export function createSharedQuotaFetch(fetchImpl, { store, clock = Date.now, blo
       const now = clock();
       if (state.pausedUntil > now) {
         stats.retryAt = new Date(state.pausedUntil).toISOString();
-        throw pause('shared cooldown');
+        throw pause('shared cooldown', 'cooldown');
       }
       // Even a previously reserved block observes other jobs' cooldowns.
-      if (remaining > 0 && now < leaseUntil) { remaining -= 1; return; }
+      if (remaining > 0 && now < leaseUntil) {
+        remaining -= 1;
+        stats.retryAt = '';
+        return;
+      }
       const reservations = state.reservations.filter((r) => r.expiresAt > now);
       const capacity = state.adaptiveQuota;
       const validCapacity = Number.isFinite(capacity?.limit) && capacity.limit >= limit && capacity.limit <= 10000
@@ -193,12 +209,22 @@ export function createSharedQuotaFetch(fetchImpl, { store, clock = Date.now, blo
         continue;
       }
       stats.limitPerHour = effectiveLimit;
-      const available = effectiveLimit - used;
+      const priorityUntil = Number.isFinite(state.wienCombinedPriorityUntil) ? state.wienCombinedPriorityUntil : 0;
+      const available = availableSlots(effectiveLimit, reservations, priorityUntil, now);
+      const announcePriority = isWienCombined && !priorityWindowStarted;
+      const claim = announcePriority ? { wienCombinedPriorityUntil: Math.max(priorityUntil, now + waitBudget + LEASE) } : {};
       if (available <= 0) {
-        const retryAt = Math.min(...reservations.map((r) => r.expiresAt));
+        const events = [...new Set([...reservations.map((r) => r.expiresAt), ...(!isWienCombined && priorityUntil > now ? [priorityUntil] : [])])].sort((a, b) => a - b);
+        const retryAt = events.find((time) => availableSlots(effectiveLimit, reservations.filter((r) => r.expiresAt > time), priorityUntil, time) > 0);
         stats.retryAt = new Date(retryAt).toISOString();
         const wait = Math.max(1, retryAt - now + 1);
-        if (stats.waitedMs + wait > waitBudget) throw pause('rolling-hour budget exhausted');
+        if (stats.waitedMs + wait > waitBudget) throw pause('rolling-hour budget exhausted', 'budget');
+        // Claim a small share of upcoming releases while waiting. With no
+        // active Combined runner general callers keep the full shared cap.
+        if (announcePriority) {
+          if (!await store.compareAndSwap(revision, { ...state, ...claim, reservations })) continue;
+          priorityWindowStarted = true;
+        }
         stats.waitedMs += wait;
         await sleep(wait);
         attempt -= 1;
@@ -208,15 +234,16 @@ export function createSharedQuotaFetch(fetchImpl, { store, clock = Date.now, blo
       const until = now + LEASE;
       // Every call must start before the lease deadline. Keep its reservation
       // for another full hour, so overlapping jobs cannot exceed the ceiling.
-      reservations.push({ id: randomUUID(), count, expiresAt: until + HOUR });
-      if (await store.compareAndSwap(revision, { ...state, reservations })) {
+      reservations.push({ id: randomUUID(), count, expiresAt: until + HOUR, ...(isWienCombined ? { lane: WIEN_COMBINED } : {}) });
+      if (await store.compareAndSwap(revision, { ...state, ...claim, reservations })) {
+        priorityWindowStarted ||= announcePriority;
         leaseUntil = until;
         remaining = count;
         stats.reserved += count;
         // Recheck time and shared pause after potentially slow storage I/O.
       }
     }
-    throw pause('quota contention');
+    throw pause('quota contention', 'contention');
   };
   const cooldown = async (duration) => {
     const pausedUntil = clock() + duration;
@@ -254,7 +281,7 @@ export function createSharedQuotaFetch(fetchImpl, { store, clock = Date.now, blo
   const wrapped = (...args) => {
     const task = tail.then(async () => {
       try {
-        if (stats.stopped) throw pause(stats.reason);
+        if (stats.stopped) throw pause(stats.reason, stats.stopKind);
         if (lastRequestAt !== null) {
           const delay = Math.max(0, lastRequestAt + interval - clock());
           if (delay) { stats.pacingMs += delay; await sleep(delay); }
@@ -271,6 +298,7 @@ export function createSharedQuotaFetch(fetchImpl, { store, clock = Date.now, blo
         if (throttled || stats.highestUsagePercent >= threshold) {
           stats.stopped = true;
           stats.reason = throttled ? 'Meta rate limit' : 'Meta usage headroom';
+          stats.stopKind = throttled ? 'rate-limit' : 'headroom';
           const retry = response.headers.get('retry-after');
           const seconds = Number(retry);
           const retryMs = Number.isFinite(seconds) ? seconds * 1000 : Date.parse(retry) - clock();
@@ -290,6 +318,7 @@ export function createSharedQuotaFetch(fetchImpl, { store, clock = Date.now, blo
         if (error?.code === 'SCAN_BUDGET' || stats.requests === 0) {
           stats.stopped = true;
           stats.reason = error?.code === 'SCAN_BUDGET' ? error.message : 'quota unavailable';
+          stats.stopKind = error?.quotaReason || 'unavailable';
           if (error?.storage) {
             stats.storageFailure = error.storage;
             if (error.storage.retryAt) stats.retryAt = error.storage.retryAt;
@@ -305,7 +334,7 @@ export function createSharedQuotaFetch(fetchImpl, { store, clock = Date.now, blo
   return wrapped;
 }
 
-export function sharedInstagramFetch(fetchImpl, env = process.env) {
+export function sharedInstagramFetch(fetchImpl, env = process.env, { lane = '' } = {}) {
   if (env.INSTAGRAM_SHARED_QUOTA_ENABLED !== '1') return fetchImpl;
   const shared = createSharedQuotaFetch(fetchImpl, {
     store: githubQuotaStore(env),
@@ -315,6 +344,7 @@ export function sharedInstagramFetch(fetchImpl, env = process.env) {
     blockSize: Number(env.INSTAGRAM_SHARED_BLOCK_SIZE || 5),
     minRequestIntervalMs: Number(env.INSTAGRAM_SHARED_MIN_INTERVAL_MS || 0),
     adaptiveMaxRequestsPerHour: Number(env.INSTAGRAM_SHARED_ADAPTIVE_MAX_REQUESTS_PER_HOUR || 0),
+    lane,
   });
   const wrapped = (url, ...args) => {
     const hostname = new URL(url instanceof URL || typeof url === 'string' ? url : url.url).hostname;

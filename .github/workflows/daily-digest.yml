@@ -52,15 +52,38 @@ jobs:
         with:
           node-version: '22'
 
+      - name: Check whether Wien Combined deferred
+        id: wien-combined
+        if: ${{ github.event_name == 'workflow_run' && github.event.workflow_run.name == 'Wien Deals Combined' }}
+        env:
+          WIEN_COMBINED_RUN_ID: ${{ github.event.workflow_run.id }}
+          WIEN_COMBINED_RUN_ATTEMPT: ${{ github.event.workflow_run.run_attempt }}
+        run: |
+          node --input-type=module <<'JS'
+          import { appendFileSync, readFileSync } from 'node:fs';
+          const history = JSON.parse(readFileSync('docs/deal-pipeline-runs-wien-combined.json', 'utf8'));
+          const run = history.runs.find(({ runProvenance }) =>
+            runProvenance?.runId === process.env.WIEN_COMBINED_RUN_ID
+            && runProvenance?.runAttempt === process.env.WIEN_COMBINED_RUN_ATTEMPT);
+          if (run?.status === 'deferred' || run?.diagnostics?.skipImmediateDispatch === true) {
+            console.log('Wien Combined reached its quota without collecting fresh Graph posts.');
+            appendFileSync(process.env.GITHUB_OUTPUT, 'deferred=true\n');
+          }
+          JS
+
       - name: Install Dependencies
+        if: steps.wien-combined.outputs.deferred != 'true'
         run: npm ci
 
       - uses: ./.github/actions/coupon-tools
+        if: steps.wien-combined.outputs.deferred != 'true'
 
       - name: Refresh Instagram merchant registry
+        if: steps.wien-combined.outputs.deferred != 'true'
         run: npm run instagram:merchant-registry
 
       - name: Verify fresh Instagram candidates via Graph API
+        if: steps.wien-combined.outputs.deferred != 'true'
         env:
           INSTAGRAM_SHARED_QUOTA_ENABLED: '1'
           GH_TOKEN: ${{ github.token }}
@@ -73,6 +96,7 @@ jobs:
         run: npm run instagram:graph:verify
 
       - name: Reverify Firecrawl outputs
+        if: steps.wien-combined.outputs.deferred != 'true'
         env:
           FIRECRAWL_POST_VERIFY_MAX: "80"
           FIRECRAWL_POST_VERIFY_CONCURRENCY: "4"
@@ -80,14 +104,17 @@ jobs:
         run: npm run firecrawl:reverify
 
       - name: Build Deal Source Health
+        if: steps.wien-combined.outputs.deferred != 'true'
         run: node scraper/build-deal-source-health.js
 
       - name: Build Social Food loss funnel and review candidates
+        if: steps.wien-combined.outputs.deferred != 'true'
         env:
           SOCIAL_FOOD_REVIEW_SEND_ALL: '1'
         run: npm run social-food:audit
 
       - name: Send validated new deals to Slack
+        if: steps.wien-combined.outputs.deferred != 'true'
         # Keep malformed Unicode out of Slack block payloads.
         # The regression test runs before any message is sent.
         run: |
@@ -102,6 +129,7 @@ jobs:
           node scripts/test-card-editor-approval.mjs
 
       - name: Deliver validated new deals to Slack
+        if: steps.wien-combined.outputs.deferred != 'true'
         env:
           COMMUNITY_SYNC_TOKEN: ${{ secrets.COMMUNITY_SYNC_TOKEN }}
           COMMUNITY_QUEUE_PATH: .community-internal/queue.json
@@ -129,6 +157,7 @@ jobs:
           exit "$result"
 
       - name: Mark posted community submissions as queued
+        if: steps.wien-combined.outputs.deferred != 'true'
         env:
           COMMUNITY_SYNC_TOKEN: ${{ secrets.COMMUNITY_SYNC_TOKEN }}
           COMMUNITY_QUEUE_PATH: .community-internal/queue.json
@@ -136,6 +165,6 @@ jobs:
         run: node scraper/ack-community-submissions.js
 
       - name: Commit dispatch state
-        if: always()
+        if: ${{ always() && steps.wien-combined.outputs.deferred != 'true' }}
         run: |
           node scripts/commit-generated.mjs --skip-conflicts --message "Central deal dispatch $(date +%Y-%m-%dT%H:%MZ)" --files docs/deals-pending-all.json docs/deals-pending-gastro2.json docs/deals-pending-food3.json docs/deals-pending-firecrawl2.json docs/deals-pending-firecrawl4.json docs/deals-pending-firecrawl5.json docs/deal-candidates-index.json docs/deal-source-health.json docs/deal-validity-report.json docs/instagram-merchant-registry.json docs/instagram-graph-post-evidence.json docs/instagram-graph-verification-report.json docs/slack-seen-posts.json docs/social-food-candidate-audit.json docs/deals-review-social-food.json docs/social-food-review-state.json docs/deal-review-feedback.json docs/deal-card-editor-cache.json docs/vienna-food-benefit-pause.json docs/carrier-benefit-pause.json

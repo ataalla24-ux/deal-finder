@@ -219,6 +219,11 @@ function rejectionCounts(rejected) {
   return counts;
 }
 
+function isQuotaDeferral(error) {
+  return (error?.code === 'SCAN_BUDGET' && error.quotaReason !== 'unavailable')
+    || error?.status === 429 || [4, 17, 32, 613, 80002].includes(error?.code);
+}
+
 export async function runWienDealsCombined(options = {}) {
   const env = options.env || process.env;
   const now = options.now instanceof Date ? options.now : new Date();
@@ -234,7 +239,7 @@ export async function runWienDealsCombined(options = {}) {
   const maxMediaPerHashtag = Math.max(5, Math.min(50, Number(env.WIEN_COMBINED_MEDIA_PER_HASHTAG || 30)));
   const maxDeals = Math.max(1, Math.min(80, Number(env.WIEN_COMBINED_MAX_DEALS || 40)));
   const timeoutMs = Math.max(3000, Number(env.WIEN_COMBINED_GRAPH_TIMEOUT_MS || 12000));
-  const fetchImpl = sharedInstagramFetch(options.fetchImpl || globalThis.fetch, env);
+  const fetchImpl = sharedInstagramFetch(options.fetchImpl || globalThis.fetch, env, { lane: SOURCE_KEY });
   const outputPath = options.outputPath || OUTPUT_PATH;
   const reportPath = options.reportPath || REPORT_PATH;
   const mediaCachePath = options.mediaCachePath || MEDIA_CACHE_PATH;
@@ -268,13 +273,11 @@ export async function runWienDealsCombined(options = {}) {
   const sourceResults = [];
   const graphEntries = new Map();
   let fetchedPosts = 0;
+  let cachedGraphPosts = 0;
   let budgetDeferred = false;
+  let quotaPause = null;
 
   for (const hashtag of hashtags) {
-    if (budget.stats.stopped) {
-      budgetDeferred = true;
-      break;
-    }
     try {
       let hashtagId = '';
       const scan = await scanGraphSource({
@@ -282,6 +285,9 @@ export async function runWienDealsCombined(options = {}) {
         cacheMinutes: collectorConfig.scanCacheMinutes, maxPages: collectorConfig.maxPagesPerSource,
         refreshHours: collectorConfig.scanRefreshHours,
         fetchPage: async (after) => {
+          // A quota stop inhibits fresh requests, but still allows complete,
+          // fresh peer snapshots for other hashtags to be processed.
+          if (quotaPause) throw quotaPause;
           // Resolve only when paging is needed. A fresh peer snapshot costs no
           // search request and leaves the shared quota for unvisited sources.
           if (!hashtagId) {
@@ -298,6 +304,12 @@ export async function runWienDealsCombined(options = {}) {
       });
       const mediaResponse = scan.lastResponse;
       const rows = scan.rows;
+      if (isQuotaDeferral(scan.pageError)) {
+        quotaPause = scan.pageError;
+        budgetDeferred = true;
+      }
+      const reusedAfterPause = quotaPause !== null && scan.report.cacheHit === true;
+      if (scan.report.cacheHit) cachedGraphPosts += rows.length;
       fetchedPosts += rows.length;
       for (const raw of rows) {
         const key = canonicalInstagramPostKey(raw?.permalink) || cleanText(raw?.id, 160);
@@ -305,6 +317,7 @@ export async function runWienDealsCombined(options = {}) {
         const existing = graphEntries.get(key);
         if (existing) {
           existing.hashtags.add(hashtag);
+          existing.reusedAfterPause &&= reusedAfterPause;
           continue;
         }
         graphEntries.set(key, {
@@ -312,6 +325,7 @@ export async function runWienDealsCombined(options = {}) {
           item: raw,
           context: { sourceType: 'hashtag', sourceName: `#${hashtag}`, account: null },
           hashtags: new Set([hashtag]),
+          reusedAfterPause,
         });
       }
       sourceResults.push({
@@ -325,37 +339,46 @@ export async function runWienDealsCombined(options = {}) {
         mediaLimit: mediaResponse.appliedLimit,
       });
     } catch (error) {
-      budgetDeferred = error?.code === 'SCAN_BUDGET';
+      const deferred = isQuotaDeferral(error);
+      if (deferred) {
+        quotaPause = error;
+        budgetDeferred = true;
+      }
       const notFound = Number(error?.code || 0) === 24;
       sourceResults.push({
         hashtag,
-        status: budgetDeferred ? 'deferred' : notFound ? 'not-found' : 'error',
+        status: deferred ? 'deferred' : notFound ? 'not-found' : 'error',
         fetched: 0,
         accepted: 0,
         ...(notFound
           ? { detail: cleanText(error?.message || error, 500) }
           : { error: cleanText(error?.message || error, 500) }),
       });
-      if (budgetDeferred) break;
     }
   }
 
   const successfulSources = sourceResults.filter((source) => ['ok', 'partial'].includes(source.status)).length;
   const failedSources = sourceResults.filter((source) => ['error', 'partial'].includes(source.status));
   if (successfulSources === 0) {
+    const deferred = budgetDeferred && failedSources.length === 0;
     const report = {
       generatedAt: now.toISOString(),
-      status: budgetDeferred ? 'deferred' : 'failed',
-      message: 'No Graph hashtag source completed successfully; last-good output was preserved.',
+      status: deferred ? 'deferred' : 'failed',
+      message: deferred
+        ? 'Graph hashtag collection deferred by quota; last-good output was preserved.'
+        : 'No Graph hashtag source completed successfully; last-good output was preserved.',
       hashtags,
       fetchedPosts,
+      cachedGraphPosts,
       totalDeals: 0,
       sources: sourceResults,
       rejectionReasons: {},
       budgetDeferred,
+      requestBudget: budget.stats,
       sharedQuota: fetchImpl.quotaStats || null,
     };
     if (options.write !== false) writeJsonAtomic(reportPath, report);
+    if (deferred) return { payload: null, report, rejected: [] };
     const details = sourceResults.map((source) => `#${source.hashtag}: ${source.error || source.detail || source.status}`).join('; ');
     throw new Error(`${report.message} ${details}`);
   }
@@ -367,7 +390,7 @@ export async function runWienDealsCombined(options = {}) {
   ]));
   const rescueCandidates = uniqueEntries.filter((entry) => {
     const initial = initialOutcomes.get(entry.key);
-    return !initial?.deal
+    return !entry.reusedAfterPause && !initial?.deal
       && RESCUABLE_REJECTIONS.has(initial?.rejection)
       && isFreshMediaRescueCandidate(entry.item, now, collectorConfig.maxOrganicAgeHours)
       && extractInstagramMediaAssets(entry.item).length > 0;
@@ -492,6 +515,7 @@ export async function runWienDealsCombined(options = {}) {
     message: `${deals.length} fresh, evidence-checked Graph hashtag deal(s) found; ${rescuedDeals} recovered from media.`,
     hashtags,
     fetchedPosts,
+    cachedGraphPosts,
     uniquePosts: uniqueEntries.length,
     totalDeals: deals.length,
     rescueEligible: rescueCandidates.length,
@@ -519,41 +543,43 @@ export async function runWienDealsCombined(options = {}) {
   return { payload, report, rejected };
 }
 
-async function main() {
-  const result = await runWienDealsCombined();
-  const finishedAt = new Date();
+export function buildWienCombinedPipelineReport(result, { startedAt = RUN_STARTED_AT, finishedAt = new Date() } = {}) {
   const sourceErrors = result.report.sources
     .filter((source) => ['error', 'partial', 'deferred'].includes(source.status))
     .map((source) => `#${source.hashtag}: ${source.error}`);
   if (result.report.budgetDeferred && !sourceErrors.length) {
     sourceErrors.push('Graph collection deferred by request or shared quota budget.');
   }
-  if (result.report.fetchedPosts === 0) {
+  if (result.report.fetchedPosts === 0 && result.report.status !== 'deferred') {
     sourceErrors.push('Meta Graph returned zero posts across all resolved hashtags.');
   }
   if (['degraded', 'unavailable'].includes(result.report.mediaEvidence?.status)) {
     sourceErrors.push(...(result.report.mediaEvidence.errors || []).map((error) => `media evidence: ${error}`));
   }
-  writePipelineRunReport(buildPipelineRunReport({
+  return buildPipelineRunReport({
     sourceKey: SOURCE_KEY,
     sourceLabel: SOURCE_LABEL,
-    status: sourceErrors.length > 0 ? 'completed-with-errors' : 'completed',
-    startedAt: RUN_STARTED_AT,
+    status: result.report.status === 'deferred' ? 'deferred' : sourceErrors.length > 0 ? 'completed-with-errors' : 'completed',
+    startedAt,
     finishedAt,
     outputFile: path.relative(ROOT, OUTPUT_PATH),
     rawCandidates: result.report.fetchedPosts,
-    normalizedCandidates: result.payload.totalDeals,
-    verifiedCandidates: result.payload.totalDeals,
-    acceptedDeals: result.payload.totalDeals,
+    normalizedCandidates: result.payload?.totalDeals,
+    verifiedCandidates: result.payload?.totalDeals,
+    acceptedDeals: result.payload?.totalDeals,
     rejected: result.rejected,
     errors: sourceErrors,
     diagnostics: {
       hashtags: result.report.hashtags.length,
-      successfulSources: result.payload.meta.successfulSources,
-      failedSources: result.payload.meta.failedSources,
-      uniquePosts: result.payload.meta.uniquePosts,
-      rescueEligible: result.report.rescueEligible,
-      rescuedDeals: result.report.rescuedDeals,
+      successfulSources: result.payload?.meta.successfulSources || 0,
+      failedSources: result.payload?.meta.failedSources || 0,
+      uniquePosts: result.payload?.meta.uniquePosts || 0,
+      budgetDeferred: result.report.budgetDeferred,
+      quotaRetryAt: result.report.sharedQuota?.retryAt || '',
+      cachedGraphPosts: result.report.cachedGraphPosts,
+      skipImmediateDispatch: result.report.budgetDeferred && result.report.fetchedPosts === result.report.cachedGraphPosts,
+      rescueEligible: result.report.rescueEligible || 0,
+      rescuedDeals: result.report.rescuedDeals || 0,
       mediaAnalyzed: result.report.mediaEvidence?.analyzed || 0,
       mediaAiCalls: result.report.mediaEvidence?.aiCalls || 0,
       mediaVisionCalls: result.report.mediaEvidence?.visionCalls || 0,
@@ -561,8 +587,17 @@ async function main() {
       graphVersion: cleanText(process.env.META_GRAPH_VERSION || 'v26.0', 20),
     },
     constraints: { maxSocialPostAgeDays: 7 },
-  }));
+  });
+}
+
+async function main() {
+  const result = await runWienDealsCombined();
+  writePipelineRunReport(buildWienCombinedPipelineReport(result));
   console.log(`Wien Deals Combined: ${result.report.status}`);
+  if (!result.payload) {
+    console.log(result.report.message);
+    return;
+  }
   console.log(`  Graph posts: ${result.report.fetchedPosts}`);
   console.log(`  media rescue: ${result.report.rescuedDeals}/${result.report.rescueEligible}`);
   console.log(`  deals: ${result.payload.totalDeals}`);

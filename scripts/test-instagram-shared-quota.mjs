@@ -38,8 +38,8 @@ for (const status of [409, 422]) {
   assert(waits[0] >= 200 && waits[0] <= 500, 'conflict backoff is bounded within the existing retry count');
 }
 let now = Date.parse('2026-09-07T20:00:00Z');
-const makeStore = () => {
-  let state = { version: 1, reservations: [], pausedUntil: 0 };
+const makeStore = (initial = {}) => {
+  let state = { version: 1, reservations: [], pausedUntil: 0, ...initial };
   let revision = 0;
   return {
     async read() { return { state: structuredClone(state), revision }; },
@@ -58,6 +58,58 @@ for (let i = 0; i < 50; i += 1) await Promise.all([a('unused'), b('unused'), c('
 assert.equal(calls, 150);
 await assert.rejects(worker()('unused'), { code: 'SCAN_BUDGET' });
 assert.equal(calls, 150);
+
+// A normal run can fill the ledger. Once Wien Combined is actively waiting,
+// simultaneous readers must leave the first released capacity to it.
+const nearRelease = now + 389000;
+const protectedStore = makeStore({ reservations: [
+  { id: 'general-retained', count: 182, expiresAt: now + HOUR },
+  { id: 'general-expiring', count: 8, expiresAt: nearRelease },
+] });
+let resumeCombined;
+let reportWaiting;
+const waiting = new Promise((resolve) => { reportWaiting = resolve; });
+const combined = createSharedQuotaFetch(response, { store: protectedStore, clock: () => now,
+  maxRequestsPerHour: 190, lane: 'wien-combined', waitForBudgetMs: 480000, minRequestIntervalMs: 3000,
+  sleep: async (ms) => {
+    if (!resumeCombined) {
+      await new Promise((resume) => { resumeCombined = resume; reportWaiting(ms); });
+    } else {
+      now += ms;
+    }
+  },
+});
+const ordinary = () => createSharedQuotaFetch(response, { store: protectedStore, clock: () => now, maxRequestsPerHour: 190 });
+calls = 0;
+const firstCombined = combined('unused');
+assert.equal(await waiting, 389001, 'the recent six-minute-and-29-second failure fits the bound');
+now = nearRelease + 1;
+await assert.rejects(ordinary()('unused'), { quotaReason: 'budget' });
+assert.equal(calls, 0, 'regular runners cannot take the newly released priority capacity');
+resumeCombined();
+await firstCombined;
+for (let call = 1; call < 8; call += 1) await combined('unused');
+assert.equal(calls, 8);
+assert.equal(combined.quotaStats.limitPerHour, 190);
+assert.equal(combined.quotaStats.pacingMs, 21000);
+assert.equal((await protectedStore.read()).state.reservations.reduce((sum, row) => sum + row.count, 0), 190);
+await assert.rejects(combined('unused'), { quotaReason: 'budget' });
+assert.equal(calls, 8);
+
+// The priority claim is limited to the active wait. It does not lower ordinary
+// capacity at other times and cannot bypass a provider cooldown.
+const inactivePriority = makeStore({ wienCombinedPriorityUntil: now - 1, reservations: [
+  { id: 'other-187', count: 187, expiresAt: now + HOUR },
+] });
+const idleOrdinary = createSharedQuotaFetch(response, { store: inactivePriority, clock: () => now, maxRequestsPerHour: 190 });
+for (let call = 0; call < 3; call += 1) await idleOrdinary('unused');
+await assert.rejects(idleOrdinary('unused'), { quotaReason: 'budget' });
+const pauseStore = makeStore({ pausedUntil: now + HOUR });
+const pausedCombined = createSharedQuotaFetch(response, { store: pauseStore, clock: () => now, maxRequestsPerHour: 190,
+  lane: 'wien-combined', waitForBudgetMs: 480000 });
+await assert.rejects(pausedCombined('unused'), { quotaReason: 'cooldown' });
+assert.equal(calls, 11);
+assert.equal((await pauseStore.read()).state.wienCombinedPriorityUntil, undefined);
 
 // Reservations outlive their spend deadline by one hour; late spends cannot
 // disappear from the ledger early, even if a runner stalls for several minutes.

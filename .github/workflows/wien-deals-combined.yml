@@ -41,6 +41,8 @@ jobs:
         id: collector
         env:
           INSTAGRAM_SHARED_QUOTA_ENABLED: '1'
+          INSTAGRAM_SHARED_BUDGET_WAIT_MS: '480000'
+          INSTAGRAM_SHARED_MIN_INTERVAL_MS: '3000'
           GH_TOKEN: ${{ github.token }}
           INSTAGRAM_ACCESS_TOKEN: ${{ secrets.INSTAGRAM_ACCESS_TOKEN }}
           INSTAGRAM_USER_ID: ${{ secrets.INSTAGRAM_USER_ID }}

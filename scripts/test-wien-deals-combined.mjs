@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 
-import { runWienDealsCombined, orderCombinedHashtags } from '../scraper/wien-deals-combined.js';
+import { buildWienCombinedPipelineReport, runWienDealsCombined, orderCombinedHashtags } from '../scraper/wien-deals-combined.js';
 
 const tags = ['wien', 'vienna', 'viennafood', 'wienevents', 'wienergastro', 'essenwien', 'viennaeats'];
 const emptyStore = { get: () => ({}) };
@@ -238,7 +238,7 @@ assert.equal(quotaDeferred.payload.meta.budgetDeferred, true);
 assert.equal(quotaDeferred.report.sources.at(-1).status, 'deferred');
 
 const requestedTags = [];
-await assert.rejects(() => runWienDealsCombined({
+const noCallsLeft = await runWienDealsCombined({
   now, write: false,
   env: {
     INSTAGRAM_ACCESS_TOKEN: 'test-token', INSTAGRAM_USER_ID: '17840000000000000',
@@ -249,7 +249,53 @@ await assert.rejects(() => runWienDealsCombined({
     requestedTags.push(parsed.searchParams.get('q'));
     return Response.json({ data: [{ id: 'food' }] });
   },
-}), /request-budget/);
+});
+assert.equal(noCallsLeft.payload, null, 'a fully deferred run has no replacement pending artifact');
+assert.equal(noCallsLeft.report.status, 'deferred');
+assert.equal(noCallsLeft.report.sources.length, tags.length, 'report remaining sources as deferred');
+const deferReport = buildWienCombinedPipelineReport(noCallsLeft, { startedAt: now, finishedAt: now });
+assert.equal(deferReport.status, 'deferred');
+assert.equal(deferReport.counts.acceptedDeals, 0);
+assert.equal(deferReport.diagnostics.skipImmediateDispatch, true);
+assert(!deferReport.errors.some((entry) => entry.includes('zero posts')), 'do not invent an empty API response for budget deferral');
 assert.deepEqual(requestedTags, ['viennafood'], 'actual collector uses food-first order without raising the budget');
+
+const cacheOnly = await runWienDealsCombined({
+  now, write: false,
+  env: {
+    INSTAGRAM_ACCESS_TOKEN: 'test-token', INSTAGRAM_USER_ID: '123',
+    WIEN_COMBINED_GRAPH_HASHTAGS: 'uncached,peerfresh',
+  },
+  scanState: { scope: 'v26.0:123', sources: { 'hashtag:peerfresh': { updatedAt: now.toISOString(), rows: [{
+    id: 'fresh-cache', caption: 'Nur in 1070 Wien: zweiter Kaffee gratis, gueltig bis 25. August 2026.',
+    permalink: 'https://www.instagram.com/p/PartialCaptionDeal/', timestamp: freshTimestamp,
+  }, { id: 'fresh-cache-media', caption: 'Wien',
+    permalink: 'https://www.instagram.com/p/CacheRescueMedia/', timestamp: freshTimestamp, media_type: 'IMAGE',
+    media_url: 'https://scontent.cdninstagram.com/cached.jpg',
+  }] } } },
+  fetchImpl: async (url) => {
+    assert.equal(new URL(url).searchParams.get('q'), 'uncached');
+    throw Object.assign(new Error('Shared quota paused'), { code: 'SCAN_BUDGET', quotaReason: 'budget' });
+  },
+  enrichGraphMedia: async () => assert.fail('additional reused rows must not create extra media or AI calls'),
+});
+assert.equal(cacheOnly.payload.totalDeals, 1);
+assert.equal(cacheOnly.report.cachedGraphPosts, 2);
+assert.equal(cacheOnly.report.sources[1].coverage.cacheHit, true);
+assert.equal(buildWienCombinedPipelineReport(cacheOnly).diagnostics.skipImmediateDispatch, true);
+
+const accessFixture = { now, write: false, env: {
+  INSTAGRAM_ACCESS_TOKEN: 'test-token', INSTAGRAM_USER_ID: '123', WIEN_COMBINED_GRAPH_HASHTAGS: 'austriatesting',
+} };
+await assert.rejects(() => runWienDealsCombined({ ...accessFixture, fetchImpl: async () =>
+  Response.json({ error: { code: 190, message: 'Invalid OAuth access token' } }, { status: 401 }),
+}), /Invalid OAuth/);
+await assert.rejects(() => runWienDealsCombined({ ...accessFixture, fetchImpl: async () => {
+  throw Object.assign(new Error('GitHub quota storage permission failure'), { code: 'SCAN_BUDGET', quotaReason: 'unavailable' });
+} }), /quota storage permission failure/);
+const providerPaused = await runWienDealsCombined({ ...accessFixture, fetchImpl: async () =>
+  Response.json({ error: { code: 4, message: 'Application request limit reached' } }, { status: 400 }),
+});
+assert.equal(providerPaused.report.status, 'deferred', 'an actual Meta throttle is separate from an authorization failure');
 
 console.log('wien deals combined tests passed');
