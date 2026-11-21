@@ -3,7 +3,7 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { createHash } from 'node:crypto';
 import { duplicateDealKey } from '../scraper/deal-evidence-utils.js';
-import { creditPeriodExposure, isAstraEnrichmentActive, loadAiCreditPolicy, modelForTask } from '../scraper/ai-credit-budget.js';
+import { creditPeriodExposure, dailyCreditExposureUsd, isAstraEnrichmentActive, loadAiCreditPolicy, modelForTask } from '../scraper/ai-credit-budget.js';
 import { inspectSourceBackedQuality } from '../scraper/source-backed-quality.js';
 import { loadDealMapReviewContext, reviewDealMap } from './deal-map-review.mjs';
 import { maintenanceEvidenceFor } from './refresh-maintenance-evidence.mjs';
@@ -146,7 +146,8 @@ export function creditSnapshot(ledger, policy, now = new Date()) {
     return { status: 'unavailable-or-invalid', providerBalanceKnown: false };
   }
   const all = ledger.reservations, recent = all.filter(r => r.at > +now - 86400000);
-  const sum = values => Number(values.reduce((total,r) => total + r.usd, 0).toFixed(6));
+  const sum = (values, amount = row => row.usd) => Number(values.reduce((total, row) => total + amount(row), 0).toFixed(6));
+  const dayAmount = row => dailyCreditExposureUsd(row, +now);
   const exposed = creditPeriodExposure(all, policy.periodId);
   const astra = exposed.filter(r => r.profile === 'astra-deal-enrichment');
   const pausedUntil = ledger.pausedUntil;
@@ -157,13 +158,13 @@ export function creditSnapshot(ledger, policy, now = new Date()) {
     && isAstraEnrichmentActive({ enabled: true, now: +now, policy });
   return { status: 'internal-ledger', observedAt: now.toISOString(), providerBalanceKnown: false,
     periodId: policy.periodId, periodLimitUsd: policy.periodLimitUsd, rollingDayLimitUsd: policy.rollingDayLimitUsd,
-    periodReservedOrSettledUsd: sum(exposed), rollingDayReservedOrSettledUsd: sum(recent),
+    periodReservedOrSettledUsd: sum(exposed), rollingDayReservedOrSettledUsd: sum(recent, dayAmount),
     ...(pauseKnown ? { sharedPauseUntil } : {}),
     unsettledReservations: exposed.filter(r => r.status !== 'settled').length,
     ...(policy.astraEnrichment ? { astraEnrichment: { active: astraOpen,
       rollingDayLimitUsd: policy.astraEnrichment.rollingDayLimitUsd,
       reservedOrSettledUsd: sum(astra), settledCalls: astra.filter(r => r.status === 'settled').length,
-      regularRollingDayReservedOrSettledUsd: sum(recent.filter(r => r.profile !== 'astra-deal-enrichment')) } } : {}),
+      regularRollingDayReservedOrSettledUsd: sum(recent.filter(r => r.profile !== 'astra-deal-enrichment'), dayAmount) } } : {}),
     expiresAt: policy.expiresAt, expired: +now >= Date.parse(policy.expiresAt),
     modelsLast24Hours: countBy(recent.map(r => r.model || 'unknown')) };
 }

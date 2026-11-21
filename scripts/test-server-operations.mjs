@@ -197,6 +197,22 @@ test('credit reporting shows the shared stop even inside the scheduled enrichmen
   assert.equal(creditSnapshot({...ledger, pausedUntil:0, modelPausedUntil:{'gpt-6.2-astra':Date.parse(end)}}, policy, now).astraEnrichment.active, false);
 });
 
+test('daily reporting uses the authorized daily share of a pending request and the full metered usage after settlement', () => {
+  const start = new Date(+now - 3600000).toISOString();
+  const end = new Date(+now + 86400000).toISOString();
+  const policy = { periodId:'fixture', periodLimitUsd:100, rollingDayLimitUsd:2, expiresAt:end,
+    astraEnrichment:{notBefore:start, rollingDayLimitUsd:38} };
+  const rows = [
+    {at:+now-50, model:'gpt-6.2-sol', status:'reserved', usd:1, dailyAuthorizedUsd:0.4},
+    {at:+now-5000, model:'gpt-6.2-sol', status:'settled', usd:0.15, dailyAuthorizedUsd:0.6},
+    {at:+now-6000, model:'gpt-6.2-astra', status:'reserved', profile:'astra-deal-enrichment', usd:0.5},
+  ];
+  const report = creditSnapshot({creditPeriod:'fixture', pausedUntil:0, reservations:rows}, policy, now);
+  assert.equal(report.periodReservedOrSettledUsd, 1.65);
+  assert.equal(report.rollingDayReservedOrSettledUsd, 1.05);
+  assert.equal(report.astraEnrichment.regularRollingDayReservedOrSettledUsd, 0.55);
+});
+
 test('pilot does not count malformed, future, pre-sample or duplicate-ID labels and exposes missing evidence',()=>{
   const queue=[{id:'one',fingerprint:'first',priority:'human-review-ready',issues:[],source:'fixture'}];
   const state=updatePublicationPilot(null,queue,{now});
