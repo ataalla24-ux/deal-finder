@@ -259,3 +259,27 @@ test('real transport shares the five-request cap with carrier robots and rejects
   } });
   assert.equal(redirects, 1);
 }));
+
+test('targeted review passes one real draft to the independent verifier and preserves unrelated feed records', () =>
+  fixture(async ({ root, put }) => {
+    const untouched = pending('other'), target = pending('target');
+    const globalReport = { existing: true };
+    put('docs/deals.json', { deals: [untouched, target], totalDeals: 2 });
+    put('docs/automatic-deal-maintenance-report.json', globalReport);
+    const drafts = [], verifications = [];
+    const editor = { model: 'gpt-6.2-sol', request: modelMock(drafts) };
+    const result = await maintainFeedFile({ cwd: root, now, allowAi: true, targetDealId: 'target',
+      editor, request: modelMock(verifications) });
+    assert.equal(drafts.length, 1);
+    assert.equal(verifications.length, 1);
+    assert.deepEqual(verifications[0].patch, { description });
+    assert.deepEqual(result.report.corrected.map(row => row.id), ['target']);
+    const saved = JSON.parse(fs.readFileSync(path.join(root, 'docs/deals.json')));
+    assert.equal(saved.totalDeals, 2);
+    assert.deepEqual(saved.deals[0], untouched);
+    assert.equal(saved.deals[1].description, description);
+    assert.deepEqual(JSON.parse(fs.readFileSync(path.join(root, 'docs/automatic-deal-maintenance-report.json'))), globalReport);
+    await assert.rejects(maintainFeedFile({ cwd: root, now, allowAi: true, targetDealId: 'absent',
+      editor, request: modelMock(verifications) }), /exactly one live deal/);
+    assert.equal(drafts.length, 1);
+  }));

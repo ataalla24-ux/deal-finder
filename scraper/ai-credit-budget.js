@@ -321,15 +321,16 @@ export function createCreditBudget({ store, policy, clock = Date.now, request = 
   };
 }
 
+export function createProductionCreditFetch({ allowAstraEnrichment = false } = {}) {
+  let store;
+  try { store = githubQuotaStore(process.env, globalThis.fetch, {
+    branch: 'automation/openai-free-credit-budget', file: 'openai-free-credit-budget.json', initialPauseMs: 0,
+  }); } catch { throw paused('shared-github-storage-unavailable'); }
+  return createCreditBudget({ store, policy: loadAiCreditPolicy(), allowAstraEnrichment });
+}
+
 let productionRequest;
 export async function freeCreditOpenAiFetch(url, init, options) {
-  if (!productionRequest) {
-    let store;
-    try { store = githubQuotaStore(process.env, globalThis.fetch, {
-      branch: 'automation/openai-free-credit-budget', file: 'openai-free-credit-budget.json', initialPauseMs: 0,
-    }); } catch { throw paused('shared-github-storage-unavailable'); }
-    productionRequest = createCreditBudget({ store, policy: loadAiCreditPolicy(),
-      allowAstraEnrichment: process.env.FREEFINDER_ASTRA_ENRICHMENT === '1' });
-  }
+  productionRequest ??= createProductionCreditFetch({ allowAstraEnrichment: process.env.FREEFINDER_ASTRA_ENRICHMENT === '1' });
   return productionRequest(url, init, options);
 }
