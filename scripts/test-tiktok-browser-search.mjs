@@ -120,7 +120,7 @@ test('active pause does not even install a browser transport or navigate', async
 test('TikTok diagnostics distinguish a local request cap from unreadable or missing provider responses', async () => {
   for (const [config, reason] of [
     [{html: '<body>Search unavailable</body>'}, 'no-search-request'],
-    [{html: '<script>fetch("/api/search/item/full/?keyword=private-value&count=30&token=do-not-log")</script>'}, 'request-policy-blocked'],
+    [{html: '<script>fetch("/api/search/item/full/?keyword=private-value&count=30&token=do-not-log")</script>'}, 'unrecognized-search-request'],
     [{api: () => ({status:200,contentType:'text/html',body:'<html>Unavailable</html>'})}, 'non-json-response'],
     [{api: () => ({status:200,contentType:'application/json',headers:{'content-length':'0'},body:''})}, 'empty-response'],
     [{documentStatus:403,html:'denied'}, 'document-http-error'],
@@ -132,7 +132,7 @@ test('TikTok diagnostics distinguish a local request cap from unreadable or miss
     assert.equal(result.rows.length,0);
     assert.ok(result.nextRetryAt);
     assert.doesNotMatch(JSON.stringify(result),/private-value|do-not-log/);
-    if (reason==='request-policy-blocked') {
+    if (reason==='unrecognized-search-request') {
       assert.equal(result.observedSearchEndpoints['item-full'],1);
       assert.equal(result.observedSearchPaths['/api/search/item/full/'],1);
       assert.equal(result.blockedRequestReasons['unexpected-endpoint'],1);
@@ -185,6 +185,33 @@ test('a blocked ancillary request cannot mask the allowed search response', asyn
   });
 });
 
+test('ancillary search requests stay blocked without claiming that a video result request was denied', async () => {
+  await fixture({ html: '<script>fetch("/api/search/user/preview/");'
+    + 'fetch("/api/search/suggest/guide/?keyword=wien%20gratis%20kaffee")</script>' }, async (page, calls) => {
+    const result = await scan(page);
+    assert.equal(calls.length, 0);
+    assert.equal(result.searchRequests, 0);
+    assert.equal(result.blockedRequestReasons['auxiliary-endpoint'], 2);
+    assert.equal(result.errors[0].transportReason, 'ancillary-search-only');
+    assert.equal(result.boundedRetry, undefined, 'an ancillary-only page cannot trigger a short local retry');
+    assert.equal(result.nextRetryAt, '2026-11-12T12:00:00.000Z');
+  });
+});
+
+test('a result route must be one GET with the exact query and one explicit integer count at or below the cap', async () => {
+  await fixture({ html: '<script>const base="/api/search/general/full/?keyword=wien%20gratis%20kaffee";'
+    + 'fetch(base); fetch(base+"&count=1.5"); fetch(base+"&count=30&count=90");'
+    + 'fetch(base+"&keyword=other&count=30"); fetch(base+"&count=30",{method:"POST"});'
+    + 'fetch(base+"&count=30");</script>' }, async (page, calls) => {
+    const result = await scan(page, { pages: 1 });
+    assert.equal(result.rows.length, 1);
+    assert.equal(calls.length, 1);
+    assert.equal(result.blockedRequestReasons['count-cap'], 3);
+    assert.equal(result.blockedRequestReasons['keyword-mismatch'], 1);
+    assert.equal(result.blockedRequestReasons['unexpected-transport'], 1);
+  });
+});
+
 test('a readable public search page exposes only visible first-party video links', async () => {
   await fixture({html:`<main>
     <a href="/@vienna.cafe/video/1234567890123456789?ref=drop-me">Coffee clip</a>
@@ -197,7 +224,7 @@ test('a readable public search page exposes only visible first-party video links
     const result=await scan(page,{timeoutMs:1000});
     const visibleUrl='https://www.tiktok.com/@vienna.cafe/video/1234567890123456789';
     assert.equal(calls.length,0);
-    assert.equal(result.errors[0].transportReason,'request-policy-blocked');
+    assert.equal(result.errors[0].transportReason,'ancillary-search-only');
     assert.ok(result.nextRetryAt);
     assert.deepEqual(result.publicVideoLinks,[visibleUrl]);
     assert.deepEqual(selectTikTokPostVisits(result,[visibleUrl,'https://www.tiktok.com/@vienna.cafe/video/6789012345678901234'],2),

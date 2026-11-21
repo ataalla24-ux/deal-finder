@@ -34,6 +34,7 @@ async function visiblePublicVideoLinks(page, keyword, limit) {
 
 const publicSearchOrigin = 'https://www.tiktok.com';
 const searchRoutePattern = '**/api/search/**';
+const auxiliarySearchPath = /^\/api\/search\/(?:user\/preview|suggest\/guide)\/?$/;
 const publicRouteShape = /^\/api\/search\/(?:general|item|user|suggest|recommend|suggest_words|suggest_guide|live|video|business|multi|aggregate)(?:\/(?:full|preview|guide|stream|list|mixed|v[1-9]\d?)){0,2}\/?$/;
 
 function countBucket(buckets, key, limit = 12) {
@@ -91,7 +92,7 @@ export async function observeTikTokSearchRoutes(page, keyword, { waitMs = 6000 }
 // Let the public search page create its own requests. Signatures and credentials
 // belong to the browser, and a refusal ends the scan.
 export async function createTikTokBrowserSearch(page, { pages = 3, count = 30, timeoutMs = 12000 } = {}) {
-  let keyword = '', requests = 0, rejectedForKeyword = 0, closed = false, generation = 0;
+  let keyword = '', requests = 0, resultsBlocked = 0, auxiliaryBlocked = 0, unknownBlocked = 0, closed = false, generation = 0;
   let waiting = null;
   const responses = [];
   const admitted = new Set();
@@ -115,17 +116,21 @@ export async function createTikTokBrowserSearch(page, { pages = 3, count = 30, t
     stats.observedSearchEndpoints[endpoint] = (stats.observedSearchEndpoints[endpoint] || 0) + 1;
     const shape = searchRequestShape(request, url, keyword, count);
     countBucket(stats.observedSearchPaths, shape.path);
-    const requestCount = Number(url.searchParams.get('count') || count);
-    const matching = url.origin === 'https://www.tiktok.com'
-      && isGeneralFull
-      && url.searchParams.get('keyword') === keyword;
-    if (!matching || requests >= pages || !Number.isFinite(requestCount) || requestCount > count || requestCount < 1) {
+    let reason = '';
+    if (shape.origin !== 'first-party') reason = 'unexpected-origin';
+    else if (auxiliarySearchPath.test(url.pathname)) reason = 'auxiliary-endpoint';
+    else if (!isGeneralFull) reason = 'unexpected-endpoint';
+    else if (shape.method !== 'GET' || shape.resource === 'other') reason = 'unexpected-transport';
+    else if (shape.keyword !== 'match' || url.searchParams.getAll('keyword').length !== 1) reason = 'keyword-mismatch';
+    else if (requests >= pages) reason = 'request-cap';
+    else if (shape.count !== 'within-cap' || url.searchParams.getAll('count').length !== 1) reason = 'count-cap';
+
+    if (reason) {
       stats.blockedExtraRequests++;
-      rejectedForKeyword++;
-      const reason = url.origin !== 'https://www.tiktok.com' || endpoint !== 'general-full' ? 'unexpected-endpoint'
-        : url.searchParams.get('keyword') !== keyword ? 'keyword-mismatch'
-        : requests >= pages ? 'request-cap' : 'count-cap';
-      stats.blockedRequestReasons[reason] = (stats.blockedRequestReasons[reason] || 0) + 1;
+      if (reason === 'auxiliary-endpoint') auxiliaryBlocked++;
+      else if (isGeneralFull && shape.origin === 'first-party') resultsBlocked++;
+      else unknownBlocked++;
+      countBucket(stats.blockedRequestReasons, reason);
       await route.abort();
       return;
     }
@@ -169,7 +174,9 @@ export async function createTikTokBrowserSearch(page, { pages = 3, count = 30, t
         generation++;
         keyword = nextKeyword;
         requests = 0;
-        rejectedForKeyword = 0;
+        resultsBlocked = 0;
+        auxiliaryBlocked = 0;
+        unknownBlocked = 0;
         responses.length = 0;
         admitted.clear();
       }
@@ -180,7 +187,9 @@ export async function createTikTokBrowserSearch(page, { pages = 3, count = 30, t
         timer = setTimeout(() => {
           waiting = null;
           resolve(unavailable(0, '', requests ? 'response-timeout'
-            : rejectedForKeyword ? 'request-policy-blocked' : 'no-search-request'));
+            : resultsBlocked ? 'request-policy-blocked'
+              : unknownBlocked ? 'unrecognized-search-request'
+              : auxiliaryBlocked ? 'ancillary-search-only' : 'no-search-request'));
         }, timeoutMs);
       });
       try {
@@ -196,7 +205,8 @@ export async function createTikTokBrowserSearch(page, { pages = 3, count = 30, t
           await page.evaluate(() => window.scrollTo(0, document.body.scrollHeight));
         }
         const result = await responsePromise;
-        if (offset === 0 && requests === 0 && ['request-policy-blocked', 'no-search-request'].includes(result.transportReason)) {
+        if (offset === 0 && requests === 0 && ['request-policy-blocked', 'no-search-request',
+          'unrecognized-search-request', 'ancillary-search-only'].includes(result.transportReason)) {
           const refusal = await tikTokAccessRefusal(page);
           if (refusal) return { ok: false, ...refusal };
           // Read the already-visible results from the successful public page.

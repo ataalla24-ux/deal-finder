@@ -2,7 +2,7 @@ import fs from 'node:fs';
 import { chromium } from 'playwright';
 import { buildDealFromPost, extractTikTokPostData, fetchTikTokApiCandidates } from '../scraper/tiktok-deals-scanner.js';
 import { tikTokRetryAt } from '../scraper/tiktok-search-discovery.js';
-import { canonicalSocialPostKey } from '../scraper/deal-evidence-utils.js';
+import { canonicalSocialPostKey, semanticCrossPlatformOfferKey } from '../scraper/deal-evidence-utils.js';
 import { filterModeratedDeals, loadDealModeration } from '../scraper/deal-moderation-utils.js';
 import { githubRunProvenance } from '../scraper/pipeline-run-report-utils.js';
 
@@ -11,14 +11,16 @@ function read(file) {
 }
 
 const previous = read('tiktok-scanner-report');
-const known = new Set([
+const previousCandidates = [
   ...(read('deals').deals || []),
   ...(read('deals-pending-all').deals || []),
   ...(read('deals-pending-tiktok').deals || []),
   ...(read('deal-candidates-index').candidates || []),
-].map(row => canonicalSocialPostKey(row.url || row.postUrl)).filter(Boolean));
+];
+const known = new Set(previousCandidates.map(row => canonicalSocialPostKey(row.url || row.postUrl)).filter(Boolean));
+const knownOffers = new Set(previousCandidates.map(semanticCrossPlatformOfferKey).filter(Boolean));
 for (const key of read('slack-seen-posts').seenPostKeys || []) {
-  if (/^tiktok:\d{8,30}$/.test(key)) known.add(key);
+  if (/^tiktok:video:\d{8,30}$/.test(key)) known.add(key);
 }
 
 const provenance = githubRunProvenance();
@@ -56,10 +58,12 @@ try {
     const key = canonicalSocialPostKey(url);
     if (!key || known.has(key)) return;
     const { deal } = buildDealFromPost(url, data);
-    if (deal) {
-      known.add(key);
-      deals.push(deal);
-    }
+    if (!deal) return;
+    const offer = semanticCrossPlatformOfferKey(deal);
+    if (offer && knownOffers.has(offer)) return;
+    known.add(key);
+    if (offer) knownOffers.add(offer);
+    deals.push(deal);
   };
   for (const { data } of rows) include(data.url, data);
   for (const url of publicVideoLinks.filter(url => {

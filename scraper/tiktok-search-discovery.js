@@ -5,7 +5,7 @@ const LOCAL_RETRY_MS = 4 * 3600000;
 const LOCAL_RETRY_REASON = 'local-request-policy';
 const transportReasons = new Set(['response-unavailable', 'request-policy-blocked', 'response-http-error',
   'response-too-large', 'empty-response', 'non-json-response', 'response-read-failed', 'request-failed', 'response-timeout',
-  'no-search-request', 'document-http-error', 'login-wall', 'access-challenge']);
+  'no-search-request', 'unrecognized-search-request', 'ancillary-search-only', 'document-http-error', 'login-wall', 'access-challenge']);
 
 export function tikTokRetryAt(retryAfter, now = new Date(), minimumMs = DAY_MS) {
   return new Date(Math.max(+now + minimumMs, Date.parse(retryAfterAt(retryAfter, now)) || 0)).toISOString();
