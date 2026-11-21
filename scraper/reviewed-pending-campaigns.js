@@ -19,15 +19,22 @@ const happyHour = { id: 'g2-13q9t1x', thread: '372595',
   reference: 'https://catalog.xxxlutz.at/frontend/catalogs/1420952/1/pdf/complete.pdf',
   title: 'XXXLutz: Zwei Schnitzel um 8 € oder zwei Grillteller um 12 €',
   description: 'Mit Gutschein gibt es täglich ab 16 Uhr zwei Schweinsschnitzel mit Pommes für insgesamt 8 € oder zwei Grillteller für insgesamt 12 €. Den Gutschein bei der Bestellung abgeben. Gültig bis einschließlich 8. Dezember, solange der Vorrat reicht.' };
-const chicken = { id: 'fc4g-1569bjd', thread: '366802',
-  url: 'https://www.preisjaeger.at/deals/gutschein-11-crispychicken-in-ausgewahlten-burger-king-filialen-3x-wien-3x-wien-4x-niederosterreich-und-2x-burgenland-366802',
-  brand: 'Burger King', merchant: 'Burger King',
-  sourceTitle: '1+1 CrispyChicken in ausgewählten Burger King Filialen: 3x Wien, 4x Niederösterreich und 2x Burgenland',
-  body: '2b5316311d06f6284226227d495419c0de969b4a87de403e7c6bb6241773b1cf',
-  until: '2026-12-31', endEpoch: 1798757940, code: 'D1001',
-  title: 'Burger King: Zwei Crispy Chicken zum Preis von einem',
-  description: 'Mit Coupon D1001 bekommst du zwei Crispy Chicken zum Preis von einem. In Wien gilt der Gutschein am Hauptbahnhof (E0 beim Infopoint), am Elterleinplatz 8 und an der Straße des 1. Mai 114. Gültig bis einschließlich 31. Dezember. Nicht mit anderen Aktionen kombinierbar. Keine Barablöse.' };
-const rules = [pizza, happyHour, chicken];
+const chickenAliasId = 'fc4g-1569bjd';
+const chickenAliasUrl = 'https://www.preisjaeger.at/deals/gutschein-11-crispychicken-in-ausgewahlten-burger-king-filialen-3x-wien-3x-wien-4x-niederosterreich-und-2x-burgenland-366802';
+const chickenOriginalUrl = 'https://www.gutschein.at/burger-king/1-plus-1-crispy-chicken-gratis';
+const rules = [pizza, happyHour];
+
+export function reviewedCouponAliasHold(deal, existingDeals) {
+  if (deal?.id !== chickenAliasId || deal.url !== chickenAliasUrl) return '';
+  if (existingDeals.some(row => row.url === chickenOriginalUrl && row.brand === 'Burger King'
+    && String(row.validUntil || row.expires || '').slice(0, 10) === '2026-12-31')) {
+    return 'Bereits live: derselbe Burger-King-Gutschein für zwei Crispy Chicken, dieselben drei Wiener Filialen und derselbe Aktionszeitraum.';
+  }
+  // A second source names a code while the original redemption requires
+  // authentication on the phone and entry by staff. Never advertise its code
+  // as an independently usable voucher, even after the original leaves the app.
+  return 'Einlöseweg unklar: Der Gutscheinanbieter verlangt Aktivierung mit dem Personal. Ein separat einlösbarer öffentlicher Code ist nicht bestätigt.';
+}
 const viennaDay = new Intl.DateTimeFormat('sv-SE', { timeZone: 'Europe/Vienna' });
 const day = date => viennaDay.format(date);
 
@@ -56,7 +63,7 @@ export function reviewedThreadCampaign(thread, requestedUrl) {
   if (!rule || String(thread.threadId) !== rule.thread || thread.merchant?.merchantName !== rule.merchant
     || thread.title !== rule.sourceTitle || digest(thread.threadDetails?.preparedHtmlDescription) !== rule.body
     || thread.endDate?.timestamp !== rule.endEpoch || thread.isExpired !== false || thread.isMaybeExpired
-    || thread.expiryReportStatus !== 'None' || (rule.code && thread.voucherCode !== rule.code)) return {};
+    || thread.expiryReportStatus !== 'None') return {};
   return { campaignId: rule.id, contentHash: rule.body };
 }
 
@@ -128,7 +135,7 @@ export function isReviewedCampaignRetry(deal, now = new Date()) {
   return Boolean(rule && day(now) <= rule.until && deal.approvalBlock);
 }
 
-// The generic expiry parser uses UTC end-of-day. These three reviewed winter
+// The generic expiry parser uses UTC end-of-day. These reviewed winter
 // campaigns end at local midnight in Vienna; retain that instant on replays.
 export function reconcileReviewedCampaignExpiry(deal) {
   const rule = rules.find(row => deal?.id === row.id && deal.url === row.url);

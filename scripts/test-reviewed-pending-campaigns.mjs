@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import { extractApprovalSourceEvidence } from '../scraper/approval-source-evidence.js';
 import { readReviewedPizzaPost, prepareReviewedCampaign, reviewedCampaignHold,
-  isReviewedCampaignRetry, reconcileReviewedCampaignExpiry } from '../scraper/reviewed-pending-campaigns.js';
+  isReviewedCampaignRetry, reconcileReviewedCampaignExpiry, reviewedCouponAliasHold } from '../scraper/reviewed-pending-campaigns.js';
 import { validateApprovalCandidates } from '../scraper/slack-approve.js';
 
 const rows = JSON.parse(readFileSync(new URL('./fixtures/reviewed-pending-campaigns-20261121.json', import.meta.url)));
@@ -13,18 +13,23 @@ const proof = ({ candidate, meta, thread, finalUrl }) => meta
   ? readReviewedPizzaPost(meta, candidate.url, finalUrl)
   : extractApprovalSourceEvidence('<script>window.__INITIAL_STATE__=' + JSON.stringify({ threadDetail: thread }) + ';</script>', candidate.url, finalUrl);
 
-test('three real review messages pass current-source checks, the expired November coupon stays blocked', async () => {
+test('two real review messages pass, the active coupon alias and expired November coupon stay held', async () => {
   for (const [index, row] of rows.entries()) {
     const evidence = proof(row);
-    const result = await validateApprovalCandidates([approved(row.candidate)], { now, existingDeals: [],
+    const live = { id: 'g2-1gbztrr', url: 'https://www.gutschein.at/burger-king/1-plus-1-crispy-chicken-gratis', brand: 'Burger King', validUntil: '2026-12-31' };
+    const result = await validateApprovalCandidates([approved(row.candidate)], { now, existingDeals: [live],
       requireMap: false, approvalCachedReviewOnly: true, inspectDealUrlHealth: async () => ({
         status: 200, finalUrl: row.finalUrl, checkedAt: now.toISOString(), contentHints: {}, dateHints: {}, approvalSourceEvidence: evidence }) });
     const { deal, decision } = result.results[0];
-    assert.equal(decision.allowed, index < 3, JSON.stringify(decision.reasons));
-    if (index < 3) {
-      assert.equal(deal.validUntil, ['2026-11-30', '2026-12-08', '2026-12-31'][index]);
+    assert.equal(decision.allowed, index < 2, JSON.stringify(decision.reasons));
+    if (index < 2) {
+      assert.equal(deal.validUntil, ['2026-11-30', '2026-12-08'][index]);
       assert.equal(deal.expires, deal.validUntil + 'T22:59:59.999Z');
-      assert.match(deal.description, [/8,50 €.*11,50 €/u, /Gutschein.*ab 16 Uhr.*8 €.*12 €/u, /D1001.*Elterleinplatz 8.*Nicht mit anderen Aktionen/u][index]);
+      assert.match(deal.description, [/8,50 €.*11,50 €/u, /Gutschein.*ab 16 Uhr.*8 €.*12 €/u][index]);
+    } else if (index === 2) {
+      assert.ok(evidence.caption.includes('D1001'));
+      assert.ok(decision.reasons.some(reason => reason.startsWith('Bereits live:')));
+      assert.match(reviewedCouponAliasHold(row.candidate, []), /Einlöseweg unklar/);
     } else assert.ok(evidence.blockingReason);
   }
 });
@@ -40,7 +45,7 @@ test('same-host canonical voucher identity, live status, owner and exact unchang
     assert.ok(proof({ ...burger, thread: { ...burger.thread, ...patch } }).blockingReason);
   }
   assert.ok(proof({ ...burger, finalUrl: expired.finalUrl }).blockingReason);
-  for (const row of [happy, burger]) {
+  for (const row of [happy]) {
     for (const patch of [{ title: row.thread.title + ' beendet' }, { endDate: { timestamp: 0 } },
       { threadDetails: { preparedHtmlDescription: row.thread.threadDetails.preparedHtmlDescription + 'nur für Clubmitglieder' } }]) {
       const evidence = proof({ ...row, thread: { ...row.thread, ...patch } });
@@ -50,7 +55,7 @@ test('same-host canonical voucher identity, live status, owner and exact unchang
 });
 
 test('preserves human edits and the real reaction, rejects input after expiry and stale or missing source reads', () => {
-  for (const row of rows.slice(0,3)) {
+  for (const row of rows.slice(0, 2)) {
     const current = { ...proof(row), checkedAt: now.toISOString() };
     const input = approved(row.candidate);
     assert.equal(isReviewedCampaignRetry(input, now), true);

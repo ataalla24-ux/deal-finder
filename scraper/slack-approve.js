@@ -1,4 +1,4 @@
-import { pizzaPost, prepareReviewedCampaign, reviewedCampaignHold, isReviewedCampaignRetry } from './reviewed-pending-campaigns.js';
+import { pizzaPost, prepareReviewedCampaign, reviewedCampaignHold, reviewedCouponAliasHold, isReviewedCampaignRetry } from './reviewed-pending-campaigns.js';
 import { prepareReviewedApprovalCopy } from './approval-reviewed-source-copy.js';
 import { curatedMerchantTask } from './merchant-offer-discovery.js';
 import { basicCopyHold, contradictedOfferPriceHold, prepareTwoStagePublication } from './approval-two-stage.js';
@@ -891,6 +891,13 @@ async function validateApprovalCandidates(deals, options = {}) {
       decision.allowed = false;
       decision.reasons.push(sourceDateHold);
       addedBlock = true;
+    }
+    const duplicateCoupon = reviewedCouponAliasHold(deal, existingDeals);
+    if (duplicateCoupon) {
+      decision.allowed = false;
+      decision.reasons.push(duplicateCoupon);
+      addedBlock = true;
+      continue;
     }
     const sourceHold = sourceEvidence.get(deal.id)?.blockingReason
       || (!existingIds.has(deal.id) && reviewedCampaignHold(originals.get(deal.id), sourceEvidence.get(deal.id), now));
