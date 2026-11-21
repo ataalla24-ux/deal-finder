@@ -36,7 +36,7 @@ concurrency:
 
 jobs:
   dispatch-deals:
-    if: ${{ github.event_name != 'workflow_run' || (github.event.workflow_run.conclusion == 'success' && github.event.workflow_run.display_title != 'Meta Graph health audit') }}
+    if: ${{ github.event_name != 'workflow_run' || (github.event.workflow_run.conclusion == 'success' && github.event.workflow_run.display_title != 'Meta Graph health audit' && github.event.workflow_run.display_title != 'Wien Combined validation') }}
     runs-on: ubuntu-latest
     timeout-minutes: 15
     permissions:

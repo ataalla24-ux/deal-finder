@@ -1,9 +1,15 @@
 name: "Wien Deals Combined"
+run-name: ${{ inputs.validation_only && 'Wien Combined validation' || github.workflow }}
 
 on:
   schedule:
     - cron: '35 */6 * * *'
   workflow_dispatch:
+    inputs:
+      validation_only:
+        description: Sample Graph collection with no external model calls or pending publication
+        type: boolean
+        default: false
 
 concurrency:
   group: wien-deals-combined
@@ -46,13 +52,13 @@ jobs:
           GH_TOKEN: ${{ github.token }}
           INSTAGRAM_ACCESS_TOKEN: ${{ secrets.INSTAGRAM_ACCESS_TOKEN }}
           INSTAGRAM_USER_ID: ${{ secrets.INSTAGRAM_USER_ID }}
-          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+          OPENAI_API_KEY: ${{ !inputs.validation_only && secrets.OPENAI_API_KEY || '' }}
           META_GRAPH_VERSION: ${{ vars.META_GRAPH_VERSION }}
           WIEN_COMBINED_GRAPH_HASHTAGS: ${{ vars.WIEN_COMBINED_GRAPH_HASHTAGS }}
           META_INSTAGRAM_FOOD_SOURCES_ONLY: '1'
           WIEN_COMBINED_MEDIA_PER_HASHTAG: '25'
           META_INSTAGRAM_MAX_PAGES_PER_SOURCE: '3'
-          WIEN_COMBINED_MAX_GRAPH_REQUESTS: '30'
+          WIEN_COMBINED_MAX_GRAPH_REQUESTS: ${{ inputs.validation_only && '16' || '30' }}
           META_INSTAGRAM_GRAPH_USAGE_THRESHOLD: '85'
           WIEN_COMBINED_MAX_DEALS: '40'
           WIEN_COMBINED_MEDIA_MAX_POSTS_PER_RUN: '18'
@@ -60,9 +66,21 @@ jobs:
           WIEN_COMBINED_MEDIA_MAX_VIDEO_FRAMES: '4'
           WIEN_COMBINED_MEDIA_LLM_MAX_CALLS_PER_RUN: '18'
           WIEN_COMBINED_MEDIA_LLM_MIN_CONFIDENCE: '0.84'
-        run: node scraper/wien-deals-combined.js
+        run: |
+          if [ "${{ inputs.validation_only }}" = "true" ]; then
+            node scripts/check-wien-combined-discovery.mjs
+          else
+            node scraper/wien-deals-combined.js
+          fi
+
+      - uses: actions/upload-artifact@v4
+        if: ${{ always() && inputs.validation_only }}
+        with:
+          name: wien-combined-validation
+          path: output/social-discovery/wien-combined.json
+          retention-days: 7
 
       - name: Commit deals
-        if: ${{ always() && steps.collector.outcome != 'skipped' }}
+        if: ${{ always() && !inputs.validation_only && steps.collector.outcome != 'skipped' }}
         run: |
           node scripts/commit-generated.mjs --message "Wien combined Graph deals $(date +%Y-%m-%d)" --files docs/deals-pending-wien-combined.json docs/wien-deals-combined-report.json docs/wien-deals-combined-media-cache.json docs/wien-combined-scan-state.json docs/deal-pipeline-last-run-wien-combined.json docs/deal-pipeline-runs-wien-combined.json
