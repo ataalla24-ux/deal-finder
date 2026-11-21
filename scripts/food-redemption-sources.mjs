@@ -44,6 +44,36 @@ export function redemptionPageHash(deal, html, finalUrl) {
   return digest(block.text().replace(/\s+/g, ' ').trim());
 }
 
+// Both maintenance lanes share the same host permission and delay. Reserve the
+// requested number of HTTP slots for other work before making any network call.
+export async function allowFoodOfferPage({ url, state, now, getRobots, remaining, reserve = 0, deliveryUrls = [] }) {
+  const origin = new URL(url).origin;
+  state.robots ||= {}; state.pauses ||= {};
+  if (Date.parse(state.pauses[origin]) > +now || remaining() <= reserve) return false;
+  let gate = state.robots[origin];
+  if (!gate || !(Date.parse(gate.expiresAt) > +now)) {
+    if (remaining() < reserve + 2) return false;
+    let content;
+    try { content = await getRobots(origin + '/robots.txt'); }
+    catch (error) {
+      const retry = Date.parse(retryAfterAt(error.retryAfter, now)) || 0;
+      state.pauses[origin] = new Date(Math.max(+now + 24 * HOUR, retry)).toISOString();
+      return false;
+    }
+    const rules = robotsParser(origin + '/robots.txt', content);
+    const urls = [...Object.values(sources).map(source => source.url), ...deliveryUrls];
+    const paths = urls.filter(value => new URL(value).origin === origin && rules.isAllowed(value, AGENT) !== false);
+    gate = state.robots[origin] = { paths, delay: rules.getCrawlDelay(AGENT) || 0, expiresAt: new Date(+now + 24 * HOUR).toISOString() };
+    if (gate.delay) {
+      state.pauses[origin] = new Date(+now + gate.delay * 1000).toISOString();
+      return false;
+    }
+  }
+  if (!gate.paths.includes(url) || remaining() <= reserve) return false;
+  if (gate.delay) state.pauses[origin] = new Date(+now + gate.delay * 1000).toISOString();
+  return true;
+}
+
 // Allocate at most three of the ordinary four offer-page slots. Keep one HTTP
 // request and one offer slot available for existing source/copy maintenance.
 export async function checkDueRedemptionPages({ manifest, live, state, now, getPage, getRobots, remaining, paused = () => false }) {
@@ -62,29 +92,14 @@ export async function checkDueRedemptionPages({ manifest, live, state, now, getP
     if (seen.length >= 3 || remaining() <= 1) break;
     const { url } = sources[row.dealId], origin = new URL(url).origin;
     if (paused(url) || Date.parse(state.pauses[origin]) > +now) continue;
-    let gate = state.robots[origin];
     try {
-      if (!gate || !(Date.parse(gate.expiresAt) > +now)) {
-        if (remaining() < 3) continue;
-        const content = await getRobots(origin + '/robots.txt');
-        const robots = robotsParser(origin + '/robots.txt', content);
-        const delay = robots.getCrawlDelay(AGENT) || 0;
-        // Defer long crawl delays and honor any positive delay by trying on a
-        // later maintenance run. Never sleep through another source's allowance.
-        const paths = Object.values(sources).filter(source => new URL(source.url).origin === origin)
-          .map(source => source.url).filter(value => robots.isAllowed(value, AGENT) !== false);
-        gate = { paths, delay, expiresAt: new Date(+now + 24 * HOUR).toISOString() };
-        state.robots[origin] = gate;
-        if (delay) state.pauses[origin] = new Date(+now + delay * 1000).toISOString();
-      }
-      if (Date.parse(state.pauses[origin]) > +now || !gate.paths.includes(url) || remaining() <= 1) continue;
+      if (!await allowFoodOfferPage({ url, state, now, getRobots, remaining, reserve: 1 })) continue;
       seen.push(url);
       const page = await getPage(url);
       if (page.finalUrl !== url || page.status && page.status !== 200) throw Error('unconfirmed-page');
       const hash = redemptionPageHash(liveById.get(row.dealId), page.html, page.finalUrl);
       state.pages[row.dealId] = { url, checkedAt: now.toISOString(), status: hash === row.recheck.contentHash ? 'matched' : 'changed',
         contentHash: hash, retryAt: new Date(+now + (hash === row.recheck.contentHash ? 8 : 24) * HOUR).toISOString() };
-      if (gate.delay) state.pauses[origin] = new Date(+now + gate.delay * 1000).toISOString();
     } catch (error) {
       const at = now.toISOString();
       const wait = Math.max(+now + 24 * HOUR, Date.parse(retryAfterAt(error.retryAfter, now)) || 0);

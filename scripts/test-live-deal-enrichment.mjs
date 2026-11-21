@@ -319,3 +319,78 @@ test('a duplicated benefit badge in verified merchant copy requests a grounded d
     assert.equal(result.report.ai.corrected,1);
     assert.deepEqual(copyReviewReasons(result.deals[0]), []);
   }));
+
+const deliveryKitchen = { ...pending('g2-oyxgdj'), brand:'Kitchen 23', title:'30 % auf ausgewählte Super-Deals',
+  url:'https://www.lieferando.at/speisekarte/kitchen-23-1230', enrichmentFields:['description'], caption:'Eine alte Kopie' };
+const deliveryBurger = { ...deliveryKitchen, id:'g2-1kg4kae', brand:'Lieferando',
+  title:'1+1 gratis: ausgewählte Burger und Nuggets bei Lieferando', url:'https://www.lieferando.at/en/menu/bk-lc-wien-lugner-city',
+  liveEditedAt:now.toISOString(), liveEditedFields:['title'] };
+const deliveryPizza = { ...deliveryKitchen, id:'g2-acp99i', brand:'Don’t Call It Pizza', title:'7 EUR Rabatt auf Bestellungen über 16 EUR',
+  url:'https://wolt.com/de-at/aut/vienna/restaurant/dont-call-it-pizza' };
+const menuPage = (url, venue, title, text) => '<html><head><link rel="canonical" href="'+url+'"></head><body><main><h1>'+venue+
+  '</h1><article><h2>'+title+'</h2><p>'+text+'</p></article></main></body></html>';
+const transport = (handler, calls) => async (url, init) => {
+  calls.push(url); assert.equal(init.redirect, 'manual');
+  return url.endsWith('/robots.txt') ? new Response('User-agent: *\nAllow: /', {headers:{'content-type':'text/plain'}}) : handler(url);
+};
+const htmlReply = text => new Response(text,{headers:{'content-type':'text/html'}});
+
+test('restaurant menus share the normal HTTP cap, actual provider refusal blocks the other venue, stale copy is suppressed', () => fixture(async ({ root, put }) => {
+  const ds=[deliveryKitchen,deliveryBurger,deliveryPizza]; put('docs/deals.json',{deals:ds}); const calls=[];
+  const result=await refreshMaintenanceEvidence({ root,now,renewRedemptions:true,fetchImpl:transport(url =>
+    url===deliveryKitchen.url ? new Response('Forbidden',{status:403,headers:{'retry-after':'90000'}}) :
+      htmlReply(menuPage(url,"Don't Call It Pizza 1120",'Speisekarte','Pizza 7 EUR. Pizza Special 16 EUR.')), calls) });
+  assert.deepEqual(calls,['https://www.lieferando.at/robots.txt',deliveryKitchen.url,'https://wolt.com/robots.txt',deliveryPizza.url]);
+  assert.equal(result.report.sourceRequests,4);
+  assert.equal(result.cache.entries[deliveryPizza.url].reason,'promotion-not-confirmed-on-current-menu');
+  assert.equal(result.cache.entries[deliveryKitchen.url].httpStatus,403);
+  for (const row of ds) assert.ok(maintenanceEvidenceFor(ds,result.cache,now).get(row.id).blockingReason);
+  await refreshMaintenanceEvidence({root,now:new Date(+now+3600000),renewRedemptions:true,fetchImpl:()=>assert.fail('ignore cooldown')});
+}));
+
+test('a protected title still permits its independently matched description to be researched', () => fixture(async({root,put}) => {
+  put('docs/deals.json',{deals:[deliveryBurger]});
+  const calls=[];
+  const text='1+1 gratis auf den Crispy Chicken bei der Bestellung über das Menü für die Filiale Lugner City.';
+  const result=await refreshMaintenanceEvidence({root,now,renewRedemptions:true,
+    fetchImpl:transport(url => htmlReply(menuPage(url,'Burger King Lugner City','1+1 Deals',text)),calls)});
+  assert.equal(calls.length,2); const evidence=maintenanceEvidenceFor([deliveryBurger],result.cache,now).get(deliveryBurger.id);
+  assert.match(evidence.officialText,/Crispy Chicken/);assert.equal(evidence.deliveryOffer,true);
+  const hidden={...deliveryBurger, liveEditedFields:['description']}; put('docs/deals.json',{deals:[hidden]});
+  await refreshMaintenanceEvidence({root,now:new Date(+now+2*86400000),renewRedemptions:true,fetchImpl:()=>assert.fail('protected field')});
+}));
+
+test('future approved menus require a canonical first-party restaurant, exact campaign title and original product or conditions', async () => {
+  const {extractDeliveryOffer}=await import('../scraper/delivery-menu-evidence.js');
+  const d={...deliveryKitchen,id:'future-branch-campaign',brand:'Pizzeria Wien', title:'20 % auf ausgewählte große Pizzen',
+    description:'Details werden ergänzt. Gilt nur für die Aktionspizzen Marinara und Funghi ab 25 EUR Bestellwert. – Testgasse 1, 1010 Wien',
+    distance:'Testgasse 1, 1010 Wien',approvedAt:now.toISOString(),url:'https://www.lieferando.at/speisekarte/pizzeria-wien'};
+  const details='Gilt nur für die Aktionspizzen Marinara und Funghi ab 25 EUR Bestellwert.';
+  const page=menuPage(d.url,d.brand,d.title,details+' Gültig bis 30.11.2026. Gutschein an der Kasse aktivieren.');
+  assert.match(extractDeliveryOffer(d,page,d.url,now),/Gutschein an der Kasse/);
+  for (const broken of [page.replace('20 %','25 %'), page.replace('25 EUR Bestellwert','20 EUR Bestellwert'),
+    page.replace('Marinara und Funghi','alle Gerichte'), page.replace('Pizzeria Wien','Andere Filiale'),
+    page.replace('30.11.2026','10.11.2026'), page.replace('<article>','<article hidden>'), page.replace('canonical','unknown')]) {
+    assert.equal(extractDeliveryOffer(d,broken,d.url,now),null);
+  }
+  assert.equal(extractDeliveryOffer({...d,description:d.title},page,d.url,now),null);
+  assert.equal(extractDeliveryOffer(d,page,'https://other.example/menu',now),null);
+});
+
+test('unchanged delivery terms are not repeatedly sent to the editor after a veto; a later source revision is eligible', () => fixture(async({root,put}) => {
+  const deal={...deliveryPizza,enrichmentNextReviewAt:'2026-11-10T00:00:00Z'};
+  put('docs/deals.json',{deals:[deal]});
+  const source=menuPage(deal.url,"Don't Call It Pizza 1120",'Aktionsangebot',
+    '7 EUR Rabatt auf Bestellungen über 16 EUR. Der Vorteil gilt bei Lieferung der Speisen durch Wolt.');
+  const refresh=(at,page)=>refreshMaintenanceEvidence({root,now:at,renewRedemptions:true,fetchImpl:transport(()=>htmlReply(page),[])});
+  const calls=[];
+  const check=at=>maintainFeedFile({cwd:root,now:at,allowAi:true,request:modelMock(calls,false)});
+  await refresh(now,source);
+  assert.equal((await check(now)).report.ai.attempted,1);
+  const later=new Date(+now+25*3600000);
+  await refresh(later,source);
+  assert.equal((await check(later)).report.ai.attempted,0);
+  const after=new Date(+later+25*3600000);
+  await refresh(after,source.replace('durch Wolt','durch Wolt, einmal pro Konto'));
+  assert.equal((await check(after)).report.ai.attempted,1);
+}));

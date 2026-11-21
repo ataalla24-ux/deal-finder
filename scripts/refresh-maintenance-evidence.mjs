@@ -5,6 +5,7 @@ import { createHash } from 'node:crypto';
 import { extractApprovalSourceEvidence, hasOnlyPreviewDescription, preisjaegerThreadId } from '../scraper/approval-source-evidence.js';
 import { extractIamstudentApprovalSourceEvidence, isSupportedIamstudentApprovalUrl, isReviewedIamstudentApprovalEvidence } from '../scraper/approval-iamstudent-source-evidence.js';
 import { extractMarktguruCashbackEvidence, isSupportedMarktguruUrl, reviewedMarktguruCopy } from '../scraper/marktguru-cashback-evidence.js';
+import { isReviewedDeliveryMenu, matchesDeliveryOffer, extractDeliveryOffer } from '../scraper/delivery-menu-evidence.js';
 import { needsSourceBackedTitle } from '../scraper/offer-title-utils.js';
 
 const read = (root, file, fallback) => { try { return JSON.parse(fs.readFileSync(path.join(root, file), 'utf8')); } catch (e) { if (e.code === 'ENOENT') return fallback; throw e; } };
@@ -50,15 +51,18 @@ export function maintenanceEvidenceFor(deals, cache, now = new Date()) {
     const row = cache?.entries?.[deal.url];
     // Failed or absent current public evidence must not fall back to an old
     // queue caption merely because this already published row needs details.
-    if (publicSupported(deal.url) && pendingDescription(deal)) result.set(deal.id, { blockingReason: 'maintenance-current-source-unavailable' });
-    if (!row || row.status !== 'verified' || !supported(deal.url) || row.url !== deal.url
+    const delivery = isReviewedDeliveryMenu(deal);
+    if ((publicSupported(deal.url) || delivery) && pendingDescription(deal)) result.set(deal.id, { blockingReason: 'maintenance-current-source-unavailable' });
+    if (!row || row.status !== 'verified' || !(supported(deal.url) || delivery) || row.url !== deal.url
       || !sameMerchant(row.brand, deal.brand, deal.url) || typeof row.text !== 'string' || !row.text.trim()
       || row.text.length > 16000 || row.hash !== digest(row.text)
       || !Number.isFinite(Date.parse(row.checkedAt)) || Date.parse(row.checkedAt) > +now
       || +now - Date.parse(row.checkedAt) > 24 * 3600000) continue;
     if (publicSupported(deal.url) && (row.parserVersion !== 4 || row.sourceKind !== 'approval-source-caption'
       || row.approvalSourceEvidence?.caption !== row.text || !createMaintenanceSourceEntry(deal, row.approvalSourceEvidence, now))) continue;
-    result.set(deal.id, { officialText: row.text, verifiedAt: row.checkedAt, sourceUrl: row.url, contentHash: row.hash,
+    if (delivery && (row.dealId !== deal.id || row.parserVersion !== 1 || row.sourceKind !== 'delivery-offer-card'
+      || !matchesDeliveryOffer(deal, row.text, now))) continue;
+    result.set(deal.id, { ...(delivery ? { deliveryOffer: true } : {}), officialText: row.text, verifiedAt: row.checkedAt, sourceUrl: row.url, contentHash: row.hash,
       ...(publicSupported(deal.url) ? { approvalSourceEvidence: row.approvalSourceEvidence } : {}) });
   }
   return result;
@@ -103,8 +107,9 @@ export async function refreshMaintenanceEvidence({ root = process.cwd(), now = n
   };
   let checkedRouteUrls = [];
   const readRouteUrls = new Set();
+  let allowDeliveryPage;
   if (renewRedemptions && !offline) {
-    const { checkDueRedemptionPages } = await import('./food-redemption-sources.mjs');
+    const { checkDueRedemptionPages, allowFoodOfferPage } = await import('./food-redemption-sources.mjs');
     const { merchantOfferHostPaused } = await import('../scraper/merchant-offer-discovery.js');
     const states = [read(root, 'reviews/vienna-merchant-website-state.json', {}), read(root, 'reviews/vienna-merchant-offer-state.json', {})];
     const power = read(root, 'docs/power-scraper-report.json', {});
@@ -134,13 +139,20 @@ export async function refreshMaintenanceEvidence({ root = process.cwd(), now = n
       return text;
     };
     cache.foodRedemptions ||= {};
+    const deliveryUrls = deals.filter(isReviewedDeliveryMenu).map(d => d.url);
+    allowDeliveryPage = url => !paused(url) && allowFoodOfferPage({ url, state: cache.foodRedemptions, now,
+      getRobots, remaining: () => 5 - sourceRequests, deliveryUrls });
     const manifest = read(root, 'reviews/deal-redemptions.json', { reviews: [] });
     for (const row of manifest.reviews) if (row.recheck?.kind === 'official-food-page') readRouteUrls.add(row.recheck.url);
     checkedRouteUrls = await checkDueRedemptionPages({ manifest,
       live: deals, state: cache.foodRedemptions, now, getPage: get, getRobots, remaining: () => 5 - sourceRequests, paused });
   }
   const missing = deals.filter(d => hasOnlyPreviewDescription(d) || pendingDescription(d));
-  const candidates = deals.filter(d => carrierSupported(d.url) || publicSupported(d.url) && reviewablePublicCopy(d, now));
+  const candidates = deals.filter(d => carrierSupported(d.url) || publicSupported(d.url) && reviewablePublicCopy(d, now)
+    || allowDeliveryPage && isReviewedDeliveryMenu(d) && dueDescription(d, now) && !d.forceKeep && !d.campaignId && !d.isBusiness
+      && !d.isBusinessAdvertisement && !(d.liveEditedAt && !d.liveEditedFields?.length)
+      && !((d.editedInSlack || d.slackEditedAt || d.slackFormEditTs) && !d.slackEditedFields?.length)
+      && ![...(d.liveEditedFields || []), ...(d.slackEditedFields || [])].includes('description'));
   const selected = [...new Map(candidates.map(d => [d.url, d])).values()]
     .sort((a, b) => Number(dueDescription(b, now)) - Number(dueDescription(a, now))
       || (requireSameDay ? Number(b.category === 'essen') - Number(a.category === 'essen') : 0)
@@ -150,7 +162,8 @@ export async function refreshMaintenanceEvidence({ root = process.cwd(), now = n
     const previous = cache.entries[deal.url];
     const freshDayNeeded = requireSameDay && previous?.status === 'verified'
       && Number.isFinite(Date.parse(previous.checkedAt)) && localDay(new Date(previous.checkedAt)) !== localDay(now);
-    const parserVersion = publicSupported(deal.url) ? 4 : 3;
+    const delivery = isReviewedDeliveryMenu(deal);
+    const parserVersion = delivery ? 1 : publicSupported(deal.url) ? 4 : 3;
     const paused = publicSupported(deal.url) && Object.values(cache.entries).some(row => {
       try { return new URL(row.url).origin === new URL(deal.url).origin && [401, 403, 429].includes(row.httpStatus)
         && (!Number.isFinite(Date.parse(row.nextAttemptAt)) || Date.parse(row.nextAttemptAt) > +now); } catch { return false; }
@@ -166,13 +179,18 @@ export async function refreshMaintenanceEvidence({ root = process.cwd(), now = n
     if (offline || routeBlocked || checkedRouteUrls.includes(deal.url) || requests >= 4 || sourceRequests >= 5 || paused
       || originPause && (!Number.isFinite(Date.parse(originPause)) || Date.parse(originPause) > +now)
       || previous?.parserVersion === parserVersion && Date.parse(previous?.nextAttemptAt) > +now && !freshDayNeeded) continue;
+    if (delivery && !await allowDeliveryPage(deal.url)) continue;
     requests++;
     let next = { url: deal.url, parserVersion, checkedAt: now.toISOString(), nextAttemptAt: new Date(+now + 86400000).toISOString(), status: 'deferred' };
     try {
       const page = await get(deal.url);
       if (page.finalUrl !== deal.url) throw Error('unexpected-source-redirect');
       if (page.status && page.status !== 200) throw Object.assign(Error('source-http'), { httpStatus: page.status });
-      if (publicSupported(deal.url)) {
+      if (delivery) {
+        const text = extractDeliveryOffer(deal, page.html, page.finalUrl, now);
+        next = text ? { ...next, status: 'verified', sourceKind: 'delivery-offer-card', dealId: deal.id, brand: deal.brand,
+          text, hash: digest(text) } : { ...next, reason: 'promotion-not-confirmed-on-current-menu' };
+      } else if (publicSupported(deal.url)) {
         const evidence = isSupportedIamstudentApprovalUrl(deal.url)
           ? extractIamstudentApprovalSourceEvidence(page.html, deal.url, page.finalUrl)
           : isSupportedMarktguruUrl(deal.url) ? extractMarktguruCashbackEvidence(page.html, deal.url, page.finalUrl)
@@ -204,7 +222,7 @@ export async function refreshMaintenanceEvidence({ root = process.cwd(), now = n
     sourceRequests,
     verified: missing.filter(d => verified.get(d.id)?.officialText).map(d => d.id),
     unresolved: missing.filter(d => !verified.get(d.id)?.officialText).map(d => ({ id: d.id, title: d.title,
-      reason: supported(d.url) ? cache.entries[d.url]?.reason || 'refresh-deferred' : 'no-reviewed-source-adapter' })),
+      reason: (supported(d.url) || isReviewedDeliveryMenu(d)) ? cache.entries[d.url]?.reason || 'refresh-deferred' : 'no-reviewed-source-adapter' })),
     noAutomaticApproval: true };
   if (apply) for (const [file, value] of [['reviews/maintenance-source-evidence.json', cache], ['reviews/maintenance-source-report.json', report]]) {
     fs.writeFileSync(path.join(root, file), JSON.stringify(value, null, 2) + '\n');

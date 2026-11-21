@@ -672,7 +672,8 @@ export async function maintainFeedFile({ cwd = process.cwd(), allowAi = false, a
       }
       const checkHash = hash([inputHash, sourceTexts(deal, sourceEvidence.get(deal.id)), [...fields].sort(),
         'model-reviewed-maintenance-v5', pendingDescription(deal), result.report.ai.models, 'max', 'pro']);
-      if (result.state.checks.some(row => row.hash === checkHash && +now - Date.parse(row.at) < 24 * 3600000)) continue;
+      if (result.state.checks.some(row => row.hash === checkHash && (+now - Date.parse(row.at) < 24 * 3600000
+        || sourceEvidence.get(deal.id)?.deliveryOffer && row.outcome === 'no-safe-patch'))) continue;
       const prior = result.state.corrections.find(entry => entry.id === deal.id && entry.inputHash === inputHash);
       if (prior && !pendingDescription(deal)) continue;
       // Match the evidence actually admissible to the editor; deterministic
