@@ -1,6 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { curatedMerchantTask, extractMerchantOfferCandidates } from '../scraper/merchant-offer-discovery.js';
+import { normalizeDealRecord } from '../scraper/deal-normalization-utils.js';
 import { normalizeDeal } from '../scraper/slack-notify.js';
 import { validateDealsForSlack } from '../scraper/deal-validity-agent.js';
 import { validateApprovalCandidates } from '../scraper/slack-approve.js';
@@ -30,6 +31,9 @@ function servePage(t, body, finalUrl = url) {
 test('two offers share one request and keep their unknown end after Slack approval', async t => {
   const source = servePage(t, page + '<aside>Andere Aktion gültig bis 24.12.2026</aside>');
   assert.equal(cards.length, 2);
+  assert.ok(cards.every(card => card.category === 'essen'));
+  assert.equal(normalizeDealRecord({ ...cards[0], category: 'Essen & Trinken' }).category, 'essen');
+  assert.equal(normalizeDealRecord({ ...cards[0], category: 'shopping', slackEditedFields: ['category'] }).category, 'shopping');
   const dispatch = await validateDealsForSlack(cards, { now });
   assert.equal(dispatch.allowedDeals.length, 2, JSON.stringify(dispatch.report));
   assert.equal(source.mock.callCount(), 1);
@@ -37,6 +41,7 @@ test('two offers share one request and keep their unknown end after Slack approv
   assert.equal(result.allowedDeals.length, 2, JSON.stringify(result.report));
   assert.equal(source.mock.callCount(), 2);
   for (const row of result.allowedDeals) {
+    assert.equal(row.category, 'essen');
     assert.equal(row.address, 'Neuer Markt 8a, 1010 Wien');
     assert.ok(!row.validUntil && !row.validOn);
   }

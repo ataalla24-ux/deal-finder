@@ -174,7 +174,7 @@ export function extractMerchantOfferCandidates(html, task, now) {
     || Date.parse(task.merchant.observedAt) > +now)) return [];
   if (!homepage && !canonicalOfferUrl(task.url, task.merchant?.website)) return [];
   const source = { name: `merchant-website:${new URL(task.url).hostname}`, brand: task.merchant.name,
-    url: task.url, allowedHosts: [new URL(task.url).hostname], category: 'Essen & Trinken' };
+    url: task.url, allowedHosts: [new URL(task.url).hostname], category: 'essen' };
   const url = new URL(task.url);
   if (task.curated && !curatedMerchantTask(task.url)) return [];
   if (task.url === 'https://viennasweets.com/de/offers') {

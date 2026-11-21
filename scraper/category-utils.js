@@ -15,6 +15,7 @@ const CATEGORY_ALIASES = {
   christlich: 'kirche',
   christlichevents: 'events',
   gemeinde: 'kirche',
+  'essen & trinken': 'essen',
   restaurant: 'essen',
   gastro: 'essen',
   food: 'essen',
