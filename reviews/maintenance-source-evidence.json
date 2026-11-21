@@ -176,6 +176,23 @@
         "campaignId": "g2-13q9t1x",
         "contentHash": "42e19a72e058d65800f102b7251bfe0cce8ae874fb154804958620dcfeffcd27"
       }
+    },
+    "https://wolt.com/de-at/aut/vienna/restaurant/dont-call-it-pizza": {
+      "url": "https://wolt.com/de-at/aut/vienna/restaurant/dont-call-it-pizza",
+      "parserVersion": 1,
+      "checkedAt": "2026-11-21T12:54:01.946Z",
+      "nextAttemptAt": "2026-11-22T12:54:01.946Z",
+      "status": "deferred",
+      "reason": "promotion-not-confirmed-on-current-menu"
+    },
+    "https://www.lieferando.at/speisekarte/kitchen-23-1230": {
+      "url": "https://www.lieferando.at/speisekarte/kitchen-23-1230",
+      "parserVersion": 1,
+      "checkedAt": "2026-11-21T12:54:01.504Z",
+      "nextAttemptAt": "2026-11-22T12:54:01.504Z",
+      "status": "deferred",
+      "reason": "source-http-403",
+      "httpStatus": 403
     }
   },
   "foodRedemptions": {
@@ -253,8 +270,25 @@
         ],
         "delay": 0,
         "expiresAt": "2026-11-22T11:51:28.847Z"
+      },
+      "https://wolt.com": {
+        "paths": [
+          "https://wolt.com/de-at/aut/vienna/restaurant/dont-call-it-pizza"
+        ],
+        "delay": 0,
+        "expiresAt": "2026-11-22T12:53:46.464Z"
+      },
+      "https://www.lieferando.at": {
+        "paths": [
+          "https://www.lieferando.at/speisekarte/kitchen-23-1230",
+          "https://www.lieferando.at/en/menu/bk-lc-wien-lugner-city"
+        ],
+        "delay": 0,
+        "expiresAt": "2026-11-22T12:53:46.721Z"
       }
     },
-    "pauses": {}
+    "pauses": {
+      "https://www.lieferando.at": "2026-11-22T12:54:01.504Z"
+    }
   }
 }
