@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-11-21T14:54:11.425Z",
+  "generatedAt": "2026-11-21T15:15:41.436Z",
   "discoveryAvailability": {
     "note": "Transport evidence, not deal yield. Retry eligibility is not recovery. Candidate counts are not Slack deliveries. No extra runs or quota resets.",
     "lanes": [
@@ -54,10 +54,10 @@
   },
   "summary": {
     "filesConsidered": 32,
-    "totalCandidates": 635,
-    "uniqueCandidates": 595,
-    "distinctCandidates": 611,
-    "duplicateClusters": 16,
+    "totalCandidates": 626,
+    "uniqueCandidates": 591,
+    "distinctCandidates": 605,
+    "duplicateClusters": 14,
     "topHealthySources": [
       {
         "sourceKey": "instagram-apify",
@@ -110,16 +110,16 @@
         "totalDeals": 3
       },
       {
+        "sourceKey": "firecrawl4",
+        "sourceLabel": "Firecrawl Key 4 - Instagram Direct",
+        "missionFitScore": 55,
+        "totalDeals": 49
+      },
+      {
         "sourceKey": "vienna-websites",
         "sourceLabel": "Wiener Lokal-Angebotsseiten",
         "missionFitScore": 54,
         "totalDeals": 10
-      },
-      {
-        "sourceKey": "meta-instagram",
-        "sourceLabel": "Meta Instagram Graph",
-        "missionFitScore": 53,
-        "totalDeals": 80
       }
     ],
     "topCoverageSources": [
@@ -154,8 +154,8 @@
       {
         "sourceKey": "firecrawl4",
         "sourceLabel": "Firecrawl Key 4 - Instagram Direct",
-        "coverageScore": 35,
-        "totalDeals": 58,
+        "coverageScore": 32,
+        "totalDeals": 49,
         "fresh1dCount": 0
       }
     ],
@@ -698,13 +698,114 @@
       "sourceWeightScore": 45
     },
     {
+      "sourceKey": "firecrawl4",
+      "file": "deals-pending-firecrawl4.json",
+      "sourceLabel": "Firecrawl Key 4 - Instagram Direct",
+      "totalDeals": 49,
+      "uniqueDeals": 43,
+      "duplicateDeals": 6,
+      "duplicateAcrossSources": 6,
+      "fresh1dCount": 0,
+      "fresh7dCount": 10,
+      "viennaCount": 8,
+      "foodDrinkCount": 47,
+      "promoCount": 28,
+      "missingUrlCount": 0,
+      "sampleTitles": [
+        "Frühstückwien: Wien wird irgendwann wach. Das Goodmann serviert ...",
+        "Bis zu 40 % Rabatt auf Bestellungen bei CIO'S Grill über die Lieferando Super Deals",
+        "1+1 Schnitzel: zwei Portionen zum Preis von einer (50 % Ersparnis)"
+      ],
+      "lastRun": {
+        "status": "completed",
+        "startedAt": "2026-11-21T15:07:34.376Z",
+        "finishedAt": "2026-11-21T15:14:48.553Z",
+        "durationMs": 434177,
+        "counts": {
+          "rawCandidates": 10,
+          "normalizedCandidates": 10,
+          "verifiedCandidates": 49,
+          "previousDeals": 58,
+          "acceptedDeals": 49,
+          "rejectedDeals": 4
+        },
+        "rejectedByReason": {
+          "post-verification-rejected": 4
+        },
+        "errors": [],
+        "reportFile": "deal-pipeline-last-run-firecrawl4.json"
+      },
+      "uniqueRate": 0.9,
+      "duplicateRate": 0.1,
+      "fresh1dRate": 0,
+      "fresh7dRate": 0.2,
+      "viennaRate": 0.2,
+      "foodDrinkRate": 1,
+      "promoRate": 0.6,
+      "missingUrlRate": 0,
+      "averageQualityScore": 63.9,
+      "topCategories": [
+        {
+          "value": "essen",
+          "count": 45
+        },
+        {
+          "value": "fitness",
+          "count": 1
+        },
+        {
+          "value": "kaffee",
+          "count": 1
+        },
+        {
+          "value": "shopping",
+          "count": 1
+        },
+        {
+          "value": "supermarkt",
+          "count": 1
+        }
+      ],
+      "topTypes": [
+        {
+          "value": "rabatt",
+          "count": 25
+        },
+        {
+          "value": "bogo",
+          "count": 13
+        },
+        {
+          "value": "gratis",
+          "count": 8
+        },
+        {
+          "value": "freebie",
+          "count": 2
+        },
+        {
+          "value": "gutschein",
+          "count": 1
+        }
+      ],
+      "issues": [
+        "wenige Deals sind frischer als 1 Tag",
+        "Wien-Signal ist zu schwach"
+      ],
+      "healthScore": 60,
+      "missionFitScore": 55,
+      "coverageScore": 32,
+      "precisionScore": 56,
+      "sourceWeightScore": 52
+    },
+    {
       "sourceKey": "gastro2",
       "file": "deals-pending-gastro2.json",
       "sourceLabel": "Firecrawl Key 1 - Gastro",
       "totalDeals": 131,
-      "uniqueDeals": 118,
-      "duplicateDeals": 13,
-      "duplicateAcrossSources": 13,
+      "uniqueDeals": 120,
+      "duplicateDeals": 11,
+      "duplicateAcrossSources": 9,
       "fresh1dCount": 0,
       "fresh7dCount": 8,
       "viennaCount": 7,
@@ -902,107 +1003,6 @@
       "coverageScore": 27,
       "precisionScore": 48,
       "sourceWeightScore": 44
-    },
-    {
-      "sourceKey": "firecrawl4",
-      "file": "deals-pending-firecrawl4.json",
-      "sourceLabel": "Firecrawl Key 4 - Instagram Direct",
-      "totalDeals": 58,
-      "uniqueDeals": 49,
-      "duplicateDeals": 9,
-      "duplicateAcrossSources": 9,
-      "fresh1dCount": 0,
-      "fresh7dCount": 9,
-      "viennaCount": 8,
-      "foodDrinkCount": 56,
-      "promoCount": 30,
-      "missingUrlCount": 0,
-      "sampleTitles": [
-        "Zushi Market: 🍣 Zushi Market x Pichelmayergasse 💚 Exklusiv für unsere ...",
-        "Lidl: Döner-Croissants heute gratis in Wien! Was als Aprilscherz begonnen hat ...",
-        "1+1 Schnitzel: zwei Portionen zum Preis von einer"
-      ],
-      "lastRun": {
-        "status": "completed",
-        "startedAt": "2026-11-20T15:56:01.075Z",
-        "finishedAt": "2026-11-20T16:04:48.415Z",
-        "durationMs": 527340,
-        "counts": {
-          "rawCandidates": 21,
-          "normalizedCandidates": 21,
-          "verifiedCandidates": 59,
-          "previousDeals": 56,
-          "acceptedDeals": 59,
-          "rejectedDeals": 11
-        },
-        "rejectedByReason": {
-          "post-verification-rejected": 11
-        },
-        "errors": [],
-        "reportFile": "deal-pipeline-last-run-firecrawl4.json"
-      },
-      "uniqueRate": 0.8,
-      "duplicateRate": 0.2,
-      "fresh1dRate": 0,
-      "fresh7dRate": 0.2,
-      "viennaRate": 0.1,
-      "foodDrinkRate": 1,
-      "promoRate": 0.5,
-      "missingUrlRate": 0,
-      "averageQualityScore": 64.1,
-      "topCategories": [
-        {
-          "value": "essen",
-          "count": 54
-        },
-        {
-          "value": "fitness",
-          "count": 1
-        },
-        {
-          "value": "kaffee",
-          "count": 1
-        },
-        {
-          "value": "shopping",
-          "count": 1
-        },
-        {
-          "value": "supermarkt",
-          "count": 1
-        }
-      ],
-      "topTypes": [
-        {
-          "value": "rabatt",
-          "count": 30
-        },
-        {
-          "value": "bogo",
-          "count": 14
-        },
-        {
-          "value": "gratis",
-          "count": 10
-        },
-        {
-          "value": "freebie",
-          "count": 2
-        },
-        {
-          "value": "gutschein",
-          "count": 2
-        }
-      ],
-      "issues": [
-        "wenige Deals sind frischer als 1 Tag",
-        "Wien-Signal ist zu schwach"
-      ],
-      "healthScore": 54,
-      "missionFitScore": 51,
-      "coverageScore": 35,
-      "precisionScore": 50,
-      "sourceWeightScore": 48
     },
     {
       "sourceKey": "firecrawl5",
@@ -1353,7 +1353,7 @@
       ],
       "healthScore": 49,
       "missionFitScore": 35,
-      "coverageScore": 31,
+      "coverageScore": 30,
       "precisionScore": 38,
       "sourceWeightScore": 39
     },
