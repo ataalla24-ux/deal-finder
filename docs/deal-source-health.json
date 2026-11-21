@@ -1,21 +1,21 @@
 {
-  "generatedAt": "2026-11-21T19:47:54.889Z",
+  "generatedAt": "2026-11-21T20:07:02.486Z",
   "discoveryAvailability": {
     "note": "Transport evidence, not deal yield. Retry eligibility is not recovery. Candidate counts are not Slack deliveries. No extra runs or quota resets.",
     "lanes": [
       {
         "name": "instagram-search",
-        "observedAt": "2026-11-21T08:16:43.310Z",
+        "observedAt": "2026-11-21T20:06:11.491Z",
         "status": "paused",
-        "reason": "search-unavailable",
+        "reason": "search-cooldown",
         "retryAt": "2026-11-22T13:51:57.556Z",
-        "attempted": 1,
+        "attempted": 0,
         "discovered": 0,
         "deliveredToSlack": null
       },
       {
         "name": "instagram-profiles",
-        "observedAt": "2026-11-21T08:16:43.310Z",
+        "observedAt": "2026-11-21T20:06:11.491Z",
         "status": "no-block-reported",
         "reason": "",
         "retryAt": "",
@@ -24,7 +24,7 @@
       },
       {
         "name": "instagram-previews",
-        "observedAt": "2026-11-21T08:16:43.310Z",
+        "observedAt": "2026-11-21T20:06:11.491Z",
         "status": "no-block-reported",
         "reason": "",
         "retryAt": "",
@@ -54,10 +54,10 @@
   },
   "summary": {
     "filesConsidered": 32,
-    "totalCandidates": 627,
-    "uniqueCandidates": 592,
+    "totalCandidates": 626,
+    "uniqueCandidates": 593,
     "distinctCandidates": 606,
-    "duplicateClusters": 14,
+    "duplicateClusters": 13,
     "topHealthySources": [
       {
         "sourceKey": "wien-combined",
@@ -133,9 +133,9 @@
       {
         "sourceKey": "meta-instagram",
         "sourceLabel": "Meta Instagram Graph",
-        "coverageScore": 55,
+        "coverageScore": 54,
         "totalDeals": 81,
-        "fresh1dCount": 10
+        "fresh1dCount": 9
       },
       {
         "sourceKey": "gutscheine",
@@ -181,7 +181,7 @@
       {
         "sourceKey": "meta-instagram",
         "sourceLabel": "Meta Instagram Graph",
-        "precisionScore": 68,
+        "precisionScore": 69,
         "totalDeals": 81
       },
       {
@@ -424,10 +424,10 @@
       "file": "deals-pending-meta-instagram.json",
       "sourceLabel": "Meta Instagram Graph",
       "totalDeals": 81,
-      "uniqueDeals": 72,
-      "duplicateDeals": 9,
-      "duplicateAcrossSources": 5,
-      "fresh1dCount": 10,
+      "uniqueDeals": 73,
+      "duplicateDeals": 8,
+      "duplicateAcrossSources": 4,
+      "fresh1dCount": 9,
       "fresh7dCount": 72,
       "viennaCount": 81,
       "foodDrinkCount": 60,
@@ -440,7 +440,7 @@
       ],
       "lastRun": null,
       "uniqueRate": 0.9,
-      "duplicateRate": 0.1,
+      "duplicateRate": 0,
       "fresh1dRate": 0.1,
       "fresh7dRate": 0.9,
       "viennaRate": 1,
@@ -497,8 +497,8 @@
       ],
       "healthScore": 70,
       "missionFitScore": 53,
-      "coverageScore": 55,
-      "precisionScore": 68,
+      "coverageScore": 54,
+      "precisionScore": 69,
       "sourceWeightScore": 61
     },
     {
@@ -647,35 +647,35 @@
       "sourceKey": "instagram-ai",
       "file": "deals-pending-instagram-ai.json",
       "sourceLabel": "Instagram AI Agent",
-      "totalDeals": 7,
+      "totalDeals": 6,
       "uniqueDeals": 4,
-      "duplicateDeals": 3,
-      "duplicateAcrossSources": 3,
+      "duplicateDeals": 2,
+      "duplicateAcrossSources": 2,
       "fresh1dCount": 1,
-      "fresh7dCount": 7,
-      "viennaCount": 7,
-      "foodDrinkCount": 6,
-      "promoCount": 1,
+      "fresh7dCount": 6,
+      "viennaCount": 6,
+      "foodDrinkCount": 5,
+      "promoCount": 0,
       "missingUrlCount": 0,
       "sampleTitles": [
         "👉 Nur 6,99 € pro kg Lachs (Somon Baligi) Ideal für traditionelle Gerichte & besondere Anlässe",
-        "Mit einem Shinoi Gutschein verschenkst du köstliches Essen, besondere Momente und gemeinsame Erinnerungen",
-        "Pizza-Mittagsmenü mit Suppe oder Salat um 11,90 € Im Ristorante Gondola, Schönbrunner Str"
+        "🍕 Monday to Frid",
+        "Und heute im Mittagsmenü: gebackenes Schweinsschnitzerl mit Erdäpfel-Vogerlsalat, mit Suppe um € 9,90. Reservi"
       ],
       "lastRun": null,
-      "uniqueRate": 0.6,
-      "duplicateRate": 0.4,
-      "fresh1dRate": 0.1,
+      "uniqueRate": 0.7,
+      "duplicateRate": 0.3,
+      "fresh1dRate": 0.2,
       "fresh7dRate": 1,
       "viennaRate": 1,
-      "foodDrinkRate": 0.9,
-      "promoRate": 0.1,
+      "foodDrinkRate": 0.8,
+      "promoRate": 0,
       "missingUrlRate": 0,
-      "averageQualityScore": 82,
+      "averageQualityScore": 81,
       "topCategories": [
         {
           "value": "essen",
-          "count": 4
+          "count": 3
         },
         {
           "value": "kaffee",
@@ -693,19 +693,17 @@
       "topTypes": [
         {
           "value": "rabatt",
-          "count": 7
+          "count": 6
         }
       ],
       "issues": [
-        "wenige Deals sind frischer als 1 Tag",
-        "wenige klare Gratis-/Promo-Signale",
-        "hohe Überschneidung mit anderen Quellen"
+        "wenige klare Gratis-/Promo-Signale"
       ],
       "healthScore": 62,
-      "missionFitScore": 52,
-      "coverageScore": 13,
-      "precisionScore": 64,
-      "sourceWeightScore": 49
+      "missionFitScore": 47,
+      "coverageScore": 12,
+      "precisionScore": 61,
+      "sourceWeightScore": 47
     },
     {
       "sourceKey": "instagram-verified",
