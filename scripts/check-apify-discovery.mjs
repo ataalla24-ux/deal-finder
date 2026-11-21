@@ -1,17 +1,15 @@
 import fs from 'node:fs';
-import { ApifyDiscoveryClient, HASHTAG_ACTOR, PROFILE_CAP_USD, HASHTAG_CAP_USD, budgetCheck } from '../scraper/apify-discovery-client.js';
+import { ApifyDiscoveryClient, HASHTAG_ACTOR, PROFILE_CAP_USD, HASHTAG_CAP_USD,
+  apifyErrorDetails, budgetCheck, compareApifyAccounts } from '../scraper/apify-discovery-client.js';
 import { LIMITS } from '../scraper/apify-food-discovery-policy.js';
 
 let report;
 try {
   const client = new ApifyDiscoveryClient(process.env.APIFY_2);
   const current = await client.preflight();
-  let sameAccountAsPrimary = null;
-  if (process.env.APIFY_TOKEN) {
-    const primary = await new ApifyDiscoveryClient(process.env.APIFY_TOKEN).request('/users/me');
-    sameAccountAsPrimary = Boolean(primary.id && current.user.id && primary.id === current.user.id);
-  }
-  report = { checkedAt: new Date().toISOString(), credentialAccepted: true, sameAccountAsPrimary, ...budgetCheck(current) };
+  const primary = process.env.APIFY_TOKEN?.trim() ? new ApifyDiscoveryClient(process.env.APIFY_TOKEN) : null;
+  const accountComparison = await compareApifyAccounts(primary, current.user);
+  report = { checkedAt: new Date().toISOString(), credentialAccepted: true, ...accountComparison, ...budgetCheck(current) };
   report.hashtagBudget = budgetCheck(await client.preflight(HASHTAG_ACTOR), new Date(), HASHTAG_CAP_USD);
   report.configuredLimits = { ...LIMITS, profileCapUsd: PROFILE_CAP_USD, hashtagCapUsd: HASHTAG_CAP_USD };
   if (fs.existsSync('docs/apify-discovery-report.json')) {
@@ -42,7 +40,8 @@ try {
     report.lastRun = report.lastRuns.at(-1) || null;
   }
 } catch (error) {
-  report = { checkedAt: new Date().toISOString(), credentialAccepted: false, allowed: false, reason: error.message };
+  report = { checkedAt: new Date().toISOString(), credentialAccepted: false,
+    ...report, allowed: false, ...apifyErrorDetails(error) };
   process.exitCode = 1;
 }
 fs.mkdirSync('output', { recursive: true });

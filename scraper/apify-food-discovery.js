@@ -1,7 +1,8 @@
 import fs from 'node:fs/promises';
 import path from 'node:path';
 import { pathToFileURL } from 'node:url';
-import { ApifyDiscoveryClient, DISCOVERY_ACTOR, HASHTAG_ACTOR, PROFILE_CAP_USD, HASHTAG_CAP_USD, RUN_CAP_USD, budgetCheck } from './apify-discovery-client.js';
+import { ApifyDiscoveryClient, DISCOVERY_ACTOR, HASHTAG_ACTOR, PROFILE_CAP_USD, HASHTAG_CAP_USD, RUN_CAP_USD,
+  apifyErrorDetails, budgetCheck } from './apify-discovery-client.js';
 import {
   DAY, LIMITS, discoverySources, selectDiscoverySources, reservationReason,
   postIdentity, postFingerprint, earlyPostRejection, classifyDiscoveryPost, mergeDiscoveryPending,
@@ -66,6 +67,7 @@ export function pipelineHealthReport(report) {
     rejected: (report.candidateAudit || []).filter(row => row.status === 'rejected'),
     diagnostics: { pendingDeals: report.pendingDeals || 0, unchangedPosts: report.unchangedPosts || 0,
       providerErrors: report.providerErrors || 0, emptySourceRecords: report.emptySourceRecords || 0,
+      batchErrors: report.batchErrors || [],
       ocrCalls: report.ocrCalls || 0, sources: report.sources || [] },
     constraints: LIMITS, errors: [report.error, ...(report.batchErrors || []).map(e => e.reason)].filter(Boolean),
   });
@@ -102,11 +104,12 @@ export async function runBoundedActor(client, sources, {
 }
 
 export async function collectDiscoveryBatches(client, sources, options = {}) {
-  const items = [], runs = [], errors = [], failedSources = new Set();
+  const items = [], runs = [], errors = [], failedSources = new Set(), attemptedSources = new Set();
   let retryAt = '';
   for (const kind of ['profile', 'hashtag']) {
     const selected = sources.filter(s => s.kind === kind);
     if (!selected.length) continue;
+    selected.forEach(source => attemptedSources.add(source.key));
     try {
       const { cap } = actorBounds(selected, options.purpose);
       const check = budgetCheck(await client.preflight(kind === 'profile' ? DISCOVERY_ACTOR : HASHTAG_ACTOR),
@@ -117,14 +120,14 @@ export async function collectDiscoveryBatches(client, sources, options = {}) {
       runs.push({ id: run.runId, actorId: run.actorId, reportedChargeUsd: run.reportedChargeUsd });
     } catch (error) {
       selected.forEach(s => failedSources.add(s.key));
-      errors.push({ kind, reason: /^apify-|^actor-|^missing-|^invalid-/.test(error.message) ? error.message : 'collector-processing-failed' });
+      errors.push({ kind, ...apifyErrorDetails(error) });
       if (error.uncertainStart || [401, 403, 429].includes(error.httpStatus)) {
         retryAt = new Date(Math.max(+(options.now?.() || new Date()) + DAY, Date.parse(error.retryAt) || 0)).toISOString();
         break;
       }
     }
   }
-  return { items, runs, errors, failedSources, retryAt };
+  return { items, runs, errors, failedSources, attemptedSources, retryAt };
 }
 
 export function safeMediaUrl(value) {
@@ -295,7 +298,6 @@ export async function main(mode = '--plan') {
   const previous = (await read(FILES.pending, { deals: [] })).deals;
   const report = { generatedAt: now.toISOString(), runProvenance:githubRunProvenance(), purpose, limits: LIMITS, budget, selectedSources: plan.sources, status: 'starting' };
   reservation.status = 'attempted';
-  for (const source of plan.sources) state.sources[source.key] = { ...state.sources[source.key], lastAttemptAt: now.toISOString() };
   await write(FILES.state, state);
   try {
     const result = await collectDiscoveryBatches(client, plan.sources, { purpose, onStarted: async id => {
@@ -318,17 +320,24 @@ export async function main(mode = '--plan') {
     state.retryAt = result.retryAt;
     reservation.status = result.errors.length && !result.runs.length ? 'failed'
       : processed.report.providerErrors || processed.report.emptySourceRecords || result.errors.length ? 'partial' : 'succeeded';
-    Object.assign(state.sources, discoverySourceOutcomes(plan.sources, result.items, state.sources, result.failedSources, now));
+    const attempted = plan.sources.filter(source => result.attemptedSources.has(source.key));
+    Object.assign(state.sources, discoverySourceOutcomes(attempted, result.items, state.sources, result.failedSources, now));
+    const datasetProviderErrors = processed.report.providerErrors;
+    const completeCharges = !result.errors.length && result.runs.length && result.runs.every(run => Number.isFinite(run.reportedChargeUsd));
     Object.assign(report, processed.report, { status: reservation.status, actorRuns: result.runs, batchErrors: result.errors,
-      reportedChargeUsd: result.runs.reduce((sum, run) => sum + (run.reportedChargeUsd || 0), 0),
-      tools, sources: plan.sources.map(s => ({ key: s.key, ...state.sources[s.key] })) });
+      datasetProviderErrors, providerErrors: datasetProviderErrors + result.errors.length,
+      reportedChargeUsd: completeCharges ? result.runs.reduce((sum, run) => sum + run.reportedChargeUsd, 0) : null,
+      tools, sources: plan.sources.map(source => result.attemptedSources.has(source.key)
+        ? { key: source.key, ...state.sources[source.key] }
+        : { key: source.key, status: 'not-attempted' }) });
     if (reservation.status === 'failed') process.exitCode = 1;
     await write(FILES.pending, { source: 'Apify 2 Vienna Food Discovery', lastUpdated: new Date().toISOString(), deals: processed.deals });
   } catch (error) {
     reservation.status = error.uncertainStart ? 'uncertain-start' : 'failed';
     state.retryAt = new Date(Math.max(+now + DAY, Date.parse(error.retryAt) || 0)).toISOString();
     report.status = reservation.status;
-    report.error = /^apify-|^actor-|^missing-|^invalid-/.test(error.message) ? error.message : 'collector-processing-failed';
+    report.failure = apifyErrorDetails(error);
+    report.error = report.failure.reason;
     report.retryAt = state.retryAt;
     report.freshAcceptedDeals = 0;
     process.exitCode = 1;
@@ -341,5 +350,5 @@ export async function main(mode = '--plan') {
 }
 
 if (import.meta.url === pathToFileURL(process.argv[1] || '').href) {
-  main(process.argv[2]).catch(error => { console.error(error.message); process.exitCode = 1; });
+  main(process.argv[2]).catch(error => { console.error(JSON.stringify(apifyErrorDetails(error))); process.exitCode = 1; });
 }

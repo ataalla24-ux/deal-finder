@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { ApifyDiscoveryClient, budgetCheck } from '../scraper/apify-discovery-client.js';
+import { ApifyDiscoveryClient, HASHTAG_ACTOR, budgetCheck, compareApifyAccounts } from '../scraper/apify-discovery-client.js';
 
 const now = new Date('2026-10-22T18:00:00Z');
 const fixture = () => ({
@@ -53,4 +53,63 @@ test('provider errors are redacted and starts never retried', async () => {
   });
   assert.equal(calls, 1);
   await assert.rejects(client.request('https://another-service.test/'));
+});
+
+test('permission errors expose the request stage and documented type, omitting provider prose', async () => {
+  const client = new ApifyDiscoveryClient('private-token', async (url, options) => {
+    assert.equal(options.redirect, 'error');
+    return new Response(JSON.stringify({
+      error: { type: 'missing-actor-rights', message: 'private-token and internal account id' },
+    }), { status: 403, headers: { 'content-type': 'application/json' } });
+  });
+  for (const [route, method, operation] of [
+    [`/acts/${HASHTAG_ACTOR}`, 'GET', 'actor-metadata'],
+    [`/acts/${HASHTAG_ACTOR}/runs?maxTotalChargeUsd=0.0125`, 'POST', 'actor-start'],
+    ['/actor-runs/run123', 'GET', 'run-status'],
+    ['/datasets/dataset123/items?limit=4', 'GET', 'dataset-read'],
+  ]) {
+    await assert.rejects(client.request(route, { method }), error => {
+      assert.equal(error.message, 'apify-http-403');
+      assert.equal(error.operation, operation);
+      assert.equal(error.providerType, 'missing-actor-rights');
+      assert.doesNotMatch(JSON.stringify(error), /private-token|internal account id|run123|dataset123/);
+      return true;
+    });
+  }
+});
+
+test('unrecognized provider error types and malformed bodies are omitted', async () => {
+  for (const responseBody of ['not json', '{"error":{"type":"private-token"}}']) {
+    const client = new ApifyDiscoveryClient('private-token', async () =>
+      new Response(responseBody, { status: 403, headers: { 'content-type': 'application/json' } }));
+    await assert.rejects(client.request('/users/me/limits'), error => {
+      assert.equal(error.operation, 'account-limits');
+      assert.equal(error.providerType, undefined);
+      return true;
+    });
+  }
+});
+
+test('a 5xx after the start request leaves the charge uncertain', async () => {
+  let calls = 0;
+  const client = new ApifyDiscoveryClient('private-token', async () => {
+    calls++;
+    return new Response('unavailable', { status: 503 });
+  });
+  await assert.rejects(client.request(`/acts/${HASHTAG_ACTOR}/runs?maxTotalChargeUsd=0.0125`, { method: 'POST' }),
+    error => error.uncertainStart && error.operation === 'actor-start');
+  assert.equal(calls, 1);
+});
+
+test('scoped legacy credentials cannot invalidate the independent Apify 2 audit', async () => {
+  const scopedPrimary = new ApifyDiscoveryClient('primary-private-token', async url => {
+    assert.equal(new URL(url).pathname, '/v2/users/me');
+    return new Response('Forbidden', { status: 403 });
+  });
+  assert.deepEqual(await compareApifyAccounts(scopedPrimary, { id: 'account-2' }), {
+    sameAccountAsPrimary: null, primaryAccountComparison: 'unavailable',
+  });
+  assert.deepEqual(await compareApifyAccounts({ request: async () => ({ id: 'account-2' }) }, { id: 'account-2' }), {
+    sameAccountAsPrimary: true, primaryAccountComparison: 'checked',
+  });
 });

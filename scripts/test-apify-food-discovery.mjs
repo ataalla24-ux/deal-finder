@@ -228,6 +228,35 @@ test('dedicated hashtag actor gets hashtag input and both actors share the .075 
   assert.equal(paused.runs.length, 0);
   assert.ok(Date.parse(paused.retryAt) >= +now + DAY);
 });
+
+test('forbidden start reports the exact stage and never switches to another actor', async () => {
+  const sources = [{ kind: 'profile', key: 'profile:cafe', url: 'https://www.instagram.com/cafe/' },
+    { kind: 'hashtag', key: 'hashtag:wienfood', url: 'https://www.instagram.com/explore/tags/wienfood/' }];
+  const calls = [];
+  const client = {
+    preflight: async actor => {
+      calls.push(actor);
+      return { user: { plan: { monthlyUsageCreditsUsd: 5 } }, limits: { current: { monthlyUsageUsd: 0 },
+        limits: { maxMonthlyUsageUsd: 5 }, monthlyUsageCycle: { startAt: '2026-10-01', endAt: '2026-11-01' } },
+      actor: { pricingInfos: [{ startedAt: '2026-01-01', pricingModel: 'PAY_PER_EVENT', minimalMaxTotalChargeUsd: .0027 }] } };
+    },
+    request: async (route, options) => {
+      calls.push(options.method);
+      throw Object.assign(new Error('apify-http-403'), {
+        httpStatus: 403, operation: 'actor-start', providerType: 'missing-actor-rights',
+        retryAt: new Date(+now + 2 * DAY).toISOString(),
+      });
+    },
+  };
+  const result = await collectDiscoveryBatches(client, sources, { now: () => now });
+  assert.deepEqual(calls, ['apify~instagram-scraper', 'POST']);
+  assert.deepEqual(result.errors, [{
+    kind: 'profile', reason: 'apify-http-403', httpStatus: 403,
+    operation: 'actor-start', providerType: 'missing-actor-rights',
+  }]);
+  assert.equal(result.retryAt, new Date(+now + 2 * DAY).toISOString());
+  assert.deepEqual([...result.attemptedSources], ['profile:cafe']);
+});
 test('concrete coffee BOGO is evidenced, not automatically published or fake voted', () => {
   const { deal } = classifyDiscoveryPost(post(), { now });
   assert.ok(deal);

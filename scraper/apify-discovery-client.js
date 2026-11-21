@@ -6,6 +6,43 @@ export const HASHTAG_CAP_USD = 0.0125;
 export const RUN_CAP_USD = 0.075;
 export const CREDIT_RESERVE_USD = 0.35;
 
+const PROVIDER_ERROR_TYPES = new Set([
+  'invalid-token', 'missing-api-token', 'user-or-token-not-found',
+  'insufficient-permissions', 'missing-actor-rights', 'actor-not-public',
+  'elevated-permissions-needed', 'unsupported-permission',
+  'actor-disabled', 'public-actor-disabled', 'actor-not-found',
+  'build-not-found', 'build-outdated', 'unknown-build-tag', 'tagged-build-required',
+  'apify-plan-required-to-use-paid-actor', 'not-enough-usage-to-run-paid-actor',
+  'max-total-charge-usd-below-minimum', 'monthly-usage-limit-too-low',
+  'store-terms-not-accepted', 'user-email-not-verified',
+  'limit-reached', 'rate-limit-exceeded', 'too-many-requests',
+]);
+const OPERATIONS = new Set([
+  'account-read', 'account-limits', 'actor-metadata', 'actor-start',
+  'run-status', 'run-abort', 'dataset-read',
+]);
+
+function requestOperation(route, method) {
+  const pathname = route.split('?')[0];
+  if (pathname === '/users/me') return 'account-read';
+  if (pathname === '/users/me/limits') return 'account-limits';
+  if (/^\/acts\/[^/]+$/.test(pathname)) return 'actor-metadata';
+  if (method === 'POST' && /^\/acts\/[^/]+\/runs$/.test(pathname)) return 'actor-start';
+  if (/^\/actor-runs\/[^/]+$/.test(pathname)) return 'run-status';
+  if (/^\/actor-runs\/[^/]+\/abort$/.test(pathname)) return 'run-abort';
+  if (/^\/datasets\/[^/]+\/items$/.test(pathname)) return 'dataset-read';
+}
+
+export function apifyErrorDetails(error) {
+  return {
+    reason: /^(?:apify-|actor-|missing-|invalid-)[a-z0-9-]{1,90}$/.test(error.message)
+      ? error.message : 'collector-processing-failed',
+    ...(Number.isInteger(error.httpStatus) && { httpStatus: error.httpStatus }),
+    ...(OPERATIONS.has(error.operation) && { operation: error.operation }),
+    ...(PROVIDER_ERROR_TYPES.has(error.providerType) && { providerType: error.providerType }),
+  };
+}
+
 export class ApifyDiscoveryClient {
   constructor(token, fetchImpl = fetch) {
     if (!String(token || '').trim()) throw new Error('missing-apify-2-secret');
@@ -15,31 +52,44 @@ export class ApifyDiscoveryClient {
 
   async request(route, { method = 'GET', body } = {}) {
     if (!route.startsWith('/') || route.includes('://')) throw new Error('invalid-api-route');
+    const operation = requestOperation(route, method);
+    const isStart = operation === 'actor-start';
     let response;
     try {
       response = await this.fetch(`${BASE}${route}`, {
         method,
         headers: { Authorization: `Bearer ${this.token}`, 'Content-Type': 'application/json' },
         ...(body === undefined ? {} : { body: JSON.stringify(body) }),
+        redirect: 'error',
         signal: AbortSignal.timeout(35_000),
       });
     } catch {
       // Never retry a possibly accepted start request or print provider bodies/secrets.
-      throw Object.assign(new Error('apify-network-error'), { uncertainStart: method === 'POST' && route.includes('/runs?') });
+      throw Object.assign(new Error('apify-network-error'), { operation, uncertainStart: isStart });
     }
     if (!response.ok) {
       const retry = response.headers.get('retry-after');
       const retryAt = /^\d+$/.test(retry || '') ? Date.now() + Number(retry) * 1000 : Date.parse(retry || '');
+      let providerType;
+      if (/^application\/json(?:;|$)/i.test(response.headers.get('content-type') || '')) {
+        try {
+          const type = (await response.json())?.error?.type;
+          if (PROVIDER_ERROR_TYPES.has(type)) providerType = type;
+        } catch { /* Keep the status and operation even if the error body is unreadable. */ }
+      }
       throw Object.assign(new Error(`apify-http-${response.status}`), {
         httpStatus: response.status,
+        operation,
+        providerType,
+        uncertainStart: isStart && response.status >= 500,
         retryAt: Number.isFinite(retryAt) ? new Date(retryAt).toISOString() : null,
       });
     }
     let json;
     try { json = await response.json(); } catch {
-      throw Object.assign(new Error('apify-invalid-json'), { uncertainStart: method === 'POST' && route.includes('/runs?') });
+      throw Object.assign(new Error('apify-invalid-json'), { operation, uncertainStart: isStart });
     }
-    return json.data ?? json;
+    return json?.data ?? json;
   }
 
   async preflight(actorId = DISCOVERY_ACTOR) {
@@ -49,6 +99,17 @@ export class ApifyDiscoveryClient {
     const actor = await this.request(`/acts/${actorId}`);
     return { user, limits, actor };
   }
+}
+
+export async function compareApifyAccounts(primary, discoveryUser) {
+  if (!primary) return { sameAccountAsPrimary: null, primaryAccountComparison: 'not-configured' };
+  try {
+    const user = await primary.request('/users/me');
+    if (user?.id && discoveryUser?.id) {
+      return { sameAccountAsPrimary: user.id === discoveryUser.id, primaryAccountComparison: 'checked' };
+    }
+  } catch { /* The legacy token may be restricted to its own actor. */ }
+  return { sameAccountAsPrimary: null, primaryAccountComparison: 'unavailable' };
 }
 
 export function budgetCheck({ user, limits, actor }, now = new Date(), runCap = RUN_CAP_USD) {
