@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-11-21T12:29:39.920Z",
+  "generatedAt": "2026-11-21T13:09:41.332Z",
   "discoveryAvailability": {
     "note": "Transport evidence, not deal yield. Retry eligibility is not recovery. Candidate counts are not Slack deliveries. No extra runs or quota resets.",
     "lanes": [
@@ -72,22 +72,22 @@
         "totalDeals": 82
       },
       {
+        "sourceKey": "food3",
+        "sourceLabel": "Firecrawl Key 2 - Food",
+        "healthScore": 63,
+        "totalDeals": 4
+      },
+      {
+        "sourceKey": "vienna-websites",
+        "sourceLabel": "Wiener Lokal-Angebotsseiten",
+        "healthScore": 62,
+        "totalDeals": 10
+      },
+      {
         "sourceKey": "instagram-ai",
         "sourceLabel": "Instagram AI Agent",
         "healthScore": 62,
         "totalDeals": 7
-      },
-      {
-        "sourceKey": "instagram-verified",
-        "sourceLabel": "Instagram",
-        "healthScore": 61,
-        "totalDeals": 6
-      },
-      {
-        "sourceKey": "food3",
-        "sourceLabel": "Firecrawl Key 2 - Food",
-        "healthScore": 56,
-        "totalDeals": 4
       }
     ],
     "topMissionSources": [
@@ -98,28 +98,28 @@
         "totalDeals": 9
       },
       {
+        "sourceKey": "food3",
+        "sourceLabel": "Firecrawl Key 2 - Food",
+        "missionFitScore": 69,
+        "totalDeals": 4
+      },
+      {
         "sourceKey": "instagram-apify",
         "sourceLabel": "Apify Instagram",
         "missionFitScore": 68,
         "totalDeals": 3
       },
       {
-        "sourceKey": "food3",
-        "sourceLabel": "Firecrawl Key 2 - Food",
-        "missionFitScore": 65,
-        "totalDeals": 4
+        "sourceKey": "vienna-websites",
+        "sourceLabel": "Wiener Lokal-Angebotsseiten",
+        "missionFitScore": 54,
+        "totalDeals": 10
       },
       {
         "sourceKey": "meta-instagram",
         "sourceLabel": "Meta Instagram Graph",
         "missionFitScore": 53,
         "totalDeals": 82
-      },
-      {
-        "sourceKey": "instagram-ai",
-        "sourceLabel": "Instagram AI Agent",
-        "missionFitScore": 52,
-        "totalDeals": 7
       }
     ],
     "topCoverageSources": [
@@ -161,6 +161,12 @@
     ],
     "topPrecisionSources": [
       {
+        "sourceKey": "food3",
+        "sourceLabel": "Firecrawl Key 2 - Food",
+        "precisionScore": 72,
+        "totalDeals": 4
+      },
+      {
         "sourceKey": "instagram-apify",
         "sourceLabel": "Apify Instagram",
         "precisionScore": 68,
@@ -183,12 +189,6 @@
         "sourceLabel": "Instagram AI Agent",
         "precisionScore": 64,
         "totalDeals": 7
-      },
-      {
-        "sourceKey": "food3",
-        "sourceLabel": "Firecrawl Key 2 - Food",
-        "precisionScore": 63,
-        "totalDeals": 4
       }
     ],
     "topWeightedSources": [
@@ -205,9 +205,15 @@
         "totalDeals": 3
       },
       {
+        "sourceKey": "food3",
+        "sourceLabel": "Firecrawl Key 2 - Food",
+        "sourceWeightScore": 57,
+        "totalDeals": 4
+      },
+      {
         "sourceKey": "gastro2",
         "sourceLabel": "Firecrawl Key 1 - Gastro",
-        "sourceWeightScore": 54,
+        "sourceWeightScore": 56,
         "totalDeals": 131
       },
       {
@@ -215,12 +221,6 @@
         "sourceLabel": "jö Bonus Club",
         "sourceWeightScore": 54,
         "totalDeals": 9
-      },
-      {
-        "sourceKey": "food3",
-        "sourceLabel": "Firecrawl Key 2 - Food",
-        "sourceWeightScore": 52,
-        "totalDeals": 4
       }
     ],
     "topSourcesToFix": [
@@ -429,6 +429,148 @@
       "sourceWeightScore": 61
     },
     {
+      "sourceKey": "food3",
+      "file": "deals-pending-food3.json",
+      "sourceLabel": "Firecrawl Key 2 - Food",
+      "totalDeals": 4,
+      "uniqueDeals": 1,
+      "duplicateDeals": 3,
+      "duplicateAcrossSources": 3,
+      "fresh1dCount": 0,
+      "fresh7dCount": 4,
+      "viennaCount": 3,
+      "foodDrinkCount": 4,
+      "promoCount": 3,
+      "missingUrlCount": 0,
+      "sampleTitles": [
+        "Ort unklar: 1 ANO – Wie schnell die Zeit vergeht! ...",
+        "Lieferando: ⚠️ Wetterwarnung für Wien: Heute regnet es Super Deals! ...",
+        "Ort unklar: 🍣 WER DIE WAHL HAT, HAT BEI NARA DIE QUAL! 😍 Und ..."
+      ],
+      "lastRun": {
+        "status": "completed-with-errors",
+        "startedAt": "2026-11-21T09:25:55.090Z",
+        "finishedAt": "2026-11-21T09:28:18.168Z",
+        "durationMs": 143078,
+        "counts": {
+          "rawCandidates": 3,
+          "normalizedCandidates": 3,
+          "verifiedCandidates": 4,
+          "previousDeals": 3,
+          "acceptedDeals": 4,
+          "rejectedDeals": 1
+        },
+        "rejectedByReason": {
+          "post-verification-rejected": 1
+        },
+        "errors": [
+          "https://www.instagram.com/explore/tags/fooddealsvienna/: Firecrawl Agent nach 120s abgebrochen"
+        ],
+        "reportFile": "deal-pipeline-last-run-food3.json"
+      },
+      "uniqueRate": 0.3,
+      "duplicateRate": 0.8,
+      "fresh1dRate": 0,
+      "fresh7dRate": 1,
+      "viennaRate": 0.8,
+      "foodDrinkRate": 1,
+      "promoRate": 0.8,
+      "missingUrlRate": 0,
+      "averageQualityScore": 68.5,
+      "topCategories": [
+        {
+          "value": "essen",
+          "count": 3
+        },
+        {
+          "value": "supermarkt",
+          "count": 1
+        }
+      ],
+      "topTypes": [
+        {
+          "value": "gratis",
+          "count": 3
+        },
+        {
+          "value": "rabatt",
+          "count": 1
+        }
+      ],
+      "issues": [
+        "wenige Deals sind frischer als 1 Tag",
+        "hohe Überschneidung mit anderen Quellen"
+      ],
+      "healthScore": 63,
+      "missionFitScore": 69,
+      "coverageScore": 14,
+      "precisionScore": 72,
+      "sourceWeightScore": 57
+    },
+    {
+      "sourceKey": "vienna-websites",
+      "file": "deals-pending-vienna-websites.json",
+      "sourceLabel": "Wiener Lokal-Angebotsseiten",
+      "totalDeals": 10,
+      "uniqueDeals": 10,
+      "duplicateDeals": 0,
+      "duplicateAcrossSources": 0,
+      "fresh1dCount": 0,
+      "fresh7dCount": 0,
+      "viennaCount": 2,
+      "foodDrinkCount": 9,
+      "promoCount": 7,
+      "missingUrlCount": 0,
+      "sampleTitles": [
+        "Jeden Sonntag gibt es unser Kindermenü für nur 5,90 statt 10,90 – für gemeinsame Genussmomente mit der ganzen Familie!",
+        "Ist deine Stempelkarte voll, schenken wir dir 18,80 € Rabatt auf deinen nächsten Einkauf in unserem Restaurant.",
+        "Bei jeder Bestellung eines Burgers oder einer Bowl zusammen mit einer Beilage gibt es ein 0,3l Omnom Lager oder eine 0,3l Kräuterlimonade gratis dazu."
+      ],
+      "lastRun": null,
+      "uniqueRate": 1,
+      "duplicateRate": 0,
+      "fresh1dRate": 0,
+      "fresh7dRate": 0,
+      "viennaRate": 0.2,
+      "foodDrinkRate": 0.9,
+      "promoRate": 0.7,
+      "missingUrlRate": 0,
+      "averageQualityScore": 57,
+      "topCategories": [
+        {
+          "value": "essen",
+          "count": 9
+        },
+        {
+          "value": "trinken",
+          "count": 1
+        }
+      ],
+      "topTypes": [
+        {
+          "value": "gratis",
+          "count": 6
+        },
+        {
+          "value": "rabatt",
+          "count": 3
+        },
+        {
+          "value": "freebie",
+          "count": 1
+        }
+      ],
+      "issues": [
+        "wenige Deals sind frischer als 1 Tag",
+        "Wien-Signal ist zu schwach"
+      ],
+      "healthScore": 62,
+      "missionFitScore": 54,
+      "coverageScore": 14,
+      "precisionScore": 57,
+      "sourceWeightScore": 49
+    },
+    {
       "sourceKey": "instagram-ai",
       "file": "deals-pending-instagram-ai.json",
       "sourceLabel": "Instagram AI Agent",
@@ -556,86 +698,6 @@
       "sourceWeightScore": 45
     },
     {
-      "sourceKey": "food3",
-      "file": "deals-pending-food3.json",
-      "sourceLabel": "Firecrawl Key 2 - Food",
-      "totalDeals": 4,
-      "uniqueDeals": 1,
-      "duplicateDeals": 3,
-      "duplicateAcrossSources": 3,
-      "fresh1dCount": 0,
-      "fresh7dCount": 4,
-      "viennaCount": 2,
-      "foodDrinkCount": 4,
-      "promoCount": 3,
-      "missingUrlCount": 0,
-      "sampleTitles": [
-        "Ort unklar: 1 ANO – Wie schnell die Zeit vergeht! ...",
-        "Lieferando: ⚠️ Wetterwarnung für Wien: Heute regnet es Super Deals! ...",
-        "Ort unklar: 🍣 WER DIE WAHL HAT, HAT BEI NARA DIE QUAL! 😍 Und ..."
-      ],
-      "lastRun": {
-        "status": "completed-with-errors",
-        "startedAt": "2026-11-21T09:25:55.090Z",
-        "finishedAt": "2026-11-21T09:28:18.168Z",
-        "durationMs": 143078,
-        "counts": {
-          "rawCandidates": 3,
-          "normalizedCandidates": 3,
-          "verifiedCandidates": 4,
-          "previousDeals": 3,
-          "acceptedDeals": 4,
-          "rejectedDeals": 1
-        },
-        "rejectedByReason": {
-          "post-verification-rejected": 1
-        },
-        "errors": [
-          "https://www.instagram.com/explore/tags/fooddealsvienna/: Firecrawl Agent nach 120s abgebrochen"
-        ],
-        "reportFile": "deal-pipeline-last-run-food3.json"
-      },
-      "uniqueRate": 0.3,
-      "duplicateRate": 0.8,
-      "fresh1dRate": 0,
-      "fresh7dRate": 1,
-      "viennaRate": 0.5,
-      "foodDrinkRate": 1,
-      "promoRate": 0.8,
-      "missingUrlRate": 0,
-      "averageQualityScore": 68.5,
-      "topCategories": [
-        {
-          "value": "essen",
-          "count": 3
-        },
-        {
-          "value": "supermarkt",
-          "count": 1
-        }
-      ],
-      "topTypes": [
-        {
-          "value": "gratis",
-          "count": 3
-        },
-        {
-          "value": "rabatt",
-          "count": 1
-        }
-      ],
-      "issues": [
-        "wenige Deals sind frischer als 1 Tag",
-        "Wien-Signal ist zu schwach",
-        "hohe Überschneidung mit anderen Quellen"
-      ],
-      "healthScore": 56,
-      "missionFitScore": 65,
-      "coverageScore": 13,
-      "precisionScore": 63,
-      "sourceWeightScore": 52
-    },
-    {
       "sourceKey": "gastro2",
       "file": "deals-pending-gastro2.json",
       "sourceLabel": "Firecrawl Key 1 - Gastro",
@@ -645,7 +707,7 @@
       "duplicateAcrossSources": 13,
       "fresh1dCount": 0,
       "fresh7dCount": 8,
-      "viennaCount": 6,
+      "viennaCount": 7,
       "foodDrinkCount": 130,
       "promoCount": 63,
       "missingUrlCount": 0,
@@ -677,7 +739,7 @@
       "duplicateRate": 0.1,
       "fresh1dRate": 0,
       "fresh7dRate": 0.1,
-      "viennaRate": 0,
+      "viennaRate": 0.1,
       "foodDrinkRate": 1,
       "promoRate": 0.5,
       "missingUrlRate": 0,
@@ -726,11 +788,11 @@
         "wenige Deals sind frischer als 1 Tag",
         "Wien-Signal ist zu schwach"
       ],
-      "healthScore": 54,
-      "missionFitScore": 49,
+      "healthScore": 56,
+      "missionFitScore": 51,
       "coverageScore": 70,
-      "precisionScore": 48,
-      "sourceWeightScore": 54
+      "precisionScore": 51,
+      "sourceWeightScore": 56
     },
     {
       "sourceKey": "firecrawl4",
@@ -943,68 +1005,87 @@
       "sourceWeightScore": 42
     },
     {
-      "sourceKey": "vienna-websites",
-      "file": "deals-pending-vienna-websites.json",
-      "sourceLabel": "Wiener Lokal-Angebotsseiten",
-      "totalDeals": 10,
-      "uniqueDeals": 10,
-      "duplicateDeals": 0,
-      "duplicateAcrossSources": 0,
+      "sourceKey": "firecrawl5",
+      "file": "deals-pending-firecrawl5.json",
+      "sourceLabel": "Firecrawl Key 5 - Instagram Gastro",
+      "totalDeals": 6,
+      "uniqueDeals": 3,
+      "duplicateDeals": 3,
+      "duplicateAcrossSources": 3,
       "fresh1dCount": 0,
-      "fresh7dCount": 0,
-      "viennaCount": 2,
-      "foodDrinkCount": 3,
-      "promoCount": 7,
+      "fresh7dCount": 6,
+      "viennaCount": 4,
+      "foodDrinkCount": 5,
+      "promoCount": 1,
       "missingUrlCount": 0,
       "sampleTitles": [
-        "Jeden Sonntag gibt es unser Kindermenü für nur 5,90 statt 10,90 – für gemeinsame Genussmomente mit der ganzen Familie!",
-        "Ist deine Stempelkarte voll, schenken wir dir 18,80 € Rabatt auf deinen nächsten Einkauf in unserem Restaurant.",
-        "Bei jeder Bestellung eines Burgers oder einer Bowl zusammen mit einer Beilage gibt es ein 0,3l Omnom Lager oder eine 0,3l Kräuterlimonade gratis dazu."
+        "Zushi Market: 🍣 Zushi Market x Pichelmayergasse 💚 Exklusiv für unsere Schule! 🎓 Wir ...",
+        "neotaste.wien: New on NeoTaste: Neo Foods Vienna ...",
+        "Wiedner Gürtel 14: Wien läuft, weil ihr unterwegs seid. 💛 Ob Frühschicht, ..."
       ],
-      "lastRun": null,
-      "uniqueRate": 1,
-      "duplicateRate": 0,
+      "lastRun": {
+        "status": "completed-with-errors",
+        "startedAt": "2026-11-21T12:09:51.993Z",
+        "finishedAt": "2026-11-21T12:15:07.092Z",
+        "durationMs": 315099,
+        "counts": {
+          "rawCandidates": 2,
+          "normalizedCandidates": 2,
+          "verifiedCandidates": 6,
+          "previousDeals": 4,
+          "acceptedDeals": 6,
+          "rejectedDeals": 0
+        },
+        "rejectedByReason": {},
+        "errors": [
+          "https://www.instagram.com/tokki_korean_bbq/: Firecrawl Agent nach 120s abgebrochen"
+        ],
+        "reportFile": "deal-pipeline-last-run-firecrawl5.json"
+      },
+      "uniqueRate": 0.5,
+      "duplicateRate": 0.5,
       "fresh1dRate": 0,
-      "fresh7dRate": 0,
-      "viennaRate": 0.2,
-      "foodDrinkRate": 0.3,
-      "promoRate": 0.7,
+      "fresh7dRate": 1,
+      "viennaRate": 0.7,
+      "foodDrinkRate": 0.8,
+      "promoRate": 0.2,
       "missingUrlRate": 0,
-      "averageQualityScore": 57,
+      "averageQualityScore": 80,
       "topCategories": [
         {
-          "value": "essen & trinken",
-          "count": 9
+          "value": "essen",
+          "count": 3
         },
         {
-          "value": "trinken",
+          "value": "kaffee",
+          "count": 2
+        },
+        {
+          "value": "shopping",
           "count": 1
         }
       ],
       "topTypes": [
         {
-          "value": "gratis",
-          "count": 6
-        },
-        {
           "value": "rabatt",
-          "count": 3
+          "count": 5
         },
         {
-          "value": "freebie",
+          "value": "bogo",
           "count": 1
         }
       ],
       "issues": [
         "wenige Deals sind frischer als 1 Tag",
-        "geringe Food-/Drink-Relevanz",
-        "Wien-Signal ist zu schwach"
+        "wenige klare Gratis-/Promo-Signale",
+        "Wien-Signal ist zu schwach",
+        "hohe Überschneidung mit anderen Quellen"
       ],
-      "healthScore": 50,
-      "missionFitScore": 33,
+      "healthScore": 52,
+      "missionFitScore": 44,
       "coverageScore": 11,
-      "precisionScore": 42,
-      "sourceWeightScore": 35
+      "precisionScore": 53,
+      "sourceWeightScore": 41
     },
     {
       "sourceKey": "joe",
@@ -1394,89 +1475,6 @@
       "coverageScore": 5,
       "precisionScore": 38,
       "sourceWeightScore": 33
-    },
-    {
-      "sourceKey": "firecrawl5",
-      "file": "deals-pending-firecrawl5.json",
-      "sourceLabel": "Firecrawl Key 5 - Instagram Gastro",
-      "totalDeals": 6,
-      "uniqueDeals": 3,
-      "duplicateDeals": 3,
-      "duplicateAcrossSources": 3,
-      "fresh1dCount": 0,
-      "fresh7dCount": 6,
-      "viennaCount": 3,
-      "foodDrinkCount": 5,
-      "promoCount": 1,
-      "missingUrlCount": 0,
-      "sampleTitles": [
-        "Zushi Market: 🍣 Zushi Market x Pichelmayergasse 💚 Exklusiv für unsere Schule! 🎓 Wir ...",
-        "neotaste.wien: New on NeoTaste: Neo Foods Vienna ...",
-        "Wiedner Gürtel 14: Wien läuft, weil ihr unterwegs seid. 💛 Ob Frühschicht, ..."
-      ],
-      "lastRun": {
-        "status": "completed-with-errors",
-        "startedAt": "2026-11-21T12:09:51.993Z",
-        "finishedAt": "2026-11-21T12:15:07.092Z",
-        "durationMs": 315099,
-        "counts": {
-          "rawCandidates": 2,
-          "normalizedCandidates": 2,
-          "verifiedCandidates": 6,
-          "previousDeals": 4,
-          "acceptedDeals": 6,
-          "rejectedDeals": 0
-        },
-        "rejectedByReason": {},
-        "errors": [
-          "https://www.instagram.com/tokki_korean_bbq/: Firecrawl Agent nach 120s abgebrochen"
-        ],
-        "reportFile": "deal-pipeline-last-run-firecrawl5.json"
-      },
-      "uniqueRate": 0.5,
-      "duplicateRate": 0.5,
-      "fresh1dRate": 0,
-      "fresh7dRate": 1,
-      "viennaRate": 0.5,
-      "foodDrinkRate": 0.8,
-      "promoRate": 0.2,
-      "missingUrlRate": 0,
-      "averageQualityScore": 80,
-      "topCategories": [
-        {
-          "value": "essen",
-          "count": 3
-        },
-        {
-          "value": "kaffee",
-          "count": 2
-        },
-        {
-          "value": "shopping",
-          "count": 1
-        }
-      ],
-      "topTypes": [
-        {
-          "value": "rabatt",
-          "count": 5
-        },
-        {
-          "value": "bogo",
-          "count": 1
-        }
-      ],
-      "issues": [
-        "wenige Deals sind frischer als 1 Tag",
-        "wenige klare Gratis-/Promo-Signale",
-        "Wien-Signal ist zu schwach",
-        "hohe Überschneidung mit anderen Quellen"
-      ],
-      "healthScore": 47,
-      "missionFitScore": 41,
-      "coverageScore": 10,
-      "precisionScore": 48,
-      "sourceWeightScore": 38
     },
     {
       "sourceKey": "vienna-promo-radar",
