@@ -18,7 +18,7 @@ import { modelForTask, OPENAI_MODEL_TIMEOUT_MS } from './ai-credit-budget.js';
 import { createInstagramWebAccess } from './instagram-web-access-policy.js';
 import { instagramPageHasAccessWall } from './instagram-page-access.js';
 import { githubRunProvenance } from './pipeline-run-report-utils.js';
-import { runInstagramSearchQueries } from './instagram-search-discovery.js';
+import { parseInstagramSearchResults, runInstagramSearchQueries } from './instagram-search-discovery.js';
 import { readPublicSearchResponse } from './public-search-response.js';
 import { planInstagramQueries } from './instagram-query-plan.js';
 import { selectInstagramFoodAccounts } from './instagram-food-source-policy.js';
@@ -432,7 +432,7 @@ function normalizeInstagramPostUrl(value) {
   try {
     const parsed = new URL(unwrapped);
     const host = parsed.hostname.toLowerCase().replace(/^www\./, '');
-    if (!host.endsWith('instagram.com')) return '';
+    if (host !== 'instagram.com' && host !== 'm.instagram.com') return '';
 
     if (parsed.pathname.toLowerCase().startsWith('/accounts/login')) {
       const next = parsed.searchParams.get('next');
@@ -548,23 +548,6 @@ function trustedSourceDealPostDate(sourceDeal = {}) {
   return null;
 }
 
-function extractInstagramUrlsFromText(value) {
-  const text = decodeHtmlEntities(String(value || ''));
-  const urls = new Set();
-  const directMatches = text.match(/https?:\/\/(?:www\.)?instagram\.com\/(?:p|reel|reels|tv)\/[A-Za-z0-9_-]+\/?(?:\?[^"'<\s]*)?/gi) || [];
-  for (const match of directMatches) {
-    const normalized = normalizeInstagramPostUrl(match);
-    if (normalized) urls.add(normalized);
-  }
-
-  const hrefMatches = [...text.matchAll(/href=["']([^"']+)["']/gi)];
-  for (const match of hrefMatches) {
-    const normalized = normalizeInstagramPostUrl(match[1]);
-    if (normalized) urls.add(normalized);
-  }
-  return [...urls];
-}
-
 function extractInstagramPostPaths(value) {
   const text = decodeHtmlEntities(String(value || ''))
     .replace(/\\u002f/gi, '/')
@@ -651,34 +634,6 @@ function addCandidate(map, candidate) {
   return true;
 }
 
-function parseDuckDuckGoResults(html, query) {
-  const results = [];
-  const blocks = String(html || '').split(/<div[^>]+class=["'][^"']*result[^"']*["'][^>]*>/i).slice(1);
-
-  for (const block of blocks) {
-    const href = block.match(/href=["']([^"']+)["']/i)?.[1] || '';
-    const title = block.match(/class=["'][^"']*result__a[^"']*["'][^>]*>([\s\S]*?)<\/a>/i)?.[1] || '';
-    const snippet = block.match(/class=["'][^"']*result__snippet[^"']*["'][^>]*>([\s\S]*?)<\/[^>]+>/i)?.[1] || '';
-    const url = normalizeInstagramPostUrl(href);
-    if (!url) continue;
-    results.push(makeCandidate({
-      url,
-      title: stripTags(title),
-      snippet: stripTags(snippet),
-      source: 'duckduckgo',
-      query,
-    }));
-  }
-
-  if (results.length === 0) {
-    for (const url of extractInstagramUrlsFromText(html)) {
-      results.push(makeCandidate({ url, source: 'duckduckgo', query }));
-    }
-  }
-
-  return results.filter(Boolean);
-}
-
 async function searchDuckDuckGo(query) {
   const url = `https://html.duckduckgo.com/html/?q=${encodeURIComponent(query)}`;
   const response = await fetch(url, {
@@ -689,7 +644,9 @@ async function searchDuckDuckGo(query) {
     },
   });
   const html = await readPublicSearchResponse(response);
-  return parseDuckDuckGoResults(html, query);
+  return parseInstagramSearchResults(html)
+    .map(result => makeCandidate({ ...result, source: 'duckduckgo', query }))
+    .filter(Boolean);
 }
 
 export function loadWatchlist(options = {}) {

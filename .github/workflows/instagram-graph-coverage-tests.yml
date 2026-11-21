@@ -34,6 +34,7 @@ on:
       - 'scripts/test-social-search-reliability.mjs'
       - 'scripts/test-instagram-delivery-audit.mjs'
       - 'scripts/test-tiktok-browser-search.mjs'
+      - 'scripts/test-instagram-profile-browser.mjs'
       - 'scripts/test-lightweight-state-committer.mjs'
       - 'scripts/test-instagram-search-discovery.mjs'
       - 'scripts/test-review-clarity.mjs'
@@ -57,6 +58,7 @@ on:
     paths:
       - 'scripts/test-instagram-delivery-audit.mjs'
       - 'scripts/test-tiktok-browser-search.mjs'
+      - 'scripts/test-instagram-profile-browser.mjs'
       - 'scripts/test-instagram-food-sources.mjs'
       - 'scripts/test-source-access-oct30.mjs'
       - 'scripts/test-food-quality-oct30.mjs'
@@ -186,7 +188,7 @@ jobs:
       - run: npm ci --no-audit --no-fund
       - run: npx playwright install --with-deps chromium
       - name: Test browser search with local responses only
-        run: node --test scripts/test-tiktok-browser-search.mjs
+        run: node --test scripts/test-tiktok-browser-search.mjs scripts/test-instagram-profile-browser.mjs
 
   quota-storage:
     if: github.event_name == 'workflow_dispatch'

@@ -21,3 +21,60 @@ export function instagramPageHasAccessWall(data = {}) {
   }
   return wallTitle.test(title.trim()) || wallPrompt.test(bodyText.replace(/\s+/g, ' ').trim().slice(0, 700));
 }
+
+const publicPostPath = /^\/(?:([a-z0-9._]{2,40})\/)?(p|reels?|tv)\/([a-z0-9_-]{5,20})\/?$/i;
+const instagramHost = /^(?:(?:www|m)\.)?instagram\.com$/i;
+
+export function normalizeInstagramPublicPostUrl(value) {
+  try {
+    const url = new URL(value);
+    if (url.protocol !== 'https:' || !instagramHost.test(url.hostname) ||
+      url.username || url.password || url.port) return '';
+    const match = publicPostPath.exec(url.pathname);
+    if (!match) return '';
+    const type = /^reels?$/i.test(match[2]) ? 'reel' : match[2].toLowerCase();
+    return 'https://www.instagram.com/' + type + '/' + match[3] + '/';
+  } catch {
+    return '';
+  }
+}
+
+// The profile grid can hydrate after navigation and use a div with role="main".
+export async function readInstagramProfileTimeline(page, profileUrl, limit, timeout = 1800) {
+  const expected = new URL(profileUrl);
+  const profile = expected.pathname.toLowerCase().split('/')[1];
+  let urls = [];
+  try {
+    const links = await page.waitForFunction(({ postPathSource, hostSource, profile, limit }) => {
+      const postPath = new RegExp(postPathSource, 'i');
+      const host = new RegExp(hostSource, 'i');
+      const found = new Set();
+      for (const anchor of document.querySelectorAll('a[href]')) {
+        if (anchor.closest('[hidden], [aria-hidden="true"]') ||
+          !anchor.checkVisibility({ visibilityProperty: true, opacityProperty: true })) continue;
+        let url;
+        try { url = new URL(anchor.href); } catch { continue; }
+        if (url.protocol !== 'https:' || !host.test(url.hostname) ||
+          url.username || url.password || url.port) continue;
+        const match = postPath.exec(url.pathname);
+        if (!match || (match[1] && match[1].toLowerCase() !== profile)) continue;
+        const type = /^reels?$/i.test(match[2]) ? 'reel' : match[2].toLowerCase();
+        found.add('https://www.instagram.com/' + type + '/' + match[3] + '/');
+        if (found.size >= limit) break;
+      }
+      return found.size ? [...found] : null;
+    }, { postPathSource: publicPostPath.source, hostSource: instagramHost.source, profile, limit }, { timeout, polling: 150 });
+    try { urls = await links.jsonValue(); } finally { await links.dispose(); }
+  } catch (error) {
+    if (error.name !== 'TimeoutError') throw error;
+  }
+  const finalUrl = new URL(page.url());
+  if (instagramPageHasAccessWall({ finalUrl: finalUrl.href, html: await page.content() })) {
+    return { status: 'blocked', urls: [] };
+  }
+  if (finalUrl.origin !== expected.origin ||
+    finalUrl.pathname.toLowerCase().replace(/\/$/, '') !== expected.pathname.toLowerCase().replace(/\/$/, '')) {
+    return { status: 'unavailable', urls: [] };
+  }
+  return { status: urls.length ? 'readable' : 'no-timeline', urls };
+}

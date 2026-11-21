@@ -2,7 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import { readPublicSearchResponse } from '../scraper/public-search-response.js';
 import { planInstagramQueries } from '../scraper/instagram-query-plan.js';
-import { runInstagramSearchQueries } from '../scraper/instagram-search-discovery.js';
+import { parseInstagramSearchResults, runInstagramSearchQueries } from '../scraper/instagram-search-discovery.js';
 import { parseTikTokSearchResponse, runTikTokApiDiscovery, tikTokDiscoveryHealth } from '../scraper/tiktok-search-discovery.js';
 import { discoverTikTokLinksViaDuckDuckGo, fetchTikTokApiCandidates, normalizeTikTokApiItem } from '../scraper/tiktok-deals-scanner.js';
 import { loadWatchlist } from '../scraper/instagram-ai-agent.js';
@@ -103,6 +103,18 @@ test('TikTok search uses broad site path, deduplicates permalinks and never trea
   assert.equal(queries.length,25);assert.ok(queries.every(q=>!q.includes('site:tiktok.com/@')));
   assert.equal(new Set(queries).size,25);
   assert.deepEqual(result.links,[url]);
+});
+
+test('Instagram search reads nested result bodies and ignores unrelated links', () => {
+  const page = '<div class="result"><div class="result__body"><a href="https://example.org">Fremd</a>'
+    + '<a class="result__a" href="//duckduckgo.com/l/?uddg=https%3A%2F%2Fwww.instagram.com%2Fvienna.cafe%2Freel%2FFreshStory01%2F">Wiener Kaffee</a>'
+    + '<div class="result__snippet">Gratis <b>Kaffee</b> am Freitag</div></div></div>'
+    + '<a href="https://www.instagram.com/p/FooterPost01/">Footer</a>'
+    + '<div class="result"><a class="result__a" href="https://instagram.com.example/p/FakePost01/">Falscher Host</a></div>'
+    + '<div class="result"><a class="result__a" href="https://example.org/?url=https://www.instagram.com/p/WrappedPost01/">Fremder Redirect</a></div>';
+  assert.deepEqual(parseInstagramSearchResults(page), [{
+    url: 'https://www.instagram.com/reel/FreshStory01/', title: 'Wiener Kaffee', snippet: 'Gratis Kaffee am Freitag',
+  }]);
 });
 
 test('Instagram search reserves account slots, rotates topics, and never exceeds its existing cap', () => {

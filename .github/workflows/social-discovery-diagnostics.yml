@@ -1,10 +1,17 @@
 name: Social Discovery Read-only Diagnostics
 on:
   workflow_dispatch:
+    inputs:
+      lane:
+        description: Public TikTok search or the authenticated Instagram profile read
+        type: choice
+        options: [tiktok, instagram]
+        default: tiktok
 permissions:
   contents: read
 jobs:
   diagnose:
+    if: ${{ inputs.lane == 'tiktok' }}
     runs-on: ubuntu-latest
     timeout-minutes: 8
     env:
@@ -27,4 +34,33 @@ jobs:
         with:
           name: social-discovery-diagnostics
           path: output/social-discovery/probe.json
+          retention-days: 7
+
+  instagram:
+    if: ${{ inputs.lane == 'instagram' }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    env:
+      SENTRY_DISABLED: '1'
+      PLAYWRIGHT_BROWSERS_PATH: '0'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+      - run: npm ci --no-audit --no-fund
+      - run: npx playwright install --with-deps chromium
+      - name: Verify profile rendering with local fixtures
+        run: node --test scripts/test-instagram-profile-browser.mjs
+      - name: Run the bounded Instagram profile collector without publishing its files
+        env:
+          INSTAGRAM_SESSIONID: ${{ secrets.INSTAGRAM_SESSIONID }}
+          INSTAGRAM_COOKIES: ${{ secrets.INSTAGRAM_COOKIES }}
+        run: node scripts/check-instagram-web-discovery.mjs
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: instagram-web-diagnostics
+          path: output/social-discovery/instagram-web.json
           retention-days: 7

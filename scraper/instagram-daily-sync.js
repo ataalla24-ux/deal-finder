@@ -5,7 +5,7 @@ import { fileURLToPath } from 'url';
 import { normalizeCategoryForScraper } from './category-utils.js';
 import { discoveryRejection } from './deal-discovery-policy.js';
 import { locationConflictReason } from './deal-factual-guards.js';
-import { instagramPageHasAccessWall } from './instagram-page-access.js';
+import { instagramPageHasAccessWall, normalizeInstagramPublicPostUrl, readInstagramProfileTimeline } from './instagram-page-access.js';
 import { createInstagramWebAccess } from './instagram-web-access-policy.js';
 import { applyInstagramCookies, loadInstagramCookieHints } from './instagram-auth-utils.js';
 import { githubRunProvenance } from './pipeline-run-report-utils.js';
@@ -347,33 +347,6 @@ function normalizeInstagramPostUrl(rawUrl) {
   }
 }
 
-function normalizePostHref(href) {
-  const raw = cleanText(href);
-  if (!raw) return '';
-  if (raw.startsWith('/p/') || raw.startsWith('/reel/')) {
-    const parts = raw.split('/').filter(Boolean);
-    if (parts.length >= 2) return `https://www.instagram.com/${parts[0]}/${parts[1]}/`;
-  }
-  if (/^https?:\/\/(?:www\.)?instagram\.com\/(?:p|reel)\//i.test(raw)) {
-    return normalizeInstagramPostUrl(raw);
-  }
-  return '';
-}
-
-async function collectLinksFromDom(page) {
-  try {
-    const hrefs = await page.$$eval('main a[href]', (nodes) => nodes.map((n) => n.getAttribute('href') || '').filter(Boolean));
-    const urls = new Set();
-    for (const href of hrefs) {
-      const normalized = normalizePostHref(href);
-      if (normalized) urls.add(normalized);
-    }
-    return [...urls];
-  } catch {
-    return [];
-  }
-}
-
 function parseDateFromPage({ ldDate, timeDateTime }) {
   for (const [value, source] of [[ldDate, 'ldDate'], [timeDateTime, 'timeDatetime']]) {
     if (!/^\d{4}-\d{2}-\d{2}(?:T|$)/.test(value)) continue;
@@ -422,8 +395,12 @@ export async function openInstagramDailyPage(page, url, access, settleMs = 900) 
     access.failure('all', { reason: 'login-wall' });
     return 'blocked';
   }
-  return new URL(page.url()).pathname.toLowerCase() === new URL(url).pathname.toLowerCase()
-    && new URL(page.url()).hostname === 'www.instagram.com' ? 'readable' : 'unavailable';
+  const final = new URL(page.url());
+  const expected = new URL(url);
+  const post = normalizeInstagramPublicPostUrl(url);
+  const samePage = post ? normalizeInstagramPublicPostUrl(final.href) === post
+    : final.pathname.toLowerCase().replace(/\/$/, '') === expected.pathname.toLowerCase().replace(/\/$/, '');
+  return final.origin === expected.origin && samePage ? 'readable' : 'unavailable';
 }
 
 function readJson(filePath) {
@@ -938,7 +915,8 @@ async function main() {
   const runStartedAt = Date.now();
   let stoppedByRunBudget = false;
 
-  const shouldStopForRunBudget = () => pageVisits >= MAX_PAGE_VISITS
+  const pageVisitLimit = Math.min(MAX_PAGE_VISITS, Math.floor(toNum(process.env.IG_MAX_PAGE_VISITS, MAX_PAGE_VISITS)));
+  const shouldStopForRunBudget = () => pageVisits >= pageVisitLimit
     || Date.now() - runStartedAt >= CONFIG.maxRunMinutes * 60 * 1000;
 
   let browser;
@@ -990,7 +968,8 @@ async function main() {
 
       const sourcePerformance = sourcePerformanceScore(sourceStats[source.key]);
       pageVisits += 1;
-      const profile = await openInstagramDailyPage(page, `https://www.instagram.com/${source.username}/`, access)
+      const profileUrl = `https://www.instagram.com/${source.username}/`;
+      const profile = await openInstagramDailyPage(page, profileUrl, access)
         .catch(() => 'unavailable');
       console.log(`Instagram profile ${source.key}: ${profile}`);
       if (access.pause('profiles')) break;
@@ -998,7 +977,12 @@ async function main() {
         rejectionReasons.noProfile += 1;
       } else {
         await dismissInstagramOverlays(page);
-        const links = (await collectLinksFromDom(page)).slice(0, CONFIG.maxTimelinePostsPerAccount);
+        const { status, urls: links } = await readInstagramProfileTimeline(page, profileUrl, CONFIG.maxTimelinePostsPerAccount)
+          .catch(() => ({ status: 'unavailable', urls: [] }));
+        if (status === 'blocked') {
+          access.failure('all', { reason: 'login-wall' });
+          break;
+        }
         if (links.length) {
           readableProfiles += 1;
           access.success('profiles');

@@ -1,7 +1,25 @@
+import { load } from 'cheerio';
+import { normalizeInstagramPublicPostUrl } from './instagram-page-access.js';
 import { sourceFailureFields } from './source-http-policy.js';
 
 const DAY = 86400000;
 const time = value => Date.parse(value) || 0;
+
+export function parseInstagramSearchResults(html) {
+  const $ = load(html);
+  return $('a.result__a[href], a.result-link[href]').toArray().flatMap(node => {
+    const link = $(node);
+    let href;
+    try { href = new URL(link.attr('href'), 'https://html.duckduckgo.com'); } catch { return []; }
+    const redirect = /^(?:html\.)?duckduckgo\.com$/i.test(href.hostname) && href.pathname === '/l/'
+      ? href.searchParams.get('uddg') : '';
+    const url = normalizeInstagramPublicPostUrl(redirect || href.href);
+    if (!url) return [];
+    const result = link.closest('.result, .result__body, .result-wrapper');
+    const text = value => value.replace(/\s+/g, ' ').trim();
+    return [{ url, title: text(link.text()), snippet: text(result.find('.result__snippet, .result-snippet').first().text()) }];
+  });
+}
 
 export async function runInstagramSearchQueries(queries, { search, previousReport = {}, now = new Date(), sleep }) {
   const previous = previousReport.search || {};
