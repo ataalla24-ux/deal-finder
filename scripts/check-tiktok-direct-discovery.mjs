@@ -1,7 +1,7 @@
 import fs from 'node:fs';
 import { chromium } from 'playwright';
 import { buildDealFromPost, extractTikTokPostData, fetchTikTokApiCandidates } from '../scraper/tiktok-deals-scanner.js';
-import { tikTokRetryAt } from '../scraper/tiktok-search-discovery.js';
+import { tikTokDirectProbePrevious, tikTokRetryAt } from '../scraper/tiktok-search-discovery.js';
 import { canonicalSocialPostKey, semanticCrossPlatformOfferKey } from '../scraper/deal-evidence-utils.js';
 import { filterModeratedDeals, loadDealModeration } from '../scraper/deal-moderation-utils.js';
 import { githubRunProvenance } from '../scraper/pipeline-run-report-utils.js';
@@ -25,11 +25,14 @@ for (const key of read('slack-seen-posts').seenPostKeys || []) {
 
 const provenance = githubRunProvenance();
 const report = { checkedAt: new Date().toISOString(), provenance, maxSearchPages: 1, maxPostVisits: 3 };
+const apiPrevious = tikTokDirectProbePrevious(previous.apiDiscovery);
+const releasedLocalPolicyDeadline = apiPrevious !== previous.apiDiscovery ? previous.apiDiscovery.nextRetryAt : null;
+if (releasedLocalPolicyDeadline) report.releasedLocalPolicyDeadline = releasedLocalPolicyDeadline;
 const browser = await chromium.launch({ headless: true });
 try {
   const page = await browser.newPage({ locale: 'de-AT', timezoneId: 'Europe/Vienna' });
   const api = await fetchTikTokApiCandidates(page, {
-    keywords: ['wien gratis kaffee'], pages: 1, maxCandidates: 12, previous: previous.apiDiscovery,
+    keywords: ['wien gratis kaffee'], pages: 1, maxCandidates: 12, previous: apiPrevious,
   });
   const { rows, publicVideoLinks = [], ...summary } = api;
   const deals = [];
@@ -40,6 +43,7 @@ try {
       ...previous,
       apiDiscovery: {
         ...summary,
+        ...(releasedLocalPolicyDeadline ? { releasedLocalPolicyDeadline } : {}),
         nextKeywordIndex: previous.apiDiscovery?.nextKeywordIndex || 0,
         normalizedCandidates: rows.length,
         inspectedPublicLinks: inspected.size,

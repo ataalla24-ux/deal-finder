@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import { readPublicSearchResponse } from '../scraper/public-search-response.js';
 import { planInstagramQueries } from '../scraper/instagram-query-plan.js';
 import { parseInstagramSearchResults, runInstagramSearchQueries } from '../scraper/instagram-search-discovery.js';
-import { parseTikTokSearchResponse, runTikTokApiDiscovery, tikTokDiscoveryHealth } from '../scraper/tiktok-search-discovery.js';
+import { parseTikTokSearchResponse, runTikTokApiDiscovery, tikTokDirectProbePrevious, tikTokDiscoveryHealth } from '../scraper/tiktok-search-discovery.js';
 import { discoverTikTokLinksViaDuckDuckGo, fetchTikTokApiCandidates, normalizeTikTokApiItem } from '../scraper/tiktok-deals-scanner.js';
 import { loadWatchlist } from '../scraper/instagram-ai-agent.js';
 
@@ -86,6 +86,36 @@ test('a local TikTok request-policy rejection gets one probe, then the full paus
   assert.equal(recovered.rows.length,1);
   assert.equal(recovered.nextRetryAt,'');
   assert.equal(recovered.boundedRetry,undefined);
+});
+
+test('a direct diagnostic can replace one obsolete browser-filter hold and preserves new provider deadlines', async () => {
+  const failure = { status: 0, transportReason: 'request-policy-blocked' };
+  const previous = { transport: 'public-browser-search', attemptedRequests: 1, searchRequests: 0, lastSearchResponse: null,
+    nextRetryAt: '2026-11-11T20:00:00Z', boundedRetry: { reason: 'local-request-policy', failures: 2 }, errors: [failure] };
+  const eligible = tikTokDirectProbePrevious(previous, now);
+  assert.equal(eligible.nextRetryAt, '');
+  assert.equal(previous.nextRetryAt, '2026-11-11T20:00:00Z');
+  assert.deepEqual(eligible.boundedRetry, previous.boundedRetry);
+
+  for (const variant of [
+    { transport: 'direct-browser-search' },
+    { searchRequests: 1 },
+    { lastSearchResponse: { status: 200 } },
+    { errors: [{ ...failure, retryAfter: '3600' }] },
+    { errors: [{ status: 429, transportReason: 'response-http-error' }] },
+    { errors: [{ status: 0, transportReason: 'response-timeout' }] },
+    { boundedRetry: undefined },
+  ]) {
+    const held = { ...previous, ...variant };
+    assert.equal(tikTokDirectProbePrevious(held, now), held);
+  }
+
+  const result = await runTikTokApiDiscovery({ keywords: ['a', 'b'], now, previous: eligible, wait: never,
+    request: async () => ({ ok: false, status: 429, retryAfter: '172800' }) });
+  assert.equal(result.attemptedRequests, 1);
+  assert.equal(result.nextRetryAt, '2026-11-12T20:00:00.000Z');
+  const direct = { ...result, transport: 'direct-browser-search' };
+  assert.equal(tikTokDirectProbePrevious(direct, now), direct);
 });
 
 test('unclassified TikTok failures and legacy holds retain the conservative pause', async () => {

@@ -15,6 +15,22 @@ export function isTikTokLocalRetry(previous = {}) {
   return previous.boundedRetry?.reason === LOCAL_RETRY_REASON && previous.boundedRetry.failures >= 1;
 }
 
+export function tikTokDirectProbePrevious(previous, now = new Date()) {
+  const failure = previous?.errors?.[0];
+  if (Date.parse(previous?.nextRetryAt) > +now
+      && previous.transport === 'public-browser-search'
+      && isTikTokLocalRetry(previous)
+      && previous.attemptedRequests === 1 && previous.searchRequests === 0
+      && previous.lastSearchResponse === null && previous.errors?.length === 1
+      && failure?.status === 0 && failure.transportReason === 'request-policy-blocked'
+      && failure.retryAfter == null && failure.retryAt == null) {
+    // The diagnostic uses the replacement transport. Keep the single-request
+    // retry limit and let the new attempt record any provider deadline.
+    return { ...previous, nextRetryAt: '' };
+  }
+  return previous;
+}
+
 export function selectTikTokPostVisits(api, webLinks, maxPosts) {
   const knownUrls = new Set(api.rows.map(item => item.data.url));
   const visibleLinks = (api.publicVideoLinks || []).filter(url => !knownUrls.has(url));
