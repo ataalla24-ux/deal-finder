@@ -56,6 +56,16 @@ assert.equal(partialApproval.validation.allowedDeals.length,0);
 const existingPartial=await requireApprovalMap(validation,{map,catalog:partialCatalog,now,maxRequests:0,existingDeals:[deal]});
 assert.equal(existingPartial.validation.allowedDeals.length,1);
 const productionRules=JSON.parse(readFileSync(new URL('../reviews/map-chain-rules.json',import.meta.url))).rules;
+const xxxRule=productionRules.find(rule=>rule.id==='xxxlutz-november-2026-happy-hour-vienna-restaurants');
+const xxx={id:'g2-13q9t1x',brand:'XXXLutz',url:xxxRule.sourceUrls[0],title:'XXXLutz: Zwei Schnitzel um 8 € oder zwei Grillteller um 12 €',
+  description:'Mit Gutschein taeglich ab 16 Uhr.',distance:'Wien'};
+assert.deepEqual(matchChainRule(xxx,productionRules,'2026-11-21').addresses.map(row=>row.postalCode),
+  ['1030','1150','1210','1220']);
+for(const change of [{id:'unrelated'}, {title:'Zwei Schnitzel um 8 €'}, {metaGraphCaption:'Ausgenommen Donauzentrum.'},
+  {description:'Nur im Möbelhaus Wien 3.'}, {description:'Gültig in ausgewählten Restaurants.'}, {validUntil:'2026-11-20'}]) {
+  assert.equal(matchChainRule({...xxx,...change},productionRules,'2026-11-21'),null);
+}
+assert.equal(matchChainRule(xxx,productionRules,'2026-12-09'),null);
 const productionCatalog=JSON.parse(readFileSync(new URL('../reviews/map-location-catalog.json',import.meta.url)));
 const fish={id:'current-fish-coupon',brand:'NORDSEE',url:'https://www.nordsee.com/at/coupons',
   title:'2 Classic Fish Burger + Megafrites + 1 Softdrink 0,5 l PET: Mehr als 20 % Rabatt',

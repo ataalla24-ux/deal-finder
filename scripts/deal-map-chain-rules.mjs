@@ -14,14 +14,23 @@ const validDay=value=>typeof value==='string'&&/^\d{4}-\d{2}-\d{2}$/.test(value)
 export function matchChainRule(deal,rules=[],today) {
   const url=sourceKey(deal.url);
   if(!url||!Array.isArray(rules)) return null;
-  const place=fold([deal.address,deal.location,deal.distance,deal.description].join(' '));
+  const rawPlace=[deal.address,deal.location,deal.distance,deal.description,deal.metaGraphCaption].join('. ');
+  const place=fold(rawPlace);
   if(/\b(nur|ausschliesslich|exklusiv)\b.{0,45}\b(filiale|standort|restaurant|scs|westbahnhof|donauzentrum)\b/.test(place)) return null;
-  const exclusions=[...[deal.address,deal.location,deal.distance,deal.description].join('. ').matchAll(/\b(?:ausgenommen|außer|ausser|nicht g[üu]ltig)\s+([^.!?;\n]+)/gi)].map(match=>fold(match[1]));
+  const exclusions=[...rawPlace.matchAll(/\b(?:ausgenommen|außer|ausser|nicht g[üu]ltig)\s+([^.!?;\n]+)/gi)].map(match=>fold(match[1]));
   const matches=rules.filter(rule=>rule&&rule.reviewed===true&&rule.evidenceUrl&&validDay(rule.validFrom)&&(!rule.validUntil||validDay(rule.validUntil))
     &&rule.validFrom<=today&&(!rule.validUntil||rule.validUntil>=today)
     &&Array.isArray(rule.brands)&&rule.brands.some(brand=>fold(brand)===fold(deal.brand))
     &&Array.isArray(rule.sourceUrls)&&rule.sourceUrls.some(source=>sourceKey(source)===url)
     &&Array.isArray(rule.titleTerms)&&rule.titleTerms.length&&rule.titleTerms.some(term=>fold(term)&&fold(deal.title).includes(fold(term)))
+    &&(!rule.dealIds||(Array.isArray(rule.dealIds)&&rule.dealIds.includes(deal.id)))
+    &&(!rule.requireAllTitleTerms||rule.titleTerms.every(term=>fold(term)&&fold(deal.title).includes(fold(term))))
+    &&(rule.scopePolicy!=='reviewed-campaign-locations'
+      || (rule.dealIds?.length&&rule.requireAllTitleTerms===true&&typeof rule.participationEvidence==='string'
+        &&rule.participationEvidence.trim()
+        &&!(/\b(?:nur|ausschliesslich|exklusiv)\b.{0,45}\b(?:bestimmten|ausgewahlten|teilnehmenden|einzelnen|mobelhaus)\b/
+          .test(place) || /\b(?:bestimmte|ausgewahlte|einzelne)n? (?:filialen|restaurants|standorte)\b/.test(place))
+        &&(!deal.validUntil||(validDay(deal.validUntil)&&deal.validUntil>=today))))
     &&Array.isArray(rule.locationIds)&&rule.locationIds.every(id=>typeof id==='string'&&id)
     &&Array.isArray(rule.addresses||[])&&(rule.addresses||[]).every(address=>address.street&&/^\d+[a-z]?(?:[-/]\d+)?$/i.test(address.number)&&/^1\d{3}$/.test(address.postalCode))
     &&(rule.locationIds.length||(rule.addresses||[]).length)
