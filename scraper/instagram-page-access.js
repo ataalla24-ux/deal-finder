@@ -22,6 +22,23 @@ export function instagramPageHasAccessWall(data = {}) {
   return wallTitle.test(title.trim()) || wallPrompt.test(bodyText.replace(/\s+/g, ' ').trim().slice(0, 700));
 }
 
+// A soft redirect may replace the document while Chromium serializes it.
+// Check the resulting document pair without initiating another navigation.
+export async function instagramDocumentSnapshot(page) {
+  for (let attempt = 0; attempt < 2; attempt++) {
+    const finalUrl = page.url();
+    if (instagramPageHasAccessWall({ finalUrl })) return { finalUrl, html: '' };
+    try {
+      const html = await page.content();
+      if (finalUrl === page.url()) return { finalUrl, html };
+    } catch (error) {
+      if (!/page is navigating|execution context was destroyed|cannot find context with specified id/i.test(error.message || '')) throw error;
+    }
+    if (attempt === 0) await page.waitForTimeout(200);
+  }
+  return null;
+}
+
 const publicPostPath = /^\/(?:([a-z0-9._]{2,40})\/)?(p|reels?|tv)\/([a-z0-9_-]{5,20})\/?$/i;
 const instagramHost = /^(?:(?:www|m)\.)?instagram\.com$/i;
 
@@ -68,10 +85,10 @@ export async function readInstagramProfileTimeline(page, profileUrl, limit, time
   } catch (error) {
     if (error.name !== 'TimeoutError') throw error;
   }
-  const finalUrl = new URL(page.url());
-  if (instagramPageHasAccessWall({ finalUrl: finalUrl.href, html: await page.content() })) {
-    return { status: 'blocked', urls: [] };
-  }
+  const document = await instagramDocumentSnapshot(page);
+  if (!document) return { status: 'unavailable', urls: [] };
+  if (instagramPageHasAccessWall(document)) return { status: 'blocked', urls: [] };
+  const finalUrl = new URL(document.finalUrl);
   if (finalUrl.origin !== expected.origin ||
     finalUrl.pathname.toLowerCase().replace(/\/$/, '') !== expected.pathname.toLowerCase().replace(/\/$/, '')) {
     return { status: 'unavailable', urls: [] };

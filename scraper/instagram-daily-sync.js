@@ -5,7 +5,7 @@ import { fileURLToPath } from 'url';
 import { normalizeCategoryForScraper } from './category-utils.js';
 import { discoveryRejection } from './deal-discovery-policy.js';
 import { locationConflictReason } from './deal-factual-guards.js';
-import { instagramPageHasAccessWall, normalizeInstagramPublicPostUrl, readInstagramProfileTimeline } from './instagram-page-access.js';
+import { instagramDocumentSnapshot, instagramPageHasAccessWall, normalizeInstagramPublicPostUrl, readInstagramProfileTimeline } from './instagram-page-access.js';
 import { createInstagramWebAccess } from './instagram-web-access-policy.js';
 import { applyInstagramCookies, loadInstagramCookieHints } from './instagram-auth-utils.js';
 import { githubRunProvenance } from './pipeline-run-report-utils.js';
@@ -398,11 +398,18 @@ export async function openInstagramDailyPage(page, url, access, settleMs = 900, 
   }
   if (!response || !response.ok()) return outcome('unavailable', status ? 'http-' + status : 'no-response');
   await page.waitForTimeout(settleMs);
-  if (instagramPageHasAccessWall({ finalUrl: page.url(), html: await page.content() })) {
+  let document;
+  try {
+    document = await instagramDocumentSnapshot(page);
+  } catch {
+    return outcome('unavailable', 'document-read-error');
+  }
+  if (!document) return outcome('unavailable', 'document-kept-navigating');
+  if (instagramPageHasAccessWall(document)) {
     access.failure('all', { reason: 'login-wall' });
     return outcome('blocked', 'login-wall');
   }
-  const final = new URL(page.url());
+  const final = new URL(document.finalUrl);
   const expected = new URL(url);
   const post = normalizeInstagramPublicPostUrl(url);
   const samePage = post ? normalizeInstagramPublicPostUrl(final.href) === post

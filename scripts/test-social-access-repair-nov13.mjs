@@ -49,6 +49,19 @@ test('Instagram reports bounded navigation failures without recording paths or q
   assert.deepEqual(details, ['http-418', 'net::ERR_CONNECTION_RESET']);
 });
 
+test('Instagram rereads the document once on browser navigation churn without another GET', async () => {
+  const access = createInstagramWebAccess({ now });
+  const page = fakePage();
+  let reads = 0;
+  page.content = async () => {
+    if (++reads === 1) throw new Error('Unable to retrieve content because the page is navigating and changing the content');
+    return '<div role="main">Wiener Profil</div>';
+  };
+  assert.equal(await openInstagramDailyPage(page, url, access), 'readable');
+  assert.equal(reads, 2);
+  assert.deepEqual(page.visits, [url]);
+});
+
 test('Instagram stops on rate limit, login redirect or blocking form, not on a navigation link', async () => {
   for (const [options, reason] of [
     [{ status: 429 }, 'http-429'],
