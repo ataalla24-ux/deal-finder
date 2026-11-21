@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
-import { createCreditBudget, creditPeriodExposure, isAstraEnrichmentActive, loadAiCreditPolicy, meteredUsageUsd, modelForTask, prepareBudgetedRequest, prepareFreeCreditCall, validateCreditPolicy } from '../scraper/ai-credit-budget.js';
+import { createCreditBudget, creditPeriodExposure, dailyCreditExposureUsd, isAstraEnrichmentActive, loadAiCreditPolicy, meteredUsageUsd, modelForTask, prepareBudgetedRequest, prepareFreeCreditCall, validateCreditPolicy } from '../scraper/ai-credit-budget.js';
 import { reconcileKnownOverrun } from './reconcile-openai-budget-20261120.mjs';
 import { requestOpenAi } from '../scraper/instagram-media-evidence.js';
 import { githubQuotaStore } from '../scraper/instagram-shared-quota.js';
@@ -272,17 +272,77 @@ test('the measured November 20 input and reasoning overage fits the larger reser
   assert.equal(store.state.pausedUntil, 0);
 });
 
+test('the real November 21 Pro receipt is covered before dispatch even with only 46 cents of Sol day capacity', async () => {
+  const store = memory({ version:1, pausedUntil:0, creditPeriod:policy.periodId,
+    reservations:[{id:'older', at:now-60000, status:'settled', usd:1.54}] });
+  const requestFor = text => init('gpt-6.2-sol', { messages:[{role:'user', content:text}] });
+  const empty = prepareFreeCreditCall(url,requestFor('')).reservedUsd;
+  const request = requestFor('a'.repeat(Math.round((0.117935 - empty) / 0.000005)));
+  assert.equal(prepareFreeCreditCall(url,request).reservedUsd, 0.117935);
+  const transport = createCreditBudget({store,policy,clock:()=>now,request:async()=>{
+    const reservation = store.state.reservations.at(-1);
+    assert.equal(reservation.usd, 1);
+    assert.ok(reservation.dailyAuthorizedUsd >= 0.141308 && reservation.dailyAuthorizedUsd <= 0.46);
+    return Response.json({usage:{input_tokens:12035,output_tokens:11122}});
+  }});
+  await transport(url,request);
+  assert.equal(store.state.reservations.at(-1).usd, 0.141308);
+  assert.equal(store.state.pausedUntil, 0);
+  assert.equal((await createCreditBudget({store,policy,clock:()=>now,request:successful})(url,init())).status,200);
+});
+
+test('full period coverage, shared Astra/Sol day coverage and daily-only exhaustion are independent', async () => {
+  const at = Date.parse(policy.astraEnrichment.notBefore) + 60000;
+  const base = rows => memory({version:1,creditPeriod:policy.periodId,pausedUntil:0,reservations:rows});
+  const prior = (usd,hours,profile) => ({at:at-hours*3600000,usd,status:'settled',...(profile?{profile}: {})});
+  const request = (store, transport, clock=at) => createCreditBudget({store,policy,clock:()=>clock,request:transport})(url,init());
+  for (const rows of [[prior(37.000001,25)], [prior(37,1,'astra-deal-enrichment'),prior(0.97,1)]]) {
+    await assert.rejects(request(base(rows),()=>assert.fail('zero paid calls')), /shared-spend-limit/);
+  }
+  await request(base([prior(37,25)]),successful);
+  const store=base([prior(1.75,1)]);
+  await request(store,()=>Response.json({usage:{input_tokens:10000,output_tokens:30000}}));
+  assert.equal(store.state.reservations.at(-1).usd,0.325);
+  assert.equal(store.state.pausedUntil,0);
+  await assert.rejects(request(store,()=>assert.fail('no day capacity')),/shared-spend-limit/);
+  await request(store,successful,at+86400000);
+});
+
+test('concurrent Sol cannot reuse an Astra day reservation and ambiguous calls keep the whole period exposure', async () => {
+  const at = Date.parse(policy.astraEnrichment.notBefore) + 60000;
+  const sharedPolicy = {...policy,periodLimitUsd:100,providerGuard:{...policy.providerGuard,monthlyLimitUsd:100}};
+  const store = memory({version:1,pausedUntil:0,creditPeriod:policy.periodId,
+    reservations:[{at:at-60000,usd:37.24,status:'settled',profile:'astra-deal-enrichment'}]});
+  let started, respond;
+  const sent = new Promise(resolve => { started=resolve; });
+  const delayed = () => new Promise(resolve => { respond=resolve; started(); });
+  const astra = createCreditBudget({store,policy:sharedPolicy,clock:()=>at,allowAstraEnrichment:true,request:delayed});
+  const sol = (request,clock=at) => createCreditBudget({store,policy:sharedPolicy,clock:()=>clock,request})(url,init());
+  const pending = astra(url,init('gpt-6.2-astra'));
+  await sent;
+  const row=store.state.reservations.at(-1);
+  assert.equal(row.usd,1);
+  assert.equal(dailyCreditExposureUsd(row,at),0.76);
+  await assert.rejects(sol(()=>assert.fail('no available combined capacity')),/shared-spend-limit/);
+  respond(Response.json({}));
+  await pending;
+  assert.equal(store.state.reservations.at(-1).status,'reserved');
+  assert.equal(dailyCreditExposureUsd(row,at+180000),1);
+  await assert.rejects(sol(()=>assert.fail('unknown usage remains held'),at+180000),/shared-spend-limit/);
+  await sol(successful,at+86400000);
+});
+
 test('even a larger unexpected overrun is posted at the full cost before the shared circuit blocks future calls', async () => {
   const store = memory();
   let calls = 0;
   const request = createCreditBudget({ store, policy, clock: () => now, request: async () => {
     calls++;
-    return Response.json({ usage: { input_tokens: 50000, output_tokens: 50000 } });
+    return Response.json({ usage: { input_tokens: 50000, output_tokens: 100000 } });
   } });
   await request(url, init());
-  assert.equal(store.state.reservations[0].usd, 0.625);
+  assert.equal(store.state.reservations[0].usd, 1.125);
   assert.equal(store.state.reservations[0].status, 'settled');
-  assert.equal(store.state.costOverrun.actualUsd, 0.625);
+  assert.equal(store.state.costOverrun.actualUsd, 1.125);
   assert.equal(store.state.pausedUntil, Date.parse(policy.expiresAt));
   await assert.rejects(request(url, init()), /runner-paused/);
   await assert.rejects(createCreditBudget({ store, policy, clock: () => now, request: () => assert.fail() })(url, init()), /storage-or-provider-pause/);
@@ -314,12 +374,12 @@ test('a pause stops admission but already-dispatched calls can still account for
   const first = createCreditBudget(options)(url, init());
   const second = createCreditBudget(options)(url, init());
   await bothDispatched;
-  responses[0](Response.json({ usage: { input_tokens:50000, output_tokens:50000 } }));
+  responses[0](Response.json({ usage: { input_tokens:50000, output_tokens:100000 } }));
   await first;
   await assert.rejects(createCreditBudget(options)(url, init()), /storage-or-provider-pause/);
-  responses[1](Response.json({ usage: { input_tokens:60000, output_tokens:50000 } }));
+  responses[1](Response.json({ usage: { input_tokens:60000, output_tokens:100000 } }));
   await second;
-  assert.deepEqual(store.state.reservations.map(r => [r.usd,r.status]), [[0.625,'settled'],[0.65,'settled']]);
+  assert.deepEqual(store.state.reservations.map(r => [r.usd,r.status]), [[1.125,'settled'],[1.15,'settled']]);
   assert.equal(store.state.pausedUntil, Date.parse(policy.expiresAt));
 });
 
@@ -350,7 +410,7 @@ test('historical recovery settles only the verified receipt, preserves other res
 
 test('parallel runners cannot spend the same capacity', async () => {
   const store = memory();
-  const cost = prepareBudgetedRequest(url, init()).reservedUsd;
+  const cost = 1;
   const { astraEnrichment, ...ordinaryPolicy } = policy;
   const constrained = { ...ordinaryPolicy, periodLimitUsd: cost * 2.1, rollingDayLimitUsd: cost * 2.1 };
   let calls = 0;
@@ -510,7 +570,7 @@ test('optional blog preserves one ordinary editor and review only with actionabl
       { id: 'recent', at: now - 60000, usd: daily, status: 'settled', creditPeriod: policy.periodId },
     ],
   });
-  for (const store of [stateWithSpend(1.45), stateWithSpend(0, policy.periodLimitUsd - 0.6)]) {
+  for (const store of [stateWithSpend(1.45), stateWithSpend(0, policy.periodLimitUsd - 1.6)]) {
     const budget = createCreditBudget({ store, policy, clock: () => now, request: transport });
     const before = store.state;
     await assert.rejects(budget(url, init(candidate), { preserveDealCorrectionCapacity: true }),

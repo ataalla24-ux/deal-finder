@@ -72,6 +72,15 @@ export function creditPeriodExposure(reservations, periodId) {
   return reservations.filter(row => !row.creditPeriod || row.creditPeriod === periodId || row.status !== 'settled');
 }
 
+// New reservations hold the full single-call limit for the funding period.
+// Within the day they can use the remaining allowance. An unanswered request
+// whose provider deadline has passed is conservatively counted in full.
+export function dailyCreditExposureUsd(row, now = Date.now()) {
+  if (row.status !== 'reserved' || row.dailyAuthorizedUsd === undefined
+    || now - row.at >= OPENAI_MODEL_TIMEOUT_MS + 60000) return row.usd;
+  return row.dailyAuthorizedUsd;
+}
+
 export function validateCreditPolicy(policy, now = Date.now()) {
   const start = Date.parse(policy?.notBefore), end = Date.parse(policy?.expiresAt);
   const guard = policy?.providerGuard;
@@ -213,7 +222,9 @@ export function createCreditBudget({ store, policy, clock = Date.now, request = 
       if (state.version !== 1 || !Array.isArray(state.reservations) || !Number.isFinite(state.pausedUntil)
         || (!dispatched && state.pausedUntil > clock())) throw paused('storage-or-provider-pause');
       if (!state.creditPeriod && state.reservations.length) throw paused('unattributed-spend');
-      if (state.reservations.some(row => !Number.isFinite(row.usd) || row.usd < 0 || !Number.isFinite(row.at))) throw paused('invalid-spend-ledger');
+      if (state.reservations.some(row => !Number.isFinite(row.usd) || row.usd < 0 || !Number.isFinite(row.at)
+        || (row.status === 'reserved' && row.dailyAuthorizedUsd !== undefined
+          && (!Number.isFinite(row.dailyAuthorizedUsd) || row.dailyAuthorizedUsd <= 0 || row.dailyAuthorizedUsd > row.usd)))) throw paused('invalid-spend-ledger');
       if (state.modelPausedUntil !== undefined && (!state.modelPausedUntil || typeof state.modelPausedUntil !== 'object'
         || Array.isArray(state.modelPausedUntil) || Object.values(state.modelPausedUntil).some(deadline => !Number.isFinite(deadline) || deadline < 0))) {
         throw paused('invalid-spend-ledger');
@@ -244,24 +255,26 @@ export function createCreditBudget({ store, policy, clock = Date.now, request = 
     if (prepared.reservedUsd > policy.requestLimitUsd) throw paused('request-cost-limit');
     const id = randomUUID(), at = clock();
     await update(state => {
-      const total = rows => money(rows.reduce((sum, row) => sum + row.usd, 0));
-      const rollingLimit = astra ? policy.astraEnrichment.rollingDayLimitUsd : policy.rollingDayLimitUsd;
-      const daily = state.reservations.filter(row => row.at > at - DAY && (astra || row.profile !== ASTRA_PROFILE));
       if (astra && Number(state.astraPausedUntil) > at) throw paused('astra-provider-pause');
       if (state.modelPausedUntil?.[prepared.model] > at) throw paused('model-provider-pause');
-      const periodAfter = total(creditPeriodExposure(state.reservations, policy.periodId)) + prepared.reservedUsd;
-      const dayAfter = total(daily) + prepared.reservedUsd;
-      if (periodAfter > policy.periodLimitUsd || dayAfter > rollingLimit) throw paused('shared-spend-limit');
-      if (preserveDealCorrectionCapacity) {
-        // One ordinary grounded text correction may need an editor and a
-        // reviewer. These are the same text-only ceilings used for admission.
-        const textRequest = reservedRequestUsd(SOL, MAX_TEXT_BYTES);
-        const correction = 2 * Math.min(policy.requestLimitUsd, textRequest);
-        if (periodAfter + correction > policy.periodLimitUsd || dayAfter + correction > rollingLimit) {
-          throw paused('pending-deal-correction-priority');
-        }
-      }
-      return { ...state, reservations: [...state.reservations, { id, at, usd: prepared.reservedUsd, creditPeriod: policy.periodId,
+      // Compare integer microdollars. A cost estimate sizes work but does not
+      // limit what Pro can meter; escrow the entire per-call risk from the grant.
+      const micros = usd => Math.round(usd * 1e6);
+      const periodRows = creditPeriodExposure(state.reservations, policy.periodId);
+      const remainingPeriod = micros(policy.periodLimitUsd) - periodRows.reduce((sum,row) => sum + micros(row.usd), 0);
+      const dailyRows = state.reservations.filter(row => row.at > at - DAY);
+      const remainingDay = (limit, rows) => micros(limit) - rows.reduce((sum,row) => sum + micros(dailyCreditExposureUsd(row, at)), 0);
+      const combined = remainingDay(policy.astraEnrichment?.rollingDayLimitUsd ?? policy.rollingDayLimitUsd, dailyRows);
+      const dayCapacity = astra ? combined : Math.min(combined,
+        remainingDay(policy.rollingDayLimitUsd, dailyRows.filter(row => row.profile !== ASTRA_PROFILE)));
+      const ceiling = micros(policy.requestLimitUsd), estimate = micros(prepared.reservedUsd);
+      if (remainingPeriod < ceiling || dayCapacity < estimate) throw paused('shared-spend-limit');
+      const correction = preserveDealCorrectionCapacity
+        ? 2 * Math.min(ceiling, micros(reservedRequestUsd(SOL, MAX_TEXT_BYTES))) : 0;
+      if (remainingPeriod - ceiling < correction || dayCapacity - estimate < correction) throw paused('pending-deal-correction-priority');
+      const dailyAuthorizedUsd = Math.min(ceiling, dayCapacity - correction) / 1e6;
+      return { ...state, reservations: [...state.reservations, { id, at, usd: policy.requestLimitUsd,
+        estimatedUsd: prepared.reservedUsd, dailyAuthorizedUsd, creditPeriod: policy.periodId,
         model: prepared.model, reasoningEffort: 'max', reasoningMode: 'pro', ...(astra ? { profile: ASTRA_PROFILE } : {}),
         count: 1, expiresAt: Date.parse(policy.expiresAt), status: 'reserved' }] };
     });
@@ -294,7 +307,7 @@ export function createCreditBudget({ store, policy, clock = Date.now, request = 
         const input = usage?.input_tokens ?? usage?.prompt_tokens, output = usage?.output_tokens ?? usage?.completion_tokens;
         const actual = meteredUsageUsd(prepared.model, input, output);
         if (actual !== null) {
-          const overrun = actual > prepared.reservedUsd;
+          const overrun = actual > policy.requestLimitUsd;
           if (overrun) stopped = true;
           await update(state => {
             // Other workers may have paused new spending after this call was sent.
@@ -303,9 +316,9 @@ export function createCreditBudget({ store, policy, clock = Date.now, request = 
             return {
               ...state,
               ...(overrun ? { pausedUntil: Math.max(state.pausedUntil, Date.parse(policy.expiresAt)),
-                costOverrun: state.costOverrun || { reservationId: id, model: prepared.model, reservedUsd: prepared.reservedUsd, actualUsd: actual } } : {}),
+                costOverrun: state.costOverrun || { reservationId: id, model: prepared.model, reservedUsd: policy.requestLimitUsd, actualUsd: actual } } : {}),
               reservations: state.reservations.map(row => row.id === id
-                ? { ...row, usd: actual, status: 'settled', ...(overrun ? { reservedUsd: prepared.reservedUsd } : {}) } : row),
+                ? { ...row, usd: actual, status: 'settled', inputTokens: input, outputTokens: output, ...(overrun ? { reservedUsd: policy.requestLimitUsd } : {}) } : row),
             };
           }, { dispatched: true });
         }
