@@ -51,10 +51,10 @@ jobs:
           node scripts/test-deal-map-review.mjs
           node scripts/test-slack-business-map-review.mjs
           SENTRY_DISABLED=1 node scripts/test-community-approval-integration.mjs
-      - name: Remove deals with a confirmed elapsed end time
+      - name: Remove deals with a confirmed elapsed end time or verified merchant day
         env:
           AUTOMATIC_MAINTENANCE_APPLY: '1'
-        run: node scripts/automatic-deal-maintenance.mjs --exact-time-expiry-only
+        run: node scripts/automatic-deal-maintenance.mjs --scheduled-expiry-only
       - name: Reconcile published deals and active business campaigns
         env:
           MAP_REFRESH_BUSINESS: '1'

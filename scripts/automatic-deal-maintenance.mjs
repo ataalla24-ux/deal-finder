@@ -140,6 +140,68 @@ function editorConfirmedSingleDayEnds(value, end) {
   return [...dates, validOn === end ? end : ''];
 }
 
+function confirmedMerchantSingleDay(deal, latest, end, now) {
+  const key = canonicalInstagramPostKey(deal.url);
+  const caption = clean(latest?.caption);
+  if (!key || deal.expiryKind !== 'single' || !end || deal.validOn !== end || !caption
+    || (deal.validFrom && deal.validFrom !== end) || (deal.expires && !sameInstant(deal.expires, `${end}T23:59:59.999Z`))
+    || !deal.metaGraphVerified || !deal.metaGraphAccepted || deal.metaGraphBlockingReason || deal.metaGraphIsRepost
+    || !latest || latest.isRepost !== false || key !== canonicalInstagramPostKey(latest.url)
+    || (deal.evidencePostUrl && key !== canonicalInstagramPostKey(deal.evidencePostUrl))
+    || !deal.metaGraphMediaId || latest.mediaId !== deal.metaGraphMediaId
+    || deal.sourceAccountType !== 'merchant' || latest.sourceAccountType !== 'merchant'
+    || !deal.ownerUsername || deal.ownerUsername !== deal.merchantUsername || latest.ownerUsername !== deal.ownerUsername
+    || caption !== clean(deal.metaGraphCaption) || clean(latest.ocrText) !== clean(deal.metaGraphOcrText)) return null;
+  // Discovery can reject the identical already-published post after its date.
+  // Its rejection does not confirm expiry by itself or authorize changed copy.
+  const dateOnlyRejection = latest.graphAccepted === false
+    && ['offer-expired', 'post-too-old'].includes(latest.graphRejection)
+    && (!latest.blockingReason || latest.blockingReason === latest.graphRejection);
+  if (!dateOnlyRejection && (latest.graphAccepted !== true || latest.graphRejection || latest.blockingReason)) return null;
+
+  const shortCodeTime = decodeInstagramShortcodeDate(deal.url);
+  const graphTime = new Date(latest.sourcePublishedAt);
+  const observedAt = Date.parse(latest.verifiedAt);
+  const storedTime = Date.parse(deal.sourcePublishedAt);
+  const storedClock = deal.sourcePublishedAtSource === 'url.instagramShortcode' ? shortCodeTime
+    : deal.sourcePublishedAtSource === 'instagram-graph-timestamp' ? graphTime : null;
+  if (!shortCodeTime || latest.sourcePublishedAtSource !== 'instagram-graph-timestamp'
+    || !Number.isFinite(+graphTime) || !(+graphTime <= observedAt && observedAt <= +now) || +shortCodeTime > +now
+    || !storedClock || !Number.isFinite(storedTime) || Math.abs(storedTime - +storedClock) > 60000
+    // Graph records publication. The permalink ID can precede publication
+    // while a Reel uploads, but it must corroborate the same Vienna day.
+    || Math.abs(+graphTime - +shortCodeTime) > 5 * 60000
+    || viennaDate.format(graphTime) !== viennaDate.format(shortCodeTime)) return null;
+  const publishedDay = viennaDate.format(graphTime);
+  const daysAhead = (Date.parse(end) - Date.parse(publishedDay)) / dayMs;
+  if (daysAhead < 0 || daysAhead > 14 || Date.parse(deal.discoveredAt) - +graphTime > 14 * dayMs) return null;
+
+  const day = originalDateClauses(caption, bareDatePattern);
+  const normalizedCaption = normalizedDateText(caption);
+  const calendarTokens = normalizedCaption.match(/\b(?:20\d{2}-\d{2}-\d{2}|\d{1,2}[./]\d{1,2}(?:[./]\d{2,4})?)\b/g) || [];
+  const offer = /(?:\b\d+\s*\+\s*\d+\b|\b\d+\s*%|\b(?:gratis|kostenlos|rabatt|gutschein|coupon)\b)/;
+  const dateMarker = /\bam\s+\d{1,2}\.\d{1,2}\b/;
+  const dateBelongsToOffer = normalizedCaption.split(/[!?]|\.(?=\s)/).some(clause =>
+    dateMarker.test(clause) && (offer.test(clause) || /^\s*(?:📍\s*)?am\s/.test(clause) || /📍\s*am\s/.test(clause)));
+  if (day.length !== 1 || day[0].year || day[0].ambiguous || day[0].monthDay !== end.slice(5)
+    || calendarTokens.length !== 1 || !dateBelongsToOffer || !offer.test(normalizedCaption)) return null;
+  const context = [caption, latest.ocrText, deal.title, deal.description];
+  const ongoingOrIncidental = /\b(?:nicht|not|taglich|taeglich|daily|monthly|allmonatlich|(?:montag|dienstag|mittwoch|donnerstag|freitag|samstag|sonntag)s|start(?:et|en)|beginn(?:t|en)|opening|launch|eroffnung|eroeffnung|offnet|oeffnet|abholung|veroffentlicht|veroeffentlicht|gepostet|posted|published|upload|aufgenommen|aufgezeichnet|ankundigung|ankuendigung|ankundigen|ankuendigen|lauft weiter|geht weiter|weiterhin|auch morgen|fortgesetzt)\b/;
+  for (const value of context) {
+    const text = normalizedDateText(value);
+    // "Zu jedem Döner" is a purchase condition. Recurrence requires a scheduling term.
+    const timingText = text.replace(/\bzu jedem\s+(?!tag\b|wochentag\b|werktag\b|wochenende\b|monat\b)/g, 'zu ');
+    if (reuseOrUnclearTiming.test(timingText) || uncertainExpiry.test(clean(value)) || periodStartPattern.test(text)
+      || ongoingOrIncidental.test(text) || /instagram\.com\//.test(text)
+      || [...originalDateClauses(value), ...originalDateClauses(value, bareDatePattern)]
+        .some(clause => clause.ambiguous || clause.monthDay !== end.slice(5)
+          || (clause.year && clause.year !== end.slice(0, 4)))) return null;
+  }
+  const shape = parseExpiryShape(caption, { now: graphTime, referenceDate: graphTime, timeZone: 'Europe/Vienna' });
+  if (shape.kind !== 'single' || shape.validOn !== end) return null;
+  return { caption, publishedAt: graphTime.toISOString() };
+}
+
 function inferOriginalPostExpiry(deal, latest, now, texts) {
   const url = deal.evidencePostUrl || deal.url;
   const key = canonicalInstagramPostKey(url);
@@ -321,7 +383,7 @@ function exactEndEvidence(deal, end, edits, latest, texts) {
   return ownedPeriod[0] || '';
 }
 
-export function assessAutomaticExpiry(deal, { now = new Date(), edits = [], policy = {}, latestEvidence, exactTimeExpiryOnly = false } = {}) {
+export function assessAutomaticExpiry(deal, { now = new Date(), edits = [], policy = {}, latestEvidence, scheduledExpiryOnly = false } = {}) {
   const hold = reason => ({ eligible: false, reason });
   if (protectedDeal(deal, edits, policy)) return hold('protected-or-explicit-owner-keep');
   const ends = [deal.validUntil, deal.validOn].filter(Boolean);
@@ -373,13 +435,16 @@ export function assessAutomaticExpiry(deal, { now = new Date(), edits = [], poli
     return { eligible: true, reason: 'confirmed-exact-offer-end', validUntil: end,
       expires: new Date(deal.expires).toISOString(), evidenceHash: hash([exactPeriod]), evidence: [exactPeriod] };
   }
-  if (exactTimeExpiryOnly) return hold('exact-offer-end-not-confirmed');
+  const merchantDay = confirmedMerchantSingleDay(deal, latestEvidence, end, now);
+  if (scheduledExpiryOnly && !merchantDay) return hold('scheduled-offer-end-not-confirmed');
   // A structured date alone can be a guessed TTL. Require literal offer wording.
   const hasExplicitEnd = end && ['end', 'range', 'single'].includes(deal.expiryKind);
-  let evidence = hasExplicitEnd ? texts.filter(value => literalSourceEnds(value, deal.expiryKind).length > 0) : [];
-  let sourceEnds = evidence.flatMap(value => literalSourceEnds(value, deal.expiryKind));
-  let reason = coupon ? 'captured-coupon-offer-end' : 'literal-source-end-with-year';
-  let originalPostPublishedAt;
+  let evidence = merchantDay ? [merchantDay.caption]
+    : hasExplicitEnd ? texts.filter(value => literalSourceEnds(value, deal.expiryKind).length > 0) : [];
+  let sourceEnds = merchantDay ? [end] : evidence.flatMap(value => literalSourceEnds(value, deal.expiryKind));
+  let reason = merchantDay ? 'confirmed-original-instagram-single-day'
+    : coupon ? 'captured-coupon-offer-end' : 'literal-source-end-with-year';
+  let originalPostPublishedAt = merchantDay?.publishedAt;
   if (hasExplicitEnd && (!sourceEnds.length || sourceEnds.includes('')) && sourceEnds.every(value => !value || value === end)) {
     const confirmed = deal.expiryKind === 'single' && deal.validOn === end
       && (!deal.validFrom || deal.validFrom === end)
@@ -431,7 +496,7 @@ export function assessAutomaticExpiry(deal, { now = new Date(), edits = [], poli
 }
 
 export function maintainDeals(deals, { policy = {}, state = {}, edits = [], now = new Date(), sourceEvidence = new Map(),
-  exactTimeExpiryOnly = false } = {}) {
+  scheduledExpiryOnly = false } = {}) {
   if (policy.version !== 1 || policy.enabled !== true) return { deals, state, changed: false, report: { mode: 'disabled', hidden: [], corrected: [], review: [] } };
   const nextState = structuredClone(state);
   nextState.version = 1;
@@ -444,7 +509,7 @@ export function maintainDeals(deals, { policy = {}, state = {}, edits = [], now 
     let deal = original;
     const fields = protectedFields(deal, edits);
     const latestEvidence = sourceEvidence.get(deal.id);
-    if (!exactTimeExpiryOnly && !protectedDeal(deal, edits, policy) && !latestEvidence
+    if (!scheduledExpiryOnly && !protectedDeal(deal, edits, policy) && !latestEvidence
       && !fields.has('validity') && !offerPeriodFields.some(field => fields.has(field))
       && !matchingEdits(deal, edits).some(edit => edit.restoreDeal)) {
       const normalized = { ...deal };
@@ -454,7 +519,7 @@ export function maintainDeals(deals, { policy = {}, state = {}, edits = [], now 
         corrected.push({ id: deal.id, fields: cleared, method: 'observation-is-not-offer-period' });
       }
     }
-    if (!exactTimeExpiryOnly && deal.reviewedSourceCopy?.offerPeriodEvidence && !protectedDeal(deal, edits, policy)
+    if (!scheduledExpiryOnly && deal.reviewedSourceCopy?.offerPeriodEvidence && !protectedDeal(deal, edits, policy)
       && !latestEvidence?.blockingReason && latestEvidence?.graphAccepted !== false
       && !fields.has('validity') && !offerPeriodFields.some(field => fields.has(field))
       && ![deal.expiresSource, deal.expirySource, deal.validity?.expirySource].includes('manual')
@@ -469,7 +534,7 @@ export function maintainDeals(deals, { policy = {}, state = {}, edits = [], now 
       }
     }
     const fingerprint = maintenanceFingerprint(deal);
-    const expiry = assessAutomaticExpiry(deal, { policy, edits, now, latestEvidence, exactTimeExpiryOnly });
+    const expiry = assessAutomaticExpiry(deal, { policy, edits, now, latestEvidence, scheduledExpiryOnly });
     const previousHide = nextState.hidden.find(entry => entry.id === deal.id && entry.fingerprint === fingerprint);
     if (policy.automaticExpiry === true && expiry.eligible && (previousHide || newHides < maxHides)) {
       if (!previousHide) {
@@ -479,7 +544,7 @@ export function maintainDeals(deals, { policy = {}, state = {}, edits = [], now 
       hidden.push({ id: deal.id, validUntil: expiry.validUntil, reason: expiry.reason, replay: Boolean(previousHide) });
       continue;
     }
-    if (exactTimeExpiryOnly) {
+    if (scheduledExpiryOnly) {
       result.push(deal);
       continue;
     }
@@ -674,7 +739,7 @@ export async function reviewApprovedCopy(deals, { cwd, now = new Date(), request
 }
 
 export async function maintainFeedFile({ cwd = process.cwd(), allowAi = false, apply = true, request = freeCreditOpenAiFetch, now = new Date(),
-  targetDealId = '', editor = null, exactTimeExpiryOnly = false } = {}) {
+  targetDealId = '', editor = null, scheduledExpiryOnly = false } = {}) {
   const policy = read(path.join(cwd, 'reviews/automatic-maintenance-policy.json'), {});
   const feedPath = path.join(cwd, 'docs/deals.json'), statePath = path.join(cwd, 'reviews/automatic-deal-maintenance-state.json');
   const feed = read(feedPath, null), fullFeed = Array.isArray(feed) ? feed : feed?.deals;
@@ -704,7 +769,7 @@ export async function maintainFeedFile({ cwd = process.cwd(), allowAi = false, a
     sourceEvidence.set(deal.id, { blockingReason: 'newer-coupon-listing-needs-review' });
   }
   const beforeState = read(statePath, {});
-  const result = maintainDeals(deals, { policy, edits, state: beforeState, now, sourceEvidence, exactTimeExpiryOnly });
+  const result = maintainDeals(deals, { policy, edits, state: beforeState, now, sourceEvidence, scheduledExpiryOnly });
   if (targetDealId && (result.deals.length !== 1 || result.deals[0].id !== targetDealId || result.report.hidden.length)) {
     throw Error('Target deal is no longer eligible for copy review');
   }
@@ -716,7 +781,7 @@ export async function maintainFeedFile({ cwd = process.cwd(), allowAi = false, a
       write(feedPath, Array.isArray(feed) ? published : { ...feed, deals: published, totalDeals: published.length });
     }
   };
-  if (exactTimeExpiryOnly) {
+  if (scheduledExpiryOnly) {
     if (result.changed) persist();
     return result;
   }
@@ -826,7 +891,7 @@ export async function maintainFeedFile({ cwd = process.cwd(), allowAi = false, a
 
 if (process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.meta.url)) {
   const targetDealId = (process.env.MAINTENANCE_TARGET_DEAL_ID || '').trim();
-  const exactTimeExpiryOnly = process.argv.includes('--exact-time-expiry-only');
+  const scheduledExpiryOnly = process.argv.includes('--scheduled-expiry-only');
   const calls = [];
   // Record only provider-returned model identity and usage for the requested deal.
   const observed = transport => async (...args) => {
@@ -843,7 +908,7 @@ if (process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.me
   };
   if (targetDealId && !isAstraEnrichmentActive()) throw Error('Targeted verification requires the active Astra profile');
   const result = await maintainFeedFile({ apply: process.env.AUTOMATIC_MAINTENANCE_APPLY === '1',
-    allowAi: !exactTimeExpiryOnly, targetDealId, exactTimeExpiryOnly,
+    allowAi: !scheduledExpiryOnly, targetDealId, scheduledExpiryOnly,
     ...(targetDealId ? { editor: { model: 'gpt-6.2-sol', request: observed(createProductionCreditFetch()) },
       request: observed(freeCreditOpenAiFetch) } : {}) });
   if (targetDealId) {

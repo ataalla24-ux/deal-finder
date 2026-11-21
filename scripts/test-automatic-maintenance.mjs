@@ -132,11 +132,11 @@ test('an exact range uses the Vienna calendar day across UTC midnight and reject
     '2026-10-25T01:30:00.000Z').eligible, false);
 });
 
-test('hourly expiry removes only confirmed timed events and preserves other records and copy work', () => {
+test('hourly expiry removes the confirmed timed event while preserving unselected records and copy work', () => {
   const pending = { id: 'pending-text', title: 'Gratis Getränk', description: 'Standort folgt.',
     enrichmentPending: true, enrichmentFields: ['description'] };
   const run = maintainDeals([deal, tasting, pending], {
-    policy, edits: [tastingEdit], now: tastingEnd, exactTimeExpiryOnly: true,
+    policy, edits: [tastingEdit], now: tastingEnd, scheduledExpiryOnly: true,
   });
   assert.deepEqual(run.deals, [deal, pending], 'even an old date-only deal waits for the regular review');
   assert.deepEqual(run.report.hidden.map(record => record.id), [tasting.id]);
@@ -238,6 +238,91 @@ test('exact original Instagram publication proves a nearby yearless single day, 
   const { deals, state } = maintainDeals([record], { policy, now: after });
   assert.equal(deals.length, 0);
   assert.deepEqual(state.hidden[0].originalDeal, record);
+});
+
+const dahabCaption = '1 + 1 Döner GRATIS! Bei allen unseren Dönersorten zu jedem Döner einen GRATIS dazu🔥✅ 📍am 21.11 in der Schönbrunner Straße 149, 1050 Wien';
+const dahab = {
+  id: 'meta-ig-18046812119830342', url: 'https://www.instagram.com/reel/Df2WDjtONVV/', title: '1 + 1 Döner gratis!',
+  description: dahabCaption, metaGraphCaption: dahabCaption, metaGraphOcrText: '', metaGraphMediaId: '18046812119830342',
+  brand: 'Dahab Döner', ownerUsername: 'dahabdoener', merchantUsername: 'dahabdoener', sourceAccountType: 'merchant',
+  source: 'Instagram', originSource: 'Meta Instagram Business Discovery', metaGraphVerified: true,
+  metaGraphAccepted: true, metaGraphIsRepost: false, metaGraphVerifiedAt: '2026-11-17T19:40:02.862Z',
+  sourcePublishedAt: '2026-11-17T16:19:37.000Z', sourcePublishedAtSource: 'url.instagramShortcode',
+  discoveredAt: '2026-11-17T19:40:02.000Z', approvedAt: '2026-11-17T20:53:38.203Z',
+  validOn: '2026-11-21', expires: '2026-11-21T23:59:59.999Z', expiryKind: 'single', dateConfidence: 'medium',
+  expiryDisplayText: '2026-11-21T23:59:59.999Z', expiresOriginal: '2026-11-21T23:59:59.999Z',
+  evidence: { mediaId: '18046812119830342', username: 'dahabdoener', sourceType: 'account',
+    entityResolution: { ownerUsername: 'dahabdoener', ownerRole: 'merchant', merchantUsername: 'dahabdoener',
+      merchantRole: 'merchant', resolutionMethod: 'owner-is-merchant' } },
+};
+const dahabGraph = {
+  url: dahab.url, postKey: 'instagram:Df2WDjtONVV', mediaId: dahab.metaGraphMediaId, ownerUsername: 'dahabdoener',
+  sourceAccountType: 'merchant', isRepost: false, mediaType: 'VIDEO', mediaProductType: 'REELS',
+  caption: dahabCaption, ocrText: '', graphAccepted: true, blockingReason: '', verifiedAt: '2026-11-21T07:02:07.203Z',
+  sourcePublishedAt: '2026-11-17T16:21:27.000Z', sourcePublishedAtSource: 'instagram-graph-timestamp',
+};
+const afterDahabGrace = new Date('2026-11-22T12:00:00Z');
+const assessDahab = (record, latestEvidence) =>
+  assessAutomaticExpiry(record, { policy, latestEvidence, now: afterDahabGrace });
+
+test('an accepted original merchant post with a yearless one-day offer expires only after normal grace', () => {
+  const sourceEvidence = latestMaintenanceEvidence([dahab], [dahabGraph], afterDahabGrace);
+  const laterOffer = { id: 'other-dahab-offer', brand: dahab.brand, title: 'Drei Döner zum Preis von zwei',
+    expiryKind: 'range', validFrom: '2026-11-03', validUntil: '2026-11-30' };
+  const entries = [dahab, laterOffer];
+  for (const time of ['2026-11-21T20:00:00Z', '2026-11-22T11:59:59Z']) {
+    assert.deepEqual(maintainDeals(entries, { policy, now: new Date(time), sourceEvidence }).deals, entries, time);
+  }
+  const result = assessDahab(dahab, dahabGraph);
+  assert.equal(result.validUntil, '2026-11-21');
+  assert.equal(result.reason, 'confirmed-original-instagram-single-day');
+  const expired = maintainDeals(entries, { policy, now: afterDahabGrace, sourceEvidence });
+  assert.deepEqual(expired.deals, [laterOffer]);
+  assert.deepEqual(expired.report.hidden.map(record => record.id), [dahab.id]);
+  assert.deepEqual(maintainDeals(entries, { policy, now: afterDahabGrace, sourceEvidence,
+    scheduledExpiryOnly: true }).deals, [laterOffer]);
+});
+
+test('a bare offer day needs the original merchant and two independently attributable publication clocks', () => {
+  assert.equal(assessDahab(dahab, undefined).eligible, false);
+  for (const patch of [{ mediaId: '999' }, { url: 'https://www.instagram.com/p/DfmtMyGuGVB/' },
+    { ownerUsername: 'othermerchant' }, { graphAccepted: false }, { blockingReason: 'source-unavailable' }, { isRepost: true },
+    { sourcePublishedAt: '2026-11-17T16:24:39Z' }, { sourcePublishedAtSource: 'discoveredAt' }]) {
+    assert.equal(assessDahab(dahab, { ...dahabGraph, ...patch }).eligible, false, JSON.stringify(patch));
+  }
+  for (const patch of [{ validOn: '2026-11-20' }, { sourcePublishedAtSource: 'createdAt' }, { metaGraphIsRepost: true },
+    { sourceAccountType: 'curator' }]) {
+    assert.equal(assessDahab({ ...dahab, ...patch }, dahabGraph).eligible, false, JSON.stringify(patch));
+  }
+  const caption = dahabCaption.replace('21.11', '21.12'), expires = '2026-12-21T23:59:59.999Z';
+  const farFuture = { ...dahab, description: caption, metaGraphCaption: caption, validOn: '2026-12-21',
+    expires, expiresOriginal: expires, expiryDisplayText: expires };
+  assert.equal(assessAutomaticExpiry(farFuture, { policy, latestEvidence: { ...dahabGraph, caption },
+    now: new Date('2026-12-23T12:00:00Z') }).eligible, false, 'event must be near the original publication date');
+});
+
+test('a later age or expiry flag can preserve an unchanged verified merchant observation', () => {
+  for (const blockingReason of ['offer-expired', 'post-too-old']) {
+    const latest = { ...dahabGraph, verifiedAt: '2026-11-22T08:00:00.000Z', graphAccepted: false, blockingReason,
+      graphRejection: blockingReason };
+    assert.equal(assessDahab(dahab, latest).eligible, true, blockingReason);
+    assert.equal(assessDahab(dahab, { ...latest, caption: 'Angebot verlängert.' }).eligible, false);
+    assert.equal(assessDahab({ ...dahab, metaGraphAccepted: false }, latest).eligible, false);
+  }
+});
+
+test('a bare date in repeated captions, start notices or recurring offers cannot establish the end of a deal', () => {
+  for (const caption of [
+    '1+1 Döner gratis. Die Aktion startet am 21.11 in der Schönbrunner Straße.',
+    '1+1 Döner jeden Samstag, auch am 21.11 in der Schönbrunner Straße.',
+    '1+1 Döner gratis am 21.11 und am 22.11 in der Schönbrunner Straße.',
+    '1+1 Döner gratis. Foto aufgenommen am 21.11 in der Schönbrunner Straße.',
+    '1+1 Döner gratis. Wir erzählen euch am 21.11 mehr zum Angebot.',
+  ]) {
+    const record = { ...dahab, description: caption, metaGraphCaption: caption };
+    assert.equal(assessDahab(record, { ...dahabGraph, caption }).eligible, false, caption);
+  }
+  assert.equal(assessDahab(dahab, { ...dahabGraph, caption: '1+1 Döner ohne festen Endtermin.' }).eligible, false);
 });
 
 test('year rollover uses Vienna days, not run year, even without a structured end', () => {
