@@ -2,9 +2,107 @@
   "schemaVersion": 1,
   "sourceKey": "food3",
   "sourceLabel": "Firecrawl Key 2 - Food",
-  "updatedAt": "2026-11-20T09:52:37.547Z",
+  "updatedAt": "2026-11-21T09:28:18.168Z",
   "runCount": 90,
   "runs": [
+    {
+      "schemaVersion": 1,
+      "runProvenance": {
+        "repository": "ataalla24-ux/deal-finder",
+        "runId": "44889531377",
+        "headSha": "e37611139488051767c5ce3fbabc97415b5c422a",
+        "checkoutSha": "e37611139488051767c5ce3fbabc97415b5c422a",
+        "triggeringRun": null,
+        "event": "schedule",
+        "runAttempt": "1",
+        "url": "https://github.com/ataalla24-ux/deal-finder/actions/runs/44889531377"
+      },
+      "runId": "food3-2026-11-21T09:28:18.168Z",
+      "sourceKey": "food3",
+      "sourceLabel": "Firecrawl Key 2 - Food",
+      "status": "completed-with-errors",
+      "startedAt": "2026-11-21T09:25:55.090Z",
+      "finishedAt": "2026-11-21T09:28:18.168Z",
+      "durationMs": 143078,
+      "outputFile": "docs/deals-pending-food3.json",
+      "counts": {
+        "rawCandidates": 3,
+        "normalizedCandidates": 3,
+        "verifiedCandidates": 4,
+        "previousDeals": 3,
+        "acceptedDeals": 4,
+        "rejectedDeals": 1
+      },
+      "rejectedByReason": {
+        "post-verification-rejected": 1
+      },
+      "rejectedSamples": [
+        {
+          "reason": "post-verification-rejected",
+          "deal": {
+            "id": "food3-1aoc29i",
+            "title": "Instagram: Pizza to go? Sempre una buona idea! 🍕 Ob für die ...",
+            "brand": "Instagram",
+            "url": "https://www.instagram.com/reel/Dfuqp-ZICAj/",
+            "source": "Firecrawl Food #2",
+            "pubDate": "",
+            "expires": "",
+            "postVerificationStatus": ""
+          }
+        }
+      ],
+      "diagnostics": {
+        "agentStatus": "completed-with-errors",
+        "creditsUsed": 0,
+        "configuredSources": 6,
+        "attemptedSources": 3,
+        "completedSources": 2,
+        "targetsPerRun": 3,
+        "agentTimeoutSeconds": 120,
+        "maxCreditsPerTarget": 300,
+        "sourceStats": [
+          {
+            "url": "https://www.instagram.com/explore/tags/wienessen/",
+            "status": "completed-search",
+            "rawCandidates": 2,
+            "searchCandidates": 2,
+            "creditsUsed": 0
+          },
+          {
+            "url": "https://www.instagram.com/explore/tags/viennafood/",
+            "status": "completed-search",
+            "rawCandidates": 1,
+            "searchCandidates": 1,
+            "creditsUsed": 0
+          },
+          {
+            "url": "https://www.instagram.com/explore/tags/fooddealsvienna/",
+            "status": "failed",
+            "rawCandidates": 0,
+            "searchCandidates": 0,
+            "creditsUsed": 0,
+            "error": "Firecrawl Agent nach 120s abgebrochen"
+          }
+        ],
+        "retainedPreviousDeals": 3,
+        "prunedPreviousDeals": 0,
+        "duplicateCandidatesMerged": 1,
+        "verifier": {
+          "statusCounts": {
+            "verified-original-post": 1,
+            "verified-meta-graph": 3
+          },
+          "verifiedOriginalPosts": 1,
+          "timestampOnlyPosts": 0,
+          "unavailableOriginalPosts": 0,
+          "registryViennaEvidence": 0
+        }
+      },
+      "constraints": {},
+      "errors": [
+        "https://www.instagram.com/explore/tags/fooddealsvienna/: Firecrawl Agent nach 120s abgebrochen"
+      ]
+    },
     {
       "schemaVersion": 1,
       "runProvenance": {
@@ -15449,40 +15547,6 @@
       "errors": [
         "Firecrawl Agent nach 300s abgebrochen"
       ]
-    },
-    {
-      "schemaVersion": 1,
-      "runId": "food3-2026-08-22T12:01:53.355Z",
-      "sourceKey": "food3",
-      "sourceLabel": "Firecrawl Key 2 - Food",
-      "status": "completed",
-      "startedAt": "2026-08-22T11:57:08.910Z",
-      "finishedAt": "2026-08-22T12:01:53.355Z",
-      "durationMs": 284445,
-      "outputFile": "docs/deals-pending-food3.json",
-      "counts": {
-        "rawCandidates": 0,
-        "normalizedCandidates": 0,
-        "verifiedCandidates": 0,
-        "previousDeals": 0,
-        "acceptedDeals": 0,
-        "rejectedDeals": 0
-      },
-      "rejectedByReason": {},
-      "rejectedSamples": [],
-      "diagnostics": {
-        "agentStatus": "completed",
-        "creditsUsed": 0,
-        "verifier": {
-          "statusCounts": {},
-          "verifiedOriginalPosts": 0,
-          "timestampOnlyPosts": 0,
-          "unavailableOriginalPosts": 0,
-          "registryViennaEvidence": 0
-        }
-      },
-      "constraints": {},
-      "errors": []
     }
   ]
 }
