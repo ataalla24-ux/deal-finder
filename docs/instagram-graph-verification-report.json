@@ -1,7 +1,7 @@
 {
-  "generatedAt": "2026-11-21T09:29:02.522Z",
+  "generatedAt": "2026-11-21T09:46:26.376Z",
   "source": "instagram-graph-cross-source-verification",
-  "status": "ok",
+  "status": "failed-preserved",
   "configured": true,
   "scannedFiles": [
     "deals-pending-church-events.json",
@@ -76,7 +76,7 @@
     },
     "deals-pending-food3.json": {
       "deals": 4,
-      "candidates": 2
+      "candidates": 1
     },
     "deals-pending-freikirchen.json": {
       "deals": 32,
@@ -135,7 +135,7 @@
       "candidates": 0
     },
     "deals-pending-meta-instagram.json": {
-      "deals": 81,
+      "deals": 80,
       "candidates": 0
     },
     "deals-pending-power.json": {
@@ -167,14 +167,10 @@
       "candidates": 0
     }
   },
-  "candidatePosts": 5,
-  "candidateAccounts": 5,
+  "candidatePosts": 4,
+  "candidateAccounts": 4,
   "skippedAccountCooldowns": 0,
   "selectedAccounts": [
-    {
-      "username": "cariocawien",
-      "candidates": 1
-    },
     {
       "username": "lieferandoat",
       "candidates": 1
@@ -192,10 +188,15 @@
       "candidates": 1
     }
   ],
-  "fetchedPosts": 125,
-  "exactMatches": 5,
+  "fetchedPosts": 0,
+  "exactMatches": 0,
   "retainedEvidencePosts": 2000,
-  "errors": [],
+  "errors": [
+    {
+      "username": "lieferandoat",
+      "message": "Instagram shared quota paused: rolling-hour budget exhausted"
+    }
+  ],
   "accountFailures": {
     "natascha_rapid": {
       "count": 3,
@@ -211,19 +212,25 @@
   "sharedQuota": {
     "limitPerHour": 358,
     "usageThreshold": 95,
-    "requests": 5,
-    "reserved": 5,
-    "stopped": false,
-    "reason": "",
-    "highestUsagePercent": 48,
+    "requests": 0,
+    "reserved": 0,
+    "stopped": true,
+    "reason": "Instagram shared quota paused: rolling-hour budget exhausted",
+    "highestUsagePercent": 0,
     "waitedMs": 0,
     "pacingMs": 0,
-    "retryAt": "",
+    "retryAt": "2026-11-21T10:29:22.808Z",
     "adaptiveSafetyCeiling": 190,
     "adaptiveIncreases": 0,
     "storageFailure": null
   },
+  "globalError": {
+    "username": "lieferandoat",
+    "status": 0,
+    "code": "SCAN_BUDGET",
+    "message": "Instagram shared quota paused: rolling-hour budget exhausted"
+  },
   "blockedEvidencePosts": 72,
-  "unmatchedCandidatePosts": 0,
-  "message": "5/5 fresh cross-source Instagram candidates matched exactly via Graph API."
+  "unmatchedCandidatePosts": 4,
+  "message": "0/4 fresh cross-source Instagram candidates matched exactly via Graph API."
 }
