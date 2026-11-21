@@ -11,6 +11,7 @@ on:
       - 'docs/live-deal-edits.json'
       - 'reviews/map-addresses.json'
       - 'reviews/map-chain-rules.json'
+      - 'scripts/automatic-deal-maintenance.mjs'
       - 'scripts/deal-map-*.mjs'
       - 'scripts/enrich-deal-map.mjs'
       - '.github/workflows/deal-map-sync.yml'
@@ -50,6 +51,10 @@ jobs:
           node scripts/test-deal-map-review.mjs
           node scripts/test-slack-business-map-review.mjs
           SENTRY_DISABLED=1 node scripts/test-community-approval-integration.mjs
+      - name: Remove deals with a confirmed elapsed end time
+        env:
+          AUTOMATIC_MAINTENANCE_APPLY: '1'
+        run: node scripts/automatic-deal-maintenance.mjs --exact-time-expiry-only
       - name: Reconcile published deals and active business campaigns
         env:
           MAP_REFRESH_BUSINESS: '1'
@@ -65,4 +70,4 @@ jobs:
           node scripts/commit-generated.mjs --message "Reconcile verified deal map locations"
           --files docs/deals.json docs/deal-map-locations.json reviews/map-location-catalog.json
           reviews/map-geocode-cache.json reviews/map-source-address-cache.json
-          reviews/map-business-campaigns.json reviews/map-coverage.json
+          reviews/map-business-campaigns.json reviews/map-coverage.json reviews/automatic-deal-maintenance-state.json

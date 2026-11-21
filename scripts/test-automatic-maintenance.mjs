@@ -41,6 +41,108 @@ test('future, today and safety grace are retained across the Vienna midnight bou
   assert.equal(assess(deal, new Date('2026-11-05T12:00:00Z')).eligible, true);
 });
 
+// A published single-day event whose Slack form and durable edit preserve the exact local time.
+const tastingPeriod = {
+  validOn: '2026-11-21', validFrom: '2026-11-21', validUntil: '2026-11-21', expiryKind: 'single',
+  expires: '2026-11-21T12:00:00.000Z', expiresOriginal: '21.11.2026, 11:00 bis 21.11.2026, 13:00 Uhr',
+  expiryDisplayText: '21.11.2026, 11:00 bis 21.11.2026, 13:00 Uhr',
+};
+const tasting = {
+  ...tastingPeriod, id: 'meta-ig-17977851744156986', title: 'Gratis Kaffee-Tasting mit Reservierung',
+  brand: 'Villa Vida Café', url: 'https://www.instagram.com/p/DfmtMyGuGVB/',
+  originSource: 'Meta Instagram Business Discovery', metaGraphMediaId: '17977851744156986',
+  sourcePublishedAt: '2026-11-11T14:34:00.000Z', sourcePublishedAtSource: 'url.instagramShortcode',
+  metaGraphVerifiedAt: '2026-11-11T23:09:52.932Z', metaGraphVerified: true, metaGraphAccepted: true,
+  sourceAccountType: 'merchant', metaGraphIsRepost: false, approvedAt: '2026-11-11T23:18:21.581Z',
+  metaGraphCaption: 'Saturday 21.11 Women & Coffee: Specialty Coffee Cupping 11:00–13:00 · Free Villa Vida Café, Vienna',
+  description: 'Am Samstag, 21.11.2026, von 11:00 bis 13:00 Uhr sechs Spezialitätenkaffees verkosten.',
+  expirySource: 'manual', expiresSource: 'manual', expiresPrecision: 'day', dateConfidence: 'high',
+  validityText: tastingPeriod.expiresOriginal,
+};
+const tastingEdit = { dealId: tasting.id, ...tastingPeriod };
+const tastingEnd = new Date(tastingPeriod.expires);
+const tastingObservation = {
+  url: tasting.url, mediaId: tasting.metaGraphMediaId, caption: tasting.metaGraphCaption, ocrText: '',
+  graphAccepted: false, blockingReason: 'post-too-old', verifiedAt: '2026-11-21T03:24:45.612Z',
+  sourcePublishedAt: '2026-11-11T14:34:04.000Z', sourcePublishedAtSource: 'instagram-graph-timestamp',
+};
+const assessTasting = (record, edits, latestEvidence, time = tastingEnd) =>
+  assessAutomaticExpiry(record, { policy, now: time, edits, latestEvidence });
+
+test('a confirmed Vienna event stays until its precise end and is then removed in the same day’s maintenance', () => {
+  const before = new Date('2026-11-21T11:59:59.999Z');
+  assert.equal(assessTasting(tasting, [tastingEdit], tastingObservation, before).eligible, false);
+  const sourceEvidence = latestMaintenanceEvidence([tasting], [tastingObservation], tastingEnd);
+  assert.deepEqual([...sourceEvidence.keys()], [tasting.id]);
+  const options = { policy, now: tastingEnd, edits: [tastingEdit], sourceEvidence };
+  const cleaned = maintainDeals([tasting], options);
+  assert.deepEqual(cleaned.deals.map(record => record.id), []);
+  assert.equal(cleaned.report.hidden[0].id, tasting.id);
+  assert.equal(cleaned.report.hidden[0].reason, 'confirmed-exact-offer-end');
+  const replay = maintainDeals([tasting], { ...options, state: cleaned.state });
+  assert.equal(replay.report.hidden[0].replay, true);
+  assert.equal(replay.state.hidden.length, 1);
+});
+
+test('independent proof of a full time range can come from a recorded Slack edit or the captured source', () => {
+  const slack = { ...tasting, editedInSlack: true, slackEditedAt: '2026-11-11T23:06:47.262Z',
+    slackEditedFields: ['expires', 'expiresOriginal', 'expiryDisplayText', 'validityText'] };
+  assert.equal(assessTasting(slack, []).reason, 'confirmed-exact-offer-end');
+  assert.equal(assessTasting({ ...slack, slackEditedFields: ['title', 'expires'] }, []).eligible, false);
+  const source = { ...tasting, expiresSource: 'url', expirySource: 'url',
+    evidence: { offerTiming: { matchedText: tastingPeriod.expiresOriginal } } };
+  assert.equal(assessTasting(source, []).reason, 'confirmed-exact-offer-end');
+  const hoursOnly = { offerTiming: { matchedText: 'Nur heute, von 11:00 bis 13:00 Uhr.' } };
+  assert.equal(assessTasting({ ...source, evidence: hoursOnly }, []).eligible, false);
+  assert.equal(assessTasting(tasting, []).eligible, false);
+});
+
+test('changed or blocked source evidence, a conflicting manual edit and owner protections hold the timed event', () => {
+  for (const patch of [{ url: 'https://www.instagram.com/p/OtherPost/' }, { mediaId: 'different' },
+    { caption: '' }, { caption: 'New event tomorrow.' }, { ocrText: 'Verlängert bis 22.11.' },
+    { blockingReason: 'excerpt-withdrawn' }]) {
+    assert.equal(assessTasting(tasting, [tastingEdit], { ...tastingObservation, ...patch }).eligible, false, JSON.stringify(patch));
+  }
+  for (const patch of [{ expires: '2026-11-21T17:00:00.000Z' }, { validUntil: '2026-11-22' },
+    { expiresOriginal: '21.11.2026, 11:00 bis 21.11.2026, 17:00 Uhr' },
+    { forceKeep: true }, { restoreDeal: tasting }, { clearFields: ['validUntil'] }]) {
+    assert.equal(assessTasting(tasting, [{ ...tastingEdit, ...patch }]).eligible, false, JSON.stringify(patch));
+  }
+  assert.equal(assessTasting({ ...tasting, forceKeep: true }, [tastingEdit]).eligible, false);
+  assert.equal(assessTasting({ ...tasting, validFrom: '2026-11-20' }, [tastingEdit]).eligible, false);
+  const changedTime = '21.11.2026, 11:00 bis 21.11.2026, 18:00 Uhr';
+  const conflictingSource = { ...tasting, evidence: { offerTiming: { matchedText: changedTime } } };
+  assert.equal(assessTasting(conflictingSource, [tastingEdit]).eligible, false, 'source specifies a later time on the same day');
+  const source = { ...tasting, evidence: { offerTiming: { matchedText: tastingPeriod.expiresOriginal } } };
+  assert.equal(assessTasting(source, [{ ...tastingEdit, expiresOriginal: changedTime }]).eligible, false,
+    'even corroborating source evidence must respect an inconsistent owner edit');
+});
+
+test('an exact range uses the Vienna calendar day across UTC midnight and rejects ambiguous local clocks', () => {
+  function evaluate(raw, day, expires) {
+    const period = { ...tastingPeriod, expiresOriginal: raw, expiryDisplayText: raw,
+      validOn: day, validFrom: day, validUntil: day, expires };
+    const record = { id: 'timed-event', title: 'Verkostung', validityText: raw, description: 'Einmalige Verkostung.',
+      expirySource: 'manual', expiresSource: 'manual', ...period };
+    return assessTasting(record, [{ dealId: record.id, ...period }], undefined, new Date(expires));
+  }
+  assert.equal(evaluate('21.07.2026, 00:05 bis 21.07.2026, 00:30 Uhr', '2026-07-21',
+    '2026-07-20T22:30:00.000Z').reason, 'confirmed-exact-offer-end');
+  assert.equal(evaluate('25.10.2026, 01:00 bis 25.10.2026, 02:30 Uhr', '2026-10-25',
+    '2026-10-25T01:30:00.000Z').eligible, false);
+});
+
+test('hourly expiry removes only confirmed timed events and preserves other records and copy work', () => {
+  const pending = { id: 'pending-text', title: 'Gratis Getränk', description: 'Standort folgt.',
+    enrichmentPending: true, enrichmentFields: ['description'] };
+  const run = maintainDeals([deal, tasting, pending], {
+    policy, edits: [tastingEdit], now: tastingEnd, exactTimeExpiryOnly: true,
+  });
+  assert.deepEqual(run.deals, [deal, pending], 'even an old date-only deal waits for the regular review');
+  assert.deepEqual(run.report.hidden.map(record => record.id), [tasting.id]);
+  assert.deepEqual(run.report.corrected, []);
+});
+
 test('newer exact-post Graph captions override old expiry snapshots, including removed dates and extensions', () => {
   const original = { ...deal, url: 'https://www.instagram.com/p/DfYCVxHFu4q/' };
   for (const caption of ['Aktion verlängert, Gratis Kaffee bis 30.11.2026.', 'Gratis Kaffee in Wien, aktueller Vorteil ohne Enddatum.']) {

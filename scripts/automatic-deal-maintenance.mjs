@@ -6,7 +6,7 @@ import { preparePublicationTitle } from '../scraper/pre-publication-title.js';
 import { titleClaimGuard } from '../scraper/deal-card-editor.js';
 import { createProductionCreditFetch, dealEnrichmentModelTimeoutMs, freeCreditOpenAiFetch, isAstraEnrichmentActive, modelForTask } from '../scraper/ai-credit-budget.js';
 import { canonicalInstagramPostKey, decodeInstagramShortcodeDate } from '../scraper/deal-evidence-utils.js';
-import { parseExpiryShape, repairObservationExpiry } from '../scraper/expiry-utils.js';
+import { parseExpiryShape, parseExplicitOfferPeriod, repairObservationExpiry } from '../scraper/expiry-utils.js';
 import { assessFixedFlightEnd } from './expiry-fixed-flight.mjs';
 import { assessInstagramFiniteRangeEnd } from './expiry-instagram-finite-range.mjs';
 import { assessOriginalSocialCopy } from './original-social-copy.mjs';
@@ -105,7 +105,7 @@ const dateFields = ['validFrom', 'validOn', 'validUntil', 'expires', 'expiryKind
 const dayMs = 86400000;
 const viennaDate = new Intl.DateTimeFormat('sv-SE', { timeZone: 'Europe/Vienna', dateStyle: 'short' });
 const uncertainExpiry = /geburtstag|birthday|dauerhaft|unbefristet|bis auf weiteres|verl[aä]ngert|verlaengert|extended|voraussichtlich|ungef[aä]hr|circa/i;
-const reuseOrUnclearTiming = /\b(?:repost\w*|regram\w*|reshar\w*|throwback|ruckblick|rueckblick|archivaufnahme|flashback|letztes jahr|last year|erneut geteilt|wieder hochgeladen|jede[nmrs]?|every|wochentlich|weekly|maybe|probably|vermutlich|eventuell|geplant|planned|tentative|teilnahmeschluss|einsendeschluss|gewinnspiel|giveaway|offnungszeiten|oeffnungszeiten)\b|#tbt\b|(?:\bnicht|\bnot)\s+(?:mehr\s+)?(?:nur|only|gultig|gueltig|valid)\b/;
+const reuseOrUnclearTiming = /\b(?:repost\w*|regram\w*|reshar\w*|throwback|ruckblick|rueckblick|archivaufnahme|flashback|letztes jahr|last year|erneut geteilt|wieder hochgeladen|jede[nmrs]?|every\s+(?:(?:other|second|third|\d+)\s+)?(?:monday|tuesday|wednesday|thursday|friday|saturday|sunday|minutes?|hours?|days?|weekdays?|weekends?|weeks?|months?|years?)|wochentlich|weekly|maybe|probably|vermutlich|eventuell|geplant|planned|tentative|teilnahmeschluss|einsendeschluss|gewinnspiel|giveaway|offnungszeiten|oeffnungszeiten)\b|#tbt\b|(?:\bnicht|\bnot)\s+(?:mehr\s+)?(?:nur|only|gultig|gueltig|valid)\b/;
 const originalDateMarker = 'nur am|ausschliesslich am|only on|gultig am|gueltig am|bis|until|ends(?: on)?';
 const dateParts = `(\\d{1,2})(?:[./](\\d{1,2})(?:[./](\\d{2,4}))?|\\.?\\s+(${Object.keys(months).join('|')})\\b\\.?(?:\\s+(\\d{2,4})(?![:.\\d]))?)(?!\\d)`;
 const originalDatePattern = new RegExp(`\\b(${originalDateMarker})(?:\\s+(?:einschliesslich|inklusive|zum))?\\s*:?\\s*${dateParts}`, 'g');
@@ -274,7 +274,54 @@ function couponEndEvidence(deal, policy, now) {
   return { text: card.quote, url: card.sourceUrl };
 }
 
-export function assessAutomaticExpiry(deal, { now = new Date(), edits = [], policy = {}, latestEvidence } = {}) {
+const sameInstant = (a, b) => Number.isFinite(Date.parse(a)) && Date.parse(a) === Date.parse(b);
+const hasClock = value => /^20\d{2}-\d{2}-\d{2}T\d{2}:\d{2}(?::\d{2}(?:\.\d+)?)?(?:Z|[+-]\d{2}:\d{2})$/.test(value || '');
+
+function confirmsExactEnd(literal, deal, end) {
+  const parts = clean(literal).split(' bis ');
+  // Only a complete timed period can displace the calendar-day grace. Its
+  // Vienna wall times must resolve unambiguously and match the stored instant.
+  if (parts.length !== 2 || parts.some(part => !/\d{2}:\d{2}/.test(part))) return false;
+  const period = parseExplicitOfferPeriod(literal);
+  const start = parseExplicitOfferPeriod(parts[0]);
+  return period?.kind === deal.expiryKind && period.validUntil === end
+    && (!deal.validFrom || deal.validFrom === period.validFrom)
+    && (!deal.validOn || deal.validOn === period.validOn)
+    && Date.parse(start?.expires) < Date.parse(period.expires)
+    && hasClock(deal.expires) && sameInstant(period.expires, deal.expires);
+}
+
+function exactEndEvidence(deal, end, edits, latest, texts) {
+  if (!end || !hasClock(deal.expires) || !['single', 'range'].includes(deal.expiryKind)
+    || deal.metaGraphBlockingReason || deal.metaGraphIsRepost || latest?.isRepost) return '';
+  const persistedPeriod = [deal.expiresOriginal, deal.expiryDisplayText].filter(Boolean);
+  if (!persistedPeriod.every(value => confirmsExactEnd(value, deal, end))) return '';
+  const ownedPeriod = edits.filter(edit => edit.dealId === deal.id && sameInstant(edit.expires, deal.expires))
+    .flatMap(edit => [edit.expiresOriginal, edit.expiryDisplayText]).filter(Boolean);
+  if (!ownedPeriod.every(value => confirmsExactEnd(value, deal, end))) return '';
+  const sourcePeriod = texts.find(value => confirmsExactEnd(value, deal, end));
+  if (sourcePeriod) return sourcePeriod;
+
+  if (latest) {
+    // Discovery age does not invalidate an unchanged original. Other source
+    // updates must independently confirm the entire stored period.
+    const key = canonicalInstagramPostKey(deal.evidencePostUrl || deal.url);
+    const discoveryAgeOnly = latest.blockingReason === 'post-too-old';
+    if (!discoveryAgeOnly && (latest.blockingReason || latest.graphAccepted !== true)
+      || !key || canonicalInstagramPostKey(latest.url) !== key
+      || !deal.metaGraphVerified || !deal.metaGraphAccepted || !deal.metaGraphMediaId || latest.mediaId !== deal.metaGraphMediaId
+      || !clean(deal.metaGraphCaption) || clean(latest.caption) !== clean(deal.metaGraphCaption)
+      || clean(latest.ocrText) !== clean(deal.metaGraphOcrText)) return '';
+  }
+
+  const slackFields = deal.slackEditedFields || [];
+  if (deal.editedInSlack && deal.expiresSource === 'manual' && slackFields.includes('expires')
+    && slackFields.includes('validityText'))
+    return confirmsExactEnd(deal.validityText, deal, end) ? deal.validityText : '';
+  return ownedPeriod[0] || '';
+}
+
+export function assessAutomaticExpiry(deal, { now = new Date(), edits = [], policy = {}, latestEvidence, exactTimeExpiryOnly = false } = {}) {
   const hold = reason => ({ eligible: false, reason });
   if (protectedDeal(deal, edits, policy)) return hold('protected-or-explicit-owner-keep');
   const ends = [deal.validUntil, deal.validOn].filter(Boolean);
@@ -288,6 +335,10 @@ export function assessAutomaticExpiry(deal, { now = new Date(), edits = [], poli
       && Boolean(end) && cleared.every(field => ['validOn', 'validFrom'].includes(field) && !deal[field]);
     if (cleared.length && !endCorrection) return hold('manual-period-cleared');
     for (const field of ['validUntil', 'validOn', 'validFrom', 'expires']) {
+      if (field === 'expires' && hasClock(edit.expires) && hasClock(deal.expires)) {
+        if (!sameInstant(edit.expires, deal.expires)) return hold('newer-manual-period-correction');
+        continue;
+      }
       if (Object.hasOwn(edit, field) && clean(edit[field]).slice(0, 10) !== clean(deal[field]).slice(0, 10)) return hold('newer-manual-period-correction');
     }
   }
@@ -307,6 +358,22 @@ export function assessAutomaticExpiry(deal, { now = new Date(), edits = [], poli
     : deal.description;
   const text = clean([description, deal.expiryDisplayText, ...texts].join(' '));
   if (uncertainExpiry.test(text)) return hold('ongoing-extended-or-uncertain');
+  const exactPeriod = exactEndEvidence(deal, end, matchedEdits, latestEvidence, texts);
+  if (exactPeriod) {
+    const context = [text, deal.title, deal.metaGraphCaption, deal.metaGraphOcrText].join(' ');
+    const exactContext = normalizedDateText(context);
+    const contradictoryDate = texts.filter(value => !confirmsExactEnd(value, deal, end))
+      .flatMap(value => originalDateClauses(value))
+      .some(clause => clause.ambiguous || clause.monthDay !== end.slice(5)
+        || (clause.year && clause.year !== end.slice(0, 4)));
+    if (contradictoryDate || uncertainExpiry.test(context) || reuseOrUnclearTiming.test(exactContext)
+      || /\b(?:am nachsten tag|am folgenden tag|uber mitternacht|lauft weiter|geht weiter|weiterhin|auch morgen|fortgesetzt)\b/.test(exactContext))
+      return hold('ambiguous-exact-offer-end');
+    if (+now < Date.parse(deal.expires)) return hold('not-expired-or-safety-grace');
+    return { eligible: true, reason: 'confirmed-exact-offer-end', validUntil: end,
+      expires: new Date(deal.expires).toISOString(), evidenceHash: hash([exactPeriod]), evidence: [exactPeriod] };
+  }
+  if (exactTimeExpiryOnly) return hold('exact-offer-end-not-confirmed');
   // A structured date alone can be a guessed TTL. Require literal offer wording.
   const hasExplicitEnd = end && ['end', 'range', 'single'].includes(deal.expiryKind);
   let evidence = hasExplicitEnd ? texts.filter(value => literalSourceEnds(value, deal.expiryKind).length > 0) : [];
@@ -363,7 +430,8 @@ export function assessAutomaticExpiry(deal, { now = new Date(), edits = [], poli
     ...(coupon ? { sourceUrl: coupon.url } : {}), evidenceHash: hash(evidence), evidence: evidence.map(value => value.slice(0, 1600)) };
 }
 
-export function maintainDeals(deals, { policy = {}, state = {}, edits = [], now = new Date(), sourceEvidence = new Map() } = {}) {
+export function maintainDeals(deals, { policy = {}, state = {}, edits = [], now = new Date(), sourceEvidence = new Map(),
+  exactTimeExpiryOnly = false } = {}) {
   if (policy.version !== 1 || policy.enabled !== true) return { deals, state, changed: false, report: { mode: 'disabled', hidden: [], corrected: [], review: [] } };
   const nextState = structuredClone(state);
   nextState.version = 1;
@@ -376,7 +444,7 @@ export function maintainDeals(deals, { policy = {}, state = {}, edits = [], now 
     let deal = original;
     const fields = protectedFields(deal, edits);
     const latestEvidence = sourceEvidence.get(deal.id);
-    if (!protectedDeal(deal, edits, policy) && !latestEvidence
+    if (!exactTimeExpiryOnly && !protectedDeal(deal, edits, policy) && !latestEvidence
       && !fields.has('validity') && !offerPeriodFields.some(field => fields.has(field))
       && !matchingEdits(deal, edits).some(edit => edit.restoreDeal)) {
       const normalized = { ...deal };
@@ -386,7 +454,7 @@ export function maintainDeals(deals, { policy = {}, state = {}, edits = [], now 
         corrected.push({ id: deal.id, fields: cleared, method: 'observation-is-not-offer-period' });
       }
     }
-    if (deal.reviewedSourceCopy?.offerPeriodEvidence && !protectedDeal(deal, edits, policy)
+    if (!exactTimeExpiryOnly && deal.reviewedSourceCopy?.offerPeriodEvidence && !protectedDeal(deal, edits, policy)
       && !latestEvidence?.blockingReason && latestEvidence?.graphAccepted !== false
       && !fields.has('validity') && !offerPeriodFields.some(field => fields.has(field))
       && ![deal.expiresSource, deal.expirySource, deal.validity?.expirySource].includes('manual')
@@ -401,7 +469,7 @@ export function maintainDeals(deals, { policy = {}, state = {}, edits = [], now 
       }
     }
     const fingerprint = maintenanceFingerprint(deal);
-    const expiry = assessAutomaticExpiry(deal, { policy, edits, now, latestEvidence });
+    const expiry = assessAutomaticExpiry(deal, { policy, edits, now, latestEvidence, exactTimeExpiryOnly });
     const previousHide = nextState.hidden.find(entry => entry.id === deal.id && entry.fingerprint === fingerprint);
     if (policy.automaticExpiry === true && expiry.eligible && (previousHide || newHides < maxHides)) {
       if (!previousHide) {
@@ -409,6 +477,10 @@ export function maintainDeals(deals, { policy = {}, state = {}, edits = [], now 
         newHides++;
       }
       hidden.push({ id: deal.id, validUntil: expiry.validUntil, reason: expiry.reason, replay: Boolean(previousHide) });
+      continue;
+    }
+    if (exactTimeExpiryOnly) {
+      result.push(deal);
       continue;
     }
     const cachedPatch = nextState.corrections.find(entry =>
@@ -602,7 +674,7 @@ export async function reviewApprovedCopy(deals, { cwd, now = new Date(), request
 }
 
 export async function maintainFeedFile({ cwd = process.cwd(), allowAi = false, apply = true, request = freeCreditOpenAiFetch, now = new Date(),
-  targetDealId = '', editor = null } = {}) {
+  targetDealId = '', editor = null, exactTimeExpiryOnly = false } = {}) {
   const policy = read(path.join(cwd, 'reviews/automatic-maintenance-policy.json'), {});
   const feedPath = path.join(cwd, 'docs/deals.json'), statePath = path.join(cwd, 'reviews/automatic-deal-maintenance-state.json');
   const feed = read(feedPath, null), fullFeed = Array.isArray(feed) ? feed : feed?.deals;
@@ -632,9 +704,21 @@ export async function maintainFeedFile({ cwd = process.cwd(), allowAi = false, a
     sourceEvidence.set(deal.id, { blockingReason: 'newer-coupon-listing-needs-review' });
   }
   const beforeState = read(statePath, {});
-  const result = maintainDeals(deals, { policy, edits, state: beforeState, now, sourceEvidence });
+  const result = maintainDeals(deals, { policy, edits, state: beforeState, now, sourceEvidence, exactTimeExpiryOnly });
   if (targetDealId && (result.deals.length !== 1 || result.deals[0].id !== targetDealId || result.report.hidden.length)) {
     throw Error('Target deal is no longer eligible for copy review');
+  }
+  const persist = () => {
+    if (!apply) return;
+    if (JSON.stringify(beforeState) !== JSON.stringify(result.state)) write(statePath, result.state);
+    if (result.changed) {
+      const published = targetDealId ? fullFeed.map(row => row.id === targetDealId ? result.deals[0] : row) : result.deals;
+      write(feedPath, Array.isArray(feed) ? published : { ...feed, deals: published, totalDeals: published.length });
+    }
+  };
+  if (exactTimeExpiryOnly) {
+    if (result.changed) persist();
+    return result;
   }
   result.report.ai = { attempted: 0, corrected: 0, deferred: 0, readyForModel: 0,
     models:{editor:editor?.model || modelForTask('editor'),review:modelForTask('review')},reasoningEffort:'max',reasoningMode:'pro' };
@@ -735,17 +819,14 @@ export async function maintainFeedFile({ cwd = process.cwd(), allowAi = false, a
     const reasons = copyReviewReasons(deal, protectedFields(deal, edits));
     if (reasons.length) result.report.review.push({id:deal.id,reason:'copy-needs-grounded-review',fields:reasons});
   }
-  if (apply && JSON.stringify(beforeState) !== JSON.stringify(result.state)) write(statePath, result.state);
-  if (apply && result.changed) {
-    const published = targetDealId ? fullFeed.map(row => row.id === targetDealId ? result.deals[0] : row) : result.deals;
-    write(feedPath, Array.isArray(feed) ? published : { ...feed, deals: published, totalDeals: published.length });
-  }
+  persist();
   if (allowAi && apply && !targetDealId) write(path.join(cwd, 'docs/automatic-deal-maintenance-report.json'), result.report);
   return result;
 }
 
 if (process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.meta.url)) {
   const targetDealId = (process.env.MAINTENANCE_TARGET_DEAL_ID || '').trim();
+  const exactTimeExpiryOnly = process.argv.includes('--exact-time-expiry-only');
   const calls = [];
   // Record only provider-returned model identity and usage for the requested deal.
   const observed = transport => async (...args) => {
@@ -761,7 +842,8 @@ if (process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.me
     return response;
   };
   if (targetDealId && !isAstraEnrichmentActive()) throw Error('Targeted verification requires the active Astra profile');
-  const result = await maintainFeedFile({ apply: process.env.AUTOMATIC_MAINTENANCE_APPLY === '1', allowAi: true, targetDealId,
+  const result = await maintainFeedFile({ apply: process.env.AUTOMATIC_MAINTENANCE_APPLY === '1',
+    allowAi: !exactTimeExpiryOnly, targetDealId, exactTimeExpiryOnly,
     ...(targetDealId ? { editor: { model: 'gpt-6.2-sol', request: observed(createProductionCreditFetch()) },
       request: observed(freeCreditOpenAiFetch) } : {}) });
   if (targetDealId) {
