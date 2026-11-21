@@ -232,6 +232,59 @@ test('a readable public search page exposes only visible first-party video links
   });
 });
 
+const emptyResponsePage = (script = '') => '<main id="results"></main><script>'
+  + 'const request = () => fetch("/api/search/general/full/?keyword=wien%20gratis%20kaffee&count=30");'
+  + 'request().catch(() => {});' + script + '</script>';
+const exactPublicClip = 'https://www.tiktok.com/@vienna.cafe/video/1234567890123456789';
+
+test('a zero-length HTTP 200 still permits an already rendered public link on the same results page', async () => {
+  const markup = '<a href="' + exactPublicClip + '">Coffee clip</a>';
+  const html = emptyResponsePage('setTimeout(() => document.querySelector("#results").innerHTML = ' + JSON.stringify(markup) + ', 150);'
+    + 'setTimeout(() => request().catch(() => {}), 350);');
+  await fixture({html,api:()=>({status:200,headers:{'Content-Length':'0'},body:''})},async(page,calls)=>{
+    const result = await scan(page, { pages: 3 });
+    assert.equal(calls.length,1,'settling the existing page cannot send another search after the empty response');
+    assert.equal(result.rows.length,0);
+    assert.equal(result.errors[0].transportReason,'empty-response');
+    assert.equal(result.lastSearchResponse.bodyState,'declared-empty');
+    assert.equal(result.lastSearchResponse.declaredBytes,0);
+    assert.equal(result.lastSearchResponse.retryAfterProvided,false);
+    assert.deepEqual(result.publicVideoLinks,[exactPublicClip]);
+    assert.ok(result.nextRetryAt,'public links must not clear the transport pause');
+  });
+});
+
+test('a late wall and an explicit wait with empty HTTP 200 both suppress public links', async () => {
+  const markup = '<a href="' + exactPublicClip + '">Coffee clip</a>';
+  for (const [apiHeaders,lateWall] of [[{'Content-Length':'0'},true],
+    [{'Content-Length':'0','Retry-After':'172800'},false]]) {
+    const html = emptyResponsePage('document.querySelector("#results").innerHTML=' + JSON.stringify(markup) + ';'
+      + (lateWall ? 'setTimeout(() => document.title="Verify to continue", 150);' : ''));
+    await fixture({html,api:()=>({status:200,headers:apiHeaders,body:''})},async(page,calls)=>{
+      const result = await scan(page);
+      assert.equal(calls.length,1);
+      assert.deepEqual(result.publicVideoLinks,[]);
+      assert.equal(result.errors[0].transportReason,lateWall ? 'access-challenge' : 'empty-response');
+      if(!lateWall) {
+        assert.equal(result.lastSearchResponse.retryAfterProvided,true);
+        assert.equal(result.nextRetryAt,'2026-11-13T12:00:00.000Z');
+      }
+    });
+  }
+});
+
+test('a valid empty JSON collection is a normal zero-result search', async () => {
+  await fixture({api:()=>response(body([]))}, async (page,calls) => {
+    const result = await scan(page);
+    assert.equal(calls.length,1);
+    assert.equal(result.emptyResponses,1);
+    assert.equal(result.errors.length,0);
+    assert.equal(result.nextRetryAt,'');
+    assert.equal(result.lastSearchResponse.bodyState,'json');
+    assert.ok(result.lastSearchResponse.decodedBytes>0);
+  });
+});
+
 test('a public document refusal or challenge never exposes stale links', async () => {
   const staleLink='<main><a href="/@vienna.cafe/video/1234567890123456789">Old clip</a></main>';
   for (const config of [

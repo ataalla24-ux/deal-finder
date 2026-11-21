@@ -4,12 +4,14 @@ import { retryAfterAt } from '../scraper/source-http-policy.js';
 import { observeTikTokSearchRoutes } from '../scraper/tiktok-browser-search.js';
 import { githubRunProvenance } from '../scraper/pipeline-run-report-utils.js';
 
-const previous = JSON.parse(fs.readFileSync('docs/tiktok-scanner-report.json', 'utf8')).apiDiscovery || {};
-const retryAt = Date.parse(previous.nextRetryAt);
-const last = previous.errors?.at(-1);
-const localOnly = last?.status === 0 && last.transportReason === 'request-policy-blocked' && previous.searchRequests === 0;
+const previous = JSON.parse(fs.readFileSync('docs/tiktok-scanner-report.json', 'utf8'));
+const retryAt = Math.max(
+  Date.parse(previous.apiDiscovery?.nextRetryAt) || 0,
+  Date.parse(previous.apiDiscovery?.postVisitStop?.retryAt) || 0,
+  Date.parse(previous.searchDiscovery?.postVisitStop?.retryAt) || 0,
+);
 let routes = null;
-if (localOnly || !(retryAt > Date.now())) {
+if (retryAt <= Date.now()) {
   const browser = await chromium.launch({ headless: true });
   try {
     const page = await browser.newPage({ locale: 'de-AT', timezoneId: 'Europe/Vienna', serviceWorkers: 'block' });
@@ -23,7 +25,7 @@ if (routes?.refusal) {
 }
 const report = {
   checkedAt: new Date().toISOString(), provenance: githubRunProvenance(),
-  recordedSearchRetryAt: previous.nextRetryAt || '', status: routes ? 'routes-observed' : 'cooldown',
+  recordedSearchRetryAt: retryAt ? new Date(retryAt).toISOString() : '', status: routes ? 'routes-observed' : 'cooldown',
   routes,
 };
 fs.mkdirSync('output/social-discovery', { recursive: true });

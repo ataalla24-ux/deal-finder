@@ -89,15 +89,24 @@ export async function observeTikTokSearchRoutes(page, keyword, { waitMs = 6000 }
   };
 }
 
+function responseMediaClass(contentType) {
+  const media = contentType?.split(';', 1)[0].trim().toLowerCase();
+  if (!media) return 'absent';
+  if (media === 'application/json' || media.endsWith('+json')) return 'json';
+  if (media === 'text/html' || media === 'application/xhtml+xml') return 'html';
+  return 'other';
+}
+
 // Let the public search page create its own requests. Signatures and credentials
 // belong to the browser, and a refusal ends the scan.
 export async function createTikTokBrowserSearch(page, { pages = 3, count = 30, timeoutMs = 12000 } = {}) {
   let keyword = '', requests = 0, resultsBlocked = 0, auxiliaryBlocked = 0, unknownBlocked = 0, closed = false, generation = 0;
   let waiting = null;
+  let acceptSearchRequests = false;
   const responses = [];
   const admitted = new Set();
   const stats = { transport: 'public-browser-search', navigations: 0, searchRequests: 0, blockedExtraRequests: 0,
-    blockedRequestReasons: {}, observedSearchEndpoints: {}, observedSearchPaths: {} };
+    blockedRequestReasons: {}, observedSearchEndpoints: {}, observedSearchPaths: {}, lastSearchResponse: null };
   const publicVideoLinks = [];
   const unavailable = (status = 0, retryAfter = '', transportReason = 'response-unavailable') => ({ ok: false, status, retryAfter, transportReason });
   const deliver = value => {
@@ -122,6 +131,7 @@ export async function createTikTokBrowserSearch(page, { pages = 3, count = 30, t
     else if (!isGeneralFull) reason = 'unexpected-endpoint';
     else if (shape.method !== 'GET' || shape.resource === 'other') reason = 'unexpected-transport';
     else if (shape.keyword !== 'match' || url.searchParams.getAll('keyword').length !== 1) reason = 'keyword-mismatch';
+    else if (!acceptSearchRequests) reason = 'response-stopped';
     else if (requests >= pages) reason = 'request-cap';
     else if (shape.count !== 'within-cap' || url.searchParams.getAll('count').length !== 1) reason = 'count-cap';
 
@@ -143,24 +153,59 @@ export async function createTikTokBrowserSearch(page, { pages = 3, count = 30, t
     if (!admitted.delete(response.request())) return;
     const responseGeneration = generation;
     let result;
+    let retryAfter = null;
+    const evidence = {
+      status: response.status(), content: 'absent', declaredBytes: null, decodedBytes: null,
+      fromServiceWorker: response.fromServiceWorker(), retryAfterProvided: null, bodyState: 'read-failed',
+    };
     try {
-      const status = response.status();
-      const retryAfter = await response.headerValue('retry-after');
-      if (!response.ok()) result = unavailable(status, retryAfter, 'response-http-error');
-      else if ((await response.headerValue('content-length')) === '0') result = unavailable(status, retryAfter, 'empty-response');
-      else {
-        const text = await response.text();
-        if (!text || text.length > 4_000_000) result = unavailable(status, retryAfter, text ? 'response-too-large' : 'empty-response');
-        else {
-          try { result = { ok: true, status, body: JSON.parse(text) }; }
-          catch { result = unavailable(status, retryAfter, 'non-json-response'); }
+      retryAfter = await response.headerValue('retry-after');
+      evidence.retryAfterProvided = retryAfter !== null;
+      const length = await response.headerValue('content-length');
+      const declaredBytes = Number(length);
+      if (length && /^\d+$/.test(length) && Number.isSafeInteger(declaredBytes)) evidence.declaredBytes = declaredBytes;
+      evidence.content = responseMediaClass(await response.headerValue('content-type'));
+      if (!response.ok()) {
+        evidence.bodyState = 'http-error';
+        result = unavailable(evidence.status, retryAfter, 'response-http-error');
+      } else if (evidence.declaredBytes === 0) {
+        evidence.bodyState = 'declared-empty';
+        result = unavailable(evidence.status, retryAfter, 'empty-response');
+      } else if (evidence.declaredBytes > 4_000_000) {
+        evidence.bodyState = 'too-large';
+        result = unavailable(evidence.status, retryAfter, 'response-too-large');
+      } else {
+        const bytes = await response.body();
+        evidence.decodedBytes = bytes.length;
+        if (!bytes.length) {
+          evidence.bodyState = 'decoded-empty';
+          result = unavailable(evidence.status, retryAfter, 'empty-response');
+        } else if (bytes.length > 4_000_000) {
+          evidence.bodyState = 'too-large';
+          result = unavailable(evidence.status, retryAfter, 'response-too-large');
+        } else {
+          try {
+            result = { ok: true, status: evidence.status, body: JSON.parse(bytes.toString('utf8')) };
+            evidence.bodyState = 'json';
+          } catch {
+            evidence.bodyState = 'non-json';
+            result = unavailable(evidence.status, retryAfter, 'non-json-response');
+          }
         }
       }
-    } catch { result = unavailable(response.status(), '', 'response-read-failed'); }
-    if (responseGeneration === generation) deliver(result);
+    } catch {
+      result = unavailable(evidence.status, retryAfter, 'response-read-failed');
+    }
+    if (responseGeneration === generation) {
+      stats.lastSearchResponse = evidence;
+      if (!result.ok) acceptSearchRequests = false;
+      deliver(result);
+    }
   };
   const onFailed = request => {
-    if (admitted.delete(request)) deliver(unavailable(0, '', 'request-failed'));
+    if (!admitted.delete(request)) return;
+    acceptSearchRequests = false;
+    deliver(unavailable(0, '', 'request-failed'));
   };
   await page.route(routePattern, route);
   page.on('response', onResponse);
@@ -173,6 +218,7 @@ export async function createTikTokBrowserSearch(page, { pages = 3, count = 30, t
       if (offset === 0) {
         generation++;
         keyword = nextKeyword;
+        acceptSearchRequests = true;
         requests = 0;
         resultsBlocked = 0;
         auxiliaryBlocked = 0;
@@ -205,12 +251,16 @@ export async function createTikTokBrowserSearch(page, { pages = 3, count = 30, t
           await page.evaluate(() => window.scrollTo(0, document.body.scrollHeight));
         }
         const result = await responsePromise;
-        if (offset === 0 && requests === 0 && ['request-policy-blocked', 'no-search-request',
-          'unrecognized-search-request', 'ancillary-search-only'].includes(result.transportReason)) {
+        if (!result.ok) acceptSearchRequests = false;
+        const noResultRequest = requests === 0 && ['request-policy-blocked', 'no-search-request',
+          'unrecognized-search-request', 'ancillary-search-only'].includes(result.transportReason);
+        const emptyOk = result.status === 200 && result.transportReason === 'empty-response' && result.retryAfter === null;
+        if (offset === 0 && (noResultRequest || emptyOk)) {
+          if (emptyOk) await page.waitForTimeout(650);
           const refusal = await tikTokAccessRefusal(page);
           if (refusal) return { ok: false, ...refusal };
-          // Read the already-visible results from the successful public page.
-          // The missing API response and its cooldown remain in the report.
+          // Read only links rendered by the same public page; the search
+          // failure and its cooldown still apply to subsequent collection.
           publicVideoLinks.push(...await visiblePublicVideoLinks(page, keyword, Math.min(count, 30)));
         }
         return result;
