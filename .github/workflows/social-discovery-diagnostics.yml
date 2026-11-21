@@ -3,9 +3,9 @@ on:
   workflow_dispatch:
     inputs:
       lane:
-        description: Public TikTok search or the authenticated Instagram profile read
+        description: TikTok search, Instagram profile read, or one Instagram public search query
         type: choice
-        options: [tiktok, instagram]
+        options: [tiktok, instagram, instagram-search]
         default: tiktok
 permissions:
   contents: read
@@ -63,4 +63,37 @@ jobs:
         with:
           name: instagram-web-diagnostics
           path: output/social-discovery/instagram-web.json
+          retention-days: 7
+
+  instagram-search:
+    if: ${{ inputs.lane == 'instagram-search' }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 6
+    concurrency:
+      group: instagram-ai-scan
+      cancel-in-progress: false
+    permissions:
+      contents: write
+    env:
+      SENTRY_DISABLED: '1'
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+      - run: npm ci --no-audit --no-fund
+      - name: Search once and verify up to three previously unknown links
+        id: search
+        run: node scripts/check-instagram-search-discovery.mjs
+      - name: Persist the result of the real attempt
+        if: ${{ always() && steps.search.outputs.attempted == 'true' }}
+        run: node scripts/commit-generated.mjs --message "Record bounded Instagram search retry [skip ci]" --files docs/instagram-ai-report.json
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: instagram-search-diagnostics
+          path: output/social-discovery/instagram-search.json
           retention-days: 7

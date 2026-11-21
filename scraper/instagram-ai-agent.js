@@ -634,7 +634,7 @@ function addCandidate(map, candidate) {
   return true;
 }
 
-async function searchDuckDuckGo(query) {
+export async function searchDuckDuckGo(query) {
   const url = `https://html.duckduckgo.com/html/?q=${encodeURIComponent(query)}`;
   const response = await fetch(url, {
     signal: AbortSignal.timeout(12000),
@@ -2468,7 +2468,7 @@ async function discoverCandidates(accounts, knownPosts) {
   stats.searchSchedule = {
     attemptedQueries: searched.attemptedQueries, stoppedReason: searched.stoppedReason,
     nextRetryAt: searched.nextRetryAt, lastAttemptAt: searched.lastAttemptAt,
-    nextQueryIndex: searched.nextQueryIndex,
+    nextQueryIndex: searched.nextQueryIndex, boundedRetry: searched.boundedRetry,
   };
   return finish();
 }
