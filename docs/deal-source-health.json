@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-11-21T13:30:46.666Z",
+  "generatedAt": "2026-11-21T13:34:36.611Z",
   "discoveryAvailability": {
     "note": "Transport evidence, not deal yield. Retry eligibility is not recovery. Candidate counts are not Slack deliveries. No extra runs or quota resets.",
     "lanes": [
@@ -54,9 +54,9 @@
   },
   "summary": {
     "filesConsidered": 32,
-    "totalCandidates": 684,
-    "uniqueCandidates": 644,
-    "distinctCandidates": 660,
+    "totalCandidates": 646,
+    "uniqueCandidates": 606,
+    "distinctCandidates": 622,
     "duplicateClusters": 16,
     "topHealthySources": [
       {
@@ -131,13 +131,6 @@
         "fresh1dCount": 0
       },
       {
-        "sourceKey": "vienna-promo-radar",
-        "sourceLabel": "Vienna Promo Radar",
-        "coverageScore": 56,
-        "totalDeals": 105,
-        "fresh1dCount": 0
-      },
-      {
         "sourceKey": "meta-instagram",
         "sourceLabel": "Meta Instagram Graph",
         "coverageScore": 54,
@@ -150,6 +143,13 @@
         "coverageScore": 41,
         "totalDeals": 37,
         "fresh1dCount": 37
+      },
+      {
+        "sourceKey": "vienna-promo-radar",
+        "sourceLabel": "Vienna Promo Radar",
+        "coverageScore": 37,
+        "totalDeals": 67,
+        "fresh1dCount": 0
       },
       {
         "sourceKey": "firecrawl4",
@@ -1108,9 +1108,9 @@
       ],
       "lastRun": {
         "status": "completed-with-errors",
-        "startedAt": "2026-11-20T14:08:50.143Z",
-        "finishedAt": "2026-11-20T14:09:14.082Z",
-        "durationMs": 23939,
+        "startedAt": "2026-11-21T13:32:51.386Z",
+        "finishedAt": "2026-11-21T13:33:18.154Z",
+        "durationMs": 26768,
         "counts": {
           "rawCandidates": 9,
           "normalizedCandidates": 9,
@@ -1477,86 +1477,6 @@
       "sourceWeightScore": 33
     },
     {
-      "sourceKey": "vienna-promo-radar",
-      "file": "deals-pending-vienna-promo-radar.json",
-      "sourceLabel": "Vienna Promo Radar",
-      "totalDeals": 105,
-      "uniqueDeals": 105,
-      "duplicateDeals": 0,
-      "duplicateAcrossSources": 0,
-      "fresh1dCount": 0,
-      "fresh7dCount": 10,
-      "viennaCount": 0,
-      "foodDrinkCount": 70,
-      "promoCount": 24,
-      "missingUrlCount": 0,
-      "sampleTitles": [
-        "GRATIS: Prada-Pop-up in Wien: Diese Gratis-Goodies gibt es für Besucher",
-        "GRATIS: Gratis-Kaffee bei AÏDA: Dieses Kennwort macht’s möglich",
-        "GRATIS: Große Öffi-Aktion – Klimaticket um nur 33 € und 20.000 Gratis-Tageskarten"
-      ],
-      "lastRun": null,
-      "uniqueRate": 1,
-      "duplicateRate": 0,
-      "fresh1dRate": 0,
-      "fresh7dRate": 0.1,
-      "viennaRate": 0,
-      "foodDrinkRate": 0.7,
-      "promoRate": 0.2,
-      "missingUrlRate": 0,
-      "averageQualityScore": 38.9,
-      "topCategories": [
-        {
-          "value": "essen",
-          "count": 50
-        },
-        {
-          "value": "kaffee",
-          "count": 19
-        },
-        {
-          "value": "reisen",
-          "count": 11
-        },
-        {
-          "value": "fitness",
-          "count": 10
-        },
-        {
-          "value": "shopping",
-          "count": 9
-        },
-        {
-          "value": "technik",
-          "count": 3
-        }
-      ],
-      "topTypes": [
-        {
-          "value": "rabatt",
-          "count": 81
-        },
-        {
-          "value": "gratis",
-          "count": 23
-        },
-        {
-          "value": "freebie",
-          "count": 1
-        }
-      ],
-      "issues": [
-        "wenige Deals sind frischer als 1 Tag",
-        "wenige klare Gratis-/Promo-Signale",
-        "Wien-Signal ist zu schwach"
-      ],
-      "healthScore": 45,
-      "missionFitScore": 30,
-      "coverageScore": 56,
-      "precisionScore": 35,
-      "sourceWeightScore": 40
-    },
-    {
       "sourceKey": "gemeinde",
       "file": "deals-pending-gemeinde.json",
       "sourceLabel": "Kirchen Verzeichnis",
@@ -1711,6 +1631,86 @@
       "coverageScore": 19,
       "precisionScore": 36,
       "sourceWeightScore": 32
+    },
+    {
+      "sourceKey": "vienna-promo-radar",
+      "file": "deals-pending-vienna-promo-radar.json",
+      "sourceLabel": "Vienna Promo Radar",
+      "totalDeals": 67,
+      "uniqueDeals": 67,
+      "duplicateDeals": 0,
+      "duplicateAcrossSources": 0,
+      "fresh1dCount": 0,
+      "fresh7dCount": 4,
+      "viennaCount": 0,
+      "foodDrinkCount": 31,
+      "promoCount": 23,
+      "missingUrlCount": 0,
+      "sampleTitles": [
+        "GRATIS: Gratis-Getränk-Aktion: Starbucks eröffnet neuen Standort in Wien",
+        "GRATIS: Prada-Pop-up in Wien: Diese Gratis-Goodies gibt es für Besucher",
+        "GRATIS: Gratis-Kaffee bei AÏDA: Dieses Kennwort macht’s möglich"
+      ],
+      "lastRun": null,
+      "uniqueRate": 1,
+      "duplicateRate": 0,
+      "fresh1dRate": 0,
+      "fresh7dRate": 0.1,
+      "viennaRate": 0,
+      "foodDrinkRate": 0.5,
+      "promoRate": 0.3,
+      "missingUrlRate": 0,
+      "averageQualityScore": 46.3,
+      "topCategories": [
+        {
+          "value": "kaffee",
+          "count": 17
+        },
+        {
+          "value": "essen",
+          "count": 13
+        },
+        {
+          "value": "reisen",
+          "count": 11
+        },
+        {
+          "value": "fitness",
+          "count": 10
+        },
+        {
+          "value": "shopping",
+          "count": 9
+        },
+        {
+          "value": "technik",
+          "count": 4
+        }
+      ],
+      "topTypes": [
+        {
+          "value": "rabatt",
+          "count": 45
+        },
+        {
+          "value": "gratis",
+          "count": 20
+        },
+        {
+          "value": "freebie",
+          "count": 2
+        }
+      ],
+      "issues": [
+        "wenige Deals sind frischer als 1 Tag",
+        "wenige klare Gratis-/Promo-Signale",
+        "Wien-Signal ist zu schwach"
+      ],
+      "healthScore": 43,
+      "missionFitScore": 26,
+      "coverageScore": 37,
+      "precisionScore": 33,
+      "sourceWeightScore": 34
     },
     {
       "sourceKey": "events",
