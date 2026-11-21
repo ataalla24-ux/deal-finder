@@ -11,11 +11,12 @@ import {
 import { isAllowedFoodUrl } from "./power-food-sources.js";
 
 const FOOD =
-  /weckerl|laugenring|mohnschnecke|baguette|dinkel|kornspitz|kaffee|coffee|cappuccino|espresso|melange|matcha|tee\b|kakao|heißgetränk|heissgetraenk|mocktail|cocktail|drink|spritz|bier|beer|wein|limonade|getränk|burger|pizza|pasta|spaghetti|\bsteak\b|pommes|fries|kebab|kebap|döner|doener|schnitzel|hot.?dog|frühstück|breakfast|jause|brot|br[eö]t|breze|gebäck|semmel|knopferl|topfini|croissant|kuchen|strudel|dessert|eis\b|menü|menu|gericht|hauptspeise|teller|bällchen|waffel|sandwich|falafel|sushi|ramen|fish|fisch|backfisch|lachs|schollen|garnelen|chicken|backhuhn|backhendl|snack|minis\s*xxl|schoko/i;
+  /weckerl|laugenring|mohnschnecke|baguette|dinkel|kornspitz|kaffee|coffee|cappuccino|espresso|melange|matcha|tee\b|kakao|heißgetränk|heissgetraenk|mocktail|cocktail|drink|spritz|bier|beer|wein|limonade|getränk|burger|pizza|pasta|spaghetti|\bsteak\b|pommes|fries|kebab|kebap|döner|doener|schnitzel|hot.?dog|frühstück|breakfast|jause|brot|br[eö]t|breze|gebäck|semmel|knopferl|topfini|croissant|kuchen|strudel|dessert|eis\b|menü|menu|gericht|hauptspeise|teller|bällchen|waffel|sandwich|falafel|sushi|ramen|fish|fisch|backfisch|lachs|schollen|garnelen|chicken|backhuhn|backhendl|snack|minis\s*xxl|schoko|mozartkugel|trüffel|süßwaren|kostprobe|verkostung|mittagsangebot|bowl|cola/i;
+export { FOOD as FOOD_PRODUCT };
 const PRICE =
   /(?:€\s*\d{1,3}(?:[,.]\d{1,2})?|\d{1,3}(?:[,.]\d{1,2})?\s*(?:€|EUR\b|Euro\b))/i;
 const BENEFIT =
-  /(?:-\s*\d+\s*%|\d+\s*%\s*(?:rabatt|sparen|günstiger|off|discount))|\d+\s*\+\s*\d+|\b2\s*(?:für|for)\s*1\b|\b(?:gratis|kostenlos|geschenkt|statt|rabatt|discount)\b/i;
+  /(?:-\s*\d+\s*%|\d+\s*%\s*(?:rabatt|sparen|günstiger|off|discount))|\d+\s*\+\s*\d+|\b2\s*(?:für|for)\s*1\b|\b(?:gratis|kostenlos|geschenkt|statt|rabatt|discount)\b|\bkostenlos(?:e[rmns]?)?\s+(?:verkostung(?:en)?|kostproben?)\b/i;
 const PROMO =
   /aktion|angebot|special|happy\s*hour|vappy\s*hour|sonderpreis|vorteilspreis|aktionspreis|preiskracher|deal[- ]preis|kombiaktion|kaffeejause|bäckerjause/i;
 const VIENNA = /\bwien\b|\bvienna\b|\b1(?:0[1-9]|1[0-9]|2[0-3])0\b/i;

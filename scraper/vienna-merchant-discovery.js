@@ -61,7 +61,7 @@ export function extractMerchantLinks(html, pageUrl) {
       const url = new URL($(element).attr('href'), pageUrl);
       const handle = ['www.instagram.com', 'instagram.com'].includes(url.hostname) ? instagramHandle(url.href) : '';
       if (handle) handles.add(handle);
-      if (url.origin === new URL(pageUrl).origin && /aktion|angebot|happy.hour|coupon|special/i.test(url.pathname) && merchantWebsite(url.href)) offers.add(url.href);
+      if (url.origin === new URL(pageUrl).origin && /aktion|angebot|happy.hour|coupon|special|(?:^|\/)offers?(?:\/|$)/i.test(url.pathname) && merchantWebsite(url.href)) offers.add(url.href);
     } catch {}
   });
   return { handles: [...handles], offerUrls: [...offers].slice(0, 10) };

@@ -4,7 +4,7 @@ import os from 'node:os';
 import path from 'node:path';
 import { buildMerchantDirectory, discoveryAccounts, extractMerchantLinks, instagramHandle, merchantWebsite, selectDiscoveryAccounts } from '../scraper/vienna-merchant-discovery.js';
 import { publicIPv4, robotsAllowsDiscovery, runDiscovery } from './discover-vienna-merchants.mjs';
-import { canonicalHomepageUrl, isMerchantWebsiteReview } from '../scraper/merchant-offer-discovery.js';
+import { curatedMerchantTask, canonicalHomepageUrl, currentMerchantCandidates, extractMerchantOfferCandidates, isMerchantWebsiteReview } from '../scraper/merchant-offer-discovery.js';
 import { buildConfig, loadAccountCatalog } from '../scraper/meta-instagram-deals.js';
 
 const now = new Date();
@@ -64,7 +64,7 @@ const homeFiles = {
   'reviews/vienna-merchant-directory.json': { generatedAt: homeNow.toISOString(), merchants: [homeMerchant] },
 };
 const homeRequests = [];
-const homeReport = await runDiscovery({ now: homeNow, read: (file, fallback) => homeFiles[file] || fallback,
+const homeReport = await runDiscovery({ curatedPages: [], now: homeNow, read: (file, fallback) => homeFiles[file] || fallback,
   save: (file, data) => { homeFiles[file] = data; }, wait: async () => {}, log: () => {},
   fetchImpl: async () => { throw new Error('No directory refresh in homepage fixture'); },
   fetchPage: async url => {
@@ -113,7 +113,7 @@ async function revisitHomepage({ at, body = '', responseStatus = 200, finalUrl =
   files['reviews/vienna-merchant-directory.json'] = { generatedAt: visitTime.toISOString(),
     merchants: directoryMerchants || [{ ...homeMerchant, observedAt: visitTime.toISOString() }] };
   if (powerReport) files['docs/power-scraper-report.json'] = powerReport;
-  const report = await runDiscovery({ now: visitTime, read: (file, fallback) => files[file] || fallback,
+  const report = await runDiscovery({ curatedPages: [], now: visitTime, read: (file, fallback) => files[file] || fallback,
     save: (file, data) => { files[file] = data; }, wait: async () => {}, log: () => {},
     fetchImpl: async () => { throw new Error('No external request'); },
     fetchPage: async url => {
@@ -150,4 +150,85 @@ assert.equal(powerPausedHome.requests.length, 0, 'the homepage must respect the 
 const ambiguousHome = await revisitHomepage({ body: '<h2>20 % Rabatt auf Pizza</h2><p>In Wien bis 30.12.2026.</p>',
   directoryMerchants: [homeMerchant, { ...homeMerchant, name: 'Different Mall Restaurant' }] });
 assert.equal(ambiguousHome.deals.length, 0, 'a shared domain does not establish which restaurant offers the benefit');
-console.log('Vienna merchant discovery: safety, deduplication, rotation and catalog isolation passed');
+
+// Real examples from the merchant outbox, checked at intake and on cache replay.
+const offerTask = { url: homeUrl + 'angebote', merchant: homeMerchant };
+const merchantRows = text => extractMerchantOfferCandidates('<article><p>' + text + '</p></article>', offerTask, homeNow);
+for (const text of [
+  'Zu eurem Kaffee oder Kuchen gibt es bei uns immer ein fröhliches Lächeln und ein paar nette Worte gratis dazu!',
+  'Von Hand gemacht. Von Herzen geschenkt. Honiglebkuchen und Schokolade aus unserem Familienbetrieb.',
+  'Bis zu 15 % Rabatt, Early Check-in und Late Check-out. Im Café & Restaurant gibt es Kaffee.',
+  'Burger für 12 Euro. Kostenloser Newsletter und aktuelle Angebote per E-Mail.',
+  'Gratis WLAN beim Kauf von Kaffee und Croissants.',
+  'Der zweite Kaffee ist nicht gratis, auch beim Kauf von Mehlspeisen.',
+]) {
+  assert.equal(merchantRows(text).length, 0, text);
+  const cached = { ...homeDeals[0], title: text, description: text,
+    evidence: { ...homeDeals[0].evidence, textSample: text } };
+  assert.equal(isMerchantWebsiteReview(cached, homeNow), false, text);
+  assert.equal(currentMerchantCandidates({ old: { status: 'ok', checkedAt: homeNow.toISOString(),
+    deals: [cached] } }, homeNow).length, 0, text);
+}
+const omnom = 'Genieße eine besondere Aktion im Restaurant: Bei jeder Bestellung eines Burgers oder einer Bowl zusammen mit einer Beilage gibt es ein 0,3l Omnom Lager oder eine 0,3l Kräuterlimonade gratis dazu.';
+const omnomRows = merchantRows(omnom);
+assert.equal(omnomRows.length, 1);
+assert.doesNotMatch(omnomRows[0].title, /Details ansehen/);
+assert.match(omnomRows[0].title, /Beilage.*Kräuterlimonade gratis/);
+assert.equal(omnomRows[0].evidence.textSample, omnom);
+assert.equal(merchantRows('Jeden Sonntag gibt es unser Kindermenü für nur 5,90 statt 10,90.').length, 1);
+assert.equal(merchantRows('Jede Pizza/Pasta NUR € 9,50 + 0,33L Dose Cola GRATIS').length, 1);
+
+const sweetsUrl = 'https://viennasweets.com/de/offers';
+const sweetsTask = curatedMerchantTask(sweetsUrl);
+assert.equal(curatedMerchantTask(sweetsUrl + '?other'), null);
+assert.equal(curatedMerchantTask(sweetsUrl.replace('viennasweets.com', 'other.example')), null);
+const sweetsPage = '<main><section class="v_intro"><span class="v_eyebrow">Aktuelle Angebote</span></section>' +
+  '<section class="v_offers"><article><span>3+1</span><h2>3+1 Gratis Aktion</h2><p>Gönnen Sie sich eine Auszeit im Herzen von Wien!</p>' +
+  '<p>Genießen Sie handgemachte Mozartkugeln, Trüffel, karamellisierte Mandeln, fruchtige Gelees und Salzkaramell — und erhalten Sie 3+1 GRATIS auf ausgewählte Produkte.</p>' +
+  '<p>* Nur solange der Vorrat reicht!</p></article><ul><li><h2>Kostenlose Verkostung täglich</h2><p>Kostenlose Verkostungen täglich</p>' +
+  '<p>Entdecken Sie österreichische Süßwaren, Schokoladen und Geschenke – und genießen Sie kostenlose Kostproben bei Ihrem Besuch in unserem Geschäft.</p></li></ul></section>' +
+  '<section><h2>Unser Geschäft am Neuer Markt</h2></section></main><footer><address>Neuer Markt 8a, 1010 Wien</address></footer>';
+const sweetsOffers = extractMerchantOfferCandidates(sweetsPage, sweetsTask, homeNow);
+assert.equal(sweetsOffers.length, 2, 'independent tasting and conditional purchase');
+assert.equal(sweetsOffers[0].title, '3+1 gratis auf ausgewählte Süßwaren');
+assert.match(sweetsOffers[0].description, /ausgewählte Produkte.*solange der Vorrat reicht/);
+assert.deepEqual(sweetsOffers.map(o => [o.type, o.evidence.contentHash]), [
+  ['bogo', '5b474e48aca956cecff534fdc0c03c6d96d67195ab2a970e3d3bee8eb5946de0'],
+  ['gratis', '3ad9e85f81c65081761bc2530481cace39936d737e7687d1361a5e3a9b0445eb'],
+]);
+assert.ok(sweetsOffers.every(o => o.address === 'Neuer Markt 8a, 1010 Wien' && o.evidence.locationEvidenceUrl === sweetsUrl
+  && o.evidence.sourceUrl === sweetsUrl && !o.validUntil && o.reviewRequired && isMerchantWebsiteReview(o, homeNow)));
+for (const [before, after, count] of [
+  ['<article>', '<article hidden>', 1], ['<article>', '<article style="display: none">', 1],
+  ['<li>', '<li aria-hidden="true">', 1], ['<li>', '<li class="expired">', 1],
+  ['3+1 Gratis Aktion', '3+1 Gratis Aktion – vergriffen', 1],
+  ['3+1 Gratis Aktion', '3+1 Gratis Aktion bis 01.11.2026', 1],
+  ['class="v_offers"', 'class="v_offers" hidden', 0], ['Aktuelle Angebote', 'Archiv', 0],
+  ['<article>', '<p>Derzeit keine aktuellen Angebote</p><article>', 0],
+  ['<main>', '<main><p>Die Aktion wurde abgesagt.</p>', 0],
+  ['Neuer Markt 8a, 1010 Wien', 'Anderer Standort in Wien', 0],
+]) assert.equal(extractMerchantOfferCandidates(sweetsPage.replace(before, after), sweetsTask, homeNow).length, count, after);
+assert.equal(extractMerchantOfferCandidates(sweetsPage, { ...sweetsTask, url: 'https://viennasweets.com/de/andere-angebote' }, homeNow).length, 0);
+const curatedFiles = { 'reviews/vienna-merchant-directory.json': { generatedAt: homeNow.toISOString(), merchants: [{...homeMerchant, website: ''}] } };
+async function runCurated() {
+  const requests = [];
+  const report = await runDiscovery({ now: homeNow, read: (f, fallback) => curatedFiles[f] || fallback, save: (f,v) => { curatedFiles[f] = v; },
+    wait: async () => {}, log: () => {}, fetchImpl: async () => { throw new Error('Unexpected Overpass request'); },
+    fetchPage: async (url, _hops, origin) => {
+      requests.push(url);
+      if (url.endsWith('/robots.txt')) return { status: 200, body: 'User-agent: *\nAllow: /', headers: {} };
+      assert.equal(origin, 'https://viennasweets.com');
+      return { url, status: 200, body: sweetsPage, headers: { 'content-type': 'text/html' } };
+    } });
+  return {requests, report};
+}
+const firstCurated = await runCurated();
+assert.deepEqual(firstCurated.requests, ['https://viennasweets.com/robots.txt', sweetsUrl]);
+assert.equal(firstCurated.report.totalPageSlotsUsed, 1);
+assert.equal(firstCurated.report.offerPageCandidatesThisRun, 2);
+assert.equal((await runCurated()).requests.length, 0, 'honour existing seven-day cooldown and reuse unchanged cards');
+delete curatedFiles['reviews/vienna-merchant-offer-state.json'][sweetsUrl];
+curatedFiles['reviews/vienna-merchant-website-state.json'] = { [sweetsTask.merchant.website]: {
+  status: 'deferred', httpStatus: 429, checkedAt: homeNow.toISOString() } };
+assert.equal((await runCurated()).requests.length, 0, 'curated pages honour host restrictions');
+console.log('Vienna merchant discovery: directory safety, product evidence, legacy replay and curated offer checks passed');

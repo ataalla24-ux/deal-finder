@@ -202,7 +202,7 @@ const files = {
   'reviews/vienna-merchant-website-state.json': sites,
 };
 const requests = [];
-const report = await runDiscovery({ now, read: (name, fallback) => files[name] || fallback,
+const report = await runDiscovery({ curatedPages: [], now, read: (name, fallback) => files[name] || fallback,
   save: (name, value) => { files[name] = value; }, wait: async () => {}, log: () => {},
   fetchImpl: async () => { throw new Error('cached directory must not trigger Overpass'); },
   fetchPage: async (url, hops, origin, allowedPath) => {
@@ -219,7 +219,7 @@ assert.equal(report.sitesAttemptedThisRun, 0, 'an offer slot replaces its domain
 assert.equal(requests.length, 2, 'one robots check and one offer page; no paid or media requests');
 assert.equal(files['docs/deals-pending-vienna-websites.json'].deals.length, 2);
 assert.ok(!files['docs/deals.json'], 'collector never publishes to the live app');
-const pausedReport = await runDiscovery({ now: new Date(+now + 8 * 86400000),
+const pausedReport = await runDiscovery({ curatedPages: [], now: new Date(+now + 8 * 86400000),
   read: (name, fallback) => name.endsWith('directory.json') ? { ...files[name], generatedAt: new Date(+now + 8 * 86400000).toISOString() } : files[name] || fallback,
   save: (name, value) => { files[name] = value; }, wait: async () => {}, log: () => {},
   fetchPage: async url => ({ status: 429, body: '', headers: { 'retry-after': '172800' }, url }),
@@ -235,7 +235,7 @@ const cappedFiles = {
   'reviews/vienna-merchant-website-state.json': manySites,
 };
 let cappedRequests = 0;
-const cappedReport = await runDiscovery({ now, read: (name, fallback) => cappedFiles[name] || fallback,
+const cappedReport = await runDiscovery({ curatedPages: [], now, read: (name, fallback) => cappedFiles[name] || fallback,
   save: (name, value) => { cappedFiles[name] = value; }, wait: async () => {}, log: () => {},
   fetchImpl: async () => { throw new Error('no external requests'); },
   fetchPage: async url => {

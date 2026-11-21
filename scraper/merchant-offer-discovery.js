@@ -1,12 +1,55 @@
 import { createHash } from 'node:crypto';
 import { load } from 'cheerio';
 import { merchantWebsite } from './vienna-merchant-discovery.js';
-import { extractFoodOffers } from './power-food-extraction.js';
+import { FOOD_PRODUCT, extractFoodOffers } from './power-food-extraction.js';
 import { discoveryRejection } from './deal-discovery-policy.js';
 
 const DAY = 86400000;
-const OFFER_PATH = /(?:^|[\/\s_.-])(?:aktionen?|aktionsbon|(?:tages|wochen|mittags)?angebote?|specials?|rabatt|deals?)(?=$|[\/\s_.-])|happy[-_\s]?hour|coupon|mittagsaktion|studentenangebot|geburtstagsangebot/i;
+const OFFER_PATH = /(?:^|[\/\s_.-])(?:aktionen?|aktionsbon|(?:tages|wochen|mittags)?angebote?|specials?|offers?|rabatt|deals?)(?=$|[\/\s_.-])|happy[-_\s]?hour|coupon|mittagsaktion|studentenangebot|geburtstagsangebot/i;
 const EXCLUDED_PATH = /(?:^|[\/_.-])(?:jobs?|jobangebote|karriere|careers?|stellen(?:angebote)?|bewerbung|catering|business|b2b|corporate|franchise|presse?|login|account|warenkorb|checkout|veranstaltungen?|reservierung|accessoires|running[-_]club|tee-gastronomie|ch|barcelona|praguex?|teams|kultur|bier)(?=$|[\/_.-])/i;
+
+// Official single-venue offer pages missing from the Vienna directory. These
+// compete for the same rotating slots and never create OSM records or map pins.
+export const CURATED_MERCHANT_PAGES = [{
+  url: 'https://viennasweets.com/de/offers',
+  name: 'Vienna Sweets & Gifts',
+}];
+
+export function curatedMerchantTask(url) {
+  const page = CURATED_MERCHANT_PAGES.find(entry => entry.url === url);
+  return page ? { url, curated: true,
+    merchant: { name: page.name, website: new URL(url).origin + '/', sourceUrl: url } } : null;
+}
+
+const genericTitle = /Angebot\s*[–—-]\s*Details ansehen/i;
+const nonProductBenefit = /(?:nicht|kein(?:e[rmns]?)?)\s+(?:mehr\s+)?(?:gratis|kostenlos|geschenkt|rabatt)|lächeln|nette[nr]? worte|von herzen geschenkt|early[ -]check[ -]in|late[ -]check[ -]out|(?:gratis|kostenlos\w*)\s*(?:wlan|wi-fi|newsletter|versand|parkplatz)|(?:newsletter|wlan|versand)\s+(?:gratis|kostenlos\w*)/i;
+const tangibleBenefit = /\b(?:gratis|kostenlos(?:e[rmns]?)?|geschenkt)\b|\b\d+\s*\+\s*\d+|\b2\s*(?:für|fuer|for)\s*1|\b\d+(?:[.,]\d+)?\s*%\s*(?:rabatt|sparen|ersparnis|günstiger|billiger|discount|off|auf)\b|\b(?:rabatt|ersparnis)\s+(?:von\s+)?\d+\s*%|\d+[.,]?\d*\s*(?:euro|eur|€)?\s*statt\s*(?:€\s*)?\d+|(?:€\s*\d+(?:[.,]\d+)?|\d+(?:[.,]\d+)?\s*(?:euro|€))\s*(?:rabatt|günstiger)|\b(?:aktionspreis|vorteilspreis|sonderpreis)\b.{0,20}(?:\d|€)/i;
+
+function merchantOfferTitle(deal) {
+  const text = deal.evidence?.textSample || '';
+  if (deal.url === 'https://viennasweets.com/de/offers' && deal.title === '3+1 Gratis Aktion'
+    && /Mozartkugeln, Trüffel, karamellisierte Mandeln, fruchtige Gelees und Salzkaramell — und erhalten Sie 3\+1 GRATIS auf ausgewählte Produkte\./.test(text)) {
+    return '3+1 gratis auf ausgewählte Süßwaren';
+  }
+  const usable = clause => typeof clause === 'string' && clause.length <= 180 && !nonProductBenefit.test(clause)
+    && FOOD_PRODUCT.test(clause) && tangibleBenefit.test(clause);
+  // A title without a product or benefit can be a hotel perk or navigation
+  // next to unrelated menu text. Only use a self-contained original clause.
+  if (usable(deal.title) && !genericTitle.test(deal.title)) return deal.title;
+  const clauses = text.split(/(?<=[.!?])\s+|:\s+/);
+  const match = clauses.find(usable);
+  if (match && (!genericTitle.test(deal.title) || text.length <= 400)) return match;
+  // A compact original loyalty card states the purchase and reward in two
+  // sentences. Keep the qualifying condition in the title when present.
+  if (text.length <= 280 && /stempelkarte|bei voller karte/i.test(text) && FOOD_PRODUCT.test(text)) {
+    return clauses.find(clause => clause.length <= 180 && /(?:volle?r?\s+karte|stempelkarte\s+voll)/i.test(clause)
+      && tangibleBenefit.test(clause) && !nonProductBenefit.test(clause)) || '';
+  }
+  if (deal.evidence?.extractionMethod === 'merchant-card' && !genericTitle.test(deal.title)
+    && FOOD_PRODUCT.test(text) && !nonProductBenefit.test(text)
+    && /\bnur\s+€\s*\d/i.test(text) && /Aktionen:/i.test(text)) return deal.title;
+  return '';
+}
 
 function explicitHomepageBenefit(deal) {
   const text = deal.evidence?.textSample || '';
@@ -72,7 +115,7 @@ export function merchantOfferHostPaused(url, state, now, powerReport = {}) {
 }
 
 // Offer pages replace homepage slots; they do not add a second request budget.
-export function selectMerchantOfferPages(directory, websiteState, offerState, now, budget, powerReport = {}) {
+export function selectMerchantOfferPages(directory, websiteState, offerState, now, budget, powerReport = {}, curatedPages = []) {
   const coveredUrls = new Set();
   const blockedHosts = new Set();
   for (const source of powerReport.sources || []) {
@@ -104,7 +147,17 @@ export function selectMerchantOfferPages(directory, websiteState, offerState, no
       byUrl.set(url, { url, merchant, checkedAt: previous?.checkedAt || '' });
     }
   }
-  const ranked = [...byUrl.values()].sort((a, b) => (Date.parse(a.checkedAt) || 0) - (Date.parse(b.checkedAt) || 0) || a.url.localeCompare(b.url));
+  for (const page of curatedPages) {
+    const task = curatedMerchantTask(page.url);
+    if (!task) continue;
+    const url = task.url;
+    if (coveredUrls.has(url) || merchantOfferHostPaused(url, offerState, now, powerReport)
+      || merchantOfferHostPaused(url, websiteState, now)) continue;
+    const previous = offerState[url];
+    if (Date.parse(previous?.retryAt) > +now || Date.parse(previous?.checkedAt) > +now - (previous?.status === 'ok' ? 7 : 14) * DAY) continue;
+    byUrl.set(url, { ...task, checkedAt: previous?.checkedAt || '' });
+  }
+  const ranked = [...byUrl.values()].sort((a, b) => Number(Boolean(b.curated)) - Number(Boolean(a.curated)) || (Date.parse(a.checkedAt) || 0) - (Date.parse(b.checkedAt) || 0) || a.url.localeCompare(b.url));
   const domains = new Set();
   return ranked.filter(row => {
     const host = new URL(row.url).hostname;
@@ -119,9 +172,42 @@ export function extractMerchantOfferCandidates(html, task, now) {
   if (homepage && (!canonicalHomepageUrl(task.url, task.merchant?.website)
     || !(Date.parse(task.merchant?.observedAt) >= +now - 45 * DAY)
     || Date.parse(task.merchant.observedAt) > +now)) return [];
+  if (!homepage && !canonicalOfferUrl(task.url, task.merchant?.website)) return [];
   const source = { name: `merchant-website:${new URL(task.url).hostname}`, brand: task.merchant.name,
     url: task.url, allowedHosts: [new URL(task.url).hostname], category: 'Essen & Trinken' };
   const url = new URL(task.url);
+  if (task.curated && !curatedMerchantTask(task.url)) return [];
+  if (task.url === 'https://viennasweets.com/de/offers') {
+    const $ = load(html);
+    $('template,noscript,[hidden],[inert],[aria-hidden="true"],.hidden,.d-none,.expired,.inactive,.sold-out,[data-status="expired"]').remove();
+    $('[style]').filter((_, el) => /(?:display\s*:\s*none|visibility\s*:\s*hidden)/i.test($(el).attr('style'))).remove();
+    const unavailable = /\b(?:ausverkauft|vergriffen|abgelaufen|beendet|zurückgezogen|abgesagt|pausiert|nicht (?:mehr )?(?:erhältlich|verfügbar|gültig)|keine (?:aktuellen )?(?:angebote|aktionen))\b/i;
+    const spacedText = node => {
+      const copy = node.clone();
+      copy.find('div,span,h1,h2,h3,p,li').prepend(' ').append(' ');
+      return copy.text().replace(/\s+/g, ' ').trim();
+    };
+    const intro = spacedText($('main section[class*="_intro"]').first());
+    if (!$('main section[class*="_intro"] > [class*="_eyebrow"]').toArray().some(el => $(el).text().trim() === 'Aktuelle Angebote')
+      || unavailable.test(intro)) return [];
+    const offerSection = $('main section[class$="_offers"]');
+    if (offerSection.length !== 1) return [];
+    const cards = offerSection.find('article:has(h2),li:has(h2)');
+    cards.each((_, el) => {
+      const card = $(el);
+      if (unavailable.test(spacedText(card))) card.remove();
+    });
+    const pageNotices = $('main').clone();
+    pageNotices.find('section[class$="_offers"] article, section[class$="_offers"] li, script, style').remove();
+    if (unavailable.test(spacedText(pageNotices))) return [];
+    html = $.html();
+    // Bind the single venue to the current offer page, never to a directory entry.
+    if ($('main h2').filter((_, el) => $(el).text().trim() === 'Unser Geschäft am Neuer Markt').length !== 1
+      || $('footer address').text().trim() !== 'Neuer Markt 8a, 1010 Wien') return [];
+    source.selector = 'main section[class$="_offers"] article:has(h2),main section[class$="_offers"] li:has(h2)';
+    source.address = 'Neuer Markt 8a, 1010 Wien';
+    source.locationEvidenceUrl = task.url;
+  }
   if (/^(?:www\.)?schmankerlbraeu\.at$/.test(url.hostname)
     && url.pathname === '/pages/himmlisch-guat_aktionen.html') {
     // This verified single-venue page places unrelated menu-pass teasers beside
@@ -138,18 +224,22 @@ export function extractMerchantOfferCandidates(html, task, now) {
       source.locationEvidenceUrl = task.url;
     }
   }
-  return extractFoodOffers(html, source, { now, pageUrl: task.url }).deals
-    .filter(deal => (!homepage || explicitHomepageBenefit(deal))
-      && !discoveryRejection({ ...deal, originSource: 'vienna-merchant-website' })).map(deal => ({
-    ...deal,
-    id: `merchant-web-${createHash('sha256').update(`${task.url}|${deal.title}${/Angebot.*Details ansehen/.test(deal.title) ? `|${deal.evidence.contentHash}` : ''}`).digest('hex').slice(0, 20)}`,
-    source: 'Offizielle Lokal-Website', originSource: 'vienna-merchant-website',
-    // A Vienna directory address is a lead, not proof of coupon participation.
-    evidence: { ...deal.evidence, directoryLead: { name: task.merchant.name,
-      website: task.merchant.website, address: task.merchant.address, sourceUrl: task.merchant.sourceUrl,
-      observedAt: task.merchant.observedAt }, candidateLane: 'merchant-website-review',
-      ...(homepage ? { discoveryPageKind: 'homepage' } : {}) },
-  }));
+  return extractFoodOffers(html, source, { now, pageUrl: task.url }).deals.flatMap(deal => {
+    const title = merchantOfferTitle(deal);
+    if (!title || (homepage && !explicitHomepageBenefit(deal))
+      || discoveryRejection({ ...deal, title, originSource: 'vienna-merchant-website' })) return [];
+    // Preserve prior IDs even when a vague heading gains a source-backed title.
+    const identity = task.url + '|' + deal.title + (genericTitle.test(deal.title) ? '|' + deal.evidence.contentHash : '');
+    return [{ ...deal, title,
+      id: 'merchant-web-' + createHash('sha256').update(identity).digest('hex').slice(0, 20),
+      source: 'Offizielle Lokal-Website', originSource: 'vienna-merchant-website',
+      evidence: { ...deal.evidence, directoryLead: { name: task.merchant.name,
+        website: task.merchant.website, address: task.merchant.address, sourceUrl: task.merchant.sourceUrl,
+        observedAt: task.merchant.observedAt }, candidateLane: 'merchant-website-review',
+        ...(task.curated ? { merchantLeadSource: 'official-offer-page' } : {}),
+        ...(homepage ? { discoveryPageKind: 'homepage' } : {}) },
+    }];
+  });
 }
 
 export function currentMerchantCandidates(state, now, websiteState = {}) {
@@ -159,7 +249,10 @@ export function currentMerchantCandidates(state, now, websiteState = {}) {
   return [...Object.values(state).filter(fresh).flatMap(row => row.deals || []),
     ...Object.values(websiteState).filter(fresh).flatMap(row => row.homepageDeals || [])
       .filter(deal => deal.evidence?.discoveryPageKind === 'homepage' && isMerchantWebsiteReview(deal, now))]
-    .filter(deal => !discoveryRejection(deal))
+    .flatMap(deal => {
+      const title = merchantOfferTitle(deal);
+      return title && !discoveryRejection(deal) ? [{ ...deal, title }] : [];
+    })
     .filter(deal => /^\d{4}-\d{2}-\d{2}$/.test(deal.validUntil || '')
       ? deal.validUntil >= today
       : !Number.isFinite(Date.parse(deal.validUntil)) || Date.parse(deal.validUntil) >= +now);
@@ -170,7 +263,7 @@ export function isMerchantWebsiteReview(deal, now = new Date()) {
   const checked = Date.parse(evidence?.checkedAt);
   return deal?.originSource === 'vienna-merchant-website'
     && evidence?.source === 'official-merchant-page'
-    && evidence?.candidateLane === 'merchant-website-review'
+    && evidence?.candidateLane === 'merchant-website-review' && Boolean(merchantOfferTitle(deal))
     && Number.isFinite(checked) && checked <= +now && checked >= +now - 8 * DAY
     && Boolean(evidence?.discoveryPageKind === 'homepage'
       ? explicitHomepageBenefit(deal) && canonicalHomepageUrl(deal.url, evidence?.directoryLead?.website)

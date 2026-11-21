@@ -5,7 +5,7 @@ import robotsParser from 'robots-parser';
 import { resolve4 } from 'node:dns/promises';
 import { fileURLToPath } from 'node:url';
 import { VIENNA_FOOD_QUERY, buildMerchantDirectory, discoveryAccounts, extractMerchantLinks, merchantWebsite } from '../scraper/vienna-merchant-discovery.js';
-import { selectMerchantOfferPages, extractMerchantOfferCandidates, currentMerchantCandidates, merchantOfferHostPaused } from '../scraper/merchant-offer-discovery.js';
+import { CURATED_MERCHANT_PAGES, selectMerchantOfferPages, extractMerchantOfferCandidates, currentMerchantCandidates, merchantOfferHostPaused } from '../scraper/merchant-offer-discovery.js';
 import { sourceHttpError, sourceFailureFields } from '../scraper/source-http-policy.js';
 import { githubRunProvenance } from '../scraper/pipeline-run-report-utils.js';
 
@@ -86,7 +86,7 @@ export async function runDiscovery(options = {}) {
       homepageMerchants.set(merchant.website, null);
   }
   const budget = Math.max(0, Math.min(500, Number(process.env.VIENNA_WEBSITE_BUDGET ?? 200) || 0));
-  const offerTasks = selectMerchantOfferPages(directory, state, offerState, now, budget, powerReport);
+  const offerTasks = selectMerchantOfferPages(directory, state, offerState, now, budget, powerReport, options.curatedPages ?? CURATED_MERCHANT_PAGES);
   const sites = [...new Set(directory.merchants.map(m => m.website).filter(Boolean))]
     .filter(url => !merchantOfferHostPaused(url, offerState, now, powerReport)
       && !merchantOfferHostPaused(url, state, now))
