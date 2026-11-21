@@ -149,10 +149,16 @@ export function creditSnapshot(ledger, policy, now = new Date()) {
   const sum = values => Number(values.reduce((total,r) => total + r.usd, 0).toFixed(6));
   const exposed = creditPeriodExposure(all, policy.periodId);
   const astra = exposed.filter(r => r.profile === 'astra-deal-enrichment');
-  const astraOpen = isAstraEnrichmentActive({ enabled: true, now: +now, policy });
+  const pausedUntil = ledger.pausedUntil;
+  const pauseKnown = Number.isFinite(pausedUntil) && Number.isFinite(+new Date(pausedUntil));
+  const sharedPauseUntil = pauseKnown && pausedUntil > +now ? new Date(pausedUntil).toISOString() : null;
+  const astraOpen = pauseKnown && !sharedPauseUntil
+    && !(ledger.astraPausedUntil > +now || ledger.modelPausedUntil?.['gpt-6.2-astra'] > +now)
+    && isAstraEnrichmentActive({ enabled: true, now: +now, policy });
   return { status: 'internal-ledger', observedAt: now.toISOString(), providerBalanceKnown: false,
     periodId: policy.periodId, periodLimitUsd: policy.periodLimitUsd, rollingDayLimitUsd: policy.rollingDayLimitUsd,
     periodReservedOrSettledUsd: sum(exposed), rollingDayReservedOrSettledUsd: sum(recent),
+    ...(pauseKnown ? { sharedPauseUntil } : {}),
     unsettledReservations: exposed.filter(r => r.status !== 'settled').length,
     ...(policy.astraEnrichment ? { astraEnrichment: { active: astraOpen,
       rollingDayLimitUsd: policy.astraEnrichment.rollingDayLimitUsd,
@@ -254,7 +260,7 @@ export async function writeOperationsReport({ root = process.cwd(), now = new Da
     routingReasoningEffort:'max',routingReasoningMode:'pro',routingScope:'new-requests',
     sourceYield,
     slack:{ newlyDelivered:null, status:'not-proven-by-this-report', reason:'Only actual message IDs/run-linked receipts count, never candidate counts.' } };
-  const markdown = `# FreeFinder Betriebsbericht\n\nStand: ${report.checkedAt}\n\n- ${live.length} Live-Angebote; ${queue.length} nicht-live Entwuerfe geprueft.\n- ${added === null ? 'Erste Bestandsaufnahme' : added.length+' neue IDs seit letzter Bestandsaufnahme'}; keine automatische Erfolgszuordnung.\n- ${queue.filter(r=>r.priority==='human-review-ready').length} Entwuerfe ohne formale Pruefluecke, weiterhin menschliche Freigabe.\n- Pilot: ${pilot.samples.length} Faelle gesammelt, ${pilot.evaluatedCases} unabhaengig bewertet, ${pilot.regularRuns.length} regulaere Qualitaetslaeufe beobachtet. Automatische Freigabe AUS.\n- Zugestellte und veröffentlichte Angebote nach Quelle stehen unten im Abschnitt Ertrag je Quelle.\n- API: ${report.credits.status}; ${report.credits.rollingDayReservedOrSettledUsd ?? 'unbekannt'} USD intern gebucht/reserviert in 24 Stunden. Kein Anbieter-Kontostand.\n\n## Naechste Schritte\n\n${Object.entries(report.sourceRecovery.byPriority).map(([key,n])=>'- '+key+': '+n).join('\n')}\n`;
+  const markdown = `# FreeFinder Betriebsbericht\n\nStand: ${report.checkedAt}\n\n- ${live.length} Live-Angebote; ${queue.length} nicht-live Entwuerfe geprueft.\n- ${added === null ? 'Erste Bestandsaufnahme' : added.length+' neue IDs seit letzter Bestandsaufnahme'}; keine automatische Erfolgszuordnung.\n- ${queue.filter(r=>r.priority==='human-review-ready').length} Entwuerfe ohne formale Pruefluecke, weiterhin menschliche Freigabe.\n- Pilot: ${pilot.samples.length} Faelle gesammelt, ${pilot.evaluatedCases} unabhaengig bewertet, ${pilot.regularRuns.length} regulaere Qualitaetslaeufe beobachtet. Automatische Freigabe AUS.\n- Zugestellte und veröffentlichte Angebote nach Quelle stehen unten im Abschnitt Ertrag je Quelle.\n- API: ${report.credits.status}; ${report.credits.rollingDayReservedOrSettledUsd ?? 'unbekannt'} USD intern gebucht/reserviert in 24 Stunden. Kein Anbieter-Kontostand.${report.credits.sharedPauseUntil ? ' Gemeinsame Modellsperre bis ' + report.credits.sharedPauseUntil + '.' : ''}\n\n## Naechste Schritte\n\n${Object.entries(report.sourceRecovery.byPriority).map(([key,n])=>'- '+key+': '+n).join('\n')}\n`;
   if(apply) {
     for(const [file,value] of [['server-operations-report.json',report],['automatic-publication-pilot.json',pilot],
       ['automatic-publication-review-pack.json',reviewPack]]) fs.writeFileSync(path.join(root,'reviews',file),JSON.stringify(value,null,2)+'\n');

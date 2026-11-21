@@ -182,6 +182,21 @@ test('credit summary includes unsettled charges, reports missing data honestly a
   assert.equal(creditSnapshot({...ledger,creditPeriod:'old'},policy,now).status,'unavailable-or-invalid');
 });
 
+test('credit reporting shows the shared stop even inside the scheduled enrichment period', () => {
+  const start = new Date(+now - 3600000).toISOString();
+  const end = new Date(+now + 86400000).toISOString();
+  const policy = { periodId:'fixture', periodLimitUsd:100, expiresAt:end,
+    astraEnrichment:{notBefore:start, rollingDayLimitUsd:38} };
+  const ledger = { creditPeriod:'fixture', reservations:[], pausedUntil:Date.parse(end) };
+  const paused = creditSnapshot(ledger, policy, now);
+  assert.equal(paused.sharedPauseUntil, end);
+  assert.equal(paused.astraEnrichment.active, false);
+  const resumed = creditSnapshot({...ledger, pausedUntil:0}, policy, now);
+  assert.equal(resumed.sharedPauseUntil, null);
+  assert.equal(resumed.astraEnrichment.active, true);
+  assert.equal(creditSnapshot({...ledger, pausedUntil:0, modelPausedUntil:{'gpt-6.2-astra':Date.parse(end)}}, policy, now).astraEnrichment.active, false);
+});
+
 test('pilot does not count malformed, future, pre-sample or duplicate-ID labels and exposes missing evidence',()=>{
   const queue=[{id:'one',fingerprint:'first',priority:'human-review-ready',issues:[],source:'fixture'}];
   const state=updatePublicationPilot(null,queue,{now});
