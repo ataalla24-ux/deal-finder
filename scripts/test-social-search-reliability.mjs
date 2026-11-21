@@ -90,7 +90,7 @@ test('a local TikTok request-policy rejection gets one probe, then the full paus
 
 test('a direct diagnostic can replace one obsolete browser-filter hold and preserves new provider deadlines', async () => {
   const failure = { status: 0, transportReason: 'request-policy-blocked' };
-  const previous = { transport: 'public-browser-search', attemptedRequests: 1, searchRequests: 0, lastSearchResponse: null,
+  const previous = { transport: 'public-browser-search', attemptedRequests: 1, searchRequests: 0, blockedExtraRequests: 2,
     nextRetryAt: '2026-11-11T20:00:00Z', boundedRetry: { reason: 'local-request-policy', failures: 2 }, errors: [failure] };
   const eligible = tikTokDirectProbePrevious(previous, now);
   assert.equal(eligible.nextRetryAt, '');
@@ -100,6 +100,7 @@ test('a direct diagnostic can replace one obsolete browser-filter hold and prese
   for (const variant of [
     { transport: 'direct-browser-search' },
     { searchRequests: 1 },
+    { blockedExtraRequests: 0 },
     { lastSearchResponse: { status: 200 } },
     { errors: [{ ...failure, retryAfter: '3600' }] },
     { errors: [{ status: 429, transportReason: 'response-http-error' }] },

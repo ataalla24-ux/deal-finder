@@ -21,7 +21,7 @@ export function tikTokDirectProbePrevious(previous, now = new Date()) {
       && previous.transport === 'public-browser-search'
       && isTikTokLocalRetry(previous)
       && previous.attemptedRequests === 1 && previous.searchRequests === 0
-      && previous.lastSearchResponse === null && previous.errors?.length === 1
+      && previous.blockedExtraRequests > 0 && previous.lastSearchResponse == null && previous.errors?.length === 1
       && failure?.status === 0 && failure.transportReason === 'request-policy-blocked'
       && failure.retryAfter == null && failure.retryAt == null) {
     // The diagnostic uses the replacement transport. Keep the single-request
