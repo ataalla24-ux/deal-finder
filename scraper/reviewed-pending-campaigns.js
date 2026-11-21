@@ -60,6 +60,20 @@ export function reviewedThreadCampaign(thread, requestedUrl) {
   return { campaignId: rule.id, contentHash: rule.body };
 }
 
+// Preisjäger also renders this same campaign as ordinary public HTML without
+// its serialized thread state. Require the visible original and both coupon
+// image identities plus the offer-specific end banner in that representation.
+export function reviewedVisibleCampaign({ title, description, headers, images }, requestedUrl) {
+  if (requestedUrl !== happyHour.url || title !== happyHour.sourceTitle
+    || digest(title + '\n' + description) !== 'e4f5f316ab067d8f263926b3439c57677d904edd4fc7aed088fc3b04237fdd8d'
+    || !/^Deal endet am 8 Dezember 2026 um (?:22|23):59 Über diesen Deal$/u.test(headers)
+    || images.length !== 2) return {};
+  const assets = ['AhSGy', 'Gtfwu'];
+  if (!assets.every((asset, index) => images[index].id === '372595-' + asset
+    && images[index].url === 'https://static.preisjaeger.at/threads/raw/' + asset + '/372595_1/fs/895x577/qt/65/372595_1.jpg')) return {};
+  return { campaignId: happyHour.id, contentHash: happyHour.body };
+}
+
 function editableRule(deal) {
   if (deal?.pipelineLifecycle?.manualDecision !== 'approved' || deal.editedInSlack || deal.slackFormEditTs
     || deal.slackEditedAt || deal.liveEditedAt || hasReviewedOfferPeriod(deal)) return null;

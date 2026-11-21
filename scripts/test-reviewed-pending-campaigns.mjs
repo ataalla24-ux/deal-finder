@@ -66,3 +66,16 @@ test('preserves human edits and the real reaction, rejects input after expiry an
     assert.equal(reconcileReviewedCampaignExpiry(changed), false);
   }
 });
+
+test('the second live HTML representation binds the same coupon images, terms, visible expiry and thread', () => {
+  const body = readFileSync(new URL('./fixtures/preisjaeger-happy-hour-dom.html', import.meta.url), 'utf8');
+  const row = rows[1];
+  const parse = s => extractApprovalSourceEvidence(s, row.candidate.url, row.finalUrl);
+  assert.equal(parse(body).campaignId, row.candidate.id);
+  for (const [current, changed] of [['8 Dezember', '7 Dezember'], ['Deal endet am', 'Deal abgelaufen am'],
+    ['data-image="372595-AhSGy"', 'data-image="372595-X"'], ['threads/raw/Gtfwu', 'threads/raw/X'],
+    ['Gutscheine:', 'Gutscheine nur für Mitglieder:']]) {
+    assert.ok(body.includes(current));
+    assert.equal(parse(body.replace(current, changed)).campaignId, undefined);
+  }
+});

@@ -1,4 +1,4 @@
-import { reviewedThreadCampaign } from './reviewed-pending-campaigns.js';
+import { reviewedThreadCampaign, reviewedVisibleCampaign } from './reviewed-pending-campaigns.js';
 import { load } from 'cheerio';
 
 const clean = value => typeof value === 'string' ? value.replace(/\s+/g, ' ').trim() : '';
@@ -96,7 +96,9 @@ function visibleThread($, id, requestedUrl, finalUrl) {
   const headers = details.find('.threadItem-header').toArray()
     .filter(node => !isHidden($, node)).map(node => clean(visibleCopy($, $(node)).text())).join(' ');
   const withdrawn = /\b(?:abgelaufen|zurückgezogen|zurueckgezogen|(?:deal|angebot|aktion)\s+(?:(?:ist|wurde)\s+)?beendet|nicht\s+mehr\s+(?:verfügbar|verfuegbar|gültig|gueltig|einlösbar|einloesbar))\b/i.test(headers);
-  return { title: ownTitle, description: currentThreadDescription({ threadDetails: { preparedHtmlDescription: visible.html() } }, id), withdrawn };
+  const images = visible.find('img').toArray().map(node => ({ id: $(node).attr('data-image'), url: $(node).attr('src') }));
+  return { title: ownTitle, description: currentThreadDescription({ threadDetails: { preparedHtmlDescription: visible.html() } }, id),
+    headers, images, withdrawn };
 }
 
 function describeCurrentThread(title, description, requestedUrl, unavailable) {
@@ -142,5 +144,6 @@ export function extractApprovalSourceEvidence(html, requestedUrl, finalUrl = req
   const dom = visibleThread($, id, requestedUrl, finalUrl);
   if (!dom) return unavailable;
   if (dom.withdrawn) return { ...unavailable, blockingReason: 'Quelle bestaetigt kein aktives Angebot.' };
-  return { ...describeCurrentThread(dom.title, dom.description, requestedUrl, unavailable), sourceKind: 'preisjaeger-visible-thread' };
+  return { ...describeCurrentThread(dom.title, dom.description, requestedUrl, unavailable), sourceKind: 'preisjaeger-visible-thread',
+    ...reviewedVisibleCampaign(dom, requestedUrl) };
 }
