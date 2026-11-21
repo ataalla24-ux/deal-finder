@@ -663,6 +663,14 @@ async function main() {
   const startedAt = RUN_STARTED_AT;
   const outputDir = process.env.POWER_OUTPUT_DIR || path.join(__dirname, '..', 'docs');
   const reportPath = path.join(outputDir, 'power-scraper-report.json');
+  const outputPath = path.join(outputDir, 'deals-pending-power.json');
+  let previousCashbackRows = [];
+  try {
+    const previous = JSON.parse(fs.readFileSync(outputPath, 'utf8'));
+    if (Array.isArray(previous?.deals)) previousCashbackRows = previous.deals.filter(row => row?.evidence?.merchantSourceKey === 'marktguru Cashback');
+  } catch (error) {
+    if (error.code !== 'ENOENT') console.warn('Previous Power output unreadable; only newly verified cashback rows will be used.');
+  }
   let previousReport = {};
   try {
     previousReport = JSON.parse(fs.readFileSync(reportPath, 'utf8'));
@@ -691,6 +699,7 @@ async function main() {
         maxPages: Number(process.env.POWER_FOOD_MAX_PAGES || 5),
         maxDeals: MAX_DEALS_PER_SOURCE,
         pageCooldowns: source.pageCooldowns,
+        ...(source.cashbackCampaigns ? { previousCashbackRows } : {}),
       });
       console.log(`🍽️ ${source.name}: ${result.deals} Kandidaten (${result.operationalStatus})`);
       return result;
@@ -774,7 +783,6 @@ async function main() {
   };
   
   fs.mkdirSync(outputDir, { recursive: true });
-  const outputPath = path.join(outputDir, 'deals-pending-power.json');
   fs.writeFileSync(outputPath, JSON.stringify(output, null, 2));
   const sourceReport = sourceResults.map(({ rows, ...result }) => result);
   const report = {

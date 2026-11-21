@@ -36,27 +36,76 @@ function benefit(campaign) {
   return '';
 }
 
-export function discoverCashbackLinks(html, url, previousDetailUrl) {
-  if (url !== indexUrl) return [];
+const campaignId = id => 'power-food-' + createHash('sha1').update('marktguru Cashback|' + id).digest('hex').slice(0, 12);
+
+export function readCashbackListing(html, url) {
+  const listed = new Map();
+  if (url !== indexUrl) return listed;
   const page = visiblePage(html, url);
-  if (!page || !Array.isArray(page.state.items)) return [];
+  if (!page || !Array.isArray(page.state.items)) return listed;
   const { $, state } = page;
-  const items = new Map(state.items.filter(c => c && benefit(c) && c.isLoyaltyCampaign === false
-    && foodProduct.test(c.name) && !excludedProduct.test(c.name)).map(c => [c.id, c]));
-  const links = new Set();
-  $('main a.cashback[href]').each((_, el) => {
+  const active = $('main .box.cashbacks').filter((_, box) =>
+    clean($(box).children('.title').children('h2').text()).toLowerCase() === 'aktuelle cashback aktionen');
+  if (active.length !== 1) return listed;
+  const items = new Map();
+  for (const item of state.items) {
+    if (!item || !Number.isInteger(item.id)) continue;
+    // Conflicting representations of one ID cannot prove listing availability.
+    if (items.has(item.id)) { items.set(item.id, null); continue; }
+    items.set(item.id, item);
+  }
+  active.find('a.cashback[href]').each((_, el) => {
     const href = $(el).attr('href');
     if (!href.startsWith('/mb/')) return;
     const link = new URL(href, indexUrl).href;
     const id = detailPattern.exec(link)?.[1];
-    if (id && items.has(Number(id)) && $(el).attr('title')?.startsWith(items.get(Number(id)).name + ' mit ')) links.add(link);
+    const item = items.get(Number(id));
+    if (!item || !benefit(item) || item.isLoyaltyCampaign !== false || !foodProduct.test(item.name) || excludedProduct.test(item.name)
+      || item.workflowState && item.workflowState !== 'published'
+      || item.campaignAvailability !== undefined && !(Number.isInteger(item.campaignAvailability) && item.campaignAvailability > 0 && item.campaignAvailability <= 100)
+      || item.cutoffDate || item.receiptEndValidityDate
+      || $(el).closest('.hidden,.d-none,.expired,.sold-out,[aria-disabled="true"]').length
+      || !$(el).attr('title')?.startsWith(item.name + ' mit ')) return;
+    const value = benefit(item);
+    if (clean($(el).find('.cashback-title').text()) !== item.name
+      || $(el).find('.cashback-badge').text().replace(/\s/g, '') !== value.replace(/\s/g, '') + 'Cashback'
+      || /abgelaufen|beendet|vergriffen|pausiert|ausverkauft|nicht (?:mehr )?verfügbar/i.test($(el).text())) return;
+    listed.set(link, { id: campaignId(id), title: item.name + ' – ' + value + ' Cashback mit der marktguru-App' });
   });
-  const ordered = [...links].sort((a, b) => Number(detailPattern.exec(b)[1]) - Number(detailPattern.exec(a)[1]));
+  return listed;
+}
+
+export function rotateCashbackLinks(listed, previousDetailUrl) {
+  const ordered = [...listed.keys()].sort((a, b) => Number(detailPattern.exec(b)[1]) - Number(detailPattern.exec(a)[1]));
   if (!ordered.length) return [];
-  // Power has two scheduled scans a day. One detail slot rotates through
-  // eligible campaigns instead of always spending it on the first card.
   const start = (ordered.indexOf(previousDetailUrl) + 1) % ordered.length;
   return [...ordered.slice(start), ...ordered.slice(0, start)];
+}
+
+export function discoverCashbackLinks(html, url, previousDetailUrl) {
+  return rotateCashbackLinks(readCashbackListing(html, url), previousDetailUrl);
+}
+
+// A listing can keep a recent candidate in the outbox, but only its original
+// detail check is evidence. Central still re-reads that detail before sending.
+export function retainedCashbackRows(previous, listed, excludedUrls, now) {
+  const cutoff = +now - 7 * 86400000;
+  const retained = new Map();
+  for (const row of previous || []) {
+    const item = listed.get(row?.url);
+    const evidence = row?.evidence;
+    const checked = Date.parse(evidence?.checkedAt);
+    if (!item || excludedUrls.has(row.url) || item.id !== row.id || item.title !== row.title
+      || row.originSource !== 'power-official-food' || row.brand !== 'marktguru'
+      || evidence?.source !== 'official-merchant-page' || evidence.sourceUrl !== row.url || evidence.merchantSourceKey !== 'marktguru Cashback'
+      || evidence.extractionMethod !== 'published-receipt-campaign' || evidence.offerTiming?.kind !== 'ongoing'
+      || evidence.offerTiming.validFrom !== row.validFrom || row.validOn || row.validUntil
+      || row.expires !== 'Solange Vorrat und Aktionsbudget reichen'
+      || row.lastCheckedAt !== evidence.checkedAt || !(checked >= cutoff && checked <= +now)
+      || typeof evidence.textSample !== 'string' || createHash('sha256').update(evidence.textSample).digest('hex') !== evidence.contentHash) continue;
+    if (!retained.has(item.id)) retained.set(item.id, row);
+  }
+  return [...retained.values()].sort((a,b) => Date.parse(b.lastCheckedAt) - Date.parse(a.lastCheckedAt));
 }
 
 export function extractCashbackCampaign(html, source, url, now) {
@@ -117,7 +166,7 @@ export function extractCashbackCampaign(html, source, url, now) {
   const description = [offer + '.', 'Teilnehmende Händler: ' + stores + '.', limit, ...rules, redeemText].join(' ');
   const evidenceText = [product, limit, facts, redeemText].join('\n');
   return {
-    id: 'power-food-' + createHash('sha1').update(source.name + '|' + id).digest('hex').slice(0, 12),
+    id: campaignId(id),
     source: source.name, brand: 'marktguru', originSource: 'power-official-food', url, title,
     description,
     category: 'essen', type: value === '1+1' ? 'bogo' : 'rabatt', logo: '🛒', qualityScore: 78,

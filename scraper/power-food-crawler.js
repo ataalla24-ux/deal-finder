@@ -4,6 +4,7 @@ import {
 } from "./power-food-extraction.js";
 import { isAllowedFoodUrl } from "./power-food-sources.js";
 import { sourceFailureFields } from "./source-http-policy.js";
+import { readCashbackListing, retainedCashbackRows, rotateCashbackLinks } from './power-marktguru-cashback.js';
 import { extractCouponMediaOffers } from './official-coupon-media.js';
 
 export async function crawlFoodSource(source, options) {
@@ -16,6 +17,7 @@ export async function crawlFoodSource(source, options) {
   const deferredPages = [];
   const candidates = [];
   const rejected = [];
+  let listedCashback = new Map();
   while (queue.length && pages.length < maxPages) {
     const url = queue.shift();
     if (seen.has(url) || !isAllowedFoodUrl(url, source)) continue;
@@ -72,14 +74,18 @@ export async function crawlFoodSource(source, options) {
         ...(!mediaFailed.length && mediaDeferred.length ? {error:mediaDeferred.map(a=>a.error).join('; ')} : {}),
       });
       if (mediaFailed.some(a=>/HTTP (401|403|429)/.test(a.error))) break;
-      for (const link of discoverFoodLinks(
-        response.html,
-        source,
-        response.finalUrl || url,
-        maxPages * 2,
-        source.previousDetailUrl,
-      ))
+      let links;
+      if (source.cashbackCampaigns) {
+        if (url === source.url && response.status === 200) {
+          listedCashback = readCashbackListing(response.html, url);
+          links = rotateCashbackLinks(listedCashback, source.previousDetailUrl);
+        } else links = [];
+      } else {
+        links = discoverFoodLinks(response.html, source, response.finalUrl || url, maxPages * 2);
+      }
+      for (const link of links.slice(0, maxPages * 2)) {
         if (!seen.has(link) && !queue.includes(link)) queue.push(link);
+      }
     } catch (error) {
       pages.push({
         url,
@@ -99,10 +105,18 @@ export async function crawlFoodSource(source, options) {
     if (!prev || d.description.length > prev.description.length)
       byOffer.set(key, d);
   }
-  const rows = [...byOffer.values()]
+  let rows = [...byOffer.values()]
     .sort((a, b) => b.qualityScore - a.qualityScore)
     .slice(0, options.maxDeals || 25);
   const failed = pages.filter((p) => p.status !== "ok");
+  const verifiedCount = rows.length;
+  if (source.cashbackCampaigns && !failed.length) {
+    const excluded = new Set([...seen, ...Object.entries(options.pageCooldowns || {})
+      .filter(([, pause]) => Date.parse(pause.nextRetryAt) > +now).map(([url]) => url)]);
+    const retained = retainedCashbackRows(options.previousCashbackRows, listedCashback, excluded, now);
+    rows = [...rows, ...retained.filter(row => !rows.some(fresh => fresh.id === row.id))]
+      .slice(0, Math.min(10, options.maxDeals || 10));
+  }
   return {
     source: source.name,
     url: source.url,
@@ -115,6 +129,7 @@ export async function crawlFoodSource(source, options) {
           ? "candidates-found"
           : "no-offers",
     deals: rows.length,
+    ...(source.cashbackCampaigns ? { cashbackDetailsVerified: verifiedCount, cashbackDetailsRetained: rows.length - verifiedCount } : {}),
     rows,
     pages,
     ...(deferredPages.length ? { deferredPages } : {}),

@@ -45,7 +45,9 @@ function listing() {
     [800, 'Käse-Gewinnspiel', 'https://www.marktguru.at/mb/gewinnspiel-cashback-800'],
   ];
   return html(index, {items: rows.map(([id, name]) => ({ id, name, type: 'percent', cashbackValue: 50, isLoyaltyCampaign: false }))},
-    rows.map(([, name, link]) => '<a class="cashback" href="' + new URL(link).pathname + '" title="' + name + ' mit 50 % Cashback"></a>').join(''));
+    '<div class="box cashbacks"><div class="title"><h2>Aktuelle cashback Aktionen</h2></div>' +
+    rows.map(([, name, link]) => '<a class="cashback" href="' + new URL(link).pathname + '" title="' + name + ' mit 50 % - Cashback">'
+      + '<div class="cashback-title">' + name + '</div><div class="cashback-badge">50 %Cashback</div></a>').join('') + '</div>');
 }
 
 const extract = (body, href = url) => extractFoodOffers(body, source, { now, pageUrl: href }).deals;
@@ -151,4 +153,54 @@ test('exact label repair keeps the existing Slack button and receipt, and a retr
   assert.equal(retry.slackChanged,false);
   assert.equal(retry.feedbackPayload,undefined);
   assert.deepEqual(methods,['reactions.get','chat.update','reactions.get']);
+});
+
+test('rotation keeps only recent, independently listed unchanged detail evidence without new requests or a new timestamp', async () => {
+  const original = extract(detail())[0];
+  const nextTime = new Date(+now + 86400000);
+  async function next(previousRows, { at=nextTime, indexHtml=listing(), body=detail(), selected=other, status=200, maxDeals=10 }={}) {
+    const urls=[];
+    const result=await crawlFoodSource({ ...source, previousDetailUrl: selected === other ? url : other }, {
+      previousCashbackRows:previousRows, now:at, maxPages:2, maxDeals,
+      fetchPage:async href => {
+        urls.push(href);
+        if (href===index) return {status:200,finalUrl:href,html:indexHtml};
+        if (status!==200) throw sourceHttpError(status);
+        const payload=href===other ? body.replaceAll(product,'Test-Käse').replaceAll('Test-Knödel','Test-Käse')
+          .replaceAll(url, other).replace('"id":789','"id":711') : body;
+        return {status:200,finalUrl:href,html:payload};
+      }
+    });
+    assert.ok(urls.length<=2, 'never spend additional page requests on retained coupons');
+    return result;
+  }
+  const second=await next([original,original]);
+  assert.equal(second.rows.length,2);
+  assert.equal(second.cashbackDetailsVerified,1);
+  assert.equal(second.cashbackDetailsRetained,1);
+  assert.deepEqual(second.rows.find(row=>row.id===original.id),original);
+  assert.notEqual(second.rows[0].id,original.id,'newly fetched detail has priority');
+  // Stable identity avoids a second Slack delivery even on a later fresh visit.
+  const third=await next(second.rows,{selected:url});
+  assert.equal(third.rows.length,2);
+  assert.equal(officialFoodOfferKey(third.rows[0]),officialFoodOfferKey(original));
+  assert.equal(third.rows[0].id, original.id);
+  assert.equal(third.rows[0].lastCheckedAt,nextTime.toISOString());
+  for(const indexHtml of [
+    listing().replaceAll(product,'Geänderter Artikel'),
+    listing().replace('class="cashback" href="'+new URL(url).pathname,'class="cashback" hidden href="'+new URL(url).pathname),
+    listing().replace('Aktuelle cashback Aktionen','Archiv'),
+    listing().replaceAll('"isLoyaltyCampaign":false','"isLoyaltyCampaign":false,"campaignAvailability":0'),
+    listing().replaceAll('"isLoyaltyCampaign":false','"isLoyaltyCampaign":false,"workflowState":"archived"'),
+    listing().replaceAll('50 %Cashback','25 %Cashback'),
+    listing().replace(new URL(url).pathname, '/mb/neuer-link-cashback-789'),
+    listing().replace('Aktuelle cashback Aktionen','Keine aktuellen cashback Aktionen'),
+    '<html>Unvollständiger Abruf</html>',
+  ]) assert.ok(!(await next([original],{indexHtml})).rows.some(row=>row.id===original.id));
+  for(const body of [detail({campaignAvailability:0}), detail({workflowState:'archived'}), detail({cutoffDate:'2026-11-22'})])
+    assert.ok(!(await next(second.rows,{selected:url,body})).rows.some(row=>row.id===original.id));
+  assert.equal((await next([original],{status:403})).cashbackDetailsRetained,0);
+  assert.equal((await next([original],{at:new Date(+now+8*86400000)})).cashbackDetailsRetained,0);
+  assert.equal((await next([original],{at:new Date(+now-1000)})).cashbackDetailsRetained,0);
+  assert.equal((await next([original],{maxDeals:1})).rows.length,1);
 });
