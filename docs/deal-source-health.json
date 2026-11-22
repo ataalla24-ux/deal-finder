@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-11-22T03:54:51.604Z",
+  "generatedAt": "2026-11-22T04:39:28.875Z",
   "discoveryAvailability": {
     "note": "Transport evidence, not deal yield. Retry eligibility is not recovery. Candidate counts are not Slack deliveries. No extra runs or quota resets.",
     "lanes": [
@@ -84,10 +84,10 @@
         "totalDeals": 10
       },
       {
-        "sourceKey": "instagram-ai",
-        "sourceLabel": "Instagram AI Agent",
+        "sourceKey": "wien-combined",
+        "sourceLabel": "Wien Deals Combined Graph",
         "healthScore": 62,
-        "totalDeals": 6
+        "totalDeals": 2
       }
     ],
     "topMissionSources": [
@@ -135,7 +135,7 @@
         "sourceLabel": "Meta Instagram Graph",
         "coverageScore": 53,
         "totalDeals": 77,
-        "fresh1dCount": 11
+        "fresh1dCount": 10
       },
       {
         "sourceKey": "gutscheine",
@@ -353,7 +353,7 @@
       "uniqueDeals": 68,
       "duplicateDeals": 9,
       "duplicateAcrossSources": 6,
-      "fresh1dCount": 11,
+      "fresh1dCount": 10,
       "fresh7dCount": 68,
       "viennaCount": 77,
       "foodDrinkCount": 56,
@@ -570,68 +570,6 @@
       "sourceWeightScore": 49
     },
     {
-      "sourceKey": "instagram-ai",
-      "file": "deals-pending-instagram-ai.json",
-      "sourceLabel": "Instagram AI Agent",
-      "totalDeals": 6,
-      "uniqueDeals": 4,
-      "duplicateDeals": 2,
-      "duplicateAcrossSources": 2,
-      "fresh1dCount": 1,
-      "fresh7dCount": 6,
-      "viennaCount": 6,
-      "foodDrinkCount": 5,
-      "promoCount": 0,
-      "missingUrlCount": 0,
-      "sampleTitles": [
-        "👉 Nur 6,99 € pro kg Lachs (Somon Baligi) Ideal für traditionelle Gerichte & besondere Anlässe",
-        "🍕 Monday to Frid",
-        "Und heute im Mittagsmenü: gebackenes Schweinsschnitzerl mit Erdäpfel-Vogerlsalat, mit Suppe um € 9,90. Reservi"
-      ],
-      "lastRun": null,
-      "uniqueRate": 0.7,
-      "duplicateRate": 0.3,
-      "fresh1dRate": 0.2,
-      "fresh7dRate": 1,
-      "viennaRate": 1,
-      "foodDrinkRate": 0.8,
-      "promoRate": 0,
-      "missingUrlRate": 0,
-      "averageQualityScore": 81,
-      "topCategories": [
-        {
-          "value": "essen",
-          "count": 3
-        },
-        {
-          "value": "kaffee",
-          "count": 1
-        },
-        {
-          "value": "shopping",
-          "count": 1
-        },
-        {
-          "value": "supermarkt",
-          "count": 1
-        }
-      ],
-      "topTypes": [
-        {
-          "value": "rabatt",
-          "count": 6
-        }
-      ],
-      "issues": [
-        "wenige klare Gratis-/Promo-Signale"
-      ],
-      "healthScore": 62,
-      "missionFitScore": 47,
-      "coverageScore": 12,
-      "precisionScore": 61,
-      "sourceWeightScore": 47
-    },
-    {
       "sourceKey": "wien-combined",
       "file": "deals-pending-wien-combined.json",
       "sourceLabel": "Wien Deals Combined Graph",
@@ -768,6 +706,69 @@
       "coverageScore": 11,
       "precisionScore": 56,
       "sourceWeightScore": 45
+    },
+    {
+      "sourceKey": "instagram-ai",
+      "file": "deals-pending-instagram-ai.json",
+      "sourceLabel": "Instagram AI Agent",
+      "totalDeals": 6,
+      "uniqueDeals": 4,
+      "duplicateDeals": 2,
+      "duplicateAcrossSources": 2,
+      "fresh1dCount": 0,
+      "fresh7dCount": 6,
+      "viennaCount": 6,
+      "foodDrinkCount": 5,
+      "promoCount": 0,
+      "missingUrlCount": 0,
+      "sampleTitles": [
+        "👉 Nur 6,99 € pro kg Lachs (Somon Baligi) Ideal für traditionelle Gerichte & besondere Anlässe",
+        "🍕 Monday to Frid",
+        "Und heute im Mittagsmenü: gebackenes Schweinsschnitzerl mit Erdäpfel-Vogerlsalat, mit Suppe um € 9,90. Reservi"
+      ],
+      "lastRun": null,
+      "uniqueRate": 0.7,
+      "duplicateRate": 0.3,
+      "fresh1dRate": 0,
+      "fresh7dRate": 1,
+      "viennaRate": 1,
+      "foodDrinkRate": 0.8,
+      "promoRate": 0,
+      "missingUrlRate": 0,
+      "averageQualityScore": 81,
+      "topCategories": [
+        {
+          "value": "essen",
+          "count": 3
+        },
+        {
+          "value": "kaffee",
+          "count": 1
+        },
+        {
+          "value": "shopping",
+          "count": 1
+        },
+        {
+          "value": "supermarkt",
+          "count": 1
+        }
+      ],
+      "topTypes": [
+        {
+          "value": "rabatt",
+          "count": 6
+        }
+      ],
+      "issues": [
+        "wenige Deals sind frischer als 1 Tag",
+        "wenige klare Gratis-/Promo-Signale"
+      ],
+      "healthScore": 59,
+      "missionFitScore": 43,
+      "coverageScore": 12,
+      "precisionScore": 59,
+      "sourceWeightScore": 44
     },
     {
       "sourceKey": "firecrawl4",
