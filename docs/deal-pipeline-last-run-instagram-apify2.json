@@ -2,21 +2,21 @@
   "schemaVersion": 1,
   "runProvenance": {
     "repository": "ataalla24-ux/deal-finder",
-    "runId": "44835167909",
-    "headSha": "b47f827ddc135005f3f7568c709691e742a6e86c",
-    "checkoutSha": "d35c2d41a875136ad4141184c905a41e99d5a19b",
+    "runId": "45027735197",
+    "headSha": "288ea19ef41ce49732e341689e249cd6639bd354",
+    "checkoutSha": "0aa85fa1f4d50307ce6f5d4a0a036b833b7cfdc9",
     "triggeringRun": null,
     "event": "schedule",
     "runAttempt": "1",
-    "url": "https://github.com/ataalla24-ux/deal-finder/actions/runs/44835167909"
+    "url": "https://github.com/ataalla24-ux/deal-finder/actions/runs/45027735197"
   },
-  "runId": "instagram-apify2-2026-11-20T23:13:47.026Z",
+  "runId": "instagram-apify2-2026-11-22T13:29:46.536Z",
   "sourceKey": "instagram-apify2",
   "sourceLabel": "Apify 2 Vienna Food Discovery",
   "status": "failed",
-  "startedAt": "2026-11-20T23:13:46.194Z",
-  "finishedAt": "2026-11-20T23:13:47.026Z",
-  "durationMs": 832,
+  "startedAt": "2026-11-22T13:29:45.915Z",
+  "finishedAt": "2026-11-22T13:29:46.536Z",
+  "durationMs": 621,
   "outputFile": "docs/deals-pending-instagram-apify2.json",
   "counts": {
     "rawCandidates": 0,
@@ -31,45 +31,43 @@
   "diagnostics": {
     "pendingDeals": 1,
     "unchangedPosts": 0,
-    "providerErrors": 0,
+    "providerErrors": 1,
     "emptySourceRecords": 0,
+    "batchErrors": [
+      {
+        "kind": "profile",
+        "reason": "apify-http-403",
+        "httpStatus": 403,
+        "operation": "actor-start",
+        "providerType": "build-not-found",
+        "retryAfterStatus": "absent"
+      }
+    ],
     "ocrCalls": 0,
     "sources": [
       {
-        "key": "hashtag:gratiswien",
-        "lastAttemptAt": "2026-11-20T23:13:46.194Z",
+        "key": "profile:doenerwerkwien",
+        "lastAttemptAt": "2026-11-22T13:29:45.915Z",
         "postsReturned": 0,
         "status": "failed",
-        "consecutiveFailures": 1,
-        "consecutiveEmpty": 3,
-        "retryAt": "2026-11-21T23:13:46.194Z"
+        "consecutiveFailures": 2,
+        "retryAt": "2026-11-24T13:29:45.915Z"
       },
       {
-        "key": "hashtag:wienisst",
-        "lastAttemptAt": "2026-11-20T23:13:46.194Z",
-        "postsReturned": 0,
-        "status": "failed",
-        "consecutiveFailures": 1,
-        "retryAt": "2026-11-21T23:13:46.194Z",
-        "consecutiveEmpty": 0
+        "key": "hashtag:viennafood",
+        "status": "not-attempted"
+      },
+      {
+        "key": "hashtag:wienpizza",
+        "status": "not-attempted"
+      },
+      {
+        "key": "hashtag:gratiswien",
+        "status": "not-attempted"
       },
       {
         "key": "hashtag:wienfood",
-        "lastAttemptAt": "2026-11-20T23:13:46.194Z",
-        "postsReturned": 0,
-        "status": "failed",
-        "consecutiveFailures": 1,
-        "retryAt": "2026-11-21T23:13:46.194Z",
-        "consecutiveEmpty": 0
-      },
-      {
-        "key": "hashtag:wienkaffee",
-        "lastAttemptAt": "2026-11-20T23:13:46.194Z",
-        "postsReturned": 0,
-        "status": "failed",
-        "consecutiveEmpty": 0,
-        "retryAt": "2026-11-21T23:13:46.194Z",
-        "consecutiveFailures": 1
+        "status": "not-attempted"
       }
     ]
   },

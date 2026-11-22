@@ -2,9 +2,95 @@
   "schemaVersion": 1,
   "sourceKey": "instagram-apify2",
   "sourceLabel": "Apify 2 Vienna Food Discovery",
-  "updatedAt": "2026-11-20T23:13:47.026Z",
-  "runCount": 54,
+  "updatedAt": "2026-11-22T13:29:46.536Z",
+  "runCount": 55,
   "runs": [
+    {
+      "schemaVersion": 1,
+      "runProvenance": {
+        "repository": "ataalla24-ux/deal-finder",
+        "runId": "45027735197",
+        "headSha": "288ea19ef41ce49732e341689e249cd6639bd354",
+        "checkoutSha": "0aa85fa1f4d50307ce6f5d4a0a036b833b7cfdc9",
+        "triggeringRun": null,
+        "event": "schedule",
+        "runAttempt": "1",
+        "url": "https://github.com/ataalla24-ux/deal-finder/actions/runs/45027735197"
+      },
+      "runId": "instagram-apify2-2026-11-22T13:29:46.536Z",
+      "sourceKey": "instagram-apify2",
+      "sourceLabel": "Apify 2 Vienna Food Discovery",
+      "status": "failed",
+      "startedAt": "2026-11-22T13:29:45.915Z",
+      "finishedAt": "2026-11-22T13:29:46.536Z",
+      "durationMs": 621,
+      "outputFile": "docs/deals-pending-instagram-apify2.json",
+      "counts": {
+        "rawCandidates": 0,
+        "normalizedCandidates": 0,
+        "verifiedCandidates": 0,
+        "previousDeals": 0,
+        "acceptedDeals": 0,
+        "rejectedDeals": 0
+      },
+      "rejectedByReason": {},
+      "rejectedSamples": [],
+      "diagnostics": {
+        "pendingDeals": 1,
+        "unchangedPosts": 0,
+        "providerErrors": 1,
+        "emptySourceRecords": 0,
+        "batchErrors": [
+          {
+            "kind": "profile",
+            "reason": "apify-http-403",
+            "httpStatus": 403,
+            "operation": "actor-start",
+            "providerType": "build-not-found",
+            "retryAfterStatus": "absent"
+          }
+        ],
+        "ocrCalls": 0,
+        "sources": [
+          {
+            "key": "profile:doenerwerkwien",
+            "lastAttemptAt": "2026-11-22T13:29:45.915Z",
+            "postsReturned": 0,
+            "status": "failed",
+            "consecutiveFailures": 2,
+            "retryAt": "2026-11-24T13:29:45.915Z"
+          },
+          {
+            "key": "hashtag:viennafood",
+            "status": "not-attempted"
+          },
+          {
+            "key": "hashtag:wienpizza",
+            "status": "not-attempted"
+          },
+          {
+            "key": "hashtag:gratiswien",
+            "status": "not-attempted"
+          },
+          {
+            "key": "hashtag:wienfood",
+            "status": "not-attempted"
+          }
+        ]
+      },
+      "constraints": {
+        "profiles": 22,
+        "hashtags": 4,
+        "perSource": 1,
+        "posts": 26,
+        "ocrPosts": 8,
+        "dailyUsd": 0.15,
+        "cycleUsd": 4.65
+      },
+      "errors": [
+        "apify-http-403"
+      ]
+    },
     {
       "schemaVersion": 1,
       "runProvenance": {
