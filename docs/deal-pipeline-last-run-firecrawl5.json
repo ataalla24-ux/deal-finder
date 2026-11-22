@@ -2,88 +2,126 @@
   "schemaVersion": 1,
   "runProvenance": {
     "repository": "ataalla24-ux/deal-finder",
-    "runId": "44902506728",
-    "headSha": "98f989ca0077226a0b45aff213028909a6bf6579",
-    "checkoutSha": "98f989ca0077226a0b45aff213028909a6bf6579",
+    "runId": "45021550985",
+    "headSha": "90ea83e948f5a854206d877d27fb679d504fc08e",
+    "checkoutSha": "90ea83e948f5a854206d877d27fb679d504fc08e",
     "triggeringRun": null,
     "event": "schedule",
     "runAttempt": "1",
-    "url": "https://github.com/ataalla24-ux/deal-finder/actions/runs/44902506728"
+    "url": "https://github.com/ataalla24-ux/deal-finder/actions/runs/45021550985"
   },
-  "runId": "firecrawl5-2026-11-21T12:15:07.092Z",
+  "runId": "firecrawl5-2026-11-22T12:19:42.342Z",
   "sourceKey": "firecrawl5",
   "sourceLabel": "Firecrawl Key 5 - Instagram Gastro",
-  "status": "completed-with-errors",
-  "startedAt": "2026-11-21T12:09:51.993Z",
-  "finishedAt": "2026-11-21T12:15:07.092Z",
-  "durationMs": 315099,
+  "status": "completed",
+  "startedAt": "2026-11-22T12:18:14.586Z",
+  "finishedAt": "2026-11-22T12:19:42.342Z",
+  "durationMs": 87756,
   "outputFile": "docs/deals-pending-firecrawl5.json",
   "counts": {
-    "rawCandidates": 2,
-    "normalizedCandidates": 2,
-    "verifiedCandidates": 6,
-    "previousDeals": 4,
-    "acceptedDeals": 6,
-    "rejectedDeals": 0
+    "rawCandidates": 5,
+    "normalizedCandidates": 5,
+    "verifiedCandidates": 5,
+    "previousDeals": 5,
+    "acceptedDeals": 5,
+    "rejectedDeals": 3
   },
-  "rejectedByReason": {},
-  "rejectedSamples": [],
+  "rejectedByReason": {
+    "post-verification-rejected": 3
+  },
+  "rejectedSamples": [
+    {
+      "reason": "post-verification-rejected",
+      "deal": {
+        "id": "fc5-1vnep3x",
+        "title": "zushimarket: 🍣 Zushi Market x Pichelmayergasse 💚 Exklusiv für unsere ...",
+        "brand": "zushimarket",
+        "url": "https://www.instagram.com/p/Dfz4Pbzx06d/",
+        "source": "Firecrawl Instagram Gastro #5",
+        "pubDate": "",
+        "expires": "",
+        "postVerificationStatus": ""
+      }
+    },
+    {
+      "reason": "post-verification-rejected",
+      "deal": {
+        "id": "fc5-trdm4n",
+        "title": "tastyfood.vienna: Kaltes Wetter in Wien? 🌧️ Na und? ...",
+        "brand": "tastyfood.vienna",
+        "url": "https://www.instagram.com/p/Df_5ZDMiETb/",
+        "source": "Firecrawl Instagram Gastro #5",
+        "pubDate": "",
+        "expires": "",
+        "postVerificationStatus": ""
+      }
+    },
+    {
+      "reason": "post-verification-rejected",
+      "deal": {
+        "id": "fc5-1wxr1kf",
+        "title": "ciosgrill: 🍽️ VİYANA'NIN 22. BÖLGESİNE LEZZET GELİYOR! 🇦🇹🇹 ...",
+        "brand": "ciosgrill",
+        "url": "https://www.instagram.com/p/Df4onH2tKi1/",
+        "source": "Firecrawl Instagram Gastro #5",
+        "pubDate": "",
+        "expires": "",
+        "postVerificationStatus": ""
+      }
+    }
+  ],
   "diagnostics": {
-    "agentStatus": "completed-with-errors",
+    "agentStatus": "completed",
     "creditsUsed": 0,
     "configuredSources": 7,
     "attemptedSources": 4,
-    "completedSources": 3,
+    "completedSources": 4,
     "targetsPerRun": 4,
     "agentTimeoutSeconds": 120,
     "maxCreditsPerTarget": 300,
     "sourceStats": [
+      {
+        "url": "https://www.instagram.com/zushimarket/",
+        "status": "completed-search",
+        "rawCandidates": 2,
+        "searchCandidates": 2,
+        "creditsUsed": 0
+      },
+      {
+        "url": "https://www.instagram.com/tastyfood.vienna/",
+        "status": "completed-search",
+        "rawCandidates": 1,
+        "searchCandidates": 1,
+        "creditsUsed": 0
+      },
+      {
+        "url": "https://www.instagram.com/ciosgrill/",
+        "status": "completed-search",
+        "rawCandidates": 2,
+        "searchCandidates": 2,
+        "creditsUsed": 0
+      },
       {
         "url": "https://www.instagram.com/corner_xvi/",
         "status": "completed",
         "rawCandidates": 0,
         "searchCandidates": 0,
         "creditsUsed": 0
-      },
-      {
-        "url": "https://www.instagram.com/tokki_korean_bbq/",
-        "status": "failed",
-        "rawCandidates": 0,
-        "searchCandidates": 0,
-        "creditsUsed": 0,
-        "error": "Firecrawl Agent nach 120s abgebrochen"
-      },
-      {
-        "url": "https://www.instagram.com/sajado.bbq/",
-        "status": "completed",
-        "rawCandidates": 2,
-        "searchCandidates": 0,
-        "creditsUsed": 0
-      },
-      {
-        "url": "https://www.instagram.com/mosquito_mexican/",
-        "status": "completed",
-        "rawCandidates": 0,
-        "searchCandidates": 0,
-        "creditsUsed": 0
       }
     ],
-    "retainedPreviousDeals": 4,
+    "retainedPreviousDeals": 5,
     "prunedPreviousDeals": 0,
-    "duplicateCandidatesMerged": 0,
+    "duplicateCandidatesMerged": 3,
     "verifier": {
       "statusCounts": {
-        "verified-original-post": 2,
-        "verified-meta-graph": 4
+        "verified-meta-graph": 5
       },
-      "verifiedOriginalPosts": 2,
+      "verifiedOriginalPosts": 0,
       "timestampOnlyPosts": 0,
       "unavailableOriginalPosts": 0,
-      "registryViennaEvidence": 0
+      "registryViennaEvidence": 1
     }
   },
   "constraints": {},
-  "errors": [
-    "https://www.instagram.com/tokki_korean_bbq/: Firecrawl Agent nach 120s abgebrochen"
-  ]
+  "errors": []
 }
