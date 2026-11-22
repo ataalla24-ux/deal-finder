@@ -1,7 +1,7 @@
 {
-  "generatedAt": "2026-11-22T01:38:08.579Z",
+  "generatedAt": "2026-11-22T01:53:45.362Z",
   "source": "instagram-graph-cross-source-verification",
-  "status": "ok",
+  "status": "failed-preserved",
   "configured": true,
   "scannedFiles": [
     "deals-pending-church-events.json",
@@ -180,10 +180,15 @@
       "candidates": 1
     }
   ],
-  "fetchedPosts": 50,
-  "exactMatches": 2,
+  "fetchedPosts": 0,
+  "exactMatches": 0,
   "retainedEvidencePosts": 2000,
-  "errors": [],
+  "errors": [
+    {
+      "username": "sajado.bbq",
+      "message": "Instagram shared quota paused: shared cooldown"
+    }
+  ],
   "accountFailures": {
     "natascha_rapid": {
       "count": 3,
@@ -197,22 +202,28 @@
     }
   },
   "sharedQuota": {
-    "limitPerHour": 575,
+    "limitPerHour": 190,
     "usageThreshold": 95,
-    "requests": 2,
-    "reserved": 5,
-    "stopped": false,
-    "reason": "",
-    "highestUsagePercent": 1,
+    "requests": 0,
+    "reserved": 0,
+    "stopped": true,
+    "reason": "Instagram shared quota paused: shared cooldown",
+    "highestUsagePercent": 0,
     "waitedMs": 0,
     "pacingMs": 0,
-    "retryAt": "",
+    "retryAt": "2026-11-22T02:01:39.918Z",
     "adaptiveSafetyCeiling": 190,
     "adaptiveIncreases": 0,
     "storageFailure": null,
-    "stopKind": ""
+    "stopKind": "cooldown"
+  },
+  "globalError": {
+    "username": "sajado.bbq",
+    "status": 0,
+    "code": "SCAN_BUDGET",
+    "message": "Instagram shared quota paused: shared cooldown"
   },
   "blockedEvidencePosts": 76,
-  "unmatchedCandidatePosts": 0,
-  "message": "2/2 fresh cross-source Instagram candidates matched exactly via Graph API."
+  "unmatchedCandidatePosts": 2,
+  "message": "0/2 fresh cross-source Instagram candidates matched exactly via Graph API."
 }
