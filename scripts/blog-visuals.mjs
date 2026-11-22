@@ -10,6 +10,7 @@ export const covers = {
   ...backfillCovers,
   ...catchupCovers,
   ...Object.fromEntries([...novemberGuides, ...heldRecheckGuides, ...november20Guides].map(guide => [guide.slug, { lines: [guide.title], topic: guide.eyebrow, tone: 'yellow' }])),
+  'xxxlutz-schnitzel-happy-hour-wien': { lines: ['XXXLutz Happy Hour'], topic: 'Schnitzel und Grillteller in Wien', tone: 'yellow' },
   'napoleon-kinder-happy-hour-wien': { lines: ['Napoleon Kinder-Happy-Hour'], topic: 'Familienessen in Kagran', tone: 'green' },
   'dancing-noodles-20-euro-gutschein-wien': { lines: ['Dancing Noodles'], topic: 'Essen in Margareten', tone: 'green' },
   'gratis-omv-kaffee': { lines: ['OMV VIVA', 'Winterkaffee mit jö.'], topic: 'Kaffee & Getränke', tone: 'yellow' },
