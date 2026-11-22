@@ -1,7 +1,7 @@
 {
-  "runId": "45039701703",
+  "runId": "45071343585",
   "mode": "scan",
-  "createdAt": "2026-11-22T15:42:02.753Z",
+  "createdAt": "2026-11-22T21:18:34.053Z",
   "usage": {
     "scrapingbee": {
       "provider": "scrapingbee",
@@ -21,7 +21,7 @@
       "provider": "scraperapi",
       "status": "authenticated",
       "maximum": 1000,
-      "used": 210,
+      "used": 0,
       "concurrency": 0,
       "payAsYouGoEnabled": false,
       "autoUpgradeEnabled": false,
@@ -45,26 +45,8 @@
   },
   "tasks": [
     {
-      "source": "NORDSEE",
-      "url": "https://www.nordsee.com/at/coupons/pazifisches_schollen__filet_vom_grill__beilage__softdrink_02l__garnelenspie?pdf=true",
-      "provider": "scraperapi",
-      "cap": 10
-    },
-    {
-      "source": "NORDSEE",
-      "url": "https://www.nordsee.com/at/coupons/2_classic_fish_burger__pommes_frites__1_softdrink_05l_pet?pdf=true",
-      "provider": "scraperapi",
-      "cap": 10
-    },
-    {
-      "source": "NORDSEE",
-      "url": "https://www.nordsee.com/at/coupons/groer_hunger?pdf=true",
-      "provider": "scraperapi",
-      "cap": 10
-    },
-    {
-      "source": "NORDSEE",
-      "url": "https://www.nordsee.com/at/coupons/garnelen_box?pdf=true",
+      "source": "IKEA Food",
+      "url": "https://www.ikea.com/at/de/food/salesareas/bistro/",
       "provider": "scraperapi",
       "cap": 10
     }
@@ -79,49 +61,30 @@
       "reason": "zyte-trial-guard-unverified-or-expired"
     }
   ],
-  "eligiblePages": 4,
-  "finishedAt": "2026-11-22T15:42:07.362Z",
+  "eligiblePages": 1,
+  "finishedAt": "2026-11-22T21:18:37.715Z",
   "status": "partial",
   "results": [
     {
       "provider": "scraperapi",
-      "source": "NORDSEE",
-      "url": "https://www.nordsee.com/at/coupons/pazifisches_schollen__filet_vom_grill__beilage__softdrink_02l__garnelenspie?pdf=true",
+      "source": "IKEA Food",
+      "url": "https://www.ikea.com/at/de/food/salesareas/bistro/",
       "reserved": 10,
+      "directCandidates": 0,
+      "directRejected": [],
+      "directVisibleTextCharacters": 378,
       "status": "failed",
-      "reason": "source-or-processing-error",
-      "httpStatus": 0,
-      "retryAt": "2026-11-23T15:42:06.113Z"
-    },
-    {
-      "provider": "scraperapi",
-      "source": "NORDSEE",
-      "url": "https://www.nordsee.com/at/coupons/2_classic_fish_burger__pommes_frites__1_softdrink_05l_pet?pdf=true",
-      "reserved": 10,
-      "status": "source-paused"
-    },
-    {
-      "provider": "scraperapi",
-      "source": "NORDSEE",
-      "url": "https://www.nordsee.com/at/coupons/groer_hunger?pdf=true",
-      "reserved": 10,
-      "status": "source-paused"
-    },
-    {
-      "provider": "scraperapi",
-      "source": "NORDSEE",
-      "url": "https://www.nordsee.com/at/coupons/garnelen_box?pdf=true",
-      "reserved": 10,
-      "status": "source-paused"
+      "reason": "provider-cost-limit",
+      "httpStatus": 403,
+      "retryAt": "2026-11-25T21:18:36.841Z"
     }
   ],
   "funnel": {
     "pagesBySource": {
-      "NORDSEE": 4
+      "IKEA Food": 1
     },
     "statuses": {
-      "failed": 1,
-      "source-paused": 3
+      "failed": 1
     },
     "rejectionReasons": {},
     "verificationReasons": {},
