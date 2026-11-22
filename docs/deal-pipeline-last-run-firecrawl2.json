@@ -2,41 +2,68 @@
   "schemaVersion": 1,
   "runProvenance": {
     "repository": "ataalla24-ux/deal-finder",
-    "runId": "44894461501",
-    "headSha": "1f15ffaee4c21d045e0a0d4f3847736c0538be7c",
-    "checkoutSha": "1f15ffaee4c21d045e0a0d4f3847736c0538be7c",
+    "runId": "45012798924",
+    "headSha": "85b716fceff099409d5c39907afac491dba40b39",
+    "checkoutSha": "85b716fceff099409d5c39907afac491dba40b39",
     "triggeringRun": null,
     "event": "schedule",
     "runAttempt": "1",
-    "url": "https://github.com/ataalla24-ux/deal-finder/actions/runs/44894461501"
+    "url": "https://github.com/ataalla24-ux/deal-finder/actions/runs/45012798924"
   },
-  "runId": "firecrawl2-2026-11-21T10:31:24.089Z",
+  "runId": "firecrawl2-2026-11-22T10:32:50.764Z",
   "sourceKey": "firecrawl2",
   "sourceLabel": "Firecrawl Key 3 - Consumables",
-  "status": "completed",
-  "startedAt": "2026-11-21T10:28:06.880Z",
-  "finishedAt": "2026-11-21T10:31:24.089Z",
-  "durationMs": 197209,
+  "status": "completed-with-errors",
+  "startedAt": "2026-11-22T10:31:05.663Z",
+  "finishedAt": "2026-11-22T10:32:50.764Z",
+  "durationMs": 105101,
   "outputFile": "docs/deals-pending-firecrawl2.json",
   "counts": {
-    "rawCandidates": 1,
-    "normalizedCandidates": 1,
+    "rawCandidates": 3,
+    "normalizedCandidates": 2,
     "verifiedCandidates": 0,
     "previousDeals": 0,
     "acceptedDeals": 0,
-    "rejectedDeals": 1
+    "rejectedDeals": 3
   },
   "rejectedByReason": {
-    "post-verification-rejected": 1
+    "missing-concrete-offer": 1,
+    "post-verification-rejected": 2
   },
   "rejectedSamples": [
     {
+      "reason": "missing-concrete-offer",
+      "deal": {
+        "id": "",
+        "title": "Join our FREE BIPA Mini-Course and discover how fun and practical learning Indonesian can be! Designed for beginners, this online mini-course will help you ...",
+        "brand": "bipa",
+        "url": "https://www.instagram.com/p/Df_YggipPyc/",
+        "source": "",
+        "pubDate": "",
+        "expires": "",
+        "postVerificationStatus": ""
+      }
+    },
+    {
       "reason": "post-verification-rejected",
       "deal": {
-        "id": "fc3-hp7sow",
-        "title": "spar_oesterreich: https://www.seniorquality.at/senior-experts-day-2026-fuer-arbeitssuchende Die Teilnahme ist kostenlos. ... spar_oesterreic",
-        "brand": "spar_oesterreich",
-        "url": "https://www.instagram.com/p/DfuDGzUCrI3/",
+        "id": "fc3-1ro4mqm",
+        "title": "dm_oesterreich: ... dm_oesterreich, der Frauengesundheit mit uns auf die große Bühne gebracht ... bekommt ihr 15 % Rabatt auf euer Silbertic",
+        "brand": "dm_oesterreich",
+        "url": "https://www.instagram.com/p/Df0ECVslJeN/",
+        "source": "Firecrawl Key 3 - Consumables",
+        "pubDate": "",
+        "expires": "",
+        "postVerificationStatus": ""
+      }
+    },
+    {
+      "reason": "post-verification-rejected",
+      "deal": {
+        "id": "fc3-l98u82",
+        "title": "dm_oesterreich: ✨ Team selbst befüllen oder fertig kaufen? View 1 comment · dm_oesterreich ... Zu eurem Deckenhöhlen-Gutschein würde ich ein",
+        "brand": "dm_oesterreich",
+        "url": "https://www.instagram.com/p/Df9gDv3Dtlj/",
         "source": "Firecrawl Key 3 - Consumables",
         "pubDate": "",
         "expires": "",
@@ -45,38 +72,39 @@
     }
   ],
   "diagnostics": {
-    "agentStatus": "completed",
+    "agentStatus": "completed-with-errors",
     "creditsUsed": 0,
     "configuredSources": 8,
     "attemptedSources": 4,
-    "completedSources": 4,
+    "completedSources": 3,
     "targetsPerRun": 4,
     "agentTimeoutSeconds": 120,
     "maxCreditsPerTarget": 300,
     "sourceStats": [
       {
-        "url": "https://www.instagram.com/spar_oesterreich/",
+        "url": "https://www.instagram.com/dm_oesterreich/",
+        "status": "completed-search",
+        "rawCandidates": 2,
+        "searchCandidates": 2,
+        "creditsUsed": 0
+      },
+      {
+        "url": "https://www.instagram.com/bipa/",
         "status": "completed-search",
         "rawCandidates": 1,
         "searchCandidates": 1,
         "creditsUsed": 0
       },
       {
-        "url": "https://www.instagram.com/billa_at/",
-        "status": "completed",
+        "url": "https://www.instagram.com/explore/tags/wiengratis/",
+        "status": "failed",
         "rawCandidates": 0,
         "searchCandidates": 0,
-        "creditsUsed": 0
+        "creditsUsed": 0,
+        "error": "Refusal: Das angegebene Instagram-Hashtag-Ziel ist in diesem Durchlauf nicht zugänglich: Der Aufruf von https://www.instagram.com/explore/tags/wiengratis/ wird auf die Instagram-Anmeldeseite umgeleitet, und der direkte Tag-Endpoint liefert 404. Dadurch konnten keine Originalposts, Veröffentlichungsdaten oder Angebotsdetails verlässlich aus der vorgeschriebenen Quelle geprüft werden; ich gebe daher keine erfundenen oder aus anderen Quellen übernommenen Ergebnisse zurück."
       },
       {
-        "url": "https://www.instagram.com/lidl_oesterreich/",
-        "status": "completed",
-        "rawCandidates": 0,
-        "searchCandidates": 0,
-        "creditsUsed": 0
-      },
-      {
-        "url": "https://www.instagram.com/hofer_at/",
+        "url": "https://www.instagram.com/explore/tags/kostenloswien/",
         "status": "completed",
         "rawCandidates": 0,
         "searchCandidates": 0,
@@ -95,5 +123,7 @@
     }
   },
   "constraints": {},
-  "errors": []
+  "errors": [
+    "https://www.instagram.com/explore/tags/wiengratis/: Refusal: Das angegebene Instagram-Hashtag-Ziel ist in diesem Durchlauf nicht zugänglich: Der Aufruf von https://www.instagram.com/explore/tags/wiengratis/ wird auf die Instagram-Anmeldeseite umgeleitet, und der direkte Tag-Endpoint liefert 404. Dadurch konnten keine Originalposts, Veröffentlichungsdaten oder Angebotsdetails verlässlich aus der vorgeschriebenen Quelle geprüft werden; ich gebe daher keine erfundenen oder aus anderen Quellen übernommenen Ergebnisse zurück."
+  ]
 }
