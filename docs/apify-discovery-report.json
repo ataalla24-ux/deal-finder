@@ -1,52 +1,27 @@
 {
-  "generatedAt": "2026-11-22T13:29:45.915Z",
-  "runProvenance": {
-    "repository": "ataalla24-ux/deal-finder",
-    "runId": "45027735197",
-    "headSha": "288ea19ef41ce49732e341689e249cd6639bd354",
-    "checkoutSha": "0aa85fa1f4d50307ce6f5d4a0a036b833b7cfdc9",
-    "triggeringRun": null,
-    "event": "schedule",
-    "runAttempt": "1",
-    "url": "https://github.com/ataalla24-ux/deal-finder/actions/runs/45027735197"
-  },
+  "allowed": false,
+  "reason": "channel-cooldown",
+  "generatedAt": "2026-11-22T22:38:00.386Z",
+  "runKey": "45078793102",
   "purpose": "scan",
-  "limits": {
-    "profiles": 22,
-    "hashtags": 4,
-    "perSource": 1,
-    "posts": 26,
-    "ocrPosts": 8,
-    "dailyUsd": 0.15,
-    "cycleUsd": 4.65
-  },
-  "budget": {
-    "allowed": true,
-    "reason": "",
-    "plan": "FREE",
-    "includedCreditUsd": 5,
-    "accountUsageUsd": 0.07296770055695226,
-    "accountLimitUsd": 5,
-    "cycle": {
-      "startAt": "2026-11-15T00:00:00.000Z",
-      "endAt": "2026-12-14T23:59:59.999Z"
-    },
-    "runCapUsd": 0.075,
-    "creditReserveUsd": 0.35,
-    "pricingModel": "PAY_PER_EVENT"
-  },
-  "selectedSources": [
+  "sources": [
     {
-      "key": "profile:doenerwerkwien",
+      "key": "profile:friendscovienna",
       "kind": "profile",
-      "username": "doenerwerkwien",
-      "url": "https://www.instagram.com/doenerwerkwien/",
-      "priority": 84
+      "username": "friendscovienna",
+      "url": "https://www.instagram.com/friendscovienna/",
+      "priority": 76
     },
     {
       "key": "hashtag:viennafood",
       "kind": "hashtag",
       "url": "https://www.instagram.com/explore/tags/viennafood/",
+      "priority": 0
+    },
+    {
+      "key": "hashtag:neueroeffnungwien",
+      "kind": "hashtag",
+      "url": "https://www.instagram.com/explore/tags/neueroeffnungwien/",
       "priority": 0
     },
     {
@@ -60,35 +35,44 @@
       "kind": "hashtag",
       "url": "https://www.instagram.com/explore/tags/gratiswien/",
       "priority": 0
+    }
+  ],
+  "budget": {
+    "allowed": true,
+    "reason": "",
+    "plan": "FREE",
+    "includedCreditUsd": 5,
+    "accountUsageUsd": 0.07297815392690023,
+    "accountLimitUsd": 5,
+    "cycle": {
+      "startAt": "2026-11-15T00:00:00.000Z",
+      "endAt": "2026-12-14T23:59:59.999Z"
     },
-    {
-      "key": "hashtag:wienfood",
-      "kind": "hashtag",
-      "url": "https://www.instagram.com/explore/tags/wienfood/",
-      "priority": 0
-    }
-  ],
-  "status": "failed",
-  "fetchedRecords": 0,
+    "runCapUsd": 0.075,
+    "creditReserveUsd": 0.35,
+    "pricingModel": "PAY_PER_EVENT"
+  },
+  "limits": {
+    "profiles": 22,
+    "hashtags": 4,
+    "perSource": 1,
+    "posts": 26,
+    "ocrPosts": 8,
+    "dailyUsd": 0.15,
+    "cycleUsd": 4.65
+  },
+  "runProvenance": {
+    "repository": "ataalla24-ux/deal-finder",
+    "runId": "45078793102",
+    "headSha": "fa9b6577e5d851f682a21b24028e102531870c3f",
+    "checkoutSha": "fa9b6577e5d851f682a21b24028e102531870c3f",
+    "triggeringRun": null,
+    "event": "schedule",
+    "runAttempt": "1",
+    "url": "https://github.com/ataalla24-ux/deal-finder/actions/runs/45078793102"
+  },
+  "status": "deferred",
   "freshAcceptedDeals": 0,
-  "pendingDeals": 1,
-  "unchangedPosts": 0,
-  "duplicatePosts": 0,
-  "providerErrors": 1,
-  "emptySourceRecords": 0,
-  "ocrCalls": 0,
-  "candidateAudit": [],
-  "actorRuns": [],
-  "batchErrors": [
-    {
-      "kind": "profile",
-      "reason": "apify-http-403",
-      "httpStatus": 403,
-      "operation": "actor-start",
-      "providerType": "build-not-found",
-      "retryAfterStatus": "absent"
-    }
-  ],
   "retryAt": "2026-11-23T13:29:46.456Z",
   "cooldown": {
     "reason": "apify-http-403",
@@ -98,38 +82,5 @@
     "retryAfterStatus": "absent",
     "policy": "conservative",
     "until": "2026-11-23T13:29:46.456Z"
-  },
-  "datasetProviderErrors": 0,
-  "reportedChargeUsd": null,
-  "tools": {
-    "tesseract": true,
-    "ffmpeg": false,
-    "ffprobe": false
-  },
-  "sources": [
-    {
-      "key": "profile:doenerwerkwien",
-      "lastAttemptAt": "2026-11-22T13:29:45.915Z",
-      "postsReturned": 0,
-      "status": "failed",
-      "consecutiveFailures": 2,
-      "retryAt": "2026-11-24T13:29:45.915Z"
-    },
-    {
-      "key": "hashtag:viennafood",
-      "status": "not-attempted"
-    },
-    {
-      "key": "hashtag:wienpizza",
-      "status": "not-attempted"
-    },
-    {
-      "key": "hashtag:gratiswien",
-      "status": "not-attempted"
-    },
-    {
-      "key": "hashtag:wienfood",
-      "status": "not-attempted"
-    }
-  ]
+  }
 }
