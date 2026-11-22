@@ -2,9 +2,107 @@
   "schemaVersion": 1,
   "sourceKey": "food3",
   "sourceLabel": "Firecrawl Key 2 - Food",
-  "updatedAt": "2026-11-21T09:28:18.168Z",
+  "updatedAt": "2026-11-22T09:33:57.506Z",
   "runCount": 90,
   "runs": [
+    {
+      "schemaVersion": 1,
+      "runProvenance": {
+        "repository": "ataalla24-ux/deal-finder",
+        "runId": "45007909218",
+        "headSha": "4b03b8524780655c1ce84e77953178d20d52f5e0",
+        "checkoutSha": "4b03b8524780655c1ce84e77953178d20d52f5e0",
+        "triggeringRun": null,
+        "event": "schedule",
+        "runAttempt": "1",
+        "url": "https://github.com/ataalla24-ux/deal-finder/actions/runs/45007909218"
+      },
+      "runId": "food3-2026-11-22T09:33:57.506Z",
+      "sourceKey": "food3",
+      "sourceLabel": "Firecrawl Key 2 - Food",
+      "status": "completed-with-errors",
+      "startedAt": "2026-11-22T09:31:08.737Z",
+      "finishedAt": "2026-11-22T09:33:57.506Z",
+      "durationMs": 168769,
+      "outputFile": "docs/deals-pending-food3.json",
+      "counts": {
+        "rawCandidates": 3,
+        "normalizedCandidates": 3,
+        "verifiedCandidates": 6,
+        "previousDeals": 4,
+        "acceptedDeals": 6,
+        "rejectedDeals": 1
+      },
+      "rejectedByReason": {
+        "post-verification-rejected": 1
+      },
+      "rejectedSamples": [
+        {
+          "reason": "post-verification-rejected",
+          "deal": {
+            "id": "food3-y8unyg",
+            "title": "Instagram: Nach drei Jahrzehnten hat sich Markus Artner aus der ...",
+            "brand": "Instagram",
+            "url": "https://www.instagram.com/p/Df7YqRECr2L/",
+            "source": "Firecrawl Food #2",
+            "pubDate": "",
+            "expires": "",
+            "postVerificationStatus": ""
+          }
+        }
+      ],
+      "diagnostics": {
+        "agentStatus": "completed-with-errors",
+        "creditsUsed": 0,
+        "configuredSources": 6,
+        "attemptedSources": 3,
+        "completedSources": 2,
+        "targetsPerRun": 3,
+        "agentTimeoutSeconds": 120,
+        "maxCreditsPerTarget": 300,
+        "sourceStats": [
+          {
+            "url": "https://www.instagram.com/explore/tags/happyhourwien/",
+            "status": "completed",
+            "rawCandidates": 2,
+            "searchCandidates": 0,
+            "creditsUsed": 0
+          },
+          {
+            "url": "https://www.instagram.com/explore/tags/lunchdealwien/",
+            "status": "failed",
+            "rawCandidates": 0,
+            "searchCandidates": 0,
+            "creditsUsed": 0,
+            "error": "Refusal: Die Daten sind in diesem Durchlauf nicht zuverlässig abrufbar: Das angegebene Instagram-Hashtag-Ziel leitet ohne eingeloggte Sitzung auf die Login-Seite um, und die öffentlichen Instagram-Endpunkte liefern keine Hashtag-Posts. Dadurch lassen sich weder die letzten 7 Tage noch direkte Originalpost-Links, Handles, Veröffentlichungsdaten und Angebotsdetails verifizieren. Ich gebe deshalb keine unbestätigten Angebote zurück."
+          },
+          {
+            "url": "https://www.instagram.com/explore/tags/neueröffnungwien/",
+            "status": "completed-search",
+            "rawCandidates": 1,
+            "searchCandidates": 1,
+            "creditsUsed": 0
+          }
+        ],
+        "retainedPreviousDeals": 4,
+        "prunedPreviousDeals": 0,
+        "duplicateCandidatesMerged": 0,
+        "verifier": {
+          "statusCounts": {
+            "verified-original-post": 2,
+            "verified-meta-graph": 4
+          },
+          "verifiedOriginalPosts": 2,
+          "timestampOnlyPosts": 0,
+          "unavailableOriginalPosts": 0,
+          "registryViennaEvidence": 1
+        }
+      },
+      "constraints": {},
+      "errors": [
+        "https://www.instagram.com/explore/tags/lunchdealwien/: Refusal: Die Daten sind in diesem Durchlauf nicht zuverlässig abrufbar: Das angegebene Instagram-Hashtag-Ziel leitet ohne eingeloggte Sitzung auf die Login-Seite um, und die öffentlichen Instagram-Endpunkte liefern keine Hashtag-Posts. Dadurch lassen sich weder die letzten 7 Tage noch direkte Originalpost-Links, Handles, Veröffentlichungsdaten und Angebotsdetails verifizieren. Ich gebe deshalb keine unbestätigten Angebote zurück."
+      ]
+    },
     {
       "schemaVersion": 1,
       "runProvenance": {
@@ -15504,48 +15602,6 @@
       "constraints": {},
       "errors": [
         "https://www.instagram.com/explore/tags/fooddealsvienna/: Firecrawl Agent nach 120s abgebrochen"
-      ]
-    },
-    {
-      "schemaVersion": 1,
-      "runId": "food3-2026-08-22T23:46:11.368Z",
-      "sourceKey": "food3",
-      "sourceLabel": "Firecrawl Key 2 - Food",
-      "status": "completed-with-errors",
-      "startedAt": "2026-08-22T23:41:08.788Z",
-      "finishedAt": "2026-08-22T23:46:11.368Z",
-      "durationMs": 302580,
-      "outputFile": "docs/deals-pending-food3.json",
-      "counts": {
-        "rawCandidates": 0,
-        "normalizedCandidates": 0,
-        "verifiedCandidates": 0,
-        "previousDeals": 0,
-        "acceptedDeals": 0,
-        "rejectedDeals": 0
-      },
-      "rejectedByReason": {},
-      "rejectedSamples": [],
-      "diagnostics": {
-        "agentStatus": "failed",
-        "creditsUsed": 0,
-        "configuredSources": 6,
-        "agentTimeoutSeconds": 300,
-        "maxCredits": 650,
-        "retainedPreviousDeals": 0,
-        "prunedPreviousDeals": 0,
-        "duplicateCandidatesMerged": 0,
-        "verifier": {
-          "statusCounts": {},
-          "verifiedOriginalPosts": 0,
-          "timestampOnlyPosts": 0,
-          "unavailableOriginalPosts": 0,
-          "registryViennaEvidence": 0
-        }
-      },
-      "constraints": {},
-      "errors": [
-        "Firecrawl Agent nach 300s abgebrochen"
       ]
     }
   ]
