@@ -1,0 +1,112 @@
+{
+  "reviewedAt": "2026-11-22T10:08:29.407Z",
+  "sourceSha": "5d548a626effef658d1e16b9a94fc304d6d91caf",
+  "baseline": "output/title-check-20261121/after-deals.json",
+  "inventory": 87,
+  "reviewedCount": 4,
+  "newCount": 3,
+  "reviewedIds": [
+    "merchant-web-ffa1ce705e966323ca5d",
+    "g2-1kg4kae",
+    "g2-13q9t1x",
+    "social-food-review-vmehme"
+  ],
+  "correctedCount": 1,
+  "descriptionCorrections": 1,
+  "qualityReferences": [
+    "reviews/deal-title-review-2026-10-23.json",
+    "reviews/deal-title-review-2026-11-04.json"
+  ],
+  "changes": [
+    {
+      "id": "g2-13q9t1x",
+      "before": "XXXLutz: Zwei Schnitzel um 8 € oder zwei Grillteller um 12 €",
+      "previousDescription": "Zur Happy Hour gilt täglich ab 16 Uhr „2 für 1“. Zwei Schweinsschnitzel mit Pommes kosten insgesamt 8 €, zwei Grillteller insgesamt 12 €. Einzeln kostet das Schweinsschnitzel 4 € und der Grillteller 6 €. Ein Schnitzel vom Huhn kostet 2 € mehr. Die Aktion gilt vom 17. November bis einschließlich 8. Dezember 2026, solange der Vorrat reicht.",
+      "fields": {
+        "title": "Zwei Schnitzel um 8 € / zwei Grillteller um 12 €: ab 16 Uhr, Abholung",
+        "description": "Zur Happy Hour gilt täglich ab 16 Uhr „2 für 1“. Zwei Schweinsschnitzel mit Pommes kosten insgesamt 8 €, zwei Grillteller insgesamt 12 €. Einzeln kostet das Schweinsschnitzel 4 € und der Grillteller 6 €. Ein Schnitzel vom Huhn kostet 2 € mehr. Die Aktion gilt vom 17. November bis einschließlich 8. Dezember 2026, solange der Vorrat reicht. Die genannten Preise sind laut Prospekt Abholpreise. Den Preis für Verzehr vor Ort bitte vor der Bestellung bestätigen."
+      },
+      "reason": "Missing daily 16:00 start and takeaway-price qualification make the unqualified headline misleading. Preserve both price alternatives and all original purchase/period details. Longer exception retains the exact product/price phrases required by the existing four-branch campaign identity guard, without changing or weakening map rules.",
+      "evidenceUrl": "https://catalog.xxxlutz.at/frontend/catalogs/1420952/1/pdf/complete.pdf",
+      "evidence": {
+        "checkedAt": "2026-11-22T10:08:29.407Z",
+        "pages": [
+          1,
+          2
+        ],
+        "finding": "Official PDF confirms daily Happy Hour from 16:00, two pork schnitzels for 8 EUR or two grill plates for 12 EUR; individual prices 4/6 EUR, chicken supplement 2 EUR, 17 November to 8 December 2026, while stocks last. Fine print explicitly defines prices as takeaway prices. No new validity or numeric-price field changes."
+      }
+    }
+  ],
+  "unchangedReviewed": [
+    {
+      "id": "merchant-web-ffa1ce705e966323ca5d",
+      "reason": "Clear 3+1 selected-sweets headline and complete buy-three-get-four description match stored official merchant evidence. No cosmetic edit."
+    },
+    {
+      "id": "g2-1kg4kae",
+      "reason": "Previously corrected title and description unchanged; concurrent brand update to Lieferando retained."
+    }
+  ],
+  "deferred": [
+    {
+      "id": "social-food-review-vmehme",
+      "proposedTitle": "Klassische Pizzen ab 8,50 €, Spezialpizzen 11,50 €",
+      "reason": "67-character title repeats the brand; the supported 50-character shortening is withheld because the reviewed-public-voucher-venue-v1 guard rejects liveEditedAt and drops the confirmed map point.",
+      "mapReplay": {
+        "before": [
+          "address-aa27c8015d3aa567"
+        ],
+        "hypotheticalAfter": [],
+        "report": {
+          "id": "social-food-review-vmehme",
+          "brand": "M2 La Romana",
+          "title": "Klassische Pizzen ab 8,50 €, Spezialpizzen 11,50 €",
+          "url": "https://www.instagram.com/p/Dfk5ZC8DiTM/",
+          "place": "Hetzendorfer Straße 80, 1120 Wien | M2 La Romana | Hetzendorfer Straße 80, 1120 Wien",
+          "status": "reviewed-offer-location-conflict",
+          "reason": "reviewed-offer-location-conflict",
+          "channel": "onsite-or-unknown",
+          "locationCount": 0,
+          "needsReview": true,
+          "fingerprint": "d3fba2d1153abb8408009eaf",
+          "failures": []
+        }
+      },
+      "originalCaption": "NOVEMBER-ANGEBOT ❗️ Lust auf eine leckere Pizza ? 🍕 Im ganzen November bekommt ihr die klassischen Pizzen ab 8,50 € und unsere Spezialpizzen für nur 11,50 € Frisch zubereitet und mit viel Liebe gemacht. 🤍 #wien #viennafood #wienessen #pizzawien #1120wien"
+    }
+  ],
+  "priorOpenCases": [
+    "g2-15kbyb4 student requirement / title-map guard conflict",
+    "g2-acp99i unconfirmed Wolt eligibility",
+    "meta-ig-18140009089632190 brand/location metadata outside title scope"
+  ],
+  "removedByIndependentMaintenance": [
+    "gs-601262",
+    "meta-ig-17977851744156986"
+  ],
+  "preserved": {
+    "idsAndOrder": true,
+    "pricesAndDates": true,
+    "sources": true,
+    "approvalsAndHides": true,
+    "mapPoints": 204,
+    "zeroGeocoding": true
+  },
+  "openValidityCases": [
+    {
+      "id": "meta-ig-18046812119830342",
+      "reason": "Dahab 1+1 source explicitly says 21 November at Schoenbrunner Strasse 149. The unchanged public validOn and expires also end on 21 November, but the row remains public on 22 November. No removal, hiding or date extension in this title-only audit."
+    }
+  ],
+  "verification": {
+    "offlineTestGroupsPassed": 10,
+    "unchangedOtherRecords": 86,
+    "mapPointsPreserved": 204,
+    "xxxlutzBranchesPreserved": 4,
+    "featuredSelectionsAndCopyConsistent": true,
+    "persistentReplayIdempotent": true,
+    "productionValidation": "One pre-existing expired Dahab record; unchanged by this review."
+  },
+  "publication": "pending public verification"
+}
