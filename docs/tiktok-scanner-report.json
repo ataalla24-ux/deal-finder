@@ -1,14 +1,14 @@
 {
-  "lastUpdated": "2026-11-21T22:10:48.952Z",
+  "lastUpdated": "2026-11-22T13:19:35.477Z",
   "runProvenance": {
     "repository": "ataalla24-ux/deal-finder",
-    "runId": "44955303004",
-    "headSha": "126641a94918168108ff9ca1358e55d3e9992e11",
-    "checkoutSha": "126641a94918168108ff9ca1358e55d3e9992e11",
+    "runId": "45026808244",
+    "headSha": "474fe4e48398535b127c2f29eabd8c6b00632f51",
+    "checkoutSha": "474fe4e48398535b127c2f29eabd8c6b00632f51",
     "triggeringRun": null,
     "event": "schedule",
     "runAttempt": "1",
-    "url": "https://github.com/ataalla24-ux/deal-finder/actions/runs/44955303004"
+    "url": "https://github.com/ataalla24-ux/deal-finder/actions/runs/45026808244"
   },
   "status": "discovery-degraded",
   "outputPreserved": true,
@@ -49,8 +49,8 @@
     "site:tiktok.com/@ tiktok wien gratis"
   ],
   "apiKeywords": [
-    "wien gratis 21 november 2026",
-    "wien deal 21 november 2026",
+    "wien gratis 22 november 2026",
+    "wien deal 22 november 2026",
     "wien gratis november 2026",
     "wien aktion november 2026",
     "wien rabatt november 2026",
@@ -139,12 +139,25 @@
     "publicVideoLinks": 0
   },
   "searchDiscovery": {
-    "errors": [],
-    "attemptedQueries": 0,
-    "stoppedReason": "search-cooldown",
-    "nextRetryAt": "2026-11-21T23:08:43.339Z",
-    "lastAttemptAt": "2026-11-20T23:08:43.339Z",
-    "nextQueryIndex": 21,
+    "errors": [
+      {
+        "query": "site:tiktok.com/@ wien gratis goodie bag",
+        "error": "Search challenge; no bypass attempted",
+        "httpStatus": 403,
+        "retryAt": "",
+        "retryAfterProvided": false
+      }
+    ],
+    "attemptedQueries": 2,
+    "stoppedReason": "search-unavailable",
+    "nextRetryAt": "2026-11-22T17:19:35.166Z",
+    "lastAttemptAt": "2026-11-22T13:19:35.128Z",
+    "nextQueryIndex": 23,
+    "boundedRetry": {
+      "reason": "challenge-without-retry-after",
+      "failures": 1,
+      "failedAt": "2026-11-22T13:19:35.166Z"
+    },
     "deferredPostVisits": 0
   },
   "accepted": 0,
@@ -227,12 +240,20 @@
     "aiAcceptedUnusable": 0
   },
   "timings": {
-    "apiDiscoveryMs": 33,
-    "searchDiscoveryMs": 1,
-    "mediaRescueMs": 141,
-    "totalScannerMs": 371
+    "apiDiscoveryMs": 42,
+    "searchDiscoveryMs": 1513,
+    "mediaRescueMs": 274,
+    "totalScannerMs": 2147
   },
-  "discoveryErrors": [],
+  "discoveryErrors": [
+    {
+      "query": "site:tiktok.com/@ wien gratis goodie bag",
+      "error": "Search challenge; no bypass attempted",
+      "httpStatus": 403,
+      "retryAt": "",
+      "retryAfterProvided": false
+    }
+  ],
   "apiErrors": [],
   "rejected": []
 }
