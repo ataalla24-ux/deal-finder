@@ -1,21 +1,21 @@
 {
-  "generatedAt": "2026-11-22T20:02:04.396Z",
+  "generatedAt": "2026-11-22T20:22:52.797Z",
   "discoveryAvailability": {
     "note": "Transport evidence, not deal yield. Retry eligibility is not recovery. Candidate counts are not Slack deliveries. No extra runs or quota resets.",
     "lanes": [
       {
         "name": "instagram-search",
-        "observedAt": "2026-11-22T08:01:59.300Z",
-        "status": "awaiting-post-cooldown-run",
-        "reason": "search-cooldown",
-        "retryAt": "2026-11-22T13:51:57.556Z",
-        "attempted": 0,
+        "observedAt": "2026-11-22T20:21:56.410Z",
+        "status": "paused",
+        "reason": "search-unavailable",
+        "retryAt": "2026-11-23T20:20:17.409Z",
+        "attempted": 1,
         "discovered": 0,
         "deliveredToSlack": null
       },
       {
         "name": "instagram-profiles",
-        "observedAt": "2026-11-22T08:01:59.300Z",
+        "observedAt": "2026-11-22T20:21:56.410Z",
         "status": "no-block-reported",
         "reason": "",
         "retryAt": "",
@@ -24,11 +24,11 @@
       },
       {
         "name": "instagram-previews",
-        "observedAt": "2026-11-22T08:01:59.300Z",
+        "observedAt": "2026-11-22T20:21:56.410Z",
         "status": "no-block-reported",
         "reason": "",
         "retryAt": "",
-        "attempted": 1,
+        "attempted": 4,
         "deliveredToSlack": null
       },
       {
@@ -54,16 +54,22 @@
   },
   "summary": {
     "filesConsidered": 32,
-    "totalCandidates": 610,
-    "uniqueCandidates": 583,
-    "distinctCandidates": 594,
-    "duplicateClusters": 11,
+    "totalCandidates": 607,
+    "uniqueCandidates": 582,
+    "distinctCandidates": 592,
+    "duplicateClusters": 10,
     "topHealthySources": [
       {
         "sourceKey": "meta-instagram",
         "sourceLabel": "Meta Instagram Graph",
         "healthScore": 70,
         "totalDeals": 75
+      },
+      {
+        "sourceKey": "instagram-ai",
+        "sourceLabel": "Instagram AI Agent",
+        "healthScore": 70,
+        "totalDeals": 2
       },
       {
         "sourceKey": "instagram-apify",
@@ -76,12 +82,6 @@
         "sourceLabel": "Wiener Lokal-Angebotsseiten",
         "healthScore": 62,
         "totalDeals": 10
-      },
-      {
-        "sourceKey": "instagram-ai",
-        "sourceLabel": "Instagram AI Agent",
-        "healthScore": 62,
-        "totalDeals": 4
       },
       {
         "sourceKey": "instagram-verified",
@@ -167,6 +167,12 @@
         "totalDeals": 75
       },
       {
+        "sourceKey": "instagram-ai",
+        "sourceLabel": "Instagram AI Agent",
+        "precisionScore": 66,
+        "totalDeals": 2
+      },
+      {
         "sourceKey": "joe",
         "sourceLabel": "jö Bonus Club",
         "precisionScore": 64,
@@ -183,12 +189,6 @@
         "sourceLabel": "Apify Instagram",
         "precisionScore": 60,
         "totalDeals": 1
-      },
-      {
-        "sourceKey": "instagram-ai",
-        "sourceLabel": "Instagram AI Agent",
-        "precisionScore": 59,
-        "totalDeals": 4
       }
     ],
     "topWeightedSources": [
@@ -217,10 +217,10 @@
         "totalDeals": 1
       },
       {
-        "sourceKey": "food3",
-        "sourceLabel": "Firecrawl Key 2 - Food",
+        "sourceKey": "instagram-ai",
+        "sourceLabel": "Instagram AI Agent",
         "sourceWeightScore": 51,
-        "totalDeals": 5
+        "totalDeals": 2
       }
     ],
     "topSourcesToFix": [
@@ -300,11 +300,11 @@
       "file": "deals-pending-meta-instagram.json",
       "sourceLabel": "Meta Instagram Graph",
       "totalDeals": 75,
-      "uniqueDeals": 69,
-      "duplicateDeals": 6,
-      "duplicateAcrossSources": 3,
+      "uniqueDeals": 70,
+      "duplicateDeals": 5,
+      "duplicateAcrossSources": 2,
       "fresh1dCount": 9,
-      "fresh7dCount": 66,
+      "fresh7dCount": 65,
       "viennaCount": 75,
       "foodDrinkCount": 52,
       "promoCount": 32,
@@ -376,6 +376,60 @@
       "coverageScore": 53,
       "precisionScore": 69,
       "sourceWeightScore": 61
+    },
+    {
+      "sourceKey": "instagram-ai",
+      "file": "deals-pending-instagram-ai.json",
+      "sourceLabel": "Instagram AI Agent",
+      "totalDeals": 2,
+      "uniqueDeals": 2,
+      "duplicateDeals": 0,
+      "duplicateAcrossSources": 0,
+      "fresh1dCount": 0,
+      "fresh7dCount": 2,
+      "viennaCount": 2,
+      "foodDrinkCount": 2,
+      "promoCount": 0,
+      "missingUrlCount": 0,
+      "sampleTitles": [
+        "Ganzes Mastlamm um 6,99 €/kg und Lachs um 9,99 €/kg",
+        "LUNCH FOR ONLY 1 €?! YES, IT’S HAPPENING! 🥢🔥 Mark your calendars because November 27 is about to get deliciou"
+      ],
+      "lastRun": null,
+      "uniqueRate": 1,
+      "duplicateRate": 0,
+      "fresh1dRate": 0,
+      "fresh7dRate": 1,
+      "viennaRate": 1,
+      "foodDrinkRate": 1,
+      "promoRate": 0,
+      "missingUrlRate": 0,
+      "averageQualityScore": 84,
+      "topCategories": [
+        {
+          "value": "kaffee",
+          "count": 1
+        },
+        {
+          "value": "supermarkt",
+          "count": 1
+        }
+      ],
+      "topTypes": [
+        {
+          "value": "rabatt",
+          "count": 2
+        }
+      ],
+      "issues": [
+        "wenige Deals sind frischer als 1 Tag",
+        "wenige klare Gratis-/Promo-Signale"
+      ],
+      "healthScore": 70,
+      "missionFitScore": 50,
+      "coverageScore": 11,
+      "precisionScore": 66,
+      "sourceWeightScore": 51
     },
     {
       "sourceKey": "instagram-apify",
@@ -490,69 +544,6 @@
       "sourceWeightScore": 49
     },
     {
-      "sourceKey": "instagram-ai",
-      "file": "deals-pending-instagram-ai.json",
-      "sourceLabel": "Instagram AI Agent",
-      "totalDeals": 4,
-      "uniqueDeals": 3,
-      "duplicateDeals": 1,
-      "duplicateAcrossSources": 1,
-      "fresh1dCount": 0,
-      "fresh7dCount": 3,
-      "viennaCount": 4,
-      "foodDrinkCount": 3,
-      "promoCount": 0,
-      "missingUrlCount": 0,
-      "sampleTitles": [
-        "Ganzes Mastlamm um 6,99 €/kg und Lachs um 9,99 €/kg",
-        "⚠️ Wetterwarnung für Wien: Heute regnet es Super Deals! ☔️🧡 Sichert euch bis zu 50 % Rabatt bei ausgewählten",
-        "Was bekommst du um 20 € am WEIHNACHTSMARKT Schönbrunn 🎄 Adresse: Weihnachtsmarkt Schloss Schönbrunn, 1130 Wie"
-      ],
-      "lastRun": null,
-      "uniqueRate": 0.8,
-      "duplicateRate": 0.3,
-      "fresh1dRate": 0,
-      "fresh7dRate": 0.8,
-      "viennaRate": 1,
-      "foodDrinkRate": 0.8,
-      "promoRate": 0,
-      "missingUrlRate": 0,
-      "averageQualityScore": 81,
-      "topCategories": [
-        {
-          "value": "essen",
-          "count": 1
-        },
-        {
-          "value": "kaffee",
-          "count": 1
-        },
-        {
-          "value": "shopping",
-          "count": 1
-        },
-        {
-          "value": "supermarkt",
-          "count": 1
-        }
-      ],
-      "topTypes": [
-        {
-          "value": "rabatt",
-          "count": 4
-        }
-      ],
-      "issues": [
-        "wenige Deals sind frischer als 1 Tag",
-        "wenige klare Gratis-/Promo-Signale"
-      ],
-      "healthScore": 62,
-      "missionFitScore": 43,
-      "coverageScore": 11,
-      "precisionScore": 59,
-      "sourceWeightScore": 45
-    },
-    {
       "sourceKey": "instagram-verified",
       "file": "deals-pending-instagram-verified.json",
       "sourceLabel": "Instagram",
@@ -619,14 +610,14 @@
       "sourceKey": "firecrawl4",
       "file": "deals-pending-firecrawl4.json",
       "sourceLabel": "Firecrawl Key 4 - Instagram Direct",
-      "totalDeals": 45,
-      "uniqueDeals": 40,
+      "totalDeals": 44,
+      "uniqueDeals": 39,
       "duplicateDeals": 5,
       "duplicateAcrossSources": 5,
       "fresh1dCount": 0,
-      "fresh7dCount": 6,
-      "viennaCount": 5,
-      "foodDrinkCount": 43,
+      "fresh7dCount": 5,
+      "viennaCount": 4,
+      "foodDrinkCount": 42,
       "promoCount": 24,
       "missingUrlCount": 0,
       "sampleTitles": [
@@ -661,11 +652,11 @@
       "foodDrinkRate": 1,
       "promoRate": 0.5,
       "missingUrlRate": 0,
-      "averageQualityScore": 64.1,
+      "averageQualityScore": 64.2,
       "topCategories": [
         {
           "value": "essen",
-          "count": 41
+          "count": 40
         },
         {
           "value": "fitness",
@@ -687,7 +678,7 @@
       "topTypes": [
         {
           "value": "rabatt",
-          "count": 25
+          "count": 24
         },
         {
           "value": "bogo",
