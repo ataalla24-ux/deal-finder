@@ -201,3 +201,19 @@ test('waits for the observed account marker before clicking the normal search bo
     assert.equal(r.posts.length, 1);
   });
 });
+
+test('a later rewritten query preserves earlier exact search results only', async t => {
+  await fixture(t, {
+    '/search': url => PROFILE + (url.searchParams.get('q') === 'coffee'
+      ? '<main>' + card(1) + '</main>'
+      : '<main>' + card(2) + '</main><script>history.replaceState({}, "", "/search?q=rewritten")</script>'),
+    [path(1)]: original(item(1)),
+    [path(2)]: original(item(2)),
+  }, async (page, calls) => {
+    const r = await collectTikTokBrowserEvidence(page, { ...options, keywords: ['coffee', 'kebap'], maxQueries: 2 });
+    assert.deepEqual(calls, ['/foryou', '/search', '/search', path(1)]);
+    assert.equal(r.stop, null);
+    assert.deepEqual(r.errors.map(error => error.reason), ['search-page-mismatch']);
+    assert.deepEqual(r.posts.map(post => post.url), [ORIGIN + path(1)]);
+  });
+});

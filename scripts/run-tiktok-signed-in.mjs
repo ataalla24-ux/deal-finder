@@ -179,10 +179,11 @@ async function run() {
   }
 
   const offers = publicOfferPosts(result.posts, now);
+  const skippedSearches = result.errors.filter(error => error.reason === 'search-page-mismatch').length;
   const summary = {
-    status: result.stop?.reason || 'completed',
+    status: result.stop?.reason || (skippedSearches ? 'completed-with-skipped-search' : 'completed'),
     checkedAt: now.toISOString(), queryCount: result.queryCount, videoCount: result.videoCount,
-    publicPosts: result.posts.length, offerPosts: offers.length,
+    publicPosts: result.posts.length, offerPosts: offers.length, skippedSearches,
     nextRetryAt: result.stop?.nextRetryAt || '',
   };
   if (mode === 'run' && offers.length) {

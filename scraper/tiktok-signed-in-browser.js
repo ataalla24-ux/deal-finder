@@ -276,13 +276,23 @@ export async function collectTikTokBrowserEvidence(page, {
     for (const keyword of selected) {
       stage = 'search';
       const refused = await searchFromPage(keyword);
-      if (refused) return stop(refused);
-      if (!hasExactSearch(page.url(), keyword)) return stop({ stage, reason: 'search-page-mismatch' });
+      if (refused && refused.reason !== 'search-page-mismatch') return stop(refused);
+      if (refused || !hasExactSearch(page.url(), keyword)) {
+        const failure = { stage, reason: 'search-page-mismatch' };
+        if (!searchResults.length) return stop(failure);
+        result.errors.push(failure);
+        break;
+      }
       const urls = await visibleVideoLinks(page, keyword, MAX_POSTS, timeout);
       const ready = await waitForAccount();
       const late = await pageRefusal();
       if (late) return stop(late);
-      if (!hasExactSearch(page.url(), keyword)) return stop({ stage, reason: 'search-page-mismatch' });
+      if (!hasExactSearch(page.url(), keyword)) {
+        const failure = { stage, reason: 'search-page-mismatch' };
+        if (!searchResults.length) return stop(failure);
+        result.errors.push(failure);
+        break;
+      }
       if (!ready) return stop({ stage, reason: 'session-unverified' });
       if (!urls.length && !await page.getByText(/^(?:keine ergebnisse(?: gefunden)?|no results found)[.!]?$/i)
         .filter({ visible: true }).first().isVisible()) {
