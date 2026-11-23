@@ -328,7 +328,7 @@ async function detectBlockingState(page) {
   const state = await pageLoginState(page);
   if (state === 'login-rejected') return new InstagramRefreshError(state, 'Instagram lehnt diesen Server-Login ab. Das beweist bei erfolgreicher manueller Anmeldung kein falsches Passwort.');
   if (state === 'rate-limited') return new InstagramRefreshError(state, 'Instagram hat den Login gedrosselt; kein weiterer Versuch.');
-  if (['challenge', 'email-code', 'two-factor'].includes(state)) return new InstagramRefreshError('blocked', 'Instagram Challenge/Verifizierung noch nicht abgeschlossen.');
+  if (['challenge', 'email-code', 'two-factor'].includes(state)) return new InstagramRefreshError('blocked', 'Instagram Challenge/Verifizierung noch nicht abgeschlossen.', { pageState: state });
   return null;
 }
 
@@ -369,7 +369,7 @@ export async function validateBrowserSession(page, { username, expectedUserId = 
   const targetPath = `/${username.toLowerCase()}/`;
   // Ordinary own-profile UI, not the obsolete private web_profile_info endpoint.
   const response = await page.goto(`${INSTAGRAM_HOME}${username}/`, { waitUntil: 'domcontentloaded', timeout: 30000 });
-  if (response && response.status() >= 400) throw new InstagramRefreshError(response.status() === 429 ? 'rate-limited' : 'validation-failed', `Instagram Profilprüfung fehlgeschlagen (HTTP ${response.status()}); keine Secrets aktualisiert.`);
+  if (response && response.status() >= 400) throw new InstagramRefreshError(response.status() === 429 ? 'rate-limited' : 'validation-failed', `Instagram Profilprüfung fehlgeschlagen (HTTP ${response.status()}); keine Secrets aktualisiert.`, { httpStatus: response.status() });
   const editProfile = page.getByRole('link', { name: /^(Edit profile|Profil bearbeiten)$/i }).first();
   const editButton = page.getByRole('button', { name: /^(Edit profile|Profil bearbeiten)$/i }).first();
   const deadline = Date.now() + timeout;

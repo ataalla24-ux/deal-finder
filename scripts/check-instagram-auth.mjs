@@ -290,7 +290,16 @@ export async function validateInstagramAuth(cookies, options = {}) {
       return { ...base, ok: true, status: 'ok', reason: 'Sitzung und eigene Profilansicht bestätigt', attempts: 1, credentialsState: 'valid', canProceed: true, consecutiveRateLimits: 0, nextRetryAt: '' };
     } catch (error) {
       if (error?.status === 'rate-limited') return { ...rateLimitResult({ username: base.username, diagnostics, previousReport, nowMs, response: { status: 429 }, config }), validationMethod: 'own-profile-ui', canProceed: false };
-      return { ...base, ok: false, status: error?.status === 'blocked' ? 'blocked' : 'validation-unconfirmed', reason: 'Eigene Profilansicht nicht bestätigt; keine automatische Neuanmeldung', attempts: 1 };
+      // Only fixed categories leave the browser: never page text, challenge URLs,
+      // account identifiers, email addresses, or the provider's error message.
+      const pageState = ['challenge', 'email-code', 'two-factor'].includes(error?.details?.pageState) ? error.details.pageState : '';
+      const httpStatus = Number.isInteger(error?.details?.httpStatus) && error.details.httpStatus >= 400 && error.details.httpStatus <= 599 ? error.details.httpStatus : null;
+      const reasons = {
+        challenge: 'Instagram verlangt eine persönliche Kontobestätigung; keine automatische Neuanmeldung',
+        'email-code': 'Instagram verlangt eine persönliche E-Mail-Code-Bestätigung; keine automatische Neuanmeldung',
+        'two-factor': 'Instagram verlangt eine persönliche Zwei-Faktor-Bestätigung; keine automatische Neuanmeldung',
+      };
+      return { ...base, ok: false, status: error?.status === 'blocked' ? 'blocked' : 'validation-unconfirmed', reason: reasons[pageState] || (httpStatus ? `Eigene Profilansicht nicht bestätigt (HTTP ${httpStatus}); keine automatische Neuanmeldung` : 'Eigene Profilansicht nicht bestätigt; keine automatische Neuanmeldung'), validationFailure: pageState || (httpStatus ? `http-${httpStatus}` : 'own-profile-unconfirmed'), userInteractionRequired: Boolean(pageState), attempts: 1 };
     }
   }
 

@@ -101,6 +101,16 @@ test('other accounts, public login walls and profile errors cannot validate a se
   await assert.rejects(validateBrowserSession(page, { username: 'dermarollerdesign', timeout: 100 }), e => e.status === 'rate-limited');
 });
 
+test('own-profile challenge diagnostics contain only a fixed state, not the page content', async t => {
+  const { page } = await fixture(t, '<p>Check your email private@example.test for code 123456</p>');
+  await assert.rejects(validateBrowserSession(page, { username: 'fixture_account', timeout: 100 }), e => {
+    assert.equal(e.status, 'blocked');
+    assert.deepEqual(e.details, { pageState: 'email-code' });
+    assert.doesNotMatch(e.message + JSON.stringify(e.details), /private|123456/);
+    return true;
+  });
+});
+
 test('local secret transfer is restricted to the two scraper secrets using stdin', () => {
   const calls = [];
   publishScraperSession({ cookieString: 'fixture-cookies', sessionId: 'fixture-session' }, (command, args, options) => {

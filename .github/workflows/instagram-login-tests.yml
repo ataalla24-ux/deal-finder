@@ -2,9 +2,9 @@ name: Instagram Login Offline Tests
 on:
   push:
     branches: [main]
-    paths: ['scripts/refresh-instagram-cookies.mjs', 'scripts/refresh-instagram-local.mjs', 'scripts/lib/instagram-login-policy.mjs', 'scripts/test-instagram-login-*.mjs', 'scripts/check-instagram-auth.mjs', 'scripts/test-instagram-auth-reliability.mjs', '.github/workflows/instagram-login-tests.yml', '.github/workflows/firecrawl-daily-sync.yml']
+    paths: ['scripts/refresh-instagram-cookies.mjs', 'scripts/refresh-instagram-local.mjs', 'scripts/lib/instagram-login-policy.mjs', 'scripts/test-instagram-login-*.mjs', 'scripts/check-instagram-auth.mjs', 'scripts/test-instagram-auth-reliability.mjs', 'scripts/test-instagram-daily-probe.mjs', '.github/workflows/instagram-login-tests.yml', '.github/workflows/firecrawl-daily-sync.yml']
   pull_request:
-    paths: ['scripts/refresh-instagram-cookies.mjs', 'scripts/refresh-instagram-local.mjs', 'scripts/lib/instagram-login-policy.mjs', 'scripts/test-instagram-login-*.mjs', 'scripts/check-instagram-auth.mjs', 'scripts/test-instagram-auth-reliability.mjs', '.github/workflows/instagram-login-tests.yml', '.github/workflows/firecrawl-daily-sync.yml']
+    paths: ['scripts/refresh-instagram-cookies.mjs', 'scripts/refresh-instagram-local.mjs', 'scripts/lib/instagram-login-policy.mjs', 'scripts/test-instagram-login-*.mjs', 'scripts/check-instagram-auth.mjs', 'scripts/test-instagram-auth-reliability.mjs', 'scripts/test-instagram-daily-probe.mjs', '.github/workflows/instagram-login-tests.yml', '.github/workflows/firecrawl-daily-sync.yml']
 permissions:
   contents: read
 jobs:
@@ -23,4 +23,6 @@ jobs:
       - name: Local fixtures only; no account secrets or Instagram requests
         run: node --test scripts/test-instagram-login-policy.mjs scripts/test-instagram-login-browser.mjs
       - name: Existing auth health and bounded own-profile policy
-        run: SENTRY_DISABLED=1 node scripts/test-instagram-auth-reliability.mjs
+        run: |
+          SENTRY_DISABLED=1 node scripts/test-instagram-auth-reliability.mjs
+          SENTRY_DISABLED=1 node --test scripts/test-instagram-daily-probe.mjs

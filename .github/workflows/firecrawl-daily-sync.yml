@@ -9,6 +9,10 @@ on:
         description: 'Run only the free jö/OMV source check and commit its candidates/reports'
         type: boolean
         default: false
+      instagram_probe:
+        description: 'Instagram only: existing session, at most 3 profiles/12 pages; no login or paid provider'
+        type: boolean
+        default: false
 
 concurrency:
   group: firecrawl-daily-sync
@@ -42,12 +46,13 @@ jobs:
           node -e "const { chromium } = require('playwright'); (async()=>{const b=await chromium.launch({headless:true}); await b.close(); console.log('playwright-ok');})().catch(e=>{console.error(e); process.exit(1);});"
 
       - name: Load jö Auth State
+        if: ${{ !inputs.instagram_probe }}
         env:
           JOE_STORAGE_STATE_B64: ${{ secrets.JOE_STORAGE_STATE_B64 }}
         run: node scripts/load-joe-auth-state.mjs
 
       - name: Build Instagram Merchant Registry
-        if: ${{ !inputs.joe_only }}
+        if: ${{ !inputs.joe_only && !inputs.instagram_probe }}
         run: node scraper/build-instagram-merchant-registry.js
 
       - name: Respect saved Instagram web cooldowns
@@ -70,6 +75,7 @@ jobs:
           SENTRY_DISABLED: "1"
           INSTAGRAM_AUTH_CLEAR_PENDING_ON_FAILURE: "0"
           INSTAGRAM_AUTH_CLEAR_MODE: daily-sync
+          INSTAGRAM_AUTH_NOTIFY_SLACK: ${{ inputs.instagram_probe && '0' || '1' }}
           SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
           SLACK_CHANNEL_ID: ${{ secrets.SLACK_CHANNEL_ID }}
         run: node scripts/check-instagram-auth.mjs
@@ -81,28 +87,32 @@ jobs:
           INSTAGRAM_COOKIES: ${{ secrets.INSTAGRAM_COOKIES }}
           IG_MAX_AGE_DAYS: 7
           IG_MAX_DEALS: 800
-          IG_MAX_SOURCES_TOTAL: 220
+          IG_MAX_SOURCES_TOTAL: ${{ inputs.instagram_probe && '3' || '220' }}
           IG_MAX_TIMELINE_POSTS: 4
-          IG_MAX_REGISTRY_ACCOUNTS: 220
+          IG_MAX_REGISTRY_ACCOUNTS: ${{ inputs.instagram_probe && '3' || '220' }}
           IG_MIN_SCORE: 0
           IG_MAX_DEALS_PER_ACCOUNT: 120
           IG_SOURCE_DELAY_MS: 1800
-          IG_MAX_RUN_MINUTES: 80
+          IG_MAX_RUN_MINUTES: ${{ inputs.instagram_probe && '10' || '80' }}
+          IG_MAX_PAGE_VISITS: ${{ inputs.instagram_probe && '12' || '40' }}
         run: |
           node scraper/instagram-daily-sync.js
 
       - name: Run jö Scraper
+        if: ${{ !inputs.instagram_probe }}
         run: |
           SENTRY_DISABLED=1 node --test scripts/test-joe-current-offers.mjs
           node scraper/joe-scraper.js
 
       - name: Run Vienna Promo Radar
-        if: ${{ !inputs.joe_only }}
+        if: ${{ !inputs.joe_only && !inputs.instagram_probe }}
         run: node scraper/vienna-promo-radar.js
 
       - name: Commit deal updates
         run: |
-          if [ '${{ inputs.joe_only }}' = 'true' ]; then
+          if [ '${{ inputs.instagram_probe }}' = 'true' ]; then
+            node scripts/commit-generated.mjs --skip-conflicts --message "Bounded Instagram web probe $(date +%Y-%m-%dT%H:%MZ)" --files docs/deals-pending-instagram.json docs/deals-pending-instagram-web.json docs/deals-pending-instagram-discovery.json docs/instagram-source-stats.json docs/instagram-discovery-report.json docs/instagram-web-report.json docs/instagram-auth-health.json
+          elif [ '${{ inputs.joe_only }}' = 'true' ]; then
             node scripts/commit-generated.mjs --skip-conflicts --message "jo OMV source check $(date +%Y-%m-%dT%H:%MZ)" --files docs/deals-pending-joe.json docs/joe-scraper-report.json docs/deal-pipeline-last-run-joe.json docs/deal-pipeline-runs-joe.json
           else
             node scripts/commit-generated.mjs --skip-conflicts --message "Daily sync sources $(date +%Y-%m-%d)" --files docs/deals-pending-instagram.json docs/deals-pending-instagram-web.json docs/deals-pending-instagram-discovery.json docs/deals-pending-joe.json docs/joe-scraper-report.json docs/deal-pipeline-last-run-joe.json docs/deal-pipeline-runs-joe.json docs/deals-pending-vienna-promo-radar.json docs/instagram-source-stats.json docs/instagram-discovery-report.json docs/instagram-web-report.json docs/instagram-merchant-registry.json docs/instagram-auth-health.json
