@@ -34,7 +34,10 @@ runs:
           echo '::warning::Coupon package index unavailable; verification will check actual tools.'
         fi
         read -r -a packages <<< "$MISSING_COUPON_PACKAGES"
-        if ! timeout --kill-after=10s 120s sudo apt-get -o Acquire::Retries=1 -o Acquire::http::Timeout=20 -o Acquire::https::Timeout=20 install -y --no-install-recommends "${packages[@]}"; then
+        # A cold runner needs ~77 MB/91 packages; the EC2 Ubuntu mirror can
+        # still be downloading at 120 s. Keep a finite setup budget and verify
+        # the actual binaries/languages below, even after installation fails.
+        if ! timeout --kill-after=10s 240s sudo apt-get -o Acquire::Retries=1 -o Acquire::http::Timeout=20 -o Acquire::https::Timeout=20 install -y --no-install-recommends "${packages[@]}"; then
           echo '::warning::Coupon tools incomplete; media-dependent offers must wait, other offers may proceed.'
         fi
     - name: Publish actual media verification capability

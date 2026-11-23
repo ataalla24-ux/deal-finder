@@ -79,7 +79,7 @@ test('coupon preflight skips installed tools and bounds both package operations'
   assert.equal(missing.packages.filter(p => p === 'poppler-utils').length, 1);
   const action = fs.readFileSync('.github/actions/coupon-tools/action.yml', 'utf8');
   assert.match(action, /60s sudo apt-get/);
-  assert.match(action, /120s sudo apt-get/);
+  assert.match(action, /240s sudo apt-get/);
   assert.match(action, /if \(installed\) needed = false/);
   assert.match(action, /inspectCouponTools/);
   assert.match(action, /COUPON_TOOLS_AVAILABLE/);
