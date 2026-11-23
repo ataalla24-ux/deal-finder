@@ -129,6 +129,7 @@ export const POWER_FOOD_SOURCES = [
     brand: "DerMann",
     url: "https://www.dermann.at/",
     seeds: ["https://l.dermann.at/rabattmarkerl/"],
+    weeklyBakeryBranchUrl: "https://www.dermann.at/filiale/naschmarkt-11-14/",
     category: "essen",
     allowedHosts: ["www.dermann.at", "dermann.at", "l.dermann.at"],
     linkPattern: /rabatt|aktion|angebot/i,

@@ -178,6 +178,48 @@ export function extractFoodExpiry(text, now) {
   };
 }
 
+// This template omits the year in the visible offer. Bind it to this exact
+// webpage's publication date, so a retained article can never recur next year.
+function weeklyBakeryOffer($, pageUrl, branchUrl) {
+  const product = $('.produktbeschreibung');
+  const name = foodText(product.children('h1').text());
+  const text = textOf($, product.children('p'));
+  if (product.length !== 1 || product.children('h1').length !== 1 || product.children('p').length !== 1
+      || $('main').length !== 1 || textOf($, $('main')) !== foodText(name + ' ' + text)
+      || !name || !text.includes(name) || product.closest('[hidden],[aria-hidden="true"]').length
+      || product.find('[hidden],[aria-hidden="true"]').length
+      || /\b(?:nicht|keine?\w*|abgelaufen|beendet|zurückgezogen|nur online)\b/i.test(text)) return null;
+
+  const terms = text.match(/\bVom (\d{1,2})\. bis zum (\d{1,2})\. ([a-zäöü]+) erhalten Sie [^.!?\d]+? in allen Filialen von Montag bis Samstag, ausgenommen an Feiertage[n]?, um (\d{1,2})\s*% vergünstigt für nur (\d{1,2},\d{2})\s*€\.$/i);
+  if (!terms || +terms[1] > +terms[2] || +terms[4] === 0 || Number(terms[5].replace(',', '.')) <= 0) return null;
+
+  const records = [];
+  for (const script of $('script[type="application/ld+json"]').toArray()) {
+    try {
+      const graph = JSON.parse($(script).text());
+      const nodes = Array.isArray(graph['@graph']) ? graph['@graph'] : [graph];
+      records.push(...nodes.filter(node => node?.['@type'] === 'WebPage' && node.url === pageUrl
+        && node['@id'] === pageUrl && node.name === name + ' - Bäckerei Der Mann'));
+    } catch { /* Ignore unrelated JSON-LD. */ }
+  }
+  if (records.length !== 1 || !/^\d{4}-\d\d-\d\dT/.test(records[0].datePublished || '')) return null;
+  const published = new Date(records[0].datePublished);
+  if (!Number.isFinite(+published)) return null;
+  const localDate = new Intl.DateTimeFormat('sv-SE', { timeZone: 'Europe/Vienna' }).format(published);
+  const monthName = new Intl.DateTimeFormat('de-AT', { month: 'long', timeZone: 'Europe/Vienna' }).format(published);
+  if (monthName.toLowerCase() !== terms[3].toLowerCase()) return null;
+  const isoDay = day => localDate.slice(0, 8) + day.padStart(2, '0');
+  const validFrom = isoDay(terms[1]);
+  const validUntil = isoDay(terms[2]);
+  if (![validFrom, validUntil].every(day => Number.isFinite(Date.parse(day)) && new Date(day).toISOString().startsWith(day))
+      || Math.abs(Date.parse(localDate) - Date.parse(validFrom)) > 7 * 86400000) return null;
+  return {
+    title: `${name} für ${terms[5]} € (−${terms[4]} %)`,
+    text, confirmedDiscount: true, branchUrl, method: 'weekly-bakery-offer',
+    dates: { validFrom, validUntil, raw: terms[0].slice(0, terms[0].indexOf(' erhalten')), recurring: false },
+  };
+}
+
 export function extractFoodOffers(html, source, options = {}) {
   const now = options.now || new Date();
   const pageUrl = options.pageUrl || source.url;
@@ -193,6 +235,9 @@ export function extractFoodOffers(html, source, options = {}) {
   }
   if (source.mediaOnly) return {deals:[],rejected:[],links:[]};
   const $ = load(html);
+  const bakeryDetail = source.weeklyBakeryBranchUrl && new URL(pageUrl).origin === 'https://www.dermann.at'
+    && /^\/aktion\/[a-z0-9-]+\/$/.test(new URL(pageUrl).pathname) && $('.produktbeschreibung').length;
+  const bakeryOffer = bakeryDetail ? weeklyBakeryOffer($, pageUrl, source.weeklyBakeryBranchUrl) : null;
   $("script,style,noscript,nav,footer,header").remove();
   const bodyText = textOf($, $("body"));
   // Some merchant cards share a restrictive heading, such as lunch only.
@@ -260,7 +305,10 @@ export function extractFoodOffers(html, source, options = {}) {
         method,
       });
   };
-  if (source.adjacentOfferSelector) {
+  if (bakeryDetail) {
+    if (bakeryOffer) blocks.push(bakeryOffer);
+    else rejected.push({ reason: 'unconfirmed-weekly-bakery-offer', url: pageUrl });
+  } else if (source.adjacentOfferSelector) {
     $(source.adjacentOfferSelector).each((i, el) => {
       const next = $(el).next('.elementor-widget-heading');
       if (next.length) add($(el).add(next), 'merchant-card');
@@ -310,7 +358,7 @@ export function extractFoodOffers(html, source, options = {}) {
         (b.method === "merchant-card" && source.currentOffers)) &&
       PRICE.test(t);
     if (!b.confirmedFood && !FOOD.test(t)) reason = "not-food-drink";
-    else if (!BENEFIT.test(t) && !pricePromotion && !extractLowFoodPrice(t))
+    else if (!b.confirmedDiscount && !BENEFIT.test(t) && !pricePromotion && !extractLowFoodPrice(t))
       reason = "no-concrete-benefit";
     else if (
       /(?:gratis|kostenlos(?:er|e)?)\s+(?:versand|lieferung|abholung|wlan)/i.test(
@@ -358,7 +406,7 @@ export function extractFoodOffers(html, source, options = {}) {
       rejected.push({ reason, title: b.title, text: t.slice(0, 220) });
       continue;
     }
-    const dates = extractFoodExpiry(t, now);
+    const dates = b.dates || extractFoodExpiry(t, now);
     const today = new Intl.DateTimeFormat("sv-SE", {
       timeZone: "Europe/Vienna",
     }).format(now);
@@ -379,7 +427,7 @@ export function extractFoodOffers(html, source, options = {}) {
         t,
       );
     const merchantAll =
-      /in allen.{0,50}filialen/i.test(t) && VIENNA.test(bodyText);
+      /in allen.{0,50}filialen/i.test(t) && (Boolean(b.branchUrl) || VIENNA.test(bodyText));
     const scope = inText
       ? "offer-text"
       : registered
@@ -494,7 +542,7 @@ export function extractFoodOffers(html, source, options = {}) {
         extractionMethod: b.method,
         contentHash: crypto.createHash("sha256").update(t).digest("hex"),
         locationScope: scope,
-        locationEvidenceUrl: registered && !b.address ? source.locationEvidenceUrl : url,
+        locationEvidenceUrl: b.branchUrl || (registered && !b.address ? source.locationEvidenceUrl : url),
       },
       reviewRequired: true,
     };
