@@ -26,6 +26,7 @@ test('larger scans leave 35 cents for storage and stop before included credit is
 test('unknown budget, overage, stale cycle and unsupported pricing fail closed', () => {
   for (const mutate of [
     x => { delete x.user.plan; },
+    x => { x.user.plan.tier = 'STARTER'; },
     x => { x.limits.limits.maxMonthlyUsageUsd = 100; },
     x => { x.limits.current.monthlyUsageUsd = 4.8; },
     x => { x.limits.current.monthlyUsageUsd = '0'; },

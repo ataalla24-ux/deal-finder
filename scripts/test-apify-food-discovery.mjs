@@ -7,6 +7,15 @@ import { DAY, LIMITS, TAGS, discoverySources, selectDiscoverySources, reservatio
 import { actorBounds, actorInput, runBoundedActor, collectDiscoveryBatches, restrictedMediaFetch, safeMediaUrl, processDiscoveryItems, pipelineHealthReport, discoverySourceOutcomes } from '../scraper/apify-food-discovery.js';
 
 const now = new Date('2026-10-22T18:00:00Z');
+const freePreflight = async actorKey => ({
+  user: { plan: { tier: 'FREE', monthlyUsageCreditsUsd: 5 } },
+  limits: { current: { monthlyUsageUsd: 0 }, limits: { maxMonthlyUsageUsd: 5 },
+    monthlyUsageCycle: { startAt: '2026-10-01', endAt: '2026-11-01' } },
+  actor: { username: 'apify', name: actorKey.split('~')[1], isPublic: true,
+    taggedBuilds: { latest: { buildNumber: actorKey.includes('hashtag') ? '0.0.748' : '0.0.870' } },
+    pricingInfos: [{ startedAt: '2026-01-01', pricingModel: 'PAY_PER_EVENT', minimalMaxTotalChargeUsd: .0027 }] },
+});
+
 const post = overrides => ({ url: 'https://www.instagram.com/p/TestCoffee1/', caption: 'Wien: Nur heute 1+1 auf alle Kaffee!',
   ownerUsername: 'cafe_example', timestamp: '2026-10-22T09:00:00Z', locationName: 'Wien', ...overrides });
 const emptyState = () => ({ reservations: [], sources: {}, seen: {} });
@@ -65,7 +74,7 @@ test('full expanded batches are capped and old one-shot validation cannot expand
     const batch = sources.filter(s => s.kind === kind);
     const bounds = actorBounds(batch);
     chargedCap += bounds.cap;
-    const result = await runBoundedActor({ request: async (route, options) => {
+    const result = await runBoundedActor({ preflight: freePreflight, request: async (route, options) => {
       if (options?.method === 'POST') {
         starts.push({ route, body: options.body });
         return { id: 'fullRun', status: 'SUCCEEDED', defaultDatasetId: 'data' };
@@ -75,6 +84,8 @@ test('full expanded batches are capped and old one-shot validation cannot expand
     } }, batch, { now: () => now });
     assert.equal(result.items.length, kind === 'profile' ? 22 : 4);
   }
+  assert.match(starts[0].route, /build=0\.0\.870&/);
+  assert.match(starts[1].route, /build=0\.0\.748&/);
   assert.equal(starts.length, 2);
   assert.equal(chargedCap, RUN_CAP_USD);
   assert.equal(starts[0].body.directUrls.length, 22);
@@ -164,7 +175,7 @@ test('bounded actor input and one charged start, terminal polling and dataset ca
   const calls = [];
   let clock = +now;
   const sources = [{ kind: 'profile', url: 'https://www.instagram.com/cafe_example/' }];
-  const client = { request: async (url, options) => {
+  const client = { preflight: freePreflight, request: async (url, options) => {
     calls.push({ url, options });
     if (options?.method === 'POST') return { id: 'run123', status: 'RUNNING' };
     if (url.includes('/actor-runs/')) return { id: 'run123', status: 'SUCCEEDED', defaultDatasetId: 'dataset123', usageTotalUsd: .027 };
@@ -176,13 +187,31 @@ test('bounded actor input and one charged start, terminal polling and dataset ca
   assert.match(calls[0].url, /timeout=600&memory=512&maxItems=1&maxTotalChargeUsd=0.0625/);
   assert.deepEqual(calls[0].options.body, actorInput(sources, now));
 });
+test('missing or foreign provider build and paid account cannot start an Actor', async () => {
+  for (const change of [
+    x => { x.actor.name = 'different-actor'; },
+    x => { x.actor.isPublic = false; },
+    x => { x.actor.username = 'different-owner'; },
+    x => { delete x.actor.taggedBuilds.latest; },
+    x => { x.actor.taggedBuilds.latest.buildNumber = '1.2.3&maxItems=999'; },
+    x => { x.user.plan.tier = 'STARTER'; },
+  ]) {
+    let starts = 0;
+    const result = await collectDiscoveryBatches({
+      preflight: async actor => { const x = await freePreflight(actor); change(x); return x; },
+      request: async () => { starts++; throw Error('unexpected start'); },
+    }, [{ kind: 'profile', key: 'profile:cafe', url: 'https://www.instagram.com/cafe/' }], { now: () => now });
+    assert.equal(starts, 0);
+    assert.equal(result.errors.length, 1);
+  }
+});
 test('ambiguous start is never retried; polling deadline aborts bounded actor', async () => {
   let count = 0;
   const sources = [{ kind: 'profile', url: 'https://www.instagram.com/test/' }];
-  await assert.rejects(runBoundedActor({ request: async () => { count++; throw new Error('uncertain'); } }, sources));
+  await assert.rejects(runBoundedActor({ preflight: freePreflight, request: async () => { count++; throw new Error('uncertain'); } }, sources, { now: () => now }));
   assert.equal(count, 1);
   let clock = +now, aborted = false;
-  await assert.rejects(runBoundedActor({ request: async url => {
+  await assert.rejects(runBoundedActor({ preflight: freePreflight, request: async url => {
     if (url.endsWith('/abort')) aborted = true;
     return { id: 'run123', status: 'RUNNING' };
   } }, sources, { now: () => new Date(clock), sleep: async () => { clock += 120_000; } }), /deadline/);
@@ -195,9 +224,7 @@ test('dedicated hashtag actor gets hashtag input and both actors share the .075 
   const client = {
     preflight: async actor => {
       checked.push(actor);
-      return { user: { plan: { monthlyUsageCreditsUsd: 5 } }, limits: { current: { monthlyUsageUsd: 0 },
-        limits: { maxMonthlyUsageUsd: 5 }, monthlyUsageCycle: { startAt: '2026-10-01', endAt: '2026-11-01' } },
-      actor: { pricingInfos: [{ startedAt: '2026-01-01', pricingModel: 'PAY_PER_EVENT', minimalMaxTotalChargeUsd: .0027 }] } };
+      return freePreflight(actor);
     },
     request: async (route, options) => {
       if (options?.method === 'POST') {
@@ -236,9 +263,7 @@ test('forbidden start reports the exact stage and never switches to another acto
   const client = {
     preflight: async actor => {
       calls.push(actor);
-      return { user: { plan: { monthlyUsageCreditsUsd: 5 } }, limits: { current: { monthlyUsageUsd: 0 },
-        limits: { maxMonthlyUsageUsd: 5 }, monthlyUsageCycle: { startAt: '2026-10-01', endAt: '2026-11-01' } },
-      actor: { pricingInfos: [{ startedAt: '2026-01-01', pricingModel: 'PAY_PER_EVENT', minimalMaxTotalChargeUsd: .0027 }] } };
+      return freePreflight(actor);
     },
     request: async (route, options) => {
       calls.push(options.method);

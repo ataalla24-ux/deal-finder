@@ -11,8 +11,6 @@ import { analyzeInstagramMediaItem, detectMediaTools, entryMediaPriority } from 
 import { buildPipelineRunReport, writePipelineRunReport, githubRunProvenance } from './pipeline-run-report-utils.js';
 import { realPostTimestamp } from './import-apify-instagram-deals.js';
 
-export const ACTOR_BUILD = '0.0.830';
-export const HASHTAG_BUILD = '0.0.707';
 const TERMINAL = new Set(['SUCCEEDED', 'FAILED', 'TIMED-OUT', 'ABORTED']);
 const FILES = {
   state: 'docs/apify-discovery-state.json', report: 'docs/apify-discovery-report.json',
@@ -79,7 +77,13 @@ export async function runBoundedActor(client, sources, {
   const { cap, maxItems } = actorBounds(sources, purpose);
   const hashtag = sources[0].kind === 'hashtag';
   const actorId = hashtag ? HASHTAG_ACTOR : DISCOVERY_ACTOR;
-  const build = hashtag ? HASHTAG_BUILD : ACTOR_BUILD;
+  const preflight = await client.preflight(actorId);
+  const budget = budgetCheck(preflight, now(), cap);
+  if (!budget.allowed) throw new Error(`apify-budget-${budget.reason}`);
+  const { actor } = preflight;
+  const build = actor?.taggedBuilds?.latest?.buildNumber;
+  if (actor?.isPublic !== true || `${actor.username}~${actor.name}` !== actorId
+      || typeof build !== 'string' || !/^\d+\.\d+\.\d+$/.test(build)) throw new Error('invalid-actor-build');
   const start = +now();
   // One POST only. Provider timeout also bounds abandoned/cancelled GitHub jobs.
   let run = await client.request(`/acts/${actorId}/runs?build=${build}&timeout=600&memory=512&maxItems=${maxItems}&maxTotalChargeUsd=${cap}`, {
@@ -99,7 +103,7 @@ export async function runBoundedActor(client, sources, {
   if (!/^[A-Za-z0-9]+$/.test(run.defaultDatasetId || '')) throw new Error('missing-dataset-id');
   const items = await client.request(`/datasets/${run.defaultDatasetId}/items?clean=true&format=json&limit=${maxItems}`);
   if (!Array.isArray(items)) throw new Error('invalid-dataset');
-  return { runId: run.id, actorId, status: run.status, items: items.slice(0, maxItems),
+  return { runId: run.id, actorId, build, status: run.status, items: items.slice(0, maxItems),
     reportedChargeUsd: Number.isFinite(run.usageTotalUsd) ? run.usageTotalUsd : null };
 }
 
@@ -123,13 +127,9 @@ export async function collectDiscoveryBatches(client, sources, options = {}) {
     if (!selected.length) continue;
     selected.forEach(source => attemptedSources.add(source.key));
     try {
-      const { cap } = actorBounds(selected, options.purpose);
-      const check = budgetCheck(await client.preflight(kind === 'profile' ? DISCOVERY_ACTOR : HASHTAG_ACTOR),
-        options.now?.() || new Date(), cap);
-      if (!check.allowed) throw new Error(`apify-budget-${check.reason}`);
       const run = await runBoundedActor(client, selected, options);
       items.push(...run.items);
-      runs.push({ id: run.runId, actorId: run.actorId, reportedChargeUsd: run.reportedChargeUsd });
+      runs.push({ id: run.runId, actorId: run.actorId, build: run.build, reportedChargeUsd: run.reportedChargeUsd });
     } catch (error) {
       selected.forEach(s => failedSources.add(s.key));
       errors.push({ kind, ...apifyErrorDetails(error) });

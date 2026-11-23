@@ -135,8 +135,10 @@ export function budgetCheck({ user, limits, actor }, now = new Date(), runCap = 
   const pricing = (actor?.pricingInfos || [])
     .filter(p => Date.parse(p.startedAt) <= +now)
     .sort((a, b) => Date.parse(b.startedAt) - Date.parse(a.startedAt))[0];
+  const plan = String(user?.plan?.tier || user?.plan?.id || 'unknown');
   let reason = '';
   if (!Number.isFinite(runCap) || runCap <= 0 || runCap > RUN_CAP_USD) reason = 'invalid-run-cap';
+  else if (plan !== 'FREE') reason = 'requires-free-plan';
   else if (![credits, used, ceiling].every(v => typeof v === 'number' && Number.isFinite(v) && v >= 0)
       || !Number.isFinite(Date.parse(limits?.monthlyUsageCycle?.startAt))
       || !Number.isFinite(Date.parse(limits?.monthlyUsageCycle?.endAt))) reason = 'unknown-account-budget';
@@ -149,7 +151,7 @@ export function budgetCheck({ user, limits, actor }, now = new Date(), runCap = 
   return {
     allowed: !reason,
     reason,
-    plan: String(user?.plan?.tier || user?.plan?.id || 'unknown'),
+    plan,
     includedCreditUsd: Number.isFinite(credits) ? credits : null,
     accountUsageUsd: Number.isFinite(used) ? used : null,
     accountLimitUsd: Number.isFinite(ceiling) ? ceiling : null,
