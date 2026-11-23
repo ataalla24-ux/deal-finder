@@ -1,10 +1,41 @@
 {
-  "allowed": false,
-  "reason": "channel-cooldown",
-  "generatedAt": "2026-11-22T22:38:00.386Z",
-  "runKey": "45078793102",
+  "generatedAt": "2026-11-23T11:25:01.394Z",
+  "runProvenance": {
+    "repository": "ataalla24-ux/deal-finder",
+    "runId": "45164911142",
+    "headSha": "66d2c63875026b91e551e3942871bf896a8efa02",
+    "checkoutSha": "94ea9c156044b93219047da89fb6f8fa8d891306",
+    "triggeringRun": null,
+    "event": "workflow_dispatch",
+    "runAttempt": "1",
+    "url": "https://github.com/ataalla24-ux/deal-finder/actions/runs/45164911142"
+  },
   "purpose": "scan",
-  "sources": [
+  "limits": {
+    "profiles": 22,
+    "hashtags": 4,
+    "perSource": 1,
+    "posts": 26,
+    "ocrPosts": 8,
+    "dailyUsd": 0.15,
+    "cycleUsd": 4.65
+  },
+  "budget": {
+    "allowed": true,
+    "reason": "",
+    "plan": "FREE",
+    "includedCreditUsd": 5,
+    "accountUsageUsd": 0.0729863132998853,
+    "accountLimitUsd": 5,
+    "cycle": {
+      "startAt": "2026-11-15T00:00:00.000Z",
+      "endAt": "2026-12-14T23:59:59.999Z"
+    },
+    "runCapUsd": 0.075,
+    "creditReserveUsd": 0.35,
+    "pricingModel": "PAY_PER_EVENT"
+  },
+  "selectedSources": [
     {
       "key": "profile:friendscovienna",
       "kind": "profile",
@@ -37,50 +68,113 @@
       "priority": 0
     }
   ],
-  "budget": {
-    "allowed": true,
-    "reason": "",
-    "plan": "FREE",
-    "includedCreditUsd": 5,
-    "accountUsageUsd": 0.07297815392690023,
-    "accountLimitUsd": 5,
-    "cycle": {
-      "startAt": "2026-11-15T00:00:00.000Z",
-      "endAt": "2026-12-14T23:59:59.999Z"
-    },
-    "runCapUsd": 0.075,
-    "creditReserveUsd": 0.35,
-    "pricingModel": "PAY_PER_EVENT"
-  },
-  "limits": {
-    "profiles": 22,
-    "hashtags": 4,
-    "perSource": 1,
-    "posts": 26,
-    "ocrPosts": 8,
-    "dailyUsd": 0.15,
-    "cycleUsd": 4.65
-  },
-  "runProvenance": {
-    "repository": "ataalla24-ux/deal-finder",
-    "runId": "45078793102",
-    "headSha": "fa9b6577e5d851f682a21b24028e102531870c3f",
-    "checkoutSha": "fa9b6577e5d851f682a21b24028e102531870c3f",
-    "triggeringRun": null,
-    "event": "schedule",
-    "runAttempt": "1",
-    "url": "https://github.com/ataalla24-ux/deal-finder/actions/runs/45078793102"
-  },
-  "status": "deferred",
+  "status": "partial",
+  "fetchedRecords": 5,
   "freshAcceptedDeals": 0,
-  "retryAt": "2026-11-23T13:29:46.456Z",
-  "cooldown": {
-    "reason": "apify-http-403",
-    "httpStatus": 403,
-    "operation": "actor-start",
-    "providerType": "build-not-found",
-    "retryAfterStatus": "absent",
-    "policy": "conservative",
-    "until": "2026-11-23T13:29:46.456Z"
-  }
+  "pendingDeals": 1,
+  "unchangedPosts": 0,
+  "duplicatePosts": 0,
+  "providerErrors": 1,
+  "emptySourceRecords": 1,
+  "ocrCalls": 0,
+  "candidateAudit": [
+    {
+      "key": "instagram:Df6wX6rRRd5",
+      "url": "https://www.instagram.com/p/Df6wX6rRRd5/",
+      "ownerUsername": "mio.vienna",
+      "status": "rejected",
+      "reason": "non-food-ad",
+      "ocrUsed": false,
+      "ocrDeferred": false,
+      "ocrErrors": 0
+    },
+    {
+      "key": "instagram:DgCg96dsq9Z",
+      "url": "https://www.instagram.com/p/DgCg96dsq9Z/",
+      "ownerUsername": "kseniainvienna",
+      "status": "rejected",
+      "reason": "non-food-ad",
+      "ocrUsed": false,
+      "ocrDeferred": false,
+      "ocrErrors": 0
+    },
+    {
+      "key": "instagram:De4ulaNkU_d",
+      "url": "https://www.instagram.com/p/De4ulaNkU_d/",
+      "ownerUsername": "bros.pizza.nbv",
+      "status": "rejected",
+      "reason": "post-older-than-seven-days",
+      "ocrUsed": false,
+      "ocrDeferred": false,
+      "ocrErrors": 0
+    }
+  ],
+  "actorRuns": [
+    {
+      "id": "Y41ctCyRuxjLR6b5C",
+      "actorId": "apify~instagram-scraper",
+      "build": "0.0.870",
+      "reportedChargeUsd": 0.0027
+    },
+    {
+      "id": "6q2mIzIE74CQpa97W",
+      "actorId": "apify~instagram-hashtag-scraper",
+      "build": "0.0.748",
+      "reportedChargeUsd": 0.0104
+    }
+  ],
+  "batchErrors": [],
+  "datasetProviderErrors": 1,
+  "reportedChargeUsd": 0.0131,
+  "tools": {
+    "tesseract": true,
+    "ffmpeg": false,
+    "ffprobe": false
+  },
+  "sources": [
+    {
+      "key": "profile:friendscovienna",
+      "lastAttemptAt": "2026-11-23T11:25:01.394Z",
+      "postsReturned": 0,
+      "status": "not-found",
+      "consecutiveFailures": 2,
+      "retryAt": "2026-12-23T11:25:01.394Z"
+    },
+    {
+      "key": "hashtag:viennafood",
+      "lastAttemptAt": "2026-11-23T11:25:01.394Z",
+      "postsReturned": 1,
+      "status": "posts-returned",
+      "consecutiveFailures": 0,
+      "retryAt": "",
+      "consecutiveEmpty": 0
+    },
+    {
+      "key": "hashtag:neueroeffnungwien",
+      "lastAttemptAt": "2026-11-23T11:25:01.394Z",
+      "postsReturned": 0,
+      "status": "no-items",
+      "consecutiveFailures": 0,
+      "consecutiveEmpty": 2,
+      "retryAt": "2026-11-27T11:25:01.394Z"
+    },
+    {
+      "key": "hashtag:wienpizza",
+      "lastAttemptAt": "2026-11-23T11:25:01.394Z",
+      "postsReturned": 1,
+      "status": "stale-results",
+      "consecutiveEmpty": 1,
+      "retryAt": "2026-11-25T11:25:01.394Z",
+      "consecutiveFailures": 0
+    },
+    {
+      "key": "hashtag:gratiswien",
+      "lastAttemptAt": "2026-11-23T11:25:01.394Z",
+      "postsReturned": 1,
+      "status": "posts-returned",
+      "consecutiveFailures": 0,
+      "consecutiveEmpty": 0,
+      "retryAt": ""
+    }
+  ]
 }
