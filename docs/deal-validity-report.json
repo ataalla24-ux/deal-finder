@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-11-23T00:55:24.805Z",
+  "generatedAt": "2026-11-23T01:10:15.555Z",
   "summary": {
     "maxAgeDays": 7,
     "total": 242,
@@ -9,10 +9,9 @@
     "reasonCounts": {
       "kein konkretes Angebot erkennbar": 184,
       "älter als 7 Tage (2020-04-25)": 1,
-      "älter als 7 Tage (2026-02-22)": 78,
+      "älter als 7 Tage (2026-02-22)": 79,
       "URL ungültig (fehlende Ziel-URL)": 2,
       "älter als 7 Tage (2017-04-20)": 1,
-      "älter als 7 Tage (2026-11-09)": 1,
       "älter als 7 Tage (2026-11-10)": 1,
       "älter als 7 Tage (2025-07-30)": 1,
       "URL ungültig (HTTP 404)": 13,
@@ -43,6 +42,7 @@
       "Engagement-Aktion ohne garantierte Gegenleistung": 3,
       "ausgeschlossene Quelle (TheFork)": 1,
       "älter als 7 Tage (2026-11-14)": 1,
+      "Offizielle Aktion nicht erneut bestätigt (The operation was aborted due to timeout)": 1,
       "allgemeine Empfehlung/Gratis-Event statt konkreter Aktion": 4,
       "kein verlässliches Quell-/Post-Datum gefunden": 66,
       "ausgeschlossene Quelle (gastro.news)": 11
@@ -52,7 +52,7 @@
       "älter als 7 Tage": 139,
       "ungültige URL": 20,
       "abgelaufen": 12,
-      "sonstiges": 6,
+      "sonstiges": 7,
       "nicht Wien": 5,
       "ausgeschlossene Quelle": 12,
       "kein echtes Post-Datum": 66
@@ -173,6 +173,7 @@
         "blocked": 2,
         "warnings": 0,
         "reasonCategoryCounts": {
+          "sonstiges": 1,
           "nicht Wien": 1,
           "kein konkreter Deal": 1
         }
@@ -574,15 +575,17 @@
       "url": "https://www.johanniter.at",
       "reasons": [
         "kein konkretes Angebot erkennbar",
-        "älter als 7 Tage (2026-11-09)"
+        "älter als 7 Tage (2026-02-22)"
       ],
-      "warnings": [],
-      "sourceDate": "2026-11-09T00:00:00.000Z",
-      "sourceDateSource": "url.publicationDate",
-      "sourceAgeDays": 14,
+      "warnings": [
+        "URL nicht eindeutig prüfbar (temporärer Fehler)"
+      ],
+      "sourceDate": "2026-02-22T21:12:35.964Z",
+      "sourceDateSource": "deal.pubDate",
+      "sourceAgeDays": 274,
       "expiryDate": "",
       "expirySource": "deal.expires",
-      "urlStatus": "HTTP 200"
+      "urlStatus": "unklar: temporärer URL-Fehler"
     },
     {
       "id": "events-17-20260222",
@@ -840,7 +843,7 @@
       "warnings": [
         "kein Ablaufdatum gefunden"
       ],
-      "sourceDate": "2026-11-23T00:54:01.335Z",
+      "sourceDate": "2026-11-23T01:08:14.408Z",
       "sourceDateSource": "url.publicationDate",
       "sourceAgeDays": 0,
       "expiryDate": "",
@@ -3309,10 +3312,10 @@
       "source": "member-benefits-scraper",
       "url": "https://www.drei.at/de/dreiplus/ersparnisse/eislaufplatz-schoenbrunn/",
       "reasons": [
+        "Offizielle Aktion nicht erneut bestätigt (The operation was aborted due to timeout)",
         "nicht eindeutig in Wien"
       ],
       "warnings": [
-        "Aktueller Angebotsblock auf offizieller Anbieterseite erneut bestätigt; Abrufdatum ist kein Veröffentlichungsdatum",
         "kein Quell-/Post-Datum gefunden"
       ],
       "sourceDate": "",
@@ -3320,7 +3323,7 @@
       "sourceAgeDays": null,
       "expiryDate": "2027-01-06",
       "expirySource": "deal.structured",
-      "urlStatus": "HTTP 200"
+      "urlStatus": "geprüft"
     },
     {
       "id": "benefit-wienmobil-vorteilswelt-wrqng3",
@@ -4915,23 +4918,16 @@
   ],
   "runProvenance": {
     "repository": "ataalla24-ux/deal-finder",
-    "runId": "45091446418",
-    "headSha": "fd54ced8e321097a860503bbae0bea57f065817d",
-    "checkoutSha": "fd54ced8e321097a860503bbae0bea57f065817d",
-    "triggeringRun": {
-      "runId": "45091396918",
-      "headSha": "1d5545353bd141ddf99b1b3a5e25b3e2e26d60d0",
-      "event": "schedule",
-      "name": "Meta Instagram Deal Discovery",
-      "startedAt": "2026-11-23T00:53:30.000Z",
-      "url": "https://github.com/ataalla24-ux/deal-finder/actions/runs/45091396918"
-    },
-    "event": "workflow_run",
+    "runId": "45092837884",
+    "headSha": "dd468b6195123dd428616f1b9f3573ec7041395a",
+    "checkoutSha": "dd468b6195123dd428616f1b9f3573ec7041395a",
+    "triggeringRun": null,
+    "event": "schedule",
     "runAttempt": "1",
-    "url": "https://github.com/ataalla24-ux/deal-finder/actions/runs/45091446418"
+    "url": "https://github.com/ataalla24-ux/deal-finder/actions/runs/45092837884"
   },
   "instagramDelivery": {
-    "checkedAt": "2026-11-23T00:55:24.817Z",
+    "checkedAt": "2026-11-23T01:10:15.567Z",
     "scope": "instagram-ai-agent/standard-slack-lane",
     "extractedCandidates": 2,
     "counts": {
@@ -4971,7 +4967,7 @@
     ]
   },
   "tiktokDelivery": {
-    "checkedAt": "2026-11-23T00:55:24.818Z",
+    "checkedAt": "2026-11-23T01:10:15.569Z",
     "scope": "tiktok-deals-scanner/standard-slack-lane",
     "extractedCandidates": 0,
     "counts": {},
