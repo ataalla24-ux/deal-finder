@@ -1,19 +1,27 @@
 name: "TikTok Deal Scanner"
+run-name: ${{ github.event_name == 'workflow_dispatch' && inputs.browsed_posts != '' && 'TikTok browser candidate import' || github.workflow }}
 
 on:
   schedule:
     - cron: '15 5,17 * * *'
   workflow_dispatch:
+    inputs:
+      browsed_posts:
+        description: Optional public post JSON from the authorized TikTok browser
+        type: string
+        default: ''
 
 concurrency:
   group: tiktok-deal-scan
   cancel-in-progress: false
+  queue: max
 
 permissions:
   contents: write
 
 jobs:
   scan-deals:
+    if: ${{ github.event_name != 'workflow_dispatch' || inputs.browsed_posts == '' }}
     runs-on: ubuntu-latest
     timeout-minutes: 45
     env:
@@ -77,3 +85,26 @@ jobs:
         if: always()
         run: |
           node scripts/commit-generated.mjs --skip-conflicts --message "TikTok deals $(date +%Y-%m-%d)" --files docs/deals-pending-tiktok.json docs/tiktok-scanner-report.json docs/tiktok-media-evidence-cache.json
+
+  import-browser-posts:
+    if: ${{ github.event_name == 'workflow_dispatch' && github.ref == 'refs/heads/main' && inputs.browsed_posts != '' }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    env:
+      SENTRY_DISABLED: '1'
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: npm ci --no-audit --no-fund
+      - name: Test the bounded browser importer
+        run: node --test scripts/test-tiktok-browser-import.mjs
+      - name: Import public posts as pending candidates
+        id: browser_import
+        run: node scripts/import-tiktok-browser-posts.mjs
+      - name: Commit new TikTok browser candidates
+        if: steps.browser_import.outputs.changed == 'true'
+        run: node scripts/commit-generated.mjs --message "Import TikTok browser candidates [skip ci]" --files docs/deals-pending-tiktok-browser.json
