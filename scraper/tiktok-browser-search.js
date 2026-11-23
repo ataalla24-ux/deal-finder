@@ -79,14 +79,14 @@ export async function createTikTokDirectSearch(page, { timeoutMs = 12000 } = {})
         const refusal = await tikTokAccessRefusal(page, document);
         if (refusal) return { ok: false, ...refusal };
       }
-      const url = `${publicSearchOrigin}${directSearchPath}?keyword=${encodeURIComponent(keyword)}&offset=${offset}&count=${count}`;
-      expectedSearch = { url, params: { keyword, offset: String(offset), count: String(count) } };
+      const path = `${directSearchPath}?keyword=${encodeURIComponent(keyword)}&offset=${offset}&count=${count}`;
+      expectedSearch = { url: publicSearchOrigin + path, params: { keyword, offset: String(offset), count: String(count) } };
       try {
-        const { evidence, ...result } = await page.evaluate(async ({ url, timeoutMs }) => {
-          if (location.origin !== new URL(url).origin) {
+        const { evidence, ...result } = await page.evaluate(async ({ path, origin, timeoutMs }) => {
+          if (location.origin !== origin || new URL(path, document.baseURI).origin !== origin) {
             return { ok: false, transportReason: 'homepage-origin-mismatch' };
           }
-          const response = await fetch(url, {
+          const response = await fetch(path, {
             headers: { accept: 'application/json,text/plain,*/*' },
             redirect: 'error',
             signal: AbortSignal.timeout(timeoutMs),
@@ -119,7 +119,7 @@ export async function createTikTokDirectSearch(page, { timeoutMs = 12000 } = {})
           } catch {
             return unavailable('non-json-response', 'non-json');
           }
-        }, { url, timeoutMs });
+        }, { path, origin: publicSearchOrigin, timeoutMs });
         stats.lastSearchResponse = evidence || null;
         return result;
       } finally {
@@ -281,7 +281,7 @@ export async function createTikTokBrowserSearch(page, { pages = 3, count = 30, t
           result = unavailable(evidence.status, retryAfter, 'response-too-large');
         } else {
           try {
-            result = { ok: true, status: evidence.status, body: JSON.parse(bytes.toString('utf8')) };
+            result = { ok: true, status: evidence.status, retryAfter, body: JSON.parse(bytes.toString('utf8')) };
             evidence.bodyState = 'json';
           } catch {
             evidence.bodyState = 'non-json';

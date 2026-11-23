@@ -6,7 +6,7 @@ import { githubRunProvenance } from './pipeline-run-report-utils.js';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import { chromium } from 'playwright';
-import { isTikTokLocalRetry, runTikTokApiDiscovery, selectTikTokPostVisits, tikTokDiscoveryHealth, tikTokRetryAt } from './tiktok-search-discovery.js';
+import { hasTikTokSingleRequestRetry, previousTikTokSearchFailure, runTikTokApiDiscovery, selectTikTokPostVisits, tikTokDiscoveryHealth, tikTokRetryAt } from './tiktok-search-discovery.js';
 import { createTikTokDirectSearch, tikTokAccessRefusal } from './tiktok-browser-search.js';
 import { runInstagramSearchQueries } from './instagram-search-discovery.js';
 import { readPublicSearchResponse } from './public-search-response.js';
@@ -977,7 +977,7 @@ export async function fetchTikTokApiCandidates(page, options = {}) {
     return runTikTokApiDiscovery(args);
   }
   const createTransport = options.createTransport || createTikTokDirectSearch;
-  const transport = await createTransport(page, isTikTokLocalRetry(args.previous) ? { ...args, pages: 1 } : args);
+  const transport = await createTransport(page, hasTikTokSingleRequestRetry(args.previous) ? { ...args, pages: 1 } : args);
   try {
     const result = await runTikTokApiDiscovery({ ...args, request: transport.request });
     return { ...result, ...transport.stats, publicVideoLinks: transport.publicVideoLinks || [] };
@@ -1605,6 +1605,7 @@ export function dedupeTikTokDeals(deals) {
 
 async function main() {
   const scannerStartedAt = Date.now();
+  const runProvenance = githubRunProvenance();
   let previousReport = {};
   try { previousReport = JSON.parse(fs.readFileSync(REPORT_PATH, 'utf8')); } catch {}
   const timings = {
@@ -1637,11 +1638,14 @@ async function main() {
     try {
       apiPage = await context.newPage();
       apiDiscovery = await fetchTikTokApiCandidates(apiPage, {
-        previous: previousReport.apiDiscovery, fullKeywordScan: true,
+        previous: previousReport.apiDiscovery, previousRunProvenance: previousReport.runProvenance,
+        runProvenance, fullKeywordScan: true,
       });
     } catch {
+      const lastFailure = previousTikTokSearchFailure(previousReport.apiDiscovery, previousReport.runProvenance);
       apiDiscovery = { rows: [], errors: [{ error: 'TikTok session unavailable', code: 'session-unavailable' }],
-        stoppedReason: 'session-unavailable', nextRetryAt: new Date(Date.now() + DAY_MS).toISOString() };
+        stoppedReason: 'session-unavailable', nextRetryAt: new Date(Date.now() + DAY_MS).toISOString(),
+        ...(lastFailure ? { lastFailure } : {}) };
     }
     timings.apiDiscoveryMs = Date.now() - apiDiscoveryStartedAt;
     console.log(`🔎 TikTok API candidates: ${apiDiscovery.rows.length}`);
@@ -1742,7 +1746,7 @@ async function main() {
   };
   const report = {
     lastUpdated: payload.lastUpdated,
-    runProvenance: githubRunProvenance(),
+    runProvenance,
     ...tikTokDiscoveryHealth(apiDiscovery, discovery, finalDeals.length),
     config: CONFIG,
     searchQueries: SEARCH_QUERIES,

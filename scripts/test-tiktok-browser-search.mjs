@@ -65,6 +65,7 @@ test('the direct homepage search honors refusal and distinguishes a zero-byte re
   const options = { keywords: ['food', 'coffee'] };
   for (const [config, status, reason, count] of [
     [{ homepage: '<form><input type="password"></form>' }, 403, 'login-wall', 0],
+    [{ homepage: '<base href="https://example.invalid/"><body>Home</body>' }, 0, 'homepage-origin-mismatch', 0],
     [{ homepage: '<body>Home</body>', api: () => ({status:429,headers:{'Retry-After':'172800'},body:''}) }, 429, 'response-http-error', 1],
     [{ homepage: '<body>Home</body>', api: () => ({status:200,headers:{'Content-Length':'0'},body:''}) }, 200, 'empty-response', 1],
   ]) {
@@ -83,11 +84,12 @@ test('direct search accepts metadata added by the page while requiring the origi
   const homepage = `<body>Home<script>
     const browserFetch = window.fetch;
     window.fetch = async (input, init) => {
-      const search = new URL(input);
+      const search = new URL(input, document.baseURI);
       const altered = new URL(search);
       altered.searchParams.append('count', '90');
       await browserFetch(altered, init).catch(() => {});
       search.searchParams.set('fixture-context', 'added-by-site');
+      search.searchParams.set('fixture-fetch-input', input);
       return browserFetch(search, init);
     };
   </script></body>`;
@@ -97,6 +99,8 @@ test('direct search accepts metadata added by the page while requiring the origi
     assert.equal(result.searchRequests, 1);
     assert.equal(result.siteAdjustedSearchRequests, 1);
     assert.equal(calls.length, 1);
+    assert.equal(calls[0].searchParams.get('fixture-fetch-input'),
+      '/api/search/general/full/?keyword=wien%20gratis%20kaffee&offset=0&count=30');
     assert.deepEqual(calls[0].searchParams.getAll('count'), ['30']);
     assert.equal(calls[0].searchParams.get('fixture-context'), 'added-by-site');
     assert.doesNotMatch(JSON.stringify(result), /added-by-site/);
@@ -151,13 +155,16 @@ test('the same general-full route works with or without a final slash, under one
 });
 
 test('provider error 2483 and HTTP 429 stay refusals, with persisted Retry-After and no retries', async () => {
-  for (const api of [()=>response({status_code:2483}),()=>({status:429,headers:{'Retry-After':'172800'},body:''})]) {
-    await fixture({api},async(page,calls)=>{
+  for (const reply of [
+    response({status_code:2483}),
+    {...response({status_code:2483}),headers:{'Retry-After':'172800'}},
+    {status:429,headers:{'Retry-After':'172800'},body:''},
+  ]) {
+    await fixture({api:()=>reply},async(page,calls)=>{
       const result=await scan(page,{keywords:['food','coffee']});
       assert.equal(result.rows.length,0);assert.equal(calls.length,1);assert.equal(result.errors.length,1);
-      assert.ok(Date.parse(result.nextRetryAt)>=+now+86400000);
-      if (result.errors[0].status===429) assert.equal(result.nextRetryAt,'2026-11-13T12:00:00.000Z');
-      else assert.equal(result.errors[0].providerCode,'2483');
+      assert.equal(result.nextRetryAt,reply.headers ? '2026-11-13T12:00:00.000Z' : '2026-11-12T12:00:00.000Z');
+      if (reply.status===200) assert.equal(result.errors[0].providerCode,'2483');
     });
   }
 });

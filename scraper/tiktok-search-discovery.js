@@ -2,24 +2,36 @@ import { retryAfterAt } from './source-http-policy.js';
 
 const DAY_MS = 86400000;
 const LOCAL_RETRY_MS = 4 * 3600000;
-const LOCAL_RETRY_REASON = 'local-request-policy';
+const SINGLE_REQUEST = 'single-request';
 const transportReasons = new Set(['response-unavailable', 'request-policy-blocked', 'response-http-error',
   'response-too-large', 'empty-response', 'non-json-response', 'response-read-failed', 'request-failed', 'response-timeout',
   'no-search-request', 'unrecognized-search-request', 'ancillary-search-only', 'document-http-error',
   'homepage-origin-mismatch', 'login-wall', 'access-challenge']);
+const providerMessageSignals = new Map([
+  ['login required', 'login-required'], ['please log in to continue', 'login-required'],
+  ['too many requests', 'throttled'], ['rate limit exceeded', 'throttled'],
+  ['captcha required', 'access-challenge'], ['verify to continue', 'access-challenge'],
+  ['access denied', 'access-denied'], ['invalid parameter', 'invalid-parameters'],
+  ['invalid parameters', 'invalid-parameters'], ['invalid request', 'invalid-request'],
+  ['something went wrong', 'generic-provider-error'], ['try again later', 'retry-later'],
+]);
+const providerSignals = new Set([...providerMessageSignals.values(), 'unclassified']);
+const searchFailureCodes = new Set(['provider-error', 'transport-unavailable', 'invalid-response', 'schema-mismatch']);
 
 export function tikTokRetryAt(retryAfter, now = new Date(), minimumMs = DAY_MS) {
   return new Date(Math.max(+now + minimumMs, Date.parse(retryAfterAt(retryAfter, now)) || 0)).toISOString();
 }
 
-export function isTikTokLocalRetry(previous = {}) {
-  return previous.boundedRetry?.reason === LOCAL_RETRY_REASON && previous.boundedRetry.failures >= 1;
+export function hasTikTokSingleRequestRetry(previous = {}) {
+  const guard = previous.boundedRetry;
+  // Older reports expressed the same request cap as a local failure reason.
+  return guard?.failures >= 1 && (guard.mode === SINGLE_REQUEST || guard.reason === 'local-request-policy');
 }
 
 export function tikTokDirectProbePrevious(previous, now = new Date(), scheduledRun) {
   const failure = previous?.errors?.[0];
   if (!(Date.parse(previous?.nextRetryAt) > +now)
-      || !isTikTokLocalRetry(previous) || previous.attemptedRequests !== 1
+      || !hasTikTokSingleRequestRetry(previous) || previous.attemptedRequests !== 1
       || previous.searchRequests !== 0 || previous.lastSearchResponse != null
       || previous.errors?.length !== 1 || failure?.status !== 0
       || failure.retryAfter != null || failure.retryAt != null) return previous;
@@ -58,32 +70,75 @@ export function tikTokDiscoveryHealth(api, search, accepted = 0) {
   return { status: unavailable ? 'discovery-degraded' : 'completed', outputPreserved: unavailable && accepted === 0 };
 }
 
+function numericProviderCode(value) {
+  if (typeof value !== 'number' && typeof value !== 'string') return undefined;
+  const code = String(value);
+  return /^-?\d{1,10}$/.test(code) ? code : undefined;
+}
+
+function providerMessageSignal(message) {
+  if (typeof message !== 'string' || !message.trim()) return undefined;
+  if (message.length > 120) return 'unclassified';
+  const phrase = message.trim().toLowerCase().replace(/[.!]$/, '').replace(/\s+/g, ' ');
+  return providerMessageSignals.get(phrase) || 'unclassified';
+}
+
+function searchFailureEvidence(failure, { failedAt, runProvenance, retryAfterProvided } = {}) {
+  if (!searchFailureCodes.has(failure?.code)) return undefined;
+  const status = Number(failure.status);
+  const providerCode = numericProviderCode(failure.providerCode);
+  return {
+    status: Number.isInteger(status) && status >= 100 && status <= 599 ? status : 0,
+    code: failure.code,
+    ...(providerCode !== undefined ? { providerCode } : {}),
+    ...(providerSignals.has(failure.providerSignal) ? { providerSignal: failure.providerSignal } : {}),
+    ...(transportReasons.has(failure.transportReason) ? { transportReason: failure.transportReason } : {}),
+    failedAt: Number.isFinite(Date.parse(failedAt)) ? new Date(failedAt).toISOString() : null,
+    ...(typeof retryAfterProvided === 'boolean' ? { retryAfterProvided } : {}),
+    runProvenance: runProvenance || null,
+  };
+}
+
+export function previousTikTokSearchFailure(previous = {}, previousRunProvenance) {
+  if (previous.lastFailure) return searchFailureEvidence(previous.lastFailure, previous.lastFailure);
+  if (!(previous.attemptedRequests > 0) || !Array.isArray(previous.errors)) return undefined;
+  return searchFailureEvidence(previous.errors.at(-1), {
+    failedAt: previous.boundedRetry?.failedAt,
+    retryAfterProvided: previous.lastSearchResponse?.retryAfterProvided,
+    runProvenance: previous.checkedBy === undefined ? previousRunProvenance : previous.checkedBy,
+  });
+}
+
 export function parseTikTokSearchResponse(result = {}) {
   const status = Number(result.status || 0);
   if (!result.ok) return { error: status >= 400 ? `HTTP ${status}` : 'Empty or non-JSON TikTok response', code: 'transport-unavailable',
     transportReason: transportReasons.has(result.transportReason) ? result.transportReason : 'response-unavailable' };
   const body = result.body;
   if (!body || typeof body !== 'object') return { error: 'Missing TikTok response object', code: 'invalid-response' };
-  const providerCode = body.status_code ?? body.statusCode;
-  if (providerCode !== undefined && Number(providerCode) !== 0) {
-    return { error: 'TikTok returned a provider error', code: 'provider-error', providerCode: String(providerCode).slice(0, 40) };
+  const providerStatus = body.status_code ?? body.statusCode;
+  const providerCode = numericProviderCode(providerStatus);
+  if (providerStatus !== undefined && (providerCode === undefined || Number(providerCode) !== 0)) {
+    return { error: 'TikTok returned a provider error', code: 'provider-error',
+      providerCode, providerSignal: providerMessageSignal(body.status_msg ?? body.statusMsg) };
   }
   const batch = [body.data, body.item_list, body.itemList, body.data?.item_list, body.data?.itemList].find(Array.isArray);
   if (!batch) return { error: 'Unrecognized TikTok search payload', code: 'schema-mismatch' };
-  return { batch, hasMore: body.has_more ?? body.hasMore, providerCode: providerCode ?? null };
+  return { batch, hasMore: body.has_more ?? body.hasMore, providerCode: providerStatus ?? null };
 }
 
 export async function runTikTokApiDiscovery({ keywords, request, normalize, wait = async () => {},
   previous = {}, now, clock = () => now ?? new Date(), pages = 3, count = 30, maxCandidates = 1200,
-  fullKeywordScan = false } = {}) {
-  const boundedRetry = isTikTokLocalRetry(previous);
+  fullKeywordScan = false, runProvenance, previousRunProvenance } = {}) {
+  const boundedRetry = hasTikTokSingleRequestRetry(previous);
   const useFullScan = fullKeywordScan && !boundedRetry;
   const result = { rows: [], errors: [], attemptedRequests: 0, emptyResponses: 0,
     rawItems: 0, normalizedItems: 0, ignoredItems: 0, stoppedReason: '', nextRetryAt: '',
     nextKeywordIndex: Math.max(0, Math.floor(Number(previous.nextKeywordIndex) || 0)) };
   if (Date.parse(previous.nextRetryAt) > +clock()) {
+    const lastFailure = previousTikTokSearchFailure(previous, previousRunProvenance);
     return { ...result, stoppedReason: 'api-cooldown', nextRetryAt: previous.nextRetryAt,
-      ...(boundedRetry ? { boundedRetry: previous.boundedRetry } : {}) };
+      ...(lastFailure ? { lastFailure } : {}),
+      ...(boundedRetry ? { boundedRetry: { mode: SINGLE_REQUEST, failures: previous.boundedRetry.failures } } : {}) };
   }
   const seen = new Set();
   const start = !useFullScan && keywords.length ? result.nextKeywordIndex % keywords.length : 0;
@@ -98,6 +153,7 @@ export async function runTikTokApiDiscovery({ keywords, request, normalize, wait
       const offset = pageIndex * count;
       if (result.attemptedRequests) await wait(useFullScan ? 350 : 1000);
       result.attemptedRequests++;
+      if (runProvenance) result.checkedBy = runProvenance;
       let response, parsed;
       try {
         response = await request({ keyword, offset, count });
@@ -107,16 +163,20 @@ export async function runTikTokApiDiscovery({ keywords, request, normalize, wait
       }
       if (parsed.error) {
         const status = Number(response?.status || 0);
+        const retryAfter = response?.retryAfter;
         const failedAt = clock();
         const localPolicyBlocked = status === 0 && parsed.transportReason === 'request-policy-blocked'
-          && (response?.retryAfter === '' || response?.retryAfter == null);
-        result.errors.push({ keyword, offset, status,
-          error: parsed.error, code: parsed.code, providerCode: parsed.providerCode,
-          ...(parsed.transportReason ? { transportReason: parsed.transportReason } : {}) });
+          && (retryAfter === '' || retryAfter == null);
+        const failure = { status, code: parsed.code, providerCode: parsed.providerCode, providerSignal: parsed.providerSignal,
+          ...(parsed.transportReason ? { transportReason: parsed.transportReason } : {}) };
+        result.errors.push({ keyword, offset, error: parsed.error, ...failure });
+        // Null is an observed absent header. Some local transport failures use an empty placeholder.
+        result.lastFailure = searchFailureEvidence(failure, { failedAt: failedAt.toISOString(), runProvenance,
+          retryAfterProvided: retryAfter === null ? false : retryAfter ? true : undefined });
         result.stoppedReason = parsed.code;
-        result.nextRetryAt = tikTokRetryAt(response?.retryAfter, failedAt, localPolicyBlocked && !boundedRetry ? LOCAL_RETRY_MS : DAY_MS);
+        result.nextRetryAt = tikTokRetryAt(retryAfter, failedAt, localPolicyBlocked && !boundedRetry ? LOCAL_RETRY_MS : DAY_MS);
         if (localPolicyBlocked || boundedRetry) {
-          result.boundedRetry = { reason: LOCAL_RETRY_REASON, failures: boundedRetry ? 2 : 1, failedAt: failedAt.toISOString() };
+          result.boundedRetry = { mode: SINGLE_REQUEST, failures: boundedRetry ? 2 : 1 };
         }
         return result;
       }

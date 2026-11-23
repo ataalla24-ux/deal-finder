@@ -1,6 +1,6 @@
 import fs from 'node:fs';
 import { chromium } from 'playwright';
-import { buildDealFromPost, extractTikTokPostData, fetchTikTokApiCandidates } from '../scraper/tiktok-deals-scanner.js';
+import { buildDealFromPost, buildTikTokApiKeywords, extractTikTokPostData, fetchTikTokApiCandidates } from '../scraper/tiktok-deals-scanner.js';
 import { tikTokDirectProbePrevious, tikTokRetryAt } from '../scraper/tiktok-search-discovery.js';
 import { canonicalSocialPostKey, semanticCrossPlatformOfferKey } from '../scraper/deal-evidence-utils.js';
 import { filterModeratedDeals, loadDealModeration } from '../scraper/deal-moderation-utils.js';
@@ -30,24 +30,26 @@ const releasedLocalPolicyDeadline = apiPrevious !== previous.apiDiscovery ? prev
 if (releasedLocalPolicyDeadline) report.releasedLocalPolicyDeadline = releasedLocalPolicyDeadline;
 const browser = await chromium.launch({ headless: true });
 try {
-  const page = await browser.newPage({ locale: 'de-AT', timezoneId: 'Europe/Vienna' });
+  const page = await browser.newPage({ viewport: { width: 1366, height: 900 }, locale: 'de-AT', timezoneId: 'Europe/Vienna' });
   const api = await fetchTikTokApiCandidates(page, {
-    keywords: ['wien gratis kaffee'], pages: 1, maxCandidates: 12, previous: apiPrevious,
+    keywords: [buildTikTokApiKeywords()[0]], pages: 1, maxCandidates: 12, previous: apiPrevious,
+    runProvenance: provenance, previousRunProvenance: previous.runProvenance,
   });
   const { rows, publicVideoLinks = [], ...summary } = api;
   const deals = [];
   const inspected = new Set();
   const writeAttempt = () => {
     const file = 'docs/tiktok-scanner-report.json';
+    // The top-level timestamp and run provenance still describe the full scan.
     const next = {
       ...previous,
+      apiErrors: summary.errors,
       apiDiscovery: {
         ...summary,
         ...(releasedLocalPolicyDeadline ? { releasedLocalPolicyDeadline } : {}),
         nextKeywordIndex: previous.apiDiscovery?.nextKeywordIndex || 0,
         normalizedCandidates: rows.length,
         inspectedPublicLinks: inspected.size,
-        checkedBy: provenance,
       },
     };
     const temporary = file + '.direct-probe.tmp';

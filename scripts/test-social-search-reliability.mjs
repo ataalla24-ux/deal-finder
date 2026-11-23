@@ -39,6 +39,34 @@ test('TikTok response codes and unknown shapes are not successful zero results',
   assert.equal(parseTikTokSearchResponse({ok:false,status:0,transportReason:'secret-url?token=private'}).transportReason,'response-unavailable');
 });
 
+test('TikTok only reports allowlisted provider message signals and numeric codes', () => {
+  const parse = body => parseTikTokSearchResponse({ok:true,status:200,body});
+  for (const [body, providerSignal] of [
+    [{status_code:2483,status_msg:'Login required.'},'login-required'],
+    [{statusCode:'2483',statusMsg:' TOO MANY REQUESTS '},'throttled'],
+    [{status_code:2483,status_msg:'CAPTCHA required'},'access-challenge'],
+    [{status_code:2483,status_msg:'Invalid parameter'},'invalid-parameters'],
+    [{status_code:2483,status_msg:'Invalid parameters'},'invalid-parameters'],
+    [{status_code:2483,status_msg:'Invalid request'},'invalid-request'],
+    [{status_code:2483,status_msg:'Something went wrong'},'generic-provider-error'],
+    [{status_code:2483,status_msg:'Try again later'},'retry-later'],
+    [{status_code:2483,status_msg:'Login required for https://example.invalid/?token=private'},'unclassified'],
+  ]) {
+    const result = parse(body);
+    assert.equal(result.providerSignal,providerSignal);
+    assert.equal(result.providerCode,'2483');
+    assert(!JSON.stringify(result).includes('private'));
+  }
+  for (const status_code of ['token=private','true',true,false,' ',{},[],[0]]) {
+    const malformed = parse({status_code,status_msg:{message:'Login required'},data:[]});
+    assert.equal(malformed.code,'provider-error');
+    assert.equal(malformed.providerCode,undefined);
+    assert.equal(malformed.providerSignal,undefined);
+    assert(!JSON.stringify(malformed).includes('private'));
+  }
+  assert.deepEqual(parse({status_code:'0',data:[]}).batch,[]);
+});
+
 test('known TikTok envelopes normalize only actual post identities and real timestamps', () => {
   for (const raw of [item,{item},{itemStruct:item},{item_info:{item_struct:item}},
     {aweme_info:{...item,id:undefined,aweme_id:item.id,author:{unique_id:'vienna.cafe'}}}]) {
@@ -71,7 +99,8 @@ test('a local TikTok request-policy rejection gets one probe, then the full paus
   const args = {keywords:['a','b','c'],normalize:normalizeTikTokApiItem,wait:never};
   const first = await runTikTokApiDiscovery({...args,now,request:async()=>denied});
   assert.equal(first.nextRetryAt,'2026-11-11T00:00:00.000Z');
-  assert.deepEqual(first.boundedRetry,{reason:'local-request-policy',failures:1,failedAt:now.toISOString()});
+  assert.deepEqual(first.boundedRetry,{mode:'single-request',failures:1});
+  assert.equal(first.lastFailure.transportReason,'request-policy-blocked');
   const held = await runTikTokApiDiscovery({...args,now:new Date('2026-11-10T23:59:59.999Z'),previous:first,request:never});
   assert.equal(held.attemptedRequests,0);
   assert.deepEqual(held.boundedRetry,first.boundedRetry);
@@ -85,6 +114,46 @@ test('a local TikTok request-policy rejection gets one probe, then the full paus
   assert.equal(recovered.attemptedRequests,1);
   assert.equal(recovered.rows.length,1);
   assert.equal(recovered.nextRetryAt,'');
+  assert.equal(recovered.boundedRetry,undefined);
+});
+
+test('one-request mode preserves a real provider failure and its run during successive cooldowns', async () => {
+  const runProvenance = {repository:'owner/project',runId:'123',event:'workflow_dispatch'};
+  const nextRun = {repository:'owner/project',runId:'124',event:'schedule'};
+  const args = {keywords:['coffee','dinner'],now,wait:never,fullKeywordScan:true};
+  const error = {status:200,code:'provider-error',providerCode:'2483',providerSignal:'unclassified'};
+  const failed = await runTikTokApiDiscovery({...args,runProvenance,
+    previous:{boundedRetry:{reason:'local-request-policy',failures:1}},
+    request:async()=>({ok:true,status:200,retryAfter:null,body:{status_code:2483,status_msg:'Unknown message'}})});
+  assert.equal(failed.attemptedRequests,1);
+  assert.equal(failed.nextRetryAt,'2026-11-11T20:00:00.000Z');
+  assert.deepEqual(failed.boundedRetry,{mode:'single-request',failures:2});
+  assert.deepEqual(failed.lastFailure,{...error,failedAt:now.toISOString(),retryAfterProvided:false,runProvenance});
+  assert.deepEqual(failed.checkedBy,runProvenance);
+  assert.equal(tikTokDirectProbePrevious(failed,now),failed);
+
+  const legacy = { attemptedRequests:1, errors:[error], checkedBy:runProvenance, nextRetryAt:failed.nextRetryAt,
+    boundedRetry:{reason:'local-request-policy',failures:2,failedAt:now.toISOString()}, lastSearchResponse:{retryAfterProvided:false} };
+  for (const previous of [failed,legacy,{...legacy,checkedBy:undefined}]) {
+    const blocked = await runTikTokApiDiscovery({...args,previous,previousRunProvenance:runProvenance,
+      runProvenance:nextRun,now:new Date(+now+60000),request:never});
+    assert.equal(blocked.stoppedReason,'api-cooldown');
+    assert.equal(blocked.nextRetryAt,failed.nextRetryAt);
+    assert.equal(blocked.attemptedRequests,0);
+    assert.equal(blocked.checkedBy,undefined);
+    assert.deepEqual(blocked.errors,[]);
+    assert.deepEqual(blocked.lastFailure,failed.lastFailure);
+    assert.deepEqual(blocked.boundedRetry,failed.boundedRetry);
+    const blockedAgain = await runTikTokApiDiscovery({...args,previous:blocked,runProvenance:nextRun,
+      now:new Date(+now+120000),request:never});
+    assert.deepEqual(blockedAgain,blocked);
+  }
+
+  const recovered = await runTikTokApiDiscovery({...args,previous:failed,runProvenance:nextRun,
+    now:new Date(failed.nextRetryAt),request:async()=>valid([])});
+  assert.equal(recovered.attemptedRequests,1);
+  assert.deepEqual(recovered.checkedBy,nextRun);
+  assert.equal(recovered.lastFailure,undefined);
   assert.equal(recovered.boundedRetry,undefined);
 });
 
