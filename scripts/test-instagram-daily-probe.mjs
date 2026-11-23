@@ -47,6 +47,20 @@ test('unknown diagnostic values cannot copy provider text to reports', async () 
   assert.doesNotMatch(JSON.stringify(result), /private/);
 });
 
+test('browser UI diagnostics accept only fixed enum and boolean fields', async () => {
+  const result = await validateInstagramAuth(cookies, { env, browserProbe: async () => {
+    throw Object.assign(new Error('private token'), { details: { ownProfileSignals: {
+      location: 'own-profile', httpStatus: 200, documentState: 'complete', sessionCookiePresent: true,
+      ownerCookiePresent: true, editControlVisible: false, editProfileHrefVisible: true,
+      bodyHasText: 'private@example.test', cookie: 'private token', html: 'private account data',
+    } } });
+  } });
+  assert.deepEqual(result.browserSignals, { sessionCookiePresent: true, ownerCookiePresent: true,
+    editControlVisible: false, editProfileHrefVisible: true, location: 'own-profile', documentState: 'complete', httpStatus: 200 });
+  assert.equal(result.canProceed, false);
+  assert.doesNotMatch(JSON.stringify(result), /private|cookie"|html"/);
+});
+
 test('bounded manual probe leaves scheduled limits and auth gates intact without paid providers', () => {
   const workflow = fs.readFileSync(new URL('../.github/workflows/firecrawl-daily-sync.yml', import.meta.url), 'utf8');
   assert.match(workflow, /instagram_probe:\n\s+description:[^\n]+\n\s+type: boolean\n\s+default: false/);

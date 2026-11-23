@@ -373,21 +373,49 @@ export async function validateBrowserSession(page, { username, expectedUserId = 
   const editProfile = page.getByRole('link', { name: /^(Edit profile|Profil bearbeiten)$/i }).first();
   const editButton = page.getByRole('button', { name: /^(Edit profile|Profil bearbeiten)$/i }).first();
   const deadline = Date.now() + timeout;
+  let ownProfileSignals = { httpStatus: response?.status() || 0 };
   while (Date.now() < deadline) {
     const current = new URL(page.url());
     const exactProfile = current.origin === 'https://www.instagram.com' && `${current.pathname.replace(/\/$/, '').toLowerCase()}/` === targetPath;
     const cookies = await collectInstagramCookies(page.context());
     const owner = cookies.find(cookie => cookie.name === 'ds_user_id')?.value;
     const sessionPresent = cookies.some(cookie => cookie.name === 'sessionid');
+    const editControlVisible = await editProfile.isVisible() || await editButton.isVisible();
+    ownProfileSignals = {
+      httpStatus: response?.status() || 0,
+      location: exactProfile ? 'own-profile' : /^\/accounts\/login(?:\/|$)/.test(current.pathname) ? 'login' : 'other',
+      sessionCookiePresent: sessionPresent,
+      ownerCookiePresent: Boolean(owner),
+      ownerCookieMatchesExpected: expectedUserId ? owner === expectedUserId : null,
+      editControlVisible,
+    };
     if (exactProfile && owner && sessionPresent && (!expectedUserId || owner === expectedUserId)
-      && (await editProfile.isVisible() || await editButton.isVisible())) {
+      && editControlVisible) {
       return { ok: true, method: 'own-profile-ui', accountMatched: true, username };
     }
     const blockingState = await detectBlockingState(page);
     if (blockingState) throw blockingState;
     await page.waitForTimeout(500);
   }
-  throw new InstagramRefreshError('wrong-account', 'Eigene Profilansicht des erwarteten Scraper-Kontos nicht bestätigt; keine Secrets aktualisiert.');
+  // Diagnose the already loaded page using only fixed categories and booleans.
+  // Never retain visible text, account names, URLs, codes, or cookie values.
+  try {
+    Object.assign(ownProfileSignals, await page.evaluate(() => {
+      const visible = node => node.checkVisibility({ visibilityProperty: true, opacityProperty: true });
+      const bodyText = document.body?.innerText || '';
+      return {
+        documentState: document.readyState,
+        bodyHasText: Boolean(bodyText.trim()),
+        passwordInputVisible: [...document.querySelectorAll('input[type="password"]')].some(visible),
+        editProfileHrefVisible: [...document.querySelectorAll('a[href]')].some(node => {
+          try { const url = new URL(node.href); return url.origin === 'https://www.instagram.com' && /^\/accounts\/edit\/?$/.test(url.pathname) && visible(node); } catch { return false; }
+        }),
+        genericErrorVisible: /something went wrong|page could not be loaded|seite konnte nicht geladen werden|etwas ist schiefgelaufen/i.test(bodyText),
+        cookieDialogVisible: [...document.querySelectorAll('[role="dialog"], [aria-modal="true"]')].some(node => visible(node) && /cookies?/i.test(node.innerText || '')),
+      };
+    }));
+  } catch { ownProfileSignals.snapshotUnavailable = true; }
+  throw new InstagramRefreshError('wrong-account', 'Eigene Profilansicht des erwarteten Scraper-Kontos nicht bestätigt; keine Secrets aktualisiert.', { ownProfileSignals });
 }
 
 function sortCookies(cookies) {

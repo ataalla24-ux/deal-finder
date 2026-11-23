@@ -111,6 +111,21 @@ test('own-profile challenge diagnostics contain only a fixed state, not the page
   });
 });
 
+test('unconfirmed own-profile exposes only anonymous UI and cookie-presence signals', async t => {
+  const { page, context } = await fixture(t, '<p>private@example.test</p><a href="/accounts/edit/">Localized own-profile control</a>');
+  await context.addCookies([{ name: 'sessionid', value: 'fixture-session', domain: '.instagram.com', path: '/' }, { name: 'ds_user_id', value: 'private-owner', domain: '.instagram.com', path: '/' }]);
+  await assert.rejects(validateBrowserSession(page, { username: 'fixture_account', timeout: 100 }), e => {
+    assert.equal(e.status, 'wrong-account');
+    assert.deepEqual(e.details.ownProfileSignals, {
+      httpStatus: 200, location: 'own-profile', sessionCookiePresent: true, ownerCookiePresent: true,
+      ownerCookieMatchesExpected: null, editControlVisible: false, documentState: 'complete', bodyHasText: true,
+      passwordInputVisible: false, editProfileHrefVisible: true, genericErrorVisible: false, cookieDialogVisible: false,
+    });
+    assert.doesNotMatch(JSON.stringify(e.details), /private|fixture_account|Localized|fixture-session/);
+    return true;
+  });
+});
+
 test('local secret transfer is restricted to the two scraper secrets using stdin', () => {
   const calls = [];
   publishScraperSession({ cookieString: 'fixture-cookies', sessionId: 'fixture-session' }, (command, args, options) => {

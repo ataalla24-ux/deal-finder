@@ -299,7 +299,15 @@ export async function validateInstagramAuth(cookies, options = {}) {
         'email-code': 'Instagram verlangt eine persönliche E-Mail-Code-Bestätigung; keine automatische Neuanmeldung',
         'two-factor': 'Instagram verlangt eine persönliche Zwei-Faktor-Bestätigung; keine automatische Neuanmeldung',
       };
-      return { ...base, ok: false, status: error?.status === 'blocked' ? 'blocked' : 'validation-unconfirmed', reason: reasons[pageState] || (httpStatus ? `Eigene Profilansicht nicht bestätigt (HTTP ${httpStatus}); keine automatische Neuanmeldung` : 'Eigene Profilansicht nicht bestätigt; keine automatische Neuanmeldung'), validationFailure: pageState || (httpStatus ? `http-${httpStatus}` : 'own-profile-unconfirmed'), userInteractionRequired: Boolean(pageState), attempts: 1 };
+      const suppliedSignals = error?.details?.ownProfileSignals || {};
+      const browserSignals = {};
+      for (const key of ['sessionCookiePresent', 'ownerCookiePresent', 'ownerCookieMatchesExpected', 'editControlVisible', 'bodyHasText', 'passwordInputVisible', 'editProfileHrefVisible', 'genericErrorVisible', 'cookieDialogVisible', 'snapshotUnavailable']) {
+        if (typeof suppliedSignals[key] === 'boolean') browserSignals[key] = suppliedSignals[key];
+      }
+      if (['own-profile', 'login', 'other'].includes(suppliedSignals.location)) browserSignals.location = suppliedSignals.location;
+      if (['loading', 'interactive', 'complete'].includes(suppliedSignals.documentState)) browserSignals.documentState = suppliedSignals.documentState;
+      if (Number.isInteger(suppliedSignals.httpStatus) && suppliedSignals.httpStatus >= 0 && suppliedSignals.httpStatus <= 599) browserSignals.httpStatus = suppliedSignals.httpStatus;
+      return { ...base, ok: false, status: error?.status === 'blocked' ? 'blocked' : 'validation-unconfirmed', reason: reasons[pageState] || (httpStatus ? `Eigene Profilansicht nicht bestätigt (HTTP ${httpStatus}); keine automatische Neuanmeldung` : 'Eigene Profilansicht nicht bestätigt; keine automatische Neuanmeldung'), validationFailure: pageState || (httpStatus ? `http-${httpStatus}` : error?.name === 'TimeoutError' ? 'browser-timeout' : 'own-profile-unconfirmed'), userInteractionRequired: Boolean(pageState), ...(Object.keys(browserSignals).length ? { browserSignals } : {}), attempts: 1 };
     }
   }
 
@@ -640,6 +648,7 @@ export async function main() {
   console.log(`- status: ${finalReport.status}`);
   console.log(`- ok: ${finalReport.ok ? 'true' : 'false'}`);
   console.log(`- reason: ${finalReport.reason}`);
+  if (finalReport.browserSignals) console.log(`- browser signals: ${JSON.stringify(finalReport.browserSignals)}`);
   console.log(`- attempts: ${finalReport.attempts || 1}`);
   console.log(`- cookies: sessionid=${finalReport.diagnostics.hasSessionCookie ? 'yes' : 'no'}, csrftoken=${finalReport.diagnostics.hasCsrfCookie ? 'yes' : 'no'}, total=${finalReport.diagnostics.cookieCount}`);
   if (clearedFiles.length) console.log(`- cleared: ${clearedFiles.join(', ')}`);
