@@ -15,11 +15,39 @@ export async function tikTokAccessRefusal(page, document) {
   return null;
 }
 
-export async function observeTikTokPublicSearchPage(page, keyword) {
+async function publicSearchUiState(page, keyword) {
+  return page.evaluate(expectedKeyword => {
+    const current = new URL(location.href);
+    const main = document.querySelector('main, [role="main"]');
+    const text = (main || document.body)?.innerText.slice(0, 7000) || '';
+    const visible = selector => Array.from(document.querySelectorAll(selector)).some(node => node.checkVisibility());
+    const loginRequired = /^\/(?:login|signup)(?:\/|$)/i.test(current.pathname)
+      || visible('form input[type="password"]')
+      || /\b(?:log in to (?:search|see more)|anmelden,? um (?:zu suchen|mehr zu sehen)|melde dich an, um (?:zu suchen|mehr zu sehen))\b/i.test(text);
+    const challenge = /^\/(?:challenge|checkpoint)(?:\/|$)/i.test(current.pathname)
+      || /verify (?:to continue|you are human)|security check|unusual traffic|too many requests|sicherheits(?:pruefung|prüfung|überprüfung)/i.test(`${document.title} ${text}`);
+    return {
+      readyState: document.readyState,
+      expectedSearchPage: current.origin === 'https://www.tiktok.com' && /^\/search\/?$/.test(current.pathname)
+        && current.searchParams.get('q') === expectedKeyword,
+      searchTitle: /\b(search|suche)\b/i.test(document.title),
+      searchField: visible('input[type="search"], [role="searchbox"], input[name="q"]'),
+      mainRegion: Boolean(main),
+      mainHasText: Boolean(main?.innerText.trim()),
+      loadingIndicator: visible('[role="progressbar"], [aria-busy="true"], progress'),
+      explicitEmpty: Boolean(main) && /\b(?:no (?:search )?results found|nothing found|keine (?:suchergebnisse|ergebnisse)(?: gefunden)?)\b/i.test(text),
+      loginRequired,
+      challenge,
+    };
+  }, keyword);
+}
+
+export async function observeTikTokPublicSearchPage(page, keyword, { waitMs = 25000 } = {}) {
+  const startedAt = Date.now();
   const responses = [];
-  const denied = response => response.retryAfterProvided || [401, 403, 429, 451].includes(response.status)
+  const denied = response => response.retryAfterProvided || response.status >= 400
     || (response.providerCode && Number(response.providerCode) !== 0);
-  let recordDenial;
+  let recordDenial, deniedSearch = false;
   const firstDenial = new Promise(resolve => { recordDenial = resolve; });
   const observe = response => {
     const url = new URL(response.url());
@@ -32,7 +60,10 @@ export async function observeTikTokPublicSearchPage(page, keyword) {
       const code = String(payload?.status_code ?? payload?.statusCode ?? '');
       const result = { status: response.status(), retryAfterProvided: retryAfter !== null, retryAfter,
         ...(/^-?\d{1,10}$/.test(code) ? { providerCode: code } : {}) };
-      if (denied(result)) recordDenial();
+      if (denied(result)) {
+        deniedSearch = true;
+        recordDenial();
+      }
       return result;
     })());
   };
@@ -44,15 +75,38 @@ export async function observeTikTokPublicSearchPage(page, keyword) {
     const documentStatus = document?.status() ?? null;
     const documentRetryAfter = document ? await document.headerValue('retry-after') : null;
     const refusal = await tikTokAccessRefusal(page, document);
+    const result = { documentStatus, documentRetryAfter, refusal, responses: [], publicVideoLinks: [] };
     if (refusal || !document?.ok() || documentRetryAfter !== null) {
-      return { documentStatus, documentRetryAfter, refusal, responses: [], publicVideoLinks: [] };
+      return { ...result, outcome: refusal?.transportReason || 'document-http-error', elapsedMs: Date.now() - startedAt };
     }
-    await Promise.race([page.waitForTimeout(3000), firstDenial]);
-    const laterRefusal = await tikTokAccessRefusal(page, document);
-    const searchResponses = await Promise.all(responses);
-    const deniedSearch = searchResponses.some(denied);
-    return { documentStatus, documentRetryAfter, refusal: laterRefusal, responses: searchResponses,
-      publicVideoLinks: laterRefusal || deniedSearch ? [] : await visiblePublicVideoLinks(page, keyword, 12) };
+    const deadline = startedAt + Math.min(waitMs, 25000);
+    let outcome, state, unchangedSince = Date.now();
+    do {
+      const current = await publicSearchUiState(page, keyword);
+      if (JSON.stringify(current) !== JSON.stringify(state)) unchangedSince = Date.now();
+      state = current;
+      if (deniedSearch) outcome = 'provider-search-refusal';
+      else if (state.challenge) outcome = 'access-challenge';
+      else if (state.loginRequired) outcome = 'login-wall';
+      else if (!state.expectedSearchPage) outcome = 'search-page-mismatch';
+      else if (!state.loadingIndicator && Date.now() - startedAt > 500) {
+        result.publicVideoLinks = await visiblePublicVideoLinks(page, keyword, 12);
+        if (result.publicVideoLinks.length) outcome = 'visible-results';
+        else if (state.explicitEmpty) outcome = 'visible-no-results';
+      }
+      const remaining = deadline - Date.now();
+      if (outcome || remaining <= 0) break;
+      await Promise.race([page.waitForTimeout(Math.min(remaining, 350)), firstDenial]);
+    } while (true);
+
+    result.responses = await Promise.all(responses);
+    if (deniedSearch) {
+      result.publicVideoLinks = [];
+      outcome = 'provider-search-refusal';
+    }
+    return { ...result, outcome: outcome || (state.readyState === 'complete'
+      && !state.loadingIndicator ? 'complete-document-without-search-state' : 'search-state-timeout'), state,
+      elapsedMs: Date.now() - startedAt, unchangedStateMs: Date.now() - unchangedSince };
   } finally {
     page.off('response', observe);
   }

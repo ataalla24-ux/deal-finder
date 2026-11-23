@@ -54,9 +54,24 @@ test('the normal public page comparison reports visible links and respects a ref
       assert.equal(calls.length, 1);
       assert.equal(result.responses[0].status, status);
       assert.equal(result.responses[0].retryAfterProvided, status === 429);
+      assert.equal(result.outcome, status === 429 ? 'provider-search-refusal' : 'visible-results');
       assert.deepEqual(result.publicVideoLinks, status === 200 ? ['https://www.tiktok.com/@public.creator/video/1234567890'] : []);
     });
   }
+});
+
+test('the normal public page waits for an explicit search state after DOMContentLoaded', async () => {
+  const html = '<main><progress></progress></main><script>setTimeout(() => {'
+    + 'document.querySelector("main").textContent = "No results found";}, 3300)</script>';
+  await fixture({ html }, async (page, calls, documents) => {
+    const result = await observeTikTokPublicSearchPage(page, 'sample', { waitMs: 7000 });
+    assert.equal(result.outcome, 'visible-no-results');
+    assert.equal(result.state.loadingIndicator, false);
+    assert.equal(result.state.explicitEmpty, true);
+    assert.deepEqual(result.publicVideoLinks, []);
+    assert.equal(calls.length, 0);
+    assert.deepEqual(documents, ['/search']);
+  });
 });
 
 test('the default scanner accepts the same-origin homepage path and sends only the October video searches', async () => {

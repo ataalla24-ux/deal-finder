@@ -12,8 +12,14 @@ const retryAt = Math.max(
   Date.parse(api?.postVisitStop?.retryAt) || 0,
   Date.parse(previous.searchDiscovery?.postVisitStop?.retryAt) || 0,
 );
+const confirmedComparison = publicUi && process.argv.includes('--confirm-45169295428')
+  && process.env.GITHUB_EVENT_NAME === 'workflow_dispatch' && process.env.GITHUB_RUN_ATTEMPT === '1'
+  && api?.checkedBy?.runId === '45162411395' && api.lastFailure?.providerCode === '2483'
+  && api.lastFailure?.providerSignal === 'unclassified' && api.lastFailure?.status === 200
+  && api.lastFailure?.retryAfterProvided === false && api.lastSearchResponse?.retryAfterProvided === false
+  && !api.postVisitStop && !previous.searchDiscovery?.postVisitStop;
 let routes = null;
-if (retryAt <= Date.now()) {
+if (retryAt <= Date.now() || confirmedComparison) {
   const browser = await chromium.launch({ headless: true });
   try {
     const page = await browser.newPage({ locale: 'de-AT', timezoneId: 'Europe/Vienna',
@@ -40,6 +46,7 @@ const report = {
   recordedSearchRetryAt: retryAt ? new Date(retryAt).toISOString() : '',
   mode: publicUi ? 'normal-public-search-page' : 'blocked-route-diagnostics',
   status: routes ? 'routes-observed' : 'cooldown',
+  ...(confirmedComparison ? { comparisonOfRun: '45169295428' } : {}),
   routes,
 };
 fs.mkdirSync('output/social-discovery', { recursive: true });
