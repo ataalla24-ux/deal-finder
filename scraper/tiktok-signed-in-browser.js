@@ -85,44 +85,111 @@ async function visibleVideoLinks(page, keyword, limit, timeoutMs) {
   }, { origin: ORIGIN, keyword, limit, videoSource: VIDEO_PATH.source });
 }
 
-async function readOriginal(page, url) {
+export async function readPublicTikTokOriginal(page, url, { includeMedia = false } = {}) {
   const expected = tiktokUrl(url);
   const identity = expected?.pathname.match(VIDEO_PATH);
-  const actual = tiktokUrl(page.url());
-  if (!identity || actual?.pathname.replace(/\/$/, '') !== expected.pathname) return null;
-  const item = await page.evaluate(({ origin, path, handle, id }) => {
+  const path = expected?.pathname.replace(/\/$/, '');
+  if (!identity || tiktokUrl(page.url())?.pathname.replace(/\/$/, '') !== path) return null;
+  const item = await page.evaluate(({ origin, path, handle, id, includeMedia }) => {
     if (location.origin !== origin || location.pathname.replace(/\/$/, '') !== path) return null;
-    const read = name => {
-      const text = document.getElementById(name)?.textContent;
-      if (!text || text.length > 2_500_000) return null;
-      try { return JSON.parse(text); } catch { return null; }
+    const validCaption = value => typeof value === 'string' && value.trim() && value.length <= 12_000;
+    const mediaUrl = value => {
+      const raw = Array.isArray(value) ? value[0] : value;
+      if (typeof raw !== 'string' || raw.length > 2500) return '';
+      try {
+        const url = new URL(raw);
+        return url.protocol === 'https:' && !url.username && !url.password ? url.href : '';
+      } catch { return ''; }
     };
-    const details = read('__UNIVERSAL_DATA_FOR_REHYDRATION__')?.__DEFAULT_SCOPE__?.['webapp.video-detail'];
+    const read = name => {
+      const node = document.getElementById(name);
+      if (!node) return null;
+      const text = node.textContent;
+      if (text && text.length <= 2_500_000) {
+        try { return JSON.parse(text); } catch { /* An unavailable item cannot authorize a public preview. */ }
+      }
+      if (includeMedia) throw new Error('Unreadable TikTok post metadata');
+      return null;
+    };
+    let details, module;
+    try {
+      details = read('__UNIVERSAL_DATA_FOR_REHYDRATION__')?.__DEFAULT_SCOPE__?.['webapp.video-detail'];
+      module = read('SIGI_STATE')?.ItemModule;
+    } catch { return null; }
     if (details?.statusCode != null && Number(details.statusCode) !== 0) return null;
     const select = item => {
       const owner = typeof item?.author === 'string' ? item.author : item?.author?.uniqueId;
       return typeof item?.id === 'string' && item.id === id && typeof owner === 'string'
         && owner.toLowerCase() === handle.toLowerCase();
     };
-    const records = [details?.itemInfo?.itemStruct, read('SIGI_STATE')?.ItemModule?.[id]].filter(select);
+    const originals = [details?.itemInfo?.itemStruct, module?.[id]].filter(Boolean);
+    const records = originals.filter(select);
     const restricted = item => {
-      const flag = value => value === true || value === 'true' || value === 1;
+      const flag = value => value === true || value === 'true' || value === 1 || value === '1';
       const itemFlags = ['privateItem', 'isPrivate', 'secret', 'friendOnly', 'friendsOnly',
         'isFriendsOnly', 'followersOnly', 'followerOnly', 'isFollowersOnly', 'onlyFriends'];
       const authorFlags = ['privateAccount', 'isPrivate', 'secret'];
       return itemFlags.some(key => flag(item[key])) || authorFlags.some(key => flag(item.author?.[key]))
         || (item.privacyLevel != null && item.privacyLevel !== 'PUBLIC_TO_EVERYONE');
     };
-    if (records.some(restricted)) return null;
+    if (records.some(restricted) || (includeMedia && originals.length !== records.length)) return null;
     const post = records.find(item => item.privateItem === false || item.privacyLevel === 'PUBLIC_TO_EVERYONE');
-    if (!post || typeof post.desc !== 'string' || !post.desc.trim() || post.desc.length > 12_000) return null;
-    return { caption: post.desc, createTime: post.createTime };
-  }, { origin: ORIGIN, path: expected.pathname, handle: identity[1], id: identity[2] });
+    if (post && validCaption(post.desc)) {
+      return { caption: post.desc, createTime: post.createTime, ...(includeMedia && {
+        mediaUrl: mediaUrl(post.video?.playAddr) || mediaUrl(post.video?.downloadAddr),
+        thumbnailUrl: mediaUrl(post.video?.originCover) || mediaUrl(post.video?.cover) || mediaUrl(post.video?.dynamicCover),
+      }) };
+    }
+
+    // An original with unresolved identity, privacy, or copy may never be replaced
+    // by a recommendation, a preview card, or even another description of the page.
+    if (!includeMedia || details != null || module != null) return null;
+    const exactUrl = value => {
+      try {
+        const url = new URL(value);
+        return url.origin === origin && !url.username && !url.password && url.pathname.replace(/\/$/, '') === path;
+      } catch { return false; }
+    };
+    const head = document.head;
+    const meta = selector => head?.querySelector(selector)?.content || '';
+    const pageIds = Array.from(head?.querySelectorAll('link[rel~="canonical"],meta[property="og:url"]') || [],
+      element => element.getAttribute('href') || element.getAttribute('content') || '');
+    if (pageIds.some(value => !exactUrl(value))) return null;
+    const dated = (caption, published, video, thumbnail) => {
+      if (!validCaption(caption) || typeof published !== 'string'
+          || !/^\d{4}-\d\d-\d\dT\d\d:\d\d(?::\d\d(?:\.\d+)?)?(?:Z|[+-]\d\d:?\d\d)$/i.test(published)
+          || !Number.isFinite(Date.parse(published))) return null;
+      return { caption, createTime: Date.parse(published), mediaUrl: mediaUrl(video), thumbnailUrl: mediaUrl(thumbnail) };
+    };
+    for (const script of document.querySelectorAll('script[type="application/ld+json"]')) {
+      if (!script.textContent || script.textContent.length > 2_500_000) continue;
+      let root;
+      try { root = JSON.parse(script.textContent); } catch { continue; }
+      const entries = (Array.isArray(root) ? root : [root]).flatMap(node =>
+        Array.isArray(node?.['@graph']) ? [node, ...node['@graph']] : [node]);
+      for (const entry of entries) {
+        const types = entry?.['@type'];
+        if (types !== 'VideoObject' && !(Array.isArray(types) && types.includes('VideoObject'))) continue;
+        const identities = [entry.url, entry['@id'], entry.mainEntityOfPage].filter(Boolean)
+          .map(value => typeof value === 'object' ? value['@id'] : value);
+        if (!identities.length || !identities.every(exactUrl)) continue;
+        if (restricted(entry) || entry.isAccessibleForFree === false || entry.isAccessibleForFree === 'False') return null;
+        const found = dated(entry.description, entry.uploadDate || entry.datePublished, entry.contentUrl, entry.thumbnailUrl);
+        if (found) return found;
+      }
+    }
+    if (!pageIds.length) return null;
+    return dated(meta('meta[property="og:description"]') || meta('meta[name="description"]') || meta('meta[name="twitter:description"]'),
+      meta('meta[property="article:published_time"]'),
+      meta('meta[property="og:video"]') || meta('meta[property="og:video:url"]'),
+      meta('meta[property="og:image"]') || meta('meta[name="twitter:image"]'));
+  }, { origin: ORIGIN, path, handle: identity[1], id: identity[2], includeMedia });
   if (!item) return null;
   const raw = String(item.createTime ?? '');
   const milliseconds = /^\d{10}$/.test(raw) ? Number(raw) * 1000 : /^\d{13}$/.test(raw) ? Number(raw) : NaN;
   const createTime = Number.isFinite(milliseconds) ? new Date(milliseconds).toISOString() : null;
-  return { url, caption: item.caption, createTime };
+  return { url, caption: item.caption, createTime,
+    ...(includeMedia && { mediaUrl: item.mediaUrl, thumbnailUrl: item.thumbnailUrl }) };
 }
 
 function boundedCount(value, fallback, cap) {
@@ -304,7 +371,7 @@ export async function collectTikTokBrowserEvidence(page, {
     for (const candidate of interleaveOriginals(searchResults, limit)) {
       const blocked = await navigate(candidate);
       if (blocked) return stop(blocked);
-      const post = await readOriginal(page, candidate);
+      const post = await readPublicTikTokOriginal(page, candidate);
       const late = await pageRefusal();
       if (late) return stop(late);
       if (post) result.posts.push(post);

@@ -9,6 +9,7 @@ import { chromium } from 'playwright';
 import { hasTikTokSingleRequestRetry, previousTikTokSearchFailure, runTikTokApiDiscovery, selectTikTokPostVisits, tikTokDiscoveryHealth, tikTokRetryAt } from './tiktok-search-discovery.js';
 import { readKnownTikTokLinks } from './tiktok-known-links.js';
 import { createTikTokDirectSearch, tikTokAccessRefusal } from './tiktok-browser-search.js';
+import { readPublicTikTokOriginal } from './tiktok-signed-in-browser.js';
 import { runInstagramSearchQueries } from './instagram-search-discovery.js';
 import { parsePublicSearchResults, readPublicSearchResponse } from './public-search-response.js';
 
@@ -1010,50 +1011,22 @@ export async function extractTikTokPostData(page, url) {
   const document = await page.goto(url, { waitUntil: 'domcontentloaded', timeout: 25000 });
   const initialRefusal = await tikTokAccessRefusal(page, document);
   if (initialRefusal) return { accessRefusal: initialRefusal };
-  if (document && !document.ok()) return {};
+  const retryAfter = document ? await document.headerValue('retry-after') : null;
+  if (retryAfter !== null) return { accessRefusal: { status: document.status(), retryAfter, transportReason: 'document-retry-after' } };
+  if (!document?.ok()) return {};
   await page.waitForTimeout(1800);
   const visibleRefusal = await tikTokAccessRefusal(page);
   if (visibleRefusal) return { accessRefusal: visibleRefusal };
-  const finalUrl = new URL(page.url());
-  if (`${finalUrl.origin}${finalUrl.pathname.replace(/\/$/, '')}` !== url) return {};
-
-  return page.evaluate(() => {
-    const meta = (selector) => document.querySelector(selector)?.getAttribute('content') || '';
-    const bodyText = document.body?.innerText || '';
-    const scriptText = Array.from(document.querySelectorAll('script'))
-      .map((node) => node.textContent || '')
-      .join('\n')
-      .slice(0, 1200000);
-    const createTimes = Array.from(scriptText.matchAll(/"createTime"\s*:\s*"?(\d{10})"?/g)).map((match) => match[1]);
-    let jsonLdUploadDate = '';
-    let jsonLdDatePublished = '';
-    for (const script of Array.from(document.querySelectorAll('script[type="application/ld+json"]'))) {
-      try {
-        const parsed = JSON.parse(script.textContent || '{}');
-        const entries = Array.isArray(parsed) ? parsed : [parsed];
-        for (const entry of entries) {
-          jsonLdUploadDate ||= entry.uploadDate || '';
-          jsonLdDatePublished ||= entry.datePublished || '';
-        }
-      } catch {}
-    }
-
-    const accountMatch = location.pathname.match(/\/@([^/]+)\//);
-    return {
-      finalUrl: location.href,
-      accountHandle: accountMatch?.[1] || '',
-      title: meta('meta[property="og:title"]') || meta('meta[name="twitter:title"]') || document.title || '',
-      description: meta('meta[property="og:description"]') || meta('meta[name="description"]') || meta('meta[name="twitter:description"]') || '',
-      bodyText,
-      timeDateTime: document.querySelector('time[datetime]')?.getAttribute('datetime') || '',
-      jsonLdUploadDate,
-      jsonLdDatePublished,
-      createTimes: [...new Set(createTimes)].slice(0, 8),
-      mediaType: meta('meta[property="og:video"]') ? 'VIDEO' : (meta('meta[property="og:image"]') ? 'IMAGE' : ''),
-      mediaUrl: meta('meta[property="og:video"]') || meta('meta[property="og:video:url"]') || '',
-      thumbnailUrl: meta('meta[property="og:image"]') || meta('meta[name="twitter:image"]') || '',
-    };
-  });
+  const post = await readPublicTikTokOriginal(page, url, { includeMedia: true });
+  if (!post) return {};
+  return {
+    url: post.url, finalUrl: post.url,
+    accountHandle: new URL(post.url).pathname.split('/')[1].slice(1),
+    title: post.caption, description: post.caption, bodyText: post.caption,
+    timeDateTime: post.createTime || '',
+    mediaUrl: post.mediaUrl, thumbnailUrl: post.thumbnailUrl,
+    mediaType: post.mediaUrl ? 'VIDEO' : (post.thumbnailUrl ? 'IMAGE' : ''),
+  };
 }
 
 function trustedTikTokMediaEvidence(data, minimumConfidence = 0.84) {
