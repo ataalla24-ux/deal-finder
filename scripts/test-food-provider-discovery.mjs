@@ -162,6 +162,21 @@ test('cashback campaigns use direct Power slots even when provider allowance is 
     assert.equal(calls, 0);
   }
 });
+test('directly readable legal terms stay outside provider reservations and requests', async () => {
+  const source = POWER_FOOD_SOURCES.find(s => s.name === 'Vapiano');
+  const url = 'https://www.vapiano.at/teilnahmebedingungen/';
+  const report = power();
+  report.sources.find(s => s.source === source.name).pages = [{ status: 'ok', url }];
+  const state = empty();
+  rememberLinks(state, source, [url], now);
+  const scan = planRequests(state, report, usages, 'scan', now, '126');
+  assert.equal(scan.tasks.length, 18);
+  assert.ok(scan.tasks.every(task => task.url !== url));
+  for (const provider of ['scraperapi', 'scrapingbee', 'zyte']) {
+    const client = new FoodProviderClient(provider, {env: {}, fetchImpl: () => assert.fail('unexpected request')});
+    await assert.rejects(client.scrape(source, url + '?utm_source=test'), /direct-only-source/);
+  }
+});
 test('expired trial services leave normal free discovery running; missing guard does not claim success', () => {
   const later = new Date('2026-11-22T10:00:00Z');
   const report = { ...power(), finishedAt: later.toISOString() };

@@ -28,7 +28,7 @@ import {
 const now = new Date("2026-09-23T12:00:00Z");
 {
   const merchant = POWER_FOOD_SOURCES.find(row => row.name === 'Vapiano');
-  const pageUrl = merchant.seeds[0];
+  const pageUrl = merchant.directOnlyPages[0];
   const date = new Date('2026-11-23T12:00:00Z');
   const heading = '<h2>Teilnahmebedingungen „Pasta del Giorno“</h2>';
   const lines = [

@@ -25,6 +25,14 @@ export function canonicalPage(value, source) {
   url.searchParams.sort();
   return url.href;
 }
+export function isDirectOnlyTarget(source, url) {
+  if (source.cashbackCampaigns) return true;
+  if (!source.directOnlyPages?.length) return false;
+  const target = new URL(url);
+  target.hash = '';
+  target.search = '';
+  return source.directOnlyPages.some(value => value.replace(/\/$/, '') === target.href.replace(/\/$/, ''));
+}
 export const taskKey = task => `${task.source}|${task.url || POWER_FOOD_SOURCES.find(s => s.name === task.source)?.url}`;
 
 export function powerPageAvailable(source, powerReport, value, now) {
@@ -96,7 +104,7 @@ export function scanTargets(state, powerReport, now) {
     const urls = [source.url, ...(source.seeds || []), ...(report.pages || []).filter(p => p.status === 'ok').map(p => p.finalUrl || p.url), ...saved.map(p => p.url)];
     for (const value of urls) {
       const url = canonicalPage(value, source);
-      if (!url || !powerPageAvailable(source, powerReport, url, now)) continue;
+      if (!url || isDirectOnlyTarget(source, url) || !powerPageAvailable(source, powerReport, url, now)) continue;
       if (url !== source.url && !(source.seeds || []).includes(url)
           && source.providerPagePattern && !source.providerPagePattern.test(url)) continue;
       const target = { source: source.name, url };

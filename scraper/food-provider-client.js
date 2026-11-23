@@ -1,5 +1,6 @@
 import { createHash } from 'node:crypto';
 import { isAllowedFoodUrl } from './power-food-sources.js';
+import { isDirectOnlyTarget } from './food-provider-policy.js';
 import { retryAfterAt } from './source-http-policy.js';
 import { setTimeout as delay } from 'node:timers/promises';
 const PROVIDERS = ['scraperapi', 'scrapingbee', 'zyte'];
@@ -81,8 +82,8 @@ export class FoodProviderClient {
     return usageSummary(this.provider, body);
   }
   async scrape(source, target = source.url) {
-    if (source.cashbackCampaigns) throw new ProviderError('direct-only-source');
     if (!isAllowedFoodUrl(target, source)) throw new ProviderError('untrusted-target');
+    if (isDirectOnlyTarget(source, target)) throw new ProviderError('direct-only-source');
     try {
     let result, html, finalUrl, cost, status = 200;
     if (this.provider === 'scraperapi') {

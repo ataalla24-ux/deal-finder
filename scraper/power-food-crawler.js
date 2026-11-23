@@ -11,7 +11,7 @@ export async function crawlFoodSource(source, options) {
   const now = options.now || new Date();
   const started = Date.now();
   const maxPages = Math.max(1, Math.min(8, source.maxPages || 8, options.maxPages || 5));
-  const queue = [source.url, ...(source.seeds || [])];
+  const queue = [source.url, ...(source.seeds || []), ...(source.directOnlyPages || [])];
   const seen = new Set();
   const pages = [];
   const deferredPages = [];
