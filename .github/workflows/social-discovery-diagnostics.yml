@@ -5,11 +5,38 @@ on:
       lane:
         description: TikTok search, Instagram profile read, or one Instagram public search query
         type: choice
-        options: [tiktok, tiktok-direct, tiktok-routes, tiktok-public-ui, instagram, instagram-search]
+        options: [tiktok, tiktok-direct, tiktok-routes, tiktok-public-ui, tiktok-creator-embed, instagram, instagram-search]
         default: tiktok
 permissions:
   contents: read
 jobs:
+  creator-embed:
+    if: ${{ inputs.lane == 'tiktok-creator-embed' }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions:
+      contents: read
+    env:
+      PLAYWRIGHT_BROWSERS_PATH: '0'
+      SENTRY_DISABLED: '1'
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+      - run: npm ci --no-audit --no-fund
+      - run: npx playwright install --with-deps chromium
+      - run: node --test scripts/test-tiktok-creator-embed.mjs
+      - run: node scripts/check-tiktok-creator-embed.mjs
+      - uses: actions/upload-artifact@v4
+        with:
+          name: public-creator-embed
+          path: output/social-discovery/creator-embed.json
+          retention-days: 7
+
   diagnose:
     if: ${{ inputs.lane == 'tiktok' || inputs.lane == 'tiktok-routes' || inputs.lane == 'tiktok-public-ui' }}
     runs-on: ubuntu-latest

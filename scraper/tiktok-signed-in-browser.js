@@ -85,7 +85,7 @@ async function visibleVideoLinks(page, keyword, limit, timeoutMs) {
   }, { origin: ORIGIN, keyword, limit, videoSource: VIDEO_PATH.source });
 }
 
-async function readOriginal(page, url) {
+export async function readPublicTikTokOriginal(page, url) {
   const expected = tiktokUrl(url);
   const identity = expected?.pathname.match(VIDEO_PATH);
   const actual = tiktokUrl(page.url());
@@ -304,7 +304,7 @@ export async function collectTikTokBrowserEvidence(page, {
     for (const candidate of interleaveOriginals(searchResults, limit)) {
       const blocked = await navigate(candidate);
       if (blocked) return stop(blocked);
-      const post = await readOriginal(page, candidate);
+      const post = await readPublicTikTokOriginal(page, candidate);
       const late = await pageRefusal();
       if (late) return stop(late);
       if (post) result.posts.push(post);
