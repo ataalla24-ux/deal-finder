@@ -578,7 +578,7 @@ function inferCategoryAndLogo(text, type) {
 function merchantFromOpeningHeading(caption, accountHandle, url) {
   const text = cleanText(caption, 1800);
   const handle = String(accountHandle || '').toLowerCase();
-  const match = url.match(/^https:\/\/www\.tiktok\.com\/@([a-z0-9._-]{2,40})\/video\/\d{8,30}\/?$/i);
+  const match = String(url || '').match(/^https:\/\/www\.tiktok\.com\/@([a-z0-9._-]{2,40})\/video\/\d{8,30}\/?$/i);
   if (!match || match[1].toLowerCase() !== handle || !/\b(?:wir (?:feiern|eröffnen)|(?:unsere|unserer) (?:große |grosse )?(?:neu)?eröffnung)\b/iu.test(text)) return '';
   const heading = text.match(/^[^\p{L}\p{N}@#]{0,18}([\p{L}][\p{L}’'&-]*(?: [\p{L}][\p{L}’'&-]*){0,3})\s+(?:grand opening|neueröffnung)\s*[!:.🎉]/iu)?.[1];
   if (!heading || heading.length < 4 || heading.length > 45 || isWeakBrandCandidate(heading)) return '';
