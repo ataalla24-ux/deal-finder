@@ -26,16 +26,22 @@ export function isViennaBenefitUrl(value, detail = true) {
 export function parseViennaBenefitListing(html, pageUrl) {
   if (!isViennaBenefitUrl(pageUrl, false)) throw new Error('Untrusted benefit listing');
   const $ = load(html), links = new Set();
-  $('.wm-card').each((_, card) => {
-    if (!clean($(card).find('.benefit-card-info').text())) return;
-    const href = $(card).find('.wm-card__heading a').attr('href');
+  $('.wm-card, main wm-grid wm-card').each((_, card) => {
+    const element = $(card);
+    const offer = element.is('wm-card') ? element.children('[slot="content"]').find('p') : element.find('.benefit-card-info');
+    if (!clean(offer.text())) return;
+    const headingLink = element.is('wm-card') ? element.children('h3[slot="heading"]').children('a') : element.find('.wm-card__heading a');
+    if (headingLink.length !== 1) return;
+    const href = headingLink.attr('href');
     if (!href) return;
     const url = new URL(href, pageUrl).href;
     if (isViennaBenefitUrl(url)) links.add(url);
   });
   let pages = 1;
-  $('a[href]').each((_, element) => {
-    const url = new URL($(element).attr('href'), pageUrl);
+  $('a[href], wm-pagination button[data-url]').each((_, element) => {
+    const href = $(element).attr('href') || $(element).attr('data-url');
+    if (!URL.canParse(href, pageUrl)) return;
+    const url = new URL(href, pageUrl);
     if (isViennaBenefitUrl(url.href, false) && url.searchParams.get('kategorien') === new URL(pageUrl).searchParams.get('kategorien'))
       pages = Math.max(pages, Number(url.searchParams.get('p')) || 1);
   });
@@ -48,14 +54,16 @@ export function parseViennaFoodBenefit(html, url, { now = new Date() } = {}) {
   if (HELD.has(slug)) return { reason: 'specialized-or-wine-focused-review' };
   const $ = load(html);
   $('script,style,noscript,svg').remove();
-  const headings = $('h1.wm-stage__heading');
-  const offerNodes = $('.wm-site-content .wm-text-background strong');
-  const details = $('.wm-accordion__header').filter((_, e) => clean($(e).text()) === 'Details');
+  const headings = $('h1.wm-stage__heading, main > wm-stage > h1[slot="content"]');
+  const offerNodes = $('.wm-site-content .wm-text-background strong, main > wm-section > wm-stack > wm-highlight > strong');
+  const details = $('.wm-accordion__header, main wm-accordion > wm-accordion-heading').filter((_, e) => clean($(e).text()) === 'Details');
   if (headings.length !== 1 || offerNodes.length !== 1 || details.length !== 1) return { reason: 'ambiguous-benefit-page' };
   const brand = clean(headings.text()), offer = clean(offerNodes.text());
-  const terms = clean(details.next('.wm-accordion__panel').text());
-  const context = clean(offerNodes.closest('.wm-block').find('p').text());
-  const addresses = [...new Set($('.wm-card--partner .wm-icon-text__content').map((_, e) => clean($(e).text())).get()
+  const terms = clean(details.next('.wm-accordion__panel, wm-accordion-content').text());
+  const context = clean(offerNodes.closest('.wm-block, wm-stack').find('p').text());
+  const partner = $('main wm-card h2').filter((_, e) => clean($(e).text()) === 'Partnerinformationen').closest('wm-card');
+  const addressNodes = $('.wm-card--partner .wm-icon-text__content').add(partner.find('li > wm-icon[iconid="pin"] + span'));
+  const addresses = [...new Set(addressNodes.map((_, e) => clean($(e).clone().find('br').replaceWith(' ').end().text())).get()
     .filter(value => /\b1(?:0[1-9]|1[0-9]|2[0-3])0\s+Wien\b/i.test(value)))];
   if (!brand || brand.length > 150 || !terms || terms.length > 2000 || addresses.length !== 1) return { reason: 'missing-benefit-facts' };
   if (!/speise|gericht|getränk|nudelbox|torte|kuchen|kaffee|coffee|café|sushi|burger|pizz(?:a|eri)|lebensmittel|bäckerei|gebäck|frühstück|küche|restaurant/i.test(`${brand} ${offer} ${terms} ${context}`)) return {reason:'not-food-benefit'};

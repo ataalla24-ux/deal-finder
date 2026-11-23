@@ -80,3 +80,31 @@ test('source pause survives another reader and cannot be shortened or silently i
     fs.writeFileSync(file,'{"retryAt":"invalid"}');assert.throws(()=>readViennaFoodPause(file),/Invalid benefit source pause/);
   } finally {fs.rmSync(dir,{recursive:true,force:true});}
 });
+
+test('current city components retain the deal card and follow category-bound pagination', () => {
+  const card = (href, heading, content) => `<wm-card><h3 slot="heading"><a href="${href}">${heading}</a></h3>
+    <div slot="content"><p>${content}</p></div><div slot="postcontent"><a href="#favorite">Favorit</a></div></wm-card>`;
+  const listing = `<main><wm-grid>${card('/meine-vorteile/pizzeria-test', 'Pizzeria Test', offer)}
+    ${card('https://example.com/meine-vorteile/other','Other',offer)}
+    ${card('/meine-vorteile/empty','No offer','')}</wm-grid>
+    <wm-pagination><button data-url="?kategorien=restaurants&amp;p=5">5</button>
+    <button data-url="?kategorien=nachtleben&amp;p=8">8</button></wm-pagination></main>`;
+  assert.deepEqual(parseViennaBenefitListing(listing,'https://vorteilsclub.wien.at/meine-vorteile?kategorien=restaurants&p=1'),
+    {urls:[url],pages:5});
+});
+
+test('city detail reads the official benefit and partner address without borrowing related cards', () => {
+  const page = `<main><wm-stage><h1 slot="content">Pizzeria Test</h1></wm-stage>
+    <wm-section><wm-stack><wm-highlight><strong>${offer}</strong></wm-highlight><p>Restaurant in Wien</p></wm-stack></wm-section>
+    <wm-section><wm-accordion><wm-accordion-heading><h3>Details</h3></wm-accordion-heading>
+    <wm-accordion-content>${terms}</wm-accordion-content></wm-accordion></wm-section>
+    <wm-section><wm-card><h2>Partnerinformationen</h2><ul><li><wm-icon iconid="pin"></wm-icon><span>Testgasse 1<br>1090 Wien</span></li></ul></wm-card>
+    <wm-card><h2>Weiterer Vorteil</h2><p>50 Prozent auf alles</p><ul><li><wm-icon iconid="pin"></wm-icon><span>Andere Straße 5 1010 Wien</span></li></ul></wm-card></wm-section></main>`;
+  const { deal } = parse(page);
+  assert.equal(deal.address, 'Testgasse 1 1090 Wien');
+  assert.equal(deal.evidence.terms, terms);
+  assert.equal(deal.evidence.offerText, offer);
+  assert.doesNotMatch(deal.description, /50 Prozent/);
+  for (const broken of [page.replace('Partnerinformationen','Navigation'),page.replace('>Details<','>Location<'),
+    page.replace(offer,'Verlosung'),page.replace('1090 Wien','4020 Linz')]) assert.equal(parse(broken).deal, undefined);
+});
