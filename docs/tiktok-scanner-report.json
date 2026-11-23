@@ -1,14 +1,14 @@
 {
-  "lastUpdated": "2026-11-23T10:54:04.717Z",
+  "lastUpdated": "2026-11-23T11:16:01.244Z",
   "runProvenance": {
     "repository": "ataalla24-ux/deal-finder",
-    "runId": "45159254437",
-    "headSha": "8b7dfe5bdc60a3eccbda001bc71472c3dc84fa24",
-    "checkoutSha": "8b7dfe5bdc60a3eccbda001bc71472c3dc84fa24",
+    "runId": "45162411395",
+    "headSha": "c65fbe03f08049eb9bba9be942975bc3337ed302",
+    "checkoutSha": "c65fbe03f08049eb9bba9be942975bc3337ed302",
     "triggeringRun": null,
     "event": "workflow_dispatch",
-    "runAttempt": "2",
-    "url": "https://github.com/ataalla24-ux/deal-finder/actions/runs/45159254437"
+    "runAttempt": "1",
+    "url": "https://github.com/ataalla24-ux/deal-finder/actions/runs/45162411395"
   },
   "status": "discovery-degraded",
   "outputPreserved": true,
@@ -124,12 +124,13 @@
   "apiDiscovery": {
     "errors": [
       {
-        "keyword": "wien gratis kaffee",
+        "keyword": "wien gratis 23 november 2026",
         "offset": 0,
-        "status": 200,
         "error": "TikTok returned a provider error",
+        "status": 200,
         "code": "provider-error",
-        "providerCode": "2483"
+        "providerCode": "2483",
+        "providerSignal": "unclassified"
       }
     ],
     "attemptedRequests": 1,
@@ -138,12 +139,39 @@
     "normalizedItems": 0,
     "ignoredItems": 0,
     "stoppedReason": "provider-error",
-    "nextRetryAt": "2026-11-23T11:08:16.260Z",
-    "nextKeywordIndex": 0,
+    "nextRetryAt": "2026-11-24T11:16:00.145Z",
+    "nextKeywordIndex": 1,
+    "checkedBy": {
+      "repository": "ataalla24-ux/deal-finder",
+      "runId": "45162411395",
+      "headSha": "c65fbe03f08049eb9bba9be942975bc3337ed302",
+      "checkoutSha": "c65fbe03f08049eb9bba9be942975bc3337ed302",
+      "triggeringRun": null,
+      "event": "workflow_dispatch",
+      "runAttempt": "1",
+      "url": "https://github.com/ataalla24-ux/deal-finder/actions/runs/45162411395"
+    },
+    "lastFailure": {
+      "status": 200,
+      "code": "provider-error",
+      "providerCode": "2483",
+      "providerSignal": "unclassified",
+      "failedAt": "2026-11-23T11:16:00.145Z",
+      "retryAfterProvided": false,
+      "runProvenance": {
+        "repository": "ataalla24-ux/deal-finder",
+        "runId": "45162411395",
+        "headSha": "c65fbe03f08049eb9bba9be942975bc3337ed302",
+        "checkoutSha": "c65fbe03f08049eb9bba9be942975bc3337ed302",
+        "triggeringRun": null,
+        "event": "workflow_dispatch",
+        "runAttempt": "1",
+        "url": "https://github.com/ataalla24-ux/deal-finder/actions/runs/45162411395"
+      }
+    },
     "boundedRetry": {
-      "reason": "local-request-policy",
-      "failures": 2,
-      "failedAt": "2026-11-23T10:57:34.914Z"
+      "mode": "single-request",
+      "failures": 2
     },
     "transport": "direct-browser-search",
     "navigations": 1,
@@ -157,39 +185,20 @@
       "bodyState": "json"
     },
     "homepageNavigation": "root",
-    "normalizedCandidates": 0,
-    "inspectedPublicLinks": 0,
-    "checkedBy": {
-      "repository": "ataalla24-ux/deal-finder",
-      "runId": "45160688985",
-      "headSha": "bb81f1d981da9d220fb8eaee3cc0f1a7271d4e08",
-      "checkoutSha": "bb81f1d981da9d220fb8eaee3cc0f1a7271d4e08",
-      "triggeringRun": null,
-      "event": "workflow_dispatch",
-      "runAttempt": "1",
-      "url": "https://github.com/ataalla24-ux/deal-finder/actions/runs/45160688985"
-    }
+    "publicVideoLinks": 0
   },
   "searchDiscovery": {
-    "errors": [
-      {
-        "query": "site:tiktok.com/@ wien gratis heute",
-        "error": "Search challenge; no bypass attempted",
-        "httpStatus": 403,
-        "retryAt": "",
-        "retryAfterProvided": false
-      }
-    ],
-    "attemptedQueries": 2,
-    "stoppedReason": "search-unavailable",
+    "errors": [],
+    "attemptedQueries": 0,
+    "stoppedReason": "search-cooldown",
     "nextRetryAt": "2026-11-23T14:54:04.620Z",
     "lastAttemptAt": "2026-11-23T10:54:04.591Z",
-    "nextQueryIndex": 1,
     "boundedRetry": {
       "reason": "challenge-without-retry-after",
       "failures": 1,
       "failedAt": "2026-11-23T10:54:04.620Z"
     },
+    "nextQueryIndex": 1,
     "deferredPostVisits": 0
   },
   "accepted": 0,
@@ -228,7 +237,7 @@
     "aiAccepted": 0,
     "aiSkippedLowIntent": 0,
     "aiSkippedUnrecoverable": 0,
-    "analysisWallTimeMs": 0,
+    "analysisWallTimeMs": 1,
     "analysisTotalItemTimeMs": 0,
     "analysisMaxItemTimeMs": 0,
     "aiWallTimeMs": 0,
@@ -272,20 +281,22 @@
     "aiAcceptedUnusable": 0
   },
   "timings": {
-    "apiDiscoveryMs": 37,
-    "searchDiscoveryMs": 1537,
-    "mediaRescueMs": 68,
-    "totalScannerMs": 2522
+    "apiDiscoveryMs": 4039,
+    "searchDiscoveryMs": 0,
+    "mediaRescueMs": 331,
+    "totalScannerMs": 6859
   },
-  "discoveryErrors": [
+  "discoveryErrors": [],
+  "apiErrors": [
     {
-      "query": "site:tiktok.com/@ wien gratis heute",
-      "error": "Search challenge; no bypass attempted",
-      "httpStatus": 403,
-      "retryAt": "",
-      "retryAfterProvided": false
+      "keyword": "wien gratis 23 november 2026",
+      "offset": 0,
+      "error": "TikTok returned a provider error",
+      "status": 200,
+      "code": "provider-error",
+      "providerCode": "2483",
+      "providerSignal": "unclassified"
     }
   ],
-  "apiErrors": [],
   "rejected": []
 }
