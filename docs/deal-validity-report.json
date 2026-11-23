@@ -1,13 +1,13 @@
 {
-  "generatedAt": "2026-11-23T10:34:35.126Z",
+  "generatedAt": "2026-11-23T10:55:32.213Z",
   "summary": {
     "maxAgeDays": 7,
-    "total": 245,
+    "total": 244,
     "allowed": 0,
-    "blocked": 245,
+    "blocked": 244,
     "warnings": 0,
     "reasonCounts": {
-      "kein konkretes Angebot erkennbar": 185,
+      "kein konkretes Angebot erkennbar": 184,
       "älter als 7 Tage (2020-04-25)": 1,
       "älter als 7 Tage (2026-02-22)": 78,
       "URL ungültig (fehlende Ziel-URL)": 2,
@@ -46,7 +46,7 @@
       "ausgeschlossene Quelle (gastro.news)": 11
     },
     "reasonCategoryCounts": {
-      "kein konkreter Deal": 189,
+      "kein konkreter Deal": 188,
       "älter als 7 Tage": 141,
       "ungültige URL": 20,
       "abgelaufen": 14,
@@ -194,15 +194,6 @@
         "reasonCategoryCounts": {
           "kein konkreter Deal": 7,
           "sonstiges": 1
-        }
-      },
-      "tiktok-deals-scanner": {
-        "total": 1,
-        "allowed": 0,
-        "blocked": 1,
-        "warnings": 0,
-        "reasonCategoryCounts": {
-          "kein konkreter Deal": 1
         }
       }
     }
@@ -847,7 +838,7 @@
       "warnings": [
         "kein Ablaufdatum gefunden"
       ],
-      "sourceDate": "2026-11-23T10:33:01.422Z",
+      "sourceDate": "2026-11-23T10:55:07.075Z",
       "sourceDateSource": "url.publicationDate",
       "sourceAgeDays": 0,
       "expiryDate": "",
@@ -3641,23 +3632,6 @@
       "urlStatus": "HTTP 200"
     },
     {
-      "id": "tiktok-195pzjx",
-      "title": "Museum of Change Angebot",
-      "brand": "Museum of Change",
-      "source": "tiktok-deals-scanner",
-      "url": "https://www.tiktok.com/@goodnight.at_wien/video/7709139846413012246",
-      "reasons": [
-        "kein konkretes Angebot erkennbar"
-      ],
-      "warnings": [],
-      "sourceDate": "2026-11-17T13:59:52.000Z",
-      "sourceDateSource": "url.tiktokVideoId",
-      "sourceAgeDays": 6,
-      "expiryDate": "",
-      "expirySource": "deal.expires",
-      "urlStatus": "HTTP 200"
-    },
-    {
       "id": "vpr-1371lsp",
       "title": "GRATIS: Gratis-Getränk-Aktion: Starbucks eröffnet neuen Standort in Wien",
       "brand": "Starbucks",
@@ -4974,23 +4948,23 @@
   ],
   "runProvenance": {
     "repository": "ataalla24-ux/deal-finder",
-    "runId": "45157016820",
-    "headSha": "62c75540f6ca7a4ec52c56f247b04df096c10a2f",
-    "checkoutSha": "35adf0293bd86ab6f953540f306b35c5e838147e",
+    "runId": "45160268116",
+    "headSha": "887d81ad29fabccbdfdebc92f69fcae0adad56aa",
+    "checkoutSha": "887d81ad29fabccbdfdebc92f69fcae0adad56aa",
     "triggeringRun": {
-      "runId": "45156570046",
-      "headSha": "515d636849805fb91aafe05139bf5cb1faacad0c",
-      "event": "schedule",
-      "name": "Firecrawl Key 2 - Food",
-      "startedAt": "2026-11-23T10:29:31.000Z",
-      "url": "https://github.com/ataalla24-ux/deal-finder/actions/runs/45156570046"
+      "runId": "45159254437",
+      "headSha": "8b7dfe5bdc60a3eccbda001bc71472c3dc84fa24",
+      "event": "workflow_dispatch",
+      "name": "TikTok Deal Scanner",
+      "startedAt": "2026-11-23T10:53:17.000Z",
+      "url": "https://github.com/ataalla24-ux/deal-finder/actions/runs/45159254437"
     },
     "event": "workflow_run",
     "runAttempt": "1",
-    "url": "https://github.com/ataalla24-ux/deal-finder/actions/runs/45157016820"
+    "url": "https://github.com/ataalla24-ux/deal-finder/actions/runs/45160268116"
   },
   "instagramDelivery": {
-    "checkedAt": "2026-11-23T10:34:35.136Z",
+    "checkedAt": "2026-11-23T10:55:32.223Z",
     "scope": "instagram-ai-agent/standard-slack-lane",
     "extractedCandidates": 3,
     "counts": {
@@ -5045,28 +5019,10 @@
     ]
   },
   "tiktokDelivery": {
-    "checkedAt": "2026-11-23T10:34:35.138Z",
+    "checkedAt": "2026-11-23T10:55:32.224Z",
     "scope": "tiktok-deals-scanner/standard-slack-lane",
-    "extractedCandidates": 1,
-    "counts": {
-      "validator-blocked": 1
-    },
-    "rows": [
-      {
-        "id": "tiktok-195pzjx",
-        "url": "https://www.tiktok.com/@goodnight.at_wien/video/7709139846413012246",
-        "title": "Museum of Change Angebot",
-        "brand": "Museum of Change",
-        "status": "validator-blocked",
-        "reasons": [
-          "kein konkretes Angebot erkennbar"
-        ],
-        "sourceDate": "2026-11-17T13:59:52.000Z",
-        "sourceDateSource": "url.tiktokVideoId",
-        "declaredSourceDate": "2026-11-17T18:00:00.000Z",
-        "slackTs": "",
-        "slackThreadTs": ""
-      }
-    ]
+    "extractedCandidates": 0,
+    "counts": {},
+    "rows": []
   }
 }
