@@ -86,6 +86,18 @@ test('keeps the fallback bounded and deterministic across reordered queues', t =
   assert.deepEqual(f.select(), expected);
 });
 
+test('excludes scanner self-accounts before budget selection, using the video URL owner', t => {
+  const f = fixture(t);
+  const from = (id, handle) => lead(id, { url: lead(id).url.replace('food.at', handle), ownerUsername: 'somebody_else' });
+  const external = from(1, 'freefinderat_guest');
+  f.write('deals-pending-firecrawl4', { deals: [external, from(2, 'FreeFinder'), from(3, 'freefinderat')] });
+  f.write('deals-pending-gastro2', { deals: [
+    from(4, 'freefinderwien'), from(5, 'Free_Finder.Wien'), from(6, 'freefinder.at'),
+    from(6, 'otherhandle'),
+  ] });
+  assert.deepEqual(f.select(), [external.url]);
+});
+
 test('missing lead input leaves the other eligible, unreadable suppression state skips the fallback', t => {
   const f = fixture(t);
   f.write('deals-pending-firecrawl4', { deals: [lead(1)] });

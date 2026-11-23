@@ -11,7 +11,8 @@ const knownQueues = [
 ];
 const maxDiscoveryAge = 7 * 24 * 60 * 60 * 1000;
 const maxLinks = 20;
-const canonicalUrl = /^https:\/\/www\.tiktok\.com\/@[a-zA-Z0-9._-]{2,40}\/video\/([1-9]\d{15,21})$/;
+const canonicalUrl = /^https:\/\/www\.tiktok\.com\/@([a-zA-Z0-9._-]{2,40})\/video\/([1-9]\d{15,21})$/;
+const selfAccountKeys = new Set(['freefinder', 'freefinderat', 'freefinderwien']);
 // Older stored URLs can have a mobile hostname or tracking parameters. These
 // are used only for duplicate matching and can never become navigation targets.
 const storedUrl = /^https?:\/\/(?:(?:www|m)\.)?tiktok\.com\/@[a-zA-Z0-9._-]{2,40}\/video\/([1-9]\d{15,21})(?:\/?(?:[?#].*)?)$/i;
@@ -65,8 +66,9 @@ export function readKnownTikTokLinks(docsDir, { now = new Date() } = {}) {
       if (typeof row?.url !== 'string') continue;
       const match = canonicalUrl.exec(row.url);
       if (!match || match[0] !== row.url) continue;
-      const videoId = match[1];
-      if (knownDealIds.has(row.id)) knownVideoIds.add(videoId);
+      const [, handle, videoId] = match;
+      const accountKey = handle.toLowerCase().replace(/[^a-z0-9]/g, '');
+      if (selfAccountKeys.has(accountKey) || knownDealIds.has(row.id)) knownVideoIds.add(videoId);
       if (typeof row.discoveredAt !== 'string' || !discoveryTimestamp.test(row.discoveredAt)) continue;
       const age = +now - Date.parse(row.discoveredAt);
       if (!Number.isFinite(age) || age < 0 || age > maxDiscoveryAge) continue;
