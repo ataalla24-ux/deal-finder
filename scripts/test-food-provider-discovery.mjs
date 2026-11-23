@@ -555,3 +555,29 @@ test('documented cost refusal pauses its source, not the healthy provider; unkno
     assert.equal(state.reservations[0].unspent, undefined, 'failed requests remain conservatively charged');
   }
 });
+
+test('IKEA store-specific menu is recognized directly without rendering or pausing other campaigns', async () => {
+  const ikea = POWER_FOOD_SOURCES.find(s => s.name === 'IKEA Food');
+  const url = ikea.url + 'salesareas/bistro/';
+  const state = empty(), tasks = [{ provider: 'scraperapi', source: ikea.name, cap: 10, url }];
+  state.reservations.push({ runId: '808', mode: 'scan', at: now.toISOString(), tasks });
+  const output = await collectPlan({ runId: '808', mode: 'scan', tasks }, state, power(), { now,
+    fetchPage: async () => ({ html: '<body><h1>Schwedisches Bistro</h1><p>Ein Einrichtungshaus auswählen um das richtige Menü und die Preise zu sehen.</p></body>', finalUrl: url }),
+    clientFor: () => assert.fail('A headless render cannot choose a participating store') });
+  assert.equal(output.results[0].status, 'store-selection-required');
+  assert.deepEqual(state.reservations[0].unspent, [0]);
+  assert.ok(state.pages[taskKey(tasks[0])].retryAt);
+  assert.equal(state.sources[ikea.name].retryAt, undefined);
+});
+
+test('a provider price limit for one page preserves other pages at the merchant', async () => {
+  const state = empty(), tasks = [{ provider: 'scraperapi', source: source.name, cap: 10, url: source.url }];
+  state.reservations.push({ runId: '809', mode: 'scan', at: now.toISOString(), tasks });
+  const client = new FoodProviderClient('scraperapi', { env: { SCRAPINGAPI: 'test' },
+    fetchImpl: async () => new Response('This request exceeds your max_cost.', { status: 403 }) });
+  await collectPlan({ runId: '809', mode: 'scan', tasks }, state, power(), { now,
+    fetchPage: async () => ({ html: '<html><body>Welcome</body></html>', finalUrl: source.url }),
+    clientFor: () => ({ usage: async () => usages.scraperapi, scrape: (...args) => client.scrape(...args) }) });
+  assert.equal(state.pages[taskKey(tasks[0])].reason, 'provider-cost-limit');
+  assert.equal(state.sources[source.name].retryAt, undefined);
+});

@@ -25,7 +25,7 @@ export function applyYieldCooldown(state, results, now) {
     const target = rows[0].url ? state.pages : state.sources;
     const entry = rows[0].url ? key : rows[0].source;
     if (rows.some(row => row.status === 'failed' || row.status === 'source-paused')) continue;
-    const examined = rows.filter(row => ['fetched', 'direct-sufficient', 'direct-no-offer'].includes(row.status));
+    const examined = rows.filter(row => ['fetched', 'direct-sufficient', 'direct-no-offer', 'store-selection-required'].includes(row.status));
     if (!examined.length) continue;
     if (examined.some(row => row.verifiedIncrementalCandidates > 0)) {
       target[entry] = { attemptedAt: now.toISOString(), noGainCount: 0,
@@ -142,6 +142,15 @@ export async function collectPlan(plan, state, powerReport, {
         results.push(row);
         continue;
       }
+      // Rendering another copy of the store picker cannot produce a local menu.
+      const needsIkeaStore = source.name === 'IKEA Food'
+        && new URL(baseline.finalUrl).pathname.startsWith('/at/de/food/salesareas/')
+        && /Einrichtungshaus auswählen.{0,15}um das richtige Menü und die Preise zu sehen/i.test(parsedDirect.pageText);
+      if (plan.mode === 'scan' && needsIkeaStore) {
+        row.status = 'store-selection-required';
+        row.reason = 'menu-and-prices-depend-on-store';
+        unspent(); results.push(row); continue;
+      }
       if (plan.mode === 'scan' && !source.render && row.directVisibleTextCharacters >= 400
           && !/enable javascript|javascript.{0,20}(?:required|aktivieren)/i.test(parsedDirect.pageText)) {
         row.status = 'direct-no-offer';
@@ -187,7 +196,12 @@ export async function collectPlan(plan, state, powerReport, {
       const status = Number(error.httpStatus) || 0;
       const retryAt = new Date(Math.max(Date.parse(error.retryAt) || 0,
         +now + ([401, 403, 404, 410].includes(status) ? 3 * DAY : DAY))).toISOString();
-      state.sources[source.name] = { attemptedAt: now.toISOString(), retryAt };
+      if (task.url && error instanceof ProviderError && error.message === 'provider-cost-limit') {
+        state.pages ||= {};
+        state.pages[taskKey(task)] = { attemptedAt: now.toISOString(), retryAt, reason: 'provider-cost-limit' };
+      } else {
+        state.sources[source.name] = { attemptedAt: now.toISOString(), retryAt };
+      }
       if (error instanceof ProviderError && error.message !== 'provider-cost-limit' && (/cost/.test(error.message) || [401, 403, 429].includes(status)))
         state.providerPauses[task.provider] = retryAt;
       results.push({ ...row, status: 'failed', reason: reason(error), httpStatus: status, retryAt });

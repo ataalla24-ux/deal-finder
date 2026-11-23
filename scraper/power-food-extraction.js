@@ -49,6 +49,30 @@ function titleKey(v) {
     .replace(/[^\p{L}\p{N}]+/gu, "");
 }
 
+// Campaign cards carry the comparison price. Their separate legal blocks carry
+// participation, article numbers and restrictions. Match both before combining.
+function ikeaCampaign($, legal, title) {
+  const terms = textOf($, legal);
+  const article = terms.match(/\bArt\.\s*(\d{3})\.(\d{3})\.(\d{2})\b/);
+  if (!article) return null;
+  const id = article.slice(1).join("");
+  const headings = $('h2[class*="campaign__content__title"]').filter((_, node) => foodText($(node).text()) === title);
+  if (headings.length !== 1) return null;
+  const card = headings.parent();
+  const link = card.find('a[href]').attr('href') || '';
+  const product = link.match(/^https:\/\/www\.ikea\.com\/at\/de\/p\/([a-z0-9-]+)-(\d{8})\/?$/);
+  const copy = foodText(card.children('p').text());
+  if (!product || product[2] !== id || !/statt\s*€\s*\d/i.test(copy)) return null;
+  return {
+    title,
+    text: foodText([title, copy, terms.slice(title.length)].join(' ')),
+    method: 'merchant-card',
+    // This SKU's official product page identifies a 256 g chocolate calendar.
+    // Other calendars (including non-food products) retain the normal food check.
+    confirmedFood: id === '10646580' && product[1] === 'vintersaga-adventskalender' && /\b256\s*g\b/.test(terms),
+  };
+}
+
 function extractMabelsMocktailOffer($, source, pageUrl) {
   if (source.nonAlcoholicHappyHour !== "mabels"
       || new URL(pageUrl).hostname !== "mabels.at"
@@ -223,6 +247,11 @@ export function extractFoodOffers(html, source, options = {}) {
     });
   }
   const add = (el, method, title) => {
+    if (source.name === 'IKEA Food' && pageUrl === source.url && method === 'merchant-card') {
+      const heading = foodText($(el).children('h2').first().text());
+      const campaign = ikeaCampaign($, el, heading);
+      if (campaign) { blocks.push(campaign); return; }
+    }
     const text = foodText([offerContext, textOf($, el)].filter(Boolean).join(' '));
     if (text.length >= 18 && text.length <= 16000)
       blocks.push({
@@ -280,7 +309,7 @@ export function extractFoodOffers(html, source, options = {}) {
       (PROMO.test(t) ||
         (b.method === "merchant-card" && source.currentOffers)) &&
       PRICE.test(t);
-    if (!FOOD.test(t)) reason = "not-food-drink";
+    if (!b.confirmedFood && !FOOD.test(t)) reason = "not-food-drink";
     else if (!BENEFIT.test(t) && !pricePromotion && !extractLowFoodPrice(t))
       reason = "no-concrete-benefit";
     else if (
@@ -368,7 +397,7 @@ export function extractFoodOffers(html, source, options = {}) {
       title = headings.find((h) => /\d+\s*%|\d+\s*\+\s*\d+/.test(h)) || title;
     }
     // Retain source wording; do not invent a summary or silently truncate it.
-    if (!FOOD.test(title) || (!BENEFIT.test(title) && !PRICE.test(title))) {
+    if ((!b.confirmedFood && !FOOD.test(title)) || (!BENEFIT.test(title) && !PRICE.test(title))) {
       const clause = t
         .split(/(?<=[.!?])\s/)
         .find(

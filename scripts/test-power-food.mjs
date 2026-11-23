@@ -380,3 +380,19 @@ const shortTitle = parse(
   ),
 ).deals[0];
 assert.match(shortTitle.title, /Mocktails 8€/);
+
+{
+  const date = new Date('2026-11-23T10:00:00Z');
+  const title = 'IKEA Family: VINTERSAGA Adventskalender um €12,99*';
+  const card = `<div><h2 class="styles_campaign__content__title__x">${title}</h2><p>VINTERSAGA Adventskalender (256 g) zum IKEA Family Preis von €12,99 statt €14,99.</p><a href="https://www.ikea.com/at/de/p/vintersaga-adventskalender-10646580/">Zum Adventskalender</a></div>`;
+  const terms = `<div class="styles_legal__accordion__item__text__x"><h2>${title}</h2><p>Angebot gültig von 06.11. bis 28.11.2026 für IKEA Family Mitglieder und IKEA Business Network Mitglieder in allen teilnehmenden IKEA Einrichtungshäusern und Schwedenshops in Österreich. VINTERSAGA Adventskalender (256 g, Art. 106.465.80). Solange der Vorrat reicht.</p></div>`;
+  const read = html => extractFoodOffers(html, ikea, { now: date }).deals;
+  const [row] = read(card + terms);
+  assert.equal(row.validUntil, '2026-11-28');
+  assert.match(row.description, /€12,99 statt €14,99/);
+  assert.match(row.description, /IKEA Business Network Mitglieder/);
+  assert.equal(row.evidence.locationScope, 'austria-wide');
+  for (const broken of [terms, card + terms.replace('106.465.80','106.465.81'), card + card + terms,
+    card + terms.replace(title, 'Anderer Artikel'), card.replace('statt €14,99','regulär') + terms])
+    assert.equal(read(broken).length, 0);
+}
