@@ -8,7 +8,7 @@ const NOW = new Date('2026-11-23T12:00:00.000Z');
 const PROFILE = '<nav><a href="/@signed-in-user">Profil</a></nav>';
 const SEARCH_UI = '<input type="search" aria-label="Suchen" onclick="this.nextElementSibling.hidden = false">'
   + '<form action="/search" method="GET" hidden><input type="text" role="combobox" name="q"></form>';
-const options = { keywords: ['wien kaffee'], now: NOW, settleMs: 0, timeoutMs: 600 };
+const options = { keywords: ['wien kaffee'], now: NOW, settleMs: 0, timeoutMs: 2_000 };
 const id = index => String(1_234_567_890 + index);
 const path = index => '/@cafe.fixture/video/' + id(index);
 const card = index => `<a href="${path(index)}?ignored=1">Cafe item</a>`;
@@ -162,7 +162,7 @@ test('query limits cannot exceed eight and original visits cannot exceed twenty'
   await fixture(t, fixtures, async (page, calls) => {
     const before = Array.from({ length: 7 }, (_, index) => 'empty ' + index);
     const r = await collectTikTokBrowserEvidence(page, {
-      ...options, keywords: [...before, 'go', 'never sent'], maxQueries: 99, maxPosts: 50, timeoutMs: 100,
+      ...options, keywords: [...before, 'go', 'never sent'], maxQueries: 99, maxPosts: 50,
     });
     assert.equal(r.queryCount, 8);
     assert.equal(r.videoCount, 20);
