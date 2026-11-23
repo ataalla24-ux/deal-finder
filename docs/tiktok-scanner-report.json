@@ -1,14 +1,14 @@
 {
-  "lastUpdated": "2026-11-23T15:57:04.248Z",
+  "lastUpdated": "2026-11-23T16:43:56.531Z",
   "runProvenance": {
     "repository": "ataalla24-ux/deal-finder",
-    "runId": "45210768813",
-    "headSha": "a23744bf0d21ce4c660eaded6f34eb8419e1d1a5",
-    "checkoutSha": "a23744bf0d21ce4c660eaded6f34eb8419e1d1a5",
+    "runId": "45218793261",
+    "headSha": "1d453dbd66c4b538fe4689773c3bb418c352ba51",
+    "checkoutSha": "1d453dbd66c4b538fe4689773c3bb418c352ba51",
     "triggeringRun": null,
-    "event": "schedule",
+    "event": "workflow_dispatch",
     "runAttempt": "1",
-    "url": "https://github.com/ataalla24-ux/deal-finder/actions/runs/45210768813"
+    "url": "https://github.com/ataalla24-ux/deal-finder/actions/runs/45218793261"
   },
   "status": "discovery-degraded",
   "outputPreserved": true,
@@ -25,6 +25,8 @@
     "site:tiktok.com/@ wien gratis heute",
     "site:tiktok.com/@ wien nur heute gratis",
     "site:tiktok.com/@ wien gratis essen",
+    "site:tiktok.com/@ \"dahabdoener\" gratis",
+    "site:tiktok.com/@ \"tadimakebap1\" gratis",
     "site:tiktok.com/@ wien gratis kaffee",
     "site:tiktok.com/@ wien gratis drink",
     "site:tiktok.com/@ wien gratis eintritt",
@@ -44,9 +46,7 @@
     "site:tiktok.com/@ wien happy hour deal",
     "site:tiktok.com/@ wien rabatt gutschein",
     "site:tiktok.com/@ wien gratis probetraining",
-    "site:tiktok.com/@ wien gratis goodie bag",
-    "site:tiktok.com/@ wien kostenlos aktion",
-    "site:tiktok.com/@ tiktok wien gratis"
+    "site:tiktok.com/@ wien gratis goodie bag"
   ],
   "apiKeywords": [
     "wien gratis 23 november 2026",
@@ -103,7 +103,7 @@
     "dahabdoener gratis",
     "fitnessunionwien kostenlos",
     "viennas_joy gratis",
-    "viennas joy free entry",
+    "tadimakebap1 gratis",
     "kseniainvienna free drinks",
     "foodiewien gratis",
     "foodiewien deal",
@@ -156,13 +156,35 @@
     "publicVideoLinks": 0
   },
   "searchDiscovery": {
-    "errors": [],
-    "attemptedQueries": 1,
-    "stoppedReason": "",
-    "nextRetryAt": "",
-    "lastAttemptAt": "2026-11-23T15:57:03.372Z",
-    "nextQueryIndex": 2,
-    "deferredPostVisits": 0
+    "errors": [
+      {
+        "query": "site:tiktok.com/@ \"dahabdoener\" gratis",
+        "error": "Search challenge; no bypass attempted",
+        "httpStatus": 403,
+        "retryAt": "",
+        "retryAfterProvided": false
+      }
+    ],
+    "attemptedQueries": 2,
+    "stoppedReason": "search-unavailable",
+    "nextRetryAt": "2026-11-23T20:43:56.440Z",
+    "lastAttemptAt": "2026-11-23T16:43:56.357Z",
+    "nextQueryIndex": 4,
+    "boundedRetry": {
+      "reason": "challenge-without-retry-after",
+      "failures": 1,
+      "failedAt": "2026-11-23T16:43:56.440Z"
+    },
+    "parsedResultLinks": 0,
+    "deferredPostVisits": 1,
+    "knownPostLinks": {
+      "available": 2,
+      "selected": 0,
+      "visited": 0,
+      "accepted": 0,
+      "deferredByAccess": 1,
+      "nextIndex": 0
+    }
   },
   "accepted": 0,
   "initialRejected": 0,
@@ -173,83 +195,53 @@
     "tesseractTimeoutMs": 8000,
     "maxPostsPerRun": 16,
     "maxVideoFrames": 2,
-    "maxLlmCallsPerRun": 8,
+    "maxLlmCallsPerRun": 0,
     "llmConcurrency": 2,
     "minConfidence": 0.84,
     "model": "gpt-6.2-sol",
     "visionDetail": "low",
     "visionMaxImages": 2,
-    "llmEnabled": true,
-    "visionEnabled": true
+    "llmEnabled": false,
+    "visionEnabled": false
   },
   "mediaEvidence": {
-    "status": "ok",
+    "status": "disabled",
+    "rescueCandidates": 0,
     "eligible": 0,
+    "deduplicatedEligible": 0,
+    "duplicateCandidatesSkipped": 0,
     "selected": 0,
     "cached": 0,
     "analyzed": 0,
     "withOcrText": 0,
     "withVisionImages": 0,
     "aiCalls": 0,
-    "analysisConcurrency": 2,
-    "tesseractTimeoutMs": 8000,
-    "aiConcurrency": 2,
-    "visionDetail": "low",
-    "visionMaxImages": 2,
     "visionCalls": 0,
     "aiAccepted": 0,
     "aiSkippedLowIntent": 0,
     "aiSkippedUnrecoverable": 0,
-    "analysisWallTimeMs": 1,
-    "analysisTotalItemTimeMs": 0,
-    "analysisMaxItemTimeMs": 0,
-    "aiWallTimeMs": 0,
-    "aiTotalRequestTimeMs": 0,
-    "aiMaxRequestTimeMs": 0,
+    "aiAcceptedUnusable": 0,
     "inputTokens": 0,
     "outputTokens": 0,
     "totalTokens": 0,
-    "errors": [],
-    "warnings": [],
-    "downloadRetries": 0,
-    "retryableFailures": 0,
-    "retriedCacheEntries": 0,
-    "aiRetryBudgetDeferred": 0,
-    "duplicateEntries": 0,
-    "skippedResolved": 0,
-    "aiSkippedCircuitOpen": 0,
-    "aiCircuit": null,
-    "errorCounts": {},
-    "warningCounts": {},
-    "llmConfigured": true,
-    "visionConfigured": true,
-    "backlogResumed": 0,
-    "backlogExpired": 0,
-    "runtimeDeferred": 0,
-    "mediaRefreshAttempts": 0,
-    "mediaRefreshRecovered": 0,
-    "tools": {
-      "tesseract": true,
-      "ffmpeg": true,
-      "ffprobe": true
-    },
-    "ocrAvailable": true,
-    "ocrReused": 0,
-    "backlogPending": 0,
-    "backlogOldestAt": null,
-    "rescueCandidates": 0,
-    "deduplicatedEligible": 0,
-    "duplicateCandidatesSkipped": 0,
     "rescuedDeals": 0,
-    "aiAcceptedUnusable": 0
+    "errors": []
   },
   "timings": {
-    "apiDiscoveryMs": 39,
-    "searchDiscoveryMs": 630,
-    "mediaRescueMs": 216,
-    "totalScannerMs": 1166
+    "apiDiscoveryMs": 37,
+    "searchDiscoveryMs": 1789,
+    "mediaRescueMs": 1,
+    "totalScannerMs": 2907
   },
-  "discoveryErrors": [],
+  "discoveryErrors": [
+    {
+      "query": "site:tiktok.com/@ \"dahabdoener\" gratis",
+      "error": "Search challenge; no bypass attempted",
+      "httpStatus": 403,
+      "retryAt": "",
+      "retryAfterProvided": false
+    }
+  ],
   "apiErrors": [],
   "rejected": []
 }
