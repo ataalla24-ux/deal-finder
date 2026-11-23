@@ -1,9 +1,9 @@
 {
-  "generatedAt": "2026-11-23T11:34:14.179Z",
+  "generatedAt": "2026-11-23T11:35:50.677Z",
   "summary": {
     "maxAgeDays": 7,
-    "total": 244,
-    "allowed": 0,
+    "total": 245,
+    "allowed": 1,
     "blocked": 244,
     "warnings": 0,
     "reasonCounts": {
@@ -195,10 +195,33 @@
           "kein konkreter Deal": 7,
           "sonstiges": 1
         }
+      },
+      "tiktok-deals-scanner": {
+        "total": 1,
+        "allowed": 1,
+        "blocked": 0,
+        "warnings": 0,
+        "reasonCategoryCounts": {}
       }
     }
   },
-  "allowed": [],
+  "allowed": [
+    {
+      "id": "tiktok-1h9pwk",
+      "title": "Gratis Eintritt: Museum of Change",
+      "brand": "Museum of Change",
+      "source": "tiktok-deals-scanner",
+      "url": "https://www.tiktok.com/@goodnight.at_wien/video/7709139846413012246",
+      "reasons": [],
+      "warnings": [],
+      "sourceDate": "2026-11-17T13:59:52.000Z",
+      "sourceDateSource": "url.tiktokVideoId",
+      "sourceAgeDays": 6,
+      "expiryDate": "",
+      "expirySource": "deal.expires",
+      "urlStatus": "HTTP 200"
+    }
+  ],
   "blocked": [
     {
       "id": "jesuszentrum-events-20261116",
@@ -838,7 +861,7 @@
       "warnings": [
         "kein Ablaufdatum gefunden"
       ],
-      "sourceDate": "2026-11-23T11:33:14.429Z",
+      "sourceDate": "2026-11-23T11:34:21.353Z",
       "sourceDateSource": "url.publicationDate",
       "sourceAgeDays": 0,
       "expiryDate": "",
@@ -4947,23 +4970,23 @@
   ],
   "runProvenance": {
     "repository": "ataalla24-ux/deal-finder",
-    "runId": "45166159985",
-    "headSha": "61660ad8603eba52a8d861c848aa2db5ac58cf5e",
-    "checkoutSha": "a1ab228404f6675eee24185f2cfe038879397e0c",
+    "runId": "45166404467",
+    "headSha": "d0038a7f170e6bce4e7ab46d3c6c1f59db29c5d2",
+    "checkoutSha": "d0038a7f170e6bce4e7ab46d3c6c1f59db29c5d2",
     "triggeringRun": {
-      "runId": "45165854619",
-      "headSha": "38262d6356462fb3df3fc55406f2138aa982d2e0",
-      "event": "schedule",
-      "name": "Firecrawl Key 3 - Consumables",
-      "startedAt": "2026-11-23T11:30:39.000Z",
-      "url": "https://github.com/ataalla24-ux/deal-finder/actions/runs/45165854619"
+      "runId": "45166167433",
+      "headSha": "75b665e3d58490e030756a7e1146616b9fc95c67",
+      "event": "workflow_dispatch",
+      "name": "Firecrawl Daily Sync",
+      "startedAt": "2026-11-23T11:32:45.000Z",
+      "url": "https://github.com/ataalla24-ux/deal-finder/actions/runs/45166167433"
     },
     "event": "workflow_run",
     "runAttempt": "1",
-    "url": "https://github.com/ataalla24-ux/deal-finder/actions/runs/45166159985"
+    "url": "https://github.com/ataalla24-ux/deal-finder/actions/runs/45166404467"
   },
   "instagramDelivery": {
-    "checkedAt": "2026-11-23T11:34:14.193Z",
+    "checkedAt": "2026-11-23T11:35:51.882Z",
     "scope": "instagram-ai-agent/standard-slack-lane",
     "extractedCandidates": 3,
     "counts": {
@@ -5018,10 +5041,26 @@
     ]
   },
   "tiktokDelivery": {
-    "checkedAt": "2026-11-23T11:34:14.195Z",
+    "checkedAt": "2026-11-23T11:35:51.884Z",
     "scope": "tiktok-deals-scanner/standard-slack-lane",
-    "extractedCandidates": 0,
-    "counts": {},
-    "rows": []
+    "extractedCandidates": 1,
+    "counts": {
+      "slack-confirmed": 1
+    },
+    "rows": [
+      {
+        "id": "tiktok-1h9pwk",
+        "url": "https://www.tiktok.com/@goodnight.at_wien/video/7709139846413012246",
+        "title": "Gratis Eintritt: Museum of Change",
+        "brand": "Museum of Change",
+        "status": "slack-confirmed",
+        "reasons": [],
+        "sourceDate": "2026-11-17T13:59:52.000Z",
+        "sourceDateSource": "url.tiktokVideoId",
+        "declaredSourceDate": "2026-11-17T18:00:00.000Z",
+        "slackTs": "1795433751.721559",
+        "slackThreadTs": "1795433750.808869"
+      }
+    ]
   }
 }
