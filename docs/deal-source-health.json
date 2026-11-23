@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-11-23T11:16:48.387Z",
+  "generatedAt": "2026-11-23T11:27:30.050Z",
   "discoveryAvailability": {
     "note": "Transport evidence, not deal yield. Retry eligibility is not recovery. Candidate counts are not Slack deliveries. No extra runs or quota resets.",
     "lanes": [
@@ -282,12 +282,11 @@
     ],
     "pipelineRuns": {
       "reportedSources": 9,
-      "failedSources": [
-        "instagram-apify2"
-      ],
+      "failedSources": [],
       "completedWithErrors": [
         "firecrawl2",
         "food3",
+        "instagram-apify2",
         "joe",
         "power",
         "wien-combined"
@@ -1101,9 +1100,9 @@
       ],
       "lastRun": {
         "status": "completed-with-errors",
-        "startedAt": "2026-11-22T13:26:07.759Z",
-        "finishedAt": "2026-11-22T13:26:28.642Z",
-        "durationMs": 20883,
+        "startedAt": "2026-11-23T11:26:10.825Z",
+        "finishedAt": "2026-11-23T11:26:33.341Z",
+        "durationMs": 22516,
         "counts": {
           "rawCandidates": 9,
           "normalizedCandidates": 9,
@@ -1368,22 +1367,23 @@
         "Authentische neapolitanische Pizza für unter 6 € in Wien"
       ],
       "lastRun": {
-        "status": "failed",
-        "startedAt": "2026-11-22T13:29:45.915Z",
-        "finishedAt": "2026-11-22T13:29:46.536Z",
-        "durationMs": 621,
+        "status": "completed-with-errors",
+        "startedAt": "2026-11-23T11:25:01.394Z",
+        "finishedAt": "2026-11-23T11:25:47.723Z",
+        "durationMs": 46329,
         "counts": {
-          "rawCandidates": 0,
-          "normalizedCandidates": 0,
+          "rawCandidates": 5,
+          "normalizedCandidates": 3,
           "verifiedCandidates": 0,
           "previousDeals": 0,
           "acceptedDeals": 0,
-          "rejectedDeals": 0
+          "rejectedDeals": 3
         },
-        "rejectedByReason": {},
-        "errors": [
-          "apify-http-403"
-        ],
+        "rejectedByReason": {
+          "non-food-ad": 2,
+          "post-older-than-seven-days": 1
+        },
+        "errors": [],
         "reportFile": "deal-pipeline-last-run-instagram-apify2.json"
       },
       "uniqueRate": 1,
@@ -1408,7 +1408,7 @@
         }
       ],
       "issues": [
-        "letzter Pipeline-Lauf ist fehlgeschlagen",
+        "letzter Lauf fand Kandidaten, aber akzeptierte keinen Deal",
         "wenige Deals sind frischer als 1 Tag",
         "wenige klare Gratis-/Promo-Signale",
         "Wien-Signal ist zu schwach"
