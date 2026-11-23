@@ -31,6 +31,8 @@ on:
       - 'scripts/test-source-access-oct30.mjs'
       - 'scripts/test-instagram-food-sources.mjs'
       - 'scripts/test-tiktok-deal-scanner.mjs'
+      - 'scripts/test-deal-evidence.mjs'
+      - 'scripts/*tiktok*browser*.mjs'
       - 'scripts/test-social-search-reliability.mjs'
       - 'scripts/test-instagram-delivery-audit.mjs'
       - 'scripts/test-tiktok-browser-search.mjs'
@@ -63,6 +65,8 @@ on:
       - 'scripts/test-source-access-oct30.mjs'
       - 'scripts/test-food-quality-oct30.mjs'
       - 'scripts/test-tiktok-deal-scanner.mjs'
+      - 'scripts/test-deal-evidence.mjs'
+      - 'scripts/*tiktok*browser*.mjs'
       - 'scripts/test-review-clarity.mjs'
       - 'scraper/**'
       - 'scripts/review-live-deals-llm.mjs'
@@ -141,6 +145,7 @@ jobs:
           node --test scripts/test-social-access-repair-nov13.mjs
           node --test scripts/test-instagram-food-sources.mjs
           node scripts/test-tiktok-deal-scanner.mjs
+          node --test scripts/test-tiktok-browser-import.mjs scripts/test-tiktok-signed-in-browser.mjs
           node --test scripts/test-social-search-reliability.mjs scripts/test-lightweight-state-committer.mjs
           node --test scripts/test-instagram-delivery-audit.mjs
           node scripts/test-instagram-search-discovery.mjs

@@ -54,6 +54,7 @@ const SOURCE_LABEL_OVERRIDES = {
   'meta-instagram': 'Meta Instagram Graph',
   power: 'Power Scraper',
   tiktok: 'TikTok Scanner',
+  'tiktok-browser': 'TikTok Browser',
   'vienna-promo-radar': 'Vienna Promo Radar',
   'vienna-websites': 'Wiener Lokal-Angebotsseiten',
   'wien-combined': 'Wien Deals Combined Graph',

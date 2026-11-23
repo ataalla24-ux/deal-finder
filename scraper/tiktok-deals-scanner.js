@@ -594,6 +594,7 @@ function extractBrand(text, accountHandle) {
     { pattern: /\bsipsy\b/i, name: 'SIPSY' },
     { pattern: /\bsoundcube\b/i, name: 'Soundcube' },
     { pattern: /\bpalace\s+of\s+justice\b/i, name: 'Palace of Justice Vienna' },
+    { pattern: /\bmuseum\s+of\s+change\b/i, name: 'Museum of Change' },
     { pattern: /@wukvienna\b|\bwuk\s+vienna\b/i, name: 'WUK Wien' },
   ];
   const knownProvider = knownProviders.find((provider) => provider.pattern.test(signal));
@@ -628,6 +629,10 @@ function buildOfferTitle(text, brand, type) {
   const signal = cleanText(text, 1200);
   const foodOffer = concreteFoodOfferTitle(signal);
   if (foodOffer) return foodOffer;
+  if (type === 'gratis' && brand && !brand.startsWith('@') && brand !== 'TikTok Wien'
+      && /\beintritt\s*:\s*(?:0(?:[.,]00)?\s*€|(?:gratis|kostenlos|frei)\b)/i.test(signal)) {
+    return `Gratis Eintritt: ${brand}`;
+  }
   const venueMatch = signal.match(/\b(?:beim?|bei)\s+(Stift Klosterneuburg)\b/i);
   const venue = cleanText(venueMatch?.[1] || '', 80);
   const birthdayEntryOffer = extractBirthdayEntryOffer(signal);
