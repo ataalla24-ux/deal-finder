@@ -108,6 +108,7 @@ test('city detail reads the official benefit and partner address without borrowi
   const related = '<wm-grid><wm-card><h2>Partnerinformationen</h2><ul><li><wm-icon iconid="pin"></wm-icon><span>Fremder Platz 1 1050 Wien</span></li></ul><wm-accordion><wm-accordion-heading><h3>Details</h3></wm-accordion-heading><wm-accordion-content>Fremde Bedingungen</wm-accordion-content></wm-accordion></wm-card></wm-grid>';
   for (const broken of [page.replace('Partnerinformationen','Navigation').replace('</wm-section>', related + '</wm-section>'),
     page.replace('>Details<','>Location<').replace('</wm-section>', related + '</wm-section>'),
+    page.replace('>Details<','>Location<').replace('</wm-section>', '<wm-grid><wm-card><h3 class="wm-accordion__header">Details</h3><div class="wm-accordion__panel">Fremde Bedingungen</div></wm-card></wm-grid></wm-section>'),
     page.replace(offer,'Verlosung'),page.replace('1090 Wien','4020 Linz')]) assert.equal(parse(broken).deal, undefined);
 });
 

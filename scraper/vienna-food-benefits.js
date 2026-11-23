@@ -55,17 +55,20 @@ export function parseViennaFoodBenefit(html, url, { now = new Date() } = {}) {
   const $ = load(html);
   $('script,style,noscript,svg').remove();
   const headings = $('h1.wm-stage__heading, main > wm-stage > h1[slot="content"]');
-  const offerNodes = $('.wm-site-content .wm-text-background strong, main > wm-section > wm-stack > wm-highlight > strong');
-  const details = $('.wm-accordion__header, main > wm-section > wm-accordion > wm-accordion-heading').filter((_, e) => clean($(e).text()) === 'Details');
-  if (headings.length !== 1 || offerNodes.length !== 1 || details.length !== 1) return { reason: 'ambiguous-benefit-page' };
+  if (headings.length !== 1) return { reason: 'ambiguous-benefit-page' };
+  const componentLayout = headings.parent().is('wm-stage');
+  const offerNodes = $(componentLayout ? 'main > wm-section > wm-stack > wm-highlight > strong' : '.wm-site-content .wm-text-background strong');
+  const details = $(componentLayout ? 'main > wm-section > wm-accordion > wm-accordion-heading' : '.wm-accordion__header')
+    .filter((_, e) => clean($(e).text()) === 'Details');
+  if (offerNodes.length !== 1 || details.length !== 1) return { reason: 'ambiguous-benefit-page' };
   const brand = clean(headings.text()), offer = clean(offerNodes.text());
-  const terms = clean(details.next('.wm-accordion__panel, wm-accordion-content').text());
-  const context = clean(offerNodes.closest('.wm-block, wm-stack').find('p').text());
+  const terms = clean(details.next(componentLayout ? 'wm-accordion-content' : '.wm-accordion__panel').text());
+  const context = clean(offerNodes.closest(componentLayout ? 'wm-stack' : '.wm-block').find('p').text());
   const partner = $('main > wm-section > wm-card').filter((_, card) =>
     $(card).find('h2').toArray().some(heading => $(heading).closest('wm-card')[0] === card && clean($(heading).text()) === 'Partnerinformationen'));
   const pins = partner.length === 1 ? partner.find('li > wm-icon[iconid="pin"] + span')
     .filter((_, node) => $(node).closest('wm-card')[0] === partner[0]) : $();
-  const addressNodes = $('.wm-card--partner .wm-icon-text__content').add(pins);
+  const addressNodes = componentLayout ? pins : $('.wm-card--partner .wm-icon-text__content');
   const addresses = [...new Set(addressNodes.map((_, e) => clean($(e).clone().find('br').replaceWith(' ').end().text())).get()
     .filter(value => /\b1(?:0[1-9]|1[0-9]|2[0-3])0\s+Wien\b/i.test(value)))];
   const withdrawn = /\b(?:dies(?:er|e|es)|de[rns]|die|das)\s+(?:Angebot|Rabatt|Aktion|Vorteil|Ermäßigung)\s+(?:ist|wurde)\s+(?:nicht mehr (?:gültig|verfügbar|einlösbar)|(?:dauerhaft |vorzeitig )?(?:beendet|eingestellt|zurückgezogen|abgelaufen))(?=[.!?;]|$)/i;
