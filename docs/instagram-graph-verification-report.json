@@ -1,7 +1,7 @@
 {
-  "generatedAt": "2026-11-23T09:28:48.863Z",
+  "generatedAt": "2026-11-23T10:12:04.273Z",
   "source": "instagram-graph-cross-source-verification",
-  "status": "ok",
+  "status": "failed-preserved",
   "configured": true,
   "scannedFiles": [
     "deals-pending-church-events.json",
@@ -176,10 +176,15 @@
       "candidates": 1
     }
   ],
-  "fetchedPosts": 25,
+  "fetchedPosts": 0,
   "exactMatches": 0,
   "retainedEvidencePosts": 2000,
-  "errors": [],
+  "errors": [
+    {
+      "username": "heute.at",
+      "message": "Instagram shared quota paused: rolling-hour budget exhausted"
+    }
+  ],
   "accountFailures": {
     "meatmewien": {
       "count": 2,
@@ -190,18 +195,24 @@
   "sharedQuota": {
     "limitPerHour": 401,
     "usageThreshold": 95,
-    "requests": 1,
-    "reserved": 5,
-    "stopped": false,
-    "reason": "",
-    "highestUsagePercent": 32,
+    "requests": 0,
+    "reserved": 0,
+    "stopped": true,
+    "reason": "Instagram shared quota paused: rolling-hour budget exhausted",
+    "highestUsagePercent": 0,
     "waitedMs": 0,
     "pacingMs": 0,
-    "retryAt": "",
+    "retryAt": "2026-11-23T10:12:11.402Z",
     "adaptiveSafetyCeiling": 190,
     "adaptiveIncreases": 0,
     "storageFailure": null,
-    "stopKind": ""
+    "stopKind": "budget"
+  },
+  "globalError": {
+    "username": "heute.at",
+    "status": 0,
+    "code": "SCAN_BUDGET",
+    "message": "Instagram shared quota paused: rolling-hour budget exhausted"
   },
   "blockedEvidencePosts": 72,
   "unmatchedCandidatePosts": 1,
