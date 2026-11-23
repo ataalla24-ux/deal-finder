@@ -362,6 +362,14 @@ export async function readJoeBenefits(browser, storageState, { signalsOnly = fal
     technical.documentStatus = response?.status() ?? null;
     await page.waitForTimeout(1500);
     const result = await extractLoggedInJoeBenefitsPage(page, { signalsOnly });
+    const accessStatus = [technical.documentStatus, technical.bundleStatus];
+    // A rejected entry document or bootstrap script says nothing about whether
+    // the saved session is valid. A failed secondary fetch is only diagnostic.
+    if (accessStatus.includes(429) || accessStatus.includes(403) || accessStatus.some(code => code >= 500)) {
+      const status = accessStatus.includes(429) ? 'provider-rate-limited'
+        : accessStatus.includes(403) ? 'provider-access-denied' : 'provider-unavailable';
+      return { deals: [], health: { status, authenticated: false, readableOffers: 0, technical, signals: result.health.signals } };
+    }
     result.health.technical = technical;
     return result;
   } finally { await context.close(); }

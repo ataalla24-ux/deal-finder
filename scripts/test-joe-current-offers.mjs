@@ -152,6 +152,7 @@ test('no offers or absence of login text never proves a usable account session',
 
 test('render comparison retains only closed technical categories and never extracts or logs coupon text', async () => {
   const page = new EventEmitter(), privateText = 'SENSITIVE_VALUE';
+  let documentCode = 200;
   page.goto = async () => {
     const req = { url: () => 'https://www.joe-club.at/bundle.js?key=' + privateText, resourceType: () => 'script' };
     page.emit('response', { request: () => req, status: () => 200, headers: () => ({ 'content-type': 'text/javascript' }) });
@@ -161,7 +162,7 @@ test('render comparison retains only closed technical categories and never extra
     page.emit('requestfailed', { ...req, failure: () => ({ errorText: privateText }) });
     page.emit('response', { request: () => ({ url: () => 'https://api.joe-club.at/' + privateText, resourceType: () => 'xhr' }),
       status: () => 503 });
-    return { status: () => 200 };
+    return { status: () => documentCode };
   };
   page.waitForTimeout = page.waitForFunction = page.waitForLoadState = async () => {};
   page.evaluate = async (_, signalsOnly) => {
@@ -184,6 +185,14 @@ test('render comparison retains only closed technical categories and never extra
   assert.equal(result.health.technical.firstOwnScriptError, 'TypeError');
   assert.deepEqual(result.health.technical.firstOwnHttpError, { kind: 'xhr', status: 503 });
   assert.equal(JSON.stringify(result).includes(privateText), false);
+  assert.notEqual(result.health.status, 'provider-unavailable', 'a failed secondary request alone is not a confirmed page outage');
+  for (const [code, expected] of [[429, 'provider-rate-limited'], [403, 'provider-access-denied'], [503, 'provider-unavailable']]) {
+    documentCode = code;
+    const blocked = await readJoeBenefits(browser, undefined, { signalsOnly: true });
+    assert.equal(blocked.health.status, expected);
+    assert.equal(blocked.health.authenticated, false);
+    assert.deepEqual(blocked.deals, []);
+  }
 });
 
 test('scraper writes visible partial coverage, complete candidate and pipeline report without auth claims', async () => {
