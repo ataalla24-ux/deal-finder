@@ -4,6 +4,7 @@ import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import { cleanText, cleanUiNoiseText, normalizeDealRecord } from './deal-normalization-utils.js';
+import { admissionOfferCategory } from './category-utils.js';
 import {
   canonicalSocialPostKey,
   extractStructuredOwnerUsername,
@@ -226,6 +227,8 @@ function loadLatestPipelineReports() {
 }
 
 function hasFoodDrinkSignal(deal) {
+  const admission = admissionOfferCategory(deal);
+  if (admission) return FOOD_DRINK_CATEGORIES.has(admission);
   const category = cleanUiNoiseText(deal.category || '').toLowerCase();
   if (FOOD_DRINK_CATEGORIES.has(category)) return true;
   const haystack = [deal.brand, deal.title, deal.description].map(cleanText).join(' ');

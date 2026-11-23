@@ -35,6 +35,16 @@ try {
     },
     errors: ['test failure'],
   }));
+  fs.writeFileSync(path.join(docsDir, 'deals-pending-tiktok-browser.json'), JSON.stringify({
+    deals: [
+      { id: 'admission', title: 'Gratis Eintritt: Museum of Change', category: 'kultur',
+        description: 'Heißen Tee einpacken. Kaffee und Kuchen sind separat erhältlich.',
+        url: 'https://www.tiktok.com/@venue/video/7709139846413012246' },
+      { id: 'bundle', title: 'Museumseintritt inklusive Brunch um 19 €', category: 'kultur',
+        description: 'Der Brunch ist im Preis enthalten.',
+        url: 'https://www.tiktok.com/@venue/video/7709139846413012247' },
+    ],
+  }));
 
   const result = spawnSync(process.execPath, ['scraper/build-deal-source-health.js'], {
     cwd: path.resolve('.'),
@@ -54,10 +64,18 @@ try {
   assert(source.issues.includes('letzter Lauf fand Kandidaten, aber akzeptierte keinen Deal'));
   assert.equal(health.summary.pipelineRuns.reportedSources, 1);
   assert.deepEqual(health.summary.pipelineRuns.failedSources, ['firecrawl4']);
+  const tiktok = health.sources.find((item) => item.sourceKey === 'tiktok-browser');
+  assert.equal(tiktok.totalDeals, 2);
+  assert.equal(tiktok.foodDrinkCount, 1);
+  assert.deepEqual(tiktok.topCategories.sort((a, b) => a.value.localeCompare(b.value)), [
+    { value: 'essen', count: 1 }, { value: 'kultur', count: 1 },
+  ]);
 
   const candidateIndex = JSON.parse(fs.readFileSync(path.join(docsDir, 'deal-candidates-index.json'), 'utf8'));
   const serializedCandidate = JSON.stringify(candidateIndex.candidates[0]);
   assert.doesNotMatch(serializedCandidate, /\\ud83d(?!\\ud[c-f][0-9a-f]{2})/i, 'candidate index must repair lone Unicode surrogates');
+  assert.equal(candidateIndex.candidates.find(candidate => candidate.id === 'admission').hasFoodDrinkSignal, false);
+  assert.equal(candidateIndex.candidates.find(candidate => candidate.id === 'bundle').hasFoodDrinkSignal, true);
 } finally {
   fs.rmSync(docsDir, { recursive: true, force: true });
 }

@@ -2,6 +2,29 @@ import assert from 'node:assert/strict';
 
 import { normalizeCategoryForScraper } from '../scraper/category-utils.js';
 import { normalizeDealRecord } from '../scraper/deal-normalization-utils.js';
+import { buildSlackMessage, normalizeDeal } from '../scraper/slack-notify.js';
+
+const museumAdmission = {
+  id: 'tiktok-1h9pwk', brand: 'Museum of Change', title: 'Gratis Eintritt: Museum of Change',
+  description: 'Lichtkunst im Innenhof der Alten Hauptpost. Heißen Tee einpacken und vorbeischauen. Kaffee und Kuchen kann man separat kaufen.',
+  category: 'kultur', type: 'gratis',
+};
+const slackMuseum = normalizeDeal(museumAdmission, 'tiktok-browser');
+assert.equal(slackMuseum.category, 'kultur');
+assert.match(buildSlackMessage(slackMuseum, 1), /Kategorie: kultur\b/);
+const oldMuseum = { ...museumAdmission, category: 'kaffee', slackTs: '1795433751.721559' };
+assert.equal(normalizeDeal(oldMuseum, 'tiktok-browser').category, 'kultur');
+assert.equal(normalizeDealRecord(oldMuseum).category, 'kultur');
+assert.equal(normalizeDeal({ ...oldMuseum, slackEditedFields: ['category'] }, 'tiktok-browser').category, 'kaffee');
+
+for (const foodOffer of [
+  { title: 'Gratis Pizza bei der Museumsnacht', description: 'Eine Pizza pro Gast.', category: 'essen' },
+  { title: 'Museumseintritt inklusive Brunch um 19 €', description: 'Der Brunch ist im Ticket enthalten.', category: 'kultur' },
+  { title: 'Museumseintritt um 12 €', description: 'Ein Getränk im Ticketpreis ist inbegriffen.', category: 'kultur' },
+]) {
+  assert.equal(normalizeDeal(foodOffer, 'merchant').category, 'essen');
+  assert.equal(normalizeDealRecord(foodOffer).category, 'essen');
+}
 
 assert.equal(
   normalizeCategoryForScraper('shopping', [

@@ -2,7 +2,7 @@ import { officialFoodOfferKey } from './power-food-sources.js';
 import { isMerchantWebsiteReview } from './merchant-offer-discovery.js';
 import { polishOfferTitle } from './offer-title-utils.js';
 import { carrierBenefitPostKey } from './carrier-benefits.js';
-import { normalizeCategoryForScraper } from './category-utils.js';
+import { admissionOfferCategory, normalizeCategoryForScraper } from './category-utils.js';
 import { officialFamilyMealCampaignKey, officialOmvVariantKey, semanticVenueCampaignKey, semanticVenueTimeGapKey } from './deal-evidence-utils.js';
 import { filterDiscoveryDeals, foodDiscoveryPriority } from './deal-discovery-policy.js';
 import { normalizeDealFacts, locationConflictReason, materialOfferConditions } from './deal-factual-guards.js';
@@ -425,7 +425,8 @@ function normalizeDeal(rawDeal, sourceKey) {
     title,
     description: cleanText(deal.description),
     url,
-    category: protectedTitle || deal.flight ? inferCategory(deal)
+    category: deal.flight ? inferCategory(deal) : protectedTitle
+      ? (admissionOfferCategory({ ...deal, title }) || inferCategory(deal))
       : normalizeCategoryForScraper(inferCategory(deal), [title, deal.description], deal),
     type,
     logo: identity.logo,

@@ -140,6 +140,41 @@ function hasAnyTerm(text, tokens = []) {
   return tokens.some((token) => hasTerm(text, token));
 }
 
+const ADMISSION_TITLE = /\b(?:(?:museums|kino|konzert|theater)[- ]?)?(?:eintritt|einlass)\b|\b(?:admission|(?:free|reduced)\s+entry|tickets?)\b/i;
+const INCLUDED_FOOD = 'kaffee|coffee|espresso|latte|tee|tea|matcha|speisen?|essen|food|meals?|dinners?|menüs?|menues?|getränke?|getraenke?|drinks?|brunch|buffet|frühstück|fruehstueck|snacks?|pizza|burger|popcorn|kuchen|desserts?|cocktails?';
+const EXPLICIT_FOOD_BENEFIT = 'gratis|kostenlos(?:e[rmns]?)?|kostenfrei(?:e[rmns]?)?|free|inklusive|inkl\\.?|inbegriffen|enthalten';
+const foodWithBenefit = new RegExp(
+  `\\b(?:${EXPLICIT_FOOD_BENEFIT})\\s+(?:(?:ein(?:e[nmr]?)?|a|an|one|zwei)\\s+)?(${INCLUDED_FOOD})\\b`
+  + `|\\b(${INCLUDED_FOOD})\\s+(?:(?:ist|sind|gibt es|is|are)\\s+)?(?:im (?:ticketpreis|eintrittspreis|preis)\\s+(?:ist\\s+)?)?(?:${EXPLICIT_FOOD_BENEFIT})\\b`
+  + `|\\b\\d{1,2}\\s*%\\s*(?:rabatt\\s*)?(?:auf|off)\\s+(?:(?:alle|all)\\s+)?(${INCLUDED_FOOD})\\b`, 'i',
+);
+const foodInTitlePackage = new RegExp(`(?:\\+\\s*|\\b(?:mit|with)\\s+)(?:(?:ein(?:e[nmr]?)?|a|an|zwei)\\s+)?(${INCLUDED_FOOD})\\b`, 'i');
+
+export function admissionOfferCategory(deal = {}) {
+  if ([deal.slackEditedFields, deal.liveEditedFields].flat()
+    .some(field => /^(?:category|kategorie)$/i.test(field))) return '';
+  const title = buildSignalText([deal.title]);
+  if (!ADMISSION_TITLE.test(title)) return '';
+  const supplied = cleanText(deal.category).toLowerCase();
+  const declared = CATEGORY_ALIASES[supplied] || supplied;
+  if (!['kultur', 'freizeit', 'events', 'essen', 'kaffee'].includes(declared) && !WEAK_CATEGORIES.has(declared)) return '';
+  const venue = ['freizeit', 'kultur'].find(category => hasAnyTerm(title, CATEGORY_HINTS[category]))
+    || (/\b(?:(?:museums|kino|konzert|theater)eintritt|freiluftmuseum)\b/.test(title) ? 'kultur' : '')
+    || (['freizeit', 'kultur'].includes(declared) ? declared : '');
+  if (!venue) return '';
+
+  // The ticket is the offer unless the text binds a named food or drink to a
+  // benefit. A menu, a food stall or a suggestion to pack a drink is incidental.
+  const bundled = title.match(foodInTitlePackage)?.[1];
+  const explicit = [title, deal.description, deal.promotionEvidence].flatMap(value =>
+    cleanText(value).toLowerCase().split(/(?<!\d)[.!?](?=\s|$)|[;,]|\baber\b/))
+    .filter(clause => !/\b(?:kein\w*|nicht|not|ohne|separat|mitbringen|einpacken)\b/i.test(clause))
+    .map(clause => clause.match(foodWithBenefit)?.slice(1).find(Boolean)).find(Boolean);
+  const product = explicit || (!/\b(?:ohne|nicht|mitbringen|einpacken|im gepäck)\b/.test(title) && bundled);
+  if (!product) return venue;
+  return hasAnyTerm(product, CATEGORY_HINTS.kaffee) ? 'kaffee' : 'essen';
+}
+
 function isChristianText(text) {
   return hasAnyTerm(text, CHRISTIAN_KEYWORDS);
 }
@@ -203,9 +238,11 @@ function normalizeCategoryForScraper(rawCategory, parts = [], deal = {}) {
   if (category === 'technik' && ['essen', 'kaffee'].includes(inferred)
       && !/\b(?:iphone|ipad|macbook|airpods|samsung|playstation|xbox|smartphone|tablet|laptop)\b/i.test(text)) return inferred;
 
-  if (category === 'events') return isChristianText(text) ? 'events' : (inferred || 'kultur');
+  const admission = admissionOfferCategory({ ...deal, category, title: deal.title || parts[0], description: deal.description || parts[1] });
+  if (category === 'events') return isChristianText(text) ? 'events' : (admission || inferred || 'kultur');
   if (isChristianText(text) && hasServiceContext(text)) return 'kirche';
   if (category === 'kirche') return 'kirche';
+  if (admission) return admission;
   if (category === 'kaffee' && inferred === 'supermarkt') return inferred;
 
   if (['essen', 'kaffee'].includes(category) && ['fitness', 'freizeit', 'kultur', 'reisen', 'beauty'].includes(inferred)) {
