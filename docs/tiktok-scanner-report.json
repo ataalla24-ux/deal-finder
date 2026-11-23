@@ -122,21 +122,53 @@
   "discovered": 0,
   "apiCandidates": 0,
   "apiDiscovery": {
-    "errors": [],
-    "attemptedRequests": 0,
+    "errors": [
+      {
+        "keyword": "wien gratis kaffee",
+        "offset": 0,
+        "status": 200,
+        "error": "TikTok returned a provider error",
+        "code": "provider-error",
+        "providerCode": "2483"
+      }
+    ],
+    "attemptedRequests": 1,
     "emptyResponses": 0,
     "rawItems": 0,
     "normalizedItems": 0,
     "ignoredItems": 0,
-    "stoppedReason": "api-cooldown",
-    "nextRetryAt": "2026-11-23T10:56:48.794Z",
+    "stoppedReason": "provider-error",
+    "nextRetryAt": "2026-11-24T10:57:34.914Z",
     "nextKeywordIndex": 10,
     "boundedRetry": {
       "reason": "local-request-policy",
       "failures": 2,
-      "failedAt": "2026-11-23T09:37:29.226Z"
+      "failedAt": "2026-11-23T10:57:34.914Z"
     },
-    "publicVideoLinks": 0
+    "transport": "direct-browser-search",
+    "navigations": 1,
+    "searchRequests": 1,
+    "siteAdjustedSearchRequests": 1,
+    "lastSearchResponse": {
+      "status": 200,
+      "declaredBytes": 125,
+      "decodedBytes": 125,
+      "retryAfterProvided": false,
+      "bodyState": "json"
+    },
+    "homepageNavigation": "root",
+    "normalizedCandidates": 0,
+    "inspectedPublicLinks": 0,
+    "checkedBy": {
+      "repository": "ataalla24-ux/deal-finder",
+      "runId": "45160688985",
+      "headSha": "bb81f1d981da9d220fb8eaee3cc0f1a7271d4e08",
+      "checkoutSha": "bb81f1d981da9d220fb8eaee3cc0f1a7271d4e08",
+      "triggeringRun": null,
+      "event": "workflow_dispatch",
+      "runAttempt": "1",
+      "url": "https://github.com/ataalla24-ux/deal-finder/actions/runs/45160688985"
+    }
   },
   "searchDiscovery": {
     "errors": [
