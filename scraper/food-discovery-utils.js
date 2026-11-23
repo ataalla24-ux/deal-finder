@@ -65,9 +65,20 @@ export function getAdFoodBenefitRejection(value) {
   return 'no-consumer-food-benefit';
 }
 
+const META_SPOT_DESCRIPTION = /\bwhat makes (?:this|the) (?:spot|place|restaurant) special\??/giu;
+const META_CHANCE_FOOD_BENEFIT = /\b(?:wenn (?:du|ihr|sie) glück (?:hast|habt|haben)|mit etwas glück|if (?:you['’]re|you are) lucky)\b[^.!?;]{0,100}?\b(?:gratis|kostenlos\w*|free|\d{1,2}\s*%\s*(?:rabatt|off|discount))\b/giu;
+
+export function metaPromotionEvidenceText(value) {
+  return String(value || '').replace(META_SPOT_DESCRIPTION, ' ').replace(META_CHANCE_FOOD_BENEFIT, ' ');
+}
+
 export function getMetaNonOfferRejection(value) {
   const text = String(value || '').replace(/\b(?:animal|gluten|sugar|lactose|dairy|alcohol|caffeine|cruelty|plastic|smoke|tax|risk|fat|nut|gmo)[- ]free\b/gi, '')
     .replace(/\bfree[- ]entry\s+food\s+stalls?\b/gi, 'food stalls');
+  const offerText = metaPromotionEvidenceText(text);
+  if (offerText !== text && AD_FOOD_PRODUCT_PATTERN.test(text) && getAdFoodBenefitRejection(offerText)) {
+    return 'food-recommendation-without-guaranteed-benefit';
+  }
   const explicitBenefit = /\b(?:gratis|kostenlos\w*|free|rabatt\w*|discount|gutschein|coupon|voucher|bogo|happy\s*hour)\b|\b[12]\s*\+\s*1\b|\d{1,2}\s*%\s*(?:off|rabatt|discount|auf)\b|\b(?:statt|instead\s+of)\s*(?:\u20ac\s*)?\d/i.test(text);
   if (explicitBenefit || extractLowFoodPrice(text)) return '';
   if (/\bfree[- ]entry\s+food\s+stalls?\b/i.test(String(value || ''))) return 'food-stall-access-not-food-offer';

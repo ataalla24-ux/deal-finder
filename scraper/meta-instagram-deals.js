@@ -14,7 +14,7 @@ import path from 'path';
 import { fileURLToPath } from 'url';
 
 import { normalizeCategoryForScraper } from './category-utils.js';
-import { extractLowFoodPrice, getAdFoodBenefitRejection, getMetaNonOfferRejection, isFoodDrinkSource, weakFoodPromotionReason } from './food-discovery-utils.js';
+import { extractLowFoodPrice, getAdFoodBenefitRejection, getMetaNonOfferRejection, isFoodDrinkSource, metaPromotionEvidenceText, weakFoodPromotionReason } from './food-discovery-utils.js';
 import { discoveryRejection } from './deal-discovery-policy.js';
 import { githubRunProvenance } from './pipeline-run-report-utils.js';
 import { locationConflictReason } from './deal-factual-guards.js';
@@ -782,14 +782,15 @@ export function findViennaEvidence(candidate, account = null, config = {}) {
 }
 
 export function classifyPromotion(text) {
-  const normalized = cleanText(text, 6000);
-  if (!normalized) {
+  const original = cleanText(text, 6000);
+  if (!original) {
     return { accepted: false, type: '', reason: 'missing-text' };
   }
-  const discoveryPolicy = discoveryRejection(normalized);
+  const discoveryPolicy = discoveryRejection(original);
   if (discoveryPolicy) return { accepted: false, type: '', reason: discoveryPolicy };
-  const incidentalFood = getMetaNonOfferRejection(normalized);
+  const incidentalFood = getMetaNonOfferRejection(original);
   if (incidentalFood) return { accepted: false, type: '', reason: incidentalFood };
+  const normalized = metaPromotionEvidenceText(original);
   if (weakFoodPromotionReason(normalized)) return { accepted: false, type: '', reason: 'weak-food-offer' };
   if (getNonGuaranteedPromotionReason(normalized)
       || getEditorialRoundupPromotionReason(normalized)

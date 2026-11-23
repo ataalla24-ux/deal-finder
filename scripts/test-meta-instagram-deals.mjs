@@ -17,6 +17,7 @@ import {
 } from '../scraper/meta-instagram-deals.js';
 import { runCheck as runMetaInstagramGraphHealthCheck } from './check-meta-instagram-graph.mjs';
 import { modelForTask, OPENAI_MODEL_TIMEOUT_MS } from '../scraper/ai-credit-budget.js';
+import { validateApprovalCandidates } from '../scraper/slack-approve.js';
 
 const now = new Date('2026-07-17T10:00:00.000Z');
 const config = buildConfig({
@@ -36,6 +37,45 @@ assert.equal(boundedHashtagConfig.maxHashtagsPerRun, 30, 'Meta hashtag selection
 
 assert.equal(classifyPromotion('Heute 1+1 gratis auf alle Kaffees').accepted, true);
 assert.equal(classifyPromotion('20 % Rabatt auf alle Burger').type, 'rabatt');
+{
+  const checkedAt = new Date('2026-11-23T13:02:00Z');
+  const captionAt = '2026-11-23T10:59:40Z';
+  const venue = '1170 Wien';
+  const ads = [
+    { id: '17893406397686731', permalink: 'https://www.instagram.com/reel/DgFONdjorPG/',
+      title: 'What makes this spot special?', apparentBenefit: 'special',
+      caption: 'Looking for a smash burger in Vienna? What makes this spot special? 100% Austrian halal beef. Umami Lab, Hernalser Gürtel 47, 1170 Vienna. *Ad' },
+    { id: '18347786665286888', permalink: 'https://www.instagram.com/reel/DgFMjcRhMBN/',
+      title: 'Waffeln und wenn du Glück hast gibts eines davon sogar gratis', apparentBenefit: 'gratis',
+      caption: 'Crêpes, Bubble Waffeln, Milchshakes und wenn du Glück hast gibts eines davon sogar gratis. Nascheck, Wien.' },
+  ];
+  const context = { sourceType: 'hashtag', sourceName: '#viennafood' };
+  const raw = ({ id, permalink, caption }) => ({ id, permalink, caption, timestamp: captionAt, media_type: 'VIDEO' });
+  for (const source of ads) {
+    const result = normalizeGraphMediaItem(raw(source), context, config, checkedAt);
+    assert.equal(result.deal, null);
+    assert.equal(result.rejection, 'food-recommendation-without-guaranteed-benefit');
+  }
+  const approvalOptions = { now: checkedAt, existingDeals: [], requireMap: false, approvalCachedReviewOnly: true,
+    inspectDealUrlHealth: async url => ({ status: 200, ok: true, finalUrl: url }) };
+  const previous = ads.map(row => ({ id: `meta-ig-${row.id}`, brand: 'Wiener Lokal', title: row.title,
+    description: row.caption, category: 'essen', type: 'rabatt', originSource: 'Meta Instagram Hashtag API',
+    url: row.permalink, distance: venue, sourcePublishedAt: captionAt, promotionEvidence: row.apparentBenefit,
+    pipelineLifecycle: { manualDecision: 'approved' } }));
+  const approval = await validateApprovalCandidates(previous, approvalOptions);
+  assert.equal(approval.allowedDeals.length, 0);
+  for (const row of approval.results) assert(row.decision.reasons.some(reason => /food-recommendation-without-guaranteed-benefit/.test(reason)));
+
+  const regularDiscount = `${ads[0].caption} Diese Woche gibt es 20 % Rabatt auf alle Burger mit dem Code BURGER20.`;
+  const guaranteedFree = 'Bei Kauf eines Burgers erhalten alle Gäste gratis Pommes in 1170 Wien.';
+  const separateOffer = `${ads[1].caption} Heute bekommen alle Gäste 20 % Rabatt auf Waffeln mit dem Code WAFFEL20.`;
+  for (const [caption, expected] of [[regularDiscount, 'rabatt'], [guaranteedFree, 'gratis'], [separateOffer, 'rabatt']]) {
+    const published = normalizeGraphMediaItem(raw({ ...ads[0], caption }), context, config, checkedAt).deal;
+    assert.equal(published?.type, expected);
+    const validated = await validateApprovalCandidates([published], approvalOptions);
+    assert.equal(validated.allowedDeals.length, 1, validated.results[0]?.decision.reasons.join(', '));
+  }
+}
 assert.equal(classifyPromotion('Mit dem Vorteilsclub sparst du 25 % auf Tickets.').accepted, true);
 assert.equal(classifyPromotion('Das Ergebnis der Studie: Testosteron stieg um 47 Prozent.').accepted, false);
 assert.equal(classifyPromotion('100 % Geschmack und Energie für deinen Tag.').accepted, false);
