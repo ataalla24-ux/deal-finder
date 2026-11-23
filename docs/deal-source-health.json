@@ -1,21 +1,21 @@
 {
-  "generatedAt": "2026-11-23T08:52:13.382Z",
+  "generatedAt": "2026-11-23T09:03:16.420Z",
   "discoveryAvailability": {
     "note": "Transport evidence, not deal yield. Retry eligibility is not recovery. Candidate counts are not Slack deliveries. No extra runs or quota resets.",
     "lanes": [
       {
         "name": "instagram-search",
-        "observedAt": "2026-11-22T20:21:56.410Z",
+        "observedAt": "2026-11-23T09:02:28.111Z",
         "status": "paused",
-        "reason": "search-unavailable",
+        "reason": "search-cooldown",
         "retryAt": "2026-11-23T20:20:17.409Z",
-        "attempted": 1,
+        "attempted": 0,
         "discovered": 0,
         "deliveredToSlack": null
       },
       {
         "name": "instagram-profiles",
-        "observedAt": "2026-11-22T20:21:56.410Z",
+        "observedAt": "2026-11-23T09:02:28.111Z",
         "status": "no-block-reported",
         "reason": "",
         "retryAt": "",
@@ -24,11 +24,11 @@
       },
       {
         "name": "instagram-previews",
-        "observedAt": "2026-11-22T20:21:56.410Z",
+        "observedAt": "2026-11-23T09:02:28.111Z",
         "status": "no-block-reported",
         "reason": "",
         "retryAt": "",
-        "attempted": 4,
+        "attempted": 3,
         "deliveredToSlack": null
       },
       {
@@ -54,16 +54,16 @@
   },
   "summary": {
     "filesConsidered": 32,
-    "totalCandidates": 598,
-    "uniqueCandidates": 577,
-    "distinctCandidates": 585,
+    "totalCandidates": 599,
+    "uniqueCandidates": 578,
+    "distinctCandidates": 586,
     "duplicateClusters": 8,
     "topHealthySources": [
       {
         "sourceKey": "instagram-ai",
         "sourceLabel": "Instagram AI Agent",
         "healthScore": 70,
-        "totalDeals": 2
+        "totalDeals": 3
       },
       {
         "sourceKey": "meta-instagram",
@@ -133,9 +133,9 @@
       {
         "sourceKey": "meta-instagram",
         "sourceLabel": "Meta Instagram Graph",
-        "coverageScore": 56,
+        "coverageScore": 55,
         "totalDeals": 76,
-        "fresh1dCount": 10
+        "fresh1dCount": 9
       },
       {
         "sourceKey": "gutscheine",
@@ -170,7 +170,7 @@
         "sourceKey": "instagram-ai",
         "sourceLabel": "Instagram AI Agent",
         "precisionScore": 66,
-        "totalDeals": 2
+        "totalDeals": 3
       },
       {
         "sourceKey": "joe",
@@ -220,7 +220,7 @@
         "sourceKey": "instagram-ai",
         "sourceLabel": "Instagram AI Agent",
         "sourceWeightScore": 51,
-        "totalDeals": 2
+        "totalDeals": 3
       }
     ],
     "topSourcesToFix": [
@@ -299,18 +299,19 @@
       "sourceKey": "instagram-ai",
       "file": "deals-pending-instagram-ai.json",
       "sourceLabel": "Instagram AI Agent",
-      "totalDeals": 2,
-      "uniqueDeals": 2,
+      "totalDeals": 3,
+      "uniqueDeals": 3,
       "duplicateDeals": 0,
       "duplicateAcrossSources": 0,
       "fresh1dCount": 0,
-      "fresh7dCount": 2,
-      "viennaCount": 2,
-      "foodDrinkCount": 2,
+      "fresh7dCount": 3,
+      "viennaCount": 3,
+      "foodDrinkCount": 3,
       "promoCount": 0,
       "missingUrlCount": 0,
       "sampleTitles": [
-        "Ganzes Mastlamm um 6,99 €/kg und Lachs um 9,99 €/kg",
+        "👉 Nur 6,99 € pro kg Lachs (Somon Baligi) Ideal für traditionelle Gerichte & besondere Anlässe",
+        "Und heute im Mittagsmenü: gebackenes Schweinsschnitzerl mit Erdäpfel-Vogerlsalat, mit Suppe um € 9,90. Reservi",
         "LUNCH FOR ONLY 1 €?! YES, IT’S HAPPENING! 🥢🔥 Mark your calendars because November 27 is about to get deliciou"
       ],
       "lastRun": null,
@@ -322,8 +323,12 @@
       "foodDrinkRate": 1,
       "promoRate": 0,
       "missingUrlRate": 0,
-      "averageQualityScore": 84,
+      "averageQualityScore": 81.7,
       "topCategories": [
+        {
+          "value": "essen",
+          "count": 1
+        },
         {
           "value": "kaffee",
           "count": 1
@@ -336,7 +341,7 @@
       "topTypes": [
         {
           "value": "rabatt",
-          "count": 2
+          "count": 3
         }
       ],
       "issues": [
@@ -345,7 +350,7 @@
       ],
       "healthScore": 70,
       "missionFitScore": 50,
-      "coverageScore": 11,
+      "coverageScore": 12,
       "precisionScore": 66,
       "sourceWeightScore": 51
     },
@@ -357,7 +362,7 @@
       "uniqueDeals": 71,
       "duplicateDeals": 5,
       "duplicateAcrossSources": 1,
-      "fresh1dCount": 10,
+      "fresh1dCount": 9,
       "fresh7dCount": 66,
       "viennaCount": 76,
       "foodDrinkCount": 49,
@@ -427,7 +432,7 @@
       ],
       "healthScore": 69,
       "missionFitScore": 52,
-      "coverageScore": 56,
+      "coverageScore": 55,
       "precisionScore": 69,
       "sourceWeightScore": 61
     },
