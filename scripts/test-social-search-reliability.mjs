@@ -346,7 +346,26 @@ test('TikTok web search uses the October site path and deduplicates permalinks',
   assert.equal(queries[0], 'site:tiktok.com/@ wien gratis heute');
   assert.ok(queries.every(q => q.startsWith('site:tiktok.com/@ ')));
   assert.equal(new Set(queries).size,25);
+  assert.ok(queries.some(query => query.includes('"dahabdoener"')));
+  assert.ok(queries.some(query => query.includes('"tadimakebap1"')));
   assert.deepEqual(result.links,[url]);
+});
+
+test('TikTok web search resolves relative result redirects and excludes navigation and lookalikes', async () => {
+  const original = 'https://www.tiktok.com/@dahabdoener/video/7698001121721208086';
+  const second = 'https://www.tiktok.com/@tadimakebap1/video/7697993250354826518';
+  const nav = 'https://www.tiktok.com/@irrelevant/video/7697993250354826519';
+  const wrapper = encodeURIComponent(original);
+  const html = [
+    '<a class="result__a" href="//duckduckgo.com/l/?uddg=' + wrapper + '&amp;rut=123">Dahab</a>',
+    '<a class="result-link" href="/l/?uddg=' + encodeURIComponent(second) + '">Tadim</a>',
+    '<a href="' + nav + '">Footer</a>',
+    '<a class="result__a" href="https://news.invalid/?url=' + nav + '">Third party redirect</a>',
+    '<a class="result__a" href="https://www.tiktok.com.evil.invalid/@irrelevant/video/7697993250354826519">Wrong domain</a>',
+    '<a class="result__a" href="' + nav + '/comments">Wrong path</a>',
+  ].join('');
+  const result = await discoverTikTokLinksViaDuckDuckGo({ queries: ['wien'], fetcher: async () => new Response(html), now, sleep: never });
+  assert.deepEqual(result.links, [original, second]);
 });
 
 test('Instagram search reads nested result bodies and ignores unrelated links', () => {

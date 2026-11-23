@@ -7,9 +7,10 @@ import path from 'path';
 import { fileURLToPath } from 'url';
 import { chromium } from 'playwright';
 import { hasTikTokSingleRequestRetry, previousTikTokSearchFailure, runTikTokApiDiscovery, selectTikTokPostVisits, tikTokDiscoveryHealth, tikTokRetryAt } from './tiktok-search-discovery.js';
+import { readKnownTikTokLinks } from './tiktok-known-links.js';
 import { createTikTokDirectSearch, tikTokAccessRefusal } from './tiktok-browser-search.js';
 import { runInstagramSearchQueries } from './instagram-search-discovery.js';
-import { readPublicSearchResponse } from './public-search-response.js';
+import { parsePublicSearchResults, readPublicSearchResponse } from './public-search-response.js';
 
 import { normalizeCategoryForScraper } from './category-utils.js';
 import { discoveryRejection } from './deal-discovery-policy.js';
@@ -57,6 +58,8 @@ const SEARCH_QUERIES = [
   'site:tiktok.com/@ wien gratis heute',
   'site:tiktok.com/@ wien nur heute gratis',
   'site:tiktok.com/@ wien gratis essen',
+  'site:tiktok.com/@ "dahabdoener" gratis',
+  'site:tiktok.com/@ "tadimakebap1" gratis',
   'site:tiktok.com/@ wien gratis kaffee',
   'site:tiktok.com/@ wien gratis drink',
   'site:tiktok.com/@ wien gratis eintritt',
@@ -77,8 +80,6 @@ const SEARCH_QUERIES = [
   'site:tiktok.com/@ wien rabatt gutschein',
   'site:tiktok.com/@ wien gratis probetraining',
   'site:tiktok.com/@ wien gratis goodie bag',
-  'site:tiktok.com/@ wien kostenlos aktion',
-  'site:tiktok.com/@ tiktok wien gratis',
 ];
 
 const CORE_TIKTOK_API_KEYWORDS = [
@@ -126,7 +127,7 @@ const TIKTOK_SEED_ACCOUNT_KEYWORDS = [
   'dahabdoener gratis',
   'fitnessunionwien kostenlos',
   'viennas_joy gratis',
-  'viennas joy free entry',
+  'tadimakebap1 gratis',
   'kseniainvienna free drinks',
   'foodiewien gratis',
   'foodiewien deal',
@@ -469,22 +470,12 @@ function stableHash(value = '') {
 }
 
 function normalizeTikTokVideoUrl(value = '') {
-  const raw = cleanText(value, 1200);
-  if (!raw) return '';
-
-  let candidate = raw;
-  try {
-    const parsed = new URL(raw);
-    const redirect = parsed.searchParams.get('uddg') || parsed.searchParams.get('url') || parsed.searchParams.get('u');
-    if (redirect) candidate = decodeURIComponent(redirect);
-  } catch {}
-
-  const decoded = candidate
-    .replace(/\\u002F/g, '/')
-    .replace(/&amp;/g, '&');
-  const match = decoded.match(/https?:\/\/(?:www\.|m\.)?tiktok\.com\/@([A-Za-z0-9._-]{2,40})\/video\/(\d{8,30})/i);
-  if (!match) return '';
-  return `https://www.tiktok.com/@${match[1]}/video/${match[2]}`;
+  let url;
+  try { url = new URL(value); } catch { return ''; }
+  if (!['https:', 'http:'].includes(url.protocol) || url.username || url.password || url.port
+      || !['www.tiktok.com', 'm.tiktok.com', 'tiktok.com'].includes(url.hostname)) return '';
+  const match = url.pathname.match(/^\/@([a-z0-9._-]{2,40})\/video\/(\d{8,30})\/?$/i);
+  return match ? 'https://www.tiktok.com/@' + match[1] + '/video/' + match[2] : '';
 }
 
 function extractViennaEvidence(text) {
@@ -991,6 +982,7 @@ export async function fetchTikTokApiCandidates(page, options = {}) {
 
 export async function discoverTikTokLinksViaDuckDuckGo(options = {}) {
   const links = new Set();
+  let parsedResultLinks = 0;
   const result = await runInstagramSearchQueries(options.queries || SEARCH_QUERIES, {
     sleep: ms => new Promise(resolve => setTimeout(resolve, ms)), ...options,
     search: async query => {
@@ -1003,18 +995,15 @@ export async function discoverTikTokLinksViaDuckDuckGo(options = {}) {
         },
       });
       const html = await readPublicSearchResponse(response, options.now);
-      const found = [];
-      const hrefMatches = [...html.matchAll(/href=["']([^"']+)["']/gi)];
-      for (const match of hrefMatches) {
-        const normalized = normalizeTikTokVideoUrl(match[1]);
-        if (normalized) found.push(normalized);
-      }
-      return found;
+      return parsePublicSearchResults(html, href => {
+        parsedResultLinks++;
+        return normalizeTikTokVideoUrl(href);
+      }).map(result => result.url);
     },
   });
   for (const url of result.candidates) links.add(url);
   const { candidates, ...schedule } = result;
-  return { ...schedule, links: [...links] };
+  return { ...schedule, parsedResultLinks, links: [...links] };
 }
 
 export async function extractTikTokPostData(page, url) {
@@ -1670,12 +1659,29 @@ async function main() {
       lastUpdated: previousReport.lastUpdated,
       search: previousReport.searchDiscovery || { errors: previousReport.discoveryErrors || [] },
     } });
-    const { urls, deferredWebVisits } = selectTikTokPostVisits(apiDiscovery, discovery.links, CONFIG.maxPostsToVisit);
+    const primaryLinks = new Set([...discovery.links, ...(apiDiscovery.publicVideoLinks || []),
+      ...apiDiscovery.rows.map(row => row.data.url)]);
+    const knownLinks = readKnownTikTokLinks(DOCS_DIR).filter(url => !primaryLinks.has(url));
+    // Reuse a free post-visit slot after the ordinary search. Existing provider pauses apply.
+    const lastIndex = previousReport.searchDiscovery?.knownPostLinks?.nextIndex;
+    const hintIndex = knownLinks.length && Number.isSafeInteger(lastIndex) && lastIndex >= 0 ? lastIndex % knownLinks.length : 0;
+    const hint = knownLinks[hintIndex];
+    const requestedLinks = hint ? [...discovery.links, hint] : discovery.links;
+    const { urls, deferredWebVisits } = selectTikTokPostVisits(apiDiscovery, requestedLinks, CONFIG.maxPostsToVisit);
     discovery.deferredPostVisits = deferredWebVisits;
+    discovery.knownPostLinks = {
+      available: knownLinks.length, selected: Number(Boolean(hint && urls.includes(hint))), visited: 0, accepted: 0,
+      deferredByAccess: Number(Boolean(hint && apiDiscovery.nextRetryAt)), nextIndex: hintIndex,
+    };
     const publicLinkCount = apiDiscovery.publicVideoLinks?.length || 0;
     console.log(`🔎 public-page videos: ${publicLinkCount}; search-engine videos: ${discovery.links.length}; visiting fallback: ${urls.length}`);
     const page = apiPage;
     for (const url of urls) {
+      const fromLocalHint = url === hint;
+      if (fromLocalHint) {
+        discovery.knownPostLinks.visited++;
+        discovery.knownPostLinks.nextIndex = (hintIndex + 1) % knownLinks.length;
+      }
       try {
         const data = await extractTikTokPostData(page, url);
         if (data.accessRefusal) {
@@ -1687,11 +1693,12 @@ async function main() {
         }
         const { deal, reason } = buildDealFromPost(url, data);
         if (deal) {
+          if (fromLocalHint) discovery.knownPostLinks.accepted++;
           deals.push(deal);
           console.log(`  ✅ ${deal.title}`);
         } else {
           rejected.push(summarizeTikTokRejection(url, data, reason));
-          rescuePool.push({ url, data, initial: { deal, reason } });
+          if (!fromLocalHint) rescuePool.push({ url, data, initial: { deal, reason } });
         }
       } catch (error) {
         rejected.push(summarizeTikTokRejection(url, {}, error.message));

@@ -1,3 +1,4 @@
+import { load } from 'cheerio';
 import { sourceHttpError } from './source-http-policy.js';
 
 function publicSearchError(response, status, now) {
@@ -19,4 +20,21 @@ export async function readPublicSearchResponse(response, now = new Date()) {
     throw Object.assign(new Error('Unrecognized search response'), { retryAt: new Date(+now + 86400000).toISOString() });
   }
   return html;
+}
+
+export function parsePublicSearchResults(html, normalizeUrl) {
+  const $ = load(html);
+  return $('a.result__a[href], a.result-link[href]').toArray().flatMap(node => {
+    const link = $(node);
+    let href;
+    try { href = new URL(link.attr('href'), 'https://html.duckduckgo.com'); } catch { return []; }
+    if (href.username || href.password || !['https:', 'http:'].includes(href.protocol)) return [];
+    const redirect = /^(?:html\.)?duckduckgo\.com$/i.test(href.hostname) && href.pathname === '/l/'
+      ? href.searchParams.get('uddg') : '';
+    const url = normalizeUrl(redirect || href.href);
+    if (!url) return [];
+    const result = link.closest('.result, .result__body, .result-wrapper');
+    const text = value => value.replace(/\s+/g, ' ').trim();
+    return [{ url, title: text(link.text()), snippet: text(result.find('.result__snippet, .result-snippet').first().text()) }];
+  });
 }
