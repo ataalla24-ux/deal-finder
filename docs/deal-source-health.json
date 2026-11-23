@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-11-23T10:12:07.132Z",
+  "generatedAt": "2026-11-23T10:31:28.680Z",
   "discoveryAvailability": {
     "note": "Transport evidence, not deal yield. Retry eligibility is not recovery. Candidate counts are not Slack deliveries. No extra runs or quota resets.",
     "lanes": [
@@ -53,12 +53,18 @@
     ]
   },
   "summary": {
-    "filesConsidered": 32,
-    "totalCandidates": 598,
-    "uniqueCandidates": 577,
-    "distinctCandidates": 585,
+    "filesConsidered": 33,
+    "totalCandidates": 599,
+    "uniqueCandidates": 578,
+    "distinctCandidates": 586,
     "duplicateClusters": 8,
     "topHealthySources": [
+      {
+        "sourceKey": "tiktok-browser",
+        "sourceLabel": "TikTok Browser",
+        "healthScore": 86,
+        "totalDeals": 1
+      },
       {
         "sourceKey": "instagram-ai",
         "sourceLabel": "Instagram AI Agent",
@@ -82,15 +88,15 @@
         "sourceLabel": "Wiener Lokal-Angebotsseiten",
         "healthScore": 62,
         "totalDeals": 10
-      },
-      {
-        "sourceKey": "instagram-verified",
-        "sourceLabel": "Instagram",
-        "healthScore": 61,
-        "totalDeals": 6
       }
     ],
     "topMissionSources": [
+      {
+        "sourceKey": "tiktok-browser",
+        "sourceLabel": "TikTok Browser",
+        "missionFitScore": 78,
+        "totalDeals": 1
+      },
       {
         "sourceKey": "joe",
         "sourceLabel": "jö Bonus Club",
@@ -114,12 +120,6 @@
         "sourceLabel": "Wiener Lokal-Angebotsseiten",
         "missionFitScore": 54,
         "totalDeals": 10
-      },
-      {
-        "sourceKey": "firecrawl4",
-        "sourceLabel": "Firecrawl Key 4 - Instagram Direct",
-        "missionFitScore": 53,
-        "totalDeals": 43
       }
     ],
     "topCoverageSources": [
@@ -133,9 +133,9 @@
       {
         "sourceKey": "meta-instagram",
         "sourceLabel": "Meta Instagram Graph",
-        "coverageScore": 55,
+        "coverageScore": 54,
         "totalDeals": 75,
-        "fresh1dCount": 9
+        "fresh1dCount": 8
       },
       {
         "sourceKey": "gutscheine",
@@ -161,6 +161,12 @@
     ],
     "topPrecisionSources": [
       {
+        "sourceKey": "tiktok-browser",
+        "sourceLabel": "TikTok Browser",
+        "precisionScore": 88,
+        "totalDeals": 1
+      },
+      {
         "sourceKey": "meta-instagram",
         "sourceLabel": "Meta Instagram Graph",
         "precisionScore": 69,
@@ -183,15 +189,15 @@
         "sourceLabel": "Apify Instagram",
         "precisionScore": 60,
         "totalDeals": 1
-      },
-      {
-        "sourceKey": "food3",
-        "sourceLabel": "Firecrawl Key 2 - Food",
-        "precisionScore": 60,
-        "totalDeals": 4
       }
     ],
     "topWeightedSources": [
+      {
+        "sourceKey": "tiktok-browser",
+        "sourceLabel": "TikTok Browser",
+        "sourceWeightScore": 70,
+        "totalDeals": 1
+      },
       {
         "sourceKey": "meta-instagram",
         "sourceLabel": "Meta Instagram Graph",
@@ -215,12 +221,6 @@
         "sourceLabel": "Apify Instagram",
         "sourceWeightScore": 52,
         "totalDeals": 1
-      },
-      {
-        "sourceKey": "instagram-ai",
-        "sourceLabel": "Instagram AI Agent",
-        "sourceWeightScore": 51,
-        "totalDeals": 3
       }
     ],
     "topSourcesToFix": [
@@ -296,6 +296,54 @@
   },
   "sources": [
     {
+      "sourceKey": "tiktok-browser",
+      "file": "deals-pending-tiktok-browser.json",
+      "sourceLabel": "TikTok Browser",
+      "totalDeals": 1,
+      "uniqueDeals": 1,
+      "duplicateDeals": 0,
+      "duplicateAcrossSources": 0,
+      "fresh1dCount": 0,
+      "fresh7dCount": 0,
+      "viennaCount": 1,
+      "foodDrinkCount": 1,
+      "promoCount": 1,
+      "missingUrlCount": 0,
+      "sampleTitles": [
+        "Museum of Change Angebot"
+      ],
+      "lastRun": null,
+      "uniqueRate": 1,
+      "duplicateRate": 0,
+      "fresh1dRate": 0,
+      "fresh7dRate": 0,
+      "viennaRate": 1,
+      "foodDrinkRate": 1,
+      "promoRate": 1,
+      "missingUrlRate": 0,
+      "averageQualityScore": 58,
+      "topCategories": [
+        {
+          "value": "kaffee",
+          "count": 1
+        }
+      ],
+      "topTypes": [
+        {
+          "value": "gratis",
+          "count": 1
+        }
+      ],
+      "issues": [
+        "wenige Deals sind frischer als 1 Tag"
+      ],
+      "healthScore": 86,
+      "missionFitScore": 78,
+      "coverageScore": 16,
+      "precisionScore": 88,
+      "sourceWeightScore": 70
+    },
+    {
       "sourceKey": "instagram-ai",
       "file": "deals-pending-instagram-ai.json",
       "sourceLabel": "Instagram AI Agent",
@@ -362,7 +410,7 @@
       "uniqueDeals": 70,
       "duplicateDeals": 5,
       "duplicateAcrossSources": 1,
-      "fresh1dCount": 9,
+      "fresh1dCount": 8,
       "fresh7dCount": 66,
       "viennaCount": 75,
       "foodDrinkCount": 48,
@@ -432,7 +480,7 @@
       ],
       "healthScore": 69,
       "missionFitScore": 52,
-      "coverageScore": 55,
+      "coverageScore": 54,
       "precisionScore": 69,
       "sourceWeightScore": 61
     },

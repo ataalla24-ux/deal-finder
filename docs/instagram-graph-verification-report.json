@@ -1,7 +1,7 @@
 {
-  "generatedAt": "2026-11-23T10:12:04.273Z",
+  "generatedAt": "2026-11-23T10:31:22.394Z",
   "source": "instagram-graph-cross-source-verification",
-  "status": "failed-preserved",
+  "status": "ok",
   "configured": true,
   "scannedFiles": [
     "deals-pending-church-events.json",
@@ -31,6 +31,7 @@
     "deals-pending-meta-instagram.json",
     "deals-pending-power.json",
     "deals-pending-telegram.json",
+    "deals-pending-tiktok-browser.json",
     "deals-pending-tiktok.json",
     "deals-pending-twitter.json",
     "deals-pending-vienna-promo-radar.json",
@@ -64,7 +65,7 @@
     },
     "deals-pending-firecrawl5.json": {
       "deals": 3,
-      "candidates": 0
+      "candidates": 1
     },
     "deals-pending-flights.json": {
       "deals": 9,
@@ -146,6 +147,10 @@
       "deals": 0,
       "candidates": 0
     },
+    "deals-pending-tiktok-browser.json": {
+      "deals": 1,
+      "candidates": 0
+    },
     "deals-pending-tiktok.json": {
       "deals": 0,
       "candidates": 0
@@ -167,24 +172,23 @@
       "candidates": 0
     }
   },
-  "candidatePosts": 1,
-  "candidateAccounts": 1,
+  "candidatePosts": 2,
+  "candidateAccounts": 2,
   "skippedAccountCooldowns": 0,
   "selectedAccounts": [
     {
       "username": "heute.at",
       "candidates": 1
-    }
-  ],
-  "fetchedPosts": 0,
-  "exactMatches": 0,
-  "retainedEvidencePosts": 2000,
-  "errors": [
+    },
     {
-      "username": "heute.at",
-      "message": "Instagram shared quota paused: rolling-hour budget exhausted"
+      "username": "neotaste.wien",
+      "candidates": 1
     }
   ],
+  "fetchedPosts": 50,
+  "exactMatches": 1,
+  "retainedEvidencePosts": 2000,
+  "errors": [],
   "accountFailures": {
     "meatmewien": {
       "count": 2,
@@ -195,26 +199,20 @@
   "sharedQuota": {
     "limitPerHour": 401,
     "usageThreshold": 95,
-    "requests": 0,
-    "reserved": 0,
-    "stopped": true,
-    "reason": "Instagram shared quota paused: rolling-hour budget exhausted",
-    "highestUsagePercent": 0,
+    "requests": 2,
+    "reserved": 5,
+    "stopped": false,
+    "reason": "",
+    "highestUsagePercent": 6,
     "waitedMs": 0,
     "pacingMs": 0,
-    "retryAt": "2026-11-23T10:12:11.402Z",
+    "retryAt": "",
     "adaptiveSafetyCeiling": 190,
     "adaptiveIncreases": 0,
     "storageFailure": null,
-    "stopKind": "budget"
-  },
-  "globalError": {
-    "username": "heute.at",
-    "status": 0,
-    "code": "SCAN_BUDGET",
-    "message": "Instagram shared quota paused: rolling-hour budget exhausted"
+    "stopKind": ""
   },
   "blockedEvidencePosts": 72,
   "unmatchedCandidatePosts": 1,
-  "message": "0/1 fresh cross-source Instagram candidates matched exactly via Graph API."
+  "message": "1/2 fresh cross-source Instagram candidates matched exactly via Graph API."
 }
