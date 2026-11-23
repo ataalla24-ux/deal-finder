@@ -1,11 +1,11 @@
 {
-  "generatedAt": "2026-11-23T22:25:28.949Z",
+  "generatedAt": "2026-11-23T22:59:46.557Z",
   "summary": {
     "maxAgeDays": 7,
-    "total": 245,
-    "allowed": 0,
+    "total": 247,
+    "allowed": 2,
     "blocked": 245,
-    "warnings": 0,
+    "warnings": 2,
     "reasonCounts": {
       "kein konkretes Angebot erkennbar": 187,
       "älter als 7 Tage (2020-04-25)": 1,
@@ -197,10 +197,10 @@
         }
       },
       "Meta Instagram Hashtag API": {
-        "total": 8,
-        "allowed": 0,
+        "total": 10,
+        "allowed": 2,
         "blocked": 8,
-        "warnings": 0,
+        "warnings": 2,
         "reasonCategoryCounts": {
           "kein konkreter Deal": 7,
           "sonstiges": 1
@@ -208,7 +208,42 @@
       }
     }
   },
-  "allowed": [],
+  "allowed": [
+    {
+      "id": "meta-ig-18117235097144006",
+      "title": "30 % Rabatt auf alle Speisen",
+      "brand": "TINMO",
+      "source": "Meta Instagram Hashtag API",
+      "url": "https://www.instagram.com/reel/DgGOk5etsMa/",
+      "reasons": [],
+      "warnings": [
+        "Inhalt prüfen: Caption-Reste oder Emoji-Codes im sichtbaren Text"
+      ],
+      "sourceDate": "2026-11-23T20:22:07.000Z",
+      "sourceDateSource": "url.instagramShortcode",
+      "sourceAgeDays": 0,
+      "expiryDate": "2026-11-29",
+      "expirySource": "url.contentHints.title",
+      "urlStatus": "HTTP 200"
+    },
+    {
+      "id": "meta-ig-18505604857107196",
+      "title": "😍❄️ 🍽️ 5 Gerichte zur Auswahl – inklusive Suppe für nur € 14,90!",
+      "brand": "Mährischer Spatz",
+      "source": "Meta Instagram Hashtag API",
+      "url": "https://www.instagram.com/reel/DgGHmc3xn0y/",
+      "reasons": [],
+      "warnings": [
+        "Inhalt prüfen: Caption-Reste oder Emoji-Codes im sichtbaren Text"
+      ],
+      "sourceDate": "2026-11-23T19:21:10.000Z",
+      "sourceDateSource": "url.instagramShortcode",
+      "sourceAgeDays": 0,
+      "expiryDate": "2026-11-27",
+      "expirySource": "url.contentHints.title",
+      "urlStatus": "HTTP 200"
+    }
+  ],
   "blocked": [
     {
       "id": "jesuszentrum-events-20261123",
@@ -848,7 +883,7 @@
       "warnings": [
         "kein Ablaufdatum gefunden"
       ],
-      "sourceDate": "2026-11-23T22:24:36.241Z",
+      "sourceDate": "2026-11-23T22:58:04.782Z",
       "sourceDateSource": "url.publicationDate",
       "sourceAgeDays": 0,
       "expiryDate": "",
@@ -2561,7 +2596,6 @@
         "älter als 7 Tage (2026-02-22)"
       ],
       "warnings": [
-        "URL nicht eindeutig prüfbar (temporärer Fehler)",
         "kein Ablaufdatum gefunden"
       ],
       "sourceDate": "2026-02-22T21:13:07.696Z",
@@ -2569,7 +2603,7 @@
       "sourceAgeDays": 274,
       "expiryDate": "",
       "expirySource": "",
-      "urlStatus": "unklar: temporärer URL-Fehler"
+      "urlStatus": "HTTP 200"
     },
     {
       "id": "extra-30-20260222",
@@ -4982,16 +5016,23 @@
   ],
   "runProvenance": {
     "repository": "ataalla24-ux/deal-finder",
-    "runId": "45279280319",
-    "headSha": "656e4e658d51ff09ffbb2079e08c24ec408e975d",
-    "checkoutSha": "656e4e658d51ff09ffbb2079e08c24ec408e975d",
-    "triggeringRun": null,
-    "event": "workflow_dispatch",
+    "runId": "45284656832",
+    "headSha": "2e3669074132354b5d8b0c213a86f89082f66de7",
+    "checkoutSha": "2e3669074132354b5d8b0c213a86f89082f66de7",
+    "triggeringRun": {
+      "runId": "45281671465",
+      "headSha": "b76e9ac9894558a6150d3e22744c485452b0f451",
+      "event": "workflow_dispatch",
+      "name": "Meta Instagram Deal Discovery",
+      "startedAt": "2026-11-23T22:38:55.000Z",
+      "url": "https://github.com/ataalla24-ux/deal-finder/actions/runs/45281671465"
+    },
+    "event": "workflow_run",
     "runAttempt": "1",
-    "url": "https://github.com/ataalla24-ux/deal-finder/actions/runs/45279280319"
+    "url": "https://github.com/ataalla24-ux/deal-finder/actions/runs/45284656832"
   },
   "instagramDelivery": {
-    "checkedAt": "2026-11-23T22:25:28.960Z",
+    "checkedAt": "2026-11-23T22:59:47.562Z",
     "scope": "instagram-ai-agent/standard-slack-lane",
     "extractedCandidates": 3,
     "counts": {
@@ -5046,7 +5087,7 @@
     ]
   },
   "tiktokDelivery": {
-    "checkedAt": "2026-11-23T22:25:28.962Z",
+    "checkedAt": "2026-11-23T22:59:47.563Z",
     "scope": "tiktok-deals-scanner/standard-slack-lane",
     "extractedCandidates": 1,
     "counts": {
