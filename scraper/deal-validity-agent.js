@@ -539,6 +539,14 @@ function hasLowProductPrice(value) {
 }
 
 function getConcreteOfferDecision(deal, health = null) {
+  // A bare signup CTA stays a non-offer even when the destination's generic
+  // page preview advertises unrelated discounts. Actual candidate terms win.
+  const ownOfferText = getOfferText(deal);
+  const bareSignup = /\b(?:(?:jetzt|hier)\s+)?(?:gratis|kostenlos|kostenfrei|free)\s+(?:anmelden|registrieren|sign[ -]?up)\b/gi;
+  if (bareSignup.test(ownOfferText)
+    && !ownOfferText.replace(bareSignup, '').replace(/[\s.!,:;|–-]+/g, '')) {
+    return { concrete: false, reason: 'Anmeldung/Registrierung ohne eigenständigen Vorteil' };
+  }
   const offerText = getOfferText(deal, health);
   const isMetaAd = deal.originSource === 'Meta Ad Library API' || ['Instagram Anzeige', 'Meta Anzeige'].includes(deal.source);
   let hasAdFoodBenefit = false;

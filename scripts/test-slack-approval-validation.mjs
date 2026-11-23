@@ -1,4 +1,6 @@
 import assert from 'node:assert/strict';
+import fs from 'node:fs';
+import { validateDealsForSlack } from '../scraper/deal-validity-agent.js';
 
 import {
   applySlackEdits,
@@ -351,5 +353,40 @@ assert.deepEqual(validation.allowedDeals.map((deal) => deal.id), ['active-at-app
 assert.match(validation.results[0].decision.reasons.join(' | '), /abgelaufen \(2026-07-18\)/);
 assert.match(validation.results[2].decision.reasons.join(' | '), /kein echtes Social-Post-Datum/);
 assert.match(validation.results[3].decision.reasons.join(' | '), /nicht eindeutig in Wien/);
+
+const queuedMedia = JSON.parse(fs.readFileSync(new URL('./fixtures/power-mediamarkt-queued-20261123.json', import.meta.url))).deals;
+const signup = queuedMedia.find(deal => deal.id === 'power-41bc8cc54817');
+const gift = queuedMedia.find(deal => deal.id === 'power-fbef7821ce1d');
+const mediaNow = new Date('2026-11-23T14:00:00Z');
+let mediaInspections = 0;
+const mediaOptions = {
+  now: mediaNow, existingDeals: [], requireMap: false, approvalCachedReviewOnly: true,
+  inspectDealUrlHealth: async url => {
+    mediaInspections++;
+    // Existing validity recorded HTTP 200/exact URL. Generic page promotions
+    // below are an adversarial preview, never evidence for the bare signup.
+    return {status: 200, finalUrl: url, dateHints: {}, contentHints: {
+      title: 'MediaMarkt Angebote und Gutscheine', description: '10% Rabatt auf andere Angebote.',
+    }};
+  },
+  approvalModelRequest: async () => { throw new Error('No model calls permitted in this fixture'); },
+};
+for (const validate of [validateDealsForSlack, validateApprovalCandidates]) {
+  const original = structuredClone(signup);
+  const result = await validate([signup, gift], mediaOptions);
+  assert.equal(result.results[0].decision.allowed, false, 'the already queued bare signup must be held by central and approval validation');
+  assert.match(result.results[0].decision.reasons.join(' '), /Anmeldung\/Registrierung ohne eigenständigen Vorteil/);
+  assert.equal(result.results[1].decision.allowed, true, 'actual KitchenAid product gift remains eligible');
+  assert.deepEqual(signup, original, 'saved pending record is not mutated');
+}
+const checkedSignup = {...signup, pipelineLifecycle: {...signup.pipelineLifecycle, manualDecision: 'approved'}};
+const checked = await validateApprovalCandidates([checkedSignup], mediaOptions);
+assert.equal(checked.allowedDeals.length, 0, 'a later human checkmark cannot make signup itself a product benefit');
+assert.match(checked.results[0].decision.reasons.join(' '), /Anmeldung\/Registrierung ohne eigenständigen Vorteil/);
+for (const description of ['10% Rabatt auf Küchenmaschinen in der App.', 'Gratis Zubehör beim Kauf einer Küchenmaschine.']) {
+  const eligible = await validateDealsForSlack([{...signup, description}], mediaOptions);
+  assert.equal(eligible.results[0].decision.allowed, true, 'an actual independent discount or gift alongside signup remains eligible');
+}
+assert.equal(mediaInspections, 7, 'only the existing URL-health read per candidate, stubbed without network');
 
 console.log('slack approval validation ok');
