@@ -37,6 +37,12 @@ export function actorBounds(sources, purpose = 'scan') {
     if (!hashtag || sources.length !== 1 || sources[0].key !== 'hashtag:wienfood') throw new Error('invalid-validation-sources');
     return { cap: .01, maxItems: 2, perSource: 2 };
   }
+  if (purpose === 'profile-test') {
+    if (hashtag || sources.length > 2 || sources.some(s => s.verifiedMerchant !== true
+        || !/^[a-z0-9_.]{1,30}$/.test(s.username) || s.key !== `profile:${s.username}`
+        || s.url !== `https://www.instagram.com/${s.username}/`)) throw new Error('invalid-validation-sources');
+    return { cap: .01, maxItems: sources.length, perSource: 1 };
+  }
   if (purpose !== 'scan') throw new Error('invalid-purpose');
   if (sources.length > (hashtag ? LIMITS.hashtags : LIMITS.profiles)) throw new Error('invalid-source-count');
   return { cap: hashtag ? HASHTAG_CAP_USD : PROFILE_CAP_USD,
@@ -131,7 +137,10 @@ export async function collectDiscoveryBatches(client, sources, options = {}) {
       items.push(...run.items);
       runs.push({ id: run.runId, actorId: run.actorId, build: run.build, reportedChargeUsd: run.reportedChargeUsd });
     } catch (error) {
-      selected.forEach(s => failedSources.add(s.key));
+      if (error.httpStatus === 403 && error.operation === 'actor-start' && error.providerType === 'build-not-found') {
+        // Apify rejected the build before it inspected any of these profiles.
+        selected.forEach(s => attemptedSources.delete(s.key));
+      } else selected.forEach(s => failedSources.add(s.key));
       errors.push({ kind, ...apifyErrorDetails(error) });
       if (error.uncertainStart || [401, 403, 429].includes(error.httpStatus)) {
         cooldown = discoveryCooldown(error, options.now?.() || new Date(), options.previousCooldown);
@@ -275,7 +284,8 @@ export async function main(mode = '--plan') {
   const state = await read(FILES.state, { version: 1, reservations: [], sources: {}, seen: {} });
   if (state.version !== 1 || !Array.isArray(state.reservations) || !state.sources || !state.seen) throw new Error('invalid-ledger');
   const registry = await read('docs/instagram-merchant-registry.json', {});
-  const pool = discoverySources(await read('docs/instagram-watchlist.json', {}), registry);
+  const pool = discoverySources(await read('docs/instagram-watchlist.json', {}), registry,
+    await read('docs/instagram-graph-post-evidence.json', {}), now);
   if (mode === '--plan') {
     console.log(JSON.stringify({ sources: pool.length, selected: selectDiscoverySources(pool, state, now), limits: LIMITS }, null, 2));
     return;
@@ -283,15 +293,17 @@ export async function main(mode = '--plan') {
   if (!['--reserve', '--run'].includes(mode)) throw new Error('invalid-mode');
   if (!/^\d+$/.test(process.env.GITHUB_RUN_ID || '')) throw new Error('requires-audited-github-workflow');
   const purpose = process.env.APIFY_DISCOVERY_PURPOSE || 'scan';
-  if (!['scan', 'hashtag-test'].includes(purpose)) throw new Error('invalid-purpose');
+  if (!['scan', 'hashtag-test', 'profile-test'].includes(purpose)) throw new Error('invalid-purpose');
   const validation = purpose === 'hashtag-test';
-  if (validation && process.env.GITHUB_EVENT_NAME !== 'workflow_dispatch') throw new Error('validation-requires-manual-dispatch');
+  const profileValidation = purpose === 'profile-test';
+  if ((validation || profileValidation) && process.env.GITHUB_EVENT_NAME !== 'workflow_dispatch') throw new Error('validation-requires-manual-dispatch');
   const runKey = process.env.GITHUB_RUN_ID;
   const client = new ApifyDiscoveryClient(process.env.APIFY_2);
   const budget = budgetCheck(await client.preflight(validation ? HASHTAG_ACTOR : DISCOVERY_ACTOR), now, validation ? .01 : RUN_CAP_USD);
   if (mode === '--reserve') {
     const sources = validation
       ? pool.filter(s => s.key === 'hashtag:wienfood' && !(Date.parse(state.sources[s.key]?.retryAt) > +now))
+      : profileValidation ? selectDiscoverySources(pool.filter(s => s.verifiedMerchant), state, now).slice(0, 2)
       : selectDiscoverySources(pool, state, now);
     const reason = reservationReason(state, budget, runKey, now, purpose) || (!sources.length ? 'no-available-sources' : '');
     const plan = { allowed: !reason, reason, generatedAt: now.toISOString(), runKey, purpose, sources, budget, limits: LIMITS };
@@ -300,6 +312,7 @@ export async function main(mode = '--plan') {
       state.reservations.push({ key: runKey, at: now.toISOString(), capUsd: budget.runCapUsd, purpose, status: 'reserved' });
       // Permanent marker: pruning the monetary ledger must never reopen this one-shot test.
       if (validation) state.hashtagValidationReservedAt = now.toISOString();
+      if (profileValidation) state.profileValidationReservedAt = now.toISOString();
       await write(FILES.state, state);
     }
     await write(FILES.plan, plan);
@@ -314,6 +327,8 @@ export async function main(mode = '--plan') {
   if (!budget.allowed || !plan?.allowed || plan.runKey !== runKey || plan.purpose !== purpose
       || reservation?.status !== 'reserved' || reservation.purpose !== purpose || reservation.capUsd !== budget.runCapUsd
       || (validation && (plan.sources.length !== 1 || plan.sources[0].key !== 'hashtag:wienfood'))
+      || (profileValidation && (!plan.sources.length || plan.sources.length > 2 || plan.sources.some(s =>
+        !pool.some(eligible => eligible.verifiedMerchant && eligible.key === s.key && eligible.url === s.url))))
       || +now - Date.parse(reservation.at) > 30 * 60_000) throw new Error('missing-or-invalid-committed-reservation');
   const previous = (await read(FILES.pending, { deals: [] })).deals;
   const report = { generatedAt: now.toISOString(), runProvenance:githubRunProvenance(), purpose, limits: LIMITS, budget, selectedSources: plan.sources, status: 'starting' };

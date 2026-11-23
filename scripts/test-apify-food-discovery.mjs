@@ -126,6 +126,37 @@ test('curated profiles rotate fairly; blocked merchants and bar-only seeds exclu
   state.sources['profile:pizza_two'] = { retryAt: new Date(+now + DAY).toISOString() };
   assert.equal(selectDiscoverySources(pool, state, now)[0].username, 'cafe_one');
 });
+test('only actual active first-party posts of approved Vienna food merchants fill unused profile slots', () => {
+  const merchant = { username: 'cafe_active', accountType: 'merchant', viennaVerified: true, manualApprovedDeals: 1,
+    foodDrinkHits: 1, topCategories: [{ value: 'kaffee' }] };
+  const evidence = { ownerUsername: merchant.username, sourceAccountType: 'merchant', isRepost: false,
+    postKey: 'instagram:Fresh1', url: 'https://www.instagram.com/p/Fresh1/', sourceTypes: ['account'],
+    sourcePublishedAtSource: 'instagram-graph-timestamp', sourcePublishedAt: now.toISOString(), verifiedAt: now.toISOString() };
+  const pool = (m, e, watchlist) => discoverySources(watchlist, { accounts: [m] }, { posts: [e] }, now).filter(s => s.kind === 'profile');
+  assert.equal(pool(merchant, evidence)[0].verifiedMerchant, true);
+  assert.equal(pool(merchant, evidence, { accounts: [{ username: merchant.username, category: 'drinks' }] }).length, 0);
+  for (const delta of [{ blockedByModeration: true }, { accountType: 'creator' }, { viennaVerified: false },
+    { manualApprovedDeals: 0 }, { topCategories: [{ value: 'alkohol' }] }]) assert.equal(pool({ ...merchant, ...delta }, evidence).length, 0);
+  for (const delta of [{ sourceTypes: ['hashtag'] }, { ownerUsername: 'other' }, { isRepost: true }, { postKey: 'instagram:Different' },
+    { sourcePublishedAt: '2026-09-01' }, { verifiedAt: '2026-10-23' }, { blockingReason: 'withdrawn' }])
+    assert.equal(pool(merchant, { ...evidence, ...delta }).length, 0);
+});
+
+test('one-time profile repair uses one full remaining reservation but only two verified profiles and one cent', () => {
+  const verified = { kind: 'profile', key: 'profile:cafe', username: 'cafe', url: 'https://www.instagram.com/cafe/', verifiedMerchant: true };
+  assert.deepEqual(actorBounds([verified], 'profile-test'), { cap: .01, maxItems: 1, perSource: 1 });
+  for (const group of [[], [verified, verified, verified], [{ ...verified, verifiedMerchant: false }],
+    [{ ...verified, url: 'https://www.instagram.com/other/' }], [{ kind: 'hashtag' }]])
+    assert.throws(() => actorBounds(group, 'profile-test'));
+  const s = { ...emptyState(), reservations: [{ key: 'previous', at: now.toISOString(), capUsd: .075 }] };
+  assert.equal(reservationReason(s, budget, 'new', now, 'scan'), 'minimum-six-hour-spacing');
+  assert.equal(reservationReason(s, budget, 'new', now, 'profile-test'), '');
+  assert.equal(reservationReason(s, { ...budget, runCapUsd: .01 }, 'new', now, 'profile-test'), 'invalid-validation-cap');
+  assert.equal(reservationReason({ ...s, profileValidationReservedAt: now.toISOString() }, budget, 'new', now, 'profile-test'), 'profile-validation-already-reserved');
+  assert.equal(reservationReason({ ...s, retryAt: new Date(+now + DAY).toISOString() }, budget, 'new', now, 'profile-test'), 'channel-cooldown');
+  s.reservations.push({ key: 'second', at: now.toISOString(), capUsd: .075 });
+  assert.equal(reservationReason(s, budget, 'third', now, 'profile-test'), 'daily-budget-reserved');
+});
 test('eight search slots rotate fairly in two batches and retain offer-led seeds', () => {
   assert.equal(TAGS.length, 8);
   assert.ok(TAGS.includes('gratiswien'));
@@ -283,6 +314,16 @@ test('forbidden start reports the exact stage and never switches to another acto
   assert.deepEqual([...result.attemptedSources], ['profile:cafe']);
 });
 
+test('a missing provider build never attributes a lookup or a new cooldown to an unvisited profile', async () => {
+  const s = { kind: 'profile', key: 'profile:restaurant', username: 'restaurant', url: 'https://www.instagram.com/restaurant/' };
+  const result = await collectDiscoveryBatches({ preflight: freePreflight, request: async () => {
+    throw Object.assign(Error('apify-http-403'), { httpStatus: 403, providerType: 'build-not-found', operation: 'actor-start', retryAfterStatus: 'absent' });
+  } }, [s], { now: () => now });
+  assert.equal(result.attemptedSources.size, 0);
+  assert.equal(result.failedSources.size, 0);
+  assert.equal(result.errors[0].providerType, 'build-not-found');
+  assert.equal(result.retryAt, new Date(+now + DAY).toISOString());
+});
 test('only a first documented rate limit without Retry-After uses six hours', async () => {
   const sources = [{ kind: 'hashtag', key: 'hashtag:wienfood', url: 'https://www.instagram.com/explore/tags/wienfood/' }];
   const rateLimit = { httpStatus: 429, providerType: 'rate-limit-exceeded', retryAfterStatus: 'absent' };

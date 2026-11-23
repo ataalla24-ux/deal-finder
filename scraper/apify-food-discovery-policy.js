@@ -1,4 +1,5 @@
 import { createHash } from 'node:crypto';
+import { RUN_CAP_USD } from './apify-discovery-client.js';
 import { normalizeApifyItem, realPostTimestamp } from './import-apify-instagram-deals.js';
 import { discoveryRejection } from './deal-discovery-policy.js';
 import { getAdFoodBenefitRejection, isFoodDrinkSource } from './food-discovery-utils.js';
@@ -16,7 +17,7 @@ const handle = value => String(value || '').replace(/^@/, '').toLowerCase();
 const plain = value => String(value || '').replace(/#[\p{L}\p{N}_]+/gu, ' ').trim();
 const vienna = value => /\b(?:wien|vienna|1(?:0[1-9]|1\d|2[0-3])0)\b/i.test(value);
 
-export function discoverySources(watchlist = {}, registry = {}) {
+export function discoverySources(watchlist = {}, registry = {}, graph = {}, now = new Date()) {
   const registered = new Map((registry.accounts || []).map(a => [handle(a.username), a]));
   const profiles = new Map();
   for (const row of watchlist.accounts || []) {
@@ -28,6 +29,26 @@ export function discoverySources(watchlist = {}, registry = {}) {
       key: `profile:${username}`, kind: 'profile', username,
       url: `https://www.instagram.com/${username}/`, priority: Number(row.priority) || 0,
     });
+  }
+  // Only independently evidenced, previously approved Vienna food merchants can
+  // fill unused watchlist slots. An account mention or a fresh verification of
+  // an old post alone does not establish current activity.
+  const fresh = value => { const t = Date.parse(value); return t <= +now && t >= +now - 7 * DAY; };
+  const watchHandles = new Set((watchlist.accounts || []).map(row => handle(row.username)));
+  for (const post of graph.posts || []) {
+    const username = handle(post.ownerUsername), known = registered.get(username);
+    if (!known || !/^[a-z0-9_.]{1,30}$/.test(username) || known.blockedByModeration || known.accountType !== 'merchant'
+        || !known.viennaVerified || !(known.manualApprovedDeals > 0) || !(known.foodDrinkHits > 0)
+        || !known.topCategories?.some(c => ['essen', 'kaffee', 'food'].includes(c.value))
+        || post.sourceAccountType !== 'merchant' || post.isRepost !== false || post.blockingReason
+        || post.sourcePublishedAtSource !== 'instagram-graph-timestamp' || !post.sourceTypes?.includes('account')
+        || !post.postKey || post.postKey !== canonicalInstagramPostKey(post.url)
+        || !fresh(post.sourcePublishedAt) || !fresh(post.verifiedAt)) continue;
+    if (!profiles.has(username) && watchHandles.has(username)) continue;
+    const row = profiles.get(username) || { key: `profile:${username}`, kind: 'profile', username,
+      url: `https://www.instagram.com/${username}/`, priority: 0 };
+    row.verifiedMerchant = true;
+    profiles.set(username, row);
   }
   return [...profiles.values(), ...TAGS.map(tag => ({ key: `hashtag:${tag}`, kind: 'hashtag', url: `https://www.instagram.com/explore/tags/${tag}/`, priority: 0 }))];
 }
@@ -41,7 +62,7 @@ export function selectDiscoverySources(pool, state, now = new Date()) {
 }
 
 export function reservationReason(state, budget, runKey, now = new Date(), purpose = 'scan') {
-  if (!['scan', 'hashtag-test'].includes(purpose)) return 'invalid-purpose';
+  if (!['scan', 'hashtag-test', 'profile-test'].includes(purpose)) return 'invalid-purpose';
   if (!budget.allowed) return budget.reason;
   if (Date.parse(state.retryAt) > +now) return 'channel-cooldown';
   const reservations = state.reservations || [];
@@ -49,6 +70,9 @@ export function reservationReason(state, budget, runKey, now = new Date(), purpo
   if (purpose === 'hashtag-test') {
     if (budget.runCapUsd !== .01) return 'invalid-validation-cap';
     if (state.hashtagValidationReservedAt) return 'hashtag-validation-already-reserved';
+  } else if (purpose === 'profile-test') {
+    if (budget.runCapUsd !== RUN_CAP_USD) return 'invalid-validation-cap';
+    if (state.profileValidationReservedAt) return 'profile-validation-already-reserved';
   } else if (reservations.some(r => +now - Date.parse(r.at) < MIN_SCAN_SPACING_MS)) return 'minimum-six-hour-spacing';
   const day = now.toISOString().slice(0, 10);
   const sum = rows => rows.reduce((n, r) => n + Number(r.capUsd), 0);
