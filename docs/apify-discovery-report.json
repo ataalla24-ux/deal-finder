@@ -1,31 +1,56 @@
 {
-  "generatedAt": "2026-11-23T11:31:37.205Z",
-  "runProvenance": {
-    "repository": "ataalla24-ux/deal-finder",
-    "runId": "45165933271",
-    "headSha": "da4c2e9151d76d25e174a288afa0fc73a32698de",
-    "checkoutSha": "2e09638fbfb2b2b9701c1e0f27fa0dd881b96a7c",
-    "triggeringRun": null,
-    "event": "workflow_dispatch",
-    "runAttempt": "1",
-    "url": "https://github.com/ataalla24-ux/deal-finder/actions/runs/45165933271"
-  },
-  "purpose": "profile-test",
-  "limits": {
-    "profiles": 22,
-    "hashtags": 4,
-    "perSource": 1,
-    "posts": 26,
-    "ocrPosts": 8,
-    "dailyUsd": 0.15,
-    "cycleUsd": 4.65
-  },
+  "allowed": false,
+  "reason": "minimum-six-hour-spacing",
+  "generatedAt": "2026-11-23T16:16:46.944Z",
+  "runKey": "45214623873",
+  "purpose": "scan",
+  "sources": [
+    {
+      "key": "profile:doenerwerkwien",
+      "kind": "profile",
+      "username": "doenerwerkwien",
+      "url": "https://www.instagram.com/doenerwerkwien/",
+      "priority": 84
+    },
+    {
+      "key": "profile:papa.duck.at",
+      "kind": "profile",
+      "username": "papa.duck.at",
+      "url": "https://www.instagram.com/papa.duck.at/",
+      "priority": 0,
+      "verifiedMerchant": true
+    },
+    {
+      "key": "hashtag:esseninwien",
+      "kind": "hashtag",
+      "url": "https://www.instagram.com/explore/tags/esseninwien/",
+      "priority": 0
+    },
+    {
+      "key": "hashtag:wienfood",
+      "kind": "hashtag",
+      "url": "https://www.instagram.com/explore/tags/wienfood/",
+      "priority": 0
+    },
+    {
+      "key": "hashtag:wienisst",
+      "kind": "hashtag",
+      "url": "https://www.instagram.com/explore/tags/wienisst/",
+      "priority": 0
+    },
+    {
+      "key": "hashtag:wienkaffee",
+      "kind": "hashtag",
+      "url": "https://www.instagram.com/explore/tags/wienkaffee/",
+      "priority": 0
+    }
+  ],
   "budget": {
     "allowed": true,
     "reason": "",
     "plan": "FREE",
     "includedCreditUsd": 5,
-    "accountUsageUsd": 0.08609809088306715,
+    "accountUsageUsd": 0.09150953085219445,
     "accountLimitUsd": 5,
     "cycle": {
       "startAt": "2026-11-15T00:00:00.000Z",
@@ -35,89 +60,25 @@
     "creditReserveUsd": 0.35,
     "pricingModel": "PAY_PER_EVENT"
   },
-  "selectedSources": [
-    {
-      "key": "profile:hongkongcafewien",
-      "kind": "profile",
-      "username": "hongkongcafewien",
-      "url": "https://www.instagram.com/hongkongcafewien/",
-      "priority": 0,
-      "verifiedMerchant": true
-    },
-    {
-      "key": "profile:papa.duck.at",
-      "kind": "profile",
-      "username": "papa.duck.at",
-      "url": "https://www.instagram.com/papa.duck.at/",
-      "priority": 0,
-      "verifiedMerchant": true
-    }
-  ],
-  "status": "succeeded",
-  "fetchedRecords": 2,
-  "freshAcceptedDeals": 0,
-  "pendingDeals": 1,
-  "unchangedPosts": 0,
-  "duplicatePosts": 0,
-  "providerErrors": 0,
-  "emptySourceRecords": 0,
-  "ocrCalls": 2,
-  "candidateAudit": [
-    {
-      "key": "instagram:DgAPwxACLta",
-      "url": "https://www.instagram.com/p/DgAPwxACLta/",
-      "ownerUsername": "papa.duck.at",
-      "status": "rejected",
-      "reason": "no-consumer-food-benefit",
-      "ocrUsed": true,
-      "ocrDeferred": false,
-      "ocrErrors": 0
-    },
-    {
-      "key": "instagram:DgDpjXpK34w",
-      "url": "https://www.instagram.com/p/DgDpjXpK34w/",
-      "ownerUsername": "gina.sundara",
-      "status": "rejected",
-      "reason": "non-food-ad",
-      "ocrUsed": true,
-      "ocrDeferred": false,
-      "ocrErrors": 0
-    }
-  ],
-  "actorRuns": [
-    {
-      "id": "FO1rH7KRd3hcGQ6Ig",
-      "actorId": "apify~instagram-scraper",
-      "build": "0.0.870",
-      "reportedChargeUsd": 0.0027
-    }
-  ],
-  "batchErrors": [],
-  "datasetProviderErrors": 0,
-  "reportedChargeUsd": 0.0027,
-  "tools": {
-    "tesseract": true,
-    "ffmpeg": false,
-    "ffprobe": false
+  "limits": {
+    "profiles": 22,
+    "hashtags": 4,
+    "perSource": 1,
+    "posts": 26,
+    "ocrPosts": 8,
+    "dailyUsd": 0.15,
+    "cycleUsd": 4.65
   },
-  "sources": [
-    {
-      "key": "profile:hongkongcafewien",
-      "lastAttemptAt": "2026-11-23T11:31:37.205Z",
-      "postsReturned": 1,
-      "status": "posts-returned",
-      "consecutiveFailures": 0,
-      "consecutiveEmpty": 0,
-      "retryAt": ""
-    },
-    {
-      "key": "profile:papa.duck.at",
-      "lastAttemptAt": "2026-11-23T11:31:37.205Z",
-      "postsReturned": 1,
-      "status": "posts-returned",
-      "consecutiveFailures": 0,
-      "consecutiveEmpty": 0,
-      "retryAt": ""
-    }
-  ]
+  "runProvenance": {
+    "repository": "ataalla24-ux/deal-finder",
+    "runId": "45214623873",
+    "headSha": "0eba4c6632381504ead61feb21fc7fceff2aa509",
+    "checkoutSha": "0eba4c6632381504ead61feb21fc7fceff2aa509",
+    "triggeringRun": null,
+    "event": "schedule",
+    "runAttempt": "1",
+    "url": "https://github.com/ataalla24-ux/deal-finder/actions/runs/45214623873"
+  },
+  "status": "deferred",
+  "freshAcceptedDeals": 0
 }
