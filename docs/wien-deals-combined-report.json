@@ -1,21 +1,21 @@
 {
-  "generatedAt": "2026-11-22T19:56:12.939Z",
+  "generatedAt": "2026-11-23T08:04:46.713Z",
   "status": "degraded",
   "message": "0 fresh, evidence-checked Graph hashtag deal(s) found; 0 recovered from media.",
   "hashtags": [
+    "wienfoodie",
     "wienkaffee",
-    "essenwien",
     "wienisst",
+    "essenwien",
     "wienergastro",
     "viennaeats",
-    "viennarestaurants",
     "wienfood",
-    "viennafood",
-    "wienfoodie"
+    "viennarestaurants",
+    "viennafood"
   ],
-  "fetchedPosts": 24,
+  "fetchedPosts": 33,
   "cachedGraphPosts": 0,
-  "uniquePosts": 21,
+  "uniquePosts": 31,
   "totalDeals": 0,
   "rescueEligible": 0,
   "rescuedDeals": 0,
@@ -39,21 +39,21 @@
   "requestBudget": {
     "requests": 30,
     "maxRequests": 30,
-    "highestUsagePercent": 51,
+    "highestUsagePercent": 63,
     "stopped": true,
     "reason": "request-budget"
   },
   "budgetDeferred": true,
   "sharedQuota": {
-    "limitPerHour": 242,
+    "limitPerHour": 437,
     "usageThreshold": 95,
     "requests": 30,
     "reserved": 30,
     "stopped": false,
     "reason": "",
-    "highestUsagePercent": 51,
-    "waitedMs": 192647,
-    "pacingMs": 50295,
+    "highestUsagePercent": 63,
+    "waitedMs": 0,
+    "pacingMs": 35009,
     "retryAt": "",
     "adaptiveSafetyCeiling": 190,
     "adaptiveIncreases": 0,
@@ -62,33 +62,67 @@
   },
   "sources": [
     {
-      "hashtag": "wienkaffee",
-      "status": "error",
+      "hashtag": "wienfoodie",
+      "status": "ok",
+      "coverage": {
+        "pages": 1,
+        "uniquePosts": 0,
+        "newPosts": 0,
+        "stopReason": "exhausted",
+        "incomplete": false,
+        "resumed": false
+      },
       "fetched": 0,
       "accepted": 0,
-      "error": "Instagram shared quota paused: request or quota unavailable"
+      "mediaFieldMode": "full-media-with-owner",
+      "mediaLimit": 25
     },
     {
-      "hashtag": "essenwien",
-      "status": "error",
+      "hashtag": "wienkaffee",
+      "status": "ok",
+      "coverage": {
+        "pages": 1,
+        "uniquePosts": 0,
+        "newPosts": 0,
+        "stopReason": "exhausted",
+        "incomplete": false,
+        "resumed": false
+      },
       "fetched": 0,
       "accepted": 0,
-      "error": "Instagram shared quota paused: request or quota unavailable"
+      "mediaFieldMode": "full-media-with-owner",
+      "mediaLimit": 25
     },
     {
       "hashtag": "wienisst",
       "status": "ok",
       "coverage": {
         "pages": 3,
-        "uniquePosts": 6,
+        "uniquePosts": 7,
+        "newPosts": 1,
+        "stopReason": "page-limit",
+        "incomplete": true,
+        "resumed": false
+      },
+      "fetched": 7,
+      "accepted": 0,
+      "mediaFieldMode": "full-media-with-owner",
+      "mediaLimit": 25
+    },
+    {
+      "hashtag": "essenwien",
+      "status": "ok",
+      "coverage": {
+        "pages": 1,
+        "uniquePosts": 1,
         "newPosts": 0,
         "stopReason": "exhausted",
         "incomplete": false,
-        "resumed": true
+        "resumed": false
       },
-      "fetched": 6,
+      "fetched": 1,
       "accepted": 0,
-      "mediaFieldMode": "full-media-with-owner",
+      "mediaFieldMode": "basic",
       "mediaLimit": 25
     },
     {
@@ -112,35 +146,36 @@
       "status": "ok",
       "coverage": {
         "pages": 3,
-        "uniquePosts": 15,
-        "newPosts": 5,
-        "stopReason": "exhausted",
-        "incomplete": false,
+        "uniquePosts": 14,
+        "newPosts": 0,
+        "stopReason": "page-limit",
+        "incomplete": true,
         "resumed": true
       },
-      "fetched": 15,
-      "accepted": 0,
-      "mediaFieldMode": "full-media-with-owner",
-      "mediaLimit": 25
-    },
-    {
-      "hashtag": "viennarestaurants",
-      "status": "ok",
-      "coverage": {
-        "pages": 3,
-        "uniquePosts": 3,
-        "newPosts": 1,
-        "stopReason": "exhausted",
-        "incomplete": false,
-        "resumed": false
-      },
-      "fetched": 3,
+      "fetched": 14,
       "accepted": 0,
       "mediaFieldMode": "full-media-with-owner",
       "mediaLimit": 25
     },
     {
       "hashtag": "wienfood",
+      "status": "partial",
+      "coverage": {
+        "pages": 1,
+        "uniquePosts": 11,
+        "newPosts": 3,
+        "stopReason": "request-budget",
+        "incomplete": true,
+        "resumed": false
+      },
+      "error": "Instagram scan paused: request-budget",
+      "fetched": 11,
+      "accepted": 0,
+      "mediaFieldMode": "basic",
+      "mediaLimit": 25
+    },
+    {
+      "hashtag": "viennarestaurants",
       "status": "deferred",
       "fetched": 0,
       "accepted": 0,
@@ -152,31 +187,214 @@
       "fetched": 0,
       "accepted": 0,
       "error": "Instagram scan paused: request-budget"
-    },
-    {
-      "hashtag": "wienfoodie",
-      "status": "ok",
-      "coverage": {
-        "pages": 0,
-        "uniquePosts": 0,
-        "newPosts": 0,
-        "stopReason": "exhausted",
-        "incomplete": false,
-        "resumed": false,
-        "cacheHit": true
-      },
-      "fetched": 0,
-      "accepted": 0
     }
   ],
   "rejectionReasons": {
-    "no-concrete-offer": 12,
-    "alcohol-offer": 2,
+    "no-concrete-offer": 22,
+    "alcohol-offer": 3,
     "excluded-promotion-type": 1,
     "non-offer-content": 1,
-    "general-recommendation": 5
+    "general-recommendation": 2,
+    "missing-text": 1,
+    "self-syndicated-deal": 1
   },
   "candidateAudit": [
+    {
+      "id": "18506179126101775",
+      "status": "rejected",
+      "url": "https://www.instagram.com/p/DgE25lAgJjv/",
+      "title": "Eure Weihnachtsfeier im Restaurant Aladdin Lasst das Jahr bei gutem Essen und in festlicher Atmosphäre ausklingen. Ob mit eurem Team oder im kleinen Kreis, wir freuen uns auf euch!",
+      "text": "Eure Weihnachtsfeier im Restaurant Aladdin Lasst das Jahr bei gutem Essen und in festlicher Atmosphäre ausklingen. Ob mit eurem Team oder im kleinen Kreis, wir freuen uns auf euch! Schickt uns euren Wunschtermin und die Anzahl der Gäste. #RestaurantAladdin #WeihnachtsfeierWien #FirmenfeierWien #RestaurantWien #WienFood",
+      "ownerUsername": "",
+      "ownerRole": "",
+      "scoutUsername": "",
+      "merchantUsername": "",
+      "pubDate": "2026-11-23T07:35:59+0000",
+      "rejectionReason": "no-concrete-offer",
+      "qualityScore": 0,
+      "viennaVerified": false,
+      "mediaEvidence": {
+        "analyzedAt": "",
+        "ocrText": "",
+        "assetCount": 0,
+        "imageCount": 0,
+        "videoFrameCount": 0,
+        "downloadRetries": 0,
+        "errors": [],
+        "ai": null
+      },
+      "hashtags": [
+        "wienfood"
+      ]
+    },
+    {
+      "id": "18113765072526240",
+      "status": "rejected",
+      "url": "https://www.instagram.com/reel/DgE0qUmqXer/",
+      "title": "#htl_spengergasse #1050wien #margaretten #wienfood #bfi1050",
+      "text": "#htl_spengergasse #1050wien #margaretten #wienfood #bfi1050",
+      "ownerUsername": "",
+      "ownerRole": "",
+      "scoutUsername": "",
+      "merchantUsername": "",
+      "pubDate": "2026-11-23T07:17:43+0000",
+      "rejectionReason": "missing-text",
+      "qualityScore": 0,
+      "viennaVerified": false,
+      "mediaEvidence": {
+        "analyzedAt": "",
+        "ocrText": "",
+        "assetCount": 0,
+        "imageCount": 0,
+        "videoFrameCount": 0,
+        "downloadRetries": 0,
+        "errors": [],
+        "ai": null
+      },
+      "hashtags": [
+        "wienfood"
+      ]
+    },
+    {
+      "id": "18121495475094746",
+      "status": "rejected",
+      "url": "https://www.instagram.com/reel/DgEwbAso9xH/",
+      "title": "Cay auf Platz 1 😋 #elysiumgrill #çay #wienfood #wienessen #foodlover",
+      "text": "Cay auf Platz 1 😋 #elysiumgrill #çay #wienfood #wienessen #foodlover",
+      "ownerUsername": "",
+      "ownerRole": "",
+      "scoutUsername": "",
+      "merchantUsername": "",
+      "pubDate": "2026-11-23T06:40:13+0000",
+      "rejectionReason": "no-concrete-offer",
+      "qualityScore": 0,
+      "viennaVerified": false,
+      "mediaEvidence": {
+        "analyzedAt": "",
+        "ocrText": "",
+        "assetCount": 0,
+        "imageCount": 0,
+        "videoFrameCount": 0,
+        "downloadRetries": 0,
+        "errors": [],
+        "ai": null
+      },
+      "hashtags": [
+        "wienfood"
+      ]
+    },
+    {
+      "id": "18098455472689836",
+      "status": "rejected",
+      "url": "https://www.instagram.com/p/DgD0x2LDpYI/",
+      "title": "Steak lovers, this one’s for you🥩🔥 Juicy grilled steak strips, red onions, a fried egg and fresh pico de gallo. All the good stuff on one plate! And the best part? It’s yours for",
+      "text": "Steak lovers, this one’s for you🥩🔥 Juicy grilled steak strips, red onions, a fried egg and fresh pico de gallo. All the good stuff on one plate! And the best part? It’s yours for just €16.90👀 Who’s joining you for dinner at Shebeen?🍻 📍 Shebeen – The International Pub, Vienna #shebeenvienna #steaklover #viennafoodie #wiengehtaus #viennaeats",
+      "ownerUsername": "",
+      "ownerRole": "",
+      "scoutUsername": "",
+      "merchantUsername": "",
+      "pubDate": "2026-11-22T21:58:13+0000",
+      "rejectionReason": "no-concrete-offer",
+      "qualityScore": 0,
+      "viennaVerified": false,
+      "mediaEvidence": {
+        "analyzedAt": "",
+        "ocrText": "",
+        "assetCount": 0,
+        "imageCount": 0,
+        "videoFrameCount": 0,
+        "downloadRetries": 0,
+        "errors": [],
+        "ai": null
+      },
+      "hashtags": [
+        "viennaeats"
+      ]
+    },
+    {
+      "id": "17911684650589150",
+      "status": "rejected",
+      "url": "https://www.instagram.com/p/DgDuW0pDLgj/",
+      "title": "🥩 Steakwochen im s’Pfiff! Ab 27. November erwarten euch saftige Steaks, köstliche Beilagen und jede Menge Genuss! 🤤 Wer ist dabei? ❤️ #spfiff #wienisst #steak #genuss #efeuconten",
+      "text": "🥩 Steakwochen im s’Pfiff! Ab 27. November erwarten euch saftige Steaks, köstliche Beilagen und jede Menge Genuss! 🤤 Wer ist dabei? ❤️ #spfiff #wienisst #steak #genuss #efeucontent",
+      "ownerUsername": "",
+      "ownerRole": "",
+      "scoutUsername": "",
+      "merchantUsername": "",
+      "pubDate": "2026-11-22T21:02:06+0000",
+      "rejectionReason": "no-concrete-offer",
+      "qualityScore": 0,
+      "viennaVerified": false,
+      "mediaEvidence": {
+        "analyzedAt": "",
+        "ocrText": "",
+        "assetCount": 0,
+        "imageCount": 0,
+        "videoFrameCount": 0,
+        "downloadRetries": 0,
+        "errors": [],
+        "ai": null
+      },
+      "hashtags": [
+        "wienisst"
+      ]
+    },
+    {
+      "id": "18134058847694117",
+      "status": "rejected",
+      "url": "https://www.instagram.com/reel/DgDnSc_gcn6/",
+      "title": "Hi, I’m Lisa! 👋🏼🤎 A Vienna girl who can never say no to good food, an iced matcha, a cute café or the chance to discover somewhere new! ☕️🍵🥐 Most of my days are spent teaching",
+      "text": "Hi, I’m Lisa! 👋🏼🤎 A Vienna girl who can never say no to good food, an iced matcha, a cute café or the chance to discover somewhere new! ☕️🍵🥐 Most of my days are spent teaching, but outside the classroom, you’ll usually find me exploring Vienna, trying restaurants on my never-ending food bucket list, planning my next trip or capturing all the little moments along the way. 🏛️📸✨ Somewhere between coffee dates, food adventures & countless pictures of Vienna, this little Instagram diary came to life. 🤎 Here, I’m sharing all my favorite discoveries – honest food reviews, cozy cafés, must-try restaurants, hidden gems, travel adventures & a little bit of everything that makes everyday life special. Nothing fancy, nothing overly staged. Just my genuine love for beautiful places, amazing food & creating memories along the way! 🫶🏼 I may be starting small, but I have big dreams, so many ideas & a whole city full of places still waiting to be discovered. 🥹✨ And this is only the beginning! If you’re always looking for your next favorite brunch spot, a delicious matcha or a new corner of Vienna to explore, you’re in the right place! 👀 Follow wiener.lisa_ and join me as I eat, sip, explore & document this little journey one discovery at a time! 🤎 #ViennaFoodGuide #ViennaEats #ViennaCafes #ViennaCoffeeSpots #WienLiebe",
+      "ownerUsername": "",
+      "ownerRole": "",
+      "scoutUsername": "",
+      "merchantUsername": "",
+      "pubDate": "2026-11-22T20:00:56+0000",
+      "rejectionReason": "no-concrete-offer",
+      "qualityScore": 0,
+      "viennaVerified": false,
+      "mediaEvidence": {
+        "analyzedAt": "",
+        "ocrText": "",
+        "assetCount": 0,
+        "imageCount": 0,
+        "videoFrameCount": 0,
+        "downloadRetries": 0,
+        "errors": [],
+        "ai": null
+      },
+      "hashtags": [
+        "viennaeats"
+      ]
+    },
+    {
+      "id": "18171486388477505",
+      "status": "rejected",
+      "url": "https://www.instagram.com/reel/DgDhpLsRwms/",
+      "title": "Bei QiYe (齐爷) servieren wir die echte Beijing Roast Duck (北京烤鸭) 🇨🇳✨ – nur auf Vorbestellung Außen goldbraun & knusprig, innen zart & saftig – mit hausgemachten Pfannkuchen, Gurke",
+      "text": "Bei QiYe (齐爷) servieren wir die echte Beijing Roast Duck (北京烤鸭) 🇨🇳✨ – nur auf Vorbestellung Außen goldbraun & knusprig, innen zart & saftig – mit hausgemachten Pfannkuchen, Gurkenstreifen & süßer Bohnensauce. 📍 Spitalgasse 1B, 1090 Wien 📞 +43 676 319 7235 #pekinduck #pekingente #viennafoodie #wienfood #asianfood chinesischesessen",
+      "ownerUsername": "",
+      "ownerRole": "",
+      "scoutUsername": "",
+      "merchantUsername": "",
+      "pubDate": "2026-11-22T19:11:32+0000",
+      "rejectionReason": "no-concrete-offer",
+      "qualityScore": 0,
+      "viennaVerified": false,
+      "mediaEvidence": {
+        "analyzedAt": "",
+        "ocrText": "",
+        "assetCount": 0,
+        "imageCount": 0,
+        "videoFrameCount": 0,
+        "downloadRetries": 0,
+        "errors": [],
+        "ai": null
+      },
+      "hashtags": [
+        "wienfood"
+      ]
+    },
     {
       "id": "18221886133348546",
       "status": "rejected",
@@ -203,6 +421,34 @@
       },
       "hashtags": [
         "wienisst"
+      ]
+    },
+    {
+      "id": "17990555984882430",
+      "status": "rejected",
+      "url": "https://www.instagram.com/reel/DgDghInnJYR/",
+      "title": "🥢 Mittagessen für 1 € in 1010 Wien? Bei @hongkongcafewien bekommst du am Freitag, 27.11.2026 von 13–15 Uhr Mapo Doufu oder Char Siu um 1 €. 1. @hongkongcafewien auf Instagram folg",
+      "text": "🥢 Mittagessen für 1 € in 1010 Wien? Bei @hongkongcafewien bekommst du am Freitag, 27.11.2026 von 13–15 Uhr Mapo Doufu oder Char Siu um 1 €. 1. @hongkongcafewien auf Instagram folgen. 2. Den Original-Aktionspost vom 13.11. liken. 3. Zwischen 13 und 15 Uhr in die Wipplingerstraße 32, 1010 Wien kommen. Vergabe nach Ankunft, solange der Vorrat reicht. Symbolaufnahmen · KI-Stimme (Florian) · Eigenwerbung für FreeFinder. #Wien #WienFood #HongKongCafe #FreeFinder #Mittagessen",
+      "ownerUsername": "",
+      "ownerRole": "",
+      "scoutUsername": "",
+      "merchantUsername": "",
+      "pubDate": "2026-11-22T19:01:37+0000",
+      "rejectionReason": "self-syndicated-deal",
+      "qualityScore": 0,
+      "viennaVerified": false,
+      "mediaEvidence": {
+        "analyzedAt": "",
+        "ocrText": "",
+        "assetCount": 0,
+        "imageCount": 0,
+        "videoFrameCount": 0,
+        "downloadRetries": 0,
+        "errors": [],
+        "ai": null
+      },
+      "hashtags": [
+        "wienfood"
       ]
     },
     {
@@ -234,16 +480,16 @@
       ]
     },
     {
-      "id": "18436066189149535",
+      "id": "17962995159253548",
       "status": "rejected",
-      "url": "https://www.instagram.com/reel/DgDVj8liQcC/",
-      "title": "NEW IN VIENNA. And definitely one to put on your radar. 🥩🍷 Meet INIGO ASADOR inigoasador.vienna – bringing a little Basque flair to Vienna. From tempting starters to beautifully ",
-      "text": "NEW IN VIENNA. And definitely one to put on your radar. 🥩🍷 Meet INIGO ASADOR inigoasador.vienna – bringing a little Basque flair to Vienna. From tempting starters to beautifully prepared steaks and a Basque cheesecake worth saving room for… there’s more to discover than just the main event. A new steakhouse for your next dinner in Vienna. 📍 INIGO ASADOR · Vienna, Austria How do you like your steak? Medium rare or well done? 👇 Follow us for more restaurant discoveries, hidden gems & places worth knowing about. #viennafood #viennarestaurants #viennafoodguide #newinvienna #steakhouse",
+      "url": "https://www.instagram.com/reel/DgDXYNetePc/",
+      "title": "Sambusak, Kubeh, Falafel. Wie viele davon kennst du wirklich? Alle drei sind bei uns hausgemacht, und im Video siehst du, was in jedem drinsteckt. Sag uns in den Kommentaren, welch",
+      "text": "Sambusak, Kubeh, Falafel. Wie viele davon kennst du wirklich? Alle drei sind bei uns hausgemacht, und im Video siehst du, was in jedem drinsteckt. Sag uns in den Kommentaren, welches neu für dich war 🤍 📍 Rennweg 92, 1030 Wien #1030wien #wienfood #wienessen #sambusak #babylonwien",
       "ownerUsername": "",
       "ownerRole": "",
       "scoutUsername": "",
       "merchantUsername": "",
-      "pubDate": "2026-11-22T17:33:44+0000",
+      "pubDate": "2026-11-22T17:42:08+0000",
       "rejectionReason": "no-concrete-offer",
       "qualityScore": 0,
       "viennaVerified": false,
@@ -258,15 +504,15 @@
         "ai": null
       },
       "hashtags": [
-        "viennarestaurants"
+        "wienfood"
       ]
     },
     {
       "id": "18131942707882424",
       "status": "rejected",
       "url": "https://www.instagram.com/p/DgDV7wwAlH0/",
-      "title": "Wir feiern den Jahreswechsel mit wilden Kreationen. Heimische Klassiker treffen auf wilde Küche, geile Aromen und eine ordentliche Portion Wildling. Sicher dir gleich deinen Tisch ",
-      "text": "Wir feiern den Jahreswechsel mit wilden Kreationen. Heimische Klassiker treffen auf wilde Küche, geile Aromen und eine ordentliche Portion Wildling. Sicher dir gleich deinen Tisch für Silvester (Link in Bio) Neugierig, was dich erwartet? Dann check dir unser Silvestermenü auf unserer Webseite & wirf einen Blick auf unsere wilden Kreationen. Spoiler: Es wird richtig wild! #wildling #silvestermenü #wienisst #newyear #viennafoodies",
+      "title": "Wir feiern den Jahreswechsel mit wilden Kreationen. Heimische Klassiker treffen auf wilde Küche, geile Aromen und eine ordentliche Portion Wildling. 6-Gänge Silvestermenü: wahlweis",
+      "text": "Wir feiern den Jahreswechsel mit wilden Kreationen. Heimische Klassiker treffen auf wilde Küche, geile Aromen und eine ordentliche Portion Wildling. 6-Gänge Silvestermenü: wahlweise mit Fleisch oder vegetarisch 🤤 Optional: Getränkebegleitung „Kreuz und Quer“ mit oder ohne Sprit. 🍸 2 Slots: 17:00 Uhr oder 20:15 Uhr Sicher dir gleich deinen Tisch für Silvester (Link in Bio) Neugierig, was dich erwartet? Dann check dir unser Silvestermenü auf unserer Webseite & wirf einen Blick auf unsere wilden Kreationen. Spoiler: Es wird richtig wild! #wildling #silvestermenü #wienisst #newyear #viennafoodies",
       "ownerUsername": "",
       "ownerRole": "",
       "scoutUsername": "",
@@ -316,6 +562,62 @@
       "hashtags": [
         "wienisst",
         "viennaeats"
+      ]
+    },
+    {
+      "id": "18090317987306693",
+      "status": "rejected",
+      "url": "https://www.instagram.com/reel/DgDQy3PokCR/",
+      "title": "Dein Zeichen, deine beste Freundin zum Essen bei Paolo auszuführen. 🥂 Gutes Essen, ein Glas Wein und Gespräche, bei denen man die Zeit vergisst. Ob Mittagsmenü unter der Woche ode",
+      "text": "Dein Zeichen, deine beste Freundin zum Essen bei Paolo auszuführen. 🥂 Gutes Essen, ein Glas Wein und Gespräche, bei denen man die Zeit vergisst. Ob Mittagsmenü unter der Woche oder Dinner am Abend – italienische und kroatische Küche mit mediterranem Flair, mitten in Wien im 3. Bezirk. Markier die Freundin, die dich unbedingt hierher mitnehmen muss. 👇 Tisch reservieren: 📞 +43 1 713 42 73 📍 Paulusgasse 8, 1030 Wien #mädelsabend #restaurantwien #italienischesrestaurantwien #wien1030 #essenwien",
+      "ownerUsername": "",
+      "ownerRole": "",
+      "scoutUsername": "",
+      "merchantUsername": "",
+      "pubDate": "2026-11-22T16:44:07+0000",
+      "rejectionReason": "alcohol-offer",
+      "qualityScore": 0,
+      "viennaVerified": false,
+      "mediaEvidence": {
+        "analyzedAt": "",
+        "ocrText": "",
+        "assetCount": 0,
+        "imageCount": 0,
+        "videoFrameCount": 0,
+        "downloadRetries": 0,
+        "errors": [],
+        "ai": null
+      },
+      "hashtags": [
+        "essenwien"
+      ]
+    },
+    {
+      "id": "17980169619152458",
+      "status": "rejected",
+      "url": "https://www.instagram.com/reel/DgDHxI4Iflr/",
+      "title": "🔥 Habt ihr unseren Efel Gemischten Dürüm immer noch nicht probiert? 😍 Eine einzigartige Kombination aus saftigem Beef-Steak, zartem Hähnchenfleisch, frischem Gemüse und unseren l",
+      "text": "🔥 Habt ihr unseren Efel Gemischten Dürüm immer noch nicht probiert? 😍 Eine einzigartige Kombination aus saftigem Beef-Steak, zartem Hähnchenfleisch, frischem Gemüse und unseren leckeren Saucen – alles im original türkischen Lavash-Brot! 🤤 Worauf wartet ihr noch? Kommt vorbei und probiert ihn selbst! ❤️ 📍 Mariahilfer Straße 100, 1070 Wien EFEL KEBAB GRILL – Einzigartig. Frisch. Echt. Lecker! #EfelKebabGrill #GemischterDürüm #BerlinerDöner #DönerWien #WienFood Mariahilferstraße FoodLovers Dürüm",
+      "ownerUsername": "",
+      "ownerRole": "",
+      "scoutUsername": "",
+      "merchantUsername": "",
+      "pubDate": "2026-11-22T15:27:04+0000",
+      "rejectionReason": "no-concrete-offer",
+      "qualityScore": 0,
+      "viennaVerified": false,
+      "mediaEvidence": {
+        "analyzedAt": "",
+        "ocrText": "",
+        "assetCount": 0,
+        "imageCount": 0,
+        "videoFrameCount": 0,
+        "downloadRetries": 0,
+        "errors": [],
+        "ai": null
+      },
+      "hashtags": [
+        "wienfood"
       ]
     },
     {
@@ -403,6 +705,34 @@
       ]
     },
     {
+      "id": "18118972666828257",
+      "status": "rejected",
+      "url": "https://www.instagram.com/reel/DgC6Ba0RtY3/",
+      "title": "🥰 EN GÜZEL REKLAM, MÜŞTERİLERİMİZİN GÜZEL SÖZLERİ! Peki DURAK10’u müşterilerimiz nasıl anlatıyor? ❤️ Sizlerin memnuniyeti bizim en büyük mutluluğumuz. İyi ki varsınız! ❤️ 📍 DURAK",
+      "text": "🥰 EN GÜZEL REKLAM, MÜŞTERİLERİMİZİN GÜZEL SÖZLERİ! Peki DURAK10’u müşterilerimiz nasıl anlatıyor? ❤️ Sizlerin memnuniyeti bizim en büyük mutluluğumuz. İyi ki varsınız! ❤️ 📍 DURAK10 – Gudrunstraße 184, 1100 Wien #Durak10 #MüşterilerimizNeDiyor #ViyanaLezzetleri #TürkYemekleri #wienfood",
+      "ownerUsername": "",
+      "ownerRole": "",
+      "scoutUsername": "",
+      "merchantUsername": "",
+      "pubDate": "2026-11-22T13:25:17+0000",
+      "rejectionReason": "no-concrete-offer",
+      "qualityScore": 0,
+      "viennaVerified": false,
+      "mediaEvidence": {
+        "analyzedAt": "",
+        "ocrText": "",
+        "assetCount": 0,
+        "imageCount": 0,
+        "videoFrameCount": 0,
+        "downloadRetries": 0,
+        "errors": [],
+        "ai": null
+      },
+      "hashtags": [
+        "wienfood"
+      ]
+    },
+    {
       "id": "18041874359648986",
       "status": "rejected",
       "url": "https://www.instagram.com/reel/DgCy0J2NuzK/",
@@ -487,6 +817,34 @@
       ]
     },
     {
+      "id": "18157776787548501",
+      "status": "rejected",
+      "url": "https://www.instagram.com/reel/DgCsHmzsXo9/",
+      "title": "• So schmeckt Venezuela – mitten in Wien. 🤤🥑 Wer muss mit dir zu Aguacate? Markier deine Begleitung! 👇 📍 Mohsgasse 28, 1030 Wien • Así sabe Venezuela en pleno Viena. 🤤🥑 ¿Con ",
+      "text": "• So schmeckt Venezuela – mitten in Wien. 🤤🥑 Wer muss mit dir zu Aguacate? Markier deine Begleitung! 👇 📍 Mohsgasse 28, 1030 Wien • Así sabe Venezuela en pleno Viena. 🤤🥑 ¿Con quién te vienes a Aguacate? Etiquétalo para que le dé hambre también. 👇 📍 Mohsgasse 28, 1030 Wien #AguacateLatinFood #VenezolanischesEssen #WienEats #ComidaVenezolana #WienFood",
+      "ownerUsername": "",
+      "ownerRole": "",
+      "scoutUsername": "",
+      "merchantUsername": "",
+      "pubDate": "2026-11-22T11:26:41+0000",
+      "rejectionReason": "no-concrete-offer",
+      "qualityScore": 0,
+      "viennaVerified": false,
+      "mediaEvidence": {
+        "analyzedAt": "",
+        "ocrText": "",
+        "assetCount": 0,
+        "imageCount": 0,
+        "videoFrameCount": 0,
+        "downloadRetries": 0,
+        "errors": [],
+        "ai": null
+      },
+      "hashtags": [
+        "wienfood"
+      ]
+    },
+    {
       "id": "18121188548095067",
       "status": "rejected",
       "url": "https://www.instagram.com/p/DgCpPjSge8h/",
@@ -516,6 +874,34 @@
       ]
     },
     {
+      "id": "17951061219069608",
+      "status": "rejected",
+      "url": "https://www.instagram.com/reel/DgCmf_zoEyf/",
+      "title": "🔥🇮🇹 WIEN, BIST DU BEREIT FÜR ECHTES ITALIENISCHES ESSEN?! 🤌🍝🍕 Ein bisschen Pasta, eine traumhafte Pizza, frischer Fisch und jede Menge AMORE! ❤️🔥 Bei I FRATELLI PULCINELLA k",
+      "text": "🔥🇮🇹 WIEN, BIST DU BEREIT FÜR ECHTES ITALIENISCHES ESSEN?! 🤌🍝🍕 Ein bisschen Pasta, eine traumhafte Pizza, frischer Fisch und jede Menge AMORE! ❤️🔥 Bei I FRATELLI PULCINELLA kommt nicht einfach nur Essen auf den Tisch – hier servieren wir ein Stück Italien! 🇮🇹 👨‍🍳 Frisch zubereitet, mit Leidenschaft gekocht und mit ganz viel Liebe serviert! 😍 Welches Gericht würdest DU als Erstes probieren? Schreib's in die Kommentare! 👇🔥 📍 I FRATELLI PULCINELLA – myhive Wienerberg, Twin Towers, 1100 Wien 🇦🇹 ❤️ Speichern, teilen & deinen Lieblingsmenschen markieren, mit dem du vorbeikommen musst! #FratelliPulcinella #WienFood #FoodTok #ViennaFood #ItalianFood WienEssen PizzaLovers PastaLovers FoodPorn WienGehtEssen TikTokAustria NapoliFood",
+      "ownerUsername": "",
+      "ownerRole": "",
+      "scoutUsername": "",
+      "merchantUsername": "",
+      "pubDate": "2026-11-22T10:35:32+0000",
+      "rejectionReason": "no-concrete-offer",
+      "qualityScore": 0,
+      "viennaVerified": false,
+      "mediaEvidence": {
+        "analyzedAt": "",
+        "ocrText": "",
+        "assetCount": 0,
+        "imageCount": 0,
+        "videoFrameCount": 0,
+        "downloadRetries": 0,
+        "errors": [],
+        "ai": null
+      },
+      "hashtags": [
+        "wienfood"
+      ]
+    },
+    {
       "id": "18122196259966046",
       "status": "rejected",
       "url": "https://www.instagram.com/reel/DgCmOhDhoRD/",
@@ -540,8 +926,7 @@
         "ai": null
       },
       "hashtags": [
-        "viennaeats",
-        "viennarestaurants"
+        "viennaeats"
       ]
     },
     {
@@ -657,44 +1042,16 @@
       ]
     },
     {
-      "id": "17967440085232644",
+      "id": "18188911420421102",
       "status": "rejected",
-      "url": "https://www.instagram.com/reel/DgCeZ6ItN5i/",
-      "title": "If you’re looking for a pretty lunch spot in Vienna, save this one. 📍 The Bollicafé at Park Hyatt Vienna Am Hof 2, 1010 Wien invitation #ViennaFood #ViennaCafe #ViennaLunch #Vienn",
-      "text": "If you’re looking for a pretty lunch spot in Vienna, save this one. 📍 The Bollicafé at Park Hyatt Vienna Am Hof 2, 1010 Wien invitation #ViennaFood #ViennaCafe #ViennaLunch #ViennaRestaurants #VisitVienna",
+      "url": "https://www.instagram.com/p/DgCcESFiHY9/",
+      "title": "Pizza, die einfach glücklich macht! 🍕😍 Knuspriger Rand, geschmolzener Käse und ein Belag, der keine Wünsche offenlässt. 🔥 Bei **Bella Italia** kommt italienischer Genuss direkt ",
+      "text": "Pizza, die einfach glücklich macht! 🍕😍 Knuspriger Rand, geschmolzener Käse und ein Belag, der keine Wünsche offenlässt. 🔥 Bei **Bella Italia** kommt italienischer Genuss direkt auf deinen Teller! 🇮🇹❤️ 🤤 Mit wem würdest du diese Pizza teilen? Markiere deinen Pizza-Buddy! 👇 #BellaItalia #PizzaLiebe #PizzaWien #PizzaLovers #WienEssen #FoodVienna #ItalianFood #PizzaTime #WienFood",
       "ownerUsername": "",
       "ownerRole": "",
       "scoutUsername": "",
       "merchantUsername": "",
-      "pubDate": "2026-11-22T09:24:33+0000",
-      "rejectionReason": "general-recommendation",
-      "qualityScore": 0,
-      "viennaVerified": false,
-      "mediaEvidence": {
-        "analyzedAt": "",
-        "ocrText": "",
-        "assetCount": 0,
-        "imageCount": 0,
-        "videoFrameCount": 0,
-        "downloadRetries": 0,
-        "errors": [],
-        "ai": null
-      },
-      "hashtags": [
-        "viennarestaurants"
-      ]
-    },
-    {
-      "id": "18645482011021164",
-      "status": "rejected",
-      "url": "https://www.instagram.com/reel/DgBlMx8xg6T/",
-      "title": "✨It was so good, we had to come back.🔥 Sheeba Vienna, is officially celebrating its Grand Opening on November 22nd at 3 PM!🇾🇪 If you haven’t checked them out yet, this is the pe",
-      "text": "✨It was so good, we had to come back.🔥 Sheeba Vienna, is officially celebrating its Grand Opening on November 22nd at 3 PM!🇾🇪 If you haven’t checked them out yet, this is the perfect time!✨ sheeba_restaurant 📍 Vienna, VA 📅 November 22nd ⏰ 3 PM #Sheeba #ViennaEats #YemeniFood #HalalDMV #DMVEats",
-      "ownerUsername": "",
-      "ownerRole": "",
-      "scoutUsername": "",
-      "merchantUsername": "",
-      "pubDate": "2026-11-22T01:04:25+0000",
+      "pubDate": "2026-11-22T09:03:57+0000",
       "rejectionReason": "no-concrete-offer",
       "qualityScore": 0,
       "viennaVerified": false,
@@ -709,63 +1066,7 @@
         "ai": null
       },
       "hashtags": [
-        "viennaeats"
-      ]
-    },
-    {
-      "id": "17996186058072966",
-      "status": "rejected",
-      "url": "https://www.instagram.com/reel/DgBH-duACu2/",
-      "title": "Hey, I’m Lisa! 👋🏼🤎 Just a Vienna girl who’s always on the hunt for delicious food, cozy cafés, the perfect matcha & beautiful little corners of the city. ☕️🍵🥐 When I’m not tea",
-      "text": "Hey, I’m Lisa! 👋🏼🤎 Just a Vienna girl who’s always on the hunt for delicious food, cozy cafés, the perfect matcha & beautiful little corners of the city. ☕️🍵🥐 When I’m not teaching, you’ll probably find me exploring Vienna, discovering new restaurants, enjoying a coffee somewhere cute or capturing all the little moments in between. 🏛️📸✨ This is my little space to share everything I love – from honest food reviews and hidden café gems to travel adventures, everyday moments & everything that makes life a little sweeter. 🤎 Just a small creator with big dreams, a camera roll full of memories & a never-ending list of places to explore! 🥹✨ If you love good food, pretty places & discovering Vienna one café at a time, you’re in the right place! 🫶🏼 Follow wiener.lisa_ for delicious discoveries, honest recommendations & a little taste of my Vienna life! 🤎 #ViennaFoodGuide #ViennaEats #ViennaCafes #ViennaCoffeeSpots #WienLiebe",
-      "ownerUsername": "",
-      "ownerRole": "",
-      "scoutUsername": "",
-      "merchantUsername": "",
-      "pubDate": "2026-11-21T20:48:41+0000",
-      "rejectionReason": "general-recommendation",
-      "qualityScore": 0,
-      "viennaVerified": false,
-      "mediaEvidence": {
-        "analyzedAt": "",
-        "ocrText": "",
-        "assetCount": 0,
-        "imageCount": 0,
-        "videoFrameCount": 0,
-        "downloadRetries": 0,
-        "errors": [],
-        "ai": null
-      },
-      "hashtags": [
-        "viennaeats"
-      ]
-    },
-    {
-      "id": "18131826002308050",
-      "status": "rejected",
-      "url": "https://www.instagram.com/reel/DgBHKaCgZ9H/",
-      "title": "Hey, I’m Lisa! 👋🏼🤎 Just a Vienna girl who’s always on the hunt for delicious food, cozy cafés, the perfect matcha & beautiful little corners of the city. ☕️🍵🥐 When I’m not tea",
-      "text": "Hey, I’m Lisa! 👋🏼🤎 Just a Vienna girl who’s always on the hunt for delicious food, cozy cafés, the perfect matcha & beautiful little corners of the city. ☕️🍵🥐 When I’m not teaching, you’ll probably find me exploring Vienna, discovering new restaurants, enjoying a coffee somewhere cute or capturing all the little moments in between. 🏛️📸✨ This is my little space to share everything I love – from honest food reviews and hidden café gems to travel adventures, everyday moments & everything that makes life a little sweeter. 🤎 Just a small creator with big dreams, a camera roll full of memories & a never-ending list of places to explore! 🥹✨ If you love good food, pretty places & discovering Vienna one café at a time, you’re in the right place! 🫶🏼 Follow wiener.lisa_ for delicious discoveries, honest recommendations & a little taste of my Vienna life! 🤎 #ViennaFoodGuide #ViennaEats #ViennaCafes #ViennaCoffeeSpots #WienLiebe",
-      "ownerUsername": "",
-      "ownerRole": "",
-      "scoutUsername": "",
-      "merchantUsername": "",
-      "pubDate": "2026-11-21T20:41:53+0000",
-      "rejectionReason": "general-recommendation",
-      "qualityScore": 0,
-      "viennaVerified": false,
-      "mediaEvidence": {
-        "analyzedAt": "",
-        "ocrText": "",
-        "assetCount": 0,
-        "imageCount": 0,
-        "videoFrameCount": 0,
-        "downloadRetries": 0,
-        "errors": [],
-        "ai": null
-      },
-      "hashtags": [
-        "viennaeats"
+        "wienfood"
       ]
     }
   ]
