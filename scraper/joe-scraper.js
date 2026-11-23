@@ -702,7 +702,11 @@ async function extractBipaJoePage(page, source) {
 
 export async function extractLoggedInJoeBenefitsPage(page) {
   await page.waitForLoadState('domcontentloaded');
-  await page.waitForTimeout(2000);
+  // This SPA serves an empty document first. Wait for a guest or account control
+  // before assessing the saved session, within the existing single navigation.
+  await page.waitForFunction(() => Array.from(document.querySelectorAll('button,a,[role="button"]')).some(node =>
+    /^(?:jetzt einloggen|abmelden|ausloggen|log\s*out)$/i.test((node.innerText || node.getAttribute('aria-label') || '').trim())),
+    undefined, { timeout: 10_000 }).catch(() => {});
 
   const pageData = await page.evaluate(() => {
     const bodyText = (document.body?.innerText || '').trim();
@@ -734,6 +738,15 @@ export async function extractLoggedInJoeBenefitsPage(page) {
 
     return {
       bodyText,
+      signals: {
+        onBenefitsPage: location.origin === 'https://www.joe-club.at' && location.pathname.replace(/\/$/, '') === '/vorteile',
+        readablePage: bodyText.length >= 120,
+        benefitsHeading: Array.from(document.querySelectorAll('h1,h2')).some(n => /persönlichen jö Gutscheine|persönlichen Vorteilsbons/i.test(n.innerText)),
+        loginButton: visibleControls.some(node => /^login$/i.test(label(node))),
+        accountMenu: visibleControls.some(node => /^(?:mein konto|mein jö|mein profil|kontomenü)$/i.test(label(node))),
+        guestPrompt: loginPrompt,
+        accessDenied: /access denied|zugriff verweigert|anfrage blockiert/i.test(bodyText),
+      },
       requiresLogin,
       loginPrompt,
       authenticatedControls,
@@ -745,7 +758,7 @@ export async function extractLoggedInJoeBenefitsPage(page) {
   const health = assessJoeAuthPage(pageData);
   if (!health.authenticated) {
     console.log(`   ↳ jö Sitzung nicht als angemeldet bestätigt: ${health.status}`);
-    return { deals: [], health };
+    return { deals: [], health: { ...health, signals: pageData.signals } };
   }
 
   const deals = [];

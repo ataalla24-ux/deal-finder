@@ -144,7 +144,7 @@ test('no offers or absence of login text never proves a usable account session',
   assert.equal(assessJoeAuthPage({ url: 'https://www.joe-club.at/vorteile', loginPrompt: true }).status, 'login-required');
   assert.equal(assessJoeAuthPage({ authenticatedControls: true }).status, 'authenticated-no-readable-offers');
   assert.equal(assessJoeAuthPage({ authenticatedControls: true }, 2).status, 'authenticated-offers-read');
-  const result = await extractLoggedInJoeBenefitsPage({ waitForLoadState: async () => {}, waitForTimeout: async () => {}, evaluate: async () => ({ url: 'https://www.joe-club.at/vorteile', bodyText: 'OMV VIVA Kaffee', candidates: [], authenticatedControls: false }) });
+  const result = await extractLoggedInJoeBenefitsPage({ waitForLoadState: async () => {}, waitForFunction: async () => {}, evaluate: async () => ({ url: 'https://www.joe-club.at/vorteile', bodyText: 'OMV VIVA Kaffee', candidates: [], authenticatedControls: false }) });
   assert.equal(result.deals.length, 0, 'no old summer fallback even when OMV is mentioned');
   assert.equal(result.health.status, 'unverified-session');
 });
