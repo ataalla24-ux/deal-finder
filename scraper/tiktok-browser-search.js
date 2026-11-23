@@ -45,6 +45,7 @@ async function publicSearchUiState(page, keyword) {
 export async function observeTikTokPublicSearchPage(page, keyword, { waitMs = 25000 } = {}) {
   const startedAt = Date.now();
   const responses = [];
+  const observed = [];
   const denied = response => response.retryAfterProvided || response.status >= 400
     || (response.providerCode && Number(response.providerCode) !== 0);
   let recordDenial, deniedSearch = false;
@@ -53,18 +54,22 @@ export async function observeTikTokPublicSearchPage(page, keyword, { waitMs = 25
     const url = new URL(response.url());
     if (url.origin !== 'https://www.tiktok.com'
         || !/^\/api\/search\/(?:general|item)\/full\/?$/.test(url.pathname) || responses.length >= 6) return;
+    if (response.status() >= 400) {
+      deniedSearch = true;
+      recordDenial();
+    }
     responses.push((async () => {
-      const retryAfter = await response.headerValue('retry-after').catch(() => null);
+      const retryAfter = await response.headerValue('retry-after').catch(() => undefined);
       const size = Number(await response.headerValue('content-length').catch(() => null));
       const payload = size > 0 && size <= 65536 && response.ok() ? await response.json().catch(() => null) : null;
       const code = String(payload?.status_code ?? payload?.statusCode ?? '');
-      const result = { status: response.status(), retryAfterProvided: retryAfter !== null, retryAfter,
+      const result = { status: response.status(), retryAfterProvided: retryAfter === undefined ? null : retryAfter !== null, retryAfter,
         ...(/^-?\d{1,10}$/.test(code) ? { providerCode: code } : {}) };
       if (denied(result)) {
         deniedSearch = true;
         recordDenial();
       }
-      return result;
+      observed.push(result);
     })());
   };
   page.on('response', observe);
@@ -99,7 +104,8 @@ export async function observeTikTokPublicSearchPage(page, keyword, { waitMs = 25
       await Promise.race([page.waitForTimeout(Math.min(remaining, 350)), firstDenial]);
     } while (true);
 
-    result.responses = await Promise.all(responses);
+    await Promise.race([Promise.all(responses), page.waitForTimeout(750)]);
+    result.responses = observed;
     if (deniedSearch) {
       result.publicVideoLinks = [];
       outcome = 'provider-search-refusal';
