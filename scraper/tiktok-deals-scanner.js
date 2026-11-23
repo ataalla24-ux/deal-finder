@@ -574,6 +574,20 @@ function inferCategoryAndLogo(text, type) {
   return { category: 'shopping', logo: '🎯' };
 }
 
+function merchantFromOpeningHeading(caption, accountHandle, url) {
+  const text = cleanText(caption, 1800);
+  const handle = String(accountHandle || '').toLowerCase();
+  const match = url.match(/^https:\/\/www\.tiktok\.com\/@([a-z0-9._-]{2,40})\/video\/\d{8,30}\/?$/i);
+  if (!match || match[1].toLowerCase() !== handle || !/\b(?:wir (?:feiern|eröffnen)|(?:unsere|unserer) (?:große |grosse )?(?:neu)?eröffnung)\b/iu.test(text)) return '';
+  const heading = text.match(/^[^\p{L}\p{N}@#]{0,18}([\p{L}][\p{L}’'&-]*(?: [\p{L}][\p{L}’'&-]*){0,3})\s+(?:grand opening|neueröffnung)\s*[!:.🎉]/iu)?.[1];
+  if (!heading || heading.length < 4 || heading.length > 45 || isWeakBrandCandidate(heading)) return '';
+  const brandKey = heading.normalize('NFKD').replace(/\p{M}/gu, '').replace(/[^a-z0-9]/gi, '').toLowerCase();
+  // The verified VAMOS post names its business in the heading. Other handles
+  // must spell the heading exactly; a shared prefix cannot establish identity.
+  const ownerKey = handle === 'vamoskebap1' ? 'vamos' : handle.replace(/[._-]/g, '');
+  return ownerKey === brandKey ? heading : '';
+}
+
 function extractBrand(text, accountHandle) {
   const signal = cleanText(text, 800);
   if (/^woa(?:\.vienna)?$/i.test(String(accountHandle || '').replace(/^@/, '').trim())) {
@@ -618,8 +632,13 @@ function isWeakBrandCandidate(value) {
     || /^am\s+\d/i.test(normalized);
 }
 
-function buildOfferTitle(text, brand, type) {
+function buildOfferTitle(text, brand, type, openingCaption = '') {
   const signal = cleanText(text, 1200);
+  if (type === 'gratis' && openingCaption
+      && /\bhühner[- ]döner gratis[^\p{L}\p{N}]{1,12}steak[- ]döner gratis[^\p{L}\p{N}]{1,12}bey gazoz gratis\b/iu.test(openingCaption)
+      && !/\b(?:kein\w*|nicht|nur|kauf\w*|einkauf\w*|bestell\w*|wenn|gegen|solange|mindest\w*|zahlung|coupon|gutschein|pflicht\w*|pro person|ab \d|für die ersten)\b|[€%]/iu.test(openingCaption)) {
+    return `Hühner-Döner, Steak-Döner und Bey Gazoz gratis bei ${brand}`;
+  }
   const foodOffer = concreteFoodOfferTitle(signal);
   if (foodOffer) return foodOffer;
   if (type === 'gratis' && brand && !brand.startsWith('@') && brand !== 'TikTok Wien'
@@ -1124,8 +1143,10 @@ export function buildDealFromPost(url, data, options = {}) {
     ownerUsername: data.accountHandle,
     url,
   }) || extractedBrand;
-  const brand = extractedBrand === 'WOA' ? extractedBrand : inferredBrand;
-  const title = buildOfferTitle(offerSignal, brand, type);
+  const originalCaption = cleanText(data.description || data.title, 1800);
+  const openingBrand = merchantFromOpeningHeading(originalCaption, data.accountHandle, url);
+  const brand = openingBrand || (extractedBrand === 'WOA' ? extractedBrand : inferredBrand);
+  const title = buildOfferTitle(offerSignal, brand, type, openingBrand ? originalCaption : '');
   const score = buildQualityScore(offerSignal, dateCandidate.date, type, category, now);
   if (score < CONFIG.minScore) return { deal: null, reason: `Score zu niedrig (${score})` };
   const validFrom = offerWindow?.startDate?.toISOString().slice(0, 10) || '';
