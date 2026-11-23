@@ -48,7 +48,11 @@ assert.equal(archiveIndex('h2 a[href="gratis-wien-wochenende.html"]').closest('.
 const sitemap = load(read('sitemap.xml'), { xml: true });
 const entry = sitemap('loc').filter((_, loc) => sitemap(loc).text() === canonical).parent();
 assert.equal(entry.length, 1);
-assert.equal(entry.find('lastmod').text(), checked);
+const lastmod = entry.find('lastmod').text();
+assert.match(lastmod, /^\d{4}-\d{2}-\d{2}$/);
+assert.ok(lastmod >= checked, 'Archive maintenance must not predate the source review');
+assert.ok(lastmod <= new Intl.DateTimeFormat('sv-SE', { timeZone: 'Europe/Vienna' }).format(new Date()), 'Sitemap must not claim a future modification');
+if (lastmod > checked) assert.ok($('body').hasClass('deal-is-expired'), 'A later lastmod reflects the visible archive publication');
 
 const birthday = load(read('blog/geburtstag-gratis-wien.html'));
 assert.equal(birthday('.article-body > h2').first().attr('id'), 'ohne-begleitung');

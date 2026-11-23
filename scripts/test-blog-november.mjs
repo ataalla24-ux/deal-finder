@@ -99,5 +99,28 @@ try {
     assert.equal(fs.readFileSync(path.join(fixture, 'docs/deals.json'), 'utf8'), 'unchanged-feed-sentinel');
     assert.equal(fs.readFileSync(path.join(fixture, 'reviews/deal-guides.json'), 'utf8'), read('reviews/deal-guides.json'));
   }
+  // A later archive publication is a real modification, not a new source check.
+  // Preserve it across template replay, while rejecting future/invalid dates.
+  const sitemapFile = path.join(fixture, 'docs/sitemap.xml');
+  const maintenanceCases = [
+    ['der-mann-snacks-26-prozent-wien-november', '2026-11-23', '2026-11-23'],
+    ['baeckerei-schwarz-baguette-3plus1-wien', '2030-01-01', '2026-11-05'],
+    ['abby-smashburger-990-wien-rochusmarkt', '2026-02-30', '2026-11-05'],
+    ['hot-hofer-10-euro-gutschein-rufnummernmitnahme', '2026-10-01', '2026-11-05'],
+  ];
+  const maintenanceXml = load(fs.readFileSync(sitemapFile, 'utf8'), { xml: true });
+  for (const [slug, existing] of maintenanceCases) maintenanceXml('loc')
+    .filter((_, node) => maintenanceXml(node).text() === `https://freefinder.at/blog/${slug}.html`).next('lastmod').text(existing);
+  fs.writeFileSync(sitemapFile, maintenanceXml.xml());
+  const runMaintenance = () => execFileSync(process.execPath,
+    [path.join(fixture, 'scripts/generate-topic-guides.mjs'), ...maintenanceCases.map(([slug]) => slug)],
+    { env: { ...process.env, SEO_NOW: '2026-11-22T23:30:00Z' } });
+  runMaintenance();
+  const result = load(fs.readFileSync(sitemapFile, 'utf8'), { xml: true });
+  for (const [slug, , expected] of maintenanceCases) assert.equal(result('loc')
+    .filter((_, node) => result(node).text() === `https://freefinder.at/blog/${slug}.html`).next('lastmod').text(), expected, slug);
+  const maintained = fs.readFileSync(sitemapFile, 'utf8');
+  runMaintenance();
+  assert.equal(fs.readFileSync(sitemapFile, 'utf8'), maintained, 'Lastmod replay is idempotent');
 } finally { fs.rmSync(fixture, { recursive: true, force: true }); }
 console.log('November blog checks passed: 11 new guides, 4 updates, dates, evidence, expiry, photos and repeatable isolated regeneration.');

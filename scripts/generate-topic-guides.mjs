@@ -206,6 +206,17 @@ const BLOG_DIR = path.join(ROOT, 'docs', 'blog');
 const dealGuides = JSON.parse(fs.readFileSync(path.join(ROOT, 'reviews/deal-guides.json'), 'utf8')).guides;
 const now = process.env.SEO_NOW ? Date.parse(process.env.SEO_NOW) : Date.now();
 if (!Number.isFinite(now)) throw new Error('SEO_NOW must be a valid timestamp.');
+const today = new Intl.DateTimeFormat('sv-SE', { timeZone: 'Europe/Vienna' }).format(now);
+
+function sitemapModifiedDay(existing, reviewed) {
+  // Archive labels and other published maintenance can be newer than the last
+  // source review. Replaying a template must not move that modification back.
+  const validExisting = /^\d{4}-\d{2}-\d{2}$/.test(existing)
+    && Number.isFinite(Date.parse(`${existing}T12:00:00Z`))
+    && new Date(`${existing}T12:00:00Z`).toISOString().slice(0, 10) === existing
+    && existing <= today;
+  return validExisting && existing > reviewed ? existing : reviewed;
+}
 
 const timelyGuides = [
   {
@@ -1197,9 +1208,9 @@ const sitemapPath = path.join(ROOT, 'docs', 'sitemap.xml');
 let sitemap = fs.readFileSync(sitemapPath, 'utf8');
 for (const guide of selectedGuides.filter((guide) => guide.modified)) {
   const url = `https://freefinder.at/blog/${guide.slug}.html`;
-  const entryPattern = new RegExp(`(<loc>${url}</loc>\\s*<lastmod>)[^<]+(</lastmod>)`);
+  const entryPattern = new RegExp(`(<loc>${url}</loc>\\s*<lastmod>)([^<]+)(</lastmod>)`);
   if (entryPattern.test(sitemap)) {
-    sitemap = sitemap.replace(entryPattern, `$1${guide.modified}$2`);
+    sitemap = sitemap.replace(entryPattern, (_, start, existing, end) => `${start}${sitemapModifiedDay(existing, guide.modified)}${end}`);
   } else if (editorialGuides.includes(guide)) {
     const xml = load(sitemap, { xml: true });
     if (xml('loc').toArray().some(node => xml(node).text() === url)) throw new Error(`Unexpected sitemap format: ${url}`);
@@ -1211,7 +1222,11 @@ for (const guide of selectedGuides.filter((guide) => guide.modified)) {
 }
 for (const guide of selectedGuides) {
   const publication = publications[guide.slug];
-  if (publication) sitemap = updateBlogSitemap(sitemap, guide.slug, publication.day);
+  if (publication) {
+    const xml = load(sitemap, { xml: true });
+    const existing = xml('url').filter((_, node) => xml(node).find('loc').text() === `https://freefinder.at/blog/${guide.slug}.html`).find('lastmod').text();
+    sitemap = updateBlogSitemap(sitemap, guide.slug, sitemapModifiedDay(existing, publication.day));
+  }
 }
 fs.writeFileSync(sitemapPath, sitemap);
 
