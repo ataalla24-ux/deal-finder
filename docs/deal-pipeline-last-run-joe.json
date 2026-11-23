@@ -2,21 +2,21 @@
   "schemaVersion": 1,
   "runProvenance": {
     "repository": "ataalla24-ux/deal-finder",
-    "runId": "45166167433",
-    "headSha": "75b665e3d58490e030756a7e1146616b9fc95c67",
-    "checkoutSha": "75b665e3d58490e030756a7e1146616b9fc95c67",
+    "runId": "45212669764",
+    "headSha": "52b912dcce17a1326a57bc474078eee2dd5d56d7",
+    "checkoutSha": "52b912dcce17a1326a57bc474078eee2dd5d56d7",
     "triggeringRun": null,
-    "event": "workflow_dispatch",
+    "event": "schedule",
     "runAttempt": "1",
-    "url": "https://github.com/ataalla24-ux/deal-finder/actions/runs/45166167433"
+    "url": "https://github.com/ataalla24-ux/deal-finder/actions/runs/45212669764"
   },
-  "runId": "joe-2026-11-23T11:34:13.035Z",
+  "runId": "joe-2026-11-23T16:08:30.771Z",
   "sourceKey": "joe",
   "sourceLabel": "jö Bonus Club",
   "status": "completed-with-errors",
-  "startedAt": "2026-11-23T11:33:39.440Z",
-  "finishedAt": "2026-11-23T11:34:13.035Z",
-  "durationMs": 33595,
+  "startedAt": "2026-11-23T16:07:58.160Z",
+  "finishedAt": "2026-11-23T16:08:30.771Z",
+  "durationMs": 32611,
   "outputFile": "docs/deals-pending-joe.json",
   "counts": {
     "rawCandidates": 9,
@@ -30,10 +30,22 @@
   "rejectedSamples": [],
   "diagnostics": {
     "authenticatedCoverage": {
-      "status": "unverified-session",
+      "status": "provider-rate-limited",
       "authenticated": false,
       "readableOffers": 0,
+      "technical": {
+        "documentStatus": 429,
+        "bundleStatus": null,
+        "bundleMime": null,
+        "consentScriptStatus": null,
+        "bundleNetworkError": null,
+        "failedOwnRequests": 0,
+        "firstOwnHttpError": null,
+        "firstOwnScriptError": null
+      },
       "signals": {
+        "rootMounted": false,
+        "bundleDeclared": false,
         "onBenefitsPage": true,
         "readablePage": false,
         "benefitsHeading": false,
@@ -48,6 +60,6 @@
   },
   "constraints": {},
   "errors": [
-    "jö account coverage: unverified-session; readable offers: 0"
+    "jö account coverage: provider-rate-limited; readable offers: 0"
   ]
 }
