@@ -117,6 +117,10 @@ export async function searchFreshInstagramPosts(client, targetUrl, options = {})
     throw new Error(cleanText(response.error) || 'Firecrawl Search fehlgeschlagen');
   }
 
+  if (options.requireWebResults && !Array.isArray(response?.web)) {
+    throw new Error('Firecrawl Search lieferte keine auswertbare Web-Ergebnisliste');
+  }
+
   const byUrl = new Map();
   for (const row of Array.isArray(response?.web) ? response.web : []) {
     const url = normalizeInstagramPostUrl(row?.url || row?.metadata?.sourceURL || row?.metadata?.url);

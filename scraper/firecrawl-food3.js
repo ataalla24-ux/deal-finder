@@ -37,10 +37,11 @@ const RUN_STARTED_AT = new Date();
 const AGENT_TIMEOUT_SECONDS = positiveInteger(process.env.FIRECRAWL2_AGENT_TIMEOUT_SECONDS, 120);
 const MAX_CREDITS_PER_TARGET = positiveInteger(process.env.FIRECRAWL2_MAX_CREDITS_PER_TARGET, 300);
 const TARGETS_PER_RUN = positiveInteger(process.env.FIRECRAWL2_TARGETS_PER_RUN, 3);
+const FOOD_DEALS_HASHTAG = 'https://www.instagram.com/explore/tags/fooddealsvienna/';
 const DISCOVERY_URLS = [
   'https://www.instagram.com/explore/tags/wienessen/',
   'https://www.instagram.com/explore/tags/viennafood/',
-  'https://www.instagram.com/explore/tags/fooddealsvienna/',
+  FOOD_DEALS_HASHTAG,
   'https://www.instagram.com/explore/tags/happyhourwien/',
   'https://www.instagram.com/explore/tags/lunchdealwien/',
   'https://www.instagram.com/explore/tags/neueröffnungwien/',
@@ -166,14 +167,16 @@ async function main() {
   for (const targetUrl of ACTIVE_DISCOVERY_URLS) {
     const stat = { url: targetUrl, status: 'started', rawCandidates: 0, searchCandidates: 0, creditsUsed: 0 };
     let stopAfterTarget = false;
+    const skipAgentOnEmptySearch = targetUrl === FOOD_DEALS_HASHTAG;
     try {
       const searchPosts = (await searchFreshInstagramPosts(firecrawl, targetUrl, {
         now: RUN_STARTED_AT,
         limit: 12,
         foodFocus: true,
+        requireWebResults: skipAgentOnEmptySearch,
       })).filter(isConcreteFirecrawlSearchResult);
       stat.searchCandidates = searchPosts.length;
-      if (searchPosts.length > 0) {
+      if (searchPosts.length > 0 || skipAgentOnEmptySearch) {
         rawOffers.push(...searchPosts.map((post) => ({
           provider_name: post.ownerUsername || 'Instagram',
           product_type: post.title,
@@ -187,7 +190,7 @@ async function main() {
           discovery_target: targetUrl,
           discovery_method: post.discoveryMethod,
         })));
-        stat.status = 'completed-search';
+        stat.status = searchPosts.length ? 'completed-search' : 'completed-search-empty';
         stat.rawCandidates = searchPosts.length;
         completedSources += 1;
         console.log(`   ${targetUrl} → ${searchPosts.length} direkte Posts via Firecrawl Search`);
@@ -197,6 +200,16 @@ async function main() {
     } catch (error) {
       stat.searchError = error.message;
       console.log(`   ${targetUrl} → Search-Warnung: ${error.message}`);
+      if (skipAgentOnEmptySearch) {
+        runErrors.push(`${targetUrl}: Search: ${error.message}`);
+        const status = Number(error.statusCode || error.status || error.response?.status);
+        if ([401, 402, 403, 429].includes(status) || isFirecrawlRateOrCreditError(error.message)) {
+          stat.status = 'failed';
+          stat.error = error.message;
+          sourceStats.push(stat);
+          break;
+        }
+      }
     }
     try {
       const result = await runBoundedFirecrawlAgent(firecrawl, {
