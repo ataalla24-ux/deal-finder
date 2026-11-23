@@ -190,6 +190,10 @@ export const POWER_FOOD_SOURCES = [
     allowedHosts: ["www.burgerking.at"],
     linkPattern: /coupon|angebot|deal/i,
     render: true,
+    // The app landing page is an empty React root at DOMContentLoaded.
+    renderReadySelector: 'main [data-testid="static-page"]',
+    renderReadyHeading: 'BURGER KING App',
+    renderReadySection: 'Rewards & Coupons',
   },
   {
     name: "KFC",

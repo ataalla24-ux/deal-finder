@@ -9,6 +9,7 @@ import { crawlFoodSource } from './power-food-crawler.js';
 import { fetchOfficialFoodPage } from './power-food-verification.js';
 import { prioritizePowerSources, runScheduledPowerSource } from './power-source-scheduling.js';
 import { sourceHttpError, sourceFailureFields } from './source-http-policy.js';
+import { readPowerBrowserPage } from './power-browser-page.js';
 import crypto from 'crypto';
 import fs from 'fs';
 import { fileURLToPath } from 'url';
@@ -499,14 +500,9 @@ async function fetchHTMLWithBrowser(url, options = {}) {
   const page = await context.newPage();
   const timeoutMs = Number(options.timeoutMs || FETCH_TIMEOUT_MS);
   try {
-    const response = await page.goto(url, { waitUntil: 'domcontentloaded', timeout: timeoutMs });
-    const status = response?.status() || 0;
-    if (status >= 400) throw sourceHttpError(status, response.headers()['retry-after']);
-    const html = await page.content();
-    const maxBytes = Number(options.maxBytes || MAX_HTML_BYTES);
-    const buffer = Buffer.from(html);
-    const limited = buffer.length > maxBytes ? buffer.subarray(0, maxBytes).toString('utf8') : html;
-    return { html: limited, finalUrl: page.url() || url, bytes: Buffer.byteLength(limited), browserFallback: true };
+    return await readPowerBrowserPage(page, url, {
+      ...options, timeoutMs, maxBytes: Number(options.maxBytes || MAX_HTML_BYTES),
+    });
   } finally {
     await context.close();
   }
@@ -695,7 +691,14 @@ async function main() {
     if (source.officialFood) {
       const result = await crawlFoodSource(source, {
         fetchPage: url => fetchOfficialFoodPage(url, source),
-        renderPage: process.env.POWER_BROWSER_FALLBACK === '1' ? fetchHTMLWithBrowser : undefined,
+        renderPage: process.env.POWER_BROWSER_FALLBACK === '1'
+          ? url => fetchHTMLWithBrowser(url, {
+            ...(url === source.url ? {
+              renderReadySelector: source.renderReadySelector,
+              renderReadyHeading: source.renderReadyHeading,
+              renderReadySection: source.renderReadySection,
+            } : {}),
+          }) : undefined,
         maxPages: Number(process.env.POWER_FOOD_MAX_PAGES || 5),
         maxDeals: MAX_DEALS_PER_SOURCE,
         pageCooldowns: source.pageCooldowns,
