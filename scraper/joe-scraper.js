@@ -320,14 +320,51 @@ async function openPage(browser, url) {
   return page;
 }
 
-async function openPageInContext(context, url, extra = {}) {
-  const page = await context.newPage();
-  await page.goto(url, {
-    waitUntil: extra.waitUntil || 'domcontentloaded',
-    timeout: extra.timeout || 90000,
-  });
-  await page.waitForTimeout(extra.delayMs || 1500);
-  return page;
+export async function readJoeBenefits(browser, storageState, { signalsOnly = false } = {}) {
+  const context = await browser.newContext({ userAgent: USER_AGENT, locale: 'de-AT', storageState });
+  try {
+    const page = await context.newPage();
+    const technical = { documentStatus: null, bundleStatus: null, bundleMime: null, consentScriptStatus: null,
+      bundleNetworkError: null, failedOwnRequests: 0, firstOwnHttpError: null, firstOwnScriptError: null };
+    const classify = request => {
+      const u = new URL(request.url());
+      if (u.origin === 'https://web.cmp.usercentrics.eu' && u.pathname === '/ui/loader.js') return 'consent';
+      if (u.protocol !== 'https:' || !/^(?:[a-z0-9-]+\.)*joe-club\.at$/i.test(u.hostname)) return '';
+      if (u.origin === 'https://www.joe-club.at' && u.pathname === '/bundle.js') return 'bundle';
+      return ['script', 'fetch', 'xhr'].includes(request.resourceType()) ? request.resourceType() : '';
+    };
+    page.on('response', response => {
+      const kind = classify(response.request()), status = response.status();
+      if (kind === 'consent') technical.consentScriptStatus = status;
+      if (kind === 'bundle') {
+        technical.bundleStatus = status;
+        const mime = (response.headers()['content-type'] || '').toLowerCase();
+        technical.bundleMime = /javascript|ecmascript/.test(mime) ? 'javascript' : mime.includes('html') ? 'html' : 'other';
+      }
+      if (kind && kind !== 'consent' && status >= 400) technical.firstOwnHttpError ??= { kind, status };
+    });
+    page.on('requestfailed', request => {
+      const kind = classify(request);
+      if (!kind || kind === 'consent') return;
+      technical.failedOwnRequests++;
+      if (kind === 'bundle') {
+        const reason = request.failure()?.errorText;
+        technical.bundleNetworkError = ['net::ERR_FAILED', 'net::ERR_ABORTED', 'net::ERR_CONNECTION_RESET',
+          'net::ERR_BLOCKED_BY_RESPONSE', 'net::ERR_TIMED_OUT'].includes(reason) ? reason.slice(5) : 'other';
+      }
+    });
+    page.on('pageerror', error => {
+      if (technical.firstOwnScriptError || !/https:\/\/www\.joe-club\.at\/(?:bundle|[^/\s]+\.chunk)\.js(?=[?:)\s]|$)/.test(error.stack || '')) return;
+      technical.firstOwnScriptError = ['TypeError', 'SyntaxError', 'ReferenceError', 'SecurityError', 'ChunkLoadError',
+        'RangeError'].includes(error.name) ? error.name : 'other';
+    });
+    const response = await page.goto(JOE_PRIVATE_BENEFITS_URL, { waitUntil: 'domcontentloaded', timeout: 90_000 });
+    technical.documentStatus = response?.status() ?? null;
+    await page.waitForTimeout(1500);
+    const result = await extractLoggedInJoeBenefitsPage(page, { signalsOnly });
+    result.health.technical = technical;
+    return result;
+  } finally { await context.close(); }
 }
 
 async function acceptJoeCookies(page) {
@@ -700,7 +737,7 @@ async function extractBipaJoePage(page, source) {
   return deals.filter(Boolean);
 }
 
-export async function extractLoggedInJoeBenefitsPage(page) {
+export async function extractLoggedInJoeBenefitsPage(page, { signalsOnly = false } = {}) {
   await page.waitForLoadState('domcontentloaded');
   // This SPA serves an empty document first. Wait for a guest or account control
   // before assessing the saved session, within the existing single navigation.
@@ -708,7 +745,7 @@ export async function extractLoggedInJoeBenefitsPage(page) {
     /^(?:jetzt einloggen|abmelden|ausloggen|log\s*out)$/i.test((node.innerText || node.getAttribute('aria-label') || '').trim())),
     undefined, { timeout: 10_000 }).catch(() => {});
 
-  const pageData = await page.evaluate(() => {
+  const pageData = await page.evaluate(onlySignals => {
     const bodyText = (document.body?.innerText || '').trim();
     const visibleControls = Array.from(document.querySelectorAll('a,button,[role="button"]'))
       .filter(node => node.getClientRects().length > 0 && getComputedStyle(node).visibility !== 'hidden');
@@ -719,7 +756,7 @@ export async function extractLoggedInJoeBenefitsPage(page) {
     const authenticatedControls = visibleControls.some(node =>
       /^(?:abmelden|ausloggen|log\s*out)$/i.test(label(node)) || /\/(?:logout|abmelden)(?:[/?#]|$)/i.test(node.getAttribute('href') || ''));
 
-    const candidates = Array.from(document.querySelectorAll('a[href], button, article, section, div'))
+    const candidates = onlySignals ? [] : Array.from(document.querySelectorAll('a[href], button, article, section, div'))
       .map((node) => {
         const text = (node.innerText || '').trim();
         if (!text || text.length < 24 || text.length > 700) return null;
@@ -737,8 +774,9 @@ export async function extractLoggedInJoeBenefitsPage(page) {
       .slice(0, 40);
 
     return {
-      bodyText,
       signals: {
+        rootMounted: Boolean(document.querySelector('#root')?.childElementCount),
+        bundleDeclared: Array.from(document.scripts).some(s => s.src === 'https://www.joe-club.at/bundle.js'),
         onBenefitsPage: location.origin === 'https://www.joe-club.at' && location.pathname.replace(/\/$/, '') === '/vorteile',
         readablePage: bodyText.length >= 120,
         benefitsHeading: Array.from(document.querySelectorAll('h1,h2')).some(n => /persönlichen jö Gutscheine|persönlichen Vorteilsbons/i.test(n.innerText)),
@@ -750,12 +788,13 @@ export async function extractLoggedInJoeBenefitsPage(page) {
       requiresLogin,
       loginPrompt,
       authenticatedControls,
-      url: location.href,
+      url: onlySignals ? location.origin + location.pathname : location.href,
       candidates,
     };
-  });
+  }, signalsOnly);
 
   const health = assessJoeAuthPage(pageData);
+  if (signalsOnly) return { deals: [], health: { ...health, signals: pageData.signals } };
   if (!health.authenticated) {
     console.log(`   ↳ jö Sitzung nicht als angemeldet bestätigt: ${health.status}`);
     return { deals: [], health: { ...health, signals: pageData.signals } };
@@ -884,23 +923,14 @@ export async function runJoeScraper(options = {}) {
     }
 
     if (authStateAvailable) {
-      let authContext;
       try {
-        authContext = await browser.newContext({ userAgent: USER_AGENT, locale: 'de-AT', storageState: storagePath });
         console.log(`🔎 ${JOE_PRIVATE_BENEFITS_URL} (auth)`);
-        const page = await openPageInContext(authContext, JOE_PRIVATE_BENEFITS_URL);
-        try {
-          const result = await extractLoggedInJoeBenefitsPage(page);
-          auth = result.health;
-          console.log(`   ↳ ${result.deals.length} jö Auth-Deals (${auth.status})`);
-          allDeals.push(...result.deals);
-        } finally {
-          await page.close();
-        }
-      } catch (error) {
+        const result = await readJoeBenefits(browser, storagePath);
+        auth = result.health;
+        console.log(`   ↳ ${result.deals.length} jö Auth-Deals (${auth.status})`);
+        allDeals.push(...result.deals);
+      } catch {
         auth = { status: 'auth-read-error', authenticated: false, readableOffers: 0 };
-      } finally {
-        await authContext?.close();
       }
     }
 

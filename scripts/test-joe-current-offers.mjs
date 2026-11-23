@@ -1,4 +1,5 @@
 import assert from 'node:assert/strict';
+import { EventEmitter } from 'node:events';
 import test from 'node:test';
 import fs from 'node:fs';
 import os from 'node:os';
@@ -6,7 +7,7 @@ import path from 'node:path';
 import { execFileSync } from 'node:child_process';
 import { collectOmvPromotions, parseOmvPromotion, discoverOmvPromotionLinks, omvPromotionUrl, retainActiveOmvPromotions } from '../scraper/omv-promotion-discovery.js';
 import { assessJoeAuthPage } from '../scraper/joe-auth-health.js';
-import { extractLoggedInJoeBenefitsPage, runJoeScraper } from '../scraper/joe-scraper.js';
+import { extractLoggedInJoeBenefitsPage, readJoeBenefits, runJoeScraper } from '../scraper/joe-scraper.js';
 import { normalizeDeal, filterDuplicateDealsInRun, buildSlackMessage, addSeenDealsFromThread, filterRecentlySeenDeals, filterAlreadyQueuedDeals, loadQueuedDealDuplicateKeys, loadLiveDealDuplicateKeys } from '../scraper/slack-notify.js';
 import { dedupeApprovedDeals } from '../scraper/slack-approve.js';
 import { extractDealsFromThreadMessages } from '../scraper/slack-digest-utils.js';
@@ -147,6 +148,42 @@ test('no offers or absence of login text never proves a usable account session',
   const result = await extractLoggedInJoeBenefitsPage({ waitForLoadState: async () => {}, waitForFunction: async () => {}, evaluate: async () => ({ url: 'https://www.joe-club.at/vorteile', bodyText: 'OMV VIVA Kaffee', candidates: [], authenticatedControls: false }) });
   assert.equal(result.deals.length, 0, 'no old summer fallback even when OMV is mentioned');
   assert.equal(result.health.status, 'unverified-session');
+});
+
+test('render comparison retains only closed technical categories and never extracts or logs coupon text', async () => {
+  const page = new EventEmitter(), privateText = 'SENSITIVE_VALUE';
+  page.goto = async () => {
+    const req = { url: () => 'https://www.joe-club.at/bundle.js?key=' + privateText, resourceType: () => 'script' };
+    page.emit('response', { request: () => req, status: () => 200, headers: () => ({ 'content-type': 'text/javascript' }) });
+    const ignored = Object.assign(Error(privateText), { stack: 'at https://unrelated.example/foo.js' });
+    page.emit('pageerror', ignored);
+    page.emit('pageerror', Object.assign(new TypeError(privateText), { stack: 'at https://www.joe-club.at/bundle.js:1:2' }));
+    page.emit('requestfailed', { ...req, failure: () => ({ errorText: privateText }) });
+    page.emit('response', { request: () => ({ url: () => 'https://api.joe-club.at/' + privateText, resourceType: () => 'xhr' }),
+      status: () => 503 });
+    return { status: () => 200 };
+  };
+  page.waitForTimeout = page.waitForFunction = page.waitForLoadState = async () => {};
+  page.evaluate = async (_, signalsOnly) => {
+    assert.equal(signalsOnly, true);
+    return { url: 'https://www.joe-club.at/vorteile', authenticatedControls: true,
+      signals: { readablePage: true }, candidates: [{ text: privateText }] };
+  };
+  let closed = false;
+  const browser = { newContext: async options => {
+    assert.equal(options.storageState, undefined);
+    return { newPage: async () => page, close: async () => { closed = true; } };
+  } };
+  const result = await readJoeBenefits(browser, undefined, { signalsOnly: true });
+  assert.equal(closed, true);
+  assert.deepEqual(result.deals, []);
+  assert.equal(result.health.technical.documentStatus, 200);
+  assert.equal(result.health.technical.bundleStatus, 200);
+  assert.equal(result.health.technical.bundleMime, 'javascript');
+  assert.equal(result.health.technical.bundleNetworkError, 'other');
+  assert.equal(result.health.technical.firstOwnScriptError, 'TypeError');
+  assert.deepEqual(result.health.technical.firstOwnHttpError, { kind: 'xhr', status: 503 });
+  assert.equal(JSON.stringify(result).includes(privateText), false);
 });
 
 test('scraper writes visible partial coverage, complete candidate and pipeline report without auth claims', async () => {

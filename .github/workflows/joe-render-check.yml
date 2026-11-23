@@ -1,0 +1,24 @@
+name: jö Benefits Render Check
+on: workflow_dispatch
+
+permissions:
+  contents: read
+
+jobs:
+  compare:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    env:
+      SENTRY_DISABLED: '1'
+      PLAYWRIGHT_BROWSERS_PATH: 0
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: npm ci
+      - run: npx playwright install --with-deps chromium chromium-headless-shell
+      - name: Compare saved and guest session signals
+        env:
+          JOE_STORAGE_STATE_B64: ${{ secrets.JOE_STORAGE_STATE_B64 }}
+        run: node scripts/check-joe-render.mjs
