@@ -141,6 +141,7 @@ test('no offers or absence of login text never proves a usable account session',
   assert.equal(assessJoeAuthPage({ url: 'https://www.joe-club.at/vorteile' }).status, 'unverified-session');
   assert.equal(assessJoeAuthPage({ url: 'https://www.joe-club.at/login', authenticatedControls: true }).status, 'login-required');
   assert.equal(assessJoeAuthPage({ requiresLogin: true }).authenticated, false);
+  assert.equal(assessJoeAuthPage({ url: 'https://www.joe-club.at/vorteile', loginPrompt: true }).status, 'login-required');
   assert.equal(assessJoeAuthPage({ authenticatedControls: true }).status, 'authenticated-no-readable-offers');
   assert.equal(assessJoeAuthPage({ authenticatedControls: true }, 2).status, 'authenticated-offers-read');
   const result = await extractLoggedInJoeBenefitsPage({ waitForLoadState: async () => {}, waitForTimeout: async () => {}, evaluate: async () => ({ url: 'https://www.joe-club.at/vorteile', bodyText: 'OMV VIVA Kaffee', candidates: [], authenticatedControls: false }) });

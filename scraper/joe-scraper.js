@@ -706,9 +706,14 @@ export async function extractLoggedInJoeBenefitsPage(page) {
 
   const pageData = await page.evaluate(() => {
     const bodyText = (document.body?.innerText || '').trim();
+    const visibleControls = Array.from(document.querySelectorAll('a,button,[role="button"]'))
+      .filter(node => node.getClientRects().length > 0 && getComputedStyle(node).visibility !== 'hidden');
+    const label = node => (node.innerText || node.getAttribute('aria-label') || '').trim();
     const requiresLogin = Boolean(document.querySelector('input[type="password"],form[action*="login"]'));
-    const authenticatedControls = Array.from(document.querySelectorAll('a,button')).some(node =>
-      /^(?:abmelden|ausloggen|log\s*out)$/i.test((node.textContent || '').trim()) || /\/(?:logout|abmelden)(?:[/?#]|$)/i.test(node.getAttribute('href') || ''));
+    // The current guest page keeps /vorteile and opens passwordless login in a modal.
+    const loginPrompt = visibleControls.some(node => /^jetzt einloggen$/i.test(label(node)));
+    const authenticatedControls = visibleControls.some(node =>
+      /^(?:abmelden|ausloggen|log\s*out)$/i.test(label(node)) || /\/(?:logout|abmelden)(?:[/?#]|$)/i.test(node.getAttribute('href') || ''));
 
     const candidates = Array.from(document.querySelectorAll('a[href], button, article, section, div'))
       .map((node) => {
@@ -730,6 +735,7 @@ export async function extractLoggedInJoeBenefitsPage(page) {
     return {
       bodyText,
       requiresLogin,
+      loginPrompt,
       authenticatedControls,
       url: location.href,
       candidates,
