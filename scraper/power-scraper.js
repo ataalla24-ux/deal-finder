@@ -262,8 +262,8 @@ const SOURCES = [
   { name: 'clever fit', url: 'https://www.clever-fit.com/at/', type: 'html', brand: 'clever fit', logo: '💪', category: 'fitness' },
   
   // SHOPPING
-  { name: 'MediaMarkt', url: 'https://www.mediamarkt.at/de/campaign/angebote', type: 'html', brand: 'MediaMarkt', logo: '📺', category: 'technik' },
-  { name: 'Saturn', url: 'https://www.saturn.at/de/campaign/angebote', type: 'html', brand: 'Saturn', logo: '📻', category: 'technik' },
+  // MediaMarkt also covers the former Austrian Saturn stores.
+  { name: 'MediaMarkt', url: 'https://www.mediamarkt.at/de/campaign/prospekte-angebote', type: 'html', brand: 'MediaMarkt', logo: '📺', category: 'technik' },
   { name: 'H&M', url: 'https://www.hm.com/at/de/angebote/', type: 'html', brand: 'H&M', logo: '👕', category: 'mode' },
   { name: 'Zara', url: 'https://www.zara.com/at/de/sale', type: 'html', brand: 'Zara', logo: '👗', category: 'mode' },
   
