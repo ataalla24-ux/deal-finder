@@ -5,7 +5,7 @@ import { fileURLToPath } from 'url';
 import { normalizeCategoryForScraper } from './category-utils.js';
 import { discoveryRejection } from './deal-discovery-policy.js';
 import { locationConflictReason } from './deal-factual-guards.js';
-import { instagramDocumentSnapshot, instagramPageHasAccessWall, normalizeInstagramPublicPostUrl, readInstagramProfileTimeline } from './instagram-page-access.js';
+import { instagramDocumentSnapshot, instagramPageHasAccessWall, normalizeInstagramPublicPostUrl, readInstagramProfileTimeline, readInstagramPostLinkedDate } from './instagram-page-access.js';
 import { createInstagramWebAccess } from './instagram-web-access-policy.js';
 import { applyInstagramCookies, loadInstagramCookieHints } from './instagram-auth-utils.js';
 import { githubRunProvenance } from './pipeline-run-report-utils.js';
@@ -868,6 +868,8 @@ async function buildDealFromPostPage(page, source, postUrl, sourcePerformance, r
 
       return result;
     });
+
+    if (!data.timeDateTime) data.timeDateTime = await readInstagramPostLinkedDate(page, postUrl);
 
     const combinedText = cleanText([
       data.ldCaption,

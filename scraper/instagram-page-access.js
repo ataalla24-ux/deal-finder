@@ -56,6 +56,37 @@ export function normalizeInstagramPublicPostUrl(value) {
   }
 }
 
+// Modern post/reel pages may use role="main" instead of a main/article tree.
+// Accept only a visible, absolute timestamp linked to this exact open post;
+// a comment, recommendation, hidden template or capture time is not evidence.
+export async function readInstagramPostLinkedDate(page, postUrl) {
+  const expected = normalizeInstagramPublicPostUrl(postUrl);
+  if (!expected || normalizeInstagramPublicPostUrl(page.url()) !== expected) return '';
+  const dates = await page.evaluate(({ expected, postPathSource, hostSource }) => {
+    const postPath = new RegExp(postPathSource, 'i');
+    const host = new RegExp(hostSource, 'i');
+    const dates = new Set();
+    for (const node of document.querySelectorAll('main time[datetime], [role="main"] time[datetime]')) {
+      if (node.closest('[hidden], [aria-hidden="true"]') ||
+        !node.checkVisibility({ visibilityProperty: true, opacityProperty: true })) continue;
+      const anchor = node.closest('a[href]');
+      if (!anchor) continue;
+      let url;
+      try { url = new URL(anchor.href); } catch { continue; }
+      if (url.protocol !== 'https:' || !host.test(url.hostname) || url.username || url.password || url.port) continue;
+      const match = postPath.exec(url.pathname);
+      if (!match) continue;
+      const type = /^reels?$/i.test(match[2]) ? 'reel' : match[2].toLowerCase();
+      if ('https://www.instagram.com/' + type + '/' + match[3] + '/' !== expected) continue;
+      const date = node.getAttribute('datetime') || '';
+      if (/^\d{4}-\d{2}-\d{2}(?:T|$)/.test(date) && Number.isFinite(Date.parse(date))) dates.add(date);
+    }
+    return [...dates];
+  }, { expected, postPathSource: publicPostPath.source, hostSource: instagramHost.source });
+  if (normalizeInstagramPublicPostUrl(page.url()) !== expected || dates.length !== 1) return '';
+  return dates[0];
+}
+
 // The profile grid can hydrate after navigation and use a div with role="main".
 export async function readInstagramProfileTimeline(page, profileUrl, limit, timeout = 1800) {
   const expected = new URL(profileUrl);
