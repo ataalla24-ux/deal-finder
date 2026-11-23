@@ -16,7 +16,7 @@ export function isTikTokLocalRetry(previous = {}) {
   return previous.boundedRetry?.reason === LOCAL_RETRY_REASON && previous.boundedRetry.failures >= 1;
 }
 
-export function tikTokDirectProbePrevious(previous, now = new Date()) {
+export function tikTokDirectProbePrevious(previous, now = new Date(), scheduledRun) {
   const failure = previous?.errors?.[0];
   if (!(Date.parse(previous?.nextRetryAt) > +now)
       || !isTikTokLocalRetry(previous) || previous.attemptedRequests !== 1
@@ -31,8 +31,15 @@ export function tikTokDirectProbePrevious(previous, now = new Date()) {
   const oldHomepageCheck = previous.transport === 'direct-browser-search' && previous.navigations === 1
     && previous.checkedBy?.checkoutSha === '05060c270fa89da1247dd0e4fe206a6323f47bf9'
     && failure.transportReason === 'request-failed';
+  // The old exact-URL gate rejected the URL enriched by the public page before
+  // forwarding any search. Only release the matching scheduled report once.
+  const oldDirectUrlCheck = scheduledRun?.runId === '45077824293'
+    && scheduledRun.checkoutSha === '93b17460f15e1dc6894726f304fe52c6490f4d2f'
+    && !previous.checkedBy && previous.transport === 'direct-browser-search' && previous.navigations === 1
+    && previous.homepageNavigation === 'same-origin-redirect' && failure.code === 'transport-unavailable'
+    && !failure.transportReason;
   // Retain the single-request limit and let the new attempt record any provider deadline.
-  return oldBrowserFilter || oldHomepageCheck ? { ...previous, nextRetryAt: '' } : previous;
+  return oldBrowserFilter || oldHomepageCheck || oldDirectUrlCheck ? { ...previous, nextRetryAt: '' } : previous;
 }
 
 export function selectTikTokPostVisits(api, webLinks, maxPosts) {

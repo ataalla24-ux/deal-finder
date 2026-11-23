@@ -33,18 +33,29 @@ async function visiblePublicVideoLinks(page, keyword, limit) {
 }
 
 const publicSearchOrigin = 'https://www.tiktok.com';
+const directSearchPath = '/api/search/general/full/';
 const searchRoutePattern = '**/api/search/**';
 const auxiliarySearchPath = /^\/api\/search\/(?:user\/preview|suggest\/guide)\/?$/;
 const publicRouteShape = /^\/api\/search\/(?:general|item|user|suggest|recommend|suggest_words|suggest_guide|live|video|business|multi|aggregate)(?:\/(?:full|preview|guide|stream|list|mixed|v[1-9]\d?)){0,2}\/?$/;
 
 export async function createTikTokDirectSearch(page, { timeoutMs = 12000 } = {}) {
-  const stats = { transport: 'direct-browser-search', navigations: 0, searchRequests: 0, lastSearchResponse: null };
-  let expectedUrl = '';
+  const stats = { transport: 'direct-browser-search', navigations: 0, searchRequests: 0,
+    siteAdjustedSearchRequests: 0, lastSearchResponse: null };
+  let expectedSearch = null;
   const intercept = async route => {
     const request = route.request();
-    if (request.url() !== expectedUrl || request.method() !== 'GET' || request.resourceType() !== 'fetch'
+    if (!expectedSearch || request.method() !== 'GET' || request.resourceType() !== 'fetch'
         || request.frame() !== page.mainFrame()) return route.abort();
-    expectedUrl = '';
+    const url = new URL(request.url());
+    if (url.origin !== publicSearchOrigin || url.pathname !== directSearchPath) return route.abort();
+    // The page appends its own parameters to fetch requests. Match only the
+    // three inputs the scanner set, and forward the resulting request unchanged.
+    for (const [key, value] of Object.entries(expectedSearch.params)) {
+      const values = url.searchParams.getAll(key);
+      if (values.length !== 1 || values[0] !== value) return route.abort();
+    }
+    if (url.href !== expectedSearch.url) stats.siteAdjustedSearchRequests++;
+    expectedSearch = null;
     stats.searchRequests++;
     await route.fallback();
   };
@@ -53,6 +64,7 @@ export async function createTikTokDirectSearch(page, { timeoutMs = 12000 } = {})
   return {
     stats,
     async request({ keyword, offset, count }) {
+      stats.lastSearchResponse = null;
       if (!stats.navigations) {
         stats.navigations++;
         const document = await page.goto(publicSearchOrigin + '/', { waitUntil: 'domcontentloaded', timeout: 30000 });
@@ -67,7 +79,8 @@ export async function createTikTokDirectSearch(page, { timeoutMs = 12000 } = {})
         const refusal = await tikTokAccessRefusal(page, document);
         if (refusal) return { ok: false, ...refusal };
       }
-      expectedUrl = `${publicSearchOrigin}/api/search/general/full/?keyword=${encodeURIComponent(keyword)}&offset=${offset}&count=${count}`;
+      const url = `${publicSearchOrigin}${directSearchPath}?keyword=${encodeURIComponent(keyword)}&offset=${offset}&count=${count}`;
+      expectedSearch = { url, params: { keyword, offset: String(offset), count: String(count) } };
       try {
         const { evidence, ...result } = await page.evaluate(async ({ url, timeoutMs }) => {
           if (location.origin !== new URL(url).origin) {
@@ -78,6 +91,7 @@ export async function createTikTokDirectSearch(page, { timeoutMs = 12000 } = {})
             redirect: 'error',
             signal: AbortSignal.timeout(timeoutMs),
           });
+          if (!response?.headers) return { ok: false, transportReason: 'response-unavailable' };
           const retryAfter = response.headers.get('retry-after');
           const status = response.status;
           const length = response.headers.get('content-length');
@@ -105,11 +119,11 @@ export async function createTikTokDirectSearch(page, { timeoutMs = 12000 } = {})
           } catch {
             return unavailable('non-json-response', 'non-json');
           }
-        }, { url: expectedUrl, timeoutMs });
+        }, { url, timeoutMs });
         stats.lastSearchResponse = evidence || null;
         return result;
       } finally {
-        expectedUrl = '';
+        expectedSearch = null;
       }
     },
     async close() {

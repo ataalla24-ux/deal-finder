@@ -25,7 +25,7 @@ for (const key of read('slack-seen-posts').seenPostKeys || []) {
 
 const provenance = githubRunProvenance();
 const report = { checkedAt: new Date().toISOString(), provenance, maxSearchPages: 1, maxPostVisits: 3 };
-const apiPrevious = tikTokDirectProbePrevious(previous.apiDiscovery);
+const apiPrevious = tikTokDirectProbePrevious(previous.apiDiscovery, new Date(), previous.runProvenance);
 const releasedLocalPolicyDeadline = apiPrevious !== previous.apiDiscovery ? previous.apiDiscovery.nextRetryAt : null;
 if (releasedLocalPolicyDeadline) report.releasedLocalPolicyDeadline = releasedLocalPolicyDeadline;
 const browser = await chromium.launch({ headless: true });

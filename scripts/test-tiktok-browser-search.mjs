@@ -79,6 +79,30 @@ test('the direct homepage search honors refusal and distinguishes a zero-byte re
   }
 });
 
+test('direct search accepts metadata added by the page while requiring the original search parameters', async () => {
+  const homepage = `<body>Home<script>
+    const browserFetch = window.fetch;
+    window.fetch = async (input, init) => {
+      const search = new URL(input);
+      const altered = new URL(search);
+      altered.searchParams.append('count', '90');
+      await browserFetch(altered, init).catch(() => {});
+      search.searchParams.set('fixture-context', 'added-by-site');
+      return browserFetch(search, init);
+    };
+  </script></body>`;
+  await fixture({ homepage }, async (page, calls) => {
+    const result = await scanDirect(page, { pages: 1 });
+    assert.equal(result.rows.length, 1);
+    assert.equal(result.searchRequests, 1);
+    assert.equal(result.siteAdjustedSearchRequests, 1);
+    assert.equal(calls.length, 1);
+    assert.deepEqual(calls[0].searchParams.getAll('count'), ['30']);
+    assert.equal(calls[0].searchParams.get('fixture-context'), 'added-by-site');
+    assert.doesNotMatch(JSON.stringify(result), /added-by-site/);
+  });
+});
+
 test('the route-only probe blocks all search requests and logs bounded shape information only', async () => {
   await fixture({ html: '<script>fetch("/api/search/suggest/guide/?keyword=known-term&signature=keep-out");'
     + 'fetch("/api/search/user/private_handle/?uid=9876543210");</script>' }, async (page, calls) => {
