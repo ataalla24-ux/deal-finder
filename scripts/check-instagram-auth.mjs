@@ -308,7 +308,7 @@ export async function validateInstagramAuth(cookies, options = {}) {
       if (['own-profile', 'home', 'save-login', 'challenge', 'login', 'consent', 'account-restricted', 'edit-profile', 'normal-section', 'other-profile', 'foreign-origin', 'other'].includes(suppliedSignals.route)) browserSignals.route = suppliedSignals.route;
       if (['loading', 'interactive', 'complete'].includes(suppliedSignals.documentState)) browserSignals.documentState = suppliedSignals.documentState;
       if (Number.isInteger(suppliedSignals.httpStatus) && suppliedSignals.httpStatus >= 0 && suppliedSignals.httpStatus <= 599) browserSignals.httpStatus = suppliedSignals.httpStatus;
-      return { ...base, ok: false, status: error?.status === 'blocked' ? 'blocked' : 'validation-unconfirmed', reason: reasons[pageState] || (httpStatus ? `Eigene Profilansicht nicht bestätigt (HTTP ${httpStatus}); keine automatische Neuanmeldung` : 'Eigene Profilansicht nicht bestätigt; keine automatische Neuanmeldung'), validationFailure: pageState || (httpStatus ? `http-${httpStatus}` : error?.name === 'TimeoutError' ? 'browser-timeout' : 'own-profile-unconfirmed'), userInteractionRequired: Boolean(pageState), ...(Object.keys(browserSignals).length ? { browserSignals } : {}), attempts: 1 };
+      return classifyOwnProfileResult({ ...base, ok: false, status: error?.status === 'blocked' ? 'blocked' : 'validation-unconfirmed', reason: reasons[pageState] || (httpStatus ? `Eigene Profilansicht nicht bestätigt (HTTP ${httpStatus}); keine automatische Neuanmeldung` : 'Eigene Profilansicht nicht bestätigt; keine automatische Neuanmeldung'), validationFailure: pageState || (httpStatus ? `http-${httpStatus}` : error?.name === 'TimeoutError' ? 'browser-timeout' : 'own-profile-unconfirmed'), userInteractionRequired: Boolean(pageState), ...(Object.keys(browserSignals).length ? { browserSignals } : {}), attempts: 1 });
     }
   }
 
@@ -440,6 +440,15 @@ export async function validateInstagramAuth(cookies, options = {}) {
   };
 }
 
+export function classifyOwnProfileResult(report) {
+  if (report?.validationMethod !== 'own-profile-ui' || report.ok !== false || report.canProceed !== false
+    || report.browserSignals?.route !== 'consent' || report.browserSignals.httpStatus !== 200
+    || report.browserSignals.documentState !== 'complete') return report;
+  return { ...report, status: 'blocked', validationFailure: 'consent-unconfirmed',
+    reason: 'Instagram-Serverzugriff bleibt auf einer nicht bestätigten Einwilligungsseite; automatische Sammlung angehalten',
+    shouldRefreshCookies: false, credentialsState: 'unknown' };
+}
+
 function readPreviousReport(reportPath) {
   if (!fs.existsSync(reportPath)) return null;
   try {
@@ -551,10 +560,11 @@ function shouldNotifySlack(report, previousReport) {
 async function postSlackWarning(report, clearedFiles) {
   const context = report.context || 'Instagram Auth';
   const cleared = clearedFiles.length ? `\nGeleerte Dateien: ${clearedFiles.join(', ')}` : '';
-  const headline = report.rateLimited
+  const unresolvedConsent = report.validationFailure === 'consent-unconfirmed';
+  const headline = unresolvedConsent ? `⏸️ *Instagram Web: Einwilligungsseite blockiert* (${context})` : report.rateLimited
     ? `⏸️ *Instagram Healthcheck rate-limited* (${context})`
     : `⚠️ *Instagram Auth kaputt* (${context})`;
-  const recommendation = report.rateLimited
+  const recommendation = unresolvedConsent ? 'Die Sitzung ist dadurch nicht als ungültig belegt. Keine unbekannte Einwilligung automatisch bestätigen; bestehende offizielle Meta-Verbindung separat beurteilen.' : report.rateLimited
     ? 'Apify darf trotzdem anlaufen; Cookies nicht wegen HTTP 429 erneuern.'
     : 'Bitte Instagram-Session/Cookies erneuern; sonst liefern Apify/Daily Sync keine Posts.';
   const text = [
