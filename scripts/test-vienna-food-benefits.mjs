@@ -86,7 +86,7 @@ test('current city components retain the deal card and follow category-bound pag
     <div slot="content"><p>${content}</p></div><div slot="postcontent"><a href="#favorite">Favorit</a></div></wm-card>`;
   const listing = `<main><wm-grid>${card('/meine-vorteile/pizzeria-test', 'Pizzeria Test', offer)}
     ${card('https://example.com/meine-vorteile/other','Other',offer)}
-    ${card('/meine-vorteile/empty','No offer','')}</wm-grid>
+    ${card('/meine-vorteile/empty','No offer','')}${card('http://[','Malformed URL',offer)}</wm-grid>
     <wm-pagination><button data-url="?kategorien=restaurants&amp;p=5">5</button>
     <button data-url="?kategorien=nachtleben&amp;p=8">8</button></wm-pagination></main>`;
   assert.deepEqual(parseViennaBenefitListing(listing,'https://vorteilsclub.wien.at/meine-vorteile?kategorien=restaurants&p=1'),
@@ -105,6 +105,8 @@ test('city detail reads the official benefit and partner address without borrowi
   assert.equal(deal.evidence.terms, terms);
   assert.equal(deal.evidence.offerText, offer);
   assert.doesNotMatch(deal.description, /50 Prozent/);
-  for (const broken of [page.replace('Partnerinformationen','Navigation'),page.replace('>Details<','>Location<'),
+  const related = '<wm-grid><wm-card><h2>Partnerinformationen</h2><ul><li><wm-icon iconid="pin"></wm-icon><span>Fremder Platz 1 1050 Wien</span></li></ul><wm-accordion><wm-accordion-heading><h3>Details</h3></wm-accordion-heading><wm-accordion-content>Fremde Bedingungen</wm-accordion-content></wm-accordion></wm-card></wm-grid>';
+  for (const broken of [page.replace('Partnerinformationen','Navigation').replace('</wm-section>', related + '</wm-section>'),
+    page.replace('>Details<','>Location<').replace('</wm-section>', related + '</wm-section>'),
     page.replace(offer,'Verlosung'),page.replace('1090 Wien','4020 Linz')]) assert.equal(parse(broken).deal, undefined);
 });
