@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-11-23T11:41:00.216Z",
+  "generatedAt": "2026-11-23T11:49:47.283Z",
   "discoveryAvailability": {
     "note": "Transport evidence, not deal yield. Retry eligibility is not recovery. Candidate counts are not Slack deliveries. No extra runs or quota resets.",
     "lanes": [
@@ -54,9 +54,9 @@
   },
   "summary": {
     "filesConsidered": 33,
-    "totalCandidates": 600,
-    "uniqueCandidates": 579,
-    "distinctCandidates": 587,
+    "totalCandidates": 680,
+    "uniqueCandidates": 659,
+    "distinctCandidates": 667,
     "duplicateClusters": 8,
     "topHealthySources": [
       {
@@ -64,6 +64,12 @@
         "sourceLabel": "TikTok Browser",
         "healthScore": 86,
         "totalDeals": 1
+      },
+      {
+        "sourceKey": "member-benefits",
+        "sourceLabel": "Member Benefits",
+        "healthScore": 74,
+        "totalDeals": 113
       },
       {
         "sourceKey": "instagram-ai",
@@ -82,12 +88,6 @@
         "sourceLabel": "Apify Instagram",
         "healthScore": 64,
         "totalDeals": 1
-      },
-      {
-        "sourceKey": "vienna-websites",
-        "sourceLabel": "Wiener Lokal-Angebotsseiten",
-        "healthScore": 62,
-        "totalDeals": 10
       }
     ],
     "topMissionSources": [
@@ -104,6 +104,12 @@
         "totalDeals": 9
       },
       {
+        "sourceKey": "member-benefits",
+        "sourceLabel": "Member Benefits",
+        "missionFitScore": 63,
+        "totalDeals": 113
+      },
+      {
         "sourceKey": "instagram-apify",
         "sourceLabel": "Apify Instagram",
         "missionFitScore": 63,
@@ -114,19 +120,20 @@
         "sourceLabel": "Firecrawl Key 2 - Food",
         "missionFitScore": 62,
         "totalDeals": 4
-      },
-      {
-        "sourceKey": "vienna-websites",
-        "sourceLabel": "Wiener Lokal-Angebotsseiten",
-        "missionFitScore": 54,
-        "totalDeals": 10
       }
     ],
     "topCoverageSources": [
       {
+        "sourceKey": "member-benefits",
+        "sourceLabel": "Member Benefits",
+        "coverageScore": 82,
+        "totalDeals": 113,
+        "fresh1dCount": 16
+      },
+      {
         "sourceKey": "gastro2",
         "sourceLabel": "Firecrawl Key 1 - Gastro",
-        "coverageScore": 70,
+        "coverageScore": 69,
         "totalDeals": 121,
         "fresh1dCount": 0
       },
@@ -150,13 +157,6 @@
         "coverageScore": 39,
         "totalDeals": 67,
         "fresh1dCount": 0
-      },
-      {
-        "sourceKey": "member-benefits",
-        "sourceLabel": "Member Benefits",
-        "coverageScore": 32,
-        "totalDeals": 33,
-        "fresh1dCount": 16
       }
     ],
     "topPrecisionSources": [
@@ -165,6 +165,12 @@
         "sourceLabel": "TikTok Browser",
         "precisionScore": 88,
         "totalDeals": 1
+      },
+      {
+        "sourceKey": "member-benefits",
+        "sourceLabel": "Member Benefits",
+        "precisionScore": 72,
+        "totalDeals": 113
       },
       {
         "sourceKey": "meta-instagram",
@@ -183,15 +189,15 @@
         "sourceLabel": "jö Bonus Club",
         "precisionScore": 64,
         "totalDeals": 9
-      },
-      {
-        "sourceKey": "instagram-apify",
-        "sourceLabel": "Apify Instagram",
-        "precisionScore": 60,
-        "totalDeals": 1
       }
     ],
     "topWeightedSources": [
+      {
+        "sourceKey": "member-benefits",
+        "sourceLabel": "Member Benefits",
+        "sourceWeightScore": 72,
+        "totalDeals": 113
+      },
       {
         "sourceKey": "tiktok-browser",
         "sourceLabel": "TikTok Browser",
@@ -215,12 +221,6 @@
         "sourceLabel": "jö Bonus Club",
         "sourceWeightScore": 54,
         "totalDeals": 9
-      },
-      {
-        "sourceKey": "instagram-apify",
-        "sourceLabel": "Apify Instagram",
-        "sourceWeightScore": 52,
-        "totalDeals": 1
       }
     ],
     "topSourcesToFix": [
@@ -339,6 +339,93 @@
       "coverageScore": 16,
       "precisionScore": 88,
       "sourceWeightScore": 70
+    },
+    {
+      "sourceKey": "member-benefits",
+      "file": "deals-pending-member-benefits.json",
+      "sourceLabel": "Member Benefits",
+      "totalDeals": 113,
+      "uniqueDeals": 113,
+      "duplicateDeals": 0,
+      "duplicateAcrossSources": 0,
+      "fresh1dCount": 16,
+      "fresh7dCount": 16,
+      "viennaCount": 80,
+      "foodDrinkCount": 87,
+      "promoCount": 93,
+      "missingUrlCount": 0,
+      "sampleTitles": [
+        "1+1 Ticket gratis bei Jüdisches Museum Wien: 1+1 Ticket gratis",
+        "20 % Rabatt bei Thailanna x Mae Aurel (Vorteilsclub)",
+        "20 % Rabatt bei Trattoria Antica (Vorteilsclub)"
+      ],
+      "lastRun": null,
+      "uniqueRate": 1,
+      "duplicateRate": 0,
+      "fresh1dRate": 0.1,
+      "fresh7dRate": 0.1,
+      "viennaRate": 0.7,
+      "foodDrinkRate": 0.8,
+      "promoRate": 0.8,
+      "missingUrlRate": 0,
+      "averageQualityScore": 63.5,
+      "topCategories": [
+        {
+          "value": "essen",
+          "count": 83
+        },
+        {
+          "value": "kultur",
+          "count": 10
+        },
+        {
+          "value": "shopping",
+          "count": 7
+        },
+        {
+          "value": "fitness",
+          "count": 4
+        },
+        {
+          "value": "technik",
+          "count": 3
+        },
+        {
+          "value": "reisen",
+          "count": 2
+        }
+      ],
+      "topTypes": [
+        {
+          "value": "rabatt",
+          "count": 98
+        },
+        {
+          "value": "gratis",
+          "count": 8
+        },
+        {
+          "value": "bogo",
+          "count": 4
+        },
+        {
+          "value": "freebie",
+          "count": 2
+        },
+        {
+          "value": "gutschein",
+          "count": 1
+        }
+      ],
+      "issues": [
+        "wenige Deals sind frischer als 1 Tag",
+        "Wien-Signal ist zu schwach"
+      ],
+      "healthScore": 74,
+      "missionFitScore": 63,
+      "coverageScore": 82,
+      "precisionScore": 72,
+      "sourceWeightScore": 72
     },
     {
       "sourceKey": "instagram-ai",
@@ -1121,7 +1208,7 @@
       ],
       "healthScore": 54,
       "missionFitScore": 49,
-      "coverageScore": 70,
+      "coverageScore": 69,
       "precisionScore": 48,
       "sourceWeightScore": 54
     },
@@ -1307,93 +1394,6 @@
       "coverageScore": 6,
       "precisionScore": 42,
       "sourceWeightScore": 28
-    },
-    {
-      "sourceKey": "member-benefits",
-      "file": "deals-pending-member-benefits.json",
-      "sourceLabel": "Member Benefits",
-      "totalDeals": 33,
-      "uniqueDeals": 33,
-      "duplicateDeals": 0,
-      "duplicateAcrossSources": 0,
-      "fresh1dCount": 16,
-      "fresh7dCount": 16,
-      "viennaCount": 0,
-      "foodDrinkCount": 7,
-      "promoCount": 20,
-      "missingUrlCount": 0,
-      "sampleTitles": [
-        "1+1 Ticket gratis bei Jüdisches Museum Wien: 1+1 Ticket gratis",
-        "Drei: 50 % Rabatt von 6.11.2026 bis 6.1.2027 (Eislaufplatz Schönbrunn)",
-        "Drei: 90 Tage lang jede Bestellung mit gratis Lieferung (Lieferando)"
-      ],
-      "lastRun": null,
-      "uniqueRate": 1,
-      "duplicateRate": 0,
-      "fresh1dRate": 0.5,
-      "fresh7dRate": 0.5,
-      "viennaRate": 0,
-      "foodDrinkRate": 0.2,
-      "promoRate": 0.6,
-      "missingUrlRate": 0,
-      "averageQualityScore": 47.6,
-      "topCategories": [
-        {
-          "value": "kultur",
-          "count": 10
-        },
-        {
-          "value": "shopping",
-          "count": 7
-        },
-        {
-          "value": "fitness",
-          "count": 4
-        },
-        {
-          "value": "essen",
-          "count": 3
-        },
-        {
-          "value": "technik",
-          "count": 3
-        },
-        {
-          "value": "reisen",
-          "count": 2
-        }
-      ],
-      "topTypes": [
-        {
-          "value": "rabatt",
-          "count": 18
-        },
-        {
-          "value": "gratis",
-          "count": 8
-        },
-        {
-          "value": "bogo",
-          "count": 4
-        },
-        {
-          "value": "freebie",
-          "count": 2
-        },
-        {
-          "value": "gutschein",
-          "count": 1
-        }
-      ],
-      "issues": [
-        "geringe Food-/Drink-Relevanz",
-        "Wien-Signal ist zu schwach"
-      ],
-      "healthScore": 49,
-      "missionFitScore": 35,
-      "coverageScore": 32,
-      "precisionScore": 38,
-      "sourceWeightScore": 39
     },
     {
       "sourceKey": "food-providers",
