@@ -15,7 +15,7 @@ export async function tikTokAccessRefusal(page, document) {
   return null;
 }
 
-async function publicSearchUiState(page, keyword) {
+export async function publicSearchUiState(page, keyword) {
   return page.evaluate(expectedKeyword => {
     const current = new URL(location.href);
     const main = document.querySelector('main, [role="main"]');
