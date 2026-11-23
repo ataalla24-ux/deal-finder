@@ -105,6 +105,71 @@ test('published approved Vienna food sources survive without changing any live r
   } finally { fs.rmSync(dir, { recursive: true, force: true }); }
 });
 
+test('a reviewed Wiener merchant shares existing Graph slots without reclassifying its posts', async t => {
+  const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'reviewed-graph-food-source-'));
+  t.after(() => fs.rmSync(dir, { recursive: true, force: true }));
+  const registryPath = path.join(dir, 'registry.json'), watchlistPath = path.join(dir, 'watchlist.json');
+  const scanNow = new Date('2026-11-23T12:00:00Z');
+  fs.writeFileSync(watchlistPath, JSON.stringify({ accounts: [
+    { username: 'cafe_test_a', category: 'food' }, { username: 'cafe_test_b', category: 'food' },
+  ] }));
+  const config = {
+    ...buildConfig({ META_INSTAGRAM_FOOD_SOURCES_ONLY: '1', META_INSTAGRAM_MAX_COVERAGE: '1',
+      INSTAGRAM_ACCESS_TOKEN: 'FAKE', INSTAGRAM_USER_ID: '123' }, scanNow),
+    hashtags: [], foodAccountShare: 1, maxAccountsPerRun: 30,
+    outputPath: path.join(dir, 'out.json'), reportPath: path.join(dir, 'report.json'),
+    statePath: path.join(dir, 'state.json'), graphEvidencePath: path.join(dir, 'evidence.json'),
+  };
+  const publicId = '17956370598344176';
+  async function run({ verifiedVienna = true, dueAt = '2026-11-22T16:00:00Z', denyReviewedSource = false } = {}) {
+    fs.writeFileSync(registryPath, JSON.stringify({ accounts: [
+      { username: 'tinmowien', accountType: 'merchant', viennaVerified: verifiedVienna,
+        topCategories: [{ value: 'essen' }], sampleTitles: ['30 % RABATT'] },
+      { username: 'info.at2026', accountType: 'merchant', topCategories: [{ value: 'essen' }] },
+    ] }));
+    fs.writeFileSync(config.statePath, JSON.stringify({
+      accountPerformance: {
+        cafe_test_a: { lastRunAt: dueAt }, cafe_test_b: { lastRunAt: dueAt },
+        tinmowien: { lastRunAt: '2026-11-21T12:00:00Z' },
+      },
+      acceptedSeenIds: { [`meta-ig-${publicId}`]: '2026-11-21T17:07:00Z' },
+    }));
+    const calls = [];
+    const result = await runMetaInstagramCollector({ config, now: scanNow, write: false, env: {},
+      scanState: { version: 1, sources: {} }, paths: { registryPath, watchlistPath, candidatePaths: [] },
+      fetchImpl: async url => {
+        const username = new URL(url).searchParams.get('fields')?.match(/business_discovery\.username\(([^)]+)\)/)?.[1];
+        assert(['cafe_test_a', 'cafe_test_b', 'tinmowien'].includes(username));
+        calls.push(username);
+        if (username === 'tinmowien' && denyReviewedSource) {
+          return Response.json({ error: { code: 100, message: 'Mocked source refusal' } }, { status: 400 });
+        }
+        const data = username === 'tinmowien' ? [{ id: publicId, timestamp: '2026-11-21T13:10:34Z',
+          permalink: 'https://www.instagram.com/reel/DgATgxgNNlu/', media_type: 'IMAGE',
+          caption: 'Zur Neueröffnung 30 % Rabatt auf alle Speisen bis 29. November 2026. Getränke und Premium-Kuchen ausgenommen. TINMO Sushi & Asian Cuisine, Marc-Aurel-Straße 2a, 1010 Wien.' }] : [];
+        return Response.json({ business_discovery: { username, media: { data } } });
+      },
+      enrichGraphMedia: async (entries, _config, _now, options) => {
+        for (const entry of entries) assert.equal(options.shouldAnalyzeEntry(entry), false);
+        return { entries, cache: {}, report: { aiCalls: 0 } };
+      },
+    });
+    return { calls, report: result.report };
+  }
+  const baseline = await run({ verifiedVienna: false });
+  assert.deepEqual(baseline.calls.sort(), ['cafe_test_a', 'cafe_test_b']);
+  const restored = await run();
+  assert.equal(restored.calls.length, baseline.calls.length);
+  assert(restored.calls.includes('tinmowien'));
+  assert.equal(restored.report.sources.instagramGraph.accepted, 1);
+  assert.equal(restored.report.sources.instagramGraph.newAccepted, 0);
+  assert.equal(restored.report.mediaClassificationBudget.callsThisRun, 0);
+  assert.deepEqual((await run({ dueAt: '2026-11-23T11:45:00Z' })).calls, []);
+  const refused = await run({ denyReviewedSource: true });
+  assert.equal(refused.calls.length, baseline.calls.length);
+  assert.equal(refused.calls.filter(username => username === 'tinmowien').length, 1);
+});
+
 test('collector excludes irrelevant accounts before any Graph request and retains generic food merchants', async () => {
   const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'graph-food-sources-'));
   try {

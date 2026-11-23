@@ -1596,10 +1596,11 @@ export async function fetchInstagramBusinessDiscoveryMedia(config, account, fetc
   let businessName = '';
   let usage = {};
   const fetchPage = async (after) => {
-    const response = await fetchGraphMediaWithFallback(
-      instagramBusinessDiscoveryUrl(config, username, true, after),
-      instagramBusinessDiscoveryUrl(config, username, false, after), config, fetchImpl,
-    );
+    const primary = instagramBusinessDiscoveryUrl(config, username, true, after);
+    const response = account?.graphRotationReplacement
+      ? await fetchMetaJson(primary, { ...config, maxRetries: 0 }, fetchImpl)
+      : await fetchGraphMediaWithFallback(primary,
+        instagramBusinessDiscoveryUrl(config, username, false, after), config, fetchImpl);
     usage = response.usage;
     const business = response.payload?.business_discovery || {};
     if (!business.media || !Array.isArray(business.media.data)) throw new Error('Meta Business Discovery returned no media collection');
@@ -1691,20 +1692,28 @@ async function collectInstagramGraph(config, accountCatalog, state, now, fetchIm
   const hashtagIds = { ...(state?.hashtagIds || {}) };
   const sourceFailures = pruneSourceFailures(state?.sourceFailures, now);
   const availableAccounts = accountCatalog.filter((account) => !sourceOnCooldown(sourceFailures.accounts[account.username], now));
-  const accountTarget = Math.min(config.maxAccountsPerRun, availableAccounts.length);
-  const initialAccounts = selectAccountShard(availableAccounts, config, state, now);
+  const baselineAccounts = availableAccounts.filter((account) => !account.graphRotationReplacement);
+  const accountTarget = Math.min(config.maxAccountsPerRun, baselineAccounts.length);
+  const baselineInitial = selectAccountShard(baselineAccounts, config, state, now);
   const maxAccountBackfill = Math.max(0, Number(config.maxAccountBackfill || 0));
   const maxAccountAttempts = Math.min(
-    availableAccounts.length,
+    baselineAccounts.length,
     accountTarget + maxAccountBackfill,
   );
-  const reserveAccounts = selectAccountShard(
-    availableAccounts,
-    { ...config, maxAccountsPerRun: maxAccountAttempts,
-      maxNonFoodAccounts: accountTarget - Math.ceil(accountTarget * Math.max(0, Math.min(1, Number(config.foodAccountShare ?? 0.9)))) },
-    state,
-    now,
-  ).filter((account) => !initialAccounts.some((selected) => selected.username === account.username));
+  const reserveConfig = { ...config, maxAccountsPerRun: maxAccountAttempts,
+    maxNonFoodAccounts: accountTarget - Math.ceil(accountTarget * Math.max(0, Math.min(1, Number(config.foodAccountShare ?? 0.9)))) };
+  const baselineReserve = selectAccountShard(baselineAccounts, reserveConfig, state, now)
+    .filter((account) => !baselineInitial.some((selected) => selected.username === account.username));
+  const hasReplacement = availableAccounts.length !== baselineAccounts.length;
+  const initialAccounts = hasReplacement
+    ? selectAccountShard(availableAccounts, { ...config, maxAccountsPerRun: baselineInitial.length }, state, now)
+    : baselineInitial;
+  const reserveAccounts = hasReplacement
+    ? selectAccountShard(availableAccounts,
+      { ...reserveConfig, maxAccountsPerRun: baselineInitial.length + baselineReserve.length }, state, now)
+      .filter((account) => !initialAccounts.some((selected) => selected.username === account.username))
+      .slice(0, baselineReserve.length)
+    : baselineReserve;
   const accountQueue = [...initialAccounts, ...reserveAccounts];
   const selectedAccounts = [];
   const availableHashtags = config.hashtags.filter((tag) => !sourceOnCooldown(sourceFailures.hashtags[tag], now));
@@ -2175,6 +2184,17 @@ export async function runMetaInstagramCollector(options = {}) {
     discoveredAccounts: previousDiscoveredAccounts,
   });
   const sourceSelection = config.foodSourcesOnly ? selectInstagramFoodAccounts(loadedAccounts) : { accounts: loadedAccounts, excluded: [] };
+  const tinmoExcluded = sourceSelection.excluded.findIndex((account) => account.username === 'tinmowien'
+    && account.reason === 'no-food-source-evidence');
+  if (config.coverageMode && tinmoExcluded >= 0) {
+    // Business Discovery already read this restaurant's own opening post DgATgxgNNlu.
+    const tinmo = loadedAccounts.find((account) => account.username === 'tinmowien'
+      && account.accountType === 'merchant' && account.verifiedVienna && account.origins.includes('registry'));
+    if (tinmo) {
+      sourceSelection.accounts.push({ ...tinmo, foodDiscoveryEligible: true, graphRotationReplacement: true });
+      sourceSelection.excluded.splice(tinmoExcluded, 1);
+    }
+  }
   const accountCatalog = sourceSelection.accounts;
   config.accountRoleIndex = buildInstagramRoleIndex(accountCatalog);
   const configured = {
@@ -2384,6 +2404,7 @@ export async function runMetaInstagramCollector(options = {}) {
       },
       classifyOcr: options.classifyOcr,
       shouldAnalyzeEntry: (entry) => {
+        if (entry.context?.account?.graphRotationReplacement) return false;
         const decision = normalizeGraphMediaItem(entry.item, entry.context, config, now);
         return !decision.deal && ['missing-text', 'no-concrete-offer', 'general-recommendation', 'missing-vienna-evidence', 'media-ai-required-for-ocr-offer', 'media-ai-required-for-combined-offer'].includes(decision.rejection);
       },
