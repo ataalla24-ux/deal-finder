@@ -1,6 +1,19 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
-import { instagramLoginCredentials, instagramLoginPageState, loginConfigurationAudit, workflowMaskValue } from './lib/instagram-login-policy.mjs';
+import { instagramLoginCredentials, instagramLoginPageState, instagramSessionRoute, loginConfigurationAudit, workflowMaskValue } from './lib/instagram-login-policy.mjs';
+
+test('anonymous session route categories distinguish normal onboarding from challenges without exposing URLs', () => {
+  for (const [route, expected] of [
+    ['/fixture_owner/', 'own-profile'], ['/', 'home'], ['/accounts/onetap/?next=%2Fprivate_owner', 'save-login'],
+    ['/challenge/private-code/', 'challenge'], ['/auth_platform/codeentry/?token=private', 'challenge'],
+    ['/accounts/login/two_factor/', 'challenge'], ['/accounts/login/?next=private', 'login'],
+    ['/consent/?token=private', 'consent'], ['/accounts/password/change/', 'account-restricted'],
+    ['/accounts/edit/', 'edit-profile'], ['/private_owner/', 'other-profile'], ['/unknown/private-path/', 'other'],
+  ]) {
+    assert.equal(instagramSessionRoute('https://www.instagram.com' + route, 'fixture_owner'), expected);
+  }
+  assert.equal(instagramSessionRoute('https://instagram.com.example/fixture_owner/', 'fixture_owner'), 'foreign-origin');
+});
 
 test('preserves password bytes including significant whitespace', () => {
   const password = '  fixture  with\ttab %\r\n';

@@ -117,9 +117,10 @@ test('unconfirmed own-profile exposes only anonymous UI and cookie-presence sign
   await assert.rejects(validateBrowserSession(page, { username: 'fixture_account', timeout: 100 }), e => {
     assert.equal(e.status, 'wrong-account');
     assert.deepEqual(e.details.ownProfileSignals, {
-      httpStatus: 200, location: 'own-profile', sessionCookiePresent: true, ownerCookiePresent: true,
+      httpStatus: 200, location: 'own-profile', route: 'own-profile', sessionCookiePresent: true, ownerCookiePresent: true,
       ownerCookieMatchesExpected: null, editControlVisible: false, documentState: 'complete', bodyHasText: true,
       passwordInputVisible: false, editProfileHrefVisible: true, genericErrorVisible: false, cookieDialogVisible: false,
+      saveLoginPromptVisible: false, notNowVisible: false, loginLinkVisible: false, ownProfileNavigationVisible: false,
     });
     assert.doesNotMatch(JSON.stringify(e.details), /private|fixture_account|Localized|fixture-session/);
     return true;

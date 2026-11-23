@@ -301,10 +301,11 @@ export async function validateInstagramAuth(cookies, options = {}) {
       };
       const suppliedSignals = error?.details?.ownProfileSignals || {};
       const browserSignals = {};
-      for (const key of ['sessionCookiePresent', 'ownerCookiePresent', 'ownerCookieMatchesExpected', 'editControlVisible', 'bodyHasText', 'passwordInputVisible', 'editProfileHrefVisible', 'genericErrorVisible', 'cookieDialogVisible', 'snapshotUnavailable']) {
+      for (const key of ['sessionCookiePresent', 'ownerCookiePresent', 'ownerCookieMatchesExpected', 'editControlVisible', 'bodyHasText', 'passwordInputVisible', 'editProfileHrefVisible', 'genericErrorVisible', 'cookieDialogVisible', 'saveLoginPromptVisible', 'notNowVisible', 'loginLinkVisible', 'ownProfileNavigationVisible', 'snapshotUnavailable']) {
         if (typeof suppliedSignals[key] === 'boolean') browserSignals[key] = suppliedSignals[key];
       }
       if (['own-profile', 'login', 'other'].includes(suppliedSignals.location)) browserSignals.location = suppliedSignals.location;
+      if (['own-profile', 'home', 'save-login', 'challenge', 'login', 'consent', 'account-restricted', 'edit-profile', 'normal-section', 'other-profile', 'foreign-origin', 'other'].includes(suppliedSignals.route)) browserSignals.route = suppliedSignals.route;
       if (['loading', 'interactive', 'complete'].includes(suppliedSignals.documentState)) browserSignals.documentState = suppliedSignals.documentState;
       if (Number.isInteger(suppliedSignals.httpStatus) && suppliedSignals.httpStatus >= 0 && suppliedSignals.httpStatus <= 599) browserSignals.httpStatus = suppliedSignals.httpStatus;
       return { ...base, ok: false, status: error?.status === 'blocked' ? 'blocked' : 'validation-unconfirmed', reason: reasons[pageState] || (httpStatus ? `Eigene Profilansicht nicht bestätigt (HTTP ${httpStatus}); keine automatische Neuanmeldung` : 'Eigene Profilansicht nicht bestätigt; keine automatische Neuanmeldung'), validationFailure: pageState || (httpStatus ? `http-${httpStatus}` : error?.name === 'TimeoutError' ? 'browser-timeout' : 'own-profile-unconfirmed'), userInteractionRequired: Boolean(pageState), ...(Object.keys(browserSignals).length ? { browserSignals } : {}), attempts: 1 };

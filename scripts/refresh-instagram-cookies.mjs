@@ -4,7 +4,7 @@ import crypto from 'crypto';
 import { pathToFileURL } from 'node:url';
 import { chromium } from 'playwright';
 import { fetchInstagramCodeFromGmail, gmailInstagramCodeConfigured } from './lib/gmail-instagram-code.mjs';
-import { instagramLoginCredentials, instagramLoginPageState, workflowMaskValue } from './lib/instagram-login-policy.mjs';
+import { instagramLoginCredentials, instagramLoginPageState, instagramSessionRoute, workflowMaskValue } from './lib/instagram-login-policy.mjs';
 
 const ROOT = process.cwd();
 const ENV_PATH = path.join(ROOT, '.env');
@@ -384,6 +384,7 @@ export async function validateBrowserSession(page, { username, expectedUserId = 
     ownProfileSignals = {
       httpStatus: response?.status() || 0,
       location: exactProfile ? 'own-profile' : /^\/accounts\/login(?:\/|$)/.test(current.pathname) ? 'login' : 'other',
+      route: instagramSessionRoute(current.href, username),
       sessionCookiePresent: sessionPresent,
       ownerCookiePresent: Boolean(owner),
       ownerCookieMatchesExpected: expectedUserId ? owner === expectedUserId : null,
@@ -400,7 +401,7 @@ export async function validateBrowserSession(page, { username, expectedUserId = 
   // Diagnose the already loaded page using only fixed categories and booleans.
   // Never retain visible text, account names, URLs, codes, or cookie values.
   try {
-    Object.assign(ownProfileSignals, await page.evaluate(() => {
+    Object.assign(ownProfileSignals, await page.evaluate(targetPath => {
       const visible = node => node.checkVisibility({ visibilityProperty: true, opacityProperty: true });
       const bodyText = document.body?.innerText || '';
       return {
@@ -412,8 +413,16 @@ export async function validateBrowserSession(page, { username, expectedUserId = 
         }),
         genericErrorVisible: /something went wrong|page could not be loaded|seite konnte nicht geladen werden|etwas ist schiefgelaufen/i.test(bodyText),
         cookieDialogVisible: [...document.querySelectorAll('[role="dialog"], [aria-modal="true"]')].some(node => visible(node) && /cookies?/i.test(node.innerText || '')),
+        saveLoginPromptVisible: /save your login info|save (?:your )?login information|anmeldedaten speichern|login-informationen speichern|speichere deine anmeldedaten/i.test(bodyText),
+        notNowVisible: [...document.querySelectorAll('button, [role="button"]')].some(node => visible(node) && /^(?:Not now|Jetzt nicht|Nicht jetzt|Später)$/i.test((node.innerText || '').trim())),
+        loginLinkVisible: [...document.querySelectorAll('a[href]')].some(node => {
+          try { const url = new URL(node.href); return url.origin === 'https://www.instagram.com' && /^\/accounts\/login(?:\/|$)/.test(url.pathname) && visible(node); } catch { return false; }
+        }),
+        ownProfileNavigationVisible: [...document.querySelectorAll('a[href]')].some(node => {
+          try { const url = new URL(node.href); return url.origin === 'https://www.instagram.com' && `${url.pathname.replace(/\/$/, '').toLowerCase()}/` === targetPath && visible(node); } catch { return false; }
+        }),
       };
-    }));
+    }, targetPath));
   } catch { ownProfileSignals.snapshotUnavailable = true; }
   throw new InstagramRefreshError('wrong-account', 'Eigene Profilansicht des erwarteten Scraper-Kontos nicht bestätigt; keine Secrets aktualisiert.', { ownProfileSignals });
 }

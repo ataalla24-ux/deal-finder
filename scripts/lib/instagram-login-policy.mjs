@@ -22,6 +22,24 @@ export function workflowMaskValue(value) {
   return String(value).replace(/%/g, '%25').replace(/\r/g, '%0D').replace(/\n/g, '%0A');
 }
 
+export function instagramSessionRoute(value, username) {
+  try {
+    const url = new URL(value), route = url.pathname.toLowerCase().replace(/\/$/, '') || '/';
+    if (!/^(?:www\.|m\.)?instagram\.com$/.test(url.hostname) || url.protocol !== 'https:') return 'foreign-origin';
+    if (route === `/${String(username || '').toLowerCase()}`) return 'own-profile';
+    if (route === '/') return 'home';
+    if (/^\/accounts\/onetap(?:\/|$)/.test(route)) return 'save-login';
+    if (/^\/(?:challenge|checkpoint)(?:\/|$)|^\/auth_platform\/|^\/accounts\/login\/two_factor/.test(route)) return 'challenge';
+    if (/^\/accounts\/login(?:\/|$)/.test(route)) return 'login';
+    if (/^\/(?:consent|privacy\/consent|accounts\/consent)(?:\/|$)/.test(route)) return 'consent';
+    if (/^\/(?:accounts\/password|suspended|disabled)(?:\/|$)/.test(route)) return 'account-restricted';
+    if (/^\/accounts\/edit(?:\/|$)/.test(route)) return 'edit-profile';
+    if (/^\/(?:explore|direct|reels)(?:\/|$)/.test(route)) return 'normal-section';
+    if (/^\/[a-z0-9._]{1,30}$/.test(route)) return 'other-profile';
+  } catch {}
+  return 'other';
+}
+
 export function instagramLoginPageState(url, text) {
   const signal = String(text || '').replace(/\s+/g, ' ').trim().toLowerCase();
   let pathname = '';
