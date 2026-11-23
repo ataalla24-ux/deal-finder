@@ -199,7 +199,7 @@ export const POWER_FOOD_SOURCES = [
     currentOffers: true,
     category: "essen",
     allowedHosts: ["www.kfc.co.at", "kfc.co.at"],
-    imageOfferSelector: "main > section img[alt]",
+    imageOfferSelector: "main > section img[alt], main > .kfc-block-carousel > section img[alt]",
     linkPattern: /coupon|angebot|deal|aktion/i,
   },
   {

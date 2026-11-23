@@ -316,8 +316,12 @@ export function extractFoodOffers(html, source, options = {}) {
   // exact source text; this neither performs OCR nor establishes Vienna scope.
   if (source.imageOfferSelector) {
     $(source.imageOfferSelector).each((i, el) => {
-      const text = foodText($(el).attr("alt"));
-      const link = $(el).closest("a").attr("href") || "";
+      const image = $(el);
+      if (image.closest('template,[hidden],[aria-hidden="true"]').length
+          || image.parents().add(image).filter('[style]').toArray()
+            .some(node => /display\s*:\s*none|visibility\s*:\s*hidden/i.test($(node).attr('style')))) return;
+      const text = foodText(image.attr("alt"));
+      const link = image.closest("a").attr("href") || "";
       if (text.length < 18 || text.length > 1600 || /jobs|karriere|gewinnspiel/i.test(link)) return;
       if (FOOD.test(text) && ((PROMO.test(text) && PRICE.test(text)) || BENEFIT.test(text))) {
         blocks.push({ text, title: text, method: "official-image-alt" });

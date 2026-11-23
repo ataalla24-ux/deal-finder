@@ -14,6 +14,7 @@ import {
   fetchOfficialFoodPage,
 } from "../scraper/power-food-verification.js";
 import { validateDealsForSlack } from "../scraper/deal-validity-agent.js";
+import { filterModeratedDeals } from "../scraper/deal-moderation-utils.js";
 import {
   dedupeApprovedDeals,
   normalizeApprovedDealExpiries,
@@ -26,6 +27,26 @@ import {
   mergePendingQueue,
 } from "../scraper/slack-notify.js";
 const now = new Date("2026-09-23T12:00:00Z");
+{
+  const merchant = POWER_FOOD_SOURCES.find(row => row.name === 'KFC');
+  const burger = '<img alt="Unser Preiskracher: Crispy Cheese Burger mit Käse, Gurkerl und Ketchup um 1,70 Euro">';
+  const meals = '<img alt="Einfach huhnwiderstehlich: Bucket To Go mit Crispy Strips und Pommes um 4,30 Euro">'
+    + '<a href="/produkte/hot-wings-bucket-1">Hot Wings Bucket mit Gratis Fries</a>';
+  const read = html => extractFoodOffers(`<main>${html}</main>`, merchant, { now });
+  const carousel = `<div class="kfc-block kfc-block-carousel"><section><div><div>${burger}${meals}</div></div></section></div>`;
+  const result = read(carousel);
+  assert.deepEqual(result.deals.map(row => row.id), ['power-food-73cf88790a2d']);
+  const [deal] = result.deals;
+  assert.equal(deal.evidence.extractionMethod, 'official-image-alt');
+  assert.equal(deal.distance, 'Ort prüfen');
+  assert.equal(deal.address, undefined);
+  assert.deepEqual(result.links, []);
+  assert.deepEqual(read(`<section>${burger}</section>`).deals.map(row => row.id), [deal.id]);
+  assert.equal(read(carousel.replace('<section>', '<section hidden>')).deals.length, 0);
+  assert.equal(read(carousel.replace('<section>', '<section style="display:none">')).deals.length, 0);
+  assert.equal(read(carousel.replace('kfc-block-carousel', 'kfc-block-products')).deals.length, 0);
+  assert.equal(filterModeratedDeals(result.deals, { hiddenDeals: [{ id: deal.id, url: merchant.url }] }).deals.length, 0);
+}
 {
   const merchant = POWER_FOOD_SOURCES.find(row => row.name === 'Vapiano');
   const pageUrl = merchant.directOnlyPages[0];
