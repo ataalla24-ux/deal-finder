@@ -563,7 +563,15 @@ function cleanPowerText(value) {
 }
 
 function hasConcretePowerDealSignal(value, source = {}) {
-  const text = cleanPowerText(value);
+  // Signup and basic delivery alone are not product benefits. Keep any
+  // independent discount or product gift eligible for normal promotion checks.
+  const text = cleanPowerText(value).replace(
+    /\b(?:gratis|kostenlos(?:e[rmns]?|en)?|kostenfrei|free)\s+(?:anmelden|anmeldung|registrieren|registrierung|registration|sign[ -]?up)\b/gi,
+    ' ',
+  ).replace(
+    /\b(?:gratis|kostenlos(?:e[rmns]?|en)?|kostenfrei|free)\s+["„“”«»'‘’]*\s*basic[\s‐‑–-]+lieferung\b["„“”«»'‘’]*/gi,
+    ' ',
+  ).trim();
   if (!text || /^(?:angebote?|aktionen?|deals?|sale|gutscheine?|coupons?|mehr erfahren|jetzt entdecken)$/i.test(text)) {
     return false;
   }
