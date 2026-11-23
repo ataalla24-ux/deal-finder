@@ -1,14 +1,14 @@
 {
-  "lastUpdated": "2026-11-22T22:28:30.791Z",
+  "lastUpdated": "2026-11-23T10:54:04.717Z",
   "runProvenance": {
     "repository": "ataalla24-ux/deal-finder",
-    "runId": "45077824293",
-    "headSha": "93b17460f15e1dc6894726f304fe52c6490f4d2f",
-    "checkoutSha": "93b17460f15e1dc6894726f304fe52c6490f4d2f",
+    "runId": "45159254437",
+    "headSha": "8b7dfe5bdc60a3eccbda001bc71472c3dc84fa24",
+    "checkoutSha": "8b7dfe5bdc60a3eccbda001bc71472c3dc84fa24",
     "triggeringRun": null,
-    "event": "schedule",
-    "runAttempt": "1",
-    "url": "https://github.com/ataalla24-ux/deal-finder/actions/runs/45077824293"
+    "event": "workflow_dispatch",
+    "runAttempt": "2",
+    "url": "https://github.com/ataalla24-ux/deal-finder/actions/runs/45159254437"
   },
   "status": "discovery-degraded",
   "outputPreserved": true,
@@ -49,8 +49,8 @@
     "site:tiktok.com/@ tiktok wien gratis"
   ],
   "apiKeywords": [
-    "wien gratis 22 november 2026",
-    "wien deal 22 november 2026",
+    "wien gratis 23 november 2026",
+    "wien deal 23 november 2026",
     "wien gratis november 2026",
     "wien aktion november 2026",
     "wien rabatt november 2026",
@@ -122,22 +122,13 @@
   "discovered": 0,
   "apiCandidates": 0,
   "apiDiscovery": {
-    "errors": [
-      {
-        "keyword": "wien gratis kaffee",
-        "offset": 0,
-        "status": 200,
-        "error": "TikTok returned a provider error",
-        "code": "provider-error",
-        "providerCode": "2483"
-      }
-    ],
-    "attemptedRequests": 1,
+    "errors": [],
+    "attemptedRequests": 0,
     "emptyResponses": 0,
     "rawItems": 0,
     "normalizedItems": 0,
     "ignoredItems": 0,
-    "stoppedReason": "provider-error",
+    "stoppedReason": "api-cooldown",
     "nextRetryAt": "2026-11-24T09:37:29.226Z",
     "nextKeywordIndex": 10,
     "boundedRetry": {
@@ -145,39 +136,28 @@
       "failures": 2,
       "failedAt": "2026-11-23T09:37:29.226Z"
     },
-    "transport": "direct-browser-search",
-    "navigations": 1,
-    "searchRequests": 1,
-    "siteAdjustedSearchRequests": 1,
-    "lastSearchResponse": {
-      "status": 200,
-      "declaredBytes": 125,
-      "decodedBytes": 125,
-      "retryAfterProvided": false,
-      "bodyState": "json"
-    },
-    "homepageNavigation": "root",
-    "releasedLocalPolicyDeadline": "2026-11-23T22:28:29.546Z",
-    "normalizedCandidates": 0,
-    "inspectedPublicLinks": 0,
-    "checkedBy": {
-      "repository": "ataalla24-ux/deal-finder",
-      "runId": "45148630096",
-      "headSha": "6ffefbe6bf6e6a49b1b28159efd06034961d120b",
-      "checkoutSha": "6ffefbe6bf6e6a49b1b28159efd06034961d120b",
-      "triggeringRun": null,
-      "event": "workflow_dispatch",
-      "runAttempt": "1",
-      "url": "https://github.com/ataalla24-ux/deal-finder/actions/runs/45148630096"
-    }
+    "publicVideoLinks": 0
   },
   "searchDiscovery": {
-    "errors": [],
-    "attemptedQueries": 1,
-    "stoppedReason": "",
-    "nextRetryAt": "",
-    "lastAttemptAt": "2026-11-22T22:28:29.660Z",
-    "nextQueryIndex": 24,
+    "errors": [
+      {
+        "query": "site:tiktok.com/@ wien gratis heute",
+        "error": "Search challenge; no bypass attempted",
+        "httpStatus": 403,
+        "retryAt": "",
+        "retryAfterProvided": false
+      }
+    ],
+    "attemptedQueries": 2,
+    "stoppedReason": "search-unavailable",
+    "nextRetryAt": "2026-11-23T14:54:04.620Z",
+    "lastAttemptAt": "2026-11-23T10:54:04.591Z",
+    "nextQueryIndex": 1,
+    "boundedRetry": {
+      "reason": "challenge-without-retry-after",
+      "failures": 1,
+      "failedAt": "2026-11-23T10:54:04.620Z"
+    },
     "deferredPostVisits": 0
   },
   "accepted": 0,
@@ -260,20 +240,20 @@
     "aiAcceptedUnusable": 0
   },
   "timings": {
-    "apiDiscoveryMs": 3072,
-    "searchDiscoveryMs": 723,
-    "mediaRescueMs": 372,
-    "totalScannerMs": 5628
+    "apiDiscoveryMs": 37,
+    "searchDiscoveryMs": 1537,
+    "mediaRescueMs": 68,
+    "totalScannerMs": 2522
   },
-  "discoveryErrors": [],
-  "apiErrors": [
+  "discoveryErrors": [
     {
-      "keyword": "wien gratis dezember 2026",
-      "offset": 0,
-      "status": 0,
-      "error": "TikTok search request failed or timed out",
-      "code": "transport-unavailable"
+      "query": "site:tiktok.com/@ wien gratis heute",
+      "error": "Search challenge; no bypass attempted",
+      "httpStatus": 403,
+      "retryAt": "",
+      "retryAfterProvided": false
     }
   ],
+  "apiErrors": [],
   "rejected": []
 }
