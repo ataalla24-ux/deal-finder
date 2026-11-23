@@ -7,6 +7,7 @@ import { photoVisual } from './blog-photo-catalog.mjs';
 
 // Editorial subject metadata is retained for generators; images are photographs.
 export const covers = {
+  'vienna-sweets-3plus1-wien-neuer-markt': { lines: ['Vienna Sweets 3+1'], topic: 'Süße Mitbringsel am Neuer Markt', tone: 'yellow' },
   ...backfillCovers,
   ...catchupCovers,
   ...Object.fromEntries([...novemberGuides, ...heldRecheckGuides, ...november20Guides].map(guide => [guide.slug, { lines: [guide.title], topic: guide.eyebrow, tone: 'yellow' }])),
