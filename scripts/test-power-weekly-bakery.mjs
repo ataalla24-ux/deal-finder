@@ -63,3 +63,10 @@ test('withdrawals, missing eligibility, additional conditions and conflicting ra
   assert.deepEqual(parse(fixture().replace('</main>', '<small>Nur mit App.</small></main>')), []);
   assert.deepEqual(parse(fixture().replace('class="produktbeschreibung"', 'hidden class="produktbeschreibung"')), []);
 });
+
+test('other bakery offer formats keep their existing discovery path', () => {
+  const html = '<main><div class="produktbeschreibung"><h1>Gratis Dinkelweckerl</h1><p>Gratis Dinkelweckerl in Wien. Aktion bis 29.11.2026.</p></div></main>';
+  const result = extractFoodOffers(html, source, { now, pageUrl: 'https://www.dermann.at/aktion/anderes-weckerl/' });
+  assert.equal(result.deals.length, 1);
+  assert.equal(result.deals[0].evidence.extractionMethod, 'semantic-block');
+});

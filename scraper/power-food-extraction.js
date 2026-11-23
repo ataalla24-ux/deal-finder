@@ -236,7 +236,8 @@ export function extractFoodOffers(html, source, options = {}) {
   if (source.mediaOnly) return {deals:[],rejected:[],links:[]};
   const $ = load(html);
   const bakeryDetail = source.weeklyBakeryBranchUrl && new URL(pageUrl).origin === 'https://www.dermann.at'
-    && /^\/aktion\/[a-z0-9-]+\/$/.test(new URL(pageUrl).pathname) && $('.produktbeschreibung').length;
+    && /^\/aktion\/[a-z0-9-]+\/$/.test(new URL(pageUrl).pathname)
+    && /\d{1,2}\s*% vergünstigt für nur/i.test(textOf($, $('.produktbeschreibung')));
   const bakeryOffer = bakeryDetail ? weeklyBakeryOffer($, pageUrl, source.weeklyBakeryBranchUrl) : null;
   $("script,style,noscript,nav,footer,header").remove();
   const bodyText = textOf($, $("body"));
