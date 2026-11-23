@@ -154,6 +154,10 @@ export function getNonOfferContentReason(value) {
   if (/\bfree\s+trade\b/i.test(text) && !INDEPENDENT_PROMOTION_PATTERN.test(withoutIncidentalFree)) return 'Freihandel ist kein Gratisangebot';
   if (/\b(?:itinerary|24\s*hours?\s+in|reiseplan)\b/i.test(text)
     && !/\b(?:rabatt|aktion|coupon|gutschein|bogo|1\s*\+\s*1|2\s*(?:for|für)\s*1)\b/i.test(text)) return 'Reiseplan statt konkretem Einzelangebot';
+  if (/\bmercatin[oi]\s+di\s+natale\b/i.test(text)
+      && /\bingresso\s+gratis\s*:\s*si\s+paga\s+solo\s+quello\s+che\s+compri\b/i.test(text)
+      && !INDEPENDENT_PROMOTION_PATTERN.test(text)
+      && !/\b(?:scont[oi]|buon[oi]|omagg[io]+)\b/i.test(text)) return 'Christkindlmarkt-Empfehlung ohne konkreten Vorteil';
   if (FOREIGN_REGISTRATION_SPAM_PATTERN.test(text)) {
     return 'ausländischer Registrierungs-/WhatsApp-Spam statt Wiener Deal';
   }

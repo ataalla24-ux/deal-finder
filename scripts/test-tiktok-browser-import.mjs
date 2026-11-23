@@ -6,6 +6,7 @@ import path from 'node:path';
 import test from 'node:test';
 import { importTikTokBrowserPosts, parseTikTokBrowserBatch } from './import-tiktok-browser-posts.mjs';
 import { buildTikTokDeliveryAudit } from '../scraper/instagram-delivery-audit.js';
+import { getNonOfferContentReason } from '../scraper/promotion-quality-utils.js';
 
 const now = new Date('2026-11-23T12:00:00.000Z');
 const seconds = Math.floor((+now - 60 * 60 * 1000) / 1000);
@@ -99,6 +100,16 @@ test('retain an explicit zero entry price in the title of a named venue', () => 
   assert.equal(result.counts.accepted, 1);
   assert.equal(result.added[0].title, 'Gratis Eintritt: Museum of Change');
   assert.equal(result.added[0].type, 'gratis');
+});
+
+test('hold tourist recommendations that only describe free access to a Christmas market', () => {
+  const capture = post({ caption: 'Mercatino di Natale di Vienna al Rathausplatz. Ingresso gratis: si paga solo quello che compri ai banchi. 🎥 Foto e clip: Jakob Mueller. #vienna' });
+  capture.url = capture.url.replace('@cafemilano', '@navigoviaggi');
+  assert.match(getNonOfferContentReason(capture.caption), /Christkindlmarkt/);
+  assert.equal(getNonOfferContentReason(`${capture.caption} Un buono per un caffè.`), '');
+  const result = importTikTokBrowserPosts([capture], { now });
+  assert.equal(result.counts.rejected, 1);
+  assert.deepEqual(result.added, []);
 });
 
 test('use canonical receipts, read-only current offers, and the existing outbox to suppress duplicates', () => {
