@@ -52,6 +52,7 @@ on:
       - "scraper/slack-notify.js"
       - "scraper/slack-approve.js"
       - "scripts/test-power-*.mjs"
+      - "scripts/fixtures/power-cuadro-*.html"
       - "scripts/test-mcdonalds-foodora-footnote.mjs"
       - "package*.json"
       - ".github/workflows/power*.yml"
@@ -108,6 +109,7 @@ on:
       - "scraper/slack-notify.js"
       - "scraper/slack-approve.js"
       - "scripts/test-power-*.mjs"
+      - "scripts/fixtures/power-cuadro-*.html"
       - "scripts/test-mcdonalds-foodora-footnote.mjs"
       - "package*.json"
       - ".github/workflows/power*.yml"
@@ -147,6 +149,7 @@ jobs:
           node scripts/test-instagram-ai-agent.mjs
           node scripts/test-wien-deals-combined.mjs
           node scripts/test-power-food.mjs
+          node --test scripts/test-power-cuadro-links.mjs
           node --test scripts/test-power-marktguru-cashback.mjs
           node --test scripts/test-power-nonalcoholic-offer.mjs
           node --test scripts/test-mcdonalds-foodora-footnote.mjs

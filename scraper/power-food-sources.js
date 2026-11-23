@@ -246,10 +246,11 @@ export const POWER_FOOD_SOURCES = [
     name: "Cuadro",
     url: "https://cuadro.at/",
     category: "trinken",
-    allowedHosts: ["cuadro.at"],
+    allowedHosts: ["cuadro.at", "www.cuadro.at"],
     address: "Margaretenstraße 77, 1050 Wien",
     locationEvidenceUrl: "https://cuadro.at/",
-    linkPattern: /happy|aktion/i,
+    // The homepage's offers navigation uses the official www alias.
+    linkPattern: /happy|aktion|\/angebote-aktuelles\/?(?:$|[?#])/i,
   },
   {
     name: "MABEL'S No90",
