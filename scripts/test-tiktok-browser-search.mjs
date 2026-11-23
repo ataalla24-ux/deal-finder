@@ -2,7 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import { chromium } from 'playwright';
 import { fetchTikTokApiCandidates } from '../scraper/tiktok-deals-scanner.js';
-import { createTikTokBrowserSearch, observeTikTokSearchRoutes } from '../scraper/tiktok-browser-search.js';
+import { createTikTokBrowserSearch, observeTikTokPublicSearchPage, observeTikTokSearchRoutes } from '../scraper/tiktok-browser-search.js';
 import { selectTikTokPostVisits } from '../scraper/tiktok-search-discovery.js';
 
 const now = new Date('2026-11-11T12:00:00Z');
@@ -42,6 +42,22 @@ const scan = (page,options={}) => fetchTikTokApiCandidates(page,{keywords:['wien
   wait:async()=>{},timeoutMs:1500,createTransport:createTikTokBrowserSearch,...options});
 
 const scanDirect = (page, options) => scan(page, { ...options, createTransport: undefined });
+
+test('the normal public page comparison reports visible links and respects a refusal', async () => {
+  const html = '<main><a href="/@public.creator/video/1234567890">Original</a>'
+    + '<a href="/@hidden.creator/video/9876543210" hidden>Hidden</a></main>'
+    + '<script>fetch("/api/search/item/full/?keyword=sample");</script>';
+  for (const status of [200, 429]) {
+    await fixture({ html, api: () => ({ status, body: '{}', ...(status === 429 ? { headers: { 'Retry-After': '3600' } } : {}) }) }, async (page, calls, documents) => {
+      const result = await observeTikTokPublicSearchPage(page, 'sample');
+      assert.deepEqual(documents, ['/search']);
+      assert.equal(calls.length, 1);
+      assert.equal(result.responses[0].status, status);
+      assert.equal(result.responses[0].retryAfterProvided, status === 429);
+      assert.deepEqual(result.publicVideoLinks, status === 200 ? ['https://www.tiktok.com/@public.creator/video/1234567890'] : []);
+    });
+  }
+});
 
 test('the default scanner accepts the same-origin homepage path and sends only the October video searches', async () => {
   const homepage = '<body>Home<script>history.replaceState(null, "", "/foryou");'

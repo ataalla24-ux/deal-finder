@@ -5,13 +5,13 @@ on:
       lane:
         description: TikTok search, Instagram profile read, or one Instagram public search query
         type: choice
-        options: [tiktok, tiktok-direct, tiktok-routes, instagram, instagram-search]
+        options: [tiktok, tiktok-direct, tiktok-routes, tiktok-public-ui, instagram, instagram-search]
         default: tiktok
 permissions:
   contents: read
 jobs:
   diagnose:
-    if: ${{ inputs.lane == 'tiktok' || inputs.lane == 'tiktok-routes' }}
+    if: ${{ inputs.lane == 'tiktok' || inputs.lane == 'tiktok-routes' || inputs.lane == 'tiktok-public-ui' }}
     runs-on: ubuntu-latest
     timeout-minutes: 8
     env:
@@ -33,6 +33,9 @@ jobs:
       - name: Inspect one public search page while blocking all search data calls
         if: ${{ inputs.lane == 'tiktok-routes' }}
         run: node scripts/check-tiktok-search-routes.mjs
+      - name: Observe one normal public search page without signing in
+        if: ${{ inputs.lane == 'tiktok-public-ui' }}
+        run: node scripts/check-tiktok-search-routes.mjs --public-ui
       - uses: actions/upload-artifact@v4
         if: always()
         with:

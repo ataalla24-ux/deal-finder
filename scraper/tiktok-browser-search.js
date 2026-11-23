@@ -15,6 +15,49 @@ export async function tikTokAccessRefusal(page, document) {
   return null;
 }
 
+export async function observeTikTokPublicSearchPage(page, keyword) {
+  const responses = [];
+  const denied = response => response.retryAfterProvided || [401, 403, 429, 451].includes(response.status)
+    || (response.providerCode && Number(response.providerCode) !== 0);
+  let recordDenial;
+  const firstDenial = new Promise(resolve => { recordDenial = resolve; });
+  const observe = response => {
+    const url = new URL(response.url());
+    if (url.origin !== 'https://www.tiktok.com'
+        || !/^\/api\/search\/(?:general|item)\/full\/?$/.test(url.pathname) || responses.length >= 6) return;
+    responses.push((async () => {
+      const retryAfter = await response.headerValue('retry-after').catch(() => null);
+      const size = Number(await response.headerValue('content-length').catch(() => null));
+      const payload = size > 0 && size <= 65536 && response.ok() ? await response.json().catch(() => null) : null;
+      const code = String(payload?.status_code ?? payload?.statusCode ?? '');
+      const result = { status: response.status(), retryAfterProvided: retryAfter !== null, retryAfter,
+        ...(/^-?\d{1,10}$/.test(code) ? { providerCode: code } : {}) };
+      if (denied(result)) recordDenial();
+      return result;
+    })());
+  };
+  page.on('response', observe);
+  try {
+    const document = await page.goto(`https://www.tiktok.com/search?q=${encodeURIComponent(keyword)}`, {
+      waitUntil: 'domcontentloaded', timeout: 15000,
+    });
+    const documentStatus = document?.status() ?? null;
+    const documentRetryAfter = document ? await document.headerValue('retry-after') : null;
+    const refusal = await tikTokAccessRefusal(page, document);
+    if (refusal || !document?.ok() || documentRetryAfter !== null) {
+      return { documentStatus, documentRetryAfter, refusal, responses: [], publicVideoLinks: [] };
+    }
+    await Promise.race([page.waitForTimeout(3000), firstDenial]);
+    const laterRefusal = await tikTokAccessRefusal(page, document);
+    const searchResponses = await Promise.all(responses);
+    const deniedSearch = searchResponses.some(denied);
+    return { documentStatus, documentRetryAfter, refusal: laterRefusal, responses: searchResponses,
+      publicVideoLinks: laterRefusal || deniedSearch ? [] : await visiblePublicVideoLinks(page, keyword, 12) };
+  } finally {
+    page.off('response', observe);
+  }
+}
+
 async function visiblePublicVideoLinks(page, keyword, limit) {
   return page.evaluate(({ keyword, limit }) => {
     const current = new URL(location.href);
