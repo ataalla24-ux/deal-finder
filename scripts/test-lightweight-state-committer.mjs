@@ -47,7 +47,7 @@ test('Churches wildcard and Slack identities persist to a local remote without n
   const temp=fs.mkdtempSync(path.join(os.tmpdir(),'church-committer-no-deps-'));
   const repo=path.join(temp,'repo');
   const remote=path.join(temp,'remote.git');
-  const env={...process.env,GIT_AUTHOR_NAME:'Offline test',GIT_AUTHOR_EMAIL:'test@example.invalid',
+  const env={...process.env,GIT_GENERATED_BRANCH:'main',GIT_AUTHOR_NAME:'Offline test',GIT_AUTHOR_EMAIL:'test@example.invalid',
     GIT_COMMITTER_NAME:'Offline test',GIT_COMMITTER_EMAIL:'test@example.invalid'};
   const run=(command,args,cwd=repo)=>{
     const result=spawnSync(command,args,{cwd,env,encoding:'utf8',timeout:30000});
