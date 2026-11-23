@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import { after, before, test } from 'node:test';
 import { chromium } from 'playwright';
-import { fillLoginForm, submitLoginForm, waitForLoginAttemptResult, emailCodeChallengeVisible, twoFactorInputVisible, diagnosePage, validateBrowserSession } from './refresh-instagram-cookies.mjs';
+import { fillLoginForm, submitLoginForm, waitForLoginAttemptResult, emailCodeChallengeVisible, twoFactorInputVisible, diagnosePage, validateBrowserSession, declineOptionalInstagramCookies } from './refresh-instagram-cookies.mjs';
 import { publishScraperSession } from './refresh-instagram-local.mjs';
 
 let browser;
@@ -9,7 +9,7 @@ before(async () => { browser = await chromium.launch({ headless: true }); });
 after(async () => { await browser?.close(); });
 
 async function fixture(t, html) {
-  const context = await browser.newContext({ serviceWorkers: 'block' });
+  const context = await browser.newContext({ serviceWorkers: 'block', offline: true });
   t.after(() => context.close());
   // Every request is fulfilled locally, including the Instagram-shaped test URL.
   await context.route('**/*', route => route.fulfill({ status: 200, contentType: 'text/html', body: html }));
@@ -117,14 +117,78 @@ test('unconfirmed own-profile exposes only anonymous UI and cookie-presence sign
   await assert.rejects(validateBrowserSession(page, { username: 'fixture_account', timeout: 100 }), e => {
     assert.equal(e.status, 'wrong-account');
     assert.deepEqual(e.details.ownProfileSignals, {
-      httpStatus: 200, location: 'own-profile', route: 'own-profile', sessionCookiePresent: true, ownerCookiePresent: true,
+      httpStatus: 200, location: 'own-profile', route: 'own-profile', optionalCookiesDeclined: false, sessionCookiePresent: true, ownerCookiePresent: true,
       ownerCookieMatchesExpected: null, editControlVisible: false, documentState: 'complete', bodyHasText: true,
+      cookieTextVisible: false, paidPlanChoiceVisible: false, advertisingChoiceVisible: false, legalTermsVisible: false,
       passwordInputVisible: false, editProfileHrefVisible: true, genericErrorVisible: false, cookieDialogVisible: false,
       saveLoginPromptVisible: false, notNowVisible: false, loginLinkVisible: false, ownProfileNavigationVisible: false,
     });
     assert.doesNotMatch(JSON.stringify(e.details), /private|fixture_account|Localized|fixture-session/);
     return true;
   });
+});
+
+test('normal optional-cookie rejection is clicked once and still requires the exact own profile', async t => {
+  const context = await browser.newContext({ serviceWorkers: 'block', offline: true });
+  t.after(() => context.close());
+  await context.addCookies([{ name: 'sessionid', value: 'fixture-session', domain: '.instagram.com', path: '/' }, { name: 'ds_user_id', value: 'fixture-owner', domain: '.instagram.com', path: '/' }]);
+  let choices = 0, profileRequests = 0;
+  await context.route('**/*', route => {
+    const pathname = new URL(route.request().url()).pathname;
+    if (pathname === '/fixture-choice') { choices++; return route.fulfill({ body: 'ok' }); }
+    if (pathname === '/fixture_account/') {
+      profileRequests++;
+      if (!choices) return route.fulfill({ contentType: 'text/html', body: '<script>history.replaceState(null,"","/consent/")</script><p>Cookies</p><button onclick="fetch(\'/fixture-choice\')">Decline optional cookies</button><button onclick="window.unwanted=true">Allow all cookies</button>' });
+      return route.fulfill({ contentType: 'text/html', body: '<a href="/accounts/edit/">Profil bearbeiten</a>' });
+    }
+    return route.fulfill({ contentType: 'text/html', body: '<p>Cookies</p><button onclick="fetch(\'/fixture-choice\')">Decline optional cookies</button><button onclick="window.unwanted=true">Allow all cookies</button>' });
+  });
+  const page = await context.newPage();
+  const result = await validateBrowserSession(page, { username: 'fixture_account', expectedUserId: 'fixture-owner' });
+  assert.equal(result.ok, true);
+  assert.equal(result.sessionUiAction, 'declined-optional-cookies');
+  assert.equal(choices, 1);
+  assert.equal(profileRequests, 2, 'one initial navigation and one exact profile verification');
+  assert.equal(await page.evaluate(() => Boolean(window.unwanted)), false);
+});
+
+test('paid, ad-profile, legal, generic and hidden consent choices are never clicked', async t => {
+  const { page } = await fixture(t, '<p>Consent settings</p>' +
+    ['Subscribe', 'Use without ads', 'Use for free with ads', 'I agree', 'Continue', 'Allow all cookies', 'Jetzt nicht']
+      .map(label => `<button onclick="window.unwanted=true">${label}</button>`).join('') +
+    '<button hidden onclick="window.unwanted=true">Decline optional cookies</button>');
+  await page.goto('https://www.instagram.com/consent/');
+  assert.equal(await declineOptionalInstagramCookies(page), false);
+  assert.equal(await page.evaluate(() => Boolean(window.unwanted)), false);
+});
+
+test('a challenge or foreign origin cannot borrow the optional-cookie button', async t => {
+  const { page } = await fixture(t, '<p>Confirm it is you</p><button onclick="window.unwanted=true">Decline optional cookies</button>');
+  for (const target of ['https://www.instagram.com/consent/', 'https://www.instagram.com/challenge/', 'https://instagram.com.example/consent/']) {
+    await page.goto(target);
+    assert.equal(await declineOptionalInstagramCookies(page), false);
+    assert.equal(await page.evaluate(() => Boolean(window.unwanted)), false);
+  }
+});
+
+test('an ambiguous optional-cookie click is never repeated', async () => {
+  let clicks = 0;
+  const button = { first() { return this; }, isVisible: async () => true, click: async () => { clicks++; throw new Error('private provider failure'); } };
+  const page = { url: () => 'https://www.instagram.com/consent/', locator: () => ({ innerText: async () => 'Cookies' }), getByRole: () => button };
+  await assert.rejects(declineOptionalInstagramCookies(page), e => e.status === 'cookie-choice-unconfirmed' && !e.message.includes('private'));
+  assert.equal(clicks, 1);
+});
+
+test('cookie UI hydration is bounded and a newly appearing challenge still stops the click', async t => {
+  const { page } = await fixture(t, '<div id="choice"></div><script>setTimeout(() => document.querySelector("#choice").innerHTML = \'<button onclick="window.chosen=true">Optionale Cookies ablehnen</button>\', 50)</script>');
+  await page.goto('https://www.instagram.com/consent/');
+  assert.equal(await declineOptionalInstagramCookies(page), true);
+  assert.equal(await page.evaluate(() => window.chosen), true);
+  await page.route('**/*', route => route.fulfill({ contentType: 'text/html', body:
+    '<div id="choice"></div><script>setTimeout(() => { history.replaceState(null,"","/challenge/"); document.querySelector("#choice").innerHTML = \'<button onclick="window.chosen=true">Decline optional cookies</button>\'; }, 50)</script>' }));
+  await page.goto('https://www.instagram.com/consent/');
+  assert.equal(await declineOptionalInstagramCookies(page), false);
+  assert.equal(await page.evaluate(() => Boolean(window.chosen)), false);
 });
 
 test('local secret transfer is restricted to the two scraper secrets using stdin', () => {

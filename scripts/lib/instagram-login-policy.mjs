@@ -49,6 +49,6 @@ export function instagramLoginPageState(url, text) {
   if (/sieh in deinen e-mails nach|check your (?:e-?mail|inbox)|(?:e-?mail|email).{0,80}(?:code|bestätigung)|code.{0,80}(?:e-?mail|email)/.test(signal)) return 'email-code';
   if (/authenticator|authentifizierungs.?app|authentication app|two-factor|zweistufige|zwei-faktor/.test(signal) || /two_factor/.test(pathname)) return 'two-factor';
   if (/\/challenge\/|\/checkpoint\/|\/auth_platform\/codeentry|suspended|disabled/i.test(pathname)
-    || /confirm it'?s you|suspicious|help us confirm|verify your account|verdächtig|security code|sicherheitscode|verification code/.test(signal)) return 'challenge';
+    || /confirm (?:it'?s|it is) you|suspicious|help us confirm|verify your account|verdächtig|security code|sicherheitscode|verification code/.test(signal)) return 'challenge';
   return 'unknown';
 }

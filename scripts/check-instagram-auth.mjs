@@ -287,7 +287,7 @@ export async function validateInstagramAuth(cookies, options = {}) {
     try {
       const result = await (options.browserProbe || probeOwnProfile)(cookies, account);
       if (result?.ok !== true || result?.accountMatched !== true) throw new Error('Profile not confirmed');
-      return { ...base, ok: true, status: 'ok', reason: 'Sitzung und eigene Profilansicht bestätigt', attempts: 1, credentialsState: 'valid', canProceed: true, consecutiveRateLimits: 0, nextRetryAt: '' };
+      return { ...base, ok: true, status: 'ok', reason: 'Sitzung und eigene Profilansicht bestätigt', attempts: 1, credentialsState: 'valid', canProceed: true, consecutiveRateLimits: 0, nextRetryAt: '', sessionUiAction: result.sessionUiAction === 'declined-optional-cookies' ? 'declined-optional-cookies' : 'none' };
     } catch (error) {
       if (error?.status === 'rate-limited') return { ...rateLimitResult({ username: base.username, diagnostics, previousReport, nowMs, response: { status: 429 }, config }), validationMethod: 'own-profile-ui', canProceed: false };
       // Only fixed categories leave the browser: never page text, challenge URLs,
@@ -301,7 +301,7 @@ export async function validateInstagramAuth(cookies, options = {}) {
       };
       const suppliedSignals = error?.details?.ownProfileSignals || {};
       const browserSignals = {};
-      for (const key of ['sessionCookiePresent', 'ownerCookiePresent', 'ownerCookieMatchesExpected', 'editControlVisible', 'bodyHasText', 'passwordInputVisible', 'editProfileHrefVisible', 'genericErrorVisible', 'cookieDialogVisible', 'saveLoginPromptVisible', 'notNowVisible', 'loginLinkVisible', 'ownProfileNavigationVisible', 'snapshotUnavailable']) {
+      for (const key of ['sessionCookiePresent', 'ownerCookiePresent', 'ownerCookieMatchesExpected', 'editControlVisible', 'bodyHasText', 'cookieTextVisible', 'paidPlanChoiceVisible', 'advertisingChoiceVisible', 'legalTermsVisible', 'passwordInputVisible', 'editProfileHrefVisible', 'genericErrorVisible', 'cookieDialogVisible', 'saveLoginPromptVisible', 'notNowVisible', 'loginLinkVisible', 'ownProfileNavigationVisible', 'optionalCookiesDeclined', 'snapshotUnavailable']) {
         if (typeof suppliedSignals[key] === 'boolean') browserSignals[key] = suppliedSignals[key];
       }
       if (['own-profile', 'login', 'other'].includes(suppliedSignals.location)) browserSignals.location = suppliedSignals.location;
@@ -650,6 +650,7 @@ export async function main() {
   console.log(`- ok: ${finalReport.ok ? 'true' : 'false'}`);
   console.log(`- reason: ${finalReport.reason}`);
   if (finalReport.browserSignals) console.log(`- browser signals: ${JSON.stringify(finalReport.browserSignals)}`);
+  if (finalReport.sessionUiAction) console.log(`- session UI: ${finalReport.sessionUiAction}`);
   console.log(`- attempts: ${finalReport.attempts || 1}`);
   console.log(`- cookies: sessionid=${finalReport.diagnostics.hasSessionCookie ? 'yes' : 'no'}, csrftoken=${finalReport.diagnostics.hasCsrfCookie ? 'yes' : 'no'}, total=${finalReport.diagnostics.cookieCount}`);
   if (clearedFiles.length) console.log(`- cleared: ${clearedFiles.join(', ')}`);
