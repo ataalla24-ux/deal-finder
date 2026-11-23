@@ -183,16 +183,34 @@ assert.equal(historicalMerchantEvidence.username, 'ciosgrill');
 assert.equal(historicalMerchantEvidence.hasStreetAddress, true);
 assert.match(historicalMerchantEvidence.viennaEvidence, /1010/);
 
-const merchantRegistry = buildInstagramMerchantRegistry({
-  now: new Date('2026-07-23T12:00:00.000Z'),
-  write: false,
-});
-const verifiedMerchant = merchantRegistry.accounts.find((entry) => entry.username === 'ciosgrill');
-assert.equal(verifiedMerchant.accountType, 'merchant');
-assert.equal(verifiedMerchant.viennaVerified, true, 'watchlisted merchants with historical Vienna address evidence are verified');
-const discoveryAccount = merchantRegistry.accounts.find((entry) => entry.username === 'viennaeats');
-assert.equal(discoveryAccount.accountType, 'discovery');
-assert.equal(discoveryAccount.viennaVerified, false, 'discovery publishers never become trusted merchant locations');
+// This regression checks the watchlist and historical evidence in isolation.
+const registryFixture = fs.mkdtempSync(path.join(os.tmpdir(), 'instagram-registry-watchlist-'));
+try {
+  const watchlistPath = path.join(registryFixture, 'watchlist.json');
+  const historicalSentPath = path.join(registryFixture, 'sent.json');
+  fs.writeFileSync(watchlistPath, JSON.stringify({ accounts: [
+    { username: 'ciosgrill', accountType: 'merchant', category: 'essen' },
+    { username: 'viennaeats', accountType: 'discovery', category: 'discovery' },
+  ] }));
+  fs.writeFileSync(historicalSentPath, JSON.stringify({
+    'sig:www.instagram.com/ciosgrill|Cio’s Grill|Gratis Premium Döner|gratis|Franz-Josefs-Kai 15, 1010 Wien': Date.parse('2026-07-01T10:00:00.000Z'),
+    'sig:www.instagram.com/viennaeats|Vienna Eats|Gratis Snack|gratis|Postgasse 10, 1010 Wien': Date.parse('2026-07-01T10:00:00.000Z'),
+  }));
+  const excludedFixture = path.join(registryFixture, 'empty.json');
+  fs.writeFileSync(excludedFixture, '{}');
+  const merchantRegistry = buildInstagramMerchantRegistry({
+    now: new Date('2026-07-23T12:00:00.000Z'), write: false, docsDir: registryFixture,
+    watchlistPath, historicalSentPath, graphEvidencePath: excludedFixture, moderationPath: excludedFixture,
+  });
+  const verifiedMerchant = merchantRegistry.accounts.find((entry) => entry.username === 'ciosgrill');
+  assert.equal(verifiedMerchant.accountType, 'merchant');
+  assert.equal(verifiedMerchant.viennaVerified, true, 'watchlisted merchants with historical Vienna address evidence are verified');
+  const discoveryAccount = merchantRegistry.accounts.find((entry) => entry.username === 'viennaeats');
+  assert.equal(discoveryAccount.accountType, 'discovery');
+  assert.equal(discoveryAccount.viennaVerified, false, 'discovery publishers never become trusted merchant locations');
+} finally {
+  fs.rmSync(registryFixture, { recursive: true, force: true });
+}
 
 const feedbackDir = fs.mkdtempSync(path.join(os.tmpdir(), 'instagram-registry-feedback-'));
 const feedbackDocsDir = path.join(feedbackDir, 'docs');
