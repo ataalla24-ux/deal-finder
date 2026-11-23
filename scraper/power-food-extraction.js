@@ -15,7 +15,7 @@ const FOOD =
   /weckerl|laugenring|mohnschnecke|baguette|dinkel|kornspitz|kaffee|coffee|cappuccino|espresso|melange|matcha|tee\b|kakao|heißgetränk|heissgetraenk|mocktail|cocktail|drink|spritz|bier|beer|wein|limonade|getränk|burger|pizza|pasta|spaghetti|\bsteak\b|pommes|fries|kebab|kebap|döner|doener|schnitzel|hot.?dog|frühstück|breakfast|jause|brot|br[eö]t|breze|gebäck|semmel|knopferl|topfini|croissant|kuchen|strudel|dessert|eis\b|menü|menu|gericht|hauptspeise|teller|bällchen|waffel|sandwich|falafel|sushi|ramen|fish|fisch|backfisch|lachs|schollen|garnelen|chicken|backhuhn|backhendl|snack|minis\s*xxl|schoko|mozartkugel|trüffel|süßwaren|kostprobe|verkostung|mittagsangebot|bowl|\bcola\b/i;
 export { FOOD as FOOD_PRODUCT };
 const PRICE =
-  /(?:€\s*\d{1,3}(?:[,.]\d{1,2})?|\d{1,3}(?:[,.]\d{1,2})?\s*(?:€|EUR\b|Euro\b))/i;
+  /(?:(?:€|\bEUR\b)\s*\d{1,3}(?:[,.]\d{1,2})?|\d{1,3}(?:[,.]\d{1,2})?\s*(?:€|EUR\b|Euro\b))/i;
 const BENEFIT =
   /(?:-\s*\d+\s*%|\d+\s*%\s*(?:rabatt|sparen|günstiger|off|discount))|\d+\s*\+\s*\d+|\b2\s*(?:für|for)\s*1\b|\b(?:gratis|kostenlos|geschenkt|statt|rabatt|discount)\b|\bkostenlos(?:e[rmns]?)?\s+(?:verkostung(?:en)?|kostproben?)\b/i;
 const PROMO =
@@ -102,6 +102,38 @@ function extractMabelsMocktailOffer($, source, pageUrl) {
   };
 }
 
+// The current price and all redemption conditions live together in one
+// section of a page shared with unrelated competitions and past promotions.
+function vapianoPastaTerms($) {
+  const heading = $('main h2').filter((_, el) =>
+    /^[-\s]*Teilnahmebedingungen\s+„Pasta del Giorno“$/i.test(foodText($(el).text())));
+  if (heading.length !== 1) return null;
+  const section = heading.nextUntil('h1,h2,h3,h4');
+  const nodes = heading.parents().add(heading).add(section).add(section.find('*'));
+  if (nodes.is('[hidden],template,[aria-hidden="true"]') || nodes.filter('[style]').toArray()
+    .some(el => /display\s*:\s*none|visibility\s*:\s*hidden/i.test($(el).attr('style')))) return null;
+  const lines = section.map((_, el) => textOf($, el)).get();
+  const regular = lines.find(line => /^Im Rahmen der Aktion „Pasta del Giorno“ wird täglich /i.test(line))
+    ?.match(/zum Sonderpreis von EUR (\d{1,2},\d{2}) angeboten\.$/);
+  const app = lines.find(line => /^Mit der VAPIANO Lovers App profitieren registrierte Mitglieder /i.test(line))
+    ?.match(/zum exklusiven App-Sonderpreis von EUR (\d{1,2},\d{2})\.$/);
+  const text = foodText(lines.join(' '));
+  if (!regular || !app || Number(app[1].replace(',', '.')) >= Number(regular[1].replace(',', '.'))
+    || !/Die Aktion gilt ab dem \d{2}\.\d{2}\.20\d{2} bis auf Widerruf\./.test(text)
+    || !/Das Angebot gilt in allen VAPIANO Restaurants in Österreich\./.test(text)
+    || !text.includes(`Der exklusive App-Sonderpreis von EUR ${app[1]} ist in allen österreichischen VAPIANO Restaurants verfügbar, ausgenommen VAPIANO Linz.`)
+    // Recheck participation if any Vienna-specific condition appears.
+    || /Wien|Herrengasse/i.test(text)
+    || !/ausschließlich direkt im Restaurant oder als Take-away über die VAPIANO Lovers App erhältlich/.test(text)
+    || !text.includes(`Der App-Sonderpreis von EUR ${app[1]} wird nur bei Verwendung der VAPIANO Lovers App gewährt.`)
+    || !/nicht für Bestellungen über externe Lieferdienste/.test(text)
+    || !/Zoodles sind von der Aktion ausgeschlossen/.test(text)
+    || !/nur am jeweiligen Tag der Ausweisung und solange der Vorrat reicht/.test(text)
+    || !/nicht mit anderen Aktionen, Rabatten, Gutscheinen oder Promotions kombinierbar/.test(text)
+    || /Aktion (?:ist (?:bereits )?beendet|wurde (?:beendet|widerrufen))|(?:nicht mehr (?:verfügbar|gültig)|gilt nicht mehr)/i.test(text)) return null;
+  return { text, title: `Pasta del Giorno mit der VAPIANO Lovers App um ${app[1]} € statt ${regular[1]} €`, method: 'official-campaign-terms' };
+}
+
 export function discoverFoodLinks(
   html,
   source,
@@ -155,7 +187,7 @@ export function extractFoodExpiry(text, now) {
     ? parseExpiryDetails(`${namedEnd[1]} ${namedEnd[2] || year}`, { now })?.date?.toISOString().slice(0, 10) || ""
     : "";
   const start = text.match(
-    /\b(?:ab|vom|von)\s+(\d{1,2})\.\s*(\d{1,2})\.\s*(20\d{2})?/i,
+    /\b(?:ab(?:\s+dem)?|vom|von)\s+(\d{1,2})\.\s*(\d{1,2})\.\s*(20\d{2})?/i,
   );
   const validUntil = end
     ? iso(+end[1], +end[2], +(end[3] || year))
@@ -309,6 +341,10 @@ export function extractFoodOffers(html, source, options = {}) {
   if (bakeryDetail) {
     if (bakeryOffer) blocks.push(bakeryOffer);
     else rejected.push({ reason: 'unconfirmed-weekly-bakery-offer', url: pageUrl });
+  } else if (source.name === 'Vapiano' && pageUrl === 'https://www.vapiano.at/teilnahmebedingungen/') {
+    const offer = vapianoPastaTerms($);
+    if (offer) blocks.push(offer);
+    else rejected.push({ reason: 'unconfirmed-pasta-terms', url: pageUrl });
   } else if (source.adjacentOfferSelector) {
     $(source.adjacentOfferSelector).each((i, el) => {
       const next = $(el).next('.elementor-widget-heading');
@@ -408,6 +444,10 @@ export function extractFoodOffers(html, source, options = {}) {
       continue;
     }
     const dates = b.dates || extractFoodExpiry(t, now);
+    if (b.method === 'official-campaign-terms' && !dates.validFrom) {
+      rejected.push({ reason: 'invalid-campaign-start', url: pageUrl });
+      continue;
+    }
     const today = new Intl.DateTimeFormat("sv-SE", {
       timeZone: "Europe/Vienna",
     }).format(now);

@@ -148,6 +148,8 @@ export const POWER_FOOD_SOURCES = [
   {
     name: "Vapiano",
     url: "https://www.vapiano.at/news/",
+    seeds: ["https://www.vapiano.at/teilnahmebedingungen/"],
+    branchEvidenceUrl: "https://www.vapiano.at/restaurants/wien-herrengasse/",
     category: "essen",
     allowedHosts: ["www.vapiano.at", "vapiano.at"],
     linkPattern: /happy-hour|pasta-tag|angebot|aktion/i,

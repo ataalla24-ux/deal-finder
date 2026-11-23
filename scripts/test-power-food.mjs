@@ -26,6 +26,50 @@ import {
   mergePendingQueue,
 } from "../scraper/slack-notify.js";
 const now = new Date("2026-09-23T12:00:00Z");
+{
+  const merchant = POWER_FOOD_SOURCES.find(row => row.name === 'Vapiano');
+  const pageUrl = merchant.seeds[0];
+  const date = new Date('2026-11-23T12:00:00Z');
+  const heading = '<h2>Teilnahmebedingungen „Pasta del Giorno“</h2>';
+  const lines = [
+    'Die Aktion gilt ab dem 22.10.2026 bis auf Widerruf.',
+    'Im Rahmen der Aktion „Pasta del Giorno“ wird täglich eine Testpasta zum Sonderpreis von EUR 11,50 angeboten.',
+    'Mit der VAPIANO Lovers App profitieren registrierte Mitglieder vom Vorteil zum exklusiven App-Sonderpreis von EUR 9,50.',
+    'Das Angebot gilt in allen VAPIANO Restaurants in Österreich.',
+    'Der exklusive App-Sonderpreis von EUR 9,50 ist in allen österreichischen VAPIANO Restaurants verfügbar, ausgenommen VAPIANO Linz.',
+    'Das Angebot ist ausschließlich direkt im Restaurant oder als Take-away über die VAPIANO Lovers App erhältlich. Der App-Sonderpreis von EUR 9,50 wird nur bei Verwendung der VAPIANO Lovers App gewährt.',
+    'Gilt nicht für Bestellungen über externe Lieferdienste. Zoodles sind von der Aktion ausgeschlossen.',
+    'Das Angebot gilt nur am jeweiligen Tag der Ausweisung und solange der Vorrat reicht.',
+    'Das Angebot ist nicht mit anderen Aktionen, Rabatten, Gutscheinen oder Promotions kombinierbar.',
+  ];
+  const adjacent = '<h2>Gewinnspiel</h2><p>Mit etwas Glück bis 01.11.2026 ein Essen gewinnen.</p>';
+  const terms = heading + lines.map(line => `<p>${line}</p>`).join('');
+  const read = html => extractFoodOffers(`<main>${html}</main>`, merchant, { now: date, pageUrl }).deals;
+  const [row] = read(terms + adjacent);
+  assert.equal(row.title, 'Pasta del Giorno mit der VAPIANO Lovers App um 9,50 € statt 11,50 €');
+  assert.equal(row.validFrom, '2026-10-22');
+  assert.equal(row.validUntil, undefined);
+  assert.equal(row.evidence.offerTiming.recurring, true);
+  assert.match(row.description, /Zoodles/);
+  assert.doesNotMatch(row.description, /Gewinnspiel/);
+  for (const broken of [terms + terms, terms.replace('zum Sonderpreis', 'zum Menüpreis'),
+    terms.replaceAll('9,50', '12,50'), terms.replace('VAPIANO Linz.', 'VAPIANO Wien.'),
+    terms + '<p>Die Aktion wurde widerrufen.</p>', terms.replace(heading, '<h2>Andere Aktion</h2>'),
+    terms.replace('solange der Vorrat reicht', 'jederzeit'), terms.replace('Take-away', 'Lieferung'),
+    terms.replace('22.10.2026', '31.02.2026'),
+    terms.replace('EUR 9,50.', 'EUR 9,50.</p><h2>Andere Aktion</h2><p>'),
+    `<div hidden>${terms}</div>`]) {
+    assert.equal(read(broken).length, 0, 'Changed, incomplete or hidden offer must not borrow other terms');
+  }
+  const restaurant = '<main><h1>Wien Herrengasse</h1><p>Herrengasse 6-8, 1010 Wien, Österreich</p></main>';
+  const verify = (html, finalUrl = merchant.branchEvidenceUrl) => verifyOfficialFoodDeal(row, { now: date,
+    fetchPage: async url => url === pageUrl ? { status: 200, finalUrl: url, html: `<main>${terms}</main>` }
+      : { status: 200, finalUrl, html } });
+  assert.match((await verify(restaurant)).viennaBranchEvidence, /1010 Wien/);
+  assert.equal((await verify(restaurant, merchant.url)).viennaBranchEvidence, '');
+  assert.equal((await verify(restaurant.replace('Wien Herrengasse', 'Impressum'))).viennaBranchEvidence, '');
+  assert.equal((await verify(restaurant.replace('<p>', '<p hidden>'))).viennaBranchEvidence, '');
+}
 const source = {
   name: "Test Cafe",
   url: "https://example.com/angebote",

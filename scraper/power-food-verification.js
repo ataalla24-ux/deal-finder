@@ -175,7 +175,8 @@ export async function verifyOfficialFoodDeal(deal, options = {}) {
   const current =
     source.currentOffers || Boolean(timing.validUntil || timing.recurring || (source.cashbackCampaigns && timing.kind === 'ongoing'));
   let viennaBranchEvidence = "";
-  if (source.currentOffers && source.branchEvidenceUrl) {
+  const vapianoPasta = source.name === 'Vapiano' && match.evidence.extractionMethod === 'official-campaign-terms';
+  if ((source.currentOffers || vapianoPasta) && source.branchEvidenceUrl) {
     const locationKey = source.name + "|" + source.branchEvidenceUrl;
     if (!cache.has(locationKey))
       cache.set(
@@ -195,11 +196,19 @@ export async function verifyOfficialFoodDeal(deal, options = {}) {
     ) {
       const $ = load(locationResponse.html);
       $("script,style,noscript").remove();
-      const text = $("body").text().replace(/\s+/g, " ");
-      viennaBranchEvidence =
-        text.match(
+      if (vapianoPasta) {
+        $('template,[hidden],[aria-hidden="true"]').remove();
+        $('[style]').filter((_, el) => /display\s*:\s*none|visibility\s*:\s*hidden/i.test($(el).attr('style'))).remove();
+        if (locationResponse.status === 200 && locationResponse.finalUrl === source.branchEvidenceUrl
+          && $('main h1').text().trim() === 'Wien Herrengasse') {
+          viennaBranchEvidence = $('main p').map((_, el) => $(el).text().trim()).get()
+            .find(line => /^Herrengasse 6[-–]8, 1010 Wien, Österreich$/.test(line)) || '';
+        }
+      } else {
+        viennaBranchEvidence = $("body").text().replace(/\s+/g, " ").match(
           /.{0,50}\b1(?:0[1-9]|1[0-9]|2[0-3])0\s+Wien\b.{0,60}|Filialen.{0,60}\bWien\b.{0,60}/i,
         )?.[0] || "";
+      }
     }
   }
   return {
