@@ -124,11 +124,12 @@
   "apiDiscovery": {
     "errors": [
       {
-        "keyword": "wien gratis dezember 2026",
+        "keyword": "wien gratis kaffee",
         "offset": 0,
-        "status": 0,
-        "error": "TikTok search request failed or timed out",
-        "code": "transport-unavailable"
+        "status": 200,
+        "error": "TikTok returned a provider error",
+        "code": "provider-error",
+        "providerCode": "2483"
       }
     ],
     "attemptedRequests": 1,
@@ -136,20 +137,39 @@
     "rawItems": 0,
     "normalizedItems": 0,
     "ignoredItems": 0,
-    "stoppedReason": "transport-unavailable",
-    "nextRetryAt": "2026-11-23T22:28:29.546Z",
+    "stoppedReason": "provider-error",
+    "nextRetryAt": "2026-11-24T09:37:29.226Z",
     "nextKeywordIndex": 10,
     "boundedRetry": {
       "reason": "local-request-policy",
       "failures": 2,
-      "failedAt": "2026-11-22T22:28:29.546Z"
+      "failedAt": "2026-11-23T09:37:29.226Z"
     },
     "transport": "direct-browser-search",
     "navigations": 1,
-    "searchRequests": 0,
-    "lastSearchResponse": null,
-    "homepageNavigation": "same-origin-redirect",
-    "publicVideoLinks": 0
+    "searchRequests": 1,
+    "siteAdjustedSearchRequests": 1,
+    "lastSearchResponse": {
+      "status": 200,
+      "declaredBytes": 125,
+      "decodedBytes": 125,
+      "retryAfterProvided": false,
+      "bodyState": "json"
+    },
+    "homepageNavigation": "root",
+    "releasedLocalPolicyDeadline": "2026-11-23T22:28:29.546Z",
+    "normalizedCandidates": 0,
+    "inspectedPublicLinks": 0,
+    "checkedBy": {
+      "repository": "ataalla24-ux/deal-finder",
+      "runId": "45148630096",
+      "headSha": "6ffefbe6bf6e6a49b1b28159efd06034961d120b",
+      "checkoutSha": "6ffefbe6bf6e6a49b1b28159efd06034961d120b",
+      "triggeringRun": null,
+      "event": "workflow_dispatch",
+      "runAttempt": "1",
+      "url": "https://github.com/ataalla24-ux/deal-finder/actions/runs/45148630096"
+    }
   },
   "searchDiscovery": {
     "errors": [],
