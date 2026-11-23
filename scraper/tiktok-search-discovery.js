@@ -74,8 +74,10 @@ export function parseTikTokSearchResponse(result = {}) {
 }
 
 export async function runTikTokApiDiscovery({ keywords, request, normalize, wait = async () => {},
-  previous = {}, now, clock = () => now ?? new Date(), pages = 3, count = 30, maxCandidates = 1200 } = {}) {
+  previous = {}, now, clock = () => now ?? new Date(), pages = 3, count = 30, maxCandidates = 1200,
+  fullKeywordScan = false } = {}) {
   const boundedRetry = isTikTokLocalRetry(previous);
+  const useFullScan = fullKeywordScan && !boundedRetry;
   const result = { rows: [], errors: [], attemptedRequests: 0, emptyResponses: 0,
     rawItems: 0, normalizedItems: 0, ignoredItems: 0, stoppedReason: '', nextRetryAt: '',
     nextKeywordIndex: Math.max(0, Math.floor(Number(previous.nextKeywordIndex) || 0)) };
@@ -84,7 +86,7 @@ export async function runTikTokApiDiscovery({ keywords, request, normalize, wait
       ...(boundedRetry ? { boundedRetry: previous.boundedRetry } : {}) };
   }
   const seen = new Set();
-  const start = keywords.length ? result.nextKeywordIndex % keywords.length : 0;
+  const start = !useFullScan && keywords.length ? result.nextKeywordIndex % keywords.length : 0;
   const keywordLimit = boundedRetry ? Math.min(keywords.length, 1) : keywords.length;
   const pageLimit = boundedRetry ? Math.min(pages, 1) : pages;
   let consecutiveEmpty = 0;
@@ -94,7 +96,7 @@ export async function runTikTokApiDiscovery({ keywords, request, normalize, wait
     result.nextKeywordIndex = (keywordIndex + 1) % keywords.length;
     for (let pageIndex = 0; pageIndex < pageLimit; pageIndex++) {
       const offset = pageIndex * count;
-      if (result.attemptedRequests) await wait(1000);
+      if (result.attemptedRequests) await wait(useFullScan ? 350 : 1000);
       result.attemptedRequests++;
       let response, parsed;
       try {
@@ -130,7 +132,7 @@ export async function runTikTokApiDiscovery({ keywords, request, normalize, wait
       }
       if (parsed.batch.length === 0) {
         result.emptyResponses++;
-        if (++consecutiveEmpty >= 5) return { ...result, stoppedReason: 'empty-search-sample' };
+        if (!useFullScan && ++consecutiveEmpty >= 5) return { ...result, stoppedReason: 'empty-search-sample' };
         break;
       }
       consecutiveEmpty = 0;

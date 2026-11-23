@@ -161,6 +161,44 @@ test('empty TikTok sample is bounded and later runs rotate rather than repeat th
   assert.equal(attempted[0],'food5');
 });
 
+test('full TikTok cloud scan starts in the configured order and can reach 1,200 posts after empty queries', async () => {
+  const keywords = Array.from({ length: 25 }, (_, index) => `term-${index}`);
+  const requests = [];
+  const waits = [];
+  let id = 7551234567891234567n;
+  const report = await fetchTikTokApiCandidates({}, {
+    keywords, now, fullKeywordScan: true, previous: { nextKeywordIndex: 12 },
+    wait: async ms => waits.push(ms),
+    request: async query => {
+      requests.push(query);
+      const data = Number(query.keyword.split('-')[1]) < 5 ? []
+        : Array.from({ length: query.count }, () => ({ ...item, id: String(id++) }));
+      return { ok: true, status: 200, body: { data, has_more: data.length > 0 } };
+    },
+  });
+
+  assert.deepEqual(requests.slice(0, 5).map(query => query.keyword), keywords.slice(0, 5));
+  assert.deepEqual(requests.slice(5, 8).map(query => [query.offset, query.count]), [[0, 30], [30, 30], [60, 30]]);
+  assert.equal(report.rows.length, 1200);
+  assert.equal(report.attemptedRequests, 45);
+  assert.equal(report.stoppedReason, 'candidate-limit');
+  assert.deepEqual(waits, Array(44).fill(350));
+});
+
+test('a full TikTok cloud scan stops at the first provider refusal and respects its wait', async () => {
+  let calls = 0;
+  const args = {
+    keywords: ['one', 'two'], now, fullKeywordScan: true, wait: never,
+    request: async () => { calls++; return { ok: false, status: 429, retryAfter: '172800' }; },
+  };
+  const failed = await fetchTikTokApiCandidates({}, args);
+  assert.equal(calls, 1);
+  assert.equal(failed.nextRetryAt, '2026-11-12T20:00:00.000Z');
+  const held = await fetchTikTokApiCandidates({}, { ...args, previous: failed, request: never });
+  assert.equal(held.attemptedRequests, 0);
+  assert.equal(held.nextRetryAt, failed.nextRetryAt);
+});
+
 test('TikTok separates unrecognized items, duplicates and accepted API candidates', async () => {
   const report=await fetchTikTokApiCandidates({waitForTimeout:async()=>{}},{keywords:['food'],now,
     request:async()=>valid([item,{item}, {user_info:{id:'123'}}])});

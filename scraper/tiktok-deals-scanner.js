@@ -1636,7 +1636,9 @@ async function main() {
     let apiPage;
     try {
       apiPage = await context.newPage();
-      apiDiscovery = await fetchTikTokApiCandidates(apiPage, { previous: previousReport.apiDiscovery });
+      apiDiscovery = await fetchTikTokApiCandidates(apiPage, {
+        previous: previousReport.apiDiscovery, fullKeywordScan: true,
+      });
     } catch {
       apiDiscovery = { rows: [], errors: [{ error: 'TikTok session unavailable', code: 'session-unavailable' }],
         stoppedReason: 'session-unavailable', nextRetryAt: new Date(Date.now() + DAY_MS).toISOString() };
