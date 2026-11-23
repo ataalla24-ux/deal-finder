@@ -25,9 +25,9 @@
   "circuitOpen": false,
   "canProceed": false,
   "ok": false,
-  "status": "validation-unconfirmed",
-  "reason": "Eigene Profilansicht nicht bestätigt; keine automatische Neuanmeldung",
-  "validationFailure": "own-profile-unconfirmed",
+  "status": "blocked",
+  "reason": "Instagram-Serverzugriff bleibt auf einer nicht bestätigten Einwilligungsseite; automatische Sammlung angehalten",
+  "validationFailure": "consent-unconfirmed",
   "userInteractionRequired": false,
   "browserSignals": {
     "sessionCookiePresent": true,
@@ -55,5 +55,12 @@
   "attempts": 1,
   "clearedFiles": [],
   "slackNotified": false,
-  "slackNotificationSuppressed": true
+  "slackNotificationSuppressed": true,
+  "classification": {
+    "method": "saved-own-profile-ui-signals",
+    "observedAt": "2026-11-23T12:12:13.076Z",
+    "reclassifiedAt": "2026-11-23T12:16:52.378Z",
+    "sourceRunId": "45171899833",
+    "newRequests": 0
+  }
 }
