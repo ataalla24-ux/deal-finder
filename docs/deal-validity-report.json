@@ -1,11 +1,11 @@
 {
-  "generatedAt": "2026-11-23T22:59:46.557Z",
+  "generatedAt": "2026-11-23T23:40:17.159Z",
   "summary": {
     "maxAgeDays": 7,
-    "total": 247,
-    "allowed": 2,
+    "total": 245,
+    "allowed": 0,
     "blocked": 245,
-    "warnings": 2,
+    "warnings": 0,
     "reasonCounts": {
       "kein konkretes Angebot erkennbar": 187,
       "älter als 7 Tage (2020-04-25)": 1,
@@ -39,6 +39,7 @@
       "älter als 7 Tage (2009-05-01)": 1,
       "älter als 7 Tage (2014-06-07)": 1,
       "älter als 7 Tage (2025-12-30)": 1,
+      "abgelaufen (2026-11-23)": 2,
       "Engagement-Aktion ohne garantierte Gegenleistung": 2,
       "ausgeschlossene Quelle (TheFork)": 1,
       "älter als 7 Tage (2026-11-14)": 1,
@@ -51,7 +52,7 @@
       "älter als 7 Tage": 141,
       "ungültige URL": 16,
       "ausgeschlossene Quelle": 14,
-      "abgelaufen": 13,
+      "abgelaufen": 15,
       "Post-Datum in Zukunft": 3,
       "sonstiges": 5,
       "nicht Wien": 5,
@@ -140,7 +141,8 @@
         "blocked": 4,
         "warnings": 0,
         "reasonCategoryCounts": {
-          "ungültige URL": 4
+          "ungültige URL": 4,
+          "abgelaufen": 2
         }
       },
       "instagram-ai-agent": {
@@ -197,10 +199,10 @@
         }
       },
       "Meta Instagram Hashtag API": {
-        "total": 10,
-        "allowed": 2,
+        "total": 8,
+        "allowed": 0,
         "blocked": 8,
-        "warnings": 2,
+        "warnings": 0,
         "reasonCategoryCounts": {
           "kein konkreter Deal": 7,
           "sonstiges": 1
@@ -208,42 +210,7 @@
       }
     }
   },
-  "allowed": [
-    {
-      "id": "meta-ig-18117235097144006",
-      "title": "30 % Rabatt auf alle Speisen",
-      "brand": "TINMO",
-      "source": "Meta Instagram Hashtag API",
-      "url": "https://www.instagram.com/reel/DgGOk5etsMa/",
-      "reasons": [],
-      "warnings": [
-        "Inhalt prüfen: Caption-Reste oder Emoji-Codes im sichtbaren Text"
-      ],
-      "sourceDate": "2026-11-23T20:22:07.000Z",
-      "sourceDateSource": "url.instagramShortcode",
-      "sourceAgeDays": 0,
-      "expiryDate": "2026-11-29",
-      "expirySource": "url.contentHints.title",
-      "urlStatus": "HTTP 200"
-    },
-    {
-      "id": "meta-ig-18505604857107196",
-      "title": "😍❄️ 🍽️ 5 Gerichte zur Auswahl – inklusive Suppe für nur € 14,90!",
-      "brand": "Mährischer Spatz",
-      "source": "Meta Instagram Hashtag API",
-      "url": "https://www.instagram.com/reel/DgGHmc3xn0y/",
-      "reasons": [],
-      "warnings": [
-        "Inhalt prüfen: Caption-Reste oder Emoji-Codes im sichtbaren Text"
-      ],
-      "sourceDate": "2026-11-23T19:21:10.000Z",
-      "sourceDateSource": "url.instagramShortcode",
-      "sourceAgeDays": 0,
-      "expiryDate": "2026-11-27",
-      "expirySource": "url.contentHints.title",
-      "urlStatus": "HTTP 200"
-    }
-  ],
+  "allowed": [],
   "blocked": [
     {
       "id": "jesuszentrum-events-20261123",
@@ -883,7 +850,7 @@
       "warnings": [
         "kein Ablaufdatum gefunden"
       ],
-      "sourceDate": "2026-11-23T22:58:04.782Z",
+      "sourceDate": "2026-11-23T23:38:50.852Z",
       "sourceDateSource": "url.publicationDate",
       "sourceAgeDays": 0,
       "expiryDate": "",
@@ -3260,7 +3227,8 @@
       "source": "Gutscheine.at",
       "url": "https://www.gutscheine.at/babymarkt",
       "reasons": [
-        "URL ungültig (HTTP 404)"
+        "URL ungültig (HTTP 404)",
+        "abgelaufen (2026-11-23)"
       ],
       "warnings": [],
       "sourceDate": "2026-11-23T18:39:31.716Z",
@@ -3294,7 +3262,8 @@
       "source": "Gutscheine.at",
       "url": "https://www.gutscheine.at/babymarkt",
       "reasons": [
-        "URL ungültig (HTTP 404)"
+        "URL ungültig (HTTP 404)",
+        "abgelaufen (2026-11-23)"
       ],
       "warnings": [],
       "sourceDate": "2026-11-23T18:39:31.716Z",
@@ -5016,23 +4985,16 @@
   ],
   "runProvenance": {
     "repository": "ataalla24-ux/deal-finder",
-    "runId": "45284656832",
-    "headSha": "2e3669074132354b5d8b0c213a86f89082f66de7",
-    "checkoutSha": "2e3669074132354b5d8b0c213a86f89082f66de7",
-    "triggeringRun": {
-      "runId": "45281671465",
-      "headSha": "b76e9ac9894558a6150d3e22744c485452b0f451",
-      "event": "workflow_dispatch",
-      "name": "Meta Instagram Deal Discovery",
-      "startedAt": "2026-11-23T22:38:55.000Z",
-      "url": "https://github.com/ataalla24-ux/deal-finder/actions/runs/45281671465"
-    },
-    "event": "workflow_run",
+    "runId": "45290629219",
+    "headSha": "cbbe1fff62ca4f4ee3da3e192aa886ee97881bcb",
+    "checkoutSha": "cbbe1fff62ca4f4ee3da3e192aa886ee97881bcb",
+    "triggeringRun": null,
+    "event": "workflow_dispatch",
     "runAttempt": "1",
-    "url": "https://github.com/ataalla24-ux/deal-finder/actions/runs/45284656832"
+    "url": "https://github.com/ataalla24-ux/deal-finder/actions/runs/45290629219"
   },
   "instagramDelivery": {
-    "checkedAt": "2026-11-23T22:59:47.562Z",
+    "checkedAt": "2026-11-23T23:40:17.167Z",
     "scope": "instagram-ai-agent/standard-slack-lane",
     "extractedCandidates": 3,
     "counts": {
@@ -5087,7 +5049,7 @@
     ]
   },
   "tiktokDelivery": {
-    "checkedAt": "2026-11-23T22:59:47.563Z",
+    "checkedAt": "2026-11-23T23:40:17.169Z",
     "scope": "tiktok-deals-scanner/standard-slack-lane",
     "extractedCandidates": 1,
     "counts": {
