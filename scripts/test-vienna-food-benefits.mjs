@@ -110,3 +110,15 @@ test('city detail reads the official benefit and partner address without borrowi
     page.replace('>Details<','>Location<').replace('</wm-section>', related + '</wm-section>'),
     page.replace(offer,'Verlosung'),page.replace('1090 Wien','4020 Linz')]) assert.equal(parse(broken).deal, undefined);
 });
+
+test('a withdrawn Vienna offer fails the same verification used before posting', async () => {
+  const deal = parse(fixture()).deal;
+  for (const notice of ['Dieser Rabatt ist nicht mehr gültig.', 'Das Angebot ist dauerhaft beendet.']) {
+    const html = fixture({conditions: terms + ' ' + notice});
+    assert.equal(parse(html).reason, 'withdrawn-benefit');
+    const verification = await verifyViennaFoodBenefit(deal, {now, fetchPage: async () => ({html,finalUrl:url})});
+    assert.equal(verification.ok, false);
+  }
+  for (const restriction of ['Nicht gültig für Mittagsmenüs.', 'Der Rabatt ist nicht mehr gültig für Getränke.', 'Nicht mit anderen Aktionen kombinierbar.'])
+    assert.ok(parse(fixture({conditions:terms + ' ' + restriction})).deal);
+});

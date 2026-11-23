@@ -68,6 +68,8 @@ export function parseViennaFoodBenefit(html, url, { now = new Date() } = {}) {
   const addressNodes = $('.wm-card--partner .wm-icon-text__content').add(pins);
   const addresses = [...new Set(addressNodes.map((_, e) => clean($(e).clone().find('br').replaceWith(' ').end().text())).get()
     .filter(value => /\b1(?:0[1-9]|1[0-9]|2[0-3])0\s+Wien\b/i.test(value)))];
+  const withdrawn = /\b(?:dies(?:er|e|es)|de[rns]|die|das)\s+(?:Angebot|Rabatt|Aktion|Vorteil|Ermäßigung)\s+(?:ist|wurde)\s+(?:nicht mehr (?:gültig|verfügbar|einlösbar)|(?:dauerhaft |vorzeitig )?(?:beendet|eingestellt|zurückgezogen|abgelaufen))(?=[.!?;]|$)/i;
+  if ([offer, terms, context].some(text => withdrawn.test(text))) return { reason:'withdrawn-benefit' };
   if (!brand || brand.length > 150 || !terms || terms.length > 2000 || addresses.length !== 1) return { reason: 'missing-benefit-facts' };
   if (!/speise|gericht|getränk|nudelbox|torte|kuchen|kaffee|coffee|café|sushi|burger|pizz(?:a|eri)|lebensmittel|bäckerei|gebäck|frühstück|küche|restaurant/i.test(`${brand} ${offer} ${terms} ${context}`)) return {reason:'not-food-benefit'};
   if (!/^20 Prozent Ermäßigung (?:auf (?:die (?:Einzelrechnung|Gesamtrechnung)|Take-Away-Bestellungen|Nudelboxen|eine Speise|Speisen und Getränke bei Abholung|Torten bei Abholung|gemischte Packungen)|jeden Dienstag auf alle Produkte)/.test(offer)) return { reason: 'unsupported-benefit' };
