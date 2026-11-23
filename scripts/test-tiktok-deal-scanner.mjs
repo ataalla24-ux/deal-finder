@@ -11,6 +11,20 @@ import { modelForTask, OPENAI_MODEL_TIMEOUT_MS } from '../scraper/ai-credit-budg
 
 const REFERENCE_NOW = new Date('2026-08-26T12:00:00.000Z');
 
+// Recheck the two approved offers from the October 18 dispatch on both sides of the freshness window.
+for (const [account, id, time, caption, start, end] of [
+  ['dahabdoener', '7698001121721208086', '13:36:02', '2 + 1 Döner GRATIS auf alle Dönersorten, Rußbergstraße 9, 1210 Wien, 19.10 bis 25.10 den ganzen Tag.', '2026-10-19', '2026-10-25'],
+  ['tadimakebap1', '7697993250354826518', '13:05:29', 'Zu JEDEM DÖNER gibt’s ein leckeres TIRAMISU GRATIS! Vom 21. Oktober bis 4. November! Taborstrasse 52B 1020Wien.', '2026-10-21', '2026-11-04'],
+]) {
+  const url = 'https://www.tiktok.com/@' + account + '/video/' + id;
+  const data = { accountHandle: account, description: caption, timeDateTime: '2026-10-18T' + time + 'Z' };
+  const original = buildDealFromPost(url, data, { now: new Date('2026-10-18T19:30:00Z') });
+  assert.ok(original.deal, original.reason);
+  assert.deepEqual([original.deal.validFrom, original.deal.validUntil], [start, end]);
+  const expired = buildDealFromPost(url, data, { now: new Date('2026-11-23T16:00:00Z') });
+  assert.equal(expired.deal, null);
+}
+
 assert.equal(buildTikTokMediaConfig({}).mediaTesseractTimeoutMs, 8000);
 assert.equal(buildTikTokMediaConfig({}).mediaMaxVideoFrames, 2);
 assert.equal(buildTikTokMediaConfig({}).mediaLlmTimeoutMs, OPENAI_MODEL_TIMEOUT_MS);

@@ -25,6 +25,7 @@ function fixture(t) {
   write('deal-review-feedback', { events: [] });
   write('slack-seen-posts', { seenPostKeys: [] });
   write('sent-deal-ids', {});
+  write('deal-moderation', {});
   return { dir, write, select: () => readKnownTikTokLinks(dir, { now }) };
 }
 
@@ -108,4 +109,12 @@ test('missing lead input leaves the other eligible, unreadable suppression state
   f.write('slack-seen-posts', { seenPostKeys: [] });
   f.write('deals', { deals: 'unavailable' });
   assert.deepEqual(f.select(), []);
+});
+
+test('suppresses moderated and previously observed old videos even on rediscovery', t => {
+  const f = fixture(t);
+  f.write('deal-moderation', { hiddenDeals: [{ url: lead(1).url }] });
+  f.write('deals-pending-gastro2', { deals: [lead(1), lead(2), lead(3)] });
+  f.write('deals-pending-firecrawl4', { deals: [lead(2, { discoveredAt: '2026-11-10T12:00:00Z' })] });
+  assert.deepEqual(f.select(), [lead(3).url]);
 });

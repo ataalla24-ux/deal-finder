@@ -1,5 +1,6 @@
 import { readFileSync } from 'node:fs';
 import path from 'node:path';
+import { moderationReasonForDeal } from './deal-moderation-utils.js';
 
 const leadQueues = ['deals-pending-firecrawl4.json', 'deals-pending-gastro2.json'];
 const knownQueues = [
@@ -39,7 +40,8 @@ function readRows(docsDir, filename, field) {
 export function readKnownTikTokLinks(docsDir, { now = new Date() } = {}) {
   const seenKeys = readRows(docsDir, 'slack-seen-posts.json', 'seenPostKeys');
   const knownLists = knownQueues.map(([file, field]) => readRows(docsDir, file, field));
-  if (!seenKeys || knownLists.includes(null)) return [];
+  const moderation = readDocument(docsDir, 'deal-moderation.json');
+  if (!seenKeys || knownLists.includes(null) || !moderation) return [];
 
   const knownVideoIds = new Set();
   const historicalSent = readDocument(docsDir, 'sent-deal-ids.json');
@@ -68,9 +70,10 @@ export function readKnownTikTokLinks(docsDir, { now = new Date() } = {}) {
       if (!match || match[0] !== row.url) continue;
       const [, handle, videoId] = match;
       const accountKey = handle.toLowerCase().replace(/[^a-z0-9]/g, '');
-      if (selfAccountKeys.has(accountKey) || knownDealIds.has(row.id)) knownVideoIds.add(videoId);
+      if (selfAccountKeys.has(accountKey) || knownDealIds.has(row.id) || moderationReasonForDeal(row, moderation)) knownVideoIds.add(videoId);
       if (typeof row.discoveredAt !== 'string' || !discoveryTimestamp.test(row.discoveredAt)) continue;
       const age = +now - Date.parse(row.discoveredAt);
+      if (age > maxDiscoveryAge) knownVideoIds.add(videoId);
       if (!Number.isFinite(age) || age < 0 || age > maxDiscoveryAge) continue;
       const existingUrl = links.get(videoId);
       if (!existingUrl || row.url < existingUrl) links.set(videoId, row.url);

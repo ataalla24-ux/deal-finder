@@ -190,10 +190,11 @@ export function buildTikTokApiKeywords(now = new Date()) {
 
 const TIKTOK_API_KEYWORDS = buildTikTokApiKeywords();
 
+const VIENNA_POSTCODE = /\b1(?:0[1-9]0|1[0-9]0|2[0-3]0)(?:wien)?\b/i;
 const VIENNA_PATTERNS = [
   /\bwien\b/i,
   /\bvienna\b/i,
-  /\b1(?:0[1-9]0|1[0-9]0|2[0-3]0)\b/i,
+  VIENNA_POSTCODE,
   /\binnere stadt|leopoldstadt|landstraße|landstrasse|wieden|margareten|mariahilf|neubau|josefstadt|alsergrund|favoriten|meidling|hietzing|penzing|rudolfsheim|ottakring|hernals|währing|waehring|döbling|doebling|brigittenau|floridsdorf|donaustadt|liesing\b/i,
 ];
 
@@ -500,7 +501,7 @@ function withoutNonOfferFreeTerms(value) {
 
 function hasSpecificViennaEvidence(text) {
   const signal = cleanText(text, 2600).replace(/#[\w.äöüß-]+/gi, ' ');
-  return /\b1(?:0[1-9]0|1[0-9]0|2[0-3]0)\b/i.test(signal)
+  return VIENNA_POSTCODE.test(signal)
     || /\b(?:wien|vienna)\s*,?\s*(?:österreich|oesterreich|austria)\b/i.test(signal)
     || /\b(?:innere stadt|leopoldstadt|landstraße|landstrasse|wieden|margareten|mariahilf|neubau|josefstadt|alsergrund|favoriten|meidling|hietzing|penzing|rudolfsheim|ottakring|hernals|währing|waehring|döbling|doebling|brigittenau|floridsdorf|donaustadt|liesing)\b/i.test(signal);
 }

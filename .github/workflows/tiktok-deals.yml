@@ -58,11 +58,12 @@ jobs:
         run: npx playwright install --with-deps chromium chromium-headless-shell
 
       - name: Inspect TikTok media OCR tools
+        if: ${{ !inputs.text_only }}
         id: media_tools
         run: node scripts/coupon-tools-preflight.mjs --social-media
 
       - name: Install missing TikTok media OCR tools
-        if: steps.media_tools.outputs.available != 'true'
+        if: ${{ !inputs.text_only && steps.media_tools.outputs.available != 'true' }}
         continue-on-error: true
         timeout-minutes: 5
         env:
