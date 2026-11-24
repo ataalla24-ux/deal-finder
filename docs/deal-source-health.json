@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-11-24T16:06:32.591Z",
+  "generatedAt": "2026-11-24T16:14:05.248Z",
   "discoveryAvailability": {
     "note": "Transport evidence, not deal yield. Retry eligibility is not recovery. Candidate counts are not Slack deliveries. No extra runs or quota resets.",
     "lanes": [
@@ -54,9 +54,9 @@
   },
   "summary": {
     "filesConsidered": 33,
-    "totalCandidates": 738,
-    "uniqueCandidates": 714,
-    "distinctCandidates": 724,
+    "totalCandidates": 737,
+    "uniqueCandidates": 713,
+    "distinctCandidates": 723,
     "duplicateClusters": 10,
     "topHealthySources": [
       {
@@ -78,16 +78,16 @@
         "totalDeals": 113
       },
       {
-        "sourceKey": "instagram-apify2",
-        "sourceLabel": "Apify 2 Vienna Food Discovery",
-        "healthScore": 74,
-        "totalDeals": 2
-      },
-      {
         "sourceKey": "meta-instagram",
         "sourceLabel": "Meta Instagram Graph",
         "healthScore": 68,
         "totalDeals": 87
+      },
+      {
+        "sourceKey": "church-events",
+        "sourceLabel": "Freikirchen Wien",
+        "healthScore": 64,
+        "totalDeals": 4
       }
     ],
     "topMissionSources": [
@@ -104,12 +104,6 @@
         "totalDeals": 9
       },
       {
-        "sourceKey": "instagram-apify2",
-        "sourceLabel": "Apify 2 Vienna Food Discovery",
-        "missionFitScore": 68,
-        "totalDeals": 2
-      },
-      {
         "sourceKey": "member-benefits",
         "sourceLabel": "Member Benefits",
         "missionFitScore": 63,
@@ -120,6 +114,12 @@
         "sourceLabel": "Apify Instagram",
         "missionFitScore": 63,
         "totalDeals": 1
+      },
+      {
+        "sourceKey": "tiktok-browser",
+        "sourceLabel": "TikTok Browser",
+        "missionFitScore": 61,
+        "totalDeals": 2
       }
     ],
     "topCoverageSources": [
@@ -179,16 +179,16 @@
         "totalDeals": 113
       },
       {
-        "sourceKey": "instagram-apify2",
-        "sourceLabel": "Apify 2 Vienna Food Discovery",
-        "precisionScore": 69,
-        "totalDeals": 2
-      },
-      {
         "sourceKey": "meta-instagram",
         "sourceLabel": "Meta Instagram Graph",
         "precisionScore": 67,
         "totalDeals": 87
+      },
+      {
+        "sourceKey": "joe",
+        "sourceLabel": "jö Bonus Club",
+        "precisionScore": 62,
+        "totalDeals": 9
       }
     ],
     "topWeightedSources": [
@@ -217,10 +217,10 @@
         "totalDeals": 2
       },
       {
-        "sourceKey": "instagram-apify2",
-        "sourceLabel": "Apify 2 Vienna Food Discovery",
-        "sourceWeightScore": 59,
-        "totalDeals": 2
+        "sourceKey": "gastro2",
+        "sourceLabel": "Firecrawl Key 1 - Gastro",
+        "sourceWeightScore": 55,
+        "totalDeals": 122
       }
     ],
     "topSourcesToFix": [
@@ -285,7 +285,6 @@
       "failedSources": [],
       "completedWithErrors": [
         "food3",
-        "instagram-apify2",
         "joe",
         "power",
         "wien-combined"
@@ -514,78 +513,6 @@
       "coverageScore": 81,
       "precisionScore": 72,
       "sourceWeightScore": 71
-    },
-    {
-      "sourceKey": "instagram-apify2",
-      "file": "deals-pending-instagram-apify2.json",
-      "sourceLabel": "Apify 2 Vienna Food Discovery",
-      "totalDeals": 2,
-      "uniqueDeals": 2,
-      "duplicateDeals": 0,
-      "duplicateAcrossSources": 0,
-      "fresh1dCount": 1,
-      "fresh7dCount": 1,
-      "viennaCount": 1,
-      "foodDrinkCount": 2,
-      "promoCount": 1,
-      "missingUrlCount": 0,
-      "sampleTitles": [
-        "This week at Villa Vida, we're making space to study, sing, craft, dance, quiz, brunch and play. Bring your pe",
-        "Authentische neapolitanische Pizza für unter 6 € in Wien"
-      ],
-      "lastRun": {
-        "status": "completed-with-errors",
-        "startedAt": "2026-11-24T03:24:17.285Z",
-        "finishedAt": "2026-11-24T03:25:23.486Z",
-        "durationMs": 66201,
-        "counts": {
-          "rawCandidates": 8,
-          "normalizedCandidates": 5,
-          "verifiedCandidates": 0,
-          "previousDeals": 0,
-          "acceptedDeals": 1,
-          "rejectedDeals": 4
-        },
-        "rejectedByReason": {
-          "no-consumer-food-benefit": 2,
-          "post-older-than-seven-days": 2
-        },
-        "errors": [],
-        "reportFile": "deal-pipeline-last-run-instagram-apify2.json"
-      },
-      "uniqueRate": 1,
-      "duplicateRate": 0,
-      "fresh1dRate": 0.5,
-      "fresh7dRate": 0.5,
-      "viennaRate": 0.5,
-      "foodDrinkRate": 1,
-      "promoRate": 0.5,
-      "missingUrlRate": 0,
-      "averageQualityScore": 80,
-      "topCategories": [
-        {
-          "value": "essen",
-          "count": 2
-        }
-      ],
-      "topTypes": [
-        {
-          "value": "gratis",
-          "count": 1
-        },
-        {
-          "value": "rabatt",
-          "count": 1
-        }
-      ],
-      "issues": [
-        "Wien-Signal ist zu schwach"
-      ],
-      "healthScore": 74,
-      "missionFitScore": 68,
-      "coverageScore": 12,
-      "precisionScore": 69,
-      "sourceWeightScore": 59
     },
     {
       "sourceKey": "meta-instagram",
@@ -1571,6 +1498,76 @@
         }
       ],
       "issues": [
+        "wenige Deals sind frischer als 1 Tag",
+        "wenige klare Gratis-/Promo-Signale",
+        "Wien-Signal ist zu schwach"
+      ],
+      "healthScore": 48,
+      "missionFitScore": 35,
+      "coverageScore": 6,
+      "precisionScore": 38,
+      "sourceWeightScore": 33
+    },
+    {
+      "sourceKey": "instagram-apify2",
+      "file": "deals-pending-instagram-apify2.json",
+      "sourceLabel": "Apify 2 Vienna Food Discovery",
+      "totalDeals": 1,
+      "uniqueDeals": 1,
+      "duplicateDeals": 0,
+      "duplicateAcrossSources": 0,
+      "fresh1dCount": 0,
+      "fresh7dCount": 0,
+      "viennaCount": 0,
+      "foodDrinkCount": 1,
+      "promoCount": 0,
+      "missingUrlCount": 0,
+      "sampleTitles": [
+        "Authentische neapolitanische Pizza für unter 6 € in Wien"
+      ],
+      "lastRun": {
+        "status": "completed",
+        "startedAt": "2026-11-24T16:04:42.455Z",
+        "finishedAt": "2026-11-24T16:05:46.986Z",
+        "durationMs": 64531,
+        "counts": {
+          "rawCandidates": 7,
+          "normalizedCandidates": 3,
+          "verifiedCandidates": 0,
+          "previousDeals": 0,
+          "acceptedDeals": 0,
+          "rejectedDeals": 3
+        },
+        "rejectedByReason": {
+          "non-food-ad": 2,
+          "no-consumer-food-benefit": 1
+        },
+        "errors": [],
+        "reportFile": "deal-pipeline-last-run-instagram-apify2.json"
+      },
+      "uniqueRate": 1,
+      "duplicateRate": 0,
+      "fresh1dRate": 0,
+      "fresh7dRate": 0,
+      "viennaRate": 0,
+      "foodDrinkRate": 1,
+      "promoRate": 0,
+      "missingUrlRate": 0,
+      "averageQualityScore": 70,
+      "topCategories": [
+        {
+          "value": "essen",
+          "count": 1
+        }
+      ],
+      "topTypes": [
+        {
+          "value": "rabatt",
+          "count": 1
+        }
+      ],
+      "issues": [
+        "letzter Lauf fand Kandidaten, aber akzeptierte keinen Deal",
         "wenige Deals sind frischer als 1 Tag",
         "wenige klare Gratis-/Promo-Signale",
         "Wien-Signal ist zu schwach"
