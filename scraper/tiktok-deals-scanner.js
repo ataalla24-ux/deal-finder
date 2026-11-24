@@ -1730,21 +1730,24 @@ async function main() {
       enabled: booleanEnv(process.env, 'TIKTOK_TAVILY_INDEX_ENABLED', false),
       previous: previousReport.tavilyDiscovery,
     });
-    indexedLeads = selectTikTokIndexedLeads(DOCS_DIR, {
+    const selection = selectTikTokIndexedLeads(DOCS_DIR, {
       previous: previousReport.pendingIndexedTikTokLinks,
       duckduckgo: discovery.links,
       tavily: indexDiscovery.links,
     });
-    const webLinks = publicOnly ? indexedLeads.map(lead => lead.url)
+    indexedLeads = selection.leads;
+    discovery.linkStateUnavailable = publicOnly && !selection.ready;
+    const eligibleIndexedLeads = selection.ready ? indexedLeads : [];
+    const webLinks = publicOnly ? eligibleIndexedLeads.map(lead => lead.url)
       : [...new Set([...discovery.links, ...indexDiscovery.links])];
     const visibleLinks = apiDiscovery.publicVideoLinks || [];
     const primaryLinks = new Set([...webLinks, ...visibleLinks,
       ...apiDiscovery.rows.map(row => row.data.url)]);
-    const tavilyLinks = publicOnly ? indexedLeads.filter(lead =>
+    const tavilyLinks = publicOnly ? eligibleIndexedLeads.filter(lead =>
       lead.sources.includes('tavily') && !lead.sources.includes('duckduckgo')).map(lead => lead.url) : indexDiscovery.links;
     const indexOnlyLinks = new Set(tavilyLinks.filter(url =>
       !discovery.links.includes(url) && !visibleLinks.includes(url)));
-    const knownLinks = readKnownTikTokLinks(DOCS_DIR).filter(url => !primaryLinks.has(url));
+    const knownLinks = discovery.linkStateUnavailable ? [] : readKnownTikTokLinks(DOCS_DIR).filter(url => !primaryLinks.has(url));
     // Reuse a free post-visit slot after the ordinary search. Existing provider pauses apply.
     const lastIndex = previousReport.searchDiscovery?.knownPostLinks?.nextIndex;
     const hintIndex = knownLinks.length && Number.isSafeInteger(lastIndex) && lastIndex >= 0 ? lastIndex % knownLinks.length : 0;

@@ -23,6 +23,8 @@ test('failed or deferred discovery cannot replace the previous outbox with an em
   const index = { status: 'completed' };
   const skippedWeb = { skippedThisRun: true, errors: [{}] };
   assert.deepEqual(tikTokDiscoveryHealth(publicOnly, skippedWeb, 0, { index }), { status: 'completed', outputPreserved: true });
+  assert.deepEqual(tikTokDiscoveryHealth(publicOnly, { attemptedQueries: 1, linkStateUnavailable: true }, 0, { index }),
+    { status: 'discovery-degraded', outputPreserved: true });
   assert.deepEqual(tikTokDiscoveryHealth(publicOnly, skippedWeb, 0, { index, publicVisits: [{}] }),
     { status: 'discovery-degraded', outputPreserved: true });
   assert.deepEqual(tikTokDiscoveryHealth(publicOnly, skippedWeb, 0, { index: { status: 'rate-limited' } }),

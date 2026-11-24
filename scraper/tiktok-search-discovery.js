@@ -90,7 +90,8 @@ export function tikTokDiscoveryHealth(api, search, accepted = 0, { index, public
   const publicSearchUnavailable = api.stoppedReason === 'public-only'
     && ((!search.attemptedQueries && index?.status !== 'completed') || missedOriginals);
   const webSearchUnavailable = !search.skippedThisRun && (search.errors?.length || search.nextRetryAt);
-  const unavailable = Boolean(api.errors?.length || api.nextRetryAt || webSearchUnavailable || publicSearchUnavailable);
+  const unavailable = Boolean(api.errors?.length || api.nextRetryAt || webSearchUnavailable
+    || publicSearchUnavailable || search.linkStateUnavailable);
   return { status: unavailable ? 'discovery-degraded' : 'completed',
     outputPreserved: (unavailable || Boolean(search.skippedThisRun)) && accepted === 0 };
 }
