@@ -820,6 +820,18 @@ export async function maintainFeedFile({ cwd = process.cwd(), allowAi = false, a
   result.report.ai = { attempted: 0, corrected: 0, deferred: 0, readyForModel: 0,
     models:{editor:editor?.model || modelForTask('editor'),review:modelForTask('review')},reasoningEffort:'max',reasoningMode:'pro' };
   result.state.checks ||= [];
+  const verifiedTitles = new Map(result.state.corrections.filter(entry =>
+    entry.method === 'source-grounded-draft-and-verification' && entry.patch?.title).map(entry => [entry.id, entry]));
+  const fieldsForReview = deal => {
+    const fields = protectedFields(deal, edits);
+    const title = clean(deal.title);
+    const verified = verifiedTitles.get(deal.id);
+    // A compact title may still need up to 60 characters for mandatory terms.
+    if (title.length > 50 && title.length <= 60 && verified?.patch.title === title
+      && verified.resultHash === maintenanceFingerprint(deal)
+      && verified.sourceHash === hash(sourceTexts(deal, sourceEvidence.get(deal.id)))) fields.add('title');
+    return fields;
+  };
   // Prioritize due work without reordering the public feed. A placeholder is
   // still pending, and a failed review does not immediately rebill on pushes.
   const order = result.deals.map((deal, index) => ({ deal, index })).sort((a, b) =>
@@ -832,7 +844,7 @@ export async function maintainFeedFile({ cwd = process.cwd(), allowAi = false, a
   const maxReviews = astra && normalReviews ? 8 : normalReviews;
   for (const { index } of order) {
       if (reviewed >= maxReviews) break;
-      const deal = result.deals[index], fields = protectedFields(deal, edits);
+      const deal = result.deals[index], fields = fieldsForReview(deal);
       if (protectedDeal(deal, edits, policy) || !copyReviewReasons(deal, fields).length
         || pendingDescription(deal) && !dueDescription(deal, now)
         || !sourceTexts(deal, sourceEvidence.get(deal.id)).length) continue;
@@ -887,11 +899,13 @@ export async function maintainFeedFile({ cwd = process.cwd(), allowAi = false, a
         const next = completeDescription({ ...result.deals[index], ...patch }, patch, now);
         result.deals[index] = next;
         const method = 'source-grounded-draft-and-verification';
-        result.state.corrections.push({ id: deal.id, inputHash, resultHash: maintenanceFingerprint(next), at: now.toISOString(),
+        const correction = { id: deal.id, inputHash, resultHash: maintenanceFingerprint(next), at: now.toISOString(),
           sourceHash: hash(sourceTexts(deal, sourceEvidence.get(deal.id))),
           originalTitle: deal.title, originalDescription: deal.description, originalDeal: deal, patch, title: next.title, description:next.description,
           quote: proposal.quote, conditionsQuote:proposal.conditionsQuote, dateQuote:proposal.dateQuote,
-          models:proposal.models,reasoningEffort:proposal.reasoningEffort,reasoningMode:proposal.reasoningMode,method });
+          models:proposal.models,reasoningEffort:proposal.reasoningEffort,reasoningMode:proposal.reasoningMode,method };
+        result.state.corrections.push(correction);
+        if (patch.title) verifiedTitles.set(deal.id, correction);
         result.report.corrected.push({ id: deal.id, fields: Object.keys(patch),
           models:proposal.models,reasoningEffort:proposal.reasoningEffort,reasoningMode:proposal.reasoningMode,method });
         result.report.ai.corrected++;
@@ -915,7 +929,7 @@ export async function maintainFeedFile({ cwd = process.cwd(), allowAi = false, a
   }
   result.report.review = result.report.review.filter(row => row.reason !== 'copy-needs-grounded-review');
   for (const deal of result.deals) {
-    const reasons = copyReviewReasons(deal, protectedFields(deal, edits));
+    const reasons = copyReviewReasons(deal, fieldsForReview(deal));
     if (reasons.length) result.report.review.push({id:deal.id,reason:'copy-needs-grounded-review',fields:reasons});
   }
   persist();

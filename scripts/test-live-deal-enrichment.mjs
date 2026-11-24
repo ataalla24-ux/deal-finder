@@ -220,7 +220,15 @@ test('AÏDA tier titles use the exact matching coupon and still require an indep
     assert.equal(result.deals[0].description, deal.description);
     assert.equal(result.deals[0].validUntil, deal.validUntil);
     assert.equal(result.report.ai.corrected, Number(supported));
-    if (!supported) assert.deepEqual(result.deals, [deal]);
+    if (!supported) {
+      assert.deepEqual(result.deals, [deal]);
+      continue;
+    }
+    assert.deepEqual(result.report.review, []);
+    const replay = await maintainFeedFile({ cwd: root, now: new Date(+now + 86400000), allowAi: true,
+      request: () => assert.fail('verified unchanged title must not consume another API call') });
+    assert.deepEqual(replay.deals, result.deals);
+    assert.deepEqual(replay.report.review, []);
   }
 }));
 
