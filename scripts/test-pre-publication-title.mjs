@@ -2,6 +2,8 @@ import assert from 'node:assert/strict';
 import { preparePublicationTitle } from '../scraper/pre-publication-title.js';
 import { validateApprovalCandidates } from '../scraper/slack-approve.js';
 import { advanceDealLifecycle } from '../scraper/deal-lifecycle.js';
+import { isConditionOnlyOfferTitle, needsSourceBackedTitle } from '../scraper/offer-title-utils.js';
+import { inspectSourceBackedQuality } from '../scraper/source-backed-quality.js';
 
 const base = {
   id: 'community:pretitle', submissionId: 'pretitle', originSource: 'community-submission',
@@ -52,6 +54,31 @@ assert.equal(preparePublicationTitle({ ...base, title: 'GRATIS Kaffee zu jedem F
   'Gratis Kaffee zu jedem Frühstück');
 assert.equal(preparePublicationTitle({ ...base, title: 'Ein GRATIS-Geschenk zu jedem Menü' }).title,
   'Ein Gratis-Geschenk zu jedem Menü');
+
+for (const title of [
+  'Pro Rechnung kann ein Gutschein eingelöst werden',
+  'Je Rechnung gilt nur ein Gutschein.',
+  '🎟️ :ticket: Nur 1 Gutschein pro Bestellung einlösbar!',
+  'Nicht mit anderen Rabatten oder Aktionen kombinierbar',
+  'Nur bei Abholung',
+]) {
+  const deal = { ...base, title };
+  assert.equal(isConditionOnlyOfferTitle(title), true, title);
+  assert.equal(needsSourceBackedTitle(title), true, title);
+  assert.ok(inspectSourceBackedQuality(deal).issues.some(issue => issue.code === 'condition-only-title'), title);
+  assert.equal(isConditionOnlyOfferTitle(preparePublicationTitle(deal).title), true, 'the local editor does not invent an offer');
+}
+for (const title of [
+  'AÏDA: Bis zu 20 € Rabatt mit Gutschein',
+  'Pro Rechnung gibt es 20 € Rabatt mit Gutschein',
+  'Ein Gutschein pro Bestellung spart 5 €',
+  'Nur bei Abholung: Pizza für 7 €',
+  '20 % Rabatt auf Kaffee, nur bei Abholung',
+]) {
+  assert.equal(isConditionOnlyOfferTitle(title), false, title);
+  assert.equal(needsSourceBackedTitle(title), false, title);
+  assert.ok(!inspectSourceBackedQuality({ ...base, title }).issues.some(issue => issue.code === 'condition-only-title'), title);
+}
 
 const now = new Date('2026-11-05T12:00:00Z');
 const approved = advanceDealLifecycle(base, 'manually-approved', { at: now, user: 'U_REVIEWER' });

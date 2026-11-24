@@ -33,9 +33,22 @@ export function isBenefitOnlyTitle(value = '') {
   return /^(?:(?:jetzt|bis zu|ab)\s+)?(?:\d+(?:[,.]\d+)?\s*(?:%|prozent|€|euro)\s*(?:rabatt|sparen|ersparnis|preisvorteil)?|[12]\s*\+\s*1(?:\s+gratis)?|gratis|kostenlos)(?:\s+(?:mit|für|fuer)\s+.+)?[.!]*$/iu.test(title);
 }
 
+const perCustomerOrOrder = '(?:pro|je) (?:rechnung|bestellung|einkauf|person|haushalt)';
+const singleVoucher = '(?:nur |maximal |höchstens )?(?:ein|1) (?:gutschein|coupon)';
+const voucherLimitTitle = new RegExp(
+  `^(?:${perCustomerOrOrder} (?:(?:kann|darf) ${singleVoucher} (?:eingelöst|verwendet) werden|(?:gilt )?${singleVoucher}(?: einlösbar)?)|${singleVoucher} ${perCustomerOrOrder}(?: einlösbar)?)$`, 'iu');
+
+// A standalone redemption condition can come from the source without naming the deal.
+export function isConditionOnlyOfferTitle(value = '') {
+  const title = stripSlackEmojiCodes(String(value || '').replace(/\p{Extended_Pictographic}|\uFE0F/gu, ' ')).replace(/\s*[.!]+$/, '');
+  return voucherLimitTitle.test(title)
+    || /^nicht mit anderen (?:rabatten|aktionen|gutscheinen)(?: (?:oder|und) (?:rabatten|aktionen|gutscheinen))? kombinierbar$/iu.test(title)
+    || /^nur (?:gültig )?(?:bei (?:abholung|lieferung)|für (?:neukunden|mitglieder))$/iu.test(title);
+}
+
 export function needsSourceBackedTitle(value = '') {
   const title = String(value || '').replace(/\s+/g, ' ').trim();
-  return title.length > 50 || !title || isBenefitOnlyTitle(title)
+  return title.length > 50 || !title || isBenefitOnlyTitle(title) || isConditionOnlyOfferTitle(title)
     || /^(?:Instagram|TikTok|Community[- ]Deal)|gemeinsam schmeckt|jetzt sichern|mega deal/i.test(title);
 }
 

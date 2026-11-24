@@ -170,6 +170,30 @@ test('title-only review fetches the exact source and corrects that live row with
   assert.equal(manual.report.sourceRequests, 0);
 }));
 
+test('a live title containing only a coupon limit is corrected from the original offer', () => fixture(async ({ root, put }) => {
+  const condition = 'Pro Rechnung kann ein Gutschein eingelöst werden';
+  const quote = '€ 20 geschenkt ab € 80 Konsumation';
+  const title = 'AÏDA: 20 € Rabatt ab 80 € mit Gutschein';
+  const deal = { id: 'fixture-aida', brand: 'AÏDA', title: condition, url: 'https://www.instagram.com/p/fixture/',
+    description: 'Mit Gutschein 20 € ab 80 € Konsumation. Je Rechnung nur ein Gutschein.',
+    validUntil: '2026-11-30', expiryKind: 'end', distance: 'Wien · Standort folgt',
+    metaGraphCaption: 'AÏDA PINK WEEKS ' + quote + '. Gutschein vorzeigen. ' + condition + '. Angebot bis 30.11.2026.' };
+  put('docs/deals.json', { deals: [deal] });
+  const calls = [];
+  const result = await maintainFeedFile({ cwd: root, now, allowAi: true, request: async (_endpoint, init) => {
+    const payload = JSON.parse(JSON.parse(init.body).messages[1].content);
+    calls.push(payload);
+    const content = payload.patch ? { supported: true }
+      : { title, quote, description: '', conditionsQuote: '', dateQuote: '' };
+    return Response.json({ choices: [{ finish_reason: 'stop', message: { content: JSON.stringify(content) } }] });
+  } });
+  assert.equal(calls.length, 2);
+  assert.deepEqual(calls[0].requestedFields, ['title']);
+  assert.deepEqual(calls[1].patch, { title });
+  assert.deepEqual(result.deals, [{ ...deal, title }]);
+  assert.equal(result.report.ai.corrected, 1);
+}));
+
 test('published marktguru terms complete the same NESCAFÉ text without a model or guessed expiry or map points', () => fixture(async ({ root, put }) => {
   const source = fs.readFileSync(fileURLToPath(new URL('./fixtures/marktguru-nescafe-20261117.html', import.meta.url)), 'utf8');
   const deal = { ...pending('fc4g-w3wqsu'), url: MARKTGURU_NESCAFE_URL, brand: 'BILLA',

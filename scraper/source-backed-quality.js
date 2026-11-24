@@ -1,5 +1,5 @@
 import { createHash } from 'node:crypto';
-import { isBenefitOnlyTitle } from './offer-title-utils.js';
+import { isBenefitOnlyTitle, isConditionOnlyOfferTitle } from './offer-title-utils.js';
 import { discoveryRejection } from './deal-discovery-policy.js';
 
 const text = value => String(value || '').replace(/\s+/g, ' ').trim();
@@ -15,6 +15,7 @@ export function inspectSourceBackedQuality(deal, { mapReview, today = '', eviden
   const exclusion=discoveryRejection(deal);
   if(exclusion)add('excluded-offer', `Angebot durch gemeinsame Discovery-Regeln ausgeschlossen: ${exclusion}.`);
   if (!text(deal.title) || /^(?:Instagram[- ]Deal geteilt|Community[- ]Deal|Geteilter Deal-Link)/i.test(deal.title)) add('missing-offer', 'Konkretes Produkt und Vorteil fehlen.');
+  else if (isConditionOnlyOfferTitle(deal.title)) add('condition-only-title', 'Titel nennt nur eine Einlösebedingung. Angebot und Vorteil anhand der Quelle prüfen.');
   else if (isBenefitOnlyTitle(deal.title)) add('product-unspecified', 'Titel nennt nur den Vorteil, nicht das konkrete Produkt oder die Leistung.');
   else if (text(deal.title).length > 60) add('long-title', 'Titel lang; Bedingungen erhalten, nicht abschneiden.');
   if (!text(deal.description).replace(/https?:\/\/\S+/g, '')) add('missing-conditions', 'Beschreibung und Einloesebedingungen fehlen.');

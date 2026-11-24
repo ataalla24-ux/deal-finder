@@ -19,6 +19,7 @@ const reasonLabels = {
   'named-venue': 'Die konkret genannte Filiale ist als Kartenstandort verifiziert.',
   'multiple-branches-need-review': 'Mehrere Filialen genannt; die g\u00fcltige Filiale muss best\u00e4tigt werden.',
   'no-current-reviewed-branch': 'Keine der gepr\u00fcften Filialen ist derzeit g\u00fcltig.',
+  'enrichment-map-pending': 'Der Kartenstandort wird noch geprueft.',
   'inactive-registry-branch': 'Die best\u00e4tigte Filialzuordnung ist derzeit nicht g\u00fcltig; keine automatische Ersatzzuordnung.',
   'reopened-reviewed-branch': 'Der best\u00e4tigte Filialzeitraum hat begonnen.',
   'address-in-caption-needs-review': 'Die Adresse steht nur im Quelltext und muss best\u00e4tigt werden.',
@@ -50,12 +51,24 @@ export function loadDealMapReviewContext({ root = ROOT, now = new Date() } = {})
 }
 
 function inspectPublishedDealMap(deal, context) {
+  const fingerprint = locationFingerprint(deal);
+  const exclusions = context.map?.geocodingExclusions || [];
+  const pendingDisplay = exclusions.some(entry => entry.reason === 'enrichment-map-pending'
+    && entry.dealId === deal.id && entry.fingerprint === fingerprint);
+  if (pendingDisplay) {
+    // A public display lock supplies no evidence of a retired branch.
+    const map = { ...context.map, geocodingExclusions: exclusions.filter(entry => entry.reason !== 'enrichment-map-pending') };
+    const inspection = inspectDealLocation(deal, { ...context, map });
+    if (inspection.status === 'online-only') return inspection;
+    return { ...inspection, status: 'needs-review', locationIds: [], addresses: [],
+      reason: inspection.status === 'needs-review' ? inspection.reason : 'enrichment-map-pending' };
+  }
   const inspection = inspectDealLocation(deal, context);
   // Source-discovered addresses are ephemeral. Trust only unchanged, published
   // bindings, without overriding the inspector's online or branch safety guards.
   if (inspection.reason !== 'missing-exact-address' || inspection.status !== 'needs-review' || !deal.id) return inspection;
   const rows = Array.isArray(context.coverage?.deals) ? context.coverage.deals : [];
-  if (!rows.some(row => row?.id === deal.id && row.status === 'mapped' && row.fingerprint === locationFingerprint(deal))) return inspection;
+  if (!rows.some(row => row?.id === deal.id && row.status === 'mapped' && row.fingerprint === fingerprint)) return inspection;
   const today = context.today || new Intl.DateTimeFormat('sv-SE', { timeZone: 'Europe/Vienna' }).format(new Date());
   const locationIds = (context.map?.locations || [])
     .filter(location => typeof location.id === 'string' && location.id.trim()

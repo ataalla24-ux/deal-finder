@@ -87,6 +87,17 @@ test('dates require an exact offer clause with a year and cannot override existi
   assert.deepEqual(sourceTexts({metaGraphCaption:quote},{caption:quote,graphAccepted:false}),[]);
 });
 
+test('a grounded clock range keeps its Vienna end time and incomplete clocks stay unverified', () => {
+  const exact = '21.11.2026, 11:00 bis 21.11.2026, 13:00 Uhr';
+  const patch = groundedDatePatch(exact, [exact], {});
+  assert.equal(patch.expires, '2026-11-21T12:00:00.000Z');
+  assert.equal(patch.validOn, '2026-11-21');
+  assert.equal(patch.expiresOriginal, exact);
+  for (const value of ['21.11.2026, 11:00 bis 21.11.2026', 'Nur am 21.11.2026, 13:00 Uhr']) {
+    assert.deepEqual(groundedDatePatch(value, [value], {}), {});
+  }
+});
+
 async function fixture(callback) {
   const cwd=fs.mkdtempSync(path.join(os.tmpdir(),'server-quality-'));
   const old=process.env.OPENAI_API_KEY;

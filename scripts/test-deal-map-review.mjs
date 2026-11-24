@@ -83,6 +83,35 @@ try {
   assert.deepEqual(reviewDealMap(base, empty).locationIds, []);
   assert.match(reviewDealMap(base, empty).text, /Eine eindeutige Adresse mit Hausnummer fehlt/);
   assert.doesNotMatch(reviewDealMap(base, empty).text, /missing-exact-address/);
+  const pendingDisplay = {
+    ...empty,
+    map: { locations: [], geocodingExclusions: [{ dealId: base.id,
+      fingerprint: locationFingerprint(base), reason: 'enrichment-map-pending', locationIds: [] }] },
+  };
+  const pendingReview = reviewDealMap(base, pendingDisplay);
+  assert.equal(pendingReview.status, 'needs-review');
+  assert.equal(pendingReview.reason, 'missing-exact-address');
+  assert.match(pendingReview.text, /Eine eindeutige Adresse mit Hausnummer fehlt/);
+  assert.deepEqual(pendingReview.locationIds, []);
+  assert.deepEqual(pendingReview.addresses, []);
+  const pendingWithCatalogMatch = reviewDealMap(base, {
+    ...pendingDisplay,
+    catalog: { locations: [location], dealBindings: [{ dealId: base.id,
+      fingerprint: locationFingerprint(base), locationIds: [location.id] }] },
+  });
+  assert.equal(pendingWithCatalogMatch.status, 'needs-review', 'A public pending exclusion cannot expose a catalog location');
+  assert.equal(pendingWithCatalogMatch.reason, 'enrichment-map-pending');
+  assert.deepEqual(pendingWithCatalogMatch.locationIds, []);
+  const onlinePending = { ...pendingDisplay, map: { ...pendingDisplay.map, geocodingExclusions: [{
+    ...pendingDisplay.map.geocodingExclusions[0], dealId: online.id, fingerprint: locationFingerprint(online),
+  }] } };
+  assert.equal(reviewDealMap(online, onlinePending).status, 'online-only');
+  const expiredDisplay = { ...pendingDisplay, map: { ...pendingDisplay.map, geocodingExclusions: [{
+    ...pendingDisplay.map.geocodingExclusions[0], reason: 'inactive-registry-branch', locationIds: [location.id],
+  }] } };
+  const expiredReview = reviewDealMap(base, expiredDisplay);
+  assert.equal(expiredReview.reason, 'inactive-registry-branch');
+  assert.deepEqual(expiredReview.locationIds, []);
   assert.doesNotMatch(reviewDealMap(base, mapped).text, /existing-registry/);
   assert.doesNotMatch(reviewDealMap(addressDeal, mapped).text, /verified-address-reuse/);
   assert.deepEqual(reviewDealMap(addressDeal, empty).addresses, [{ street: 'Braunhubergasse', number: '19', postalCode: '1110' }]);
