@@ -5,11 +5,49 @@ on:
       lane:
         description: TikTok search, Instagram profile read, or one Instagram public search query
         type: choice
-        options: [tiktok, tiktok-direct, tiktok-routes, tiktok-public-ui, instagram, instagram-search]
+        options: [tiktok, tiktok-direct, tiktok-routes, tiktok-public-ui, tiktok-public-index, instagram, instagram-search]
         default: tiktok
 permissions:
   contents: read
 jobs:
+  public-index:
+    if: ${{ inputs.lane == 'tiktok-public-index' }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 3
+    steps:
+      - name: Test one free public web index query from the cloud
+        run: |
+          python3 - <<'PY'
+          import json
+          import re
+          from urllib.error import HTTPError
+          from urllib.parse import urlsplit
+          from urllib.request import Request, urlopen
+
+          query = {
+              'query': 'Wien gratis Essen Rabatt Neueröffnung Döner Pizza Kaffee',
+              'include_domains': ['tiktok.com'], 'time_range': 'week',
+              'max_results': 20, 'search_depth': 'basic', 'include_answer': False,
+              'include_raw_content': False, 'auto_parameters': False,
+          }
+          request = Request('https://api.tavily.com/search', data=json.dumps(query).encode(),
+                            headers={'Content-Type': 'application/json', 'X-Tavily-Access-Mode': 'keyless'})
+          try:
+              with urlopen(request, timeout=25) as res:
+                  report = json.loads(res.read(300000))
+              rows = report['results']
+              videos = {}
+              for row in rows:
+                  url = urlsplit(row.get('url', ''))
+                  match = re.fullmatch(r'/@[\w.]{2,40}/video/(\d{16,22})/?', url.path, re.ASCII)
+                  if url.scheme == 'https' and url.netloc in ('www.tiktok.com', 'tiktok.com', 'm.tiktok.com') and match:
+                      videos[match[1]] = 'https://www.tiktok.com' + url.path.rstrip('/')
+              print(json.dumps({'status': 200, 'indexRows': len(rows), 'uniquePublicVideoUrls': len(videos),
+                                'videos': list(videos.values())}))
+          except HTTPError as error:
+              print(json.dumps({'status': error.code, 'retryAfter': error.headers.get('Retry-After')}))
+          PY
+
   diagnose:
     if: ${{ inputs.lane == 'tiktok' || inputs.lane == 'tiktok-routes' || inputs.lane == 'tiktok-public-ui' }}
     runs-on: ubuntu-latest
