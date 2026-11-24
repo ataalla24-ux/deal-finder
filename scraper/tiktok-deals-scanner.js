@@ -7,7 +7,7 @@ import path from 'path';
 import { fileURLToPath } from 'url';
 import { chromium } from 'playwright';
 import { hasTikTokSingleRequestRetry, previousTikTokSearchFailure, runTikTokApiDiscovery, selectTikTokPostVisits, tikTokDiscoveryHealth, tikTokPublicOnlyAccess, tikTokRetryAt } from './tiktok-search-discovery.js';
-import { readKnownTikTokLinks } from './tiktok-known-links.js';
+import { readKnownTikTokLinks, retainUnattemptedTikTokIndexLeads, selectTikTokIndexedLeads } from './tiktok-known-links.js';
 import { discoverTikTokLinksViaTavily } from './tiktok-public-index.js';
 import { createTikTokDirectSearch, tikTokAccessRefusal } from './tiktok-browser-search.js';
 import { readPublicTikTokOriginal } from './tiktok-signed-in-browser.js';
@@ -1677,6 +1677,7 @@ async function main() {
   let mediaRescue = null;
   let discovery = { links: [], errors: [] };
   let indexDiscovery = { links: [] };
+  let indexedLeads = [];
   let apiDiscovery = { rows: [], errors: [] };
   try {
     const apiDiscoveryStartedAt = Date.now();
@@ -1729,11 +1730,19 @@ async function main() {
       enabled: booleanEnv(process.env, 'TIKTOK_TAVILY_INDEX_ENABLED', false),
       previous: previousReport.tavilyDiscovery,
     });
-    const webLinks = [...new Set([...discovery.links, ...indexDiscovery.links])];
+    indexedLeads = selectTikTokIndexedLeads(DOCS_DIR, {
+      previous: previousReport.pendingIndexedTikTokLinks,
+      duckduckgo: discovery.links,
+      tavily: indexDiscovery.links,
+    });
+    const webLinks = publicOnly ? indexedLeads.map(lead => lead.url)
+      : [...new Set([...discovery.links, ...indexDiscovery.links])];
     const visibleLinks = apiDiscovery.publicVideoLinks || [];
     const primaryLinks = new Set([...webLinks, ...visibleLinks,
       ...apiDiscovery.rows.map(row => row.data.url)]);
-    const indexOnlyLinks = new Set(indexDiscovery.links.filter(url =>
+    const tavilyLinks = publicOnly ? indexedLeads.filter(lead =>
+      lead.sources.includes('tavily') && !lead.sources.includes('duckduckgo')).map(lead => lead.url) : indexDiscovery.links;
+    const indexOnlyLinks = new Set(tavilyLinks.filter(url =>
       !discovery.links.includes(url) && !visibleLinks.includes(url)));
     const knownLinks = readKnownTikTokLinks(DOCS_DIR).filter(url => !primaryLinks.has(url));
     // Reuse a free post-visit slot after the ordinary search. Existing provider pauses apply.
@@ -1760,7 +1769,7 @@ async function main() {
     const page = apiPage;
     for (const url of urls) {
       const fromIndex = indexOnlyLinks.has(url);
-      const visit = { fromIndex };
+      const visit = { url, fromIndex };
       publicVisits.push(visit);
       const fromLocalHint = url === hint;
       if (fromLocalHint) {
@@ -1839,6 +1848,7 @@ async function main() {
   const finalDeals = dedupeTikTokDeals(deals);
   const { links: indexedVideos, ...indexStatus } = indexDiscovery;
   const indexVisits = publicVisits.filter(visit => visit.fromIndex);
+  const pendingIndexedTikTokLinks = retainUnattemptedTikTokIndexLeads(indexedLeads, publicVisits.map(visit => visit.url));
   timings.totalScannerMs = Date.now() - scannerStartedAt;
   const payload = {
     lastUpdated: new Date().toISOString(),
@@ -1862,6 +1872,7 @@ async function main() {
       publicVideoLinks: apiDiscovery.publicVideoLinks?.length || 0,
     },
     searchDiscovery: Object.fromEntries(Object.entries(discovery).filter(([key]) => key !== 'links')),
+    pendingIndexedTikTokLinks,
     tavilyDiscovery: {
       ...indexStatus, canonicalVideoLinks: indexedVideos.length, publicPageAttempts: indexVisits.length,
       publicPagesWithDatedOriginal: indexVisits.filter(visit => visit.dated).length,
@@ -1903,6 +1914,7 @@ async function main() {
   console.log(`Discovery ${report.status}: API ${apiDiscovery.attemptedRequests || 0} requests (${apiDiscovery.stoppedReason || 'completed'}), search ${discovery.attemptedQueries || 0} queries (${discovery.stoppedReason || 'completed'})`);
   console.log(`TikTok Tavily index: ${JSON.stringify(report.tavilyDiscovery)}`);
   console.log(`TikTok video coverage: ${JSON.stringify(report.coverage)}`);
+  console.log(`Indexed TikTok links awaiting original verification: ${pendingIndexedTikTokLinks.length}`);
   console.log(report.outputPreserved ? 'Previous TikTok outbox preserved' : `💾 ${finalDeals.length} Deals → ${OUTPUT_PATH}`);
 }
 
