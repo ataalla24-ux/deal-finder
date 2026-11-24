@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-11-24T21:10:07.473Z",
+  "generatedAt": "2026-11-24T21:47:31.546Z",
   "discoveryAvailability": {
     "note": "Transport evidence, not deal yield. Retry eligibility is not recovery. Candidate counts are not Slack deliveries. No extra runs or quota resets.",
     "lanes": [
@@ -55,9 +55,9 @@
   "summary": {
     "filesConsidered": 33,
     "totalCandidates": 738,
-    "uniqueCandidates": 711,
-    "distinctCandidates": 723,
-    "duplicateClusters": 12,
+    "uniqueCandidates": 709,
+    "distinctCandidates": 722,
+    "duplicateClusters": 13,
     "topHealthySources": [
       {
         "sourceKey": "tiktok-browser",
@@ -72,12 +72,6 @@
         "totalDeals": 113
       },
       {
-        "sourceKey": "wien-combined",
-        "sourceLabel": "Wien Deals Combined Graph",
-        "healthScore": 74,
-        "totalDeals": 2
-      },
-      {
         "sourceKey": "meta-instagram",
         "sourceLabel": "Meta Instagram Graph",
         "healthScore": 69,
@@ -88,6 +82,12 @@
         "sourceLabel": "Apify Instagram",
         "healthScore": 64,
         "totalDeals": 1
+      },
+      {
+        "sourceKey": "wien-combined",
+        "sourceLabel": "Wien Deals Combined Graph",
+        "healthScore": 63,
+        "totalDeals": 2
       }
     ],
     "topMissionSources": [
@@ -140,9 +140,9 @@
       {
         "sourceKey": "meta-instagram",
         "sourceLabel": "Meta Instagram Graph",
-        "coverageScore": 65,
+        "coverageScore": 66,
         "totalDeals": 91,
-        "fresh1dCount": 16
+        "fresh1dCount": 17
       },
       {
         "sourceKey": "vienna-promo-radar",
@@ -161,15 +161,15 @@
     ],
     "topPrecisionSources": [
       {
-        "sourceKey": "wien-combined",
-        "sourceLabel": "Wien Deals Combined Graph",
-        "precisionScore": 79,
-        "totalDeals": 2
-      },
-      {
         "sourceKey": "tiktok-browser",
         "sourceLabel": "TikTok Browser",
         "precisionScore": 76,
+        "totalDeals": 2
+      },
+      {
+        "sourceKey": "wien-combined",
+        "sourceLabel": "Wien Deals Combined Graph",
+        "precisionScore": 75,
         "totalDeals": 2
       },
       {
@@ -181,7 +181,7 @@
       {
         "sourceKey": "meta-instagram",
         "sourceLabel": "Meta Instagram Graph",
-        "precisionScore": 68,
+        "precisionScore": 67,
         "totalDeals": 91
       },
       {
@@ -199,12 +199,6 @@
         "totalDeals": 113
       },
       {
-        "sourceKey": "wien-combined",
-        "sourceLabel": "Wien Deals Combined Graph",
-        "sourceWeightScore": 63,
-        "totalDeals": 2
-      },
-      {
         "sourceKey": "meta-instagram",
         "sourceLabel": "Meta Instagram Graph",
         "sourceWeightScore": 63,
@@ -213,6 +207,12 @@
       {
         "sourceKey": "tiktok-browser",
         "sourceLabel": "TikTok Browser",
+        "sourceWeightScore": 59,
+        "totalDeals": 2
+      },
+      {
+        "sourceKey": "wien-combined",
+        "sourceLabel": "Wien Deals Combined Graph",
         "sourceWeightScore": 59,
         "totalDeals": 2
       },
@@ -433,109 +433,27 @@
       "sourceWeightScore": 71
     },
     {
-      "sourceKey": "wien-combined",
-      "file": "deals-pending-wien-combined.json",
-      "sourceLabel": "Wien Deals Combined Graph",
-      "totalDeals": 2,
-      "uniqueDeals": 1,
-      "duplicateDeals": 1,
-      "duplicateAcrossSources": 1,
-      "fresh1dCount": 1,
-      "fresh7dCount": 2,
-      "viennaCount": 2,
-      "foodDrinkCount": 2,
-      "promoCount": 1,
-      "missingUrlCount": 0,
-      "sampleTitles": [
-        "Dirty Lunch Deal",
-        "30 % Rabatt auf alle Speisen"
-      ],
-      "lastRun": {
-        "status": "completed-with-errors",
-        "startedAt": "2026-11-24T10:20:58.166Z",
-        "finishedAt": "2026-11-24T10:22:46.289Z",
-        "durationMs": 108123,
-        "counts": {
-          "rawCandidates": 46,
-          "normalizedCandidates": 2,
-          "verifiedCandidates": 2,
-          "previousDeals": 0,
-          "acceptedDeals": 2,
-          "rejectedDeals": 41
-        },
-        "rejectedByReason": {
-          "no-concrete-offer": 30,
-          "alcohol-offer": 2,
-          "missing-vienna-evidence": 1,
-          "self-syndicated-deal": 1,
-          "missing-text": 1,
-          "non-offer-content": 2,
-          "general-recommendation": 4
-        },
-        "errors": [
-          "#viennarestaurants: Instagram scan paused: request-budget",
-          "#viennafood: Instagram scan paused: request-budget",
-          "#wienfoodie: Instagram scan paused: request-budget",
-          "#essenwien: Instagram scan paused: request-budget"
-        ],
-        "reportFile": "deal-pipeline-last-run-wien-combined.json"
-      },
-      "uniqueRate": 0.5,
-      "duplicateRate": 0.5,
-      "fresh1dRate": 0.5,
-      "fresh7dRate": 1,
-      "viennaRate": 1,
-      "foodDrinkRate": 1,
-      "promoRate": 0.5,
-      "missingUrlRate": 0,
-      "averageQualityScore": 88,
-      "topCategories": [
-        {
-          "value": "essen",
-          "count": 1
-        },
-        {
-          "value": "kaffee",
-          "count": 1
-        }
-      ],
-      "topTypes": [
-        {
-          "value": "rabatt",
-          "count": 2
-        }
-      ],
-      "issues": [
-        "hohe Überschneidung mit anderen Quellen"
-      ],
-      "healthScore": 74,
-      "missionFitScore": 75,
-      "coverageScore": 14,
-      "precisionScore": 79,
-      "sourceWeightScore": 63
-    },
-    {
       "sourceKey": "meta-instagram",
       "file": "deals-pending-meta-instagram.json",
       "sourceLabel": "Meta Instagram Graph",
       "totalDeals": 91,
-      "uniqueDeals": 82,
-      "duplicateDeals": 9,
-      "duplicateAcrossSources": 4,
-      "fresh1dCount": 16,
-      "fresh7dCount": 79,
+      "uniqueDeals": 81,
+      "duplicateDeals": 10,
+      "duplicateAcrossSources": 5,
+      "fresh1dCount": 17,
+      "fresh7dCount": 80,
       "viennaCount": 91,
       "foodDrinkCount": 62,
       "promoCount": 28,
       "missingUrlCount": 0,
       "sampleTitles": [
+        "Dirty Lunch Deal",
         "6 % Inflation",
-        "Frische Rispentomaten – 1 kg nur 1,38 € 🍅 👉 Jetzt in allen MEGA Supermarkt Filialen!",
-        "🎲 Bei der Würfelaktion bekommt ihr eure Bestellung mit zwei Sechsern gratis!"
+        "Frische Rispentomaten – 1 kg nur 1,38 € 🍅 👉 Jetzt in allen MEGA Supermarkt Filialen!"
       ],
       "lastRun": null,
       "uniqueRate": 0.9,
-      "duplicateRate": 0,
+      "duplicateRate": 0.1,
       "fresh1dRate": 0.2,
       "fresh7dRate": 0.9,
       "viennaRate": 1,
@@ -546,7 +464,7 @@
       "topCategories": [
         {
           "value": "essen",
-          "count": 33
+          "count": 32
         },
         {
           "value": "shopping",
@@ -554,7 +472,7 @@
         },
         {
           "value": "kaffee",
-          "count": 14
+          "count": 15
         },
         {
           "value": "supermarkt",
@@ -588,8 +506,8 @@
       ],
       "healthScore": 69,
       "missionFitScore": 52,
-      "coverageScore": 65,
-      "precisionScore": 68,
+      "coverageScore": 66,
+      "precisionScore": 67,
       "sourceWeightScore": 63
     },
     {
@@ -640,6 +558,88 @@
       "coverageScore": 11,
       "precisionScore": 60,
       "sourceWeightScore": 52
+    },
+    {
+      "sourceKey": "wien-combined",
+      "file": "deals-pending-wien-combined.json",
+      "sourceLabel": "Wien Deals Combined Graph",
+      "totalDeals": 2,
+      "uniqueDeals": 0,
+      "duplicateDeals": 2,
+      "duplicateAcrossSources": 2,
+      "fresh1dCount": 1,
+      "fresh7dCount": 2,
+      "viennaCount": 2,
+      "foodDrinkCount": 2,
+      "promoCount": 1,
+      "missingUrlCount": 0,
+      "sampleTitles": [
+        "Dirty Lunch Deal",
+        "30 % Rabatt auf alle Speisen"
+      ],
+      "lastRun": {
+        "status": "completed-with-errors",
+        "startedAt": "2026-11-24T10:20:58.166Z",
+        "finishedAt": "2026-11-24T10:22:46.289Z",
+        "durationMs": 108123,
+        "counts": {
+          "rawCandidates": 46,
+          "normalizedCandidates": 2,
+          "verifiedCandidates": 2,
+          "previousDeals": 0,
+          "acceptedDeals": 2,
+          "rejectedDeals": 41
+        },
+        "rejectedByReason": {
+          "no-concrete-offer": 30,
+          "alcohol-offer": 2,
+          "missing-vienna-evidence": 1,
+          "self-syndicated-deal": 1,
+          "missing-text": 1,
+          "non-offer-content": 2,
+          "general-recommendation": 4
+        },
+        "errors": [
+          "#viennarestaurants: Instagram scan paused: request-budget",
+          "#viennafood: Instagram scan paused: request-budget",
+          "#wienfoodie: Instagram scan paused: request-budget",
+          "#essenwien: Instagram scan paused: request-budget"
+        ],
+        "reportFile": "deal-pipeline-last-run-wien-combined.json"
+      },
+      "uniqueRate": 0,
+      "duplicateRate": 1,
+      "fresh1dRate": 0.5,
+      "fresh7dRate": 1,
+      "viennaRate": 1,
+      "foodDrinkRate": 1,
+      "promoRate": 0.5,
+      "missingUrlRate": 0,
+      "averageQualityScore": 88,
+      "topCategories": [
+        {
+          "value": "essen",
+          "count": 1
+        },
+        {
+          "value": "kaffee",
+          "count": 1
+        }
+      ],
+      "topTypes": [
+        {
+          "value": "rabatt",
+          "count": 2
+        }
+      ],
+      "issues": [
+        "hohe Überschneidung mit anderen Quellen"
+      ],
+      "healthScore": 63,
+      "missionFitScore": 75,
+      "coverageScore": 14,
+      "precisionScore": 75,
+      "sourceWeightScore": 59
     },
     {
       "sourceKey": "vienna-websites",
