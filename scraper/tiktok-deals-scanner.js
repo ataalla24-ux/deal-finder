@@ -16,6 +16,7 @@ import { parseExplicitOfferPeriod } from './expiry-utils.js';
 
 import { normalizeCategoryForScraper } from './category-utils.js';
 import { discoveryRejection } from './deal-discovery-policy.js';
+import { canonicalSocialPostKey } from './deal-evidence-utils.js';
 import { advanceDealLifecycle } from './deal-lifecycle.js';
 import { inferPreferredBrand } from './deal-normalization-utils.js';
 import { concreteFoodOfferTitle } from './offer-title-utils.js';
@@ -1619,6 +1620,24 @@ export function dedupeTikTokDeals(deals) {
     .slice(0, CONFIG.maxDeals);
 }
 
+// Distinguish the selected detail pages, actual attempts, and original posts
+// that were read. The same video can occur under multiple handles or sources.
+export function summarizeTikTokCoverage(directRows, publicVisits) {
+  const uniqueVideos = urls => new Set(urls.map(url => canonicalSocialPostKey(normalizeTikTokVideoUrl(url))).filter(Boolean));
+  const direct = uniqueVideos(directRows.map(({ data }) => data.url));
+  const originals = publicVisits.filter(visit => visit.originalUrl);
+  const publicVideos = uniqueVideos(originals.map(visit => visit.originalUrl));
+  return {
+    directRowsChecked: directRows.length,
+    uniqueDirectVideosChecked: direct.size,
+    publicPageAttempts: publicVisits.length,
+    publicPagesWithOriginal: originals.length,
+    publicPagesWithDatedOriginal: originals.filter(visit => visit.dated).length,
+    uniquePublicVideosChecked: publicVideos.size,
+    uniqueVideosChecked: new Set([...direct, ...publicVideos]).size,
+  };
+}
+
 async function main() {
   const scannerStartedAt = Date.now();
   const runProvenance = githubRunProvenance();
@@ -1644,6 +1663,7 @@ async function main() {
   const deals = [];
   const rejected = [];
   const rescuePool = [];
+  const publicVisits = [];
   const mediaConfig = buildTikTokMediaConfig(process.env);
   let mediaRescue = null;
   let discovery = { links: [], errors: [] };
@@ -1699,6 +1719,8 @@ async function main() {
     console.log(`🔎 public-page videos: ${publicLinkCount}; search-engine videos: ${discovery.links.length}; visiting fallback: ${urls.length}`);
     const page = apiPage;
     for (const url of urls) {
+      const visit = {};
+      publicVisits.push(visit);
       const fromLocalHint = url === hint;
       if (fromLocalHint) {
         discovery.knownPostLinks.visited++;
@@ -1712,6 +1734,10 @@ async function main() {
           if (!apiDiscovery.nextRetryAt || retryAt > apiDiscovery.nextRetryAt) apiDiscovery.nextRetryAt = retryAt;
           discovery.postVisitStop = { status, transportReason, retryAt: apiDiscovery.nextRetryAt };
           break;
+        }
+        if (data.url) {
+          visit.originalUrl = data.url;
+          visit.dated = Boolean(parseDateFromPost(data));
         }
         const { deal, reason } = buildDealFromPost(url, data);
         if (deal) {
@@ -1792,6 +1818,7 @@ async function main() {
       publicVideoLinks: apiDiscovery.publicVideoLinks?.length || 0,
     },
     searchDiscovery: Object.fromEntries(Object.entries(discovery).filter(([key]) => key !== 'links')),
+    coverage: summarizeTikTokCoverage(apiDiscovery.rows, publicVisits),
     accepted: finalDeals.length,
     initialRejected: rejected.length,
     finalRejected: finalRejected.length,
@@ -1825,6 +1852,7 @@ async function main() {
     mediaEvidence: mediaRescue.cache,
   });
   console.log(`Discovery ${report.status}: API ${apiDiscovery.attemptedRequests || 0} requests (${apiDiscovery.stoppedReason || 'completed'}), search ${discovery.attemptedQueries || 0} queries (${discovery.stoppedReason || 'completed'})`);
+  console.log(`TikTok video coverage: ${JSON.stringify(report.coverage)}`);
   console.log(report.outputPreserved ? 'Previous TikTok outbox preserved; discovery unavailable' : `💾 ${finalDeals.length} Deals → ${OUTPUT_PATH}`);
 }
 

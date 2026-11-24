@@ -9,7 +9,7 @@ on:
       text_only:
         description: Run the scanner using public text evidence without paid model calls
         type: boolean
-        default: false
+        default: true
       browsed_posts:
         description: Public post captions from the authorized local TikTok browser
         type: string
@@ -58,12 +58,12 @@ jobs:
         run: npx playwright install --with-deps chromium chromium-headless-shell
 
       - name: Inspect TikTok media OCR tools
-        if: ${{ !inputs.text_only }}
+        if: ${{ github.event_name == 'workflow_dispatch' && inputs.text_only == false }}
         id: media_tools
         run: node scripts/coupon-tools-preflight.mjs --social-media
 
       - name: Install missing TikTok media OCR tools
-        if: ${{ !inputs.text_only && steps.media_tools.outputs.available != 'true' }}
+        if: ${{ github.event_name == 'workflow_dispatch' && inputs.text_only == false && steps.media_tools.outputs.available != 'true' }}
         continue-on-error: true
         timeout-minutes: 5
         env:
@@ -74,7 +74,7 @@ jobs:
 
       - name: Scan current TikTok deals
         env:
-          OPENAI_API_KEY: ${{ !inputs.text_only && secrets.OPENAI_API_KEY || '' }}
+          OPENAI_API_KEY: ${{ github.event_name == 'workflow_dispatch' && inputs.text_only == false && secrets.OPENAI_API_KEY || '' }}
           GH_TOKEN: ${{ github.token }}
           TIKTOK_MEDIA_MAX_AGE_HOURS: '72'
           TIKTOK_MEDIA_MAX_POSTS_PER_RUN: '16'
@@ -82,7 +82,7 @@ jobs:
           TIKTOK_MEDIA_MAX_VIDEO_FRAMES: '2'
           TIKTOK_MEDIA_TESSERACT_TIMEOUT_MS: '8000'
           TIKTOK_MEDIA_VISION_MAX_IMAGES_PER_POST: '2'
-          TIKTOK_MEDIA_LLM_MAX_CALLS_PER_RUN: ${{ inputs.text_only && '0' || '8' }}
+          TIKTOK_MEDIA_LLM_MAX_CALLS_PER_RUN: ${{ github.event_name == 'workflow_dispatch' && inputs.text_only == false && '8' || '0' }}
           TIKTOK_MEDIA_LLM_CONCURRENCY: '2'
           TIKTOK_MEDIA_LLM_MIN_CONFIDENCE: '0.84'
           TIKTOK_MEDIA_VISION_DETAIL: 'low'

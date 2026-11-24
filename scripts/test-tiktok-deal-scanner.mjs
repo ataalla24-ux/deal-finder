@@ -6,10 +6,31 @@ import {
   buildDealFromPost,
   dedupeTikTokDeals,
   rescueTikTokMediaCandidates,
+  summarizeTikTokCoverage,
 } from '../scraper/tiktok-deals-scanner.js';
 import { modelForTask, OPENAI_MODEL_TIMEOUT_MS } from '../scraper/ai-credit-budget.js';
 
 const REFERENCE_NOW = new Date('2026-08-26T12:00:00.000Z');
+
+const coverageVideo = 'https://www.tiktok.com/@food.at/video/7697993250354826518';
+const renamedVideo = coverageVideo.replace('@food.at', '@new.food.at');
+const otherCoverageVideo = coverageVideo.replace(/8$/, '9');
+assert.deepEqual(summarizeTikTokCoverage([
+  { data: { url: coverageVideo } },
+  { data: { url: renamedVideo } },
+], [
+  { originalUrl: renamedVideo, dated: true },
+  { originalUrl: otherCoverageVideo, dated: false },
+  {}, // Access stopped without returning the original.
+]), {
+  directRowsChecked: 2,
+  uniqueDirectVideosChecked: 1,
+  publicPageAttempts: 3,
+  publicPagesWithOriginal: 2,
+  publicPagesWithDatedOriginal: 1,
+  uniquePublicVideosChecked: 2,
+  uniqueVideosChecked: 2,
+}, 'coverage counts only attempted pages and deduplicates by video ID across sources');
 
 // Recheck the two approved offers from the October 18 dispatch on both sides of the freshness window.
 for (const [account, id, time, caption, start, end] of [
