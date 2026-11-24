@@ -88,7 +88,8 @@ export function dailyFeaturedValue(deal) {
   } else if (percentIsCeiling && guaranteedPercent) {
     value = 10;
   } else if (/\b(?:gratis|kostenlos|free)\b/.test(title)) {
-    value = minimum > 0 || /\b(?:beim kauf|zu jeder|als zugabe|zu einer bestellung|zum hauptgericht)\b/.test(terms) ? 28
+    const paidPrice = new RegExp(`\\b(?:fur|um|ab)\\s+${money}`).test(title);
+    value = paidPrice || minimum > 0 || /\b(?:beim kauf|zu jeder|als zugabe|zu einer bestellung|zum hauptgericht)\b/.test(terms) ? 28
       : /\b(?:kaffee|latte|espresso|cappuccino|tee|getrank|getraenk)\b/.test(title) ? 57 : 82;
   }
   if (/\b(?:neukund\w*|erstbestell\w*|erste\w* bestellung)\b/.test(terms)) value -= 14;

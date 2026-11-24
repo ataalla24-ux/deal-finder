@@ -60,4 +60,32 @@ assert.equal((await selectAutomaticFeaturedDeal([offer('vienna', { validOn: '202
 assert(dailyFeaturedValue(offer('fixed', { title: '25 % Rabatt auf Pizza' })) > dailyFeaturedValue(offer('max', { title: 'Bis zu 60 % auf Pizza' })));
 assert(dailyFeaturedValue(offer('public', { title: '10 € Rabatt ab 20 € für Pizza' })) >
   dailyFeaturedValue(offer('new', { title: '10 € Rabatt ab 20 € für Pizza, nur für Neukunden' })));
+assert.equal(dailyFeaturedValue(offer('paid-menu', { title: 'Burger, Pommes & Gratis-Donut für 5,50 €' })), 28,
+  'a complimentary extra cannot turn the entire paid menu into a free offer');
+
+const alternative = offer('alt', { title: '25 % Rabatt auf Pizza' });
+const recentWinner = { date: '2026-10-27', dealId: stronger.id };
+let modelCalls = 0;
+const apiSelector = async (ranked, context) => {
+  modelCalls++;
+  assert.equal(context.kind, 'daily');
+  assert.deepEqual(ranked.map(row => row.deal.id), [alternative.id, weaker.id]);
+  return weaker.id;
+};
+const fromApi = await resolveDailyFeaturedSelection([weaker, stronger, alternative, offer('expired', { validUntil: '2026-10-27' })],
+  recentWinner, now, { apiSelector });
+assert.equal(fromApi.deal.id, weaker.id, 'the API chooses among verified, unseen offers even if it disagrees with the scorer');
+assert.equal(fromApi.selectionReason, 'automatic-openai-selection');
+const apiPick = { date: current.date, dealId: weaker.id, selectionReason: fromApi.selectionReason };
+assert.equal((await resolveDailyFeaturedSelection([stronger, weaker, alternative], apiPick, now, { apiSelector })).preserve, true);
+assert.equal((await resolveDailyFeaturedSelection([stronger, weaker, alternative], { ...current, manualPick: true }, now,
+  { apiSelector })).deal.id, weaker.id);
+assert.equal(modelCalls, 1, 'repeated runs and a valid manual override do not request another model choice');
+const modelFailure = await resolveDailyFeaturedSelection([stronger, weaker, alternative], recentWinner, now, {
+  apiSelector: async () => 'not-live', weekly: { week: '2026-10-26', dealId: alternative.id },
+});
+assert.equal(modelFailure.deal.id, weaker.id, 'fallback rotates and avoids the current weekly pick');
+assert.equal(modelFailure.selectionReason, 'automatic-rotation-fallback');
+assert.equal((await resolveDailyFeaturedSelection([stronger], recentWinner, now, { apiSelector: async () => '' })).deal.id,
+  stronger.id, 'a sole eligible deal can repeat');
 console.log('Featured history, actual value and Vienna availability checks passed.');

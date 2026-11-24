@@ -33,7 +33,16 @@ jobs:
       - name: Install Dependencies
         run: npm ci
 
-      - name: Pick featured deals from Slack replies
+      - name: Verify featured selection and rotation
+        env:
+          SENTRY_DISABLED: '1'
+        run: |
+          node scripts/test-featured-deal-selection.mjs
+          node scripts/test-featured-selection-history.mjs
+          node scripts/test-featured-deal-reference-sync.mjs
+          node --test scripts/test-featured-api-selection.mjs
+
+      - name: Honor Slack picks and select remaining featured deals with OpenAI
         env:
           SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
           SLACK_CHANNEL_ID: ${{ secrets.SLACK_CHANNEL_ID }}

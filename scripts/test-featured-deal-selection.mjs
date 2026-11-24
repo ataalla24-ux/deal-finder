@@ -202,4 +202,22 @@ for (const candidate of [offer('private', '1+1 Pizza', { description: 'Personali
   assert.equal(await resolveWeeklyFeaturedSelection([candidate], null, null, weekNow), null, candidate.id);
 }
 
+const priorWeek = { ...weekly, week: '2026-11-02' };
+let weeklyModelCalls = 0;
+const chosen = await resolveWeeklyFeaturedSelection([weaker, strongest, sameValue], priorWeek, daily, weekNow, {
+  apiSelector: async rows => {
+    weeklyModelCalls++;
+    assert.deepEqual(rows.map(row => row.deal.id), [sameValue.id], 'exclude today and last week when alternatives exist');
+    assert(rows[0].days.length > 0);
+    return sameValue.id;
+  },
+});
+assert.equal(chosen.deal.id, sameValue.id);
+assert.equal(chosen.selectionReason, 'automatic-openai-selection');
+const weeklyApiPick = { ...weekly, dealId: sameValue.id, selectionReason: chosen.selectionReason };
+assert.equal((await resolveWeeklyFeaturedSelection([weaker, strongest, sameValue], weeklyApiPick, daily, weekNow, {
+  apiSelector: async () => { weeklyModelCalls++; return strongest.id; },
+})).preserve, true);
+assert.equal(weeklyModelCalls, 1);
+
 console.log('Featured deal selection checks passed.');

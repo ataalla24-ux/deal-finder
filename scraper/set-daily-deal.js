@@ -13,6 +13,7 @@ import { normalizeDealRecord } from './deal-normalization-utils.js';
 import { freeCreditOpenAiFetch, modelForTask } from './ai-credit-budget.js';
 import { inspectDealUrlHealth } from './expiry-utils.js';
 import { featuredSelectionHistory, recentFeaturedDealIds } from './featured-selection-history.js';
+import { selectFeaturedDealWithOpenAI } from './featured-api-selection.js';
 import { dailyAvailabilityReason, rankDailyFeaturedDeals, rankWeeklyFeaturedDeals, weeklyRedeemableDays } from './daily-featured-policy.js';
 import { cachedSourceReview, loadSourceReviewCache, rememberSourceReview, reviewClockContext,
     reviewFingerprint, saveSourceReviewCache } from './source-review-cache.js';
@@ -25,6 +26,9 @@ const SLACK_BOT_TOKEN = process.env.SLACK_BOT_TOKEN || '';
 const SLACK_CHANNEL_ID = process.env.SLACK_CHANNEL_ID || '';
 const FEATURED_LLM_MODEL = modelForTask('review');
 const FEATURED_WEEKLY_LLM_REQUIRED = process.env.FEATURED_WEEKLY_LLM_REQUIRED === '1';
+const FEATURED_API_SELECTION = 'automatic-openai-selection';
+const FEATURED_ROTATION_FALLBACK = 'automatic-rotation-fallback';
+const isRotatedSelection = reason => [FEATURED_API_SELECTION, FEATURED_ROTATION_FALLBACK].includes(reason);
 const FEATURED_WEEKLY_LLM_MIN_CONFIDENCE = Math.max(0, Math.min(1, Number(process.env.FEATURED_WEEKLY_LLM_MIN_CONFIDENCE || 0.55)));
 const FEATURED_TARGET_TIMEOUT_MS = Number(process.env.FEATURED_DEAL_TARGET_TIMEOUT_MS || process.env.URL_CHECK_TIMEOUT_MS || 7000);
 const FOOD_DRINK_CATEGORIES = new Set(['essen', 'kaffee', 'trinken', 'getränke', 'getraenke', 'bars']);
@@ -746,20 +750,40 @@ async function selectAutomaticFeaturedDeal(approvedDeals, options = {}) {
     const now = options.now instanceof Date ? options.now : new Date();
     const excludedIds = options.excludedIds instanceof Set ? options.excludedIds : new Set();
     const candidates = approvedDeals.filter(deal => isAutomaticFeaturedPresentationReady(deal) && isFoodDrinkDeal(deal));
-    if (kind === 'daily') {
-        const recentIds = options.recentDealIds instanceof Set ? options.recentDealIds : new Set();
-        const [best] = rankDailyFeaturedDeals(candidates.filter(deal => !excludedIds.has(deal.id)), now,
-            { recentDealIds: recentIds, currentId: options.currentId });
-        return best ? { deal: best.deal, eligibility: { eligible: true, reason: 'daily_verified_value' }, value: best.value } : null;
+    const recentDealIds = options.recentDealIds instanceof Set ? options.recentDealIds : new Set();
+    let ranked = kind === 'daily'
+        ? rankDailyFeaturedDeals(candidates.filter(deal => !excludedIds.has(deal.id)), now, { recentDealIds, currentId: options.currentId })
+        : rankWeeklyFeaturedDeals(candidates, now, { excludedIds, currentId: options.currentId });
+    if (options.distinctFromId && ranked.some(({ deal }) => deal.id !== options.distinctFromId)) {
+        ranked = ranked.filter(({ deal }) => deal.id !== options.distinctFromId);
     }
-    const ranked = rankWeeklyFeaturedDeals(candidates, now, { excludedIds, currentId: options.currentId });
+    if (!ranked.length) return null;
+    const pinned = ranked.find(({ deal }) => deal.id === options.pinnedId);
+    const verified = { eligible: true, reason: kind === 'daily' ? 'daily_verified_value' : 'weekly_verified_value' };
+    const eligibilityFor = deal => kind === 'weekly' && FEATURED_WEEKLY_LLM_REQUIRED
+        ? getFeaturedDealEligibility(deal, 'weekly', { ...options, now, llmEnabled: true }) : verified;
+    if (pinned) {
+        const eligibility = await eligibilityFor(pinned.deal);
+        if (eligibility.eligible) return { ...pinned, eligibility, preserve: true };
+        ranked = ranked.filter(candidate => candidate !== pinned);
+        if (!ranked.length) return null;
+    }
+
+    let apiId = '';
+    if (options.apiSelector) {
+        const fresh = ranked.filter(({ deal }) => !recentDealIds.has(deal.id));
+        const alternatives = ranked.filter(({ deal }) => deal.id !== options.previousId);
+        ranked = (fresh.length ? fresh : alternatives.length ? alternatives : ranked).slice(0, 8);
+        apiId = await options.apiSelector(ranked, { kind, now });
+        const selected = ranked.find(({ deal }) => deal.id === apiId);
+        if (selected) ranked = [selected, ...ranked.filter(candidate => candidate !== selected)];
+    }
     for (const candidate of ranked) {
         const { deal } = candidate;
-        if (!FEATURED_WEEKLY_LLM_REQUIRED) {
-            return { ...candidate, eligibility: { eligible: true, reason: 'weekly_verified_value' } };
-        }
-        const eligibility = await getFeaturedDealEligibility(deal, 'weekly', { ...options, now, llmEnabled: true });
-        if (eligibility.eligible) return { ...candidate, eligibility };
+        const eligibility = await eligibilityFor(deal);
+        if (eligibility.eligible) return { ...candidate, eligibility, ...(options.apiSelector ? {
+            selectionReason: deal.id === apiId ? FEATURED_API_SELECTION : FEATURED_ROTATION_FALLBACK,
+        } : {}) };
         console.log(`Automatic weekly candidate skipped: ${deal.brand} - ${deal.title} (${eligibility.reason})`);
     }
 
@@ -769,7 +793,8 @@ async function selectAutomaticFeaturedDeal(approvedDeals, options = {}) {
 // ============================================
 // Step 4: Write featured deal files
 // ============================================
-function buildDailyFeaturedSnapshot(deal, { manualPick = true, now = new Date(), existing = null } = {}) {
+function buildDailyFeaturedSnapshot(deal, { manualPick = true, now = new Date(), existing = null,
+    selectionReason = 'automatic-strongest-verified' } = {}) {
     const today = getViennaDayKey(now);
     const normalized = normalizeFeaturedDeal(deal);
 
@@ -786,7 +811,7 @@ function buildDailyFeaturedSnapshot(deal, { manualPick = true, now = new Date(),
         category: normalized.category || 'wien',
         distance: normalized.distance || 'Wien',
         manualPick,
-        selectionReason: manualPick ? 'slack-pick' : 'automatic-strongest-verified',
+        selectionReason: manualPick ? 'slack-pick' : selectionReason,
         pickedAt: now.toISOString()
   };
 
@@ -821,7 +846,7 @@ function saveDealOfTheWeek(deal, options = {}) {
         category: normalized.category || 'wien',
         distance: normalized.distance || 'Wien',
         manualPick,
-        selectionReason: manualPick ? 'slack-pick' : 'automatic-strongest-verified',
+        selectionReason: manualPick ? 'slack-pick' : options.selectionReason || 'automatic-strongest-verified',
         eligibility: options.eligibility || null,
         pickedAt: now.toISOString()
     };
@@ -954,7 +979,7 @@ async function main() {
   console.log('Done!');
 }
 
-async function resolveDailyFeaturedSelection(approvedDeals, existing, now = new Date()) {
+async function resolveDailyFeaturedSelection(approvedDeals, existing, now = new Date(), { apiSelector, weekly } = {}) {
     const today = getViennaDayKey(now);
     const currentId = existing?.date === today ? existing.dealId : '';
     const current = currentId && approvedDeals.find(deal => deal.id === currentId);
@@ -962,16 +987,21 @@ async function resolveDailyFeaturedSelection(approvedDeals, existing, now = new 
         return { deal: current, preserve: true };
     }
     const strongest = await selectAutomaticFeaturedDeal(approvedDeals, {
-        kind: 'daily', now, currentId, recentDealIds: recentFeaturedDealIds(existing, today),
+        kind: 'daily', now, currentId, recentDealIds: recentFeaturedDealIds(existing, today), apiSelector,
+        pinnedId: !existing?.manualPick && isRotatedSelection(existing?.selectionReason) ? currentId : '',
+        previousId: existing?.dealId,
+        distinctFromId: weekly?.week === getViennaWeekKey(now) ? weekly.dealId : '',
     });
-    return strongest && { ...strongest, preserve: !existing?.manualPick && strongest.deal.id === currentId
-        && existing?.selectionReason === 'automatic-strongest-verified' };
+    return strongest && { ...strongest, preserve: strongest.preserve || (!apiSelector && !existing?.manualPick
+        && strongest.deal.id === currentId && existing?.selectionReason === 'automatic-strongest-verified') };
 }
 
 async function refreshAutomaticDailyDeal(approvedDeals) {
     const existing = loadExistingFeaturedDeal('daily');
     const now = new Date();
-    const selected = await resolveDailyFeaturedSelection(approvedDeals, existing, now);
+    const selected = await resolveDailyFeaturedSelection(approvedDeals, existing, now, {
+        apiSelector: selectFeaturedDealWithOpenAI, weekly: loadExistingFeaturedDeal('weekly'),
+    });
     if (!selected) {
         if (existing?.date === getViennaDayKey(now) && existing.dealId) {
             const output = { date: existing.date, dealId: '', manualPick: false, selectionReason: 'no-verified-daily-deal',
@@ -983,13 +1013,13 @@ async function refreshAutomaticDailyDeal(approvedDeals) {
     }
     if (selected.preserve) syncExistingFeaturedDeal('daily', existing, selected.deal);
     else {
-        console.log(`Strongest verified daily deal (${selected.value}): ${selected.deal.brand} - ${selected.deal.title}`);
-        saveDealOfTheDay(selected.deal, { manualPick: false, now });
+        console.log(`Daily selection ${selected.selectionReason}: ${selected.deal.id}`);
+        saveDealOfTheDay(selected.deal, { manualPick: false, now, selectionReason: selected.selectionReason });
     }
     return selected.deal.id;
 }
 
-async function resolveWeeklyFeaturedSelection(approvedDeals, existing, daily, now = new Date()) {
+async function resolveWeeklyFeaturedSelection(approvedDeals, existing, daily, now = new Date(), { apiSelector } = {}) {
     const currentId = existing?.week === getViennaWeekKey(now) ? existing.dealId : '';
     const current = currentId && approvedDeals.find(deal => deal.id === currentId);
     if (existing?.manualPick && current) {
@@ -997,15 +1027,18 @@ async function resolveWeeklyFeaturedSelection(approvedDeals, existing, daily, no
         if (eligibility.eligible) return { deal: current, preserve: true, eligibility };
     }
     const excludedIds = new Set(daily?.date === getViennaDayKey(now) && daily.dealId ? [daily.dealId] : []);
-    const strongest = await selectAutomaticFeaturedDeal(approvedDeals, { kind: 'weekly', now, currentId, excludedIds });
-    return strongest && { ...strongest, preserve: !existing?.manualPick && strongest.deal.id === currentId
-        && existing?.selectionReason === 'automatic-strongest-verified' };
+    const strongest = await selectAutomaticFeaturedDeal(approvedDeals, { kind: 'weekly', now, currentId, excludedIds, apiSelector,
+        pinnedId: !existing?.manualPick && isRotatedSelection(existing?.selectionReason) ? currentId : '',
+        recentDealIds: new Set(existing?.dealId ? [existing.dealId] : []), previousId: existing?.dealId });
+    return strongest && { ...strongest, preserve: strongest.preserve || (!apiSelector && !existing?.manualPick
+        && strongest.deal.id === currentId && existing?.selectionReason === 'automatic-strongest-verified') };
 }
 
 async function refreshAutomaticWeeklyDeal(approvedDeals) {
     const existing = loadExistingFeaturedDeal('weekly');
     const now = new Date();
-    const selected = await resolveWeeklyFeaturedSelection(approvedDeals, existing, loadExistingFeaturedDeal('daily'), now);
+    const selected = await resolveWeeklyFeaturedSelection(approvedDeals, existing, loadExistingFeaturedDeal('daily'), now,
+        { apiSelector: selectFeaturedDealWithOpenAI });
     if (!selected) {
         const week = getViennaWeekKey(now);
         if (existing?.week !== week || existing?.dealId || existing?.selectionReason !== 'no-verified-weekly-deal') {
@@ -1017,8 +1050,9 @@ async function refreshAutomaticWeeklyDeal(approvedDeals) {
     }
     if (selected.preserve) syncExistingFeaturedDeal('weekly', existing, selected.deal, selected.eligibility);
     else {
-        console.log(`Strongest verified weekly deal (${selected.value}; ${selected.days.length} remaining days): ${selected.deal.brand} - ${selected.deal.title}`);
-        saveDealOfTheWeek(selected.deal, { manualPick: false, now, eligibility: selected.eligibility });
+        console.log(`Weekly selection ${selected.selectionReason} (${selected.days.length} remaining days): ${selected.deal.id}`);
+        saveDealOfTheWeek(selected.deal, { manualPick: false, now, selectionReason: selected.selectionReason,
+            eligibility: selected.eligibility });
     }
     return selected.deal.id;
 }

@@ -88,5 +88,13 @@ assert.equal(repairedBest.weekly.payload.dealId, coffee.id);
 const noWeekly = syncFeaturedDealSnapshots({ deals: [coffee] }, { date: '2026-08-26', dealId: coffee.id }, {}, { now });
 assert.equal(noWeekly.weekly.payload.selectionReason, 'no-verified-weekly-deal');
 assert.equal(noWeekly.weekly.payload.dealId, '');
+const apiChoice = { date: '2026-08-26', dealId: 'gone', brand: coffee.brand, title: coffee.title,
+  selectionReason: 'automatic-openai-selection' };
+const changedIdentity = syncFeaturedDealSnapshots({ deals: [coffee] }, apiChoice, {}, { now });
+assert.equal(changedIdentity.daily.report.reason, 'automatic_fallback');
+assert.equal(changedIdentity.daily.payload.dealId, coffee.id);
+assert.equal(changedIdentity.daily.payload.selectionReason, 'automatic-strongest-verified', 'an API selection binds to one exact ID');
+const existingApiChoice = syncFeaturedDealSnapshots({ deals: [coffee] }, { ...apiChoice, dealId: coffee.id }, {}, { now });
+assert.equal(existingApiChoice.daily.payload.selectionReason, 'automatic-openai-selection');
 
 console.log('featured deal reference sync tests passed');

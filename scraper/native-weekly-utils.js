@@ -216,7 +216,7 @@ function syncFeaturedDealReference(deals = [], pick = {}, options = {}) {
   let target = deals.find((deal) => cleanText(deal.id) === targetId) || null;
   let reason = target ? 'current_id' : '';
 
-  if (!target) {
+  if (!target && pick?.selectionReason !== 'automatic-openai-selection') {
     const identityKey = featuredIdentityKey(pick);
     const identityMatches = identityKey
       ? deals.filter((deal) => featuredIdentityKey(deal) === identityKey)
