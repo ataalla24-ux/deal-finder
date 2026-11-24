@@ -12,6 +12,7 @@ import { createTikTokDirectSearch, tikTokAccessRefusal } from './tiktok-browser-
 import { readPublicTikTokOriginal } from './tiktok-signed-in-browser.js';
 import { runInstagramSearchQueries } from './instagram-search-discovery.js';
 import { parsePublicSearchResults, readPublicSearchResponse } from './public-search-response.js';
+import { parseExplicitOfferPeriod } from './expiry-utils.js';
 
 import { normalizeCategoryForScraper } from './category-utils.js';
 import { discoveryRejection } from './deal-discovery-policy.js';
@@ -892,6 +893,24 @@ function dateFromNumericDayMonth(day, month, referenceDate, explicitYear = '') {
   return endDate;
 }
 
+// Keep the announcement's local calendar date and closing time together.
+function timedTikTokOfferDay(caption) {
+  const text = cleanText(caption, 2400);
+  const match = text.match(/\b(?:nur\s+)?am\s+(\d{1,2}\.\d{1,2}\.20\d{2})\s+(?:von\s+)?(\d{1,2}:\d{2})\s*(?:bis|[–-])\s*(\d{1,2}:\d{2})\s*Uhr\b/i);
+  if (!match) return null;
+  const rest = text.replace(match[0], ' ');
+  if (/\b\d{1,2}[./]\d{1,2}(?:[./]\d{2,4})?\b|\b(?:täglich|jeden|immer|wöchentlich)\b/i.test(rest)) return null;
+  const before = text.slice(0, match.index);
+  if (/(?:stand|geprüft|veröffentlicht|abgerufen|gepostet)\s*:?\s*$/i.test(before)) return null;
+  const after = text.slice(match.index + match[0].length).split(/[.!?]/, 1)[0];
+  const cues = /\b(?:eröffnung|neueröffnung|opening|aktion|angebot|gratis|kostenlos|rabatt)\b/i;
+  if (!cues.test(after) && !cues.test(before.split(/[.!?]/).at(-1).slice(-90))) return null;
+  const [, date, start, end] = match;
+  const literal = date + ', ' + start.padStart(5, '0') + ' bis ' + date + ', ' + end.padStart(5, '0') + ' Uhr';
+  const period = parseExplicitOfferPeriod(literal);
+  return period?.expires ? { ...period, literal } : null;
+}
+
 function extractTikTokFallbackOfferWindow(text, referenceDate = new Date()) {
   const signal = cleanText(text, 2600);
   const namedSingleOfferDate = signal.match(/\b(?:am|nur\s+am)\s+(?:(?:monday|tuesday|wednesday|thursday|friday|saturday|sunday|montag|dienstag|mittwoch|donnerstag|freitag|samstag|sonntag)\s*,?\s*(?:den\s+)?)?(\d{1,2})\.?\s*(jänner|jaenner|januar|februar|märz|maerz|april|mai|maj|maja|juni|juli|august|september|oktober|november|dezember)(?:\s+(\d{4}))?\b[^.!?]{0,120}\b(?:gratis|kostenlos|1\s*\+\s*1|2\s*(?:für|fuer)\s*1)\b/i);
@@ -1125,6 +1144,13 @@ export function buildDealFromPost(url, data, options = {}) {
     return { deal: null, reason: `explizites Aktionsdatum ist abgelaufen (${viennaIsoDay(offerWindow.endDate)})` };
   }
 
+  const timedDay = timedTikTokOfferDay(data.description || data.title);
+  const exactPeriod = timedDay && (!offerWindow || (offerWindow.startDate && offerWindow.endDate
+    && viennaIsoDay(offerWindow.startDate) === timedDay.validFrom && viennaIsoDay(offerWindow.endDate) === timedDay.validUntil))
+    ? timedDay : null;
+  if (exactPeriod && now.getTime() >= Date.parse(exactPeriod.expires)) {
+    return { deal: null, reason: 'explizite Aktionszeit ist abgelaufen' };
+  }
   const type = inferType(offerSignal);
   const { category, logo } = inferCategoryAndLogo(offerSignal, type);
   const extractedBrand = extractBrand(offerSignal, data.accountHandle);
@@ -1149,8 +1175,8 @@ export function buildDealFromPost(url, data, options = {}) {
   const title = buildOfferTitle(offerSignal, brand, type, openingBrand ? originalCaption : '');
   const score = buildQualityScore(offerSignal, dateCandidate.date, type, category, now);
   if (score < CONFIG.minScore) return { deal: null, reason: `Score zu niedrig (${score})` };
-  const validFrom = offerWindow?.startDate?.toISOString().slice(0, 10) || '';
-  const validUntil = offerWindow?.endDate?.toISOString().slice(0, 10) || '';
+  const validFrom = exactPeriod?.validFrom || offerWindow?.startDate?.toISOString().slice(0, 10) || '';
+  const validUntil = exactPeriod?.validUntil || offerWindow?.endDate?.toISOString().slice(0, 10) || '';
   const postalCode = contextSignal.match(/\b(1(?:0[1-9]|1\d|2[0-3])0)\b/)?.[1] || '';
 
   const mediaEvidence = media.evidence ? {
@@ -1172,12 +1198,13 @@ export function buildDealFromPost(url, data, options = {}) {
       source: 'TikTok Scanner',
       originSource: 'tiktok-deals-scanner',
       url,
-      expires: validUntil || extractExpiryText(offerSignal),
+      expires: exactPeriod?.expires || validUntil || extractExpiryText(offerSignal),
+      ...(exactPeriod && { validOn: exactPeriod.validOn, expiresOriginal: exactPeriod.literal }),
       validFrom,
       validUntil,
-      expiryKind: offerWindow?.kind || '',
-      expirySource: offerWindow ? 'tiktok-post-caption' : '',
-      dateConfidence: offerWindow ? 'high' : '',
+      expiryKind: exactPeriod?.kind || offerWindow?.kind || '',
+      expirySource: exactPeriod || offerWindow ? 'tiktok-post-caption' : '',
+      dateConfidence: exactPeriod || offerWindow ? 'high' : '',
       distance: postalCode ? `${postalCode} Wien` : 'Wien',
       city: postalCode ? 'Wien' : '',
       postalCode,

@@ -18,8 +18,22 @@ test('the real opening owner and headline identify VAMOS, leaving its address in
   assert.equal(deal.title, 'Hühner-Döner, Steak-Döner und Bey Gazoz gratis bei VAMOS');
   assert.match(deal.description, /freiwillig spenden/);
   assert.match(deal.description, /Franz-Josefs-Kai 27/);
+  assert.deepEqual([deal.validFrom, deal.validUntil, deal.expires], ['2026-11-27', '2026-11-27', '2026-11-27T18:00:00.000Z']);
+  const checkedAt = time => importTikTokBrowserPosts([post('vamoskebap1')], { now: new Date(time) });
+  assert.equal(checkedAt('2026-11-27T17:59:59Z').counts.accepted, 1);
+  assert.equal(checkedAt('2026-11-27T18:00:00Z').counts.accepted, 0);
   assert.equal(importTikTokBrowserPosts([post('vamoskebap1')], { now, previous: [deal] }).counts.duplicate, 1);
   assert.equal(importTikTokBrowserPosts([post('vamoskebap1')], { now: new Date('2026-12-04T18:00:00Z') }).counts.invalid, 1);
+});
+
+test('another event date or a source check does not establish the closing hour', () => {
+  for (const text of [caption + ' Zweiter Termin am 28.11.2026.', caption.replace('Am 27.', 'Geprüft am 27.')]) {
+    const { deal } = buildDealFromPost(post('vamoskebap1').url, {
+      accountHandle: 'vamoskebap1', description: text, timeDateTime: new Date(createTime * 1000).toISOString(),
+    }, { now });
+    assert.ok(deal);
+    assert.notEqual(deal.expires, '2026-11-27T18:00:00.000Z');
+  }
 });
 
 test('reporting accounts, near-match names, and conflicting URL authors cannot establish a merchant', () => {

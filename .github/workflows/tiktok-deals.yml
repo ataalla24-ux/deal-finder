@@ -52,7 +52,7 @@ jobs:
       - name: Test TikTok scanner
         run: |
           npm run test:tiktok-deal-scanner
-          node --test scripts/test-tiktok-known-links.mjs scripts/test-social-search-reliability.mjs
+          node --test scripts/test-tiktok-known-links.mjs scripts/test-social-search-reliability.mjs scripts/test-tiktok-opening-merchant.mjs
 
       - name: Install Playwright Chromium
         run: npx playwright install --with-deps chromium chromium-headless-shell
