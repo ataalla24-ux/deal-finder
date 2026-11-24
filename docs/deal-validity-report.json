@@ -1,13 +1,13 @@
 {
-  "generatedAt": "2026-11-24T11:00:16.108Z",
+  "generatedAt": "2026-11-24T11:08:36.229Z",
   "summary": {
     "maxAgeDays": 7,
-    "total": 248,
+    "total": 247,
     "allowed": 1,
-    "blocked": 247,
+    "blocked": 246,
     "warnings": 1,
     "reasonCounts": {
-      "kein konkretes Angebot erkennbar": 189,
+      "kein konkretes Angebot erkennbar": 188,
       "Gottesdienste nur im Wochenlauf": 36,
       "älter als 7 Tage (2020-04-25)": 1,
       "älter als 7 Tage (2026-02-22)": 78,
@@ -48,7 +48,7 @@
       "ausgeschlossene Quelle (gastro.news)": 10
     },
     "reasonCategoryCounts": {
-      "kein konkreter Deal": 194,
+      "kein konkreter Deal": 193,
       "Gottesdienste außerhalb Wochenlauf": 36,
       "älter als 7 Tage": 144,
       "ungültige URL": 17,
@@ -70,13 +70,13 @@
         }
       },
       "Firecrawl Gastro #2": {
-        "total": 23,
-        "allowed": 1,
-        "blocked": 22,
-        "warnings": 1,
+        "total": 21,
+        "allowed": 0,
+        "blocked": 21,
+        "warnings": 0,
         "reasonCategoryCounts": {
           "ungültige URL": 4,
-          "kein konkreter Deal": 4,
+          "kein konkreter Deal": 3,
           "älter als 7 Tage": 16,
           "abgelaufen": 13
         }
@@ -186,25 +186,32 @@
         "reasonCategoryCounts": {
           "kein konkreter Deal": 8
         }
+      },
+      "tiktok-deals-scanner": {
+        "total": 1,
+        "allowed": 1,
+        "blocked": 0,
+        "warnings": 1,
+        "reasonCategoryCounts": {}
       }
     }
   },
   "allowed": [
     {
-      "id": "g2-1cu5k5g",
-      "title": "10 % Rabatt auf alles gegen Vorzeigen eines Schülerausweises oder einer EduCard",
-      "brand": "Shawarma & Co.",
-      "source": "Firecrawl Gastro #2",
-      "url": "https://www.instagram.com/p/Df17zapN_n2/",
+      "id": "tiktok-1ha3oo0",
+      "title": "Hühner-Döner, Steak-Döner und Bey Gazoz gratis bei VAMOS",
+      "brand": "VAMOS",
+      "source": "tiktok-deals-scanner",
+      "url": "https://www.tiktok.com/@vamoskebap1/video/7710635479883992342",
       "reasons": [],
       "warnings": [
-        "Inhalt prüfen: Caption-Reste oder Emoji-Codes im sichtbaren Text"
+        "startet am 2026-11-27"
       ],
-      "sourceDate": "2026-11-17T12:30:13.000Z",
-      "sourceDateSource": "url.instagramShortcode",
-      "sourceAgeDays": 7,
-      "expiryDate": "",
-      "expirySource": "deal.expires",
+      "sourceDate": "2026-11-21T14:43:41.000Z",
+      "sourceDateSource": "url.tiktokVideoId",
+      "sourceAgeDays": 3,
+      "expiryDate": "2026-11-27",
+      "expirySource": "deal.structured",
       "urlStatus": "HTTP 200"
     }
   ],
@@ -851,7 +858,7 @@
       "warnings": [
         "kein Ablaufdatum gefunden"
       ],
-      "sourceDate": "2026-11-24T10:58:12.856Z",
+      "sourceDate": "2026-11-24T11:06:51.462Z",
       "sourceDateSource": "url.publicationDate",
       "sourceAgeDays": 0,
       "expiryDate": "",
@@ -1773,25 +1780,6 @@
       "sourceDateSource": "url.publicationDate",
       "sourceAgeDays": 22,
       "expiryDate": "2026-11-02",
-      "expirySource": "deal.expires",
-      "urlStatus": "HTTP 200"
-    },
-    {
-      "id": "g2-6xut7k",
-      "title": "Kaffeejause für 8,10 €: ein Heißgetränk plus ein Stück Kuchen",
-      "brand": "Schlosscafé im Parkhotel Schönbrunn",
-      "source": "Firecrawl Gastro #2",
-      "url": "https://www.austria-trend.at/en/hotels/parkhotel-schoenbrunn/schlosscafe",
-      "reasons": [
-        "kein konkretes Angebot erkennbar"
-      ],
-      "warnings": [
-        "kein Quell-/Post-Datum gefunden"
-      ],
-      "sourceDate": "",
-      "sourceDateSource": "",
-      "sourceAgeDays": null,
-      "expiryDate": "2026-12-31",
       "expirySource": "deal.expires",
       "urlStatus": "HTTP 200"
     },
@@ -5048,23 +5036,16 @@
   ],
   "runProvenance": {
     "repository": "ataalla24-ux/deal-finder",
-    "runId": "45379646687",
-    "headSha": "75ee1eb863cd6ade2c4c8bdb49140ef1770b01fa",
-    "checkoutSha": "87a71e9e0ff7242f3c5b5ee272a073e15ca72182",
-    "triggeringRun": {
-      "runId": "45377407495",
-      "headSha": "4fff30c6461621979982f8c8971fb1ae61eee45d",
-      "event": "schedule",
-      "name": "Firecrawl Key 1 - Gastro",
-      "startedAt": "2026-11-24T10:43:00.000Z",
-      "url": "https://github.com/ataalla24-ux/deal-finder/actions/runs/45377407495"
-    },
-    "event": "workflow_run",
+    "runId": "45380694865",
+    "headSha": "02bd547e53251db0b3f944d449e600c405186480",
+    "checkoutSha": "d6576ab3e6e6c2f15130f9c7f33d13ce1c4b62e8",
+    "triggeringRun": null,
+    "event": "workflow_dispatch",
     "runAttempt": "1",
-    "url": "https://github.com/ataalla24-ux/deal-finder/actions/runs/45379646687"
+    "url": "https://github.com/ataalla24-ux/deal-finder/actions/runs/45380694865"
   },
   "instagramDelivery": {
-    "checkedAt": "2026-11-24T11:00:16.648Z",
+    "checkedAt": "2026-11-24T11:08:36.695Z",
     "scope": "instagram-ai-agent/standard-slack-lane",
     "extractedCandidates": 4,
     "counts": {
@@ -5134,11 +5115,12 @@
     ]
   },
   "tiktokDelivery": {
-    "checkedAt": "2026-11-24T11:00:16.650Z",
+    "checkedAt": "2026-11-24T11:08:36.696Z",
     "scope": "tiktok-deals-scanner/standard-slack-lane",
-    "extractedCandidates": 1,
+    "extractedCandidates": 2,
     "counts": {
-      "already-seen-post": 1
+      "already-seen-post": 1,
+      "slack-confirmed": 1
     },
     "rows": [
       {
@@ -5153,6 +5135,19 @@
         "declaredSourceDate": "2026-11-17T18:00:00.000Z",
         "slackTs": "",
         "slackThreadTs": ""
+      },
+      {
+        "id": "tiktok-1ha3oo0",
+        "url": "https://www.tiktok.com/@vamoskebap1/video/7710635479883992342",
+        "title": "Hühner-Döner, Steak-Döner und Bey Gazoz gratis bei VAMOS",
+        "brand": "VAMOS",
+        "status": "slack-confirmed",
+        "reasons": [],
+        "sourceDate": "2026-11-21T14:43:41.000Z",
+        "sourceDateSource": "url.tiktokVideoId",
+        "declaredSourceDate": "2026-11-21T14:43:47.000Z",
+        "slackTs": "1795518516.524909",
+        "slackThreadTs": "1795518516.421199"
       }
     ]
   }

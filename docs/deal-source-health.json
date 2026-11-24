@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-11-24T10:59:29.538Z",
+  "generatedAt": "2026-11-24T11:07:54.539Z",
   "discoveryAvailability": {
     "note": "Transport evidence, not deal yield. Retry eligibility is not recovery. Candidate counts are not Slack deliveries. No extra runs or quota resets.",
     "lanes": [
@@ -54,15 +54,21 @@
   },
   "summary": {
     "filesConsidered": 33,
-    "totalCandidates": 707,
-    "uniqueCandidates": 683,
-    "distinctCandidates": 693,
+    "totalCandidates": 708,
+    "uniqueCandidates": 684,
+    "distinctCandidates": 694,
     "duplicateClusters": 10,
     "topHealthySources": [
       {
         "sourceKey": "wien-combined",
         "sourceLabel": "Wien Deals Combined Graph",
         "healthScore": 81,
+        "totalDeals": 2
+      },
+      {
+        "sourceKey": "tiktok-browser",
+        "sourceLabel": "TikTok Browser",
+        "healthScore": 76,
         "totalDeals": 2
       },
       {
@@ -82,12 +88,6 @@
         "sourceLabel": "Meta Instagram Graph",
         "healthScore": 71,
         "totalDeals": 87
-      },
-      {
-        "sourceKey": "tiktok-browser",
-        "sourceLabel": "TikTok Browser",
-        "healthScore": 66,
-        "totalDeals": 1
       }
     ],
     "topMissionSources": [
@@ -167,6 +167,12 @@
         "totalDeals": 2
       },
       {
+        "sourceKey": "tiktok-browser",
+        "sourceLabel": "TikTok Browser",
+        "precisionScore": 76,
+        "totalDeals": 2
+      },
+      {
         "sourceKey": "member-benefits",
         "sourceLabel": "Member Benefits",
         "precisionScore": 72,
@@ -183,12 +189,6 @@
         "sourceLabel": "Apify 2 Vienna Food Discovery",
         "precisionScore": 69,
         "totalDeals": 2
-      },
-      {
-        "sourceKey": "joe",
-        "sourceLabel": "jö Bonus Club",
-        "precisionScore": 64,
-        "totalDeals": 9
       }
     ],
     "topWeightedSources": [
@@ -211,16 +211,16 @@
         "totalDeals": 87
       },
       {
-        "sourceKey": "instagram-apify2",
-        "sourceLabel": "Apify 2 Vienna Food Discovery",
+        "sourceKey": "tiktok-browser",
+        "sourceLabel": "TikTok Browser",
         "sourceWeightScore": 59,
         "totalDeals": 2
       },
       {
-        "sourceKey": "gastro2",
-        "sourceLabel": "Firecrawl Key 1 - Gastro",
-        "sourceWeightScore": 55,
-        "totalDeals": 123
+        "sourceKey": "instagram-apify2",
+        "sourceLabel": "Apify 2 Vienna Food Discovery",
+        "sourceWeightScore": 59,
+        "totalDeals": 2
       }
     ],
     "topSourcesToFix": [
@@ -375,6 +375,59 @@
       "coverageScore": 15,
       "precisionScore": 85,
       "sourceWeightScore": 70
+    },
+    {
+      "sourceKey": "tiktok-browser",
+      "file": "deals-pending-tiktok-browser.json",
+      "sourceLabel": "TikTok Browser",
+      "totalDeals": 2,
+      "uniqueDeals": 2,
+      "duplicateDeals": 0,
+      "duplicateAcrossSources": 0,
+      "fresh1dCount": 0,
+      "fresh7dCount": 0,
+      "viennaCount": 2,
+      "foodDrinkCount": 1,
+      "promoCount": 2,
+      "missingUrlCount": 0,
+      "sampleTitles": [
+        "Gratis Eintritt: Museum of Change",
+        "Hühner-Döner, Steak-Döner und Bey Gazoz gratis bei VAMOS"
+      ],
+      "lastRun": null,
+      "uniqueRate": 1,
+      "duplicateRate": 0,
+      "fresh1dRate": 0,
+      "fresh7dRate": 0,
+      "viennaRate": 1,
+      "foodDrinkRate": 0.5,
+      "promoRate": 1,
+      "missingUrlRate": 0,
+      "averageQualityScore": 68,
+      "topCategories": [
+        {
+          "value": "essen",
+          "count": 1
+        },
+        {
+          "value": "kultur",
+          "count": 1
+        }
+      ],
+      "topTypes": [
+        {
+          "value": "gratis",
+          "count": 2
+        }
+      ],
+      "issues": [
+        "wenige Deals sind frischer als 1 Tag"
+      ],
+      "healthScore": 76,
+      "missionFitScore": 61,
+      "coverageScore": 14,
+      "precisionScore": 76,
+      "sourceWeightScore": 59
     },
     {
       "sourceKey": "member-benefits",
@@ -614,55 +667,6 @@
       "coverageScore": 64,
       "precisionScore": 70,
       "sourceWeightScore": 64
-    },
-    {
-      "sourceKey": "tiktok-browser",
-      "file": "deals-pending-tiktok-browser.json",
-      "sourceLabel": "TikTok Browser",
-      "totalDeals": 1,
-      "uniqueDeals": 1,
-      "duplicateDeals": 0,
-      "duplicateAcrossSources": 0,
-      "fresh1dCount": 0,
-      "fresh7dCount": 0,
-      "viennaCount": 1,
-      "foodDrinkCount": 0,
-      "promoCount": 1,
-      "missingUrlCount": 0,
-      "sampleTitles": [
-        "Gratis Eintritt: Museum of Change"
-      ],
-      "lastRun": null,
-      "uniqueRate": 1,
-      "duplicateRate": 0,
-      "fresh1dRate": 0,
-      "fresh7dRate": 0,
-      "viennaRate": 1,
-      "foodDrinkRate": 0,
-      "promoRate": 1,
-      "missingUrlRate": 0,
-      "averageQualityScore": 58,
-      "topCategories": [
-        {
-          "value": "kultur",
-          "count": 1
-        }
-      ],
-      "topTypes": [
-        {
-          "value": "gratis",
-          "count": 1
-        }
-      ],
-      "issues": [
-        "wenige Deals sind frischer als 1 Tag",
-        "geringe Food-/Drink-Relevanz"
-      ],
-      "healthScore": 66,
-      "missionFitScore": 43,
-      "coverageScore": 11,
-      "precisionScore": 64,
-      "sourceWeightScore": 47
     },
     {
       "sourceKey": "church-events",
