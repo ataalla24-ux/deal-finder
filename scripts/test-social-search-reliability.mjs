@@ -444,16 +444,22 @@ test('a confirmed Tavily key uses only Bearer on the same cache-only endpoint an
   const request = {
     enabled: true, clock: () => now, apiKey, freePlanConfirmed: true, fetcher: async (url, options) => {
       calls++;
-      assert.equal(url, 'https://api.tavily.com/search');
       assert.equal(options.redirect, 'error');
       assert.equal(options.credentials, 'omit');
+      if (options.method === 'GET') {
+        assert.equal(url, 'https://api.tavily.com/usage');
+        assert.deepEqual(options.headers, { Authorization: `Bearer ${apiKey}` });
+        return Response.json({ account: { current_plan: 'Researcher', plan_limit: 1000, plan_usage: 0,
+          paygo_limit: null, paygo_usage: 0 }, key: { limit: 1, usage: 0 } });
+      }
+      assert.equal(url, 'https://api.tavily.com/search');
       assert.deepEqual(options.headers, { 'Content-Type': 'application/json', Authorization: `Bearer ${apiKey}` });
       const query = JSON.parse(options.body);
       assert.equal(query.search_depth, 'basic');
       assert.equal(query.max_age_hours, -1);
       assert.equal(query.auto_parameters, false);
       assert.ok(!options.body.includes(apiKey));
-      return calls === 1 ? Response.json({ results: [], secret: apiKey })
+      return calls === 2 ? Response.json({ results: [], secret: apiKey })
         : Response.json({ error: apiKey }, { status: 401, headers: { 'Retry-After': '3600' } });
     },
   };
@@ -466,7 +472,7 @@ test('a confirmed Tavily key uses only Bearer on the same cache-only endpoint an
   assert.equal(denied.nextQueryIndex, completed.nextQueryIndex);
   assert.equal(denied.nextRetryAt, '2026-11-10T21:00:00.000Z');
   assert.ok(!JSON.stringify([completed, denied]).includes(apiKey));
-  assert.equal(calls, 2);
+  assert.equal(calls, 4);
 });
 
 test('the cache-only index rotates four Vienna food searches with one request per completed run', async () => {

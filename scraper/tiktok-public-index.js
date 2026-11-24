@@ -1,16 +1,11 @@
+import { setTimeout as wait } from 'node:timers/promises';
 import { retryAfterAt } from './source-http-policy.js';
+import { buildTavilyTikTokQueries } from './tiktok-public-index-queries.js';
 
 const DAY_MS = 86_400_000;
 const MAX_RESULTS = 20;
-const searchTerms = [
-  'Wien gratis Essen Döner Pizza Neueröffnung 1+1 Wien',
-  'Wien Neueröffnung gratis Döner Burger Pizza Verkostung Eröffnungsangebot',
-  'Wien 1+1 Essen 2 für 1 Döner Pizza Burger Restaurant Angebot',
-  'Wien gratis Kaffee Frühstück Croissant günstiges Mittagessen Aktion',
-];
-const viennaMonth = new Intl.DateTimeFormat('de-AT', {
-  timeZone: 'Europe/Vienna', month: 'long', year: 'numeric',
-});
+const FREE_PLAN_CREDITS = 1_000;
+const REQUEST_INTERVAL_MS = 1_000;
 const allowedHosts = new Set(['www.tiktok.com', 'tiktok.com', 'm.tiktok.com']);
 
 function publicVideoTarget(value) {
@@ -24,7 +19,7 @@ function publicVideoTarget(value) {
   } catch { return null; }
 }
 
-async function readIndexResults(response) {
+async function readTavilyJson(response) {
   const reader = response.body.getReader();
   const chunks = [];
   let size = 0;
@@ -38,20 +33,60 @@ async function readIndexResults(response) {
     }
     chunks.push(value);
   }
-  const results = JSON.parse(Buffer.concat(chunks).toString('utf8')).results;
-  if (!Array.isArray(results)) throw new Error('Unexpected public index response');
-  return results;
+  return JSON.parse(Buffer.concat(chunks).toString('utf8'));
+}
+
+async function requestTavilyJson(url, options, { fetcher, clock, isValid }) {
+  let response;
+  try {
+    response = await fetcher(url, {
+      ...options, redirect: 'error', credentials: 'omit', signal: AbortSignal.timeout(15_000),
+    });
+    const retryAfter = response.headers.get('retry-after');
+    if (!response.ok || retryAfter !== null) {
+      await response.body?.cancel().catch(() => {});
+      const failedAt = clock();
+      return { status: response.status === 429 ? 'rate-limited' : 'unavailable', httpStatus: response.status,
+        nextRetryAt: retryAfterAt(retryAfter, failedAt) || new Date(+failedAt + DAY_MS).toISOString() };
+    }
+    const payload = await readTavilyJson(response);
+    if (!isValid(payload)) throw new Error('Unexpected Tavily response');
+    return { status: 'completed', httpStatus: response.status, payload };
+  } catch {
+    return { status: 'unavailable', httpStatus: response?.status || 0,
+      nextRetryAt: new Date(+clock() + DAY_MS).toISOString() };
+  }
+}
+
+function getFreeSearchBudget({ account, key }, now, queryCount) {
+  const nonnegativeInteger = value => Number.isSafeInteger(value) && value >= 0;
+  const plan = typeof account?.current_plan === 'string' ? account.current_plan.trim().toLowerCase() : '';
+  if (!['researcher', 'free'].includes(plan)
+      || account.plan_limit !== FREE_PLAN_CREDITS || !nonnegativeInteger(account.plan_usage)
+      || account.paygo_usage !== 0 || ![0, null].includes(account.paygo_limit)
+      || !nonnegativeInteger(key?.usage) || (key.limit !== null && !nonnegativeInteger(key.limit))) return null;
+
+  const keyCredits = key.limit === null ? FREE_PLAN_CREDITS : key.limit - key.usage;
+  const remainingCredits = Math.max(0, Math.min(FREE_PLAN_CREDITS - account.plan_usage, keyCredits));
+  const finalDay = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth() + 1, 0)).getUTCDate();
+  const minutes = now.getUTCHours() * 60 + now.getUTCMinutes();
+  // Count the current invocation once, plus scheduled 05:15 and 17:15 UTC
+  // slots strictly after it through the end of the current UTC month.
+  const laterToday = [5 * 60 + 15, 17 * 60 + 15].filter(slot => slot > minutes).length;
+  const remainingRunSlots = 1 + laterToday + 2 * (finalDay - now.getUTCDate());
+  return { remainingCredits, remainingRunSlots,
+    plannedQueries: Math.min(queryCount, Math.ceil(remainingCredits / remainingRunSlots)) };
 }
 
 export async function discoverTikTokLinksViaTavily({
   enabled = false, previous = {}, apiKey = '', freePlanConfirmed = false,
-  fetcher = fetch, clock = () => new Date(),
+  fetcher = fetch, clock = () => new Date(), sleep = wait,
 } = {}) {
   const now = clock();
   const deadline = Date.parse(previous?.nextRetryAt);
   const nextRetryAt = deadline > +now ? new Date(deadline).toISOString() : '';
   const cursor = previous?.nextQueryIndex;
-  const nextQueryIndex = Number.isSafeInteger(cursor) && cursor >= 0 ? cursor % searchTerms.length : 0;
+  const nextQueryIndex = Number.isSafeInteger(cursor) && cursor >= 0 ? cursor : 0;
   const result = { status: 'disabled', nextRetryAt, nextQueryIndex, attemptedQueries: 0, indexRows: 0, links: [] };
   if (!enabled) return result;
   const key = typeof apiKey === 'string' ? apiKey.trim() : '';
@@ -61,9 +96,29 @@ export async function discoverTikTokLinksViaTavily({
   if (freePlanConfirmed && !key) return { ...indexRun, status: 'key-missing' };
   if (nextRetryAt) return { ...indexRun, status: 'cooldown' };
 
-  const attempt = { ...indexRun, queryIndex: nextQueryIndex, attemptedQueries: 1 };
-  const query = {
-    query: `${searchTerms[nextQueryIndex]} ${viennaMonth.format(now)}`,
+  const queryPlan = buildTavilyTikTokQueries(now);
+  const queries = [...new Set(key ? queryPlan : queryPlan.slice(0, 4))];
+  if (!queries.length) return { ...indexRun, status: 'no-search-queries' };
+  const attempt = { ...indexRun, queryIndex: nextQueryIndex % queries.length, nextQueryIndex: nextQueryIndex % queries.length };
+  const authorization = key ? { Authorization: `Bearer ${key}` } : { 'X-Tavily-Access-Mode': 'keyless' };
+  let queryBudget = 1;
+  if (key) {
+    const usage = await requestTavilyJson('https://api.tavily.com/usage', {
+      method: 'GET', headers: authorization,
+    }, { fetcher, clock, isValid: value => value && typeof value === 'object' && !Array.isArray(value) });
+    attempt.usageChecks = 1;
+    attempt.usageHttpStatus = usage.httpStatus;
+    attempt.completedQueries = 0;
+    attempt.queriesWithCreditUsage = 0;
+    attempt.reportedSearchCredits = 0;
+    if (usage.status !== 'completed') return { ...attempt, status: usage.status, nextRetryAt: usage.nextRetryAt };
+    const budget = getFreeSearchBudget(usage.payload, now, queries.length);
+    if (!budget) return { ...attempt, status: 'free-plan-unverified' };
+    attempt.budget = budget;
+    queryBudget = budget.plannedQueries;
+    if (queryBudget === 0) return { ...attempt, status: 'free-credits-exhausted' };
+  }
+  const searchOptions = {
     search_depth: 'basic',
     country: 'austria',
     time_range: 'week',
@@ -74,39 +129,44 @@ export async function discoverTikTokLinksViaTavily({
     include_answer: false,
     include_raw_content: false,
     auto_parameters: false,
+    ...(key ? { include_usage: true } : {}),
   };
-  // The configured free-plan key and keyless search are mutually exclusive.
-  // Provider results only supply links to TikTok originals.
-  const authorization = key ? { Authorization: `Bearer ${key}` } : { 'X-Tavily-Access-Mode': 'keyless' };
-  let response;
-  try {
-    response = await fetcher('https://api.tavily.com/search', {
-      method: 'POST', redirect: 'error', credentials: 'omit', signal: AbortSignal.timeout(15_000),
+  const distinct = new Map();
+  for (let index = 0; index < queryBudget; index++) {
+    if (index > 0) await sleep(REQUEST_INTERVAL_MS);
+    const query = queries[attempt.nextQueryIndex];
+    attempt.attemptedQueries++;
+    const search = await requestTavilyJson('https://api.tavily.com/search', {
+      method: 'POST',
       headers: { 'Content-Type': 'application/json', ...authorization },
-      body: JSON.stringify(query),
-    });
-    const retryAfter = response.headers.get('retry-after');
-    if (!response.ok || retryAfter !== null) {
-      await response.body?.cancel().catch(() => {});
-      const failedAt = clock();
+      body: JSON.stringify({ query, ...searchOptions }),
+    }, { fetcher, clock, isValid: value => Array.isArray(value?.results) });
+    attempt.httpStatus = search.httpStatus;
+    if (search.status !== 'completed') {
       return {
-        ...attempt, httpStatus: response.status,
-        status: response.status === 429 ? 'rate-limited' : 'unavailable',
-        nextRetryAt: retryAfterAt(retryAfter, failedAt) || new Date(+failedAt + DAY_MS).toISOString(),
+        ...attempt, status: search.status, nextRetryAt: search.nextRetryAt, links: [...distinct.values()],
       };
     }
-    const rows = await readIndexResults(response);
-    const distinct = new Map();
+    const rows = search.payload.results;
+    attempt.indexRows += rows.length;
+    const reportedCredits = search.payload.usage?.credits;
+    if (key) {
+      attempt.completedQueries++;
+      if (Number.isSafeInteger(reportedCredits) && reportedCredits >= 0) {
+        attempt.queriesWithCreditUsage++;
+        attempt.reportedSearchCredits += reportedCredits;
+      }
+    }
+    attempt.nextQueryIndex = (attempt.nextQueryIndex + 1) % queries.length;
+    // Index result content cannot become deal evidence. Keep exact URLs only.
     for (const row of rows.slice(0, MAX_RESULTS)) {
       const target = publicVideoTarget(row?.url);
       if (target && !distinct.has(target.id)) distinct.set(target.id, target.url);
     }
-    return { ...attempt, status: 'completed', httpStatus: response.status, indexRows: rows.length,
-      nextQueryIndex: (nextQueryIndex + 1) % searchTerms.length, links: [...distinct.values()] };
-  } catch {
-    return {
-      ...attempt, status: 'unavailable', httpStatus: response?.status || 0,
-      nextRetryAt: new Date(+clock() + DAY_MS).toISOString(),
-    };
+    if (key && Number.isSafeInteger(reportedCredits) && reportedCredits > 1) {
+      return { ...attempt, status: 'unexpected-search-credit-cost',
+        nextRetryAt: new Date(+clock() + DAY_MS).toISOString(), links: [...distinct.values()] };
+    }
   }
+  return { ...attempt, status: 'completed', links: [...distinct.values()] };
 }
