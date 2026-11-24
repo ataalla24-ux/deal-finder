@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-11-24T09:40:11.654Z",
+  "generatedAt": "2026-11-24T09:57:35.256Z",
   "discoveryAvailability": {
     "note": "Transport evidence, not deal yield. Retry eligibility is not recovery. Candidate counts are not Slack deliveries. No extra runs or quota resets.",
     "lanes": [
@@ -54,9 +54,9 @@
   },
   "summary": {
     "filesConsidered": 33,
-    "totalCandidates": 705,
-    "uniqueCandidates": 683,
-    "distinctCandidates": 692,
+    "totalCandidates": 703,
+    "uniqueCandidates": 681,
+    "distinctCandidates": 690,
     "duplicateClusters": 9,
     "topHealthySources": [
       {
@@ -75,12 +75,12 @@
         "sourceKey": "meta-instagram",
         "sourceLabel": "Meta Instagram Graph",
         "healthScore": 71,
-        "totalDeals": 89
+        "totalDeals": 87
       },
       {
         "sourceKey": "instagram-ai",
         "sourceLabel": "Instagram AI Agent",
-        "healthScore": 69,
+        "healthScore": 66,
         "totalDeals": 7
       },
       {
@@ -116,10 +116,10 @@
         "totalDeals": 113
       },
       {
-        "sourceKey": "instagram-ai",
-        "sourceLabel": "Instagram AI Agent",
+        "sourceKey": "instagram-apify",
+        "sourceLabel": "Apify Instagram",
         "missionFitScore": 63,
-        "totalDeals": 7
+        "totalDeals": 1
       }
     ],
     "topCoverageSources": [
@@ -140,8 +140,8 @@
       {
         "sourceKey": "meta-instagram",
         "sourceLabel": "Meta Instagram Graph",
-        "coverageScore": 67,
-        "totalDeals": 89,
+        "coverageScore": 66,
+        "totalDeals": 87,
         "fresh1dCount": 17
       },
       {
@@ -173,22 +173,22 @@
         "totalDeals": 1
       },
       {
-        "sourceKey": "instagram-ai",
-        "sourceLabel": "Instagram AI Agent",
-        "precisionScore": 70,
-        "totalDeals": 7
-      },
-      {
         "sourceKey": "meta-instagram",
         "sourceLabel": "Meta Instagram Graph",
         "precisionScore": 70,
-        "totalDeals": 89
+        "totalDeals": 87
       },
       {
         "sourceKey": "instagram-apify2",
         "sourceLabel": "Apify 2 Vienna Food Discovery",
         "precisionScore": 69,
         "totalDeals": 2
+      },
+      {
+        "sourceKey": "instagram-ai",
+        "sourceLabel": "Instagram AI Agent",
+        "precisionScore": 67,
+        "totalDeals": 7
       }
     ],
     "topWeightedSources": [
@@ -202,7 +202,7 @@
         "sourceKey": "meta-instagram",
         "sourceLabel": "Meta Instagram Graph",
         "sourceWeightScore": 65,
-        "totalDeals": 89
+        "totalDeals": 87
       },
       {
         "sourceKey": "instagram-apify2",
@@ -211,16 +211,16 @@
         "totalDeals": 2
       },
       {
-        "sourceKey": "instagram-ai",
-        "sourceLabel": "Instagram AI Agent",
-        "sourceWeightScore": 57,
-        "totalDeals": 7
-      },
-      {
         "sourceKey": "wien-combined",
         "sourceLabel": "Wien Deals Combined Graph",
         "sourceWeightScore": 57,
         "totalDeals": 1
+      },
+      {
+        "sourceKey": "gastro2",
+        "sourceLabel": "Firecrawl Key 1 - Gastro",
+        "sourceWeightScore": 54,
+        "totalDeals": 117
       }
     ],
     "topSourcesToFix": [
@@ -457,20 +457,20 @@
       "sourceKey": "meta-instagram",
       "file": "deals-pending-meta-instagram.json",
       "sourceLabel": "Meta Instagram Graph",
-      "totalDeals": 89,
-      "uniqueDeals": 80,
+      "totalDeals": 87,
+      "uniqueDeals": 78,
       "duplicateDeals": 9,
       "duplicateAcrossSources": 4,
       "fresh1dCount": 17,
-      "fresh7dCount": 76,
-      "viennaCount": 89,
-      "foodDrinkCount": 58,
+      "fresh7dCount": 77,
+      "viennaCount": 87,
+      "foodDrinkCount": 57,
       "promoCount": 33,
       "missingUrlCount": 0,
       "sampleTitles": [
+        "Say hola to our Lunch Deal",
         "Pro Rechnung kann ein Gutschein eingelöst werden",
-        "TUESDAY 24.11 Body-Doubling Sessions · 13:00–18:00 · Free GalPals Sapphic Meetup · 18:30–22:30 · Free WEDNESDAY 25.11 Lavender Lounge, queer",
-        "20 % auf die gesamte Sportnahrung"
+        "TUESDAY 24.11 Body-Doubling Sessions · 13:00–18:00 · Free GalPals Sapphic Meetup · 18:30–22:30 · Free WEDNESDAY 25.11 Lavender Lounge, queer"
       ],
       "lastRun": null,
       "uniqueRate": 0.9,
@@ -481,15 +481,15 @@
       "foodDrinkRate": 0.7,
       "promoRate": 0.4,
       "missingUrlRate": 0,
-      "averageQualityScore": 87.2,
+      "averageQualityScore": 87.1,
       "topCategories": [
         {
           "value": "essen",
-          "count": 36
+          "count": 35
         },
         {
           "value": "shopping",
-          "count": 19
+          "count": 18
         },
         {
           "value": "kaffee",
@@ -511,11 +511,11 @@
       "topTypes": [
         {
           "value": "rabatt",
-          "count": 67
+          "count": 66
         },
         {
           "value": "gratis",
-          "count": 18
+          "count": 17
         },
         {
           "value": "bogo",
@@ -529,7 +529,7 @@
       "issues": [],
       "healthScore": 71,
       "missionFitScore": 55,
-      "coverageScore": 67,
+      "coverageScore": 66,
       "precisionScore": 70,
       "sourceWeightScore": 65
     },
@@ -541,7 +541,7 @@
       "uniqueDeals": 4,
       "duplicateDeals": 3,
       "duplicateAcrossSources": 3,
-      "fresh1dCount": 4,
+      "fresh1dCount": 3,
       "fresh7dCount": 6,
       "viennaCount": 7,
       "foodDrinkCount": 6,
@@ -555,7 +555,7 @@
       "lastRun": null,
       "uniqueRate": 0.6,
       "duplicateRate": 0.4,
-      "fresh1dRate": 0.6,
+      "fresh1dRate": 0.4,
       "fresh7dRate": 0.9,
       "viennaRate": 1,
       "foodDrinkRate": 0.9,
@@ -590,11 +590,11 @@
         "wenige klare Gratis-/Promo-Signale",
         "hohe Überschneidung mit anderen Quellen"
       ],
-      "healthScore": 69,
-      "missionFitScore": 63,
-      "coverageScore": 16,
-      "precisionScore": 70,
-      "sourceWeightScore": 57
+      "healthScore": 66,
+      "missionFitScore": 58,
+      "coverageScore": 15,
+      "precisionScore": 67,
+      "sourceWeightScore": 53
     },
     {
       "sourceKey": "tiktok-browser",
