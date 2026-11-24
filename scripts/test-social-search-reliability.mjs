@@ -415,31 +415,66 @@ test('Tavily keyless search makes one cache-only request and yields canonical le
   });
   assert.equal(calls, 1);
   assert.deepEqual(result, {
-    status: 'completed', httpStatus: 200, nextRetryAt: '', attemptedQueries: 1, indexRows: 6, links: [original],
+    status: 'completed', httpStatus: 200, nextRetryAt: '', queryIndex: 0, nextQueryIndex: 1,
+    attemptedQueries: 1, indexRows: 6, links: [original],
   });
 });
 
+test('the cache-only index rotates four Vienna food searches with one request per completed run', async () => {
+  const queries = [];
+  const expected = [
+    'Wien gratis Essen Döner Pizza Neueröffnung 1+1 Wien',
+    'Wien Neueröffnung gratis Döner Burger Pizza Verkostung Eröffnungsangebot',
+    'Wien 1+1 Essen 2 für 1 Döner Pizza Burger Restaurant Angebot',
+    'Wien gratis Kaffee Frühstück Croissant günstiges Mittagessen Aktion',
+  ];
+  let previous = {};
+  for (let run = 0; run <= expected.length; run++) {
+    previous = await discoverTikTokLinksViaTavily({
+      enabled: true, previous, clock: () => now, fetcher: async (_url, options) => {
+        queries.push(JSON.parse(options.body).query);
+        return Response.json({ results: [] });
+      },
+    });
+    assert.equal(previous.queryIndex, run % expected.length);
+    assert.equal(previous.attemptedQueries, 1);
+    assert.equal(queries.length, run + 1);
+  }
+  assert.deepEqual(queries, [...expected, expected[0]].map(terms => `${terms} November 2026`));
+});
+
 test('the cache-only index persists its own Retry-After or longer default even while switched off', async () => {
-  const request = { enabled: true, clock: () => now };
+  const request = { enabled: true, clock: () => now, previous: { nextQueryIndex: 2 } };
   const limited = await discoverTikTokLinksViaTavily({ ...request,
     fetcher: async () => new Response('Do not retry yet', { status: 429, headers: { 'Retry-After': '7200' } }),
   });
   assert.equal(limited.status, 'rate-limited');
   assert.equal(limited.nextRetryAt, '2026-11-10T22:00:00.000Z');
+  assert.equal(limited.nextQueryIndex, 2);
   assert.deepEqual(limited.links, []);
   const disabled = await discoverTikTokLinksViaTavily({ ...request, previous: limited, enabled: false, fetcher: never });
   assert.equal(disabled.status, 'disabled');
   assert.equal(disabled.nextRetryAt, limited.nextRetryAt);
+  assert.equal(disabled.nextQueryIndex, limited.nextQueryIndex);
   const held = await discoverTikTokLinksViaTavily({ ...request, previous: disabled, fetcher: never });
   assert.equal(held.status, 'cooldown');
   assert.equal(held.attemptedQueries, 0);
+  assert.equal(held.nextQueryIndex, limited.nextQueryIndex);
+  const resumed = await discoverTikTokLinksViaTavily({
+    ...request, previous: held, clock: () => new Date(held.nextRetryAt),
+    fetcher: async () => Response.json({ results: [] }),
+  });
+  assert.equal(resumed.queryIndex, 2);
+  assert.equal(resumed.nextQueryIndex, 3);
   const unavailable = await discoverTikTokLinksViaTavily({ ...request,
     fetcher: async () => new Response('Unavailable', { status: 403 }),
   });
   assert.equal(unavailable.nextRetryAt, '2026-11-11T20:00:00.000Z');
+  assert.equal(unavailable.nextQueryIndex, 2);
   const malformed = await discoverTikTokLinksViaTavily({ ...request, fetcher: async () => Response.json({ error: 'Not results' }) });
   assert.equal(malformed.status, 'unavailable');
   assert.equal(malformed.nextRetryAt, unavailable.nextRetryAt);
+  assert.equal(malformed.nextQueryIndex, 2);
 });
 
 test('public-only scanning blocks all visits until the latest known TikTok refusal expires', () => {

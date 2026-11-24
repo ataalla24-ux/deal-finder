@@ -2,6 +2,12 @@ import { retryAfterAt } from './source-http-policy.js';
 
 const DAY_MS = 86_400_000;
 const MAX_RESULTS = 20;
+const searchTerms = [
+  'Wien gratis Essen Döner Pizza Neueröffnung 1+1 Wien',
+  'Wien Neueröffnung gratis Döner Burger Pizza Verkostung Eröffnungsangebot',
+  'Wien 1+1 Essen 2 für 1 Döner Pizza Burger Restaurant Angebot',
+  'Wien gratis Kaffee Frühstück Croissant günstiges Mittagessen Aktion',
+];
 const viennaMonth = new Intl.DateTimeFormat('de-AT', {
   timeZone: 'Europe/Vienna', month: 'long', year: 'numeric',
 });
@@ -41,14 +47,17 @@ export async function discoverTikTokLinksViaTavily({
   enabled = false, previous = {}, fetcher = fetch, clock = () => new Date(),
 } = {}) {
   const now = clock();
-  const deadline = Date.parse(previous.nextRetryAt);
+  const deadline = Date.parse(previous?.nextRetryAt);
   const nextRetryAt = deadline > +now ? new Date(deadline).toISOString() : '';
-  const result = { status: 'disabled', nextRetryAt, attemptedQueries: 0, indexRows: 0, links: [] };
+  const cursor = previous?.nextQueryIndex;
+  const nextQueryIndex = Number.isSafeInteger(cursor) && cursor >= 0 ? cursor % searchTerms.length : 0;
+  const result = { status: 'disabled', nextRetryAt, nextQueryIndex, attemptedQueries: 0, indexRows: 0, links: [] };
   if (!enabled) return result;
   if (nextRetryAt) return { ...result, status: 'cooldown' };
 
+  const attempt = { ...result, queryIndex: nextQueryIndex, attemptedQueries: 1 };
   const query = {
-    query: `Wien gratis Essen Döner Pizza Neueröffnung 1+1 Wien ${viennaMonth.format(now)}`,
+    query: `${searchTerms[nextQueryIndex]} ${viennaMonth.format(now)}`,
     search_depth: 'basic',
     country: 'austria',
     time_range: 'week',
@@ -74,7 +83,7 @@ export async function discoverTikTokLinksViaTavily({
       await response.body?.cancel().catch(() => {});
       const failedAt = clock();
       return {
-        ...result, attemptedQueries: 1, httpStatus: response.status,
+        ...attempt, httpStatus: response.status,
         status: response.status === 429 ? 'rate-limited' : 'unavailable',
         nextRetryAt: retryAfterAt(retryAfter, failedAt) || new Date(+failedAt + DAY_MS).toISOString(),
       };
@@ -85,11 +94,11 @@ export async function discoverTikTokLinksViaTavily({
       const target = publicVideoTarget(row?.url);
       if (target && !distinct.has(target.id)) distinct.set(target.id, target.url);
     }
-    return { ...result, status: 'completed', httpStatus: response.status, attemptedQueries: 1,
-      indexRows: rows.length, links: [...distinct.values()] };
+    return { ...attempt, status: 'completed', httpStatus: response.status, indexRows: rows.length,
+      nextQueryIndex: (nextQueryIndex + 1) % searchTerms.length, links: [...distinct.values()] };
   } catch {
     return {
-      ...result, status: 'unavailable', attemptedQueries: 1, httpStatus: response?.status || 0,
+      ...attempt, status: 'unavailable', httpStatus: response?.status || 0,
       nextRetryAt: new Date(+clock() + DAY_MS).toISOString(),
     };
   }
