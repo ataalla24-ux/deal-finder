@@ -1,13 +1,13 @@
 # FreeFinder Betriebsbericht
 
-Stand: 2026-11-24T11:58:38.261Z
+Stand: 2026-11-24T12:04:43.170Z
 
 - 89 Live-Angebote; 235 nicht-live Entwuerfe geprueft.
 - 0 neue IDs seit letzter Bestandsaufnahme; keine automatische Erfolgszuordnung.
 - 0 Entwuerfe ohne formale Pruefluecke, weiterhin menschliche Freigabe.
 - Pilot: 50 Faelle gesammelt, 0 unabhaengig bewertet, 31 regulaere Qualitaetslaeufe beobachtet. Automatische Freigabe AUS.
 - Zugestellte und veröffentlichte Angebote nach Quelle stehen unten im Abschnitt Ertrag je Quelle.
-- API: internal-ledger; 4.55138 USD intern gebucht/reserviert in 24 Stunden. Kein Anbieter-Kontostand.
+- API: internal-ledger; 4.64148 USD intern gebucht/reserviert in 24 Stunden. Kein Anbieter-Kontostand.
 
 ## Naechste Schritte
 
@@ -29,7 +29,7 @@ Stand: 2026-11-24T11:58:38.261Z
 ## Aktualitaet
 
 - Entwurfsregeln frisch und lokal geprueft, ohne Modell- oder Quellenaufruf. 235 unterschiedliche IDs in 235 Eintraegen; doppelte IDs bleiben Prueffaelle.
-- Live-/Bildpruefstand: current; letzte Pruefung 2026-11-24T11:58:36.845Z. Bei veraltetem Stand sind leere Hinweisliste und Bildzaehler KEIN Entwarnungsnachweis.
+- Live-/Bildpruefstand: current; letzte Pruefung 2026-11-24T12:04:41.684Z. Bei veraltetem Stand sind leere Hinweisliste und Bildzaehler KEIN Entwarnungsnachweis.
 
 ## Freigabe und Einloesung
 
@@ -49,7 +49,7 @@ Stand: 2026-11-24T11:58:38.261Z
 
 Jeder Deal zählt ab seiner ersten belegten Slack-Zustellung einmal. Die Freigabe zählt, sobald für die betreffende Nachricht ein menschliches Häkchen belegt ist. Die letzte Stufe zählt freigegebene Deals, die mit derselben Nachrichtenkennung im öffentlichen Feed beobachtet wurden. Kurzzeitig sichtbare Angebote zwischen zwei Beobachtungen und bereits vor der ersten Beobachtung entfernte Einträge können fehlen.
 
-Erste öffentliche Beobachtung: 2026-11-06T23:56:26.741Z. Letzte erfolgreiche Beobachtung: 2026-11-24T11:58:38.261Z.
+Erste öffentliche Beobachtung: 2026-11-06T23:56:26.741Z. Letzte erfolgreiche Beobachtung: 2026-11-24T12:04:43.170Z.
 
 ### 7 Tage
 
@@ -115,7 +115,7 @@ Erste öffentliche Beobachtung: 2026-11-06T23:56:26.741Z. Letzte erfolgreiche Be
 
 ## Händlerseiten und Cashback im Vergleich
 
-Der Test begann am 21. November 2026 um 13:06 Uhr Wiener Zeit. Das Vergleichsfenster beginnt genau zwei Wochen früher. Beide Fenster umfassen dieselben Wochentage und bisher jeweils 71.9 Stunden, höchstens 14 Tage.
+Der Test begann am 21. November 2026 um 13:06 Uhr Wiener Zeit. Das Vergleichsfenster beginnt genau zwei Wochen früher. Beide Fenster umfassen dieselben Wochentage und bisher jeweils 72.0 Stunden, höchstens 14 Tage.
 
 | Essensangebote | Slack vorher | Slack seit Start | Häkchen vorher | Häkchen seit Start | Öffentlich vorher | Öffentlich seit Start |
 |---|---:|---:|---:|---:|---:|---:|
@@ -123,5 +123,5 @@ Der Test begann am 21. November 2026 um 13:06 Uhr Wiener Zeit. Das Vergleichsfen
 | Wiener Händlerseiten | 0 | 2 | 0 | 1 | 0 | 1 |
 | Direkte marktguru-Cashbacks | 0 | 1 | 0 | 0 | 0 | 0 |
 
-Jeder Deal zählt nach seiner ersten belegten Zustellung. Freigaben und öffentliche Sichtungen werden bis zum Prüfstand nachgetragen. Ältere Nachrichten hatten mehr Zeit für ein Häkchen. Änderungen der Gesamtzahlen können auch von anderen Quellen stammen. Prüfstand 2026-11-24T11:58:38.261Z.
+Jeder Deal zählt nach seiner ersten belegten Zustellung. Freigaben und öffentliche Sichtungen werden bis zum Prüfstand nachgetragen. Ältere Nachrichten hatten mehr Zeit für ein Häkchen. Änderungen der Gesamtzahlen können auch von anderen Quellen stammen. Prüfstand 2026-11-24T12:04:43.170Z.
 
