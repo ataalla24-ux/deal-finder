@@ -69,7 +69,7 @@ jobs:
           node-version: '22'
       - run: npm ci --no-audit --no-fund
       - run: npx playwright install chromium --only-shell
-      - name: Check one ordinary public video discovered by the cloud index
+      - name: Check two ordinary public videos discovered by the cloud index
         run: |
           node --input-type=module <<'JS'
           import fs from 'node:fs';
@@ -84,17 +84,21 @@ jobs:
           if (retryAt > Date.now()) {
             console.log(JSON.stringify({ status: 'cooldown', originalRead: 0, retryAt: new Date(retryAt).toISOString() }));
           } else {
-            const url = 'https://www.tiktok.com/@nico.realrating/video/7709913443947728131';
+            const urls = ['7711008298236988694', '7709134021703339286']
+              .map(id => `https://www.tiktok.com/@foodiewien/video/${id}`);
             const browser = await chromium.launch();
             try {
               const page = await browser.newPage({ locale: 'de-AT', timezoneId: 'Europe/Vienna' });
-              const evidence = await extractTikTokPostData(page, url);
-              const { deal, reason } = evidence.url ? buildDealFromPost(url, evidence) : {};
-              console.log(JSON.stringify({
-                url, originalRead: Number(Boolean(evidence.url)), publicationDate: evidence.timeDateTime || '',
-                reason: evidence.accessRefusal?.transportReason || reason || '',
-                title: deal?.title || '', starts: deal?.validFrom || '', expires: deal?.expires || '',
-              }));
+              for (const url of urls) {
+                const evidence = await extractTikTokPostData(page, url);
+                const { deal, reason } = evidence.url ? buildDealFromPost(url, evidence) : {};
+                console.log(JSON.stringify({
+                  url, originalRead: Number(Boolean(evidence.url)), publicationDate: evidence.timeDateTime || '',
+                  reason: evidence.accessRefusal?.transportReason || reason || '',
+                  title: deal?.title || '', starts: deal?.validFrom || '', expires: deal?.expires || '',
+                }));
+                if (evidence.accessRefusal) break;
+              }
             } finally {
               await browser.close();
             }
