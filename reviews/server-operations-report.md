@@ -1,20 +1,20 @@
 # FreeFinder Betriebsbericht
 
-Stand: 2026-11-24T11:02:18.845Z
+Stand: 2026-11-24T11:36:56.517Z
 
-- 86 Live-Angebote; 241 nicht-live Entwuerfe geprueft.
-- 0 neue IDs seit letzter Bestandsaufnahme; keine automatische Erfolgszuordnung.
+- 89 Live-Angebote; 235 nicht-live Entwuerfe geprueft.
+- 3 neue IDs seit letzter Bestandsaufnahme; keine automatische Erfolgszuordnung.
 - 0 Entwuerfe ohne formale Pruefluecke, weiterhin menschliche Freigabe.
 - Pilot: 50 Faelle gesammelt, 0 unabhaengig bewertet, 31 regulaere Qualitaetslaeufe beobachtet. Automatische Freigabe AUS.
 - Zugestellte und veröffentlichte Angebote nach Quelle stehen unten im Abschnitt Ertrag je Quelle.
-- API: internal-ledger; 3.027767 USD intern gebucht/reserviert in 24 Stunden. Kein Anbieter-Kontostand.
+- API: internal-ledger; 4.489817 USD intern gebucht/reserviert in 24 Stunden. Kein Anbieter-Kontostand.
 
 ## Naechste Schritte
 
 - copy-or-period-review: 16
-- source-evidence-needed: 89
+- source-evidence-needed: 85
 - blocked-source: 57
-- venue-verification-needed: 77
+- venue-verification-needed: 75
 - duplicate-review: 2
 
 ## Native Bilder
@@ -28,20 +28,20 @@ Stand: 2026-11-24T11:02:18.845Z
 
 ## Aktualitaet
 
-- Entwurfsregeln frisch und lokal geprueft, ohne Modell- oder Quellenaufruf. 241 unterschiedliche IDs in 241 Eintraegen; doppelte IDs bleiben Prueffaelle.
-- Live-/Bildpruefstand: current; letzte Pruefung 2026-11-24T11:02:17.419Z. Bei veraltetem Stand sind leere Hinweisliste und Bildzaehler KEIN Entwarnungsnachweis.
+- Entwurfsregeln frisch und lokal geprueft, ohne Modell- oder Quellenaufruf. 235 unterschiedliche IDs in 235 Eintraegen; doppelte IDs bleiben Prueffaelle.
+- Live-/Bildpruefstand: current; letzte Pruefung 2026-11-24T11:36:55.391Z. Bei veraltetem Stand sind leere Hinweisliste und Bildzaehler KEIN Entwarnungsnachweis.
 
 ## Freigabe und Einloesung
 
-- 50 Pilotfaelle aktuell, 1736 fruehere Pruefstaende unveraendert archiviert. Keine alten Bewertungen uebernehmen.
+- 50 Pilotfaelle aktuell, 1774 fruehere Pruefstaende unveraendert archiviert. Keine alten Bewertungen uebernehmen.
 - Aktueller, unbewerteter Pruefbogen: 50 Faelle; reviews/automatic-publication-review-pack.json. Keine unabhaengige menschliche Bewertung erfunden.
-- Quellengepruefte Einloese-/Buchungswege: 10 von 86; 0 ausdruecklich unbestaetigte, 76 fehlende aktuelle Einloesepruefungen. Besuchsinfos sind keine Gutscheine; ein Buchungslink bestaetigt keinen aktuellen Flugpreis.
-- Karte frisch lokal geprueft: {"mapped":53,"online-only":32,"needs-review":1}.
+- Quellengepruefte Einloese-/Buchungswege: 11 von 89; 0 ausdruecklich unbestaetigte, 78 fehlende aktuelle Einloesepruefungen. Besuchsinfos sind keine Gutscheine; ein Buchungslink bestaetigt keinen aktuellen Flugpreis.
+- Karte frisch lokal geprueft: {"needs-review":3,"mapped":54,"online-only":32}.
 
 ## Quellen
 
 - docs/apify-discovery-report.json: partial; {"fetchedRecords":8,"freshAcceptedDeals":1,"pendingDeals":2,"duplicatePosts":1,"unchangedPosts":1,"providerErrors":1}; Slack-Zustellungen nicht aus Kandidaten ableiten.
-- docs/meta-instagram-report.json: ok; {"freshPostsFetched":425,"newDeals":1,"repeatedDeals":86,"totalDeals":87}; Slack-Zustellungen nicht aus Kandidaten ableiten.
+- docs/meta-instagram-report.json: ok; {"freshPostsFetched":50,"newDeals":0,"repeatedDeals":87,"totalDeals":87}; Slack-Zustellungen nicht aus Kandidaten ableiten.
 - docs/power-scraper-report.json: see-source-results; {"acceptedDeals":53,"healthySources":46,"failedSources":0,"deferredSources":11,"rawDeals":53}; Slack-Zustellungen nicht aus Kandidaten ableiten.
 - docs/instagram-ai-report.json: see-source-results; {"discoveredCandidates":16,"acceptedDeals":4,"aiRescueCandidates":0,"aiRescued":0}; Slack-Zustellungen nicht aus Kandidaten ableiten.
 
@@ -49,17 +49,18 @@ Stand: 2026-11-24T11:02:18.845Z
 
 Jeder Deal zählt ab seiner ersten belegten Slack-Zustellung einmal. Die Freigabe zählt, sobald für die betreffende Nachricht ein menschliches Häkchen belegt ist. Die letzte Stufe zählt freigegebene Deals, die mit derselben Nachrichtenkennung im öffentlichen Feed beobachtet wurden. Kurzzeitig sichtbare Angebote zwischen zwei Beobachtungen und bereits vor der ersten Beobachtung entfernte Einträge können fehlen.
 
-Erste öffentliche Beobachtung: 2026-11-06T23:56:26.741Z. Letzte erfolgreiche Beobachtung: 2026-11-24T11:02:18.845Z.
+Erste öffentliche Beobachtung: 2026-11-06T23:56:26.741Z. Letzte erfolgreiche Beobachtung: 2026-11-24T11:36:56.517Z.
 
 ### 7 Tage
 
 | Quelle | Essen zugestellt | Essen abgehakt | Essen öffentlich belegt | Weitere zugestellt | Weitere abgehakt | Weitere öffentlich belegt |
 |---|---:|---:|---:|---:|---:|---:|
-| Gesamt | 99 | 9 | 9 | 81 | 6 | 6 |
-| Meta Instagram Business Discovery | 13 | 3 | 3 | 18 | 0 | 0 |
+| Gesamt | 100 | 10 | 10 | 80 | 8 | 8 |
+| Meta Instagram Business Discovery | 13 | 3 | 3 | 18 | 1 | 1 |
 | Firecrawl Gastro #2 | 16 | 3 | 3 | 1 | 0 | 0 |
-| Meta Instagram Hashtag API | 15 | 2 | 2 | 24 | 0 | 0 |
+| Meta Instagram Hashtag API | 15 | 2 | 2 | 24 | 1 | 1 |
 | vienna-merchant-website | 8 | 1 | 1 | 0 | 0 | 0 |
+| tiktok-deals-scanner | 2 | 1 | 1 | 0 | 0 | 0 |
 | Gutscheine.at | 0 | 0 | 0 | 21 | 4 | 4 |
 | Meta Instagram Graph | 16 | 0 | 0 | 0 | 0 | 0 |
 | Flights Vienna | 0 | 0 | 0 | 9 | 0 | 0 |
@@ -73,26 +74,25 @@ Erste öffentliche Beobachtung: 2026-11-06T23:56:26.741Z. Letzte erfolgreiche Be
 | Apify Instagram Vienna Food Offers | 1 | 0 | 0 | 0 | 0 | 0 |
 | Firecrawl Food #2 | 1 | 0 | 0 | 0 | 0 | 0 |
 | Firecrawl Gastro #2 Search | 1 | 0 | 0 | 0 | 0 | 0 |
-| Firecrawl Key 3 - Consumables | 0 | 0 | 0 | 1 | 0 | 0 |
 | Instagram AI Agent | 1 | 0 | 0 | 0 | 0 | 0 |
 | Sportscheck | 0 | 0 | 0 | 1 | 0 | 0 |
-| tiktok-deals-scanner | 1 | 0 | 0 | 0 | 0 | 0 |
 | Unbekannt | 0 | 0 | 0 | 1 | 1 | 1 |
 
 ### 30 Tage
 
 | Quelle | Essen zugestellt | Essen abgehakt | Essen öffentlich belegt | Weitere zugestellt | Weitere abgehakt | Weitere öffentlich belegt |
 |---|---:|---:|---:|---:|---:|---:|
-| Gesamt | 460 | 66 | 50 | 346 | 35 | 31 |
+| Gesamt | 461 | 67 | 51 | 345 | 37 | 33 |
 | Firecrawl Gastro #2 | 106 | 22 | 13 | 1 | 0 | 0 |
-| Meta Instagram Business Discovery | 79 | 12 | 10 | 79 | 0 | 0 |
+| Meta Instagram Business Discovery | 79 | 12 | 10 | 78 | 1 | 1 |
 | Firecrawl Gastro #4 | 25 | 10 | 9 | 1 | 0 | 0 |
-| Meta Instagram Hashtag API | 59 | 7 | 7 | 79 | 1 | 0 |
+| Meta Instagram Hashtag API | 59 | 7 | 7 | 79 | 2 | 1 |
 | power-official-food | 25 | 4 | 4 | 0 | 0 | 0 |
 | OMV official public promotion | 4 | 3 | 3 | 0 | 0 | 0 |
 | Apify 2 Vienna Food Discovery | 4 | 3 | 2 | 0 | 0 | 0 |
 | Meta Instagram Graph | 63 | 1 | 1 | 0 | 0 | 0 |
 | vienna-merchant-website | 24 | 1 | 1 | 0 | 0 | 0 |
+| tiktok-deals-scanner | 6 | 1 | 1 | 3 | 0 | 0 |
 | Firecrawl Gastro #4 Search | 12 | 2 | 0 | 5 | 1 | 1 |
 | Meta Ad Library API | 5 | 1 | 0 | 0 | 0 | 0 |
 | Gutscheine.at | 0 | 0 | 0 | 109 | 11 | 8 |
@@ -102,7 +102,6 @@ Erste öffentliche Beobachtung: 2026-11-06T23:56:26.741Z. Letzte erfolgreiche Be
 | member-benefits-scraper | 1 | 0 | 0 | 10 | 4 | 4 |
 | Firecrawl Gastro #2 Search | 5 | 0 | 0 | 5 | 0 | 0 |
 | Firecrawl Instagram Gastro #5 | 8 | 0 | 0 | 0 | 0 | 0 |
-| tiktok-deals-scanner | 5 | 0 | 0 | 3 | 0 | 0 |
 | Instagram AI Agent | 5 | 0 | 0 | 0 | 0 | 0 |
 | Apify Instagram Vienna Food Offers | 4 | 0 | 0 | 0 | 0 | 0 |
 | Firecrawl Key 3 - Consumables | 0 | 0 | 0 | 4 | 0 | 0 |
@@ -116,13 +115,13 @@ Erste öffentliche Beobachtung: 2026-11-06T23:56:26.741Z. Letzte erfolgreiche Be
 
 ## Händlerseiten und Cashback im Vergleich
 
-Der Test begann am 21. November 2026 um 13:06 Uhr Wiener Zeit. Das Vergleichsfenster beginnt genau zwei Wochen früher. Beide Fenster umfassen dieselben Wochentage und bisher jeweils 70.9 Stunden, höchstens 14 Tage.
+Der Test begann am 21. November 2026 um 13:06 Uhr Wiener Zeit. Das Vergleichsfenster beginnt genau zwei Wochen früher. Beide Fenster umfassen dieselben Wochentage und bisher jeweils 71.5 Stunden, höchstens 14 Tage.
 
 | Essensangebote | Slack vorher | Slack seit Start | Häkchen vorher | Häkchen seit Start | Öffentlich vorher | Öffentlich seit Start |
 |---|---:|---:|---:|---:|---:|---:|
-| Alle Quellen | 28 | 37 | 5 | 2 | 4 | 2 |
+| Alle Quellen | 28 | 38 | 5 | 3 | 4 | 3 |
 | Wiener Händlerseiten | 0 | 2 | 0 | 1 | 0 | 1 |
 | Direkte marktguru-Cashbacks | 0 | 1 | 0 | 0 | 0 | 0 |
 
-Jeder Deal zählt nach seiner ersten belegten Zustellung. Freigaben und öffentliche Sichtungen werden bis zum Prüfstand nachgetragen. Ältere Nachrichten hatten mehr Zeit für ein Häkchen. Änderungen der Gesamtzahlen können auch von anderen Quellen stammen. Prüfstand 2026-11-24T11:02:18.845Z.
+Jeder Deal zählt nach seiner ersten belegten Zustellung. Freigaben und öffentliche Sichtungen werden bis zum Prüfstand nachgetragen. Ältere Nachrichten hatten mehr Zeit für ein Häkchen. Änderungen der Gesamtzahlen können auch von anderen Quellen stammen. Prüfstand 2026-11-24T11:36:56.517Z.
 
