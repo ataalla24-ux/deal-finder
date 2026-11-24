@@ -61,10 +61,13 @@ async function requestTavilyJson(url, options, { fetcher, clock, isValid }) {
 function getFreeSearchBudget({ account, key }, now, queryCount) {
   const nonnegativeInteger = value => Number.isSafeInteger(value) && value >= 0;
   const plan = typeof account?.current_plan === 'string' ? account.current_plan.trim().toLowerCase() : '';
-  if (!['researcher', 'free'].includes(plan)
-      || account.plan_limit !== FREE_PLAN_CREDITS || !nonnegativeInteger(account.plan_usage)
-      || account.paygo_usage !== 0 || ![0, null].includes(account.paygo_limit)
-      || !nonnegativeInteger(key?.usage) || (key.limit !== null && !nonnegativeInteger(key.limit))) return null;
+  if (!['researcher', 'free'].includes(plan)) return { refusal: 'account-plan-unrecognized' };
+  if (account.plan_limit !== FREE_PLAN_CREDITS) return { refusal: 'account-limit-unconfirmed' };
+  if (!nonnegativeInteger(account.plan_usage)) return { refusal: 'account-usage-invalid' };
+  if (account.paygo_usage !== 0 || ![0, null].includes(account.paygo_limit)) return { refusal: 'paygo-not-confirmed-off' };
+  if (!nonnegativeInteger(key?.usage) || (key.limit !== null && !nonnegativeInteger(key.limit))) {
+    return { refusal: 'key-usage-invalid' };
+  }
 
   const keyCredits = key.limit === null ? FREE_PLAN_CREDITS : key.limit - key.usage;
   const remainingCredits = Math.max(0, Math.min(FREE_PLAN_CREDITS - account.plan_usage, keyCredits));
@@ -113,7 +116,7 @@ export async function discoverTikTokLinksViaTavily({
     attempt.reportedSearchCredits = 0;
     if (usage.status !== 'completed') return { ...attempt, status: usage.status, nextRetryAt: usage.nextRetryAt };
     const budget = getFreeSearchBudget(usage.payload, now, queries.length);
-    if (!budget) return { ...attempt, status: 'free-plan-unverified' };
+    if (budget.refusal) return { ...attempt, status: 'free-plan-unverified', budgetRefusalReason: budget.refusal };
     attempt.budget = budget;
     queryBudget = budget.plannedQueries;
     if (queryBudget === 0) return { ...attempt, status: 'free-credits-exhausted' };

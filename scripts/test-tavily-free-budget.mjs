@@ -94,19 +94,20 @@ test('a large remaining budget never sends more than the distinct current query 
 
 test('a paid, overage-enabled or unverifiable usage response cannot start a search', async () => {
   const invalidUsage = [
-    usage({ current_plan: 'Project' }),
-    usage({ plan_limit: 4000 }),
-    usage({ plan_usage: '25' }),
-    usage({ paygo_usage: 1 }),
-    usage({ paygo_limit: 50 }),
-    usage({ paygo_limit: undefined }),
-    usage({}, { limit: '1000' }),
-    { message: apiKey },
+    [usage({ current_plan: 'Project' }), 'account-plan-unrecognized'],
+    [usage({ plan_limit: 4000 }), 'account-limit-unconfirmed'],
+    [usage({ plan_usage: '25' }), 'account-usage-invalid'],
+    [usage({ paygo_usage: 1 }), 'paygo-not-confirmed-off'],
+    [usage({ paygo_limit: 50 }), 'paygo-not-confirmed-off'],
+    [usage({ paygo_limit: undefined }), 'paygo-not-confirmed-off'],
+    [usage({}, { limit: '1000' }), 'key-usage-invalid'],
+    [{ account: { current_plan: apiKey } }, 'account-plan-unrecognized'],
   ];
-  for (const accountUsage of invalidUsage) {
+  for (const [accountUsage, reason] of invalidUsage) {
     const f = fixture({ accountUsage });
     const result = await f.run();
     assert.equal(result.status, 'free-plan-unverified');
+    assert.equal(result.budgetRefusalReason, reason);
     assert.equal(result.attemptedQueries, 0);
     assert.equal(f.requests.length, 1);
     assert.ok(!JSON.stringify(result).includes(apiKey));
