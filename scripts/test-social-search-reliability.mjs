@@ -398,7 +398,7 @@ test('Tavily keyless search makes one cache-only request and yields canonical le
       });
       assert.deepEqual(JSON.parse(options.body), {
         query: 'Wien gratis Essen Döner Pizza Neueröffnung 1+1 Wien November 2026',
-        search_depth: 'basic', topic: 'general', country: 'austria', time_range: 'week',
+        search_depth: 'basic', country: 'austria', time_range: 'week', include_published_date: true,
         max_age_hours: -1, max_results: 20, include_domains: ['tiktok.com'],
         include_answer: false, include_raw_content: false, auto_parameters: false,
       });

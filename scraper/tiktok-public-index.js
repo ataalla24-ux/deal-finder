@@ -50,9 +50,9 @@ export async function discoverTikTokLinksViaTavily({
   const query = {
     query: `Wien gratis Essen Döner Pizza Neueröffnung 1+1 Wien ${viennaMonth.format(now)}`,
     search_depth: 'basic',
-    topic: 'general',
     country: 'austria',
     time_range: 'week',
+    include_published_date: true,
     max_age_hours: -1, // Search cached index entries only, without live source fetches.
     max_results: MAX_RESULTS,
     include_domains: ['tiktok.com'],

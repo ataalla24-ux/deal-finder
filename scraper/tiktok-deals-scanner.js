@@ -1903,7 +1903,7 @@ async function main() {
   console.log(`Discovery ${report.status}: API ${apiDiscovery.attemptedRequests || 0} requests (${apiDiscovery.stoppedReason || 'completed'}), search ${discovery.attemptedQueries || 0} queries (${discovery.stoppedReason || 'completed'})`);
   console.log(`TikTok Tavily index: ${JSON.stringify(report.tavilyDiscovery)}`);
   console.log(`TikTok video coverage: ${JSON.stringify(report.coverage)}`);
-  console.log(report.outputPreserved ? 'Previous TikTok outbox preserved; discovery unavailable' : `💾 ${finalDeals.length} Deals → ${OUTPUT_PATH}`);
+  console.log(report.outputPreserved ? 'Previous TikTok outbox preserved' : `💾 ${finalDeals.length} Deals → ${OUTPUT_PATH}`);
 }
 
 if (process.argv[1] && path.resolve(process.argv[1]) === __filename) {
