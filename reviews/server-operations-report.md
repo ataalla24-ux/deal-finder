@@ -1,9 +1,9 @@
 # FreeFinder Betriebsbericht
 
-Stand: 2026-11-24T11:36:56.517Z
+Stand: 2026-11-24T11:51:57.696Z
 
 - 89 Live-Angebote; 235 nicht-live Entwuerfe geprueft.
-- 3 neue IDs seit letzter Bestandsaufnahme; keine automatische Erfolgszuordnung.
+- 0 neue IDs seit letzter Bestandsaufnahme; keine automatische Erfolgszuordnung.
 - 0 Entwuerfe ohne formale Pruefluecke, weiterhin menschliche Freigabe.
 - Pilot: 50 Faelle gesammelt, 0 unabhaengig bewertet, 31 regulaere Qualitaetslaeufe beobachtet. Automatische Freigabe AUS.
 - Zugestellte und veröffentlichte Angebote nach Quelle stehen unten im Abschnitt Ertrag je Quelle.
@@ -29,11 +29,11 @@ Stand: 2026-11-24T11:36:56.517Z
 ## Aktualitaet
 
 - Entwurfsregeln frisch und lokal geprueft, ohne Modell- oder Quellenaufruf. 235 unterschiedliche IDs in 235 Eintraegen; doppelte IDs bleiben Prueffaelle.
-- Live-/Bildpruefstand: current; letzte Pruefung 2026-11-24T11:36:55.391Z. Bei veraltetem Stand sind leere Hinweisliste und Bildzaehler KEIN Entwarnungsnachweis.
+- Live-/Bildpruefstand: current; letzte Pruefung 2026-11-24T11:51:56.245Z. Bei veraltetem Stand sind leere Hinweisliste und Bildzaehler KEIN Entwarnungsnachweis.
 
 ## Freigabe und Einloesung
 
-- 50 Pilotfaelle aktuell, 1774 fruehere Pruefstaende unveraendert archiviert. Keine alten Bewertungen uebernehmen.
+- 50 Pilotfaelle aktuell, 1813 fruehere Pruefstaende unveraendert archiviert. Keine alten Bewertungen uebernehmen.
 - Aktueller, unbewerteter Pruefbogen: 50 Faelle; reviews/automatic-publication-review-pack.json. Keine unabhaengige menschliche Bewertung erfunden.
 - Quellengepruefte Einloese-/Buchungswege: 11 von 89; 0 ausdruecklich unbestaetigte, 78 fehlende aktuelle Einloesepruefungen. Besuchsinfos sind keine Gutscheine; ein Buchungslink bestaetigt keinen aktuellen Flugpreis.
 - Karte frisch lokal geprueft: {"needs-review":3,"mapped":54,"online-only":32}.
@@ -49,17 +49,17 @@ Stand: 2026-11-24T11:36:56.517Z
 
 Jeder Deal zählt ab seiner ersten belegten Slack-Zustellung einmal. Die Freigabe zählt, sobald für die betreffende Nachricht ein menschliches Häkchen belegt ist. Die letzte Stufe zählt freigegebene Deals, die mit derselben Nachrichtenkennung im öffentlichen Feed beobachtet wurden. Kurzzeitig sichtbare Angebote zwischen zwei Beobachtungen und bereits vor der ersten Beobachtung entfernte Einträge können fehlen.
 
-Erste öffentliche Beobachtung: 2026-11-06T23:56:26.741Z. Letzte erfolgreiche Beobachtung: 2026-11-24T11:36:56.517Z.
+Erste öffentliche Beobachtung: 2026-11-06T23:56:26.741Z. Letzte erfolgreiche Beobachtung: 2026-11-24T11:51:57.696Z.
 
 ### 7 Tage
 
 | Quelle | Essen zugestellt | Essen abgehakt | Essen öffentlich belegt | Weitere zugestellt | Weitere abgehakt | Weitere öffentlich belegt |
 |---|---:|---:|---:|---:|---:|---:|
-| Gesamt | 100 | 10 | 10 | 80 | 8 | 8 |
+| Gesamt | 99 | 10 | 10 | 80 | 8 | 8 |
 | Meta Instagram Business Discovery | 13 | 3 | 3 | 18 | 1 | 1 |
 | Firecrawl Gastro #2 | 16 | 3 | 3 | 1 | 0 | 0 |
 | Meta Instagram Hashtag API | 15 | 2 | 2 | 24 | 1 | 1 |
-| vienna-merchant-website | 8 | 1 | 1 | 0 | 0 | 0 |
+| vienna-merchant-website | 7 | 1 | 1 | 0 | 0 | 0 |
 | tiktok-deals-scanner | 2 | 1 | 1 | 0 | 0 | 0 |
 | Gutscheine.at | 0 | 0 | 0 | 21 | 4 | 4 |
 | Meta Instagram Graph | 16 | 0 | 0 | 0 | 0 | 0 |
@@ -82,9 +82,9 @@ Erste öffentliche Beobachtung: 2026-11-06T23:56:26.741Z. Letzte erfolgreiche Be
 
 | Quelle | Essen zugestellt | Essen abgehakt | Essen öffentlich belegt | Weitere zugestellt | Weitere abgehakt | Weitere öffentlich belegt |
 |---|---:|---:|---:|---:|---:|---:|
-| Gesamt | 461 | 67 | 51 | 345 | 37 | 33 |
+| Gesamt | 461 | 67 | 51 | 344 | 37 | 33 |
 | Firecrawl Gastro #2 | 106 | 22 | 13 | 1 | 0 | 0 |
-| Meta Instagram Business Discovery | 79 | 12 | 10 | 78 | 1 | 1 |
+| Meta Instagram Business Discovery | 79 | 12 | 10 | 77 | 1 | 1 |
 | Firecrawl Gastro #4 | 25 | 10 | 9 | 1 | 0 | 0 |
 | Meta Instagram Hashtag API | 59 | 7 | 7 | 79 | 2 | 1 |
 | power-official-food | 25 | 4 | 4 | 0 | 0 | 0 |
@@ -115,7 +115,7 @@ Erste öffentliche Beobachtung: 2026-11-06T23:56:26.741Z. Letzte erfolgreiche Be
 
 ## Händlerseiten und Cashback im Vergleich
 
-Der Test begann am 21. November 2026 um 13:06 Uhr Wiener Zeit. Das Vergleichsfenster beginnt genau zwei Wochen früher. Beide Fenster umfassen dieselben Wochentage und bisher jeweils 71.5 Stunden, höchstens 14 Tage.
+Der Test begann am 21. November 2026 um 13:06 Uhr Wiener Zeit. Das Vergleichsfenster beginnt genau zwei Wochen früher. Beide Fenster umfassen dieselben Wochentage und bisher jeweils 71.8 Stunden, höchstens 14 Tage.
 
 | Essensangebote | Slack vorher | Slack seit Start | Häkchen vorher | Häkchen seit Start | Öffentlich vorher | Öffentlich seit Start |
 |---|---:|---:|---:|---:|---:|---:|
@@ -123,5 +123,5 @@ Der Test begann am 21. November 2026 um 13:06 Uhr Wiener Zeit. Das Vergleichsfen
 | Wiener Händlerseiten | 0 | 2 | 0 | 1 | 0 | 1 |
 | Direkte marktguru-Cashbacks | 0 | 1 | 0 | 0 | 0 | 0 |
 
-Jeder Deal zählt nach seiner ersten belegten Zustellung. Freigaben und öffentliche Sichtungen werden bis zum Prüfstand nachgetragen. Ältere Nachrichten hatten mehr Zeit für ein Häkchen. Änderungen der Gesamtzahlen können auch von anderen Quellen stammen. Prüfstand 2026-11-24T11:36:56.517Z.
+Jeder Deal zählt nach seiner ersten belegten Zustellung. Freigaben und öffentliche Sichtungen werden bis zum Prüfstand nachgetragen. Ältere Nachrichten hatten mehr Zeit für ein Häkchen. Änderungen der Gesamtzahlen können auch von anderen Quellen stammen. Prüfstand 2026-11-24T11:51:57.696Z.
 
