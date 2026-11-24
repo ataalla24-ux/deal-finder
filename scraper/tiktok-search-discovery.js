@@ -9,6 +9,7 @@ const transportReasons = new Set(['response-unavailable', 'request-policy-blocke
   'homepage-origin-mismatch', 'login-wall', 'access-challenge']);
 const providerMessageSignals = new Map([
   ['login required', 'login-required'], ['please log in to continue', 'login-required'],
+  ['please login your account first', 'login-required'],
   ['too many requests', 'throttled'], ['rate limit exceeded', 'throttled'],
   ['captcha required', 'access-challenge'], ['verify to continue', 'access-challenge'],
   ['access denied', 'access-denied'], ['invalid parameter', 'invalid-parameters'],

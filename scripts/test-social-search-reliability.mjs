@@ -53,6 +53,7 @@ test('TikTok only reports allowlisted provider message signals and numeric codes
   const parse = body => parseTikTokSearchResponse({ok:true,status:200,body});
   for (const [body, providerSignal] of [
     [{status_code:2483,status_msg:'Login required.'},'login-required'],
+    [{status_code:2483,status_msg:'Please login your account first'},'login-required'],
     [{statusCode:'2483',statusMsg:' TOO MANY REQUESTS '},'throttled'],
     [{status_code:2483,status_msg:'CAPTCHA required'},'access-challenge'],
     [{status_code:2483,status_msg:'Invalid parameter'},'invalid-parameters'],
