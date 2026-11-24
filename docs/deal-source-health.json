@@ -1,21 +1,21 @@
 {
-  "generatedAt": "2026-11-24T10:25:54.993Z",
+  "generatedAt": "2026-11-24T10:57:46.316Z",
   "discoveryAvailability": {
     "note": "Transport evidence, not deal yield. Retry eligibility is not recovery. Candidate counts are not Slack deliveries. No extra runs or quota resets.",
     "lanes": [
       {
         "name": "instagram-search",
-        "observedAt": "2026-11-24T00:49:54.981Z",
+        "observedAt": "2026-11-24T10:56:50.706Z",
         "status": "paused",
-        "reason": "search-unavailable",
+        "reason": "search-cooldown",
         "retryAt": "2026-11-25T00:49:32.774Z",
-        "attempted": 1,
+        "attempted": 0,
         "discovered": 0,
         "deliveredToSlack": null
       },
       {
         "name": "instagram-profiles",
-        "observedAt": "2026-11-24T00:49:54.981Z",
+        "observedAt": "2026-11-24T10:56:50.706Z",
         "status": "no-block-reported",
         "reason": "",
         "retryAt": "",
@@ -24,11 +24,11 @@
       },
       {
         "name": "instagram-previews",
-        "observedAt": "2026-11-24T00:49:54.981Z",
+        "observedAt": "2026-11-24T10:56:50.706Z",
         "status": "no-block-reported",
         "reason": "",
         "retryAt": "",
-        "attempted": 3,
+        "attempted": 4,
         "deliveredToSlack": null
       },
       {
@@ -54,9 +54,9 @@
   },
   "summary": {
     "filesConsidered": 33,
-    "totalCandidates": 704,
-    "uniqueCandidates": 682,
-    "distinctCandidates": 691,
+    "totalCandidates": 701,
+    "uniqueCandidates": 679,
+    "distinctCandidates": 688,
     "duplicateClusters": 9,
     "topHealthySources": [
       {
@@ -84,10 +84,10 @@
         "totalDeals": 87
       },
       {
-        "sourceKey": "instagram-ai",
-        "sourceLabel": "Instagram AI Agent",
+        "sourceKey": "tiktok-browser",
+        "sourceLabel": "TikTok Browser",
         "healthScore": 66,
-        "totalDeals": 7
+        "totalDeals": 1
       }
     ],
     "topMissionSources": [
@@ -185,10 +185,10 @@
         "totalDeals": 2
       },
       {
-        "sourceKey": "instagram-ai",
-        "sourceLabel": "Instagram AI Agent",
-        "precisionScore": 67,
-        "totalDeals": 7
+        "sourceKey": "joe",
+        "sourceLabel": "jö Bonus Club",
+        "precisionScore": 64,
+        "totalDeals": 9
       }
     ],
     "topWeightedSources": [
@@ -616,69 +616,6 @@
       "sourceWeightScore": 65
     },
     {
-      "sourceKey": "instagram-ai",
-      "file": "deals-pending-instagram-ai.json",
-      "sourceLabel": "Instagram AI Agent",
-      "totalDeals": 7,
-      "uniqueDeals": 4,
-      "duplicateDeals": 3,
-      "duplicateAcrossSources": 3,
-      "fresh1dCount": 3,
-      "fresh7dCount": 6,
-      "viennaCount": 7,
-      "foodDrinkCount": 6,
-      "promoCount": 1,
-      "missingUrlCount": 0,
-      "sampleTitles": [
-        "👉 Nur 6,99 € pro kg Lachs (Somon Baligi) Ideal für traditionelle Gerichte & besondere Anlässe",
-        "🎁 Reveal your prize and get a voucher for your next visit!",
-        "Und heute im Mittagsmenü: gebackenes Schweinsschnitzerl mit Erdäpfel-Vogerlsalat, mit Suppe um € 9,90. Reservi"
-      ],
-      "lastRun": null,
-      "uniqueRate": 0.6,
-      "duplicateRate": 0.4,
-      "fresh1dRate": 0.4,
-      "fresh7dRate": 0.9,
-      "viennaRate": 1,
-      "foodDrinkRate": 0.9,
-      "promoRate": 0.1,
-      "missingUrlRate": 0,
-      "averageQualityScore": 80.1,
-      "topCategories": [
-        {
-          "value": "essen",
-          "count": 3
-        },
-        {
-          "value": "kaffee",
-          "count": 2
-        },
-        {
-          "value": "shopping",
-          "count": 1
-        },
-        {
-          "value": "supermarkt",
-          "count": 1
-        }
-      ],
-      "topTypes": [
-        {
-          "value": "rabatt",
-          "count": 7
-        }
-      ],
-      "issues": [
-        "wenige klare Gratis-/Promo-Signale",
-        "hohe Überschneidung mit anderen Quellen"
-      ],
-      "healthScore": 66,
-      "missionFitScore": 58,
-      "coverageScore": 15,
-      "precisionScore": 67,
-      "sourceWeightScore": 53
-    },
-    {
       "sourceKey": "tiktok-browser",
       "file": "deals-pending-tiktok-browser.json",
       "sourceLabel": "TikTok Browser",
@@ -991,6 +928,65 @@
       "coverageScore": 13,
       "precisionScore": 57,
       "sourceWeightScore": 48
+    },
+    {
+      "sourceKey": "instagram-ai",
+      "file": "deals-pending-instagram-ai.json",
+      "sourceLabel": "Instagram AI Agent",
+      "totalDeals": 4,
+      "uniqueDeals": 1,
+      "duplicateDeals": 3,
+      "duplicateAcrossSources": 3,
+      "fresh1dCount": 3,
+      "fresh7dCount": 4,
+      "viennaCount": 4,
+      "foodDrinkCount": 3,
+      "promoCount": 0,
+      "missingUrlCount": 0,
+      "sampleTitles": [
+        "🎁 Reveal your prize and get a voucher for your next visit!",
+        "Mit Sauce Tartare, Blattsalat und Gemüsecremesuppe um € 9,90, Montag im Lercherl Kürbis, aber gebacken. Außen",
+        "Mittagsmenü mit Tagessuppe um € 9,90, Montag bis Freitag im Lercherl Wos gibt’s heit? Die ganze Woche in 20 Se"
+      ],
+      "lastRun": null,
+      "uniqueRate": 0.3,
+      "duplicateRate": 0.8,
+      "fresh1dRate": 0.8,
+      "fresh7dRate": 1,
+      "viennaRate": 1,
+      "foodDrinkRate": 0.8,
+      "promoRate": 0,
+      "missingUrlRate": 0,
+      "averageQualityScore": 77.5,
+      "topCategories": [
+        {
+          "value": "kaffee",
+          "count": 2
+        },
+        {
+          "value": "essen",
+          "count": 1
+        },
+        {
+          "value": "shopping",
+          "count": 1
+        }
+      ],
+      "topTypes": [
+        {
+          "value": "rabatt",
+          "count": 4
+        }
+      ],
+      "issues": [
+        "wenige klare Gratis-/Promo-Signale",
+        "hohe Überschneidung mit anderen Quellen"
+      ],
+      "healthScore": 62,
+      "missionFitScore": 61,
+      "coverageScore": 12,
+      "precisionScore": 64,
+      "sourceWeightScore": 52
     },
     {
       "sourceKey": "instagram-verified",
