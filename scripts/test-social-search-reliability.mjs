@@ -3,8 +3,9 @@ import assert from 'node:assert/strict';
 import { readPublicSearchResponse } from '../scraper/public-search-response.js';
 import { planInstagramQueries } from '../scraper/instagram-query-plan.js';
 import { parseInstagramSearchResults, runInstagramSearchQueries } from '../scraper/instagram-search-discovery.js';
-import { parseTikTokSearchResponse, runTikTokApiDiscovery, tikTokDirectProbePrevious, tikTokDiscoveryHealth } from '../scraper/tiktok-search-discovery.js';
+import { parseTikTokSearchResponse, runTikTokApiDiscovery, selectTikTokPostVisits, tikTokDirectProbePrevious, tikTokDiscoveryHealth, tikTokPublicOnlyAccess } from '../scraper/tiktok-search-discovery.js';
 import { discoverTikTokLinksViaDuckDuckGo, fetchTikTokApiCandidates, normalizeTikTokApiItem } from '../scraper/tiktok-deals-scanner.js';
+import { discoverTikTokLinksViaTavily } from '../scraper/tiktok-public-index.js';
 import { loadWatchlist } from '../scraper/instagram-ai-agent.js';
 
 const now = new Date('2026-11-10T20:00:00Z');
@@ -18,6 +19,9 @@ test('failed or deferred discovery cannot replace the previous outbox with an em
   assert.equal(tikTokDiscoveryHealth({},{nextRetryAt:'2026-11-11T20:00:00Z'}).outputPreserved,true);
   assert.equal(tikTokDiscoveryHealth({errors:[{}]},{},1).outputPreserved,false);
   assert.deepEqual(tikTokDiscoveryHealth({errors:[]},{errors:[]}),{status:'completed',outputPreserved:false});
+  const publicOnly = { stoppedReason: 'public-only' };
+  assert.equal(tikTokDiscoveryHealth(publicOnly, { skippedThisRun: true }, 0, { status: 'completed' }).outputPreserved, true);
+  assert.equal(tikTokDiscoveryHealth(publicOnly, { attemptedQueries: 1 }, 0, { status: 'unavailable' }).outputPreserved, false);
 });
 
 test('search distinguishes actual no-results from HTTP-200/202 challenges and changed layouts', async () => {
@@ -371,6 +375,87 @@ test('TikTok web search resolves relative result redirects and excludes navigati
   ].join('');
   const result = await discoverTikTokLinksViaDuckDuckGo({ queries: ['wien'], fetcher: async () => new Response(html), now, sleep: never });
   assert.deepEqual(result.links, [original, second]);
+});
+
+test('Tavily keyless search makes one cache-only request and yields canonical leads without provider copy or dates', async () => {
+  const original = `https://www.tiktok.com/@vienna.cafe/video/${item.id}`;
+  let calls = 0;
+  const result = await discoverTikTokLinksViaTavily({
+    enabled: true, clock: () => now, fetcher: async (url, options) => {
+      calls++;
+      assert.equal(url, 'https://api.tavily.com/search');
+      assert.equal(options.method, 'POST');
+      assert.equal(options.redirect, 'error');
+      assert.equal(options.credentials, 'omit');
+      assert.deepEqual(options.headers, {
+        'Content-Type': 'application/json', 'X-Tavily-Access-Mode': 'keyless',
+      });
+      assert.deepEqual(JSON.parse(options.body), {
+        query: 'Wien gratis Essen Döner Pizza Neueröffnung 1+1 Wien November 2026',
+        search_depth: 'basic', topic: 'general', country: 'austria', time_range: 'week',
+        max_age_hours: -1, max_results: 20, include_domains: ['tiktok.com'],
+        include_answer: false, include_raw_content: false, auto_parameters: false,
+      });
+      return Response.json({ results: [
+        { url: original + '?from=search', content: 'unverified offer', published_date: '2026-11-09' },
+        { url: original.replace('www.', 'm.').replace('vienna.cafe', 'renamed') },
+        { url: original.replace('https:', 'http:') },
+        { url: original.replace('www.tiktok.com', 'www.tiktok.com.invalid') },
+        { url: original.replace('www.tiktok.com', 'user:pass@www.tiktok.com') },
+        { url: original + '/subpage' },
+      ] });
+    },
+  });
+  assert.equal(calls, 1);
+  assert.deepEqual(result, {
+    status: 'completed', httpStatus: 200, nextRetryAt: '', attemptedQueries: 1, indexRows: 6, links: [original],
+  });
+});
+
+test('the cache-only index persists its own Retry-After or longer default even while switched off', async () => {
+  const request = { enabled: true, clock: () => now };
+  const limited = await discoverTikTokLinksViaTavily({ ...request,
+    fetcher: async () => new Response('Do not retry yet', { status: 429, headers: { 'Retry-After': '7200' } }),
+  });
+  assert.equal(limited.status, 'rate-limited');
+  assert.equal(limited.nextRetryAt, '2026-11-10T22:00:00.000Z');
+  assert.deepEqual(limited.links, []);
+  const disabled = await discoverTikTokLinksViaTavily({ ...request, previous: limited, enabled: false, fetcher: never });
+  assert.equal(disabled.status, 'disabled');
+  assert.equal(disabled.nextRetryAt, limited.nextRetryAt);
+  const held = await discoverTikTokLinksViaTavily({ ...request, previous: disabled, fetcher: never });
+  assert.equal(held.status, 'cooldown');
+  assert.equal(held.attemptedQueries, 0);
+  const unavailable = await discoverTikTokLinksViaTavily({ ...request,
+    fetcher: async () => new Response('Unavailable', { status: 403 }),
+  });
+  assert.equal(unavailable.nextRetryAt, '2026-11-11T20:00:00.000Z');
+  const malformed = await discoverTikTokLinksViaTavily({ ...request, fetcher: async () => Response.json({ error: 'Not results' }) });
+  assert.equal(malformed.status, 'unavailable');
+  assert.equal(malformed.nextRetryAt, unavailable.nextRetryAt);
+});
+
+test('public-only scanning blocks all visits until the latest known TikTok refusal expires', () => {
+  const failure = { code: 'provider-error', status: 200, providerCode: '2483' };
+  const previous = {
+    apiDiscovery: {
+      nextRetryAt: '2026-11-10T22:00:00Z', postVisitStop: { retryAt: '2026-11-10T21:00:00Z' },
+      attemptedRequests: 1, lastFailure: failure, boundedRetry: { mode: 'single-request', failures: 1 },
+    },
+    searchDiscovery: { postVisitStop: { retryAt: '2026-11-11T02:00:00Z' } },
+  };
+  const leads = [`https://www.tiktok.com/@vienna.cafe/video/${item.id}`];
+  const held = tikTokPublicOnlyAccess(previous, now);
+  assert.equal(held.attemptedRequests, 0);
+  assert.equal(held.lastFailure.providerCode, '2483');
+  assert.equal(held.nextRetryAt, '2026-11-11T02:00:00.000Z');
+  assert.deepEqual(selectTikTokPostVisits(held, leads, 120), { urls: [], deferredWebVisits: 1 });
+  const ready = tikTokPublicOnlyAccess({ apiDiscovery: held }, new Date(held.nextRetryAt));
+  assert.equal(ready.attemptedRequests, 0);
+  assert.equal(ready.stoppedReason, 'public-only');
+  assert.deepEqual(ready.boundedRetry, previous.apiDiscovery.boundedRetry);
+  assert.deepEqual(selectTikTokPostVisits(ready, leads, 120), { urls: leads, deferredWebVisits: 0 });
+  assert.deepEqual(selectTikTokPostVisits(ready, leads, 0).urls, []);
 });
 
 test('Instagram search reads nested result bodies and ignores unrelated links', () => {

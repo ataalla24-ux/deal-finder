@@ -6,8 +6,9 @@ import { githubRunProvenance } from './pipeline-run-report-utils.js';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import { chromium } from 'playwright';
-import { hasTikTokSingleRequestRetry, previousTikTokSearchFailure, runTikTokApiDiscovery, selectTikTokPostVisits, tikTokDiscoveryHealth, tikTokRetryAt } from './tiktok-search-discovery.js';
+import { hasTikTokSingleRequestRetry, previousTikTokSearchFailure, runTikTokApiDiscovery, selectTikTokPostVisits, tikTokDiscoveryHealth, tikTokPublicOnlyAccess, tikTokRetryAt } from './tiktok-search-discovery.js';
 import { readKnownTikTokLinks } from './tiktok-known-links.js';
+import { discoverTikTokLinksViaTavily } from './tiktok-public-index.js';
 import { createTikTokDirectSearch, tikTokAccessRefusal } from './tiktok-browser-search.js';
 import { readPublicTikTokOriginal } from './tiktok-signed-in-browser.js';
 import { runInstagramSearchQueries } from './instagram-search-discovery.js';
@@ -1671,22 +1672,32 @@ async function main() {
   const rescuePool = [];
   const publicVisits = [];
   const mediaConfig = buildTikTokMediaConfig(process.env);
+  const publicOnly = booleanEnv(process.env, 'TIKTOK_PUBLIC_ONLY', false);
+  const skipWebSearch = booleanEnv(process.env, 'TIKTOK_SKIP_WEB_SEARCH', false);
   let mediaRescue = null;
   let discovery = { links: [], errors: [] };
+  let indexDiscovery = { links: [] };
   let apiDiscovery = { rows: [], errors: [] };
   try {
     const apiDiscoveryStartedAt = Date.now();
     let apiPage;
     try {
       apiPage = await context.newPage();
-      apiDiscovery = await fetchTikTokApiCandidates(apiPage, {
-        previous: previousReport.apiDiscovery, previousRunProvenance: previousReport.runProvenance,
-        runProvenance, fullKeywordScan: true,
-      });
+      if (publicOnly) {
+        await apiPage.route('**/api/search/**', route => route.abort('blockedbyclient'));
+        apiDiscovery = tikTokPublicOnlyAccess(previousReport);
+      } else {
+        apiDiscovery = await fetchTikTokApiCandidates(apiPage, {
+          previous: previousReport.apiDiscovery, previousRunProvenance: previousReport.runProvenance,
+          runProvenance, fullKeywordScan: true,
+        });
+      }
     } catch {
+      const held = tikTokPublicOnlyAccess(previousReport);
       const lastFailure = previousTikTokSearchFailure(previousReport.apiDiscovery, previousReport.runProvenance);
       apiDiscovery = { rows: [], errors: [{ error: 'TikTok session unavailable', code: 'session-unavailable' }],
-        stoppedReason: 'session-unavailable', nextRetryAt: new Date(Date.now() + DAY_MS).toISOString(),
+        stoppedReason: 'session-unavailable',
+        nextRetryAt: new Date(Math.max(Date.parse(held.nextRetryAt) || 0, Date.now() + DAY_MS)).toISOString(),
         ...(lastFailure ? { lastFailure } : {}) };
     }
     timings.apiDiscoveryMs = Date.now() - apiDiscoveryStartedAt;
@@ -1703,29 +1714,52 @@ async function main() {
     }
 
     const searchDiscoveryStartedAt = Date.now();
-    discovery = await discoverTikTokLinksViaDuckDuckGo({ queries: searchQueries, previousReport: {
-      lastUpdated: previousReport.lastUpdated,
-      search: previousReport.searchDiscovery || { errors: previousReport.discoveryErrors || [] },
-    } });
-    const primaryLinks = new Set([...discovery.links, ...(apiDiscovery.publicVideoLinks || []),
+    const previousWebSearch = previousReport.searchDiscovery || { errors: previousReport.discoveryErrors || [] };
+    if (skipWebSearch) {
+      const { boundedRetry, lastAttemptAt, nextQueryIndex, nextRetryAt, stoppedReason, postVisitStop, errors } = previousWebSearch;
+      discovery = { links: [], attemptedQueries: 0, skippedThisRun: true,
+        boundedRetry, lastAttemptAt, nextQueryIndex, nextRetryAt, stoppedReason, postVisitStop, errors };
+    } else {
+      discovery = await discoverTikTokLinksViaDuckDuckGo({ queries: searchQueries, previousReport: {
+        lastUpdated: previousReport.lastUpdated, search: previousWebSearch,
+      } });
+    }
+    indexDiscovery = await discoverTikTokLinksViaTavily({
+      enabled: booleanEnv(process.env, 'TIKTOK_TAVILY_INDEX_ENABLED', false),
+      previous: previousReport.tavilyDiscovery,
+    });
+    const webLinks = [...new Set([...discovery.links, ...indexDiscovery.links])];
+    const visibleLinks = apiDiscovery.publicVideoLinks || [];
+    const primaryLinks = new Set([...webLinks, ...visibleLinks,
       ...apiDiscovery.rows.map(row => row.data.url)]);
+    const indexOnlyLinks = new Set(indexDiscovery.links.filter(url =>
+      !discovery.links.includes(url) && !visibleLinks.includes(url)));
     const knownLinks = readKnownTikTokLinks(DOCS_DIR).filter(url => !primaryLinks.has(url));
     // Reuse a free post-visit slot after the ordinary search. Existing provider pauses apply.
     const lastIndex = previousReport.searchDiscovery?.knownPostLinks?.nextIndex;
     const hintIndex = knownLinks.length && Number.isSafeInteger(lastIndex) && lastIndex >= 0 ? lastIndex % knownLinks.length : 0;
     const hint = knownLinks[hintIndex];
-    const requestedLinks = hint ? [...discovery.links, hint] : discovery.links;
-    const { urls, deferredWebVisits } = selectTikTokPostVisits(apiDiscovery, requestedLinks, CONFIG.maxPostsToVisit);
+    const requestedLinks = hint ? [...webLinks, hint] : webLinks;
+    const seenVideos = new Set();
+    const firstPublicPermalinks = requestedLinks.filter(url => {
+      const key = canonicalSocialPostKey(url) || url;
+      if (seenVideos.has(key)) return false;
+      seenVideos.add(key);
+      return true;
+    });
+    const { urls, deferredWebVisits } = selectTikTokPostVisits(apiDiscovery,
+      publicOnly ? firstPublicPermalinks : requestedLinks, CONFIG.maxPostsToVisit);
     discovery.deferredPostVisits = deferredWebVisits;
     discovery.knownPostLinks = {
       available: knownLinks.length, selected: Number(Boolean(hint && urls.includes(hint))), visited: 0, accepted: 0,
       deferredByAccess: Number(Boolean(hint && apiDiscovery.nextRetryAt)), nextIndex: hintIndex,
     };
     const publicLinkCount = apiDiscovery.publicVideoLinks?.length || 0;
-    console.log(`🔎 public-page videos: ${publicLinkCount}; search-engine videos: ${discovery.links.length}; visiting fallback: ${urls.length}`);
+    console.log(`🔎 public-page videos: ${publicLinkCount}; search-engine videos: ${discovery.links.length}; Tavily index videos: ${indexDiscovery.links.length}; selected fallback pages: ${urls.length}`);
     const page = apiPage;
     for (const url of urls) {
-      const visit = {};
+      const fromIndex = indexOnlyLinks.has(url);
+      const visit = { fromIndex };
       publicVisits.push(visit);
       const fromLocalHint = url === hint;
       if (fromLocalHint) {
@@ -1748,11 +1782,11 @@ async function main() {
         const { deal, reason } = buildDealFromPost(url, data);
         if (deal) {
           if (fromLocalHint) discovery.knownPostLinks.accepted++;
-          deals.push(deal);
+          deals.push(fromIndex ? { ...deal, collectionMode: 'tavily-public-index' } : deal);
           console.log(`  ✅ ${deal.title}`);
         } else {
           rejected.push(summarizeTikTokRejection(url, data, reason));
-          if (!fromLocalHint) rescuePool.push({ url, data, initial: { deal, reason } });
+          if (!fromLocalHint && !fromIndex) rescuePool.push({ url, data, initial: { deal, reason } });
         }
       } catch (error) {
         rejected.push(summarizeTikTokRejection(url, {}, error.message));
@@ -1801,6 +1835,8 @@ async function main() {
   }
 
   const finalDeals = dedupeTikTokDeals(deals);
+  const { links: indexedVideos, ...indexStatus } = indexDiscovery;
+  const indexVisits = publicVisits.filter(visit => visit.fromIndex);
   timings.totalScannerMs = Date.now() - scannerStartedAt;
   const payload = {
     lastUpdated: new Date().toISOString(),
@@ -1813,7 +1849,7 @@ async function main() {
   const report = {
     lastUpdated: payload.lastUpdated,
     runProvenance,
-    ...tikTokDiscoveryHealth(apiDiscovery, discovery, finalDeals.length),
+    ...tikTokDiscoveryHealth(apiDiscovery, discovery, finalDeals.length, indexDiscovery),
     config: CONFIG,
     searchQueries,
     apiKeywords: TIKTOK_API_KEYWORDS,
@@ -1824,6 +1860,11 @@ async function main() {
       publicVideoLinks: apiDiscovery.publicVideoLinks?.length || 0,
     },
     searchDiscovery: Object.fromEntries(Object.entries(discovery).filter(([key]) => key !== 'links')),
+    tavilyDiscovery: {
+      ...indexStatus, canonicalVideoLinks: indexedVideos.length, publicPageAttempts: indexVisits.length,
+      publicPagesWithDatedOriginal: indexVisits.filter(visit => visit.dated).length,
+      acceptedDeals: finalDeals.filter(deal => deal.collectionMode === 'tavily-public-index').length,
+    },
     coverage: summarizeTikTokCoverage(apiDiscovery.rows, publicVisits),
     accepted: finalDeals.length,
     initialRejected: rejected.length,
@@ -1858,6 +1899,7 @@ async function main() {
     mediaEvidence: mediaRescue.cache,
   });
   console.log(`Discovery ${report.status}: API ${apiDiscovery.attemptedRequests || 0} requests (${apiDiscovery.stoppedReason || 'completed'}), search ${discovery.attemptedQueries || 0} queries (${discovery.stoppedReason || 'completed'})`);
+  console.log(`TikTok Tavily index: ${JSON.stringify(report.tavilyDiscovery)}`);
   console.log(`TikTok video coverage: ${JSON.stringify(report.coverage)}`);
   console.log(report.outputPreserved ? 'Previous TikTok outbox preserved; discovery unavailable' : `💾 ${finalDeals.length} Deals → ${OUTPUT_PATH}`);
 }

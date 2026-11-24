@@ -65,8 +65,26 @@ export function selectTikTokPostVisits(api, webLinks, maxPosts) {
   };
 }
 
-export function tikTokDiscoveryHealth(api, search, accepted = 0) {
-  const unavailable = Boolean(api.errors?.length || search.errors?.length || api.nextRetryAt || search.nextRetryAt);
+export function tikTokPublicOnlyAccess(previousReport = {}, now = new Date()) {
+  const api = previousReport.apiDiscovery || {};
+  const deadlines = [api.nextRetryAt, api.postVisitStop?.retryAt, previousReport.searchDiscovery?.postVisitStop?.retryAt];
+  const deadline = Math.max(0, ...deadlines.map(value => Date.parse(value) || 0));
+  const nextRetryAt = deadline > +now ? new Date(deadline).toISOString() : '';
+  const lastFailure = previousTikTokSearchFailure(api, previousReport.runProvenance);
+  return {
+    rows: [], errors: [], attemptedRequests: 0, rawItems: 0, nextRetryAt,
+    stoppedReason: nextRetryAt ? 'api-cooldown' : 'public-only',
+    ...(api.nextKeywordIndex !== undefined ? { nextKeywordIndex: api.nextKeywordIndex } : {}),
+    ...(hasTikTokSingleRequestRetry(api) ? { boundedRetry: api.boundedRetry } : {}),
+    ...(lastFailure ? { lastFailure } : {}),
+  };
+}
+
+export function tikTokDiscoveryHealth(api, search, accepted = 0, index) {
+  const publicSearchUnavailable = api.stoppedReason === 'public-only' && !search.attemptedQueries
+    && (search.skippedThisRun || index?.status !== 'completed');
+  const unavailable = Boolean(api.errors?.length || search.errors?.length
+    || api.nextRetryAt || search.nextRetryAt || publicSearchUnavailable);
   return { status: unavailable ? 'discovery-degraded' : 'completed', outputPreserved: unavailable && accepted === 0 };
 }
 

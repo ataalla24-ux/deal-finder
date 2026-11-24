@@ -10,6 +10,18 @@ on:
         description: Run the scanner using public text evidence without paid model calls
         type: boolean
         default: true
+      legacy_search:
+        description: Enable the older direct TikTok search for this manual run
+        type: boolean
+        default: false
+      tavily_index:
+        description: Try one free cached public index query for recent TikTok links
+        type: boolean
+        default: false
+      skip_web_search:
+        description: Skip DuckDuckGo for this run while retaining its saved retry state
+        type: boolean
+        default: false
       browsed_posts:
         description: Public post captions from the authorized local TikTok browser
         type: string
@@ -76,6 +88,9 @@ jobs:
         env:
           OPENAI_API_KEY: ${{ github.event_name == 'workflow_dispatch' && inputs.text_only == false && secrets.OPENAI_API_KEY || '' }}
           GH_TOKEN: ${{ github.token }}
+          TIKTOK_PUBLIC_ONLY: ${{ github.event_name == 'workflow_dispatch' && inputs.legacy_search && '0' || '1' }}
+          TIKTOK_TAVILY_INDEX_ENABLED: ${{ (github.event_name == 'workflow_dispatch' && inputs.tavily_index) || vars.TIKTOK_TAVILY_INDEX_ENABLED == '1' }}
+          TIKTOK_SKIP_WEB_SEARCH: ${{ github.event_name == 'workflow_dispatch' && inputs.skip_web_search }}
           TIKTOK_MEDIA_MAX_AGE_HOURS: '72'
           TIKTOK_MEDIA_MAX_POSTS_PER_RUN: '16'
           TIKTOK_MEDIA_MAX_ASSETS_PER_POST: '3'
