@@ -1,13 +1,13 @@
 {
-  "generatedAt": "2026-11-24T18:49:15.651Z",
+  "generatedAt": "2026-11-24T19:18:04.974Z",
   "summary": {
     "maxAgeDays": 7,
-    "total": 284,
-    "allowed": 1,
+    "total": 283,
+    "allowed": 0,
     "blocked": 283,
     "warnings": 0,
     "reasonCounts": {
-      "kein konkretes Angebot erkennbar": 208,
+      "kein konkretes Angebot erkennbar": 209,
       "Gottesdienste nur im Wochenlauf": 36,
       "älter als 7 Tage (2020-04-25)": 1,
       "älter als 7 Tage (2026-02-22)": 78,
@@ -48,7 +48,7 @@
       "ausgeschlossene Quelle (gastro.news)": 9
     },
     "reasonCategoryCounts": {
-      "kein konkreter Deal": 213,
+      "kein konkreter Deal": 214,
       "Gottesdienste außerhalb Wochenlauf": 36,
       "älter als 7 Tage": 143,
       "ungültige URL": 24,
@@ -83,8 +83,8 @@
         }
       },
       "Firecrawl Gastro #4": {
-        "total": 5,
-        "allowed": 1,
+        "total": 4,
+        "allowed": 0,
         "blocked": 4,
         "warnings": 0,
         "reasonCategoryCounts": {
@@ -143,7 +143,7 @@
         "blocked": 97,
         "warnings": 0,
         "reasonCategoryCounts": {
-          "kein konkreter Deal": 94,
+          "kein konkreter Deal": 95,
           "älter als 7 Tage": 94,
           "ungültige URL": 7,
           "Gottesdienste außerhalb Wochenlauf": 1,
@@ -191,23 +191,7 @@
       }
     }
   },
-  "allowed": [
-    {
-      "id": "fc4g-13jty2q",
-      "title": "Alle Pizzen werden um 3,60 € reduziert.",
-      "brand": "Das Schinakl",
-      "source": "Firecrawl Gastro #4",
-      "url": "https://www.instagram.com/p/DgFPlPJoqt-/",
-      "reasons": [],
-      "warnings": [],
-      "sourceDate": "2026-11-23T11:11:39.000Z",
-      "sourceDateSource": "url.instagramShortcode",
-      "sourceAgeDays": 1,
-      "expiryDate": "2026-12-31",
-      "expirySource": "deal.expires",
-      "urlStatus": "HTTP 200"
-    }
-  ],
+  "allowed": [],
   "blocked": [
     {
       "id": "jesuszentrum-events-20261123",
@@ -317,15 +301,18 @@
       "source": "Kirchen Verzeichnis",
       "url": "https://www.donauinselfest.at",
       "reasons": [
+        "kein konkretes Angebot erkennbar",
         "älter als 7 Tage (2026-02-22)"
       ],
-      "warnings": [],
+      "warnings": [
+        "URL nicht eindeutig prüfbar (temporärer Fehler)"
+      ],
       "sourceDate": "2026-02-22T21:12:35.964Z",
       "sourceDateSource": "deal.pubDate",
       "sourceAgeDays": 275,
       "expiryDate": "",
       "expirySource": "deal.expires",
-      "urlStatus": "HTTP 200"
+      "urlStatus": "unklar: temporärer URL-Fehler"
     },
     {
       "id": "events-3-20260222",
@@ -851,7 +838,7 @@
       "warnings": [
         "kein Ablaufdatum gefunden"
       ],
-      "sourceDate": "2026-11-24T18:46:44.428Z",
+      "sourceDate": "2026-11-24T19:17:04.801Z",
       "sourceDateSource": "url.publicationDate",
       "sourceAgeDays": 0,
       "expiryDate": "",
@@ -3674,7 +3661,7 @@
       "sourceDate": "2026-11-23T13:33:43.000Z",
       "sourceDateSource": "url.instagramShortcode",
       "sourceAgeDays": 1,
-      "expiryDate": "2026-11-27T14:40:25.209Z",
+      "expiryDate": "2026-11-27T18:54:53.035Z",
       "expirySource": "deal.structured",
       "urlStatus": "HTTP 200"
     },
@@ -5749,23 +5736,23 @@
   ],
   "runProvenance": {
     "repository": "ataalla24-ux/deal-finder",
-    "runId": "45463328003",
-    "headSha": "9b8c2747c1ea3883cd57ee89e2e2cd49f75add19",
-    "checkoutSha": "9b8c2747c1ea3883cd57ee89e2e2cd49f75add19",
+    "runId": "45468392448",
+    "headSha": "3b2f7dd55b85457e509fcc4163c183d6a3bae158",
+    "checkoutSha": "3b2f7dd55b85457e509fcc4163c183d6a3bae158",
     "triggeringRun": {
-      "runId": "45462044418",
-      "headSha": "a0a6308a7a6960651c6cec404cb161c0bf80b947",
-      "event": "schedule",
-      "name": "Firecrawl Key 4 - Gastro Discovery",
-      "startedAt": "2026-11-24T18:40:24.000Z",
-      "url": "https://github.com/ataalla24-ux/deal-finder/actions/runs/45462044418"
+      "runId": "45464439840",
+      "headSha": "470ff3bcda478b294edf8113f9dbac63baa7cd23",
+      "event": "workflow_dispatch",
+      "name": "Meta Instagram Deal Discovery",
+      "startedAt": "2026-11-24T18:53:55.000Z",
+      "url": "https://github.com/ataalla24-ux/deal-finder/actions/runs/45464439840"
     },
     "event": "workflow_run",
     "runAttempt": "1",
-    "url": "https://github.com/ataalla24-ux/deal-finder/actions/runs/45463328003"
+    "url": "https://github.com/ataalla24-ux/deal-finder/actions/runs/45468392448"
   },
   "instagramDelivery": {
-    "checkedAt": "2026-11-24T18:49:16.051Z",
+    "checkedAt": "2026-11-24T19:18:04.985Z",
     "scope": "instagram-ai-agent/standard-slack-lane",
     "extractedCandidates": 4,
     "counts": {
@@ -5835,7 +5822,7 @@
     ]
   },
   "tiktokDelivery": {
-    "checkedAt": "2026-11-24T18:49:16.054Z",
+    "checkedAt": "2026-11-24T19:18:04.987Z",
     "scope": "tiktok-deals-scanner/standard-slack-lane",
     "extractedCandidates": 2,
     "counts": {
