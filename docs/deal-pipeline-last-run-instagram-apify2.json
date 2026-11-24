@@ -2,42 +2,42 @@
   "schemaVersion": 1,
   "runProvenance": {
     "repository": "ataalla24-ux/deal-finder",
-    "runId": "45319219094",
-    "headSha": "07df86a4df45afeadd722cb8f145a11013859187",
-    "checkoutSha": "616c5347e02c9813e61f89291c08ebfac16344eb",
+    "runId": "45432712970",
+    "headSha": "17048c51fc1a92e51c27e23084558799ee597650",
+    "checkoutSha": "43bbc15a3f2199e6f87e1bef0d019b79495cd970",
     "triggeringRun": null,
     "event": "schedule",
     "runAttempt": "1",
-    "url": "https://github.com/ataalla24-ux/deal-finder/actions/runs/45319219094"
+    "url": "https://github.com/ataalla24-ux/deal-finder/actions/runs/45432712970"
   },
-  "runId": "instagram-apify2-2026-11-24T03:25:23.486Z",
+  "runId": "instagram-apify2-2026-11-24T16:05:46.986Z",
   "sourceKey": "instagram-apify2",
   "sourceLabel": "Apify 2 Vienna Food Discovery",
-  "status": "completed-with-errors",
-  "startedAt": "2026-11-24T03:24:17.285Z",
-  "finishedAt": "2026-11-24T03:25:23.486Z",
-  "durationMs": 66201,
+  "status": "completed",
+  "startedAt": "2026-11-24T16:04:42.455Z",
+  "finishedAt": "2026-11-24T16:05:46.986Z",
+  "durationMs": 64531,
   "outputFile": "docs/deals-pending-instagram-apify2.json",
   "counts": {
-    "rawCandidates": 8,
-    "normalizedCandidates": 5,
+    "rawCandidates": 7,
+    "normalizedCandidates": 3,
     "verifiedCandidates": 0,
     "previousDeals": 0,
-    "acceptedDeals": 1,
-    "rejectedDeals": 4
+    "acceptedDeals": 0,
+    "rejectedDeals": 3
   },
   "rejectedByReason": {
-    "no-consumer-food-benefit": 2,
-    "post-older-than-seven-days": 2
+    "non-food-ad": 2,
+    "no-consumer-food-benefit": 1
   },
   "rejectedSamples": [
     {
-      "reason": "no-consumer-food-benefit",
+      "reason": "non-food-ad",
       "deal": {
         "id": "",
         "title": "",
         "brand": "",
-        "url": "https://www.instagram.com/p/DgC8W6-R_t5/",
+        "url": "https://www.instagram.com/p/DgH1YR9gQcM/",
         "source": "",
         "pubDate": "",
         "expires": "",
@@ -50,7 +50,7 @@
         "id": "",
         "title": "",
         "brand": "",
-        "url": "https://www.instagram.com/p/DgFzcvTjdwT/",
+        "url": "https://www.instagram.com/p/DfVS1BaqhWe/",
         "source": "",
         "pubDate": "",
         "expires": "",
@@ -58,25 +58,12 @@
       }
     },
     {
-      "reason": "post-older-than-seven-days",
+      "reason": "non-food-ad",
       "deal": {
         "id": "",
         "title": "",
         "brand": "",
-        "url": "https://www.instagram.com/p/Dfm_EccG9Ek/",
-        "source": "",
-        "pubDate": "",
-        "expires": "",
-        "postVerificationStatus": ""
-      }
-    },
-    {
-      "reason": "post-older-than-seven-days",
-      "deal": {
-        "id": "",
-        "title": "",
-        "brand": "",
-        "url": "https://www.instagram.com/p/Df0BWKjNgwq/",
+        "url": "https://www.instagram.com/p/DgDU7lfIpF6/",
         "source": "",
         "pubDate": "",
         "expires": "",
@@ -85,40 +72,16 @@
     }
   ],
   "diagnostics": {
-    "pendingDeals": 2,
+    "pendingDeals": 1,
     "unchangedPosts": 1,
-    "providerErrors": 1,
+    "providerErrors": 0,
     "emptySourceRecords": 0,
     "batchErrors": [],
-    "ocrCalls": 3,
+    "ocrCalls": 2,
     "sources": [
       {
-        "key": "profile:villavidacafe",
-        "lastAttemptAt": "2026-11-24T03:24:17.285Z",
-        "postsReturned": 1,
-        "status": "posts-returned",
-        "consecutiveFailures": 0,
-        "consecutiveEmpty": 0,
-        "retryAt": ""
-      },
-      {
-        "key": "profile:doenerwerkwien",
-        "lastAttemptAt": "2026-11-24T03:24:17.285Z",
-        "postsReturned": 0,
-        "status": "not-found",
-        "consecutiveFailures": 2,
-        "retryAt": "2026-12-24T03:24:17.285Z",
-        "lastUnstartedProfileCheck": {
-          "runId": "45027735197",
-          "reason": "build-not-found",
-          "at": "2026-11-22T13:29:45.915Z",
-          "previousRetryAt": "2026-11-24T13:29:45.915Z",
-          "previousConsecutiveFailures": 2
-        }
-      },
-      {
         "key": "profile:hongkongcafewien",
-        "lastAttemptAt": "2026-11-24T03:24:17.285Z",
+        "lastAttemptAt": "2026-11-24T16:04:42.455Z",
         "postsReturned": 1,
         "status": "posts-returned",
         "consecutiveFailures": 0,
@@ -127,7 +90,7 @@
       },
       {
         "key": "profile:papa.duck.at",
-        "lastAttemptAt": "2026-11-24T03:24:17.285Z",
+        "lastAttemptAt": "2026-11-24T16:04:42.455Z",
         "postsReturned": 1,
         "status": "posts-returned",
         "consecutiveFailures": 0,
@@ -135,26 +98,35 @@
         "retryAt": ""
       },
       {
-        "key": "hashtag:esseninwien",
-        "lastAttemptAt": "2026-11-24T03:24:17.285Z",
-        "status": "stale-results",
+        "key": "profile:villavidacafe",
+        "lastAttemptAt": "2026-11-24T16:04:42.455Z",
         "postsReturned": 1,
+        "status": "posts-returned",
         "consecutiveFailures": 0,
-        "consecutiveEmpty": 3,
-        "retryAt": "2026-12-01T03:24:17.285Z"
+        "consecutiveEmpty": 0,
+        "retryAt": ""
       },
       {
-        "key": "hashtag:wienfood",
-        "lastAttemptAt": "2026-11-24T03:24:17.285Z",
+        "key": "hashtag:gratiswien",
+        "lastAttemptAt": "2026-11-24T16:04:42.455Z",
         "postsReturned": 1,
-        "status": "stale-results",
-        "consecutiveFailures": 1,
-        "retryAt": "2026-11-26T03:24:17.285Z",
-        "consecutiveEmpty": 1
+        "status": "posts-returned",
+        "consecutiveFailures": 0,
+        "consecutiveEmpty": 0,
+        "retryAt": ""
+      },
+      {
+        "key": "hashtag:viennafood",
+        "lastAttemptAt": "2026-11-24T16:04:42.455Z",
+        "postsReturned": 1,
+        "status": "posts-returned",
+        "consecutiveFailures": 0,
+        "retryAt": "",
+        "consecutiveEmpty": 0
       },
       {
         "key": "hashtag:wienisst",
-        "lastAttemptAt": "2026-11-24T03:24:17.285Z",
+        "lastAttemptAt": "2026-11-24T16:04:42.455Z",
         "postsReturned": 1,
         "status": "posts-returned",
         "consecutiveFailures": 0,
@@ -163,7 +135,7 @@
       },
       {
         "key": "hashtag:wienkaffee",
-        "lastAttemptAt": "2026-11-24T03:24:17.285Z",
+        "lastAttemptAt": "2026-11-24T16:04:42.455Z",
         "postsReturned": 1,
         "status": "posts-returned",
         "consecutiveEmpty": 0,
