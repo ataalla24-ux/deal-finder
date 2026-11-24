@@ -5,7 +5,7 @@ on:
       lane:
         description: TikTok search, Instagram profile read, or one Instagram public search query
         type: choice
-        options: [tiktok, tiktok-direct, tiktok-routes, tiktok-public-ui, tiktok-public-index, instagram, instagram-search]
+        options: [tiktok, tiktok-direct, tiktok-routes, tiktok-public-ui, tiktok-public-index, tiktok-index-original, instagram, instagram-search]
         default: tiktok
 permissions:
   contents: read
@@ -47,6 +47,54 @@ jobs:
           except HTTPError as error:
               print(json.dumps({'status': error.code, 'retryAfter': error.headers.get('Retry-After')}))
           PY
+
+  check-index-original:
+    if: ${{ inputs.lane == 'tiktok-index-original' }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    env:
+      SENTRY_DISABLED: '1'
+      PLAYWRIGHT_BROWSERS_PATH: '0'
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: npm ci --no-audit --no-fund
+      - run: npx playwright install chromium --only-shell
+      - name: Check one ordinary public video discovered by the cloud index
+        run: |
+          node --input-type=module <<'JS'
+          import fs from 'node:fs';
+          import { chromium } from 'playwright';
+          import { extractTikTokPostData, buildDealFromPost } from './scraper/tiktok-deals-scanner.js';
+
+          const previous = JSON.parse(fs.readFileSync('docs/tiktok-scanner-report.json', 'utf8'));
+          const retryAt = Math.max(0, ...[
+            previous.apiDiscovery?.nextRetryAt, previous.apiDiscovery?.postVisitStop?.retryAt,
+            previous.searchDiscovery?.postVisitStop?.retryAt,
+          ].map(value => Date.parse(value) || 0));
+          if (retryAt > Date.now()) {
+            console.log(JSON.stringify({ status: 'cooldown', originalRead: 0, retryAt: new Date(retryAt).toISOString() }));
+          } else {
+            const url = 'https://www.tiktok.com/@nico.realrating/video/7709913443947728131';
+            const browser = await chromium.launch();
+            try {
+              const page = await browser.newPage({ locale: 'de-AT', timezoneId: 'Europe/Vienna' });
+              const evidence = await extractTikTokPostData(page, url);
+              const { deal, reason } = evidence.url ? buildDealFromPost(url, evidence) : {};
+              console.log(JSON.stringify({
+                url, originalRead: Number(Boolean(evidence.url)), publicationDate: evidence.timeDateTime || '',
+                reason: evidence.accessRefusal?.transportReason || reason || '',
+                title: deal?.title || '', starts: deal?.validFrom || '', expires: deal?.expires || '',
+              }));
+            } finally {
+              await browser.close();
+            }
+          }
+          JS
 
   diagnose:
     if: ${{ inputs.lane == 'tiktok' || inputs.lane == 'tiktok-routes' || inputs.lane == 'tiktok-public-ui' }}
