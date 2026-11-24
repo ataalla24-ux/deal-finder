@@ -7,6 +7,7 @@ import { photoVisual } from './blog-photo-catalog.mjs';
 
 // Editorial subject metadata is retained for generators; images are photographs.
 export const covers = {
+  'burgermanufaktur-3-hamburger-wien-hernals': { lines: ['Burgermanufaktur'], topic: 'Drei Hamburger in Hernals', tone: 'yellow' },
   'vienna-sweets-3plus1-wien-neuer-markt': { lines: ['Vienna Sweets 3+1'], topic: 'Süße Mitbringsel am Neuer Markt', tone: 'yellow' },
   ...backfillCovers,
   ...catchupCovers,
