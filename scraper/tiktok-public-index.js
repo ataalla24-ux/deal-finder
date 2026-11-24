@@ -44,7 +44,8 @@ async function readIndexResults(response) {
 }
 
 export async function discoverTikTokLinksViaTavily({
-  enabled = false, previous = {}, fetcher = fetch, clock = () => new Date(),
+  enabled = false, previous = {}, apiKey = '', freePlanConfirmed = false,
+  fetcher = fetch, clock = () => new Date(),
 } = {}) {
   const now = clock();
   const deadline = Date.parse(previous?.nextRetryAt);
@@ -53,9 +54,14 @@ export async function discoverTikTokLinksViaTavily({
   const nextQueryIndex = Number.isSafeInteger(cursor) && cursor >= 0 ? cursor % searchTerms.length : 0;
   const result = { status: 'disabled', nextRetryAt, nextQueryIndex, attemptedQueries: 0, indexRows: 0, links: [] };
   if (!enabled) return result;
-  if (nextRetryAt) return { ...result, status: 'cooldown' };
+  const key = typeof apiKey === 'string' ? apiKey.trim() : '';
+  const accessMode = freePlanConfirmed || apiKey ? 'keyed' : 'keyless';
+  const indexRun = { ...result, accessMode };
+  if (accessMode === 'keyed' && !freePlanConfirmed) return { ...indexRun, status: 'free-plan-unconfirmed' };
+  if (freePlanConfirmed && !key) return { ...indexRun, status: 'key-missing' };
+  if (nextRetryAt) return { ...indexRun, status: 'cooldown' };
 
-  const attempt = { ...result, queryIndex: nextQueryIndex, attemptedQueries: 1 };
+  const attempt = { ...indexRun, queryIndex: nextQueryIndex, attemptedQueries: 1 };
   const query = {
     query: `${searchTerms[nextQueryIndex]} ${viennaMonth.format(now)}`,
     search_depth: 'basic',
@@ -69,13 +75,14 @@ export async function discoverTikTokLinksViaTavily({
     include_raw_content: false,
     auto_parameters: false,
   };
-  // This documented search mode is unauthenticated. Provider results contribute
-  // links only. The scanner still needs to read the actual TikTok original.
+  // The configured free-plan key and keyless search are mutually exclusive.
+  // Provider results only supply links to TikTok originals.
+  const authorization = key ? { Authorization: `Bearer ${key}` } : { 'X-Tavily-Access-Mode': 'keyless' };
   let response;
   try {
     response = await fetcher('https://api.tavily.com/search', {
       method: 'POST', redirect: 'error', credentials: 'omit', signal: AbortSignal.timeout(15_000),
-      headers: { 'Content-Type': 'application/json', 'X-Tavily-Access-Mode': 'keyless' },
+      headers: { 'Content-Type': 'application/json', ...authorization },
       body: JSON.stringify(query),
     });
     const retryAfter = response.headers.get('retry-after');

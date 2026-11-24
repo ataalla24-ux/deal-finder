@@ -1729,6 +1729,8 @@ async function main() {
     indexDiscovery = await discoverTikTokLinksViaTavily({
       enabled: booleanEnv(process.env, 'TIKTOK_TAVILY_INDEX_ENABLED', false),
       previous: previousReport.tavilyDiscovery,
+      apiKey: process.env.TAVILY_API_KEY,
+      freePlanConfirmed: process.env.TIKTOK_TAVILY_FREE_PLAN_CONFIRMED === '1',
     });
     const selection = selectTikTokIndexedLeads(DOCS_DIR, {
       previous: previousReport.pendingIndexedTikTokLinks,

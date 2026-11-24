@@ -418,8 +418,55 @@ test('Tavily keyless search makes one cache-only request and yields canonical le
   assert.equal(calls, 1);
   assert.deepEqual(result, {
     status: 'completed', httpStatus: 200, nextRetryAt: '', queryIndex: 0, nextQueryIndex: 1,
-    attemptedQueries: 1, indexRows: 6, links: [original],
+    accessMode: 'keyless', attemptedQueries: 1, indexRows: 6, links: [original],
   });
+});
+
+test('Tavily keyed mode requires both a secret and explicit free-plan confirmation', async () => {
+  const request = { enabled: true, previous: { nextQueryIndex: 2 }, clock: () => now, fetcher: never };
+  const apiKey = 'tvly-offline-fixture';
+  const unconfirmed = await discoverTikTokLinksViaTavily({ ...request, apiKey });
+  const missing = await discoverTikTokLinksViaTavily({ ...request, freePlanConfirmed: true });
+  const disabled = await discoverTikTokLinksViaTavily({ ...request, apiKey, freePlanConfirmed: true, enabled: false });
+  assert.equal(unconfirmed.status, 'free-plan-unconfirmed');
+  assert.equal(missing.status, 'key-missing');
+  assert.equal(disabled.status, 'disabled');
+  for (const result of [unconfirmed, missing, disabled]) {
+    assert.equal(result.attemptedQueries, 0);
+    assert.equal(result.nextQueryIndex, 2);
+    assert.ok(!JSON.stringify(result).includes(apiKey));
+  }
+});
+
+test('a confirmed Tavily key uses only Bearer on the same cache-only endpoint and never falls back after denial', async () => {
+  const apiKey = 'tvly-offline-fixture';
+  let calls = 0;
+  const request = {
+    enabled: true, clock: () => now, apiKey, freePlanConfirmed: true, fetcher: async (url, options) => {
+      calls++;
+      assert.equal(url, 'https://api.tavily.com/search');
+      assert.equal(options.redirect, 'error');
+      assert.equal(options.credentials, 'omit');
+      assert.deepEqual(options.headers, { 'Content-Type': 'application/json', Authorization: `Bearer ${apiKey}` });
+      const query = JSON.parse(options.body);
+      assert.equal(query.search_depth, 'basic');
+      assert.equal(query.max_age_hours, -1);
+      assert.equal(query.auto_parameters, false);
+      assert.ok(!options.body.includes(apiKey));
+      return calls === 1 ? Response.json({ results: [], secret: apiKey })
+        : Response.json({ error: apiKey }, { status: 401, headers: { 'Retry-After': '3600' } });
+    },
+  };
+  const completed = await discoverTikTokLinksViaTavily(request);
+  const denied = await discoverTikTokLinksViaTavily({ ...request, previous: completed });
+  assert.equal(completed.status, 'completed');
+  assert.equal(completed.accessMode, 'keyed');
+  assert.equal(denied.status, 'unavailable');
+  assert.equal(denied.accessMode, 'keyed');
+  assert.equal(denied.nextQueryIndex, completed.nextQueryIndex);
+  assert.equal(denied.nextRetryAt, '2026-11-10T21:00:00.000Z');
+  assert.ok(!JSON.stringify([completed, denied]).includes(apiKey));
+  assert.equal(calls, 2);
 });
 
 test('the cache-only index rotates four Vienna food searches with one request per completed run', async () => {
