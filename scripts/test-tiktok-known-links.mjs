@@ -3,7 +3,7 @@ import { mkdtempSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import path from 'node:path';
 import test from 'node:test';
-import { readKnownTikTokLinks } from '../scraper/tiktok-known-links.js';
+import { readKnownTikTokLinks, retainUnattemptedTikTokIndexLeads, selectTikTokIndexedLeads } from '../scraper/tiktok-known-links.js';
 
 const now = new Date('2026-11-23T16:00:00Z');
 const discoveredAt = now.toISOString();
@@ -117,4 +117,58 @@ test('suppresses moderated and previously observed old videos even on rediscover
   f.write('deals-pending-gastro2', { deals: [lead(1), lead(2), lead(3)] });
   f.write('deals-pending-firecrawl4', { deals: [lead(2, { discoveredAt: '2026-11-10T12:00:00Z' })] });
   assert.deepEqual(f.select(), [lead(3).url]);
+});
+
+test('keeps the first discovery and both index sources for a canonical video, without carrying index claims', t => {
+  const { dir } = fixture(t);
+  const firstSeenAt = '2026-11-22T18:00:00.000Z';
+  const original = { url: lead(1).url, sources: ['tavily'], firstSeenAt,
+    title: 'unverified index copy', publishedAt: '2026-11-23' };
+  const alias = lead(1).url.replace('food.at', 'renamed');
+  const selected = selectTikTokIndexedLeads(dir, { now, previous: [original],
+    duckduckgo: [alias, lead(2).url], tavily: [original.url, lead(3).url] });
+  assert.deepEqual(selected, [
+    { url: original.url, sources: ['duckduckgo', 'tavily'], firstSeenAt },
+    { url: lead(3).url, sources: ['tavily'], firstSeenAt: discoveredAt },
+    { url: lead(2).url, sources: ['duckduckgo'], firstSeenAt: discoveredAt },
+  ]);
+  assert.deepEqual(retainUnattemptedTikTokIndexLeads(selected, new Set([alias])), selected.slice(1));
+  assert.deepEqual(retainUnattemptedTikTokIndexLeads(selected), selected);
+});
+
+test('a repeat index result cannot extend 48 hours or promote a malformed stored record', t => {
+  const { dir } = fixture(t);
+  const dates = ['2026-11-21T16:00:00.000Z', '2026-11-21T16:00:00.001Z',
+    '2026-11-23T16:00:00.001Z', 'bad', '2026-11-23'];
+  const previous = dates.map((firstSeenAt, i) => ({ url: lead(i + 1).url, sources: ['tavily'], firstSeenAt }));
+  previous.push({ url: lead(6).url, sources: ['external'], firstSeenAt: discoveredAt }, null);
+  const selected = selectTikTokIndexedLeads(dir, { now, previous, tavily: [lead(1).url, lead(2).url] });
+  assert.deepEqual(selected, [previous[1]]);
+});
+
+test('filters seen IDs, local moderation, aliases of self-account posts and known old hints before selection', t => {
+  const { dir, write } = fixture(t);
+  write('slack-seen-posts', { seenPostKeys: [lead(1).url] });
+  write('deals', { deals: [{ url: lead(2).url + '?ref=abc' }] });
+  write('deal-moderation', { hiddenDeals: [{ url: lead(3).url }] });
+  write('deals-pending-firecrawl4', { deals: [lead(4, { discoveredAt: '2026-10-14T08:00:00Z' }),
+    lead(5, { id: 'moderated-merchant' })] });
+  write('deal-review-feedback', { events: [{ dealId: 'moderated-merchant' }] });
+  const fresh = Array.from({ length: 7 }, (_, i) => lead(i + 1).url);
+  const malformed = [fresh[6] + '?share=1', fresh[6].replace('https:', 'http:'),
+    fresh[6].replace('www.', 'm.'), fresh[6] + '\n', fresh[6].replace('/@food.at/video/', '/explore/')];
+  const selected = selectTikTokIndexedLeads(dir, { now, duckduckgo: [...fresh, ...malformed],
+    tavily: [fresh[5].replace('food.at', 'Free_Finder.Wien')] });
+  assert.deepEqual(selected, [{ url: fresh[6], sources: ['duckduckgo'], firstSeenAt: discoveredAt }]);
+  write('deals', { deals: 'unreadable' });
+  assert.deepEqual(selectTikTokIndexedLeads(dir, { now, previous: selected }), []);
+});
+
+test('limits saved unattempted videos after actual visits, preserving the current scan budget and source order', t => {
+  const { dir } = fixture(t);
+  const fresh = Array.from({ length: 35 }, (_, i) => lead(i + 10).url);
+  const selected = selectTikTokIndexedLeads(dir, { now, duckduckgo: fresh });
+  assert.equal(selected.length, 35);
+  assert.deepEqual(retainUnattemptedTikTokIndexLeads(selected, fresh.slice(0, 4)), selected.slice(4, 24));
+  assert.deepEqual(selectTikTokIndexedLeads(dir, { now, previous: selected }), selected.slice(0, 20));
 });
