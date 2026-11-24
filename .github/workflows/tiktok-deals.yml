@@ -91,7 +91,7 @@ jobs:
           TIKTOK_PUBLIC_ONLY: ${{ github.event_name == 'workflow_dispatch' && inputs.legacy_search && '0' || '1' }}
           TIKTOK_TAVILY_INDEX_ENABLED: ${{ (github.event_name == 'workflow_dispatch' && inputs.tavily_index) || vars.TIKTOK_TAVILY_INDEX_ENABLED == '1' }}
           TIKTOK_TAVILY_FREE_PLAN_CONFIRMED: ${{ vars.TIKTOK_TAVILY_FREE_PLAN_CONFIRMED }}
-          TAVILY_API_KEY: ${{ secrets.TAVILY_API_KEY }}
+          TAVILY_API_KEY: ${{ secrets.TAVILY_API_KEY || secrets.TAVIILY_API_KEY }}
           TIKTOK_SKIP_WEB_SEARCH: ${{ github.event_name == 'workflow_dispatch' && inputs.skip_web_search }}
           TIKTOK_MEDIA_MAX_AGE_HOURS: '72'
           TIKTOK_MEDIA_MAX_POSTS_PER_RUN: '16'
