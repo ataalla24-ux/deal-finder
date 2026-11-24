@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-11-24T19:55:09.492Z",
+  "generatedAt": "2026-11-24T20:11:37.707Z",
   "discoveryAvailability": {
     "note": "Transport evidence, not deal yield. Retry eligibility is not recovery. Candidate counts are not Slack deliveries. No extra runs or quota resets.",
     "lanes": [
@@ -847,6 +847,91 @@
       "sourceWeightScore": 49
     },
     {
+      "sourceKey": "firecrawl4",
+      "file": "deals-pending-firecrawl4.json",
+      "sourceLabel": "Firecrawl Key 4 - Instagram Direct",
+      "totalDeals": 37,
+      "uniqueDeals": 33,
+      "duplicateDeals": 4,
+      "duplicateAcrossSources": 4,
+      "fresh1dCount": 0,
+      "fresh7dCount": 2,
+      "viennaCount": 2,
+      "foodDrinkCount": 36,
+      "promoCount": 18,
+      "missingUrlCount": 0,
+      "sampleTitles": [
+        "Franz-Josefs-Kai 15: 40% Rabatt mit den Lieferando Super Deals bei @ciosgrill ...",
+        "1+1 Schnitzel GRATIS bei Konsumation im Restaurant",
+        "25 % Rabatt für Mitarbeiter der Wiener Linien, Polizei, Taxifahrer sowie Beschäftigte im Gesundheitswesen"
+      ],
+      "lastRun": {
+        "status": "completed",
+        "startedAt": "2026-11-24T18:40:40.386Z",
+        "finishedAt": "2026-11-24T18:47:28.852Z",
+        "durationMs": 408466,
+        "counts": {
+          "rawCandidates": 8,
+          "normalizedCandidates": 8,
+          "verifiedCandidates": 37,
+          "previousDeals": 42,
+          "acceptedDeals": 37,
+          "rejectedDeals": 3
+        },
+        "rejectedByReason": {
+          "post-verification-rejected": 3
+        },
+        "errors": [],
+        "reportFile": "deal-pipeline-last-run-firecrawl4.json"
+      },
+      "uniqueRate": 0.9,
+      "duplicateRate": 0.1,
+      "fresh1dRate": 0,
+      "fresh7dRate": 0.1,
+      "viennaRate": 0.1,
+      "foodDrinkRate": 1,
+      "promoRate": 0.5,
+      "missingUrlRate": 0,
+      "averageQualityScore": 64.6,
+      "topCategories": [
+        {
+          "value": "essen",
+          "count": 36
+        },
+        {
+          "value": "fitness",
+          "count": 1
+        }
+      ],
+      "topTypes": [
+        {
+          "value": "rabatt",
+          "count": 23
+        },
+        {
+          "value": "bogo",
+          "count": 11
+        },
+        {
+          "value": "gutschein",
+          "count": 2
+        },
+        {
+          "value": "gratis",
+          "count": 1
+        }
+      ],
+      "issues": [
+        "wenige Deals sind frischer als 1 Tag",
+        "Wien-Signal ist zu schwach"
+      ],
+      "healthScore": 56,
+      "missionFitScore": 51,
+      "coverageScore": 27,
+      "precisionScore": 51,
+      "sourceWeightScore": 48
+    },
+    {
       "sourceKey": "gastro2",
       "file": "deals-pending-gastro2.json",
       "sourceLabel": "Firecrawl Key 1 - Gastro",
@@ -942,91 +1027,6 @@
       "coverageScore": 69,
       "precisionScore": 49,
       "sourceWeightScore": 54
-    },
-    {
-      "sourceKey": "firecrawl4",
-      "file": "deals-pending-firecrawl4.json",
-      "sourceLabel": "Firecrawl Key 4 - Instagram Direct",
-      "totalDeals": 37,
-      "uniqueDeals": 33,
-      "duplicateDeals": 4,
-      "duplicateAcrossSources": 4,
-      "fresh1dCount": 0,
-      "fresh7dCount": 2,
-      "viennaCount": 1,
-      "foodDrinkCount": 36,
-      "promoCount": 18,
-      "missingUrlCount": 0,
-      "sampleTitles": [
-        "Franz-Josefs-Kai 15: 40% Rabatt mit den Lieferando Super Deals bei @ciosgrill ...",
-        "1+1 Schnitzel GRATIS bei Konsumation im Restaurant",
-        "25 % Rabatt für Mitarbeiter der Wiener Linien, Polizei, Taxifahrer sowie Beschäftigte im Gesundheitswesen"
-      ],
-      "lastRun": {
-        "status": "completed",
-        "startedAt": "2026-11-24T18:40:40.386Z",
-        "finishedAt": "2026-11-24T18:47:28.852Z",
-        "durationMs": 408466,
-        "counts": {
-          "rawCandidates": 8,
-          "normalizedCandidates": 8,
-          "verifiedCandidates": 37,
-          "previousDeals": 42,
-          "acceptedDeals": 37,
-          "rejectedDeals": 3
-        },
-        "rejectedByReason": {
-          "post-verification-rejected": 3
-        },
-        "errors": [],
-        "reportFile": "deal-pipeline-last-run-firecrawl4.json"
-      },
-      "uniqueRate": 0.9,
-      "duplicateRate": 0.1,
-      "fresh1dRate": 0,
-      "fresh7dRate": 0.1,
-      "viennaRate": 0,
-      "foodDrinkRate": 1,
-      "promoRate": 0.5,
-      "missingUrlRate": 0,
-      "averageQualityScore": 64.6,
-      "topCategories": [
-        {
-          "value": "essen",
-          "count": 36
-        },
-        {
-          "value": "fitness",
-          "count": 1
-        }
-      ],
-      "topTypes": [
-        {
-          "value": "rabatt",
-          "count": 23
-        },
-        {
-          "value": "bogo",
-          "count": 11
-        },
-        {
-          "value": "gutschein",
-          "count": 2
-        },
-        {
-          "value": "gratis",
-          "count": 1
-        }
-      ],
-      "issues": [
-        "wenige Deals sind frischer als 1 Tag",
-        "Wien-Signal ist zu schwach"
-      ],
-      "healthScore": 54,
-      "missionFitScore": 49,
-      "coverageScore": 26,
-      "precisionScore": 48,
-      "sourceWeightScore": 46
     },
     {
       "sourceKey": "power",
