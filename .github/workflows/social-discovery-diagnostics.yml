@@ -20,15 +20,15 @@ jobs:
           python3 - <<'PY'
           import json
           import re
-          from datetime import date, timedelta
+          from datetime import date
           from urllib.error import HTTPError
           from urllib.parse import urlsplit
           from urllib.request import Request, urlopen
 
           query = {
-              'query': 'Wien gratis Essen Rabatt Neueröffnung Döner Pizza Kaffee',
-              'include_domains': ['tiktok.com'], 'country': 'austria',
-              'start_date': str(date.today() - timedelta(days=7)), 'filter_by_published_date': True,
+              'query': f'Wien gratis Essen Döner Pizza Neueröffnung 1+1 Wien {date.today():%B %Y}',
+              'include_domains': ['tiktok.com'], 'country': 'austria', 'time_range': 'week',
+              'max_age_hours': -1,
               'include_published_date': True,
               'max_results': 20, 'search_depth': 'basic', 'include_answer': False,
               'include_raw_content': False, 'auto_parameters': False,
