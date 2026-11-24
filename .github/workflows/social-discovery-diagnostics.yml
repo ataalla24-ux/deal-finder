@@ -20,13 +20,16 @@ jobs:
           python3 - <<'PY'
           import json
           import re
+          from datetime import date, timedelta
           from urllib.error import HTTPError
           from urllib.parse import urlsplit
           from urllib.request import Request, urlopen
 
           query = {
               'query': 'Wien gratis Essen Rabatt Neueröffnung Döner Pizza Kaffee',
-              'include_domains': ['tiktok.com'], 'time_range': 'week',
+              'include_domains': ['tiktok.com'], 'country': 'austria',
+              'start_date': str(date.today() - timedelta(days=7)), 'filter_by_published_date': True,
+              'include_published_date': True,
               'max_results': 20, 'search_depth': 'basic', 'include_answer': False,
               'include_raw_content': False, 'auto_parameters': False,
           }
@@ -41,7 +44,9 @@ jobs:
                   url = urlsplit(row.get('url', ''))
                   match = re.fullmatch(r'/@[\w.]{2,40}/video/(\d{16,22})/?', url.path, re.ASCII)
                   if url.scheme == 'https' and url.netloc in ('www.tiktok.com', 'tiktok.com', 'm.tiktok.com') and match:
-                      videos[match[1]] = 'https://www.tiktok.com' + url.path.rstrip('/')
+                      videos[match[1]] = {'url': 'https://www.tiktok.com' + url.path.rstrip('/'),
+                                          'indexDate': row.get('published_date', ''),
+                                          'title': str(row.get('title', ''))[:160]}
               print(json.dumps({'status': 200, 'indexRows': len(rows), 'uniquePublicVideoUrls': len(videos),
                                 'videos': list(videos.values())}))
           except HTTPError as error:
