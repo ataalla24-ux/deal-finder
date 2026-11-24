@@ -3,7 +3,10 @@ import test from 'node:test';
 import { loadAiCreditPolicy } from '../scraper/ai-credit-budget.js';
 import { releaseSettledOverrun, requireRecoveryGeneration } from './release-settled-openai-overrun-20261121.mjs';
 
-const now = Date.parse('2026-11-21T12:49:00Z'), policy = loadAiCreditPolicy();
+const now = Date.parse('2026-11-21T12:49:00Z');
+const configured = loadAiCreditPolicy();
+const policy = { ...configured, rollingDayLimitUsd: 2,
+  astraEnrichment: { ...configured.astraEnrichment, rollingDayLimitUsd: 38 } };
 const commit = 'c0b4829031f8fbb4db9d86744670bd8e111d9ffa';
 function state() {
   const at = 1795265195768, expiresAt = Date.parse(policy.expiresAt);
@@ -34,6 +37,7 @@ test('other incident, parallel booking, unbooked costs, foreign pauses or change
     assert.throws(() => releaseSettledOverrun(s, policy, now));
   }
   assert.throws(() => releaseSettledOverrun(state(), { ...policy, periodLimitUsd: 101 }, now));
+  assert.throws(() => releaseSettledOverrun(state(), configured, now));
 });
 
 test('only exact incident head allows CAS; confirmed first child is idempotent and other heads never write', () => {

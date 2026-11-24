@@ -9,9 +9,11 @@ import { classifyWithOpenAi } from '../scraper/instagram-ai-agent.js';
 
 const now = Date.parse('2026-11-06T12:00:00Z');
 const configured = loadAiCreditPolicy();
-const policy = { ...configured, periodId: 'fixture-grant', rolloverFrom: undefined, periodLimitUsd: 38,
+const historicPolicy = { ...configured, rollingDayLimitUsd: 2,
+  astraEnrichment: { ...configured.astraEnrichment, rollingDayLimitUsd: 38 } };
+const policy = { ...historicPolicy, periodId: 'fixture-grant', rolloverFrom: undefined, periodLimitUsd: 38,
   notBefore: '2026-11-05T23:20:00Z', expiresAt: '2026-11-20T08:10:11Z',
-  astraEnrichment: { ...configured.astraEnrichment, notBefore: '2026-11-17T07:30:00Z' },
+  astraEnrichment: { ...historicPolicy.astraEnrichment, notBefore: '2026-11-17T07:30:00Z' },
   providerGuard: { ...configured.providerGuard, monthlyLimitUsd: 40, verifiedAt: '2026-11-05T23:20:00Z' } };
 const url = 'https://api.openai.com/v1/chat/completions';
 const init = (model = 'gpt-6.2-sol', changes = {}) => ({ method: 'POST', headers: {}, body: JSON.stringify({ model,
@@ -308,6 +310,45 @@ test('full period coverage, shared Astra/Sol day coverage and daily-only exhaust
   await request(store,successful,at+86400000);
 });
 
+test('the active period-only policy admits Sol and Astra above the former daily limits', async () => {
+  assert.equal(configured.rollingDayLimitUsd, null);
+  assert.equal(configured.astraEnrichment.rollingDayLimitUsd, null);
+  assert.equal(configured.periodLimitUsd, 100);
+  assert.equal(configured.requestLimitUsd, 1);
+  const at = Date.parse(configured.astraEnrichment.notBefore) + 60000;
+  const missingSolLimit = { ...configured };
+  delete missingSolLimit.rollingDayLimitUsd;
+  const missingAstraLimit = structuredClone(configured);
+  delete missingAstraLimit.astraEnrichment.rollingDayLimitUsd;
+  assert.throws(() => validateCreditPolicy(missingSolLimit, at), /unverified-expired-or-unsafe-credit-policy/);
+  assert.throws(() => validateCreditPolicy(missingAstraLimit, at), /unverified-expired-or-unsafe-credit-policy/);
+  const astraProfile = 'astra-deal-enrichment';
+  const prior = (usd, profile, hoursAgo = 1) => ({
+    at: at - hoursAgo * 3600000, creditPeriod: configured.periodId, usd, status: 'settled', profile,
+  });
+  const sent = [];
+  const request = (budget, rows, model = 'gpt-6.2-sol', requestInit = init(model)) => {
+    const store = memory({ version: 1, creditPeriod: budget.periodId, pausedUntil: 0, reservations: rows });
+    return createCreditBudget({ store, policy: budget, clock: () => at, allowAstraEnrichment: model === 'gpt-6.2-astra',
+      request: async (_url, prepared) => {
+        assert.equal(store.state.reservations.at(-1).usd, 1);
+        sent.push(JSON.parse(prepared.body).model);
+        return successful();
+      } })(url, requestInit);
+  };
+
+  const aboveFormerDayLimits = [prior(2.55), prior(36, astraProfile)];
+  for (const model of ['gpt-6.2-sol', 'gpt-6.2-astra']) {
+    await assert.rejects(request(historicPolicy, aboveFormerDayLimits, model), /shared-spend-limit/);
+    assert.equal((await request(configured, aboveFormerDayLimits, model)).status, 200);
+    await assert.rejects(request(configured, [prior(99.5, undefined, 48)], model), /shared-spend-limit/);
+  }
+  const images = Array.from({ length: 3 }, () => ({ type: 'image_url', image_url: { url: 'https://example.invalid/mock.png' } }));
+  const expensive = init('gpt-6.2-astra', { messages: [{ role: 'user', content: images }] });
+  await assert.rejects(request(configured, [], 'gpt-6.2-astra', expensive), /request-cost-limit/);
+  assert.deepEqual(sent, ['gpt-6.2-sol', 'gpt-6.2-astra']);
+});
+
 test('concurrent Sol cannot reuse an Astra day reservation and ambiguous calls keep the whole period exposure', async () => {
   const at = Date.parse(policy.astraEnrichment.notBefore) + 60000;
   const sharedPolicy = {...policy,periodLimitUsd:100,providerGuard:{...policy.providerGuard,monthlyLimitUsd:100}};
@@ -385,27 +426,27 @@ test('a pause stops admission but already-dispatched calls can still account for
 
 test('historical recovery settles only the verified receipt, preserves other reservations, and refuses changed evidence or caps', () => {
   const at = Date.parse('2026-11-20T21:04:35.190Z');
-  const expiresAt = Date.parse(configured.expiresAt);
+  const expiresAt = Date.parse(historicPolicy.expiresAt);
   const clock = Date.parse('2026-11-21T12:00:00Z');
-  const r = { id:'4513a121-cb88-48ec-81d1-8dcaf179f3ac', at, expiresAt, model: 'gpt-6.2-sol', status: 'reserved', count: 1, creditPeriod: configured.periodId, usd: 0.111105 };
+  const r = { id:'4513a121-cb88-48ec-81d1-8dcaf179f3ac', at, expiresAt, model: 'gpt-6.2-sol', status: 'reserved', count: 1, creditPeriod: historicPolicy.periodId, usd: 0.111105 };
   const earlier = { ...r, id: 'unrelated-prior-reservation', at: at - 400000, usd: 0.24 };
-  const state = { version: 1, creditPeriod: configured.periodId, pausedUntil: expiresAt, reservations: [earlier, r] };
+  const state = { version: 1, creditPeriod: historicPolicy.periodId, pausedUntil: expiresAt, reservations: [earlier, r] };
   const report = {
     runProvenance: { repository: 'ataalla24-ux/deal-finder', runId: '44816571241', event: 'schedule', runAttempt: '1' },
     config: { model: r.model }, aiUsage: { inputTokens: 16259, outputTokens: 9891, totalTokens: 26150 },
     aiHealth: { budgetReason: 'runner-paused', completedCandidates: 4 },
   };
-  const { next } = reconcileKnownOverrun(state, report, configured, clock);
+  const { next } = reconcileKnownOverrun(state, report, historicPolicy, clock);
   assert.equal(next.pausedUntil, 0);
   assert.deepEqual(next.reservations, [earlier, { ...r, usd: 0.139558, status: 'settled' }]);
   assert.equal(state.pausedUntil, expiresAt);
   for (const unproven of [{ ...state, pausedUntil: 1 }, { ...state, reservations: [r, { ...r, at: at + 1 }] },
     { ...state, costOverrun: {} }, { ...state, reservations: [{...r, id:'a-different-reservation'}] },
     { ...state, reservations: [{...earlier, id:r.id}, r] }, { ...state, reservations: [{ ...earlier, usd: 1.9 }, r] }]) {
-    assert.throws(() => reconcileKnownOverrun(unproven, report, configured, clock));
+    assert.throws(() => reconcileKnownOverrun(unproven, report, historicPolicy, clock));
   }
-  assert.throws(() => reconcileKnownOverrun(state, { ...report, aiUsage: {} }, configured, clock));
-  assert.throws(() => reconcileKnownOverrun(state, report, { ...configured, rollingDayLimitUsd: 3 }, clock));
+  assert.throws(() => reconcileKnownOverrun(state, { ...report, aiUsage: {} }, historicPolicy, clock));
+  assert.throws(() => reconcileKnownOverrun(state, report, configured, clock));
 });
 
 test('parallel runners cannot spend the same capacity', async () => {

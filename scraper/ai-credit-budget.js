@@ -51,7 +51,8 @@ export function isAstraEnrichmentActive({ enabled = process.env.FREEFINDER_ASTRA
   if (!enabled) return false;
   policy ??= loadAiCreditPolicy();
   const profile = policy.astraEnrichment;
-  return profile?.rollingDayLimitUsd > 0 && now >= Date.parse(profile.notBefore)
+  return (profile?.rollingDayLimitUsd === null || profile?.rollingDayLimitUsd > 0)
+    && now >= Date.parse(profile.notBefore)
     && now + 120000 < Date.parse(policy.expiresAt);
 }
 
@@ -81,6 +82,11 @@ export function dailyCreditExposureUsd(row, now = Date.now()) {
   return row.dailyAuthorizedUsd;
 }
 
+function validDailyLimit(limit, periodLimit) {
+  // Only an explicit null disables the daily cap. Keep the shared period cap.
+  return limit === null || (Number.isFinite(limit) && limit > 0 && limit <= periodLimit);
+}
+
 export function validateCreditPolicy(policy, now = Date.now()) {
   const start = Date.parse(policy?.notBefore), end = Date.parse(policy?.expiresAt);
   const guard = policy?.providerGuard;
@@ -94,13 +100,12 @@ export function validateCreditPolicy(policy, now = Date.now()) {
     || guard?.enforced !== true || guard.scope !== 'organization'
     || guard.autoReload !== false || guard.paidBalanceAvailable !== false
     || !Number.isFinite(Date.parse(guard.verifiedAt)) || Date.parse(guard.verifiedAt) > now
-    || ![policy.periodLimitUsd, policy.rollingDayLimitUsd, policy.requestLimitUsd, guard.monthlyLimitUsd]
+    || ![policy.periodLimitUsd, policy.requestLimitUsd, guard.monthlyLimitUsd]
       .every(value => Number.isFinite(value) && value > 0)
-    || policy.periodLimitUsd > guard.monthlyLimitUsd || policy.rollingDayLimitUsd > policy.periodLimitUsd
+    || policy.periodLimitUsd > guard.monthlyLimitUsd || !validDailyLimit(policy.rollingDayLimitUsd, policy.periodLimitUsd)
     || (astra !== undefined && (!Number.isFinite(Date.parse(astra?.notBefore))
       || Date.parse(astra.notBefore) < start || Date.parse(astra.notBefore) >= end
-      || !Number.isFinite(astra.rollingDayLimitUsd) || astra.rollingDayLimitUsd <= 0
-      || astra.rollingDayLimitUsd > policy.periodLimitUsd))) {
+      || !validDailyLimit(astra.rollingDayLimitUsd, policy.periodLimitUsd)))) {
     throw paused('unverified-expired-or-unsafe-credit-policy');
   }
   return policy;
@@ -263,8 +268,10 @@ export function createCreditBudget({ store, policy, clock = Date.now, request = 
       const periodRows = creditPeriodExposure(state.reservations, policy.periodId);
       const remainingPeriod = micros(policy.periodLimitUsd) - periodRows.reduce((sum,row) => sum + micros(row.usd), 0);
       const dailyRows = state.reservations.filter(row => row.at > at - DAY);
-      const remainingDay = (limit, rows) => micros(limit) - rows.reduce((sum,row) => sum + micros(dailyCreditExposureUsd(row, at)), 0);
-      const combined = remainingDay(policy.astraEnrichment?.rollingDayLimitUsd ?? policy.rollingDayLimitUsd, dailyRows);
+      const remainingDay = (limit, rows) => limit === null ? Infinity
+        : micros(limit) - rows.reduce((sum,row) => sum + micros(dailyCreditExposureUsd(row, at)), 0);
+      const combinedLimit = policy.astraEnrichment ? policy.astraEnrichment.rollingDayLimitUsd : policy.rollingDayLimitUsd;
+      const combined = remainingDay(combinedLimit, dailyRows);
       const dayCapacity = astra ? combined : Math.min(combined,
         remainingDay(policy.rollingDayLimitUsd, dailyRows.filter(row => row.profile !== ASTRA_PROFILE)));
       const ceiling = micros(policy.requestLimitUsd), estimate = micros(prepared.reservedUsd);
