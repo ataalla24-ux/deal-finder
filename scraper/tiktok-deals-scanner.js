@@ -1698,6 +1698,7 @@ async function main() {
       apiDiscovery = { rows: [], errors: [{ error: 'TikTok session unavailable', code: 'session-unavailable' }],
         stoppedReason: 'session-unavailable',
         nextRetryAt: new Date(Math.max(Date.parse(held.nextRetryAt) || 0, Date.now() + DAY_MS)).toISOString(),
+        ...(held.postVisitStop ? { postVisitStop: held.postVisitStop } : {}),
         ...(lastFailure ? { lastFailure } : {}) };
     }
     timings.apiDiscoveryMs = Date.now() - apiDiscoveryStartedAt;
@@ -1773,6 +1774,7 @@ async function main() {
           const retryAt = tikTokRetryAt(retryAfter);
           if (!apiDiscovery.nextRetryAt || retryAt > apiDiscovery.nextRetryAt) apiDiscovery.nextRetryAt = retryAt;
           discovery.postVisitStop = { status, transportReason, retryAt: apiDiscovery.nextRetryAt };
+          apiDiscovery.postVisitStop = discovery.postVisitStop;
           break;
         }
         if (data.url) {
@@ -1849,7 +1851,7 @@ async function main() {
   const report = {
     lastUpdated: payload.lastUpdated,
     runProvenance,
-    ...tikTokDiscoveryHealth(apiDiscovery, discovery, finalDeals.length, indexDiscovery),
+    ...tikTokDiscoveryHealth(apiDiscovery, discovery, finalDeals.length, { index: indexDiscovery, publicVisits }),
     config: CONFIG,
     searchQueries,
     apiKeywords: TIKTOK_API_KEYWORDS,

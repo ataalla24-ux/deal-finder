@@ -20,8 +20,14 @@ test('failed or deferred discovery cannot replace the previous outbox with an em
   assert.equal(tikTokDiscoveryHealth({errors:[{}]},{},1).outputPreserved,false);
   assert.deepEqual(tikTokDiscoveryHealth({errors:[]},{errors:[]}),{status:'completed',outputPreserved:false});
   const publicOnly = { stoppedReason: 'public-only' };
-  assert.equal(tikTokDiscoveryHealth(publicOnly, { skippedThisRun: true }, 0, { status: 'completed' }).outputPreserved, true);
-  assert.equal(tikTokDiscoveryHealth(publicOnly, { attemptedQueries: 1 }, 0, { status: 'unavailable' }).outputPreserved, false);
+  const index = { status: 'completed' };
+  const skippedWeb = { skippedThisRun: true, errors: [{}] };
+  assert.deepEqual(tikTokDiscoveryHealth(publicOnly, skippedWeb, 0, { index }), { status: 'completed', outputPreserved: true });
+  assert.deepEqual(tikTokDiscoveryHealth(publicOnly, skippedWeb, 0, { index, publicVisits: [{}] }),
+    { status: 'discovery-degraded', outputPreserved: true });
+  assert.deepEqual(tikTokDiscoveryHealth(publicOnly, skippedWeb, 0, { index: { status: 'rate-limited' } }),
+    { status: 'discovery-degraded', outputPreserved: true });
+  assert.equal(tikTokDiscoveryHealth(publicOnly, { attemptedQueries: 1 }, 0, { index: { status: 'unavailable' } }).outputPreserved, false);
 });
 
 test('search distinguishes actual no-results from HTTP-200/202 challenges and changed layouts', async () => {
@@ -449,6 +455,7 @@ test('public-only scanning blocks all visits until the latest known TikTok refus
   assert.equal(held.attemptedRequests, 0);
   assert.equal(held.lastFailure.providerCode, '2483');
   assert.equal(held.nextRetryAt, '2026-11-11T02:00:00.000Z');
+  assert.deepEqual(held.postVisitStop, previous.searchDiscovery.postVisitStop);
   assert.deepEqual(selectTikTokPostVisits(held, leads, 120), { urls: [], deferredWebVisits: 1 });
   const ready = tikTokPublicOnlyAccess({ apiDiscovery: held }, new Date(held.nextRetryAt));
   assert.equal(ready.attemptedRequests, 0);
