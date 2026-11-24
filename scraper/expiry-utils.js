@@ -919,6 +919,16 @@ export function parseExplicitOfferPeriod(raw) {
     ...(first === last ? { validOn: first } : {}), expires };
 }
 
+// A source clock belongs only to its matching offer period. Calendar-only
+// periods, review timers and a different selected day must retain their semantics.
+export function matchingTimedOfferPeriod(literal, validFrom, validUntil) {
+  if (!validUntil || !/\d{2}:\d{2}/.test(literal || '')) return null;
+  const period = parseExplicitOfferPeriod(literal);
+  if (!period?.expires || period.validUntil !== String(validUntil).slice(0, 10)
+      || (validFrom && period.validFrom !== String(validFrom).slice(0, 10))) return null;
+  return period;
+}
+
 function repairImplausiblePastExpiry(parsed, raw, deal, now) {
   if (!parsed?.date) return null;
 

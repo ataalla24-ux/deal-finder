@@ -5,7 +5,7 @@ import { normalizeDealExpiry, parseExpiryShape, parseExpiryDetails } from '../sc
 import { normalizeDealRecord } from '../scraper/deal-normalization-utils.js';
 import { validateDealsForSlack } from '../scraper/deal-validity-agent.js';
 import { normalizeDeal, mergeParsedDealsWithQueue, normalizeApprovedDealExpiries } from '../scraper/slack-approve.js';
-import { buildSlackMessage } from '../scraper/slack-notify.js';
+import { buildSlackMessage, normalizeDeal as normalizeForSlack } from '../scraper/slack-notify.js';
 import { parseDigestDealMessage } from '../scraper/slack-digest-utils.js';
 import { prepareCommunityApproval } from '../scraper/community-review-utils.js';
 import { stampDealsFeedBundle } from './deals-feed-contract.mjs';
@@ -140,6 +140,33 @@ try {
   await normalizeApprovedDealExpiries([independentlyConfirmed.deal], { now: reviewAt, allowUrlLookup: false });
   assert.equal(independentlyConfirmed.deal.validUntil, '2026-11-24', 'an explicit source replacement survives approval normalization');
   assert.equal(independentlyConfirmed.deal.validity.expiryDate, '2026-11-24');
+
+  const timedEvent = { ...base, source: 'TikTok Browser',
+    url: 'https://www.tiktok.com/@vamoskebap1/video/7710635479883992342',
+    expiresOriginal: '27.11.2026, 15:00 bis 27.11.2026, 19:00 Uhr',
+    expires: '2026-11-27T18:00:00.000Z', expiryKind: 'single',
+    validOn: '2026-11-27', validFrom: '2026-11-27', validUntil: '2026-11-27',
+    sourcePublishedAt: '2026-11-21T14:43:00Z', sourcePublishedAtSource: 'tiktok-video-id' };
+  const normalizedEvent = normalizeForSlack(timedEvent, 'tiktok-browser');
+  assert.equal(normalizedEvent.expires, timedEvent.expires, 'central ingestion retains the Vienna closing instant');
+  const openEvent = await validation(normalizedEvent, new Date('2026-11-27T17:59:59Z'));
+  assert.equal(openEvent.decision.allowed, true, JSON.stringify(openEvent.decision));
+  assert.equal(openEvent.deal.expires, timedEvent.expires, 'the posted queue retains the precise terminal');
+  const message = buildSlackMessage(openEvent.deal, 1);
+  assert.ok(message.includes('Gültigkeit laut Text: ' + timedEvent.expiresOriginal));
+  const parsedEvent = parseDigestDealMessage({ text: message, ts: base.slackTs, thread_ts: base.slackThreadTs });
+  assert.equal(parsedEvent.expires, timedEvent.expires, 'the Slack card alone retains the precise terminal');
+  assert.equal(parsedEvent.expiresOriginal, timedEvent.expiresOriginal);
+  assert.equal((await validation(normalizedEvent, new Date('2026-11-27T18:00:00Z'))).decision.allowed, false);
+  const otherEnd = await validation(normalizedEvent, new Date('2026-11-27T18:00:00Z'), {
+    targetDateEvidence: 'explicit-phrase', targetDateRaw: 'Gültig bis 28.11.2026', validUntil: '2026-11-28' });
+  assert.equal(otherEnd.deal.expires, '2026-11-28', 'a different selected date never inherits the clock');
+  assert.equal(otherEnd.decision.allowed, true);
+  await normalizeDealExpiry(otherEnd.deal, { now, allowUrlLookup: false });
+  assert.equal(otherEnd.deal.validUntil, '2026-11-28', 'normalizing cannot restore the superseded window');
+  const dateOnly = normalizeForSlack({ ...timedEvent, expiresOriginal: '27.11.2026', expires: '2026-11-27' }, 'tiktok-browser');
+  assert.equal((await validation(dateOnly, new Date('2026-11-27T21:00:00Z'))).decision.allowed, true);
+  assert.equal((await validation(dateOnly, new Date('2026-11-27T21:00:00Z'))).deal.expires, '2026-11-27');
 
   const startEnd = { expires: '2026-11-16', expiresOriginal: '2026-11-16',
     validFrom: '2026-11-14', validUntil: '2026-11-16', expiryKind: 'range' };

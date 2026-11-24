@@ -15,7 +15,7 @@ import { discoveryRejection } from './deal-discovery-policy.js';
 import { normalizeDealFacts, locationConflictReason } from './deal-factual-guards.js';
 import { inspectDealContentQuality } from './deal-content-quality-utils.js';
 
-import { inspectDealUrlHealth, isVagueExpiry, parseExpiryShape, parseExplicitOfferPeriod, repairObservationExpiry, sparhamsterCouponRoundPath } from './expiry-utils.js';
+import { inspectDealUrlHealth, isVagueExpiry, matchingTimedOfferPeriod, parseExpiryShape, parseExplicitOfferPeriod, repairObservationExpiry, sparhamsterCouponRoundPath } from './expiry-utils.js';
 import { hasReviewedOfferPeriod, hasReviewExpiry, isReviewExpirySource } from './offer-period-fields.js';
 import { isHumanReviewedCommunity } from './community-review-utils.js';
 import {
@@ -854,7 +854,7 @@ function isAfterToday(isoDate, now) {
   return Number.isFinite(timestamp) && timestamp > now.getTime();
 }
 
-function getExpiryDecision(expiryCandidates, now) {
+function getExpiryDecision(expiryCandidates, now, deal) {
   const ranked = [...expiryCandidates].sort((left, right) => {
     const rankDifference = Number(right.rank || 0) - Number(left.rank || 0);
     if (rankDifference) return rankDifference;
@@ -867,15 +867,20 @@ function getExpiryDecision(expiryCandidates, now) {
   const selected = ranked[0] || null;
   if (!selected) return { blocked: false, candidate: null };
 
-  const expired = (selected.expires && Date.parse(selected.expires) <= now.getTime())
+  const timedPeriod = selected.kind !== 'review-ttl' && (!hasReviewExpiry(deal) || hasReviewedOfferPeriod(deal))
+    && matchingTimedOfferPeriod(deal.expiresOriginal || deal.expiryDisplayText,
+      selected.validFrom, selected.validUntil || selected.validOn);
+  const sourceClosesAt = timedPeriod?.expires || '';
+  const terminal = sourceClosesAt || selected.expires;
+  const result = { source: selected.source, candidate: selected, sourceClosesAt };
+  const expired = (terminal && Date.parse(terminal) <= now.getTime())
     || (selected.validOn && isBeforeToday(selected.validOn, now))
     || (selected.validUntil && isBeforeToday(selected.validUntil, now));
   if (expired) {
     return {
       blocked: true,
       reason: `abgelaufen (${selected.validOn || selected.validUntil})`,
-      source: selected.source,
-      candidate: selected,
+      ...result,
     };
   }
 
@@ -884,11 +889,10 @@ function getExpiryDecision(expiryCandidates, now) {
     return {
       blocked: false,
       warning: `startet am ${startsOn}`,
-      source: selected.source,
-      candidate: selected,
+      ...result,
     };
   }
-  return { blocked: false, source: selected.source, candidate: selected };
+  return { blocked: false, ...result };
 }
 
 function isTrustedPublicationSource(value) {
@@ -1184,8 +1188,9 @@ async function validateDeal(deal, context) {
   const sharedBenefitPageDeal = isSharedBenefitPageDeal(deal);
   const freshnessSensitive = socialPostDeal || newsAggregatorDeal || isCrawlerDeal(deal)
     || officialFood?.deal?.evidence?.extractionMethod === 'published-receipt-campaign';
-  const expiryCandidates = collectExpiryCandidates(officialFood?.ok ? officialFood.deal : deal, evidenceHealth, now);
-  const expiry = getExpiryDecision(expiryCandidates, now);
+  const expiryDeal = officialFood?.ok ? officialFood.deal : deal;
+  const expiryCandidates = collectExpiryCandidates(expiryDeal, evidenceHealth, now);
+  const expiry = getExpiryDecision(expiryCandidates, now, expiryDeal);
   const recurring = hasRecurringSchedule(deal, expiryCandidates);
   const activeValidity = hasActiveExplicitValidity(deal, expiry, now);
   const freshlyActiveAd = hasFreshActiveAdEvidence(deal, now);
@@ -1376,9 +1381,13 @@ async function validateDeal(deal, context) {
   }
 
   if (selectedExpiry?.validOn || selectedExpiry?.validFrom || selectedExpiry?.validUntil || selectedExpiry?.kind === 'recurring') {
-    if (hasReviewExpiry(deal) && !hasReviewedOfferPeriod(deal) && selectedExpiry.kind !== 'review-ttl') {
-      // Do not let the stale review deadline overwrite a newly proven period
-      // when the selected offer is normalized after approval.
+    const replacedTimedPeriod = explicitPeriod?.expires
+      && /\d{2}:\d{2}/.test(deal.expiresOriginal || deal.expiryDisplayText || '')
+      && selectedExpiry.source.startsWith('url.') && selectedExpiry.validUntil
+      && explicitPeriod.validUntil !== selectedExpiry.validUntil;
+    if (!hasReviewedOfferPeriod(deal) && (replacedTimedPeriod || (hasReviewExpiry(deal) && selectedExpiry.kind !== 'review-ttl'))) {
+      // Keep the selected source date on subsequent normalization, including
+      // when a newer source has replaced a timed offer or a review deadline.
       nextDeal.expiresOriginal = selectedExpiry.raw;
     }
     nextDeal.expiryKind = selectedExpiry.kind || nextDeal.expiryKind;
@@ -1388,7 +1397,7 @@ async function validateDeal(deal, context) {
       delete nextDeal[field];
       if (selectedExpiry[field]) nextDeal[field] = selectedExpiry[field];
     }
-    nextDeal.expires = selectedExpiry.validUntil || selectedExpiry.validOn
+    nextDeal.expires = expiry.sourceClosesAt || selectedExpiry.validUntil || selectedExpiry.validOn
       || (isVagueExpiry(nextDeal.expires) ? (nextDeal.expires || '') : '');
     nextDeal.expiresSource = selectedExpiry.evidenceSource || selectedExpiry.source;
     nextDeal.expirySource = selectedExpiry.evidenceSource || selectedExpiry.source;

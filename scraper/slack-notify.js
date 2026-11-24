@@ -25,7 +25,7 @@ import {
   validateDealsForSlack,
   writeDealValidityReport,
 } from './deal-validity-agent.js';
-import { parseExpiryShape } from './expiry-utils.js';
+import { matchingTimedOfferPeriod, parseExpiryShape } from './expiry-utils.js';
 import {
   filterModeratedDeals,
   loadDealModeration,
@@ -301,6 +301,9 @@ function inferExpires(deal) {
   const raw = deal.expires || deal.validUntil || deal.validOn || deal.end_date || deal.validity_date || '';
   const text = cleanText(raw);
   if (!text || /^\d{4}-\d{2}-\d{2}$/.test(text)) return text;
+  const period = matchingTimedOfferPeriod(deal.expiresOriginal || deal.expiryDisplayText,
+    deal.validFrom, deal.validUntil || deal.validOn);
+  if (period && Date.parse(text) === Date.parse(period.expires)) return period.expires;
   if (/^(?:abflug|departure|hinflug)\b/i.test(text)) return text;
   if (!/\b(?:19|20)\d{2}\b/.test(text)) return text;
   const shape = parseExpiryShape(text, {
@@ -879,6 +882,8 @@ function buildSlackMessage(deal, index, mapContext = loadDealMapReviewContext())
   const displayedStart = deal.validFrom || (deal.expiryKind === 'single' ? deal.validOn : '');
   const displayedExpiry = validity.expiryDate || deal.validUntil || deal.validOn || deal.expires;
   const internalExpiry = /ttl|fallback/i.test([deal.expiryKind, deal.expirySource, deal.expiresSource].join(' '));
+  const literal = deal.expiresOriginal || deal.expiryDisplayText;
+  const showSourcePeriod = !internalExpiry && matchingTimedOfferPeriod(literal, displayedStart, displayedExpiry);
   const link = deal.url ? `<${deal.url}|Zum Angebot>` : isCommunitySubmission(deal) ? 'Kein Link angegeben (optional)' : '⚠️ FEHLT';
   const description = String(deal.description || '');
   const desc = description ? `\n📝 ${slackTextPrefix(description, 6000)}${Array.from(description).length > 6000 ? '\n⚠️ Text gekürzt: vollständige Bedingungen in der Quelle prüfen.' : ''}` : '';
@@ -902,8 +907,8 @@ function buildSlackMessage(deal, index, mapContext = loadDealMapReviewContext())
     isCommunitySubmission(deal)
       ? `📨 Eingereicht: ${formatDate(deal.submittedAt || deal.pubDate)} (kein Aktionsdatum)`
       : `📅 Quellendatum: ${formatDate(displayedOfferDate)}`,
-    ...(isCommunitySubmission(deal) && deal.expiresOriginal
-      ? [`🗓️ Gültigkeit laut Text: ${deal.expiresOriginal}`] : []),
+    ...(showSourcePeriod || (isCommunitySubmission(deal) && deal.expiresOriginal)
+      ? [`🗓️ Gültigkeit laut Text: ${literal}`] : []),
     ...(displayedStart ? [`🚀 Startet am: ${formatDate(displayedStart)}`] : []),
     `⏳ Gültig bis: ${!internalExpiry && displayedExpiry ? formatDate(displayedExpiry) : 'k.A.'}`,
     ...(internalExpiry ? [`⚠️ Interne Prüffrist: ${formatDate(displayedExpiry)} (kein Angebotsende)`] : []),

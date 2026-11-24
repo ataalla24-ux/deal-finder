@@ -3,6 +3,7 @@ import path from 'path';
 import { fileURLToPath } from 'url';
 import { normalizeCategoryForScraper } from './category-utils.js';
 import { isGenericJunkDeal, normalizeDealRecord } from './deal-normalization-utils.js';
+import { matchingTimedOfferPeriod } from './expiry-utils.js';
 import { stripSlackEmojiCodes } from './offer-title-utils.js';
 
 const __filename = fileURLToPath(import.meta.url);
@@ -176,6 +177,7 @@ function parseDigestDealMessage(message, fallbackIndex = 0) {
   let pubDate = '';
   let validFrom = '';
   let validUntil = '';
+  let periodLiteral = '';
   let expires = '';
   let category = 'wien';
   let type = 'rabatt';
@@ -214,6 +216,8 @@ function parseDigestDealMessage(message, fallbackIndex = 0) {
     } else if (plain.startsWith('Startet am:') || plain.startsWith('Start:')) {
       const label = plain.startsWith('Startet am:') ? 'Startet am:' : 'Start:';
       validFrom = parseDisplayDate(plain.slice(label.length));
+    } else if (plain.startsWith('Gültigkeit laut Text:')) {
+      periodLiteral = cleanText(plain.slice('Gültigkeit laut Text:'.length));
     } else if (plain.startsWith('Gültig bis:')) {
       const rawExpiry = cleanText(plain.slice('Gültig bis:'.length));
       validUntil = parseDisplayDate(rawExpiry);
@@ -273,6 +277,7 @@ function parseDigestDealMessage(message, fallbackIndex = 0) {
   ]);
 
   const postalCode = distance.match(/\b(1(?:0[1-9]|1\d|2[0-3])0)\b/)?.[1] || '';
+  const period = matchingTimedOfferPeriod(periodLiteral, validFrom, validUntil);
   const normalized = normalizeDealRecord({
     id,
     title: title || `${brand || 'Deal'} Deal`,
@@ -287,6 +292,10 @@ function parseDigestDealMessage(message, fallbackIndex = 0) {
     expires,
     validFrom,
     validUntil,
+    ...(period ? {
+      expires: period.expires, validFrom: period.validFrom, validUntil: period.validUntil, validOn: period.validOn,
+      expiryKind: period.kind, expiresOriginal: periodLiteral, expiryDisplayText: periodLiteral,
+    } : {}),
     postalCode,
     pubDate: pubDate || new Date(parseFloat(message.ts || '0') * 1000).toISOString(),
     pubDateSource: pubDate ? 'slack.digest-validated-source-date' : 'slack.message-timestamp',
