@@ -335,16 +335,21 @@ test('DuckDuckGo preserves explicit Retry-After and holds when historical eviden
   assert.equal(held.boundedRetry,undefined);
 });
 
-test('TikTok web search uses the October site path and deduplicates permalinks', async () => {
+test('TikTok web search prioritizes current Vienna food offers under the existing host-only query cap', async () => {
   const queries=[];
   const url=`https://www.tiktok.com/@vienna.cafe/video/${item.id}`;
-  const result=await discoverTikTokLinksViaDuckDuckGo({now,sleep:async()=>{},fetcher:async input=>{
+  const novemberInVienna = new Date('2026-10-31T23:05:00Z');
+  const result=await discoverTikTokLinksViaDuckDuckGo({now:novemberInVienna,sleep:async()=>{},fetcher:async input=>{
     queries.push(new URL(input).searchParams.get('q'));
     return new Response(`<a class="result__a" href="${url}">food</a><a href="${url}">food</a>`);
   }});
   assert.equal(queries.length,25);
-  assert.equal(queries[0], 'site:tiktok.com/@ wien gratis heute');
-  assert.ok(queries.every(q => q.startsWith('site:tiktok.com/@ ')));
+  assert.deepEqual(queries.slice(0, 3), [
+    'site:tiktok.com Wien gratis Döner Neueröffnung November 2026',
+    'site:tiktok.com Wien gratis Essen Eröffnung November 2026',
+    'site:tiktok.com Wien Döner 1+1 November 2026',
+  ]);
+  assert.ok(queries.every(q => q.startsWith('site:tiktok.com ')));
   assert.equal(new Set(queries).size,25);
   assert.ok(queries.some(query => query.includes('"dahabdoener"')));
   assert.ok(queries.some(query => query.includes('"tadimakebap1"')));

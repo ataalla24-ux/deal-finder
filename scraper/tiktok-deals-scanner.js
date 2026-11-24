@@ -57,33 +57,38 @@ const CONFIG = {
   maxApiCandidates: Number(process.env.TIKTOK_MAX_API_CANDIDATES || 1200),
 };
 
-const SEARCH_QUERIES = [
-  'site:tiktok.com/@ wien gratis heute',
-  'site:tiktok.com/@ wien nur heute gratis',
-  'site:tiktok.com/@ wien gratis essen',
-  'site:tiktok.com/@ "dahabdoener" gratis',
-  'site:tiktok.com/@ "tadimakebap1" gratis',
-  'site:tiktok.com/@ wien gratis kaffee',
-  'site:tiktok.com/@ wien gratis drink',
-  'site:tiktok.com/@ wien gratis eintritt',
-  'site:tiktok.com/@ wien kostenlos eintritt',
-  'site:tiktok.com/@ wien gratis event',
-  'site:tiktok.com/@ vienna free entry',
-  'site:tiktok.com/@ vienna free drinks',
-  'site:tiktok.com/@ wien gratis pizza burger kebab',
-  'site:tiktok.com/@ wien neueröffnung gratis',
-  'site:tiktok.com/@ wien eröffnung gratis essen',
-  'site:tiktok.com/@ wien döner 1+1',
-  'site:tiktok.com/@ wien opening free food',
-  'site:tiktok.com/@ vienna free coffee',
-  'site:tiktok.com/@ vienna free food',
-  'site:tiktok.com/@ wien 1+1 restaurant',
-  'site:tiktok.com/@ wien 2 für 1 essen',
-  'site:tiktok.com/@ wien happy hour deal',
-  'site:tiktok.com/@ wien rabatt gutschein',
-  'site:tiktok.com/@ wien gratis probetraining',
-  'site:tiktok.com/@ wien gratis goodie bag',
-];
+function buildTikTokWebSearchQueries(now = new Date()) {
+  const month = new Intl.DateTimeFormat('de-AT', {
+    timeZone: 'Europe/Vienna', month: 'long', year: 'numeric',
+  }).format(now);
+  return [
+    `Wien gratis Döner Neueröffnung ${month}`,
+    `Wien gratis Essen Eröffnung ${month}`,
+    `Wien Döner 1+1 ${month}`,
+    'wien gratis heute',
+    'wien nur heute gratis',
+    'wien gratis essen',
+    '"dahabdoener" gratis',
+    '"tadimakebap1" gratis',
+    'wien gratis kaffee',
+    'wien gratis drink',
+    'wien gratis eintritt',
+    'wien kostenlos eintritt',
+    'wien gratis event',
+    'vienna free entry',
+    'vienna free drinks',
+    'wien gratis pizza burger kebab',
+    'wien opening free food',
+    'vienna free coffee',
+    'vienna free food',
+    'wien 1+1 restaurant',
+    'wien 2 für 1 essen',
+    'wien happy hour deal',
+    'wien rabatt gutschein',
+    'wien gratis probetraining',
+    'wien gratis goodie bag',
+  ].map(terms => `site:tiktok.com ${terms}`);
+}
 
 const CORE_TIKTOK_API_KEYWORDS = [
   'wien gratis heute',
@@ -1024,7 +1029,7 @@ export async function fetchTikTokApiCandidates(page, options = {}) {
 export async function discoverTikTokLinksViaDuckDuckGo(options = {}) {
   const links = new Set();
   let parsedResultLinks = 0;
-  const result = await runInstagramSearchQueries(options.queries || SEARCH_QUERIES, {
+  const result = await runInstagramSearchQueries(options.queries || buildTikTokWebSearchQueries(options.now), {
     sleep: ms => new Promise(resolve => setTimeout(resolve, ms)), ...options,
     search: async query => {
       const url = `https://html.duckduckgo.com/html/?q=${encodeURIComponent(query)}`;
@@ -1640,6 +1645,7 @@ export function summarizeTikTokCoverage(directRows, publicVisits) {
 
 async function main() {
   const scannerStartedAt = Date.now();
+  const searchQueries = buildTikTokWebSearchQueries(new Date(scannerStartedAt));
   const runProvenance = githubRunProvenance();
   let previousReport = {};
   try { previousReport = JSON.parse(fs.readFileSync(REPORT_PATH, 'utf8')); } catch {}
@@ -1697,7 +1703,7 @@ async function main() {
     }
 
     const searchDiscoveryStartedAt = Date.now();
-    discovery = await discoverTikTokLinksViaDuckDuckGo({ previousReport: {
+    discovery = await discoverTikTokLinksViaDuckDuckGo({ queries: searchQueries, previousReport: {
       lastUpdated: previousReport.lastUpdated,
       search: previousReport.searchDiscovery || { errors: previousReport.discoveryErrors || [] },
     } });
@@ -1809,7 +1815,7 @@ async function main() {
     runProvenance,
     ...tikTokDiscoveryHealth(apiDiscovery, discovery, finalDeals.length),
     config: CONFIG,
-    searchQueries: SEARCH_QUERIES,
+    searchQueries,
     apiKeywords: TIKTOK_API_KEYWORDS,
     discovered: discovery.links.length,
     apiCandidates: apiDiscovery.rows.length,
