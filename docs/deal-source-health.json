@@ -1,21 +1,21 @@
 {
-  "generatedAt": "2026-11-24T00:21:29.913Z",
+  "generatedAt": "2026-11-24T00:50:38.104Z",
   "discoveryAvailability": {
     "note": "Transport evidence, not deal yield. Retry eligibility is not recovery. Candidate counts are not Slack deliveries. No extra runs or quota resets.",
     "lanes": [
       {
         "name": "instagram-search",
-        "observedAt": "2026-11-23T09:02:28.111Z",
-        "status": "awaiting-post-cooldown-run",
-        "reason": "search-cooldown",
-        "retryAt": "2026-11-23T20:20:17.409Z",
-        "attempted": 0,
+        "observedAt": "2026-11-24T00:49:54.981Z",
+        "status": "paused",
+        "reason": "search-unavailable",
+        "retryAt": "2026-11-25T00:49:32.774Z",
+        "attempted": 1,
         "discovered": 0,
         "deliveredToSlack": null
       },
       {
         "name": "instagram-profiles",
-        "observedAt": "2026-11-23T09:02:28.111Z",
+        "observedAt": "2026-11-24T00:49:54.981Z",
         "status": "no-block-reported",
         "reason": "",
         "retryAt": "",
@@ -24,7 +24,7 @@
       },
       {
         "name": "instagram-previews",
-        "observedAt": "2026-11-23T09:02:28.111Z",
+        "observedAt": "2026-11-24T00:49:54.981Z",
         "status": "no-block-reported",
         "reason": "",
         "retryAt": "",
@@ -54,10 +54,10 @@
   },
   "summary": {
     "filesConsidered": 33,
-    "totalCandidates": 697,
-    "uniqueCandidates": 678,
-    "distinctCandidates": 685,
-    "duplicateClusters": 7,
+    "totalCandidates": 701,
+    "uniqueCandidates": 676,
+    "distinctCandidates": 686,
+    "duplicateClusters": 10,
     "topHealthySources": [
       {
         "sourceKey": "member-benefits",
@@ -74,8 +74,8 @@
       {
         "sourceKey": "instagram-ai",
         "sourceLabel": "Instagram AI Agent",
-        "healthScore": 70,
-        "totalDeals": 3
+        "healthScore": 69,
+        "totalDeals": 7
       },
       {
         "sourceKey": "tiktok-browser",
@@ -110,16 +110,16 @@
         "totalDeals": 113
       },
       {
+        "sourceKey": "instagram-ai",
+        "sourceLabel": "Instagram AI Agent",
+        "missionFitScore": 63,
+        "totalDeals": 7
+      },
+      {
         "sourceKey": "instagram-apify",
         "sourceLabel": "Apify Instagram",
         "missionFitScore": 63,
         "totalDeals": 1
-      },
-      {
-        "sourceKey": "food3",
-        "sourceLabel": "Firecrawl Key 2 - Food",
-        "missionFitScore": 59,
-        "totalDeals": 3
       }
     ],
     "topCoverageSources": [
@@ -140,7 +140,7 @@
       {
         "sourceKey": "meta-instagram",
         "sourceLabel": "Meta Instagram Graph",
-        "coverageScore": 62,
+        "coverageScore": 61,
         "totalDeals": 83,
         "fresh1dCount": 13
       },
@@ -173,16 +173,16 @@
         "totalDeals": 1
       },
       {
-        "sourceKey": "meta-instagram",
-        "sourceLabel": "Meta Instagram Graph",
-        "precisionScore": 70,
-        "totalDeals": 83
-      },
-      {
         "sourceKey": "instagram-ai",
         "sourceLabel": "Instagram AI Agent",
-        "precisionScore": 66,
-        "totalDeals": 3
+        "precisionScore": 70,
+        "totalDeals": 7
+      },
+      {
+        "sourceKey": "meta-instagram",
+        "sourceLabel": "Meta Instagram Graph",
+        "precisionScore": 69,
+        "totalDeals": 83
       },
       {
         "sourceKey": "joe",
@@ -201,8 +201,14 @@
       {
         "sourceKey": "meta-instagram",
         "sourceLabel": "Meta Instagram Graph",
-        "sourceWeightScore": 64,
+        "sourceWeightScore": 63,
         "totalDeals": 83
+      },
+      {
+        "sourceKey": "instagram-ai",
+        "sourceLabel": "Instagram AI Agent",
+        "sourceWeightScore": 57,
+        "totalDeals": 7
       },
       {
         "sourceKey": "wien-combined",
@@ -215,12 +221,6 @@
         "sourceLabel": "Firecrawl Key 1 - Gastro",
         "sourceWeightScore": 54,
         "totalDeals": 118
-      },
-      {
-        "sourceKey": "joe",
-        "sourceLabel": "jö Bonus Club",
-        "sourceWeightScore": 54,
-        "totalDeals": 9
       }
     ],
     "topSourcesToFix": [
@@ -385,9 +385,9 @@
       "file": "deals-pending-meta-instagram.json",
       "sourceLabel": "Meta Instagram Graph",
       "totalDeals": 83,
-      "uniqueDeals": 76,
-      "duplicateDeals": 7,
-      "duplicateAcrossSources": 2,
+      "uniqueDeals": 73,
+      "duplicateDeals": 10,
+      "duplicateAcrossSources": 5,
       "fresh1dCount": 13,
       "fresh7dCount": 73,
       "viennaCount": 83,
@@ -401,7 +401,7 @@
       ],
       "lastRun": null,
       "uniqueRate": 0.9,
-      "duplicateRate": 0,
+      "duplicateRate": 0.1,
       "fresh1dRate": 0.2,
       "fresh7dRate": 0.9,
       "viennaRate": 1,
@@ -456,46 +456,50 @@
       "issues": [],
       "healthScore": 71,
       "missionFitScore": 55,
-      "coverageScore": 62,
-      "precisionScore": 70,
-      "sourceWeightScore": 64
+      "coverageScore": 61,
+      "precisionScore": 69,
+      "sourceWeightScore": 63
     },
     {
       "sourceKey": "instagram-ai",
       "file": "deals-pending-instagram-ai.json",
       "sourceLabel": "Instagram AI Agent",
-      "totalDeals": 3,
-      "uniqueDeals": 3,
-      "duplicateDeals": 0,
-      "duplicateAcrossSources": 0,
-      "fresh1dCount": 0,
-      "fresh7dCount": 3,
-      "viennaCount": 3,
-      "foodDrinkCount": 3,
-      "promoCount": 0,
+      "totalDeals": 7,
+      "uniqueDeals": 4,
+      "duplicateDeals": 3,
+      "duplicateAcrossSources": 3,
+      "fresh1dCount": 4,
+      "fresh7dCount": 7,
+      "viennaCount": 7,
+      "foodDrinkCount": 6,
+      "promoCount": 1,
       "missingUrlCount": 0,
       "sampleTitles": [
         "👉 Nur 6,99 € pro kg Lachs (Somon Baligi) Ideal für traditionelle Gerichte & besondere Anlässe",
-        "Und heute im Mittagsmenü: gebackenes Schweinsschnitzerl mit Erdäpfel-Vogerlsalat, mit Suppe um € 9,90. Reservi",
-        "LUNCH FOR ONLY 1 €?! YES, IT’S HAPPENING! 🥢🔥 Mark your calendars because November 27 is about to get deliciou"
+        "🎁 Reveal your prize and get a voucher for your next visit!",
+        "Und heute im Mittagsmenü: gebackenes Schweinsschnitzerl mit Erdäpfel-Vogerlsalat, mit Suppe um € 9,90. Reservi"
       ],
       "lastRun": null,
-      "uniqueRate": 1,
-      "duplicateRate": 0,
-      "fresh1dRate": 0,
+      "uniqueRate": 0.6,
+      "duplicateRate": 0.4,
+      "fresh1dRate": 0.6,
       "fresh7dRate": 1,
       "viennaRate": 1,
-      "foodDrinkRate": 1,
-      "promoRate": 0,
+      "foodDrinkRate": 0.9,
+      "promoRate": 0.1,
       "missingUrlRate": 0,
-      "averageQualityScore": 81.7,
+      "averageQualityScore": 80.1,
       "topCategories": [
         {
           "value": "essen",
-          "count": 1
+          "count": 3
         },
         {
           "value": "kaffee",
+          "count": 2
+        },
+        {
+          "value": "shopping",
           "count": 1
         },
         {
@@ -506,18 +510,18 @@
       "topTypes": [
         {
           "value": "rabatt",
-          "count": 3
+          "count": 7
         }
       ],
       "issues": [
-        "wenige Deals sind frischer als 1 Tag",
-        "wenige klare Gratis-/Promo-Signale"
+        "wenige klare Gratis-/Promo-Signale",
+        "hohe Überschneidung mit anderen Quellen"
       ],
-      "healthScore": 70,
-      "missionFitScore": 50,
-      "coverageScore": 12,
-      "precisionScore": 66,
-      "sourceWeightScore": 51
+      "healthScore": 69,
+      "missionFitScore": 63,
+      "coverageScore": 16,
+      "precisionScore": 70,
+      "sourceWeightScore": 57
     },
     {
       "sourceKey": "tiktok-browser",
