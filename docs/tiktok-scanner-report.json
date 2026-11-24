@@ -1,14 +1,14 @@
 {
-  "lastUpdated": "2026-11-24T11:54:07.259Z",
+  "lastUpdated": "2026-11-24T12:25:58.396Z",
   "runProvenance": {
     "repository": "ataalla24-ux/deal-finder",
-    "runId": "45388241588",
-    "headSha": "b265b405bedf7fcea7490e340af7e9612c1b4b3a",
-    "checkoutSha": "b265b405bedf7fcea7490e340af7e9612c1b4b3a",
+    "runId": "45393354868",
+    "headSha": "e8d7101d18b4be5a13e1efe17019f3004e288a9e",
+    "checkoutSha": "e8d7101d18b4be5a13e1efe17019f3004e288a9e",
     "triggeringRun": null,
     "event": "workflow_dispatch",
     "runAttempt": "1",
-    "url": "https://github.com/ataalla24-ux/deal-finder/actions/runs/45388241588"
+    "url": "https://github.com/ataalla24-ux/deal-finder/actions/runs/45393354868"
   },
   "status": "discovery-degraded",
   "outputPreserved": true,
@@ -122,34 +122,15 @@
   "discovered": 0,
   "apiCandidates": 0,
   "apiDiscovery": {
-    "errors": [
-      {
-        "keyword": "wien deal 24 november 2026",
-        "offset": 0,
-        "error": "TikTok returned a provider error",
-        "status": 200,
-        "code": "provider-error",
-        "providerCode": "2483",
-        "providerSignal": "unclassified"
-      }
-    ],
-    "attemptedRequests": 1,
-    "emptyResponses": 0,
+    "errors": [],
+    "attemptedRequests": 0,
     "rawItems": 0,
-    "normalizedItems": 0,
-    "ignoredItems": 0,
-    "stoppedReason": "provider-error",
     "nextRetryAt": "2026-11-25T11:54:03.661Z",
+    "stoppedReason": "api-cooldown",
     "nextKeywordIndex": 2,
-    "checkedBy": {
-      "repository": "ataalla24-ux/deal-finder",
-      "runId": "45388241588",
-      "headSha": "b265b405bedf7fcea7490e340af7e9612c1b4b3a",
-      "checkoutSha": "b265b405bedf7fcea7490e340af7e9612c1b4b3a",
-      "triggeringRun": null,
-      "event": "workflow_dispatch",
-      "runAttempt": "1",
-      "url": "https://github.com/ataalla24-ux/deal-finder/actions/runs/45388241588"
+    "boundedRetry": {
+      "mode": "single-request",
+      "failures": 2
     },
     "lastFailure": {
       "status": 200,
@@ -169,22 +150,6 @@
         "url": "https://github.com/ataalla24-ux/deal-finder/actions/runs/45388241588"
       }
     },
-    "boundedRetry": {
-      "mode": "single-request",
-      "failures": 2
-    },
-    "transport": "direct-browser-search",
-    "navigations": 1,
-    "searchRequests": 1,
-    "siteAdjustedSearchRequests": 1,
-    "lastSearchResponse": {
-      "status": 200,
-      "declaredBytes": 125,
-      "decodedBytes": 125,
-      "retryAfterProvided": false,
-      "bodyState": "json"
-    },
-    "homepageNavigation": "root",
     "publicVideoLinks": 0
   },
   "searchDiscovery": {
@@ -195,7 +160,7 @@
     "nextRetryAt": "",
     "stoppedReason": "",
     "errors": [],
-    "deferredPostVisits": 2,
+    "deferredPostVisits": 1,
     "knownPostLinks": {
       "available": 2,
       "selected": 0,
@@ -205,13 +170,16 @@
       "nextIndex": 0
     }
   },
+  "pendingIndexedTikTokLinks": [],
   "tavilyDiscovery": {
-    "status": "completed",
-    "nextRetryAt": "",
+    "status": "rate-limited",
+    "nextRetryAt": "2026-11-24T12:29:34.260Z",
+    "nextQueryIndex": 0,
     "attemptedQueries": 1,
-    "indexRows": 1,
-    "httpStatus": 200,
-    "canonicalVideoLinks": 1,
+    "indexRows": 0,
+    "queryIndex": 0,
+    "httpStatus": 429,
+    "canonicalVideoLinks": 0,
     "publicPageAttempts": 0,
     "publicPagesWithDatedOriginal": 0,
     "acceptedDeals": 0
@@ -267,22 +235,12 @@
     "errors": []
   },
   "timings": {
-    "apiDiscoveryMs": 4982,
-    "searchDiscoveryMs": 1843,
+    "apiDiscoveryMs": 51,
+    "searchDiscoveryMs": 266,
     "mediaRescueMs": 0,
-    "totalScannerMs": 9295
+    "totalScannerMs": 553
   },
   "discoveryErrors": [],
-  "apiErrors": [
-    {
-      "keyword": "wien deal 24 november 2026",
-      "offset": 0,
-      "error": "TikTok returned a provider error",
-      "status": 200,
-      "code": "provider-error",
-      "providerCode": "2483",
-      "providerSignal": "unclassified"
-    }
-  ],
+  "apiErrors": [],
   "rejected": []
 }
