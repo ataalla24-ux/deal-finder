@@ -2,7 +2,7 @@ import assert from 'node:assert/strict';
 import { preparePublicationTitle } from '../scraper/pre-publication-title.js';
 import { validateApprovalCandidates } from '../scraper/slack-approve.js';
 import { advanceDealLifecycle } from '../scraper/deal-lifecycle.js';
-import { isConditionOnlyOfferTitle, needsSourceBackedTitle } from '../scraper/offer-title-utils.js';
+import { isBenefitOnlyTitle, isConditionOnlyOfferTitle, needsSourceBackedTitle } from '../scraper/offer-title-utils.js';
 import { inspectSourceBackedQuality } from '../scraper/source-backed-quality.js';
 
 const base = {
@@ -57,6 +57,7 @@ assert.equal(preparePublicationTitle({ ...base, title: 'Ein GRATIS-Geschenk zu j
 
 for (const title of [
   'Pro Rechnung kann ein Gutschein eingelöst werden',
+  'Pro Rechnung ist nur ein Gutschein einlösbar',
   'Je Rechnung gilt nur ein Gutschein.',
   '🎟️ :ticket: Nur 1 Gutschein pro Bestellung einlösbar!',
   'Nicht mit anderen Rabatten oder Aktionen kombinierbar',
@@ -78,6 +79,17 @@ for (const title of [
   assert.equal(isConditionOnlyOfferTitle(title), false, title);
   assert.equal(needsSourceBackedTitle(title), false, title);
   assert.ok(!inspectSourceBackedQuality({ ...base, title }).issues.some(issue => issue.code === 'condition-only-title'), title);
+}
+for (const title of ['38 % weniger', '38 % günstiger', '38 Prozent guenstiger!']) {
+  assert.equal(isBenefitOnlyTitle(title), true, title);
+  assert.equal(needsSourceBackedTitle(title), true, title);
+  assert.ok(inspectSourceBackedQuality({ ...base, title }).issues.some(issue => issue.code === 'product-unspecified'), title);
+}
+for (const title of ['38 % weniger für Burger', '38 % weniger für 3 Burger', '38 % günstiger mit Burger-Menü']) {
+  assert.equal(isBenefitOnlyTitle(title), false, title);
+  assert.equal(isConditionOnlyOfferTitle(title), false, title);
+  assert.equal(needsSourceBackedTitle(title), false, title);
+  assert.equal(preparePublicationTitle({ ...base, title }).title, title);
 }
 
 const now = new Date('2026-11-05T12:00:00Z');

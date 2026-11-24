@@ -194,6 +194,36 @@ test('a live title containing only a coupon limit is corrected from the original
   assert.equal(result.report.ai.corrected, 1);
 }));
 
+test('AÏDA tier titles use the exact matching coupon and still require an independent API verdict', () => fixture(async ({ root, put }) => {
+  const mediaId = '18121024280323002';
+  const tiers = '€ 5 geschenkt ab € 20 Konsumation € 10 geschenkt ab € 40 Konsumation € 20 geschenkt ab € 80 Konsumation';
+  const deal = {
+    id: 'meta-ig-' + mediaId, url: 'https://www.instagram.com/p/DgHWmA1MY02/', brand: 'AIDA',
+    title: 'Pro Rechnung kann ein Gutschein eingelöst werden',
+    description: 'Mit Gutschein 5 € ab 20 €, 10 € ab 40 € oder 20 € ab 80 €. Je Rechnung nur ein Gutschein.',
+    validUntil: '2026-11-30', expiryKind: 'end', metaGraphVerified: true, metaGraphAccepted: true,
+    metaGraphMediaId: mediaId, metaGraphCaption: 'Pink Weeks: ' + tiers
+      + '. Schneidet den Gutschein aus und zeigt ihn vor eurer Bestellung vor. Gültig bis einschließlich 30. November 2026.',
+  };
+  put('docs/deals.json', { deals: [deal] });
+  for (const supported of [false, true]) {
+    put('reviews/automatic-deal-maintenance-state.json', { checks: [], corrections: [], hidden: [] });
+    let calls = 0;
+    const result = await maintainFeedFile({ cwd: root, now, allowAi: true, request: async (_endpoint, init) => {
+      calls++;
+      const input = JSON.parse(JSON.parse(init.body).messages[1].content);
+      assert.deepEqual(input.patch, { title: 'AÏDA: 5 € ab 20 €, 10 € ab 40 €, 20 € ab 80 € mit Gutschein' });
+      assert.equal(input.quote, tiers);
+      return Response.json({ choices: [{ finish_reason: 'stop', message: { content: JSON.stringify({ supported }) } }] });
+    } });
+    assert.equal(calls, 1);
+    assert.equal(result.deals[0].description, deal.description);
+    assert.equal(result.deals[0].validUntil, deal.validUntil);
+    assert.equal(result.report.ai.corrected, Number(supported));
+    if (!supported) assert.deepEqual(result.deals, [deal]);
+  }
+}));
+
 test('published marktguru terms complete the same NESCAFÉ text without a model or guessed expiry or map points', () => fixture(async ({ root, put }) => {
   const source = fs.readFileSync(fileURLToPath(new URL('./fixtures/marktguru-nescafe-20261117.html', import.meta.url)), 'utf8');
   const deal = { ...pending('fc4g-w3wqsu'), url: MARKTGURU_NESCAFE_URL, brand: 'BILLA',

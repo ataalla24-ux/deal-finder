@@ -30,13 +30,16 @@ export function isSocialInstructionTitle(value = '') {
 // Advisory only: a benefit or eligibility clause alone does not name the offer.
 export function isBenefitOnlyTitle(value = '') {
   const title = stripSlackEmojiCodes(value).replace(/\p{Extended_Pictographic}|\uFE0F/gu, '').trim();
-  return /^(?:(?:jetzt|bis zu|ab)\s+)?(?:\d+(?:[,.]\d+)?\s*(?:%|prozent|€|euro)\s*(?:rabatt|sparen|ersparnis|preisvorteil)?|[12]\s*\+\s*1(?:\s+gratis)?|gratis|kostenlos)(?:\s+(?:mit|für|fuer)\s+.+)?[.!]*$/iu.test(title);
+  return /^\d+(?:[,.]\d+)?\s*(?:%|prozent)\s+(?:weniger|g(?:ü|ue)nstiger)[.!]*$/iu.test(title)
+    || /^(?:(?:jetzt|bis zu|ab)\s+)?(?:\d+(?:[,.]\d+)?\s*(?:%|prozent|€|euro)\s*(?:rabatt|sparen|ersparnis|preisvorteil)?|[12]\s*\+\s*1(?:\s+gratis)?|gratis|kostenlos)(?:\s+(?:mit|für|fuer)\s+.+)?[.!]*$/iu.test(title);
 }
 
 const perCustomerOrOrder = '(?:pro|je) (?:rechnung|bestellung|einkauf|person|haushalt)';
 const singleVoucher = '(?:nur |maximal |höchstens )?(?:ein|1) (?:gutschein|coupon)';
 const voucherLimitTitle = new RegExp(
-  `^(?:${perCustomerOrOrder} (?:(?:kann|darf) ${singleVoucher} (?:eingelöst|verwendet) werden|(?:gilt )?${singleVoucher}(?: einlösbar)?)|${singleVoucher} ${perCustomerOrOrder}(?: einlösbar)?)$`, 'iu');
+  `^(?:${perCustomerOrOrder} (?:(?:kann|darf) ${singleVoucher} (?:eingelöst|verwendet) werden`
+    + `|ist ${singleVoucher} einlösbar|(?:gilt )?${singleVoucher}(?: einlösbar)?)`
+    + `|${singleVoucher} ${perCustomerOrOrder}(?: einlösbar)?)$`, 'iu');
 
 // A standalone redemption condition can come from the source without naming the deal.
 export function isConditionOnlyOfferTitle(value = '') {

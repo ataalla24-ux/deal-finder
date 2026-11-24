@@ -93,7 +93,12 @@ test('a grounded clock range keeps its Vienna end time and incomplete clocks sta
   assert.equal(patch.expires, '2026-11-21T12:00:00.000Z');
   assert.equal(patch.validOn, '2026-11-21');
   assert.equal(patch.expiresOriginal, exact);
-  for (const value of ['21.11.2026, 11:00 bis 21.11.2026', 'Nur am 21.11.2026, 13:00 Uhr']) {
+  const local = 'Gültig am 27.11.2026 von 15 Uhr bis 19 Uhr.';
+  const localPatch = groundedDatePatch(local, [local], {});
+  assert.equal(localPatch.expires, '2026-11-27T18:00:00.000Z');
+  assert.equal(localPatch.expiryDisplayText, local);
+  for (const value of ['21.11.2026, 11:00 bis 21.11.2026', 'Nur am 21.11.2026, 13:00 Uhr',
+    'Gültig am 27.11.2026 ab 15 Uhr', 'Am 25.10.2026 von 02:30 bis 04:00 Uhr']) {
     assert.deepEqual(groundedDatePatch(value, [value], {}), {});
   }
 });
