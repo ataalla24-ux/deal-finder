@@ -1,16 +1,63 @@
 {
-  "allowed": false,
-  "reason": "minimum-six-hour-spacing",
-  "generatedAt": "2026-11-23T16:16:46.944Z",
-  "runKey": "45214623873",
+  "generatedAt": "2026-11-24T03:24:17.285Z",
+  "runProvenance": {
+    "repository": "ataalla24-ux/deal-finder",
+    "runId": "45319219094",
+    "headSha": "07df86a4df45afeadd722cb8f145a11013859187",
+    "checkoutSha": "616c5347e02c9813e61f89291c08ebfac16344eb",
+    "triggeringRun": null,
+    "event": "schedule",
+    "runAttempt": "1",
+    "url": "https://github.com/ataalla24-ux/deal-finder/actions/runs/45319219094"
+  },
   "purpose": "scan",
-  "sources": [
+  "limits": {
+    "profiles": 22,
+    "hashtags": 4,
+    "perSource": 1,
+    "posts": 26,
+    "ocrPosts": 8,
+    "dailyUsd": 0.15,
+    "cycleUsd": 4.65
+  },
+  "budget": {
+    "allowed": true,
+    "reason": "",
+    "plan": "FREE",
+    "includedCreditUsd": 5,
+    "accountUsageUsd": 0.0915169940961918,
+    "accountLimitUsd": 5,
+    "cycle": {
+      "startAt": "2026-11-15T00:00:00.000Z",
+      "endAt": "2026-12-14T23:59:59.999Z"
+    },
+    "runCapUsd": 0.075,
+    "creditReserveUsd": 0.35,
+    "pricingModel": "PAY_PER_EVENT"
+  },
+  "selectedSources": [
+    {
+      "key": "profile:villavidacafe",
+      "kind": "profile",
+      "username": "villavidacafe",
+      "url": "https://www.instagram.com/villavidacafe/",
+      "priority": 0,
+      "verifiedMerchant": true
+    },
     {
       "key": "profile:doenerwerkwien",
       "kind": "profile",
       "username": "doenerwerkwien",
       "url": "https://www.instagram.com/doenerwerkwien/",
       "priority": 84
+    },
+    {
+      "key": "profile:hongkongcafewien",
+      "kind": "profile",
+      "username": "hongkongcafewien",
+      "url": "https://www.instagram.com/hongkongcafewien/",
+      "priority": 0,
+      "verifiedMerchant": true
     },
     {
       "key": "profile:papa.duck.at",
@@ -45,40 +92,167 @@
       "priority": 0
     }
   ],
-  "budget": {
-    "allowed": true,
-    "reason": "",
-    "plan": "FREE",
-    "includedCreditUsd": 5,
-    "accountUsageUsd": 0.09150953085219445,
-    "accountLimitUsd": 5,
-    "cycle": {
-      "startAt": "2026-11-15T00:00:00.000Z",
-      "endAt": "2026-12-14T23:59:59.999Z"
+  "status": "partial",
+  "fetchedRecords": 8,
+  "freshAcceptedDeals": 1,
+  "pendingDeals": 2,
+  "unchangedPosts": 1,
+  "duplicatePosts": 1,
+  "providerErrors": 1,
+  "emptySourceRecords": 0,
+  "ocrCalls": 3,
+  "candidateAudit": [
+    {
+      "key": "instagram:DgGSMHfM4l3",
+      "url": "https://www.instagram.com/p/DgGSMHfM4l3/",
+      "ownerUsername": "villavidacafe",
+      "status": "accepted",
+      "reason": "",
+      "ocrUsed": true,
+      "ocrDeferred": false,
+      "ocrErrors": 0
     },
-    "runCapUsd": 0.075,
-    "creditReserveUsd": 0.35,
-    "pricingModel": "PAY_PER_EVENT"
+    {
+      "key": "instagram:DgC8W6-R_t5",
+      "url": "https://www.instagram.com/p/DgC8W6-R_t5/",
+      "ownerUsername": "freyraumcafe",
+      "status": "rejected",
+      "reason": "no-consumer-food-benefit",
+      "ocrUsed": true,
+      "ocrDeferred": false,
+      "ocrErrors": 0
+    },
+    {
+      "key": "instagram:DgFzcvTjdwT",
+      "url": "https://www.instagram.com/p/DgFzcvTjdwT/",
+      "ownerUsername": "wildling.foods",
+      "status": "rejected",
+      "reason": "no-consumer-food-benefit",
+      "ocrUsed": true,
+      "ocrDeferred": false,
+      "ocrErrors": 0
+    },
+    {
+      "key": "instagram:Dfm_EccG9Ek",
+      "url": "https://www.instagram.com/p/Dfm_EccG9Ek/",
+      "ownerUsername": "magazin_wien",
+      "status": "rejected",
+      "reason": "post-older-than-seven-days",
+      "ocrUsed": false,
+      "ocrDeferred": false,
+      "ocrErrors": 0
+    },
+    {
+      "key": "instagram:Df0BWKjNgwq",
+      "url": "https://www.instagram.com/p/Df0BWKjNgwq/",
+      "ownerUsername": "avstrija_i_ja",
+      "status": "rejected",
+      "reason": "post-older-than-seven-days",
+      "ocrUsed": false,
+      "ocrDeferred": false,
+      "ocrErrors": 0
+    }
+  ],
+  "actorRuns": [
+    {
+      "id": "tDUhd2ZGCwodo1dWB",
+      "actorId": "apify~instagram-scraper",
+      "build": "0.0.873",
+      "reportedChargeUsd": 0.0108
+    },
+    {
+      "id": "XTHQ0MYwPDHGvDKlP",
+      "actorId": "apify~instagram-hashtag-scraper",
+      "build": "0.0.751",
+      "reportedChargeUsd": 0.0104
+    }
+  ],
+  "batchErrors": [],
+  "datasetProviderErrors": 1,
+  "reportedChargeUsd": 0.0212,
+  "tools": {
+    "tesseract": true,
+    "ffmpeg": false,
+    "ffprobe": false
   },
-  "limits": {
-    "profiles": 22,
-    "hashtags": 4,
-    "perSource": 1,
-    "posts": 26,
-    "ocrPosts": 8,
-    "dailyUsd": 0.15,
-    "cycleUsd": 4.65
-  },
-  "runProvenance": {
-    "repository": "ataalla24-ux/deal-finder",
-    "runId": "45214623873",
-    "headSha": "0eba4c6632381504ead61feb21fc7fceff2aa509",
-    "checkoutSha": "0eba4c6632381504ead61feb21fc7fceff2aa509",
-    "triggeringRun": null,
-    "event": "schedule",
-    "runAttempt": "1",
-    "url": "https://github.com/ataalla24-ux/deal-finder/actions/runs/45214623873"
-  },
-  "status": "deferred",
-  "freshAcceptedDeals": 0
+  "sources": [
+    {
+      "key": "profile:villavidacafe",
+      "lastAttemptAt": "2026-11-24T03:24:17.285Z",
+      "postsReturned": 1,
+      "status": "posts-returned",
+      "consecutiveFailures": 0,
+      "consecutiveEmpty": 0,
+      "retryAt": ""
+    },
+    {
+      "key": "profile:doenerwerkwien",
+      "lastAttemptAt": "2026-11-24T03:24:17.285Z",
+      "postsReturned": 0,
+      "status": "not-found",
+      "consecutiveFailures": 2,
+      "retryAt": "2026-12-24T03:24:17.285Z",
+      "lastUnstartedProfileCheck": {
+        "runId": "45027735197",
+        "reason": "build-not-found",
+        "at": "2026-11-22T13:29:45.915Z",
+        "previousRetryAt": "2026-11-24T13:29:45.915Z",
+        "previousConsecutiveFailures": 2
+      }
+    },
+    {
+      "key": "profile:hongkongcafewien",
+      "lastAttemptAt": "2026-11-24T03:24:17.285Z",
+      "postsReturned": 1,
+      "status": "posts-returned",
+      "consecutiveFailures": 0,
+      "consecutiveEmpty": 0,
+      "retryAt": ""
+    },
+    {
+      "key": "profile:papa.duck.at",
+      "lastAttemptAt": "2026-11-24T03:24:17.285Z",
+      "postsReturned": 1,
+      "status": "posts-returned",
+      "consecutiveFailures": 0,
+      "consecutiveEmpty": 0,
+      "retryAt": ""
+    },
+    {
+      "key": "hashtag:esseninwien",
+      "lastAttemptAt": "2026-11-24T03:24:17.285Z",
+      "status": "stale-results",
+      "postsReturned": 1,
+      "consecutiveFailures": 0,
+      "consecutiveEmpty": 3,
+      "retryAt": "2026-12-01T03:24:17.285Z"
+    },
+    {
+      "key": "hashtag:wienfood",
+      "lastAttemptAt": "2026-11-24T03:24:17.285Z",
+      "postsReturned": 1,
+      "status": "stale-results",
+      "consecutiveFailures": 1,
+      "retryAt": "2026-11-26T03:24:17.285Z",
+      "consecutiveEmpty": 1
+    },
+    {
+      "key": "hashtag:wienisst",
+      "lastAttemptAt": "2026-11-24T03:24:17.285Z",
+      "postsReturned": 1,
+      "status": "posts-returned",
+      "consecutiveFailures": 0,
+      "retryAt": "",
+      "consecutiveEmpty": 0
+    },
+    {
+      "key": "hashtag:wienkaffee",
+      "lastAttemptAt": "2026-11-24T03:24:17.285Z",
+      "postsReturned": 1,
+      "status": "posts-returned",
+      "consecutiveEmpty": 0,
+      "retryAt": "",
+      "consecutiveFailures": 0
+    }
+  ]
 }
