@@ -167,12 +167,12 @@ test('filters seen IDs, local moderation, aliases of self-account posts and know
 
 test('limits saved unattempted videos after actual visits, preserving the current scan budget and source order', t => {
   const { dir } = fixture(t);
-  const fresh = Array.from({ length: 35 }, (_, i) => lead(i + 10).url);
+  const fresh = Array.from({ length: 135 }, (_, i) => lead(i + 10).url);
   const { leads: selected, ready } = selectTikTokIndexedLeads(dir, { now, duckduckgo: fresh });
   assert.equal(ready, true);
-  assert.equal(selected.length, 35);
-  assert.deepEqual(retainUnattemptedTikTokIndexLeads(selected, fresh.slice(0, 4)), selected.slice(4, 24));
-  assert.deepEqual(selectTikTokIndexedLeads(dir, { now, previous: selected }), { ready: true, leads: selected.slice(0, 20) });
+  assert.equal(selected.length, 135);
+  assert.deepEqual(retainUnattemptedTikTokIndexLeads(selected, fresh.slice(0, 4)), selected.slice(4, 124));
+  assert.deepEqual(selectTikTokIndexedLeads(dir, { now, previous: selected }), { ready: true, leads: selected.slice(0, 120) });
 });
 
 test('missing protections keep only sanitized previous leads queued and hold all visits until recovery', t => {

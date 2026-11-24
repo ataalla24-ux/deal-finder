@@ -12,6 +12,7 @@ const knownQueues = [
 ];
 const maxDiscoveryAge = 7 * 24 * 60 * 60 * 1000;
 const maxLinks = 20;
+const maxPendingIndexLinks = 120;
 const maxIndexWait = 48 * 60 * 60 * 1000;
 const indexSources = ['duckduckgo', 'tavily'];
 const canonicalUrl = /^https:\/\/www\.tiktok\.com\/@([a-zA-Z0-9._-]{2,40})\/video\/([1-9]\d{15,21})$/;
@@ -138,7 +139,7 @@ export function selectTikTokIndexedLeads(docsDir, {
     }
   }
 
-  for (const row of Array.isArray(previous) ? previous.slice(0, maxLinks) : []) {
+  for (const row of Array.isArray(previous) ? previous.slice(0, maxPendingIndexLinks) : []) {
     if (!Array.isArray(row?.sources) || typeof row.firstSeenAt !== 'string' || !discoveryTimestamp.test(row.firstSeenAt)) continue;
     add(row.url, indexSources.filter(source => row.sources.includes(source)), Date.parse(row.firstSeenAt));
   }
@@ -157,5 +158,5 @@ export function selectTikTokIndexedLeads(docsDir, {
 
 export function retainUnattemptedTikTokIndexLeads(leads, attemptedUrls = []) {
   const attemptedIds = new Set(Array.from(attemptedUrls, url => canonicalVideo(url)?.[2]));
-  return leads.filter(row => !attemptedIds.has(canonicalVideo(row.url)?.[2])).slice(0, maxLinks);
+  return leads.filter(row => !attemptedIds.has(canonicalVideo(row.url)?.[2])).slice(0, maxPendingIndexLinks);
 }
