@@ -49,15 +49,21 @@ function isSelfHandle(handle) {
   return selfAccountKeys.has(handle.toLowerCase().replace(/[^a-z0-9]/g, ''));
 }
 
+function isRecord(value) {
+  return value !== null && typeof value === 'object' && !Array.isArray(value);
+}
+
 function readTikTokLeadState(docsDir, now) {
   const seenKeys = readRows(docsDir, 'slack-seen-posts.json', 'seenPostKeys');
   const knownLists = knownQueues.map(([file, field]) => readRows(docsDir, file, field));
   const moderation = readDocument(docsDir, 'deal-moderation.json');
-  if (!seenKeys || knownLists.includes(null) || !moderation) return null;
+  const historicalSent = readDocument(docsDir, 'sent-deal-ids.json');
+  if (!seenKeys || knownLists.includes(null) || !isRecord(moderation) || !isRecord(historicalSent)) return null;
+  const moderationLists = ['hiddenDeals', 'blockedIds', 'blockedUrls', 'blockedProviders', 'blockedText'];
+  if (moderationLists.some(key => key in moderation && !Array.isArray(moderation[key]))) return null;
 
   const knownVideoIds = new Set();
-  const historicalSent = readDocument(docsDir, 'sent-deal-ids.json');
-  const knownDealIds = new Set(Object.keys(historicalSent ?? {}));
+  const knownDealIds = new Set(Object.keys(historicalSent));
   for (const value of seenKeys) {
     const videoId = storedVideoId(value);
     if (videoId) knownVideoIds.add(videoId);
@@ -110,14 +116,13 @@ export function selectTikTokIndexedLeads(docsDir, {
   previous = [], duckduckgo = [], tavily = [], now = new Date(),
 } = {}) {
   const state = readTikTokLeadState(docsDir, now);
-  if (!state) return [];
-  const { knownVideoIds, moderation } = state;
+  const knownVideoIds = state?.knownVideoIds ?? new Set();
   const leads = new Map();
   function add(url, sources, seenAt) {
     const match = canonicalVideo(url);
     if (!match) return;
     const [, handle, id] = match;
-    if (isSelfHandle(handle) || moderationReasonForDeal({ url }, moderation)) knownVideoIds.add(id);
+    if (isSelfHandle(handle) || (state && moderationReasonForDeal({ url }, state.moderation))) knownVideoIds.add(id);
     if (knownVideoIds.has(id) || !sources.length || !Number.isFinite(seenAt) || seenAt > +now) return;
     // A repeat in an index cannot extend a stored lead's deadline.
     if (+now - seenAt >= maxIndexWait) {
@@ -134,17 +139,20 @@ export function selectTikTokIndexedLeads(docsDir, {
   }
 
   for (const row of Array.isArray(previous) ? previous.slice(0, maxLinks) : []) {
-    if (!Array.isArray(row?.sources) || !discoveryTimestamp.test(row.firstSeenAt)) continue;
+    if (!Array.isArray(row?.sources) || typeof row.firstSeenAt !== 'string' || !discoveryTimestamp.test(row.firstSeenAt)) continue;
     add(row.url, indexSources.filter(source => row.sources.includes(source)), Date.parse(row.firstSeenAt));
   }
-  for (const [source, urls] of [['tavily', tavily], ['duckduckgo', duckduckgo]]) {
-    for (const url of Array.isArray(urls) ? urls : []) add(url, [source], +now);
+  if (state) {
+    for (const [source, urls] of [['tavily', tavily], ['duckduckgo', duckduckgo]]) {
+      for (const url of Array.isArray(urls) ? urls : []) add(url, [source], +now);
+    }
   }
 
-  return [...leads].filter(([id]) => !knownVideoIds.has(id))
+  const selected = [...leads].filter(([id]) => !knownVideoIds.has(id))
     .map(([, row]) => row)
     .sort((first, second) => first.firstSeenAt - second.firstSeenAt)
     .map(row => ({ ...row, firstSeenAt: new Date(row.firstSeenAt).toISOString() }));
+  return { ready: Boolean(state), leads: selected };
 }
 
 export function retainUnattemptedTikTokIndexLeads(leads, attemptedUrls = []) {

@@ -125,8 +125,9 @@ test('keeps the first discovery and both index sources for a canonical video, wi
   const original = { url: lead(1).url, sources: ['tavily'], firstSeenAt,
     title: 'unverified index copy', publishedAt: '2026-11-23' };
   const alias = lead(1).url.replace('food.at', 'renamed');
-  const selected = selectTikTokIndexedLeads(dir, { now, previous: [original],
+  const { leads: selected, ready } = selectTikTokIndexedLeads(dir, { now, previous: [original],
     duckduckgo: [alias, lead(2).url], tavily: [original.url, lead(3).url] });
+  assert.equal(ready, true);
   assert.deepEqual(selected, [
     { url: original.url, sources: ['duckduckgo', 'tavily'], firstSeenAt },
     { url: lead(3).url, sources: ['tavily'], firstSeenAt: discoveredAt },
@@ -142,7 +143,8 @@ test('a repeat index result cannot extend 48 hours or promote a malformed stored
     '2026-11-23T16:00:00.001Z', 'bad', '2026-11-23'];
   const previous = dates.map((firstSeenAt, i) => ({ url: lead(i + 1).url, sources: ['tavily'], firstSeenAt }));
   previous.push({ url: lead(6).url, sources: ['external'], firstSeenAt: discoveredAt }, null);
-  const selected = selectTikTokIndexedLeads(dir, { now, previous, tavily: [lead(1).url, lead(2).url] });
+  const { leads: selected, ready } = selectTikTokIndexedLeads(dir, { now, previous, tavily: [lead(1).url, lead(2).url] });
+  assert.equal(ready, true);
   assert.deepEqual(selected, [previous[1]]);
 });
 
@@ -157,18 +159,41 @@ test('filters seen IDs, local moderation, aliases of self-account posts and know
   const fresh = Array.from({ length: 7 }, (_, i) => lead(i + 1).url);
   const malformed = [fresh[6] + '?share=1', fresh[6].replace('https:', 'http:'),
     fresh[6].replace('www.', 'm.'), fresh[6] + '\n', fresh[6].replace('/@food.at/video/', '/explore/')];
-  const selected = selectTikTokIndexedLeads(dir, { now, duckduckgo: [...fresh, ...malformed],
+  const { leads: selected, ready } = selectTikTokIndexedLeads(dir, { now, duckduckgo: [...fresh, ...malformed],
     tavily: [fresh[5].replace('food.at', 'Free_Finder.Wien')] });
+  assert.equal(ready, true);
   assert.deepEqual(selected, [{ url: fresh[6], sources: ['duckduckgo'], firstSeenAt: discoveredAt }]);
-  write('deals', { deals: 'unreadable' });
-  assert.deepEqual(selectTikTokIndexedLeads(dir, { now, previous: selected }), []);
 });
 
 test('limits saved unattempted videos after actual visits, preserving the current scan budget and source order', t => {
   const { dir } = fixture(t);
   const fresh = Array.from({ length: 35 }, (_, i) => lead(i + 10).url);
-  const selected = selectTikTokIndexedLeads(dir, { now, duckduckgo: fresh });
+  const { leads: selected, ready } = selectTikTokIndexedLeads(dir, { now, duckduckgo: fresh });
+  assert.equal(ready, true);
   assert.equal(selected.length, 35);
   assert.deepEqual(retainUnattemptedTikTokIndexLeads(selected, fresh.slice(0, 4)), selected.slice(4, 24));
-  assert.deepEqual(selectTikTokIndexedLeads(dir, { now, previous: selected }), selected.slice(0, 20));
+  assert.deepEqual(selectTikTokIndexedLeads(dir, { now, previous: selected }), { ready: true, leads: selected.slice(0, 20) });
+});
+
+test('missing protections keep only sanitized previous leads queued and hold all visits until recovery', t => {
+  const { dir, write } = fixture(t);
+  const firstSeenAt = '2026-11-22T16:00:00.000Z';
+  const valid = { url: lead(1).url, firstSeenAt, sources: ['duckduckgo'] };
+  const previous = [{ ...valid, sources: ['untrusted', 'duckduckgo'], caption: 'drop' },
+    { ...valid, url: lead(2).url, firstSeenAt: '2026-11-21T16:00:00.000Z' },
+    { ...valid, url: lead(3).url + '?tracking=abc' }, { ...valid, url: lead(4).url.replace('food.at', 'freefinderat') },
+    { ...valid, url: lead(5).url, firstSeenAt: [firstSeenAt] }];
+  write('deals', { deals: 'unreadable' });
+  let result = selectTikTokIndexedLeads(dir, { now, previous, tavily: [valid.url, lead(7).url] });
+  assert.deepEqual(result, { ready: false, leads: [valid] });
+  write('deals', { deals: [] });
+  write('deal-moderation', { blockedUrls: 'invalid' });
+  assert.deepEqual(selectTikTokIndexedLeads(dir, { now, previous: result.leads }), result);
+  write('deal-moderation', {});
+  rmSync(path.join(dir, 'sent-deal-ids.json'));
+  assert.deepEqual(selectTikTokIndexedLeads(dir, { now, previous: result.leads }), result);
+  write('sent-deal-ids', {});
+  write('slack-seen-posts', { seenPostKeys: [valid.url] });
+  result = selectTikTokIndexedLeads(dir, { now, previous: result.leads, tavily: [lead(7).url] });
+  assert.deepEqual(result, { ready: true, leads: [{ url: lead(7).url, firstSeenAt: discoveredAt, sources: ['tavily'] }] });
 });
