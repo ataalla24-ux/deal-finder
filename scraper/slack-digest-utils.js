@@ -3,7 +3,7 @@ import path from 'path';
 import { fileURLToPath } from 'url';
 import { normalizeCategoryForScraper } from './category-utils.js';
 import { isGenericJunkDeal, normalizeDealRecord } from './deal-normalization-utils.js';
-import { matchingTimedOfferPeriod } from './expiry-utils.js';
+import { matchingTimedOfferPeriod } from './explicit-offer-period.js';
 import { stripSlackEmojiCodes } from './offer-title-utils.js';
 
 const __filename = fileURLToPath(import.meta.url);
