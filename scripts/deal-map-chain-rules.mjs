@@ -1,3 +1,5 @@
+import { createHash } from 'node:crypto';
+
 const fold=value=>String(value||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase().replace(/ß/g,'ss').replace(/[^a-z0-9]+/g,' ').trim();
 function sourceKey(value) {
   try {
@@ -24,6 +26,11 @@ export function matchChainRule(deal,rules=[],today) {
     &&Array.isArray(rule.sourceUrls)&&rule.sourceUrls.some(source=>sourceKey(source)===url)
     &&Array.isArray(rule.titleTerms)&&rule.titleTerms.length&&rule.titleTerms.some(term=>fold(term)&&fold(deal.title).includes(fold(term)))
     &&(!rule.dealIds||(Array.isArray(rule.dealIds)&&rule.dealIds.includes(deal.id)))
+    &&(rule.expectedValidUntil===undefined||rule.expectedValidUntil===deal.validUntil)
+    &&(rule.sourceCaptionSha256===undefined
+      || (deal.metaGraphAccepted===true&&deal.metaGraphVerified===true&&!deal.metaGraphBlockingReason
+        &&typeof deal.metaGraphCaption==='string'
+        &&createHash('sha256').update(deal.metaGraphCaption).digest('hex')===rule.sourceCaptionSha256))
     &&(!rule.requireAllTitleTerms||rule.titleTerms.every(term=>fold(term)&&fold(deal.title).includes(fold(term))))
     &&(rule.scopePolicy!=='reviewed-campaign-locations'
       || (rule.dealIds?.length&&rule.requireAllTitleTerms===true&&typeof rule.participationEvidence==='string'

@@ -1,4 +1,5 @@
 import assert from 'node:assert/strict';
+import { createHash } from 'node:crypto';
 import {matchChainRule} from './deal-map-chain-rules.mjs';
 import {inspectDealLocation,enrichMap} from './deal-map-enrichment.mjs';
 import {requireApprovalMap} from './approval-map-readiness.mjs';
@@ -67,6 +68,40 @@ for(const change of [{id:'unrelated'}, {title:'Zwei Schnitzel um 8 €'}, {metaG
 }
 assert.equal(matchChainRule(xxx,productionRules,'2026-12-09'),null);
 const productionCatalog=JSON.parse(readFileSync(new URL('../reviews/map-location-catalog.json',import.meta.url)));
+const aidaRule = productionRules.find(rule => rule.id === 'aida-pink-weeks-2026-vienna');
+assert.equal(aidaRule.sourceCaptionSha256, 'e81e5d2d77ce8700181b0dc3f9e1803f74943baed633121fcfadf0f790703a0d');
+const caption = 'Gutscheine gelten in den AÏDA-Filialen in Wien und Niederösterreich, ausgenommen Flughafen Wien.';
+const testAidaRule = { ...aidaRule, sourceCaptionSha256: createHash('sha256').update(caption).digest('hex') };
+const aida = {
+  id: 'meta-ig-18121024280323002', brand: 'AIDA', title: 'AÏDA Pink Weeks mit Gutschein',
+  url: 'https://www.instagram.com/p/DgHWmA1MY02/', validUntil: '2026-11-30',
+  description: 'In allen Filialen in Wien und Niederösterreich außer am Flughafen Wien einlösen.',
+  metaGraphCaption: caption, metaGraphAccepted: true, metaGraphVerified: true,
+};
+const aidaCatalog = { ...productionCatalog, chainRules: [testAidaRule] };
+const aidaDay = '2026-11-30', aidaNow = new Date(aidaDay + 'T12:00:00Z');
+assert.equal(matchChainRule(aida, [testAidaRule], aidaDay)?.id, aidaRule.id);
+for (const change of [
+  { id: 'different-campaign' }, { url: 'https://www.instagram.com/p/DfmOdD-MGGT/' },
+  { metaGraphCaption: 'Gutschein in allen Filialen.' }, { metaGraphAccepted: false },
+  { metaGraphVerified: false }, { metaGraphBlockingReason: 'source unavailable' },
+  { validUntil: '2026-12-01' }, { validUntil: '' }, { description: 'Ausgenommen Opernring.' },
+]) {
+  assert.equal(matchChainRule({ ...aida, ...change }, [testAidaRule], aidaDay), null, JSON.stringify(change));
+}
+assert.equal(matchChainRule(aida, [testAidaRule], '2026-11-23'), null);
+const aidaMap = await enrichMap({ deals: [aida], map, catalog: aidaCatalog, now: aidaNow, maxRequests: 0 });
+assert.deepEqual(aidaMap.map.locations.map(row => row.id).sort(), [...aidaRule.locationIds].sort());
+assert.equal(aidaMap.map.locations.length, 22);
+assert.equal(aidaMap.requests, 0);
+assert.ok(aidaMap.map.locations.every(row =>
+  /, 1(?:0[1-9]|1\d|2[0-3])0 Wien$/.test(row.address)
+    && row.source === 'official_aida_store_locator'
+    && !/flughafen|terminal/i.test(row.name + row.address)));
+const nextDay = await enrichMap({ deals: [aida], map: aidaMap.map,
+  catalog: { ...aidaMap.catalog, chainRules: [testAidaRule] },
+  now: new Date('2026-12-01T12:00:00Z'), maxRequests: 0 });
+assert.deepEqual(nextDay.map.locations, [], 'AIDA branch associations stop after the exact campaign window');
 const fish={id:'current-fish-coupon',brand:'NORDSEE',url:'https://www.nordsee.com/at/coupons',
   title:'2 Classic Fish Burger + Megafrites + 1 Softdrink 0,5 l PET: Mehr als 20 % Rabatt',
   description:'Gültig bis 30.11.2026 in allen teilnehmenden Restaurants in Österreich. Nicht gültig an Autobahnraststätten.',
