@@ -5,6 +5,7 @@ import os from 'node:os';
 import path from 'node:path';
 import sharp from 'sharp';
 import {prepareOriginalPhoto,writePreparedOriginalPhoto} from './original-deal-photo.mjs';
+import {photoSubjectHash} from './deal-photo-contract.mjs';
 import {validateOriginalDealPhotos} from './validate-original-deal-photos.mjs';
 import {stampDealsFeedBundle} from './deals-feed-contract.mjs';
 
@@ -20,9 +21,10 @@ async function fixture(t) {
     dealId:deal.id,sourceURL:'https://merchant.example/coffee.jpg',rights:'merchant-permission',
     rightsEvidence:'offline-test-permission',reviewedBy:'offline-test',matchesOffer:true,showsActualProduct:true,cropChecked:true,
   },bytes,now);
-  writePreparedOriginalPhoto(root,prepared);
   const locked = {...deal,photoUrl:prepared.review.photoUrl,approvedDealImage:{version:1,status:'locked',
     photoUrl:prepared.review.photoUrl,sha256:prepared.review.sha256,assetKey:'coffee',kind:'merchant-photo',approvedAt:now.toISOString()}};
+  prepared.review.subjectHash = photoSubjectHash(locked);
+  writePreparedOriginalPhoto(root,prepared);
   return {root,locked,prepared};
 }
 

@@ -2,18 +2,11 @@ import fs from 'node:fs';
 import path from 'node:path';
 import {fileURLToPath} from 'node:url';
 import {inspectBoundOriginalPhoto} from './original-deal-photo.mjs';
-import {approvedDealPhotoURL} from './deal-photo-contract.mjs';
+import {normalizeApprovedDealImage} from './deal-photo-contract.mjs';
 
 function assertLockedPhoto(deal) {
   if (!Object.hasOwn(deal,'approvedDealImage')) return;
-  const image = deal.approvedDealImage;
-  if (!image || image.version !== 1 || image.status !== 'locked'
-    || !approvedDealPhotoURL(image.photoUrl,deal.id) || image.photoUrl !== deal.photoUrl
-    || !/^[a-f0-9]{64}$/.test(image.sha256 || '')
-    || !image.photoUrl.endsWith(`-${image.sha256}.jpg`)
-    || typeof image.assetKey !== 'string' || !/^[a-z0-9._-]+$/.test(image.assetKey)
-    || !['merchant-photo','editorial-illustration'].includes(image.kind)
-    || typeof image.approvedAt !== 'string' || !Number.isFinite(Date.parse(image.approvedAt))) {
+  if (!normalizeApprovedDealImage(deal.approvedDealImage,deal.id,deal.photoUrl)) {
     throw Error('locked-photo-binding-invalid');
   }
 }
