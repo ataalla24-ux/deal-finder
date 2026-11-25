@@ -1,6 +1,6 @@
 import fs from 'fs';
 import path from 'path';
-import { approvedDealPhotoURL, disclosedPhotoDescription, photoSubjectHash } from './deal-photo-contract.mjs';
+import { approvedDealPhotoURL, disclosedPhotoDescription, photoSubjectHash, normalizeApprovedDealImage } from './deal-photo-contract.mjs';
 
 export const LIVE_DEAL_EDIT_FIELDS = [
   'url',
@@ -278,6 +278,8 @@ export function normalizeLiveDealEdit(raw = {}, options = {}) {
   }
 
   if (Object.hasOwn(edit, 'photoUrl')) edit.photoUrl = approvedDealPhotoURL(edit.photoUrl, dealId);
+  const imageApproval = normalizeApprovedDealImage(raw.approvedDealImage || existing.approvedDealImage,dealId,edit.photoUrl);
+  if (imageApproval) edit.approvedDealImage = imageApproval;
   const photoBinding = /^[a-f0-9]{64}$/.test(String(raw.photoSubjectHash || '')) ? raw.photoSubjectHash : existing.photoSubjectHash;
   if (/^[a-f0-9]{64}$/.test(String(photoBinding || ''))) edit.photoSubjectHash = photoBinding;
   if (edit.photoUrl && edit.photoSubjectHash && (raw.photoEditorialDisclosure === true
@@ -422,7 +424,11 @@ function applyEditToDeal(deal, edit, checkedAt) {
         changed.push('photoEditorialDisclosure');
       }
     }
-    const photoUrl = edit.photoSubjectHash && edit.photoSubjectHash !== photoSubjectHash(next) ? '' : edit.photoUrl;
+    if (edit.approvedDealImage) {
+      const approved = normalizeApprovedDealImage(edit.approvedDealImage,next.id,edit.photoUrl);
+      if (approved) next.approvedDealImage = approved;
+    }
+    const photoUrl = edit.photoSubjectHash && edit.photoSubjectHash !== photoSubjectHash({...next,photoUrl:edit.photoUrl}) ? '' : edit.photoUrl;
     if (setIfPresent(next,{photoUrl},'photoUrl',{skipEmpty:false})) changed.push('photoUrl');
   }
   if (changed.some(field => ['expires','validOn','validUntil'].includes(field))) {

@@ -93,7 +93,7 @@ export function readBoundPhotoSnapshot(deal,{root=process.cwd()}={}) {
   if (Object.hasOwn(review,'renderedDisclosure')) {
     const disclosure = review.renderedDisclosure;
     const previewDirectory = path.join(root,'docs/assets/deal-image-pilot');
-    const catalog = JSON.parse(boundedRead(path.join(previewDirectory,'catalog.json'),previewDirectory,20000));
+    const catalog = JSON.parse(boundedRead(path.join(previewDirectory,'catalog.json'),previewDirectory,100_000));
     const asset = catalog.assets?.[disclosure?.assetKey];
     if (catalog.version!==1 || review.kind!=='editorial-illustration' || !asset
       || disclosure.label!=='Symbolbild' || asset.label!=='Symbolbild'

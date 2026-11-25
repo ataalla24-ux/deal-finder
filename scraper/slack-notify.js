@@ -1012,6 +1012,10 @@ function pendingSlackPayload(text, threadTs = null, deal, kind = '') {
 
 async function postSlackMessage(text, threadTs = null, attempt = 0, deal, kind = '') {
   text = String(text).toWellFormed();
+  if (deal?.imageApprovalRequired && !dealImagePreviewBlock(deal)) {
+    console.log('Deal image is not ready for Slack approval; delivery deferred');
+    return null;
+  }
   kind = kind || (isCommunitySubmission(deal) ? 'community' : '');
   const payload = pendingSlackPayload(text, threadTs, deal, kind);
 
@@ -1026,7 +1030,7 @@ async function postSlackMessage(text, threadTs = null, attempt = 0, deal, kind =
 
   const data = await response.json();
   if (data.ok) return data.ts;
-  if (dealImagePreviewBlock(deal) && ['invalid_blocks','invalid_arguments','invalid_attachments','invalid_url','url_not_allowed'].includes(data.error)) {
+  if (!deal?.imageApprovalRequired && dealImagePreviewBlock(deal) && ['invalid_blocks','invalid_arguments','invalid_attachments','invalid_url','url_not_allowed'].includes(data.error)) {
     delete deal.pendingDealImage;
     return postSlackMessage(text,threadTs,attempt,undefined,kind);
   }
@@ -2137,8 +2141,8 @@ async function main() {
     }
 
     for (let i = 0; i < firecrawlReviewDeals.length; i += 1) {
-      const deal = await editCard(firecrawlReviewDeals[i]);
-      const ts = await postSlackMessage(buildFirecrawlReviewMessage(deal, i + 1), reviewHeaderTs);
+      const deal = await prepareDealImagePreview(await editCard(firecrawlReviewDeals[i]),{root:ROOT,now:runNow,checkPreview:checkImagePreview});
+      const ts = await postSlackMessage(buildFirecrawlReviewMessage(deal, i + 1), reviewHeaderTs,0,deal);
       if (!ts) continue;
 
       const sentAt = new Date();
@@ -2177,8 +2181,8 @@ async function main() {
     }
 
     for (let i = 0; i < socialFoodReviewDeals.length; i += 1) {
-      const deal = await editCard(socialFoodReviewDeals[i]);
-      const ts = await postSlackMessage(buildSocialFoodReviewMessage(deal, i + 1), reviewHeaderTs);
+      const deal = await prepareDealImagePreview(await editCard(socialFoodReviewDeals[i]),{root:ROOT,now:runNow,checkPreview:checkImagePreview});
+      const ts = await postSlackMessage(buildSocialFoodReviewMessage(deal, i + 1), reviewHeaderTs,0,deal);
       if (!ts) continue;
 
       const sentAt = new Date();

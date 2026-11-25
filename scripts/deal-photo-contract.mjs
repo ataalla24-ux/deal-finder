@@ -1,7 +1,10 @@
 import { createHash } from 'node:crypto';
+import { dealImageAssetKey, dealImageSubjectHash } from '../scraper/deal-image-subject.js';
 
 export const photoDigest = value => createHash('sha256').update(value).digest('hex');
 export function photoSubjectHash(deal) {
+  const approved = normalizeApprovedDealImage(deal?.approvedDealImage,deal?.id,deal?.photoUrl);
+  if (approved && approved.assetKey === dealImageAssetKey(deal)) return dealImageSubjectHash(deal,approved.assetKey);
   return photoDigest(JSON.stringify(['original-photo-subject-v1',
     ...['id','title','brand','description','category','url'].map(field=>String(deal?.[field]||'').trim())]));
 }
@@ -34,4 +37,16 @@ export function inspectOriginalJPEG(bytes) {
   if (!size || size.width < 600 || size.height < 400 || size.width > 6000 || size.height > 6000
       || size.width * size.height > 12_000_000) throw new Error('Expected 600x400 minimum, at most 12 megapixels');
   return size;
+}
+
+export function normalizeApprovedDealImage(raw, dealId, photoUrl) {
+  if (!raw || raw.version !== 1 || raw.status !== 'locked'
+    || !['editorial-illustration','merchant-photo'].includes(raw.kind)
+    || typeof raw.assetKey !== 'string' || !/^[a-z0-9][a-z0-9-]{0,79}$/.test(raw.assetKey)
+    || typeof raw.sha256 !== 'string' || !/^[a-f0-9]{64}$/.test(raw.sha256)
+    || !approvedDealPhotoURL(raw.photoUrl,dealId) || raw.photoUrl !== photoUrl
+    || !raw.photoUrl.endsWith(`-${raw.sha256}.jpg`)
+    || typeof raw.approvedAt !== 'string' || !Number.isFinite(Date.parse(raw.approvedAt))) return null;
+  return {version:1,status:'locked',photoUrl:raw.photoUrl,sha256:raw.sha256,assetKey:raw.assetKey,
+    kind:raw.kind,approvedAt:raw.approvedAt};
 }

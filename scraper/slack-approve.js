@@ -28,6 +28,7 @@ import { advanceDealLifecycle } from './deal-lifecycle.js';
 import { isCommunitySubmission, prepareCommunityApproval } from './community-review-utils.js';
 import { preparePublicationTitle } from './pre-publication-title.js';
 import {prepareApprovedDealImage} from './deal-image-pilot.js';
+import { normalizeApprovedDealImage } from '../scripts/deal-photo-contract.mjs';
 import { findApprovalAddresses, isApprovalMapReason, requireApprovalMap } from '../scripts/approval-map-readiness.mjs';
 import {
   loadReviewFeedback,
@@ -1502,7 +1503,17 @@ async function runTargetedApproval({ moderation, botUserId }) {
 
   const existingApprovedDeals = loadExistingApprovedDealsForMerge(moderation);
   const publishedAt = new Date();
-  const publishedDeals = await preparePublishedApprovedDeals(approvedModeration.deals,{now:publishedAt,existingDeals:existingApprovedDeals});
+  const imageBlockedDeals = [];
+  const publishedDeals = await preparePublishedApprovedDeals(approvedModeration.deals,{now:publishedAt,existingDeals:existingApprovedDeals,blockedDeals:imageBlockedDeals});
+  for (const deal of imageBlockedDeals) {
+    const reasons = ['Bildfreigabe ausstehend: Das in Slack bestätigte Foto ist noch nicht vollständig vorbereitet oder passt nicht mehr zum Angebot.'];
+    const blocked = await retainBlockedApproval(deal,reasons);
+    remainingPending.push(blocked);
+    reviewFeedback = persistReviewDecision(reviewFeedback,deal,'approved',{
+      user:deal.pipelineLifecycle?.manualDecisionUser,source:'reaction-scan',
+      publicationStatus:'validator-blocked',validationReasons:reasons,at:publishedAt,
+    });
+  }
   const mergedApproved = mergeApprovedDeals(existingApprovedDeals, publishedDeals);
   saveDealsJson(mergedApproved);
   savePendingRemaining(remainingPending);
@@ -1515,8 +1526,8 @@ async function runTargetedApproval({ moderation, botUserId }) {
     });
   }
 
-  console.log('✅ Newly approved in this targeted run: 1');
-  await clearBlockedApprovalNotice(manuallyApprovedDeal);
+  console.log(`✅ Newly approved in this targeted run: ${publishedDeals.length}`);
+  if (publishedDeals.length) await clearBlockedApprovalNotice(manuallyApprovedDeal);
   console.log(`✅ deals.json updated with approved-only deals: ${mergedApproved.length}`);
   console.log(`💾 pending queue updated: ${remainingPending.length} deals left`);
   return true;
@@ -1789,7 +1800,17 @@ async function main() {
   }
 
   const publishedAt = new Date();
-  const publishedDeals = await preparePublishedApprovedDeals(approvedModeration.deals,{now:publishedAt,existingDeals:existingApprovedDeals});
+  const imageBlockedDeals = [];
+  const publishedDeals = await preparePublishedApprovedDeals(approvedModeration.deals,{now:publishedAt,existingDeals:existingApprovedDeals,blockedDeals:imageBlockedDeals});
+  for (const deal of imageBlockedDeals) {
+    const reasons = ['Bildfreigabe ausstehend: Das in Slack bestätigte Foto ist noch nicht vollständig vorbereitet oder passt nicht mehr zum Angebot.'];
+    const blocked = await retainBlockedApproval(deal,reasons);
+    unapproved.push(blocked);
+    reviewFeedback = persistReviewDecision(reviewFeedback,deal,'approved',{
+      user:deal.pipelineLifecycle?.manualDecisionUser,source:'reaction-scan',
+      publicationStatus:'validator-blocked',validationReasons:reasons,at:publishedAt,
+    });
+  }
   const mergedApproved = mergeApprovedDeals(existingApprovedDeals, publishedDeals);
 
   saveDealsJson(mergedApproved);
@@ -1810,12 +1831,17 @@ async function main() {
   console.log(`💾 pending queue updated: ${remainingPending.length} deals left`);
 }
 
-export async function preparePublishedApprovedDeals(deals,{root=ROOT,now=new Date(),enabled,existingDeals=[]}={}) {
+export async function preparePublishedApprovedDeals(deals,{root=ROOT,now=new Date(),enabled,existingDeals=[],blockedDeals=[]}={}) {
   const published = [];
   const existingKeys = new Set(existingDeals.flatMap(getApprovedMergeKeys));
   for (const deal of deals) {
     const alreadyLive = getApprovedMergeKeys(deal).some(key=>existingKeys.has(key));
     const prepared = await prepareApprovedDealImage(deal,{root,now,enabled:alreadyLive ? false : enabled});
+    if (!alreadyLive && deal.imageApprovalRequired
+      && !normalizeApprovedDealImage(prepared.approvedDealImage,prepared.id,prepared.photoUrl)) {
+      blockedDeals.push(deal);
+      continue;
+    }
     published.push(redactPublishedCommunityDraft(advanceDealLifecycle(prepared,'published',{at:now})));
   }
   return published;
