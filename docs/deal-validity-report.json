@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-11-25T02:25:35.166Z",
+  "generatedAt": "2026-11-25T02:52:35.302Z",
   "summary": {
     "maxAgeDays": 7,
     "total": 283,
@@ -10,8 +10,9 @@
       "kein konkretes Angebot erkennbar": 208,
       "Gottesdienste nur im Wochenlauf": 36,
       "älter als 7 Tage (2020-04-25)": 1,
-      "älter als 7 Tage (2026-02-22)": 79,
+      "älter als 7 Tage (2026-02-22)": 78,
       "URL ungültig (fehlende Ziel-URL)": 2,
+      "älter als 7 Tage (2017-04-20)": 1,
       "älter als 7 Tage (2026-11-09)": 1,
       "älter als 7 Tage (2026-11-10)": 1,
       "älter als 7 Tage (2025-07-30)": 1,
@@ -402,15 +403,13 @@
         "kein konkretes Angebot erkennbar",
         "älter als 7 Tage (2026-02-22)"
       ],
-      "warnings": [
-        "URL nicht eindeutig prüfbar (temporärer Fehler)"
-      ],
+      "warnings": [],
       "sourceDate": "2026-02-22T21:12:35.964Z",
       "sourceDateSource": "deal.pubDate",
       "sourceAgeDays": 276,
       "expiryDate": "",
       "expirySource": "deal.expires",
-      "urlStatus": "unklar: temporärer URL-Fehler"
+      "urlStatus": "HTTP 200"
     },
     {
       "id": "events-8-20260222",
@@ -553,17 +552,15 @@
       "url": "https://www.malteser.at",
       "reasons": [
         "kein konkretes Angebot erkennbar",
-        "älter als 7 Tage (2026-02-22)"
+        "älter als 7 Tage (2017-04-20)"
       ],
-      "warnings": [
-        "URL nicht eindeutig prüfbar (temporärer Fehler)"
-      ],
-      "sourceDate": "2026-02-22T21:12:35.964Z",
-      "sourceDateSource": "deal.pubDate",
-      "sourceAgeDays": 276,
+      "warnings": [],
+      "sourceDate": "2017-04-20T11:03:34.000Z",
+      "sourceDateSource": "url.publicationDate",
+      "sourceAgeDays": 3506,
       "expiryDate": "",
       "expirySource": "deal.expires",
-      "urlStatus": "unklar: temporärer URL-Fehler"
+      "urlStatus": "HTTP 200"
     },
     {
       "id": "events-16-20260222",
@@ -840,7 +837,7 @@
       "warnings": [
         "kein Ablaufdatum gefunden"
       ],
-      "sourceDate": "2026-11-25T02:23:34.811Z",
+      "sourceDate": "2026-11-25T02:50:43.728Z",
       "sourceDateSource": "url.publicationDate",
       "sourceAgeDays": 0,
       "expiryDate": "",
@@ -879,6 +876,7 @@
         "älter als 7 Tage (2026-02-22)"
       ],
       "warnings": [
+        "URL nicht eindeutig prüfbar (temporärer Fehler)",
         "kein Ablaufdatum gefunden"
       ],
       "sourceDate": "2026-02-22T21:13:07.698Z",
@@ -886,7 +884,7 @@
       "sourceAgeDays": 276,
       "expiryDate": "",
       "expirySource": "",
-      "urlStatus": "HTTP 200"
+      "urlStatus": "unklar: temporärer URL-Fehler"
     },
     {
       "id": "extra-32-20260222",
@@ -5747,16 +5745,23 @@
   ],
   "runProvenance": {
     "repository": "ataalla24-ux/deal-finder",
-    "runId": "45532644411",
-    "headSha": "b5c7f0ab3d24d9901ce3db88e8f9827dbc6a28fb",
-    "checkoutSha": "b5c7f0ab3d24d9901ce3db88e8f9827dbc6a28fb",
-    "triggeringRun": null,
-    "event": "workflow_dispatch",
+    "runId": "45535881775",
+    "headSha": "c3cd119845a5c7096e9c56fd2302720162f41257",
+    "checkoutSha": "c3cd119845a5c7096e9c56fd2302720162f41257",
+    "triggeringRun": {
+      "runId": "45533214766",
+      "headSha": "f00f162272eec5a2c98f351b8db458b2901b417e",
+      "event": "schedule",
+      "name": "Meta Instagram Deal Discovery",
+      "startedAt": "2026-11-25T02:28:40.000Z",
+      "url": "https://github.com/ataalla24-ux/deal-finder/actions/runs/45533214766"
+    },
+    "event": "workflow_run",
     "runAttempt": "1",
-    "url": "https://github.com/ataalla24-ux/deal-finder/actions/runs/45532644411"
+    "url": "https://github.com/ataalla24-ux/deal-finder/actions/runs/45535881775"
   },
   "instagramDelivery": {
-    "checkedAt": "2026-11-25T02:25:35.174Z",
+    "checkedAt": "2026-11-25T02:52:35.314Z",
     "scope": "instagram-ai-agent/standard-slack-lane",
     "extractedCandidates": 4,
     "counts": {
@@ -5826,7 +5831,7 @@
     ]
   },
   "tiktokDelivery": {
-    "checkedAt": "2026-11-25T02:25:35.176Z",
+    "checkedAt": "2026-11-25T02:52:35.316Z",
     "scope": "tiktok-deals-scanner/standard-slack-lane",
     "extractedCandidates": 2,
     "counts": {
