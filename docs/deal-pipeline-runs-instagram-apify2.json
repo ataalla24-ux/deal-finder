@@ -2,9 +2,184 @@
   "schemaVersion": 1,
   "sourceKey": "instagram-apify2",
   "sourceLabel": "Apify 2 Vienna Food Discovery",
-  "updatedAt": "2026-11-25T01:30:32.922Z",
-  "runCount": 60,
+  "updatedAt": "2026-11-25T15:53:55.187Z",
+  "runCount": 61,
   "runs": [
+    {
+      "schemaVersion": 1,
+      "runProvenance": {
+        "repository": "ataalla24-ux/deal-finder",
+        "runId": "45649376260",
+        "headSha": "d71dad19f819debf6ea524b039b9e724d5ffc7b4",
+        "checkoutSha": "bd8b4a0ecacc2e22c070baad8c38374d83ddb611",
+        "triggeringRun": null,
+        "event": "schedule",
+        "runAttempt": "1",
+        "url": "https://github.com/ataalla24-ux/deal-finder/actions/runs/45649376260"
+      },
+      "runId": "instagram-apify2-2026-11-25T15:53:55.187Z",
+      "sourceKey": "instagram-apify2",
+      "sourceLabel": "Apify 2 Vienna Food Discovery",
+      "status": "completed",
+      "startedAt": "2026-11-25T15:53:05.822Z",
+      "finishedAt": "2026-11-25T15:53:55.187Z",
+      "durationMs": 49365,
+      "outputFile": "docs/deals-pending-instagram-apify2.json",
+      "counts": {
+        "rawCandidates": 6,
+        "normalizedCandidates": 5,
+        "verifiedCandidates": 0,
+        "previousDeals": 0,
+        "acceptedDeals": 0,
+        "rejectedDeals": 5
+      },
+      "rejectedByReason": {
+        "no-consumer-food-benefit": 3,
+        "non-food-ad": 1,
+        "non-offer-content": 1
+      },
+      "rejectedSamples": [
+        {
+          "reason": "no-consumer-food-benefit",
+          "deal": {
+            "id": "",
+            "title": "",
+            "brand": "",
+            "url": "https://www.instagram.com/p/DgKsc4dhqfi/",
+            "source": "",
+            "pubDate": "",
+            "expires": "",
+            "postVerificationStatus": ""
+          }
+        },
+        {
+          "reason": "no-consumer-food-benefit",
+          "deal": {
+            "id": "",
+            "title": "",
+            "brand": "",
+            "url": "https://www.instagram.com/p/DgK3G2lFbwI/",
+            "source": "",
+            "pubDate": "",
+            "expires": "",
+            "postVerificationStatus": ""
+          }
+        },
+        {
+          "reason": "no-consumer-food-benefit",
+          "deal": {
+            "id": "",
+            "title": "",
+            "brand": "",
+            "url": "https://www.instagram.com/p/DgKt1RTIibt/",
+            "source": "",
+            "pubDate": "",
+            "expires": "",
+            "postVerificationStatus": ""
+          }
+        },
+        {
+          "reason": "non-food-ad",
+          "deal": {
+            "id": "",
+            "title": "",
+            "brand": "",
+            "url": "https://www.instagram.com/p/DgKdUGIoei3/",
+            "source": "",
+            "pubDate": "",
+            "expires": "",
+            "postVerificationStatus": ""
+          }
+        },
+        {
+          "reason": "non-offer-content",
+          "deal": {
+            "id": "",
+            "title": "",
+            "brand": "",
+            "url": "https://www.instagram.com/p/DgI8HZKxWk8/",
+            "source": "",
+            "pubDate": "",
+            "expires": "",
+            "postVerificationStatus": ""
+          }
+        }
+      ],
+      "diagnostics": {
+        "pendingDeals": 1,
+        "unchangedPosts": 1,
+        "providerErrors": 0,
+        "emptySourceRecords": 0,
+        "batchErrors": [],
+        "ocrCalls": 2,
+        "sources": [
+          {
+            "key": "profile:hongkongcafewien",
+            "lastAttemptAt": "2026-11-25T15:53:05.822Z",
+            "postsReturned": 1,
+            "status": "posts-returned",
+            "consecutiveFailures": 0,
+            "consecutiveEmpty": 0,
+            "retryAt": ""
+          },
+          {
+            "key": "profile:papa.duck.at",
+            "lastAttemptAt": "2026-11-25T15:53:05.822Z",
+            "postsReturned": 1,
+            "status": "posts-returned",
+            "consecutiveFailures": 0,
+            "consecutiveEmpty": 0,
+            "retryAt": ""
+          },
+          {
+            "key": "hashtag:wienpizza",
+            "lastAttemptAt": "2026-11-25T15:53:05.822Z",
+            "postsReturned": 1,
+            "status": "posts-returned",
+            "consecutiveEmpty": 0,
+            "retryAt": "",
+            "consecutiveFailures": 0
+          },
+          {
+            "key": "hashtag:gratiswien",
+            "lastAttemptAt": "2026-11-25T15:53:05.822Z",
+            "postsReturned": 1,
+            "status": "posts-returned",
+            "consecutiveFailures": 0,
+            "consecutiveEmpty": 0,
+            "retryAt": ""
+          },
+          {
+            "key": "hashtag:viennafood",
+            "lastAttemptAt": "2026-11-25T15:53:05.822Z",
+            "postsReturned": 1,
+            "status": "posts-returned",
+            "consecutiveFailures": 0,
+            "retryAt": "",
+            "consecutiveEmpty": 0
+          },
+          {
+            "key": "hashtag:wienisst",
+            "lastAttemptAt": "2026-11-25T15:53:05.822Z",
+            "postsReturned": 1,
+            "status": "posts-returned",
+            "consecutiveFailures": 0,
+            "retryAt": "",
+            "consecutiveEmpty": 0
+          }
+        ]
+      },
+      "constraints": {
+        "profiles": 22,
+        "hashtags": 4,
+        "perSource": 1,
+        "posts": 26,
+        "ocrPosts": 8,
+        "dailyUsd": 0.15,
+        "cycleUsd": 4.65
+      },
+      "errors": []
+    },
     {
       "schemaVersion": 1,
       "runProvenance": {
