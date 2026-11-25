@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-11-25T15:40:44.680Z",
+  "generatedAt": "2026-11-25T15:45:49.441Z",
   "discoveryAvailability": {
     "note": "Transport evidence, not deal yield. Retry eligibility is not recovery. Candidate counts are not Slack deliveries. No extra runs or quota resets.",
     "lanes": [
@@ -33,20 +33,20 @@
       },
       {
         "name": "tiktok-public-search",
-        "observedAt": "2026-11-25T01:28:39.428Z",
-        "status": "awaiting-post-cooldown-run",
-        "reason": "api-cooldown",
-        "retryAt": "2026-11-25T11:54:03.661Z",
+        "observedAt": "2026-11-25T15:44:29.381Z",
+        "status": "recovery-not-yet-proven",
+        "reason": "public-only",
+        "retryAt": "",
         "attempted": 0,
         "rawItems": 0,
         "deliveredToSlack": null
       },
       {
         "name": "tiktok-web-search",
-        "observedAt": "2026-11-25T01:28:39.428Z",
-        "status": "no-block-reported",
-        "reason": "",
-        "retryAt": "",
+        "observedAt": "2026-11-25T15:44:29.381Z",
+        "status": "paused",
+        "reason": "search-unavailable",
+        "retryAt": "2026-11-25T19:34:57.365Z",
         "attempted": 1,
         "deliveredToSlack": null
       }
@@ -54,11 +54,17 @@
   },
   "summary": {
     "filesConsidered": 33,
-    "totalCandidates": 739,
-    "uniqueCandidates": 706,
-    "distinctCandidates": 721,
+    "totalCandidates": 741,
+    "uniqueCandidates": 708,
+    "distinctCandidates": 723,
     "duplicateClusters": 15,
     "topHealthySources": [
+      {
+        "sourceKey": "tiktok",
+        "sourceLabel": "TikTok Scanner",
+        "healthScore": 76,
+        "totalDeals": 2
+      },
       {
         "sourceKey": "tiktok-browser",
         "sourceLabel": "TikTok Browser",
@@ -82,12 +88,6 @@
         "sourceLabel": "Wien Deals Combined Graph",
         "healthScore": 65,
         "totalDeals": 3
-      },
-      {
-        "sourceKey": "vienna-websites",
-        "sourceLabel": "Wiener Lokal-Angebotsseiten",
-        "healthScore": 62,
-        "totalDeals": 8
       }
     ],
     "topMissionSources": [
@@ -110,16 +110,16 @@
         "totalDeals": 113
       },
       {
-        "sourceKey": "tiktok-browser",
-        "sourceLabel": "TikTok Browser",
+        "sourceKey": "tiktok",
+        "sourceLabel": "TikTok Scanner",
         "missionFitScore": 61,
         "totalDeals": 2
       },
       {
-        "sourceKey": "food3",
-        "sourceLabel": "Firecrawl Key 2 - Food",
-        "missionFitScore": 59,
-        "totalDeals": 3
+        "sourceKey": "tiktok-browser",
+        "sourceLabel": "TikTok Browser",
+        "missionFitScore": 61,
+        "totalDeals": 2
       }
     ],
     "topCoverageSources": [
@@ -161,6 +161,12 @@
     ],
     "topPrecisionSources": [
       {
+        "sourceKey": "tiktok",
+        "sourceLabel": "TikTok Scanner",
+        "precisionScore": 76,
+        "totalDeals": 2
+      },
+      {
         "sourceKey": "tiktok-browser",
         "sourceLabel": "TikTok Browser",
         "precisionScore": 76,
@@ -183,12 +189,6 @@
         "sourceLabel": "Meta Instagram Graph",
         "precisionScore": 65,
         "totalDeals": 88
-      },
-      {
-        "sourceKey": "joe",
-        "sourceLabel": "jö Bonus Club",
-        "precisionScore": 62,
-        "totalDeals": 9
       }
     ],
     "topWeightedSources": [
@@ -197,6 +197,12 @@
         "sourceLabel": "Member Benefits",
         "sourceWeightScore": 71,
         "totalDeals": 113
+      },
+      {
+        "sourceKey": "tiktok",
+        "sourceLabel": "TikTok Scanner",
+        "sourceWeightScore": 59,
+        "totalDeals": 2
       },
       {
         "sourceKey": "tiktok-browser",
@@ -215,12 +221,6 @@
         "sourceLabel": "Wien Deals Combined Graph",
         "sourceWeightScore": 58,
         "totalDeals": 3
-      },
-      {
-        "sourceKey": "gastro2",
-        "sourceLabel": "Firecrawl Key 1 - Gastro",
-        "sourceWeightScore": 55,
-        "totalDeals": 124
       }
     ],
     "topSourcesToFix": [
@@ -292,6 +292,59 @@
     }
   },
   "sources": [
+    {
+      "sourceKey": "tiktok",
+      "file": "deals-pending-tiktok.json",
+      "sourceLabel": "TikTok Scanner",
+      "totalDeals": 2,
+      "uniqueDeals": 2,
+      "duplicateDeals": 0,
+      "duplicateAcrossSources": 0,
+      "fresh1dCount": 0,
+      "fresh7dCount": 2,
+      "viennaCount": 2,
+      "foodDrinkCount": 1,
+      "promoCount": 2,
+      "missingUrlCount": 0,
+      "sampleTitles": [
+        "@vasilena.gyulemet Angebot",
+        "Vienna when there's a free pop-up: 2h queue minimum"
+      ],
+      "lastRun": null,
+      "uniqueRate": 1,
+      "duplicateRate": 0,
+      "fresh1dRate": 0,
+      "fresh7dRate": 1,
+      "viennaRate": 1,
+      "foodDrinkRate": 0.5,
+      "promoRate": 1,
+      "missingUrlRate": 0,
+      "averageQualityScore": 62,
+      "topCategories": [
+        {
+          "value": "beauty",
+          "count": 1
+        },
+        {
+          "value": "essen",
+          "count": 1
+        }
+      ],
+      "topTypes": [
+        {
+          "value": "gratis",
+          "count": 2
+        }
+      ],
+      "issues": [
+        "wenige Deals sind frischer als 1 Tag"
+      ],
+      "healthScore": 76,
+      "missionFitScore": 61,
+      "coverageScore": 14,
+      "precisionScore": 76,
+      "sourceWeightScore": 59
+    },
     {
       "sourceKey": "tiktok-browser",
       "file": "deals-pending-tiktok-browser.json",
@@ -2190,42 +2243,6 @@
       "sourceKey": "telegram",
       "file": "deals-pending-telegram.json",
       "sourceLabel": "telegram",
-      "totalDeals": 0,
-      "uniqueDeals": 0,
-      "duplicateDeals": 0,
-      "duplicateAcrossSources": 0,
-      "fresh1dCount": 0,
-      "fresh7dCount": 0,
-      "viennaCount": 0,
-      "foodDrinkCount": 0,
-      "promoCount": 0,
-      "missingUrlCount": 0,
-      "sampleTitles": [],
-      "lastRun": null,
-      "uniqueRate": 0,
-      "duplicateRate": 0,
-      "fresh1dRate": 0,
-      "fresh7dRate": 0,
-      "viennaRate": 0,
-      "foodDrinkRate": 0,
-      "promoRate": 0,
-      "missingUrlRate": 0,
-      "averageQualityScore": 0,
-      "topCategories": [],
-      "topTypes": [],
-      "issues": [
-        "liefert aktuell 0 Deals"
-      ],
-      "healthScore": 0,
-      "missionFitScore": 0,
-      "coverageScore": 0,
-      "precisionScore": 0,
-      "sourceWeightScore": 0
-    },
-    {
-      "sourceKey": "tiktok",
-      "file": "deals-pending-tiktok.json",
-      "sourceLabel": "TikTok Scanner",
       "totalDeals": 0,
       "uniqueDeals": 0,
       "duplicateDeals": 0,
