@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-11-25T11:33:56.626Z",
+  "generatedAt": "2026-11-25T11:56:38.856Z",
   "discoveryAvailability": {
     "note": "Transport evidence, not deal yield. Retry eligibility is not recovery. Candidate counts are not Slack deliveries. No extra runs or quota resets.",
     "lanes": [
@@ -34,7 +34,7 @@
       {
         "name": "tiktok-public-search",
         "observedAt": "2026-11-25T01:28:39.428Z",
-        "status": "paused",
+        "status": "awaiting-post-cooldown-run",
         "reason": "api-cooldown",
         "retryAt": "2026-11-25T11:54:03.661Z",
         "attempted": 0,
@@ -1896,20 +1896,19 @@
       "sampleTitles": [],
       "lastRun": {
         "status": "completed",
-        "startedAt": "2026-11-24T13:05:23.362Z",
-        "finishedAt": "2026-11-24T13:07:16.932Z",
-        "durationMs": 113570,
+        "startedAt": "2026-11-25T11:53:50.677Z",
+        "finishedAt": "2026-11-25T11:55:52.362Z",
+        "durationMs": 121685,
         "counts": {
-          "rawCandidates": 2,
-          "normalizedCandidates": 1,
+          "rawCandidates": 5,
+          "normalizedCandidates": 5,
           "verifiedCandidates": 0,
           "previousDeals": 0,
           "acceptedDeals": 0,
-          "rejectedDeals": 2
+          "rejectedDeals": 5
         },
         "rejectedByReason": {
-          "excluded-giveaway": 1,
-          "post-verification-rejected": 1
+          "post-verification-rejected": 5
         },
         "errors": [],
         "reportFile": "deal-pipeline-last-run-firecrawl2.json"
