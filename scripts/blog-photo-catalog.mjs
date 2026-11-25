@@ -60,6 +60,7 @@ export const photoRecipes = {
 
 // Match the benefit, not a merchant word in the URL (Pizza Rando offers döner).
 export const articlePhotos = {
+  'schinakl-pizza-rabatt-wien-alte-donau': 'pizza',
   'burgermanufaktur-3-hamburger-wien-hernals': 'burger',
   'vienna-sweets-3plus1-wien-neuer-markt': 'gift',
   ...Object.fromEntries(november20Guides.map(guide => [guide.slug, guide.photo])),

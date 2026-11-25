@@ -12,6 +12,92 @@ import { applyBlogPublication, applyBlogIndexPublication, updateBlogSitemap } fr
 
 const dailyGuides = [
   {
+  "ids": [
+    "fc4g-13jty2q"
+  ],
+  "slug": "schinakl-pizza-rabatt-wien-alte-donau",
+  "topic": "essen",
+  "title": "Schinakl Wien: Pizza ab 1. Dezember 3,60 € günstiger",
+  "meta": "Schinakl in 1220 Wien: Ab 1. Dezember 2026 jede Pizza 3,60 € günstiger, mindestens bis Jahresende. Preisbeispiele, Küchenzeiten und Planung an der Alten Donau.",
+  "eyebrow": "Pizza-Aktion ab Dezember · 1220 Wien",
+  "headline": "Schinakl Wien: ab 1. Dezember 3,60 € weniger pro Pizza",
+  "intro": "Das Restaurant Zum Schinakl an der Alten Donau kündigt ab 1. Dezember 2026 einen festen Preisnachlass auf alle Pizzen an: 3,60 Euro je Pizza, mindestens bis Ende des Jahres. Hier findest du den Unterschied zum Prozentnachlass, nachvollziehbare Rechenbeispiele und die Zeiten für einen Besuch in der Donaustadt.",
+  "published": "2026-11-25",
+  "publishedLabel": "25. November 2026",
+  "modified": "2026-11-25",
+  "modifiedLabel": "25. November 2026",
+  "dealPage": true,
+  "expires": "",
+  "image": "/assets/blog/photos/pizza.jpg",
+  "imageWidth": 1200,
+  "imageHeight": 630,
+  "imageAlt": "Symbolfoto: Pizza mit Tomaten und Käse",
+  "sections": [
+    [
+      "angebot",
+      "3,60 Euro je Pizza sparen: was angekündigt ist",
+      "<p>Im <a href=\"https://www.instagram.com/p/DgFPlPJoqt-/\" rel=\"noopener\" data-track=\"deal_outbound\">aktuellen Beitrag des Restaurantaccounts dasschinakl_restaurant</a> steht eine Reduktion um <strong>3,60 Euro auf jede einzelne Pizza ab 1. Dezember</strong>. Der Novemberbeitrag bezieht sich auf den kommenden Dezember 2026. Am Prüfdatum dieses Artikels, dem 25. November, hat die angekündigte Aktion also noch nicht begonnen.</p><p>Der Nachlass ist ein fester Geldbetrag. Aus einer Pizza um 15 Euro würden bei unverändertem Ausgangspreis rechnerisch 11,40 Euro. Ein Rabatt von 3,6 Prozent wäre dagegen nur 54 Cent. Die im Beitrag erwähnte Inflationszahl ist keine zweite Rabattstufe und kein zusätzlicher Nachlass.</p><p>Für zwei teilnehmende Pizzen ergibt die angekündigte Reduktion zusammen 7,20 Euro. Getränke, Vorspeisen, Desserts oder eine ganze Tischrechnung sind damit nicht pauschal rabattiert. Das Foto oben ist ein FreeFinder-Symbolbild und zeigt keine zugesicherte Schinakl-Pizza.</p>"
+    ],
+    [
+      "preise",
+      "Pizza-Preise: drei Rechenbeispiele zur Planung",
+      "<p>Die am 25. November auf der <a href=\"https://www.schinakl.com/\" rel=\"noopener\">Restaurantwebsite</a> verlinkte <a href=\"https://www.schinakl.com/wp-content/uploads/2026/10/PIZZAKARTE-2026-NEU-OHNE-PAUSE-1.pdf\" rel=\"noopener\">offizielle Pizzakarte</a> enthält diese regulären Preise. Die rechte Spalte zieht jeweils die angekündigten 3,60 Euro ab.</p><div class=\"table-scroll\" role=\"region\" aria-label=\"Rechnerischer Pizza-Preisvergleich\" tabindex=\"0\"><table><thead><tr><th scope=\"col\">Pizza</th><th scope=\"col\">Heute veröffentlichter Kartenpreis</th><th scope=\"col\">Rechnerisch minus 3,60 €</th></tr></thead><tbody><tr><th scope=\"row\">Marinara</th><td>11,90 €</td><td>8,30 €</td></tr><tr><th scope=\"row\">Margherita</th><td>13,90 €</td><td>10,30 €</td></tr><tr><th scope=\"row\">Salami</th><td>17,00 €</td><td>13,40 €</td></tr></tbody></table></div><p><strong>Das sind berechnete Planungswerte, keine bestätigten künftigen Endpreise.</strong> Die Karte trägt keinen gesonderten Aktionspreisstand für Dezember. Lass dir bei der Bestellung den dann geltenden Preis und den Abzug bestätigen; Extras kommen gegebenenfalls dazu. Eine Pizza kostet durch diese Ankündigung nicht insgesamt 3,60 Euro.</p>"
+    ],
+    [
+      "zeitraum",
+      "Ab 1. Dezember, mindestens bis Ende 2026",
+      "<p>Der Restaurantbeitrag sagt ausdrücklich <strong>mindestens bis Ende des Jahres</strong>. Damit ist der Zeitraum vom 1. bis einschließlich 31. Dezember 2026 angekündigt. Der 31. Dezember ist kein bestätigtes endgültiges Aktionsende. Eine Fortsetzung im Jänner ist ebenso wenig konkret zugesagt.</p><p>Für einen Besuch im Dezember bietet diese Ankündigung mehr Vorlauf als ein einzelner Aktionstag. Für spätere Termine solltest du zuerst eine neue Bestätigung des Restaurants suchen. Aus der Kampagnenlaufzeit folgen auch keine besonderen Öffnungszeiten am 8. Dezember, zu Weihnachten oder zu Silvester.</p>"
+    ],
+    [
+      "besuch",
+      "Adresse und Küchenzeiten an der Alten Donau",
+      "<p>Das <a href=\"https://www.schinakl.com/\" rel=\"noopener\">Restaurant Zum Schinakl</a> liegt am <strong>Laberlweg 19, 1220 Wien</strong>. Die Website nennt regulär <strong>Montag bis Samstag 11:00–22:00 Uhr</strong> und <strong>Sonntag 11:00–20:00 Uhr</strong>. Speisen werden bis eine Stunde vor der Schließung zubereitet: regulär also bis 21:00 beziehungsweise 19:00 Uhr.</p><p>Der Betrieb weist darauf hin, dass er je nach Reservierungslage früher schließen kann, und bittet um rechtzeitige Reservierung. Gerade vor einer längeren Anfahrt oder einem Feiertagsbesuch solltest du daher Tisch, Küchenzeit und Pizza-Aktion über <a href=\"tel:+4312633656\">01 263 36 56</a> oder die offizielle Website bestätigen. Reguläre Öffnungszeiten sind keine Zusage für jeden einzelnen Feiertag.</p><ol><li>Termin ab dem 1. Dezember wählen und die aktuelle Händlerankündigung erneut öffnen.</li><li>Bei der Reservierung nach Aktion, Küchenzeit und dem gewünschten Bestellweg fragen.</li><li>Vor der Bestellung den konkreten Pizza-Endpreis sowie Extras klären.</li><li>Auf der Rechnung den festen Nachlass je berechtigter Pizza kontrollieren.</li></ol>"
+    ],
+    [
+      "bedingungen",
+      "Was vor der Bestellung noch zu klären ist",
+      "<p>Die Ankündigung nennt alle Pizzen, aber keinen öffentlichen Gutscheincode und keine vollständige Liste weiterer Einlösebedingungen. Ob die Reduktion auch für Abholung oder Lieferung gilt und mit anderen Vorteilen kombinierbar ist, wird daraus nicht eindeutig ersichtlich. Plane den Restaurantbesuch daher anhand der bestätigten Auskunft; übertrage den Nachlass nicht ungeprüft in eine Liefer-App.</p><p>Ob Registrierung oder Mindestumsatz verlangt werden, geht aus dem Beitrag nicht hervor. Eine Kombination mit anderen Vorteilen ist nicht zugesagt. Wenn du einen dieser Punkte für deine Planung brauchst, frag vorab beim Betrieb nach. Weitere lokale Möglichkeiten findest du im <a href=\"guenstig-essen-wien.html#1220\">Wiener Food-Guide für den 22. Bezirk</a>.</p>"
+    ],
+    [
+      "quelle",
+      "Offizielle Quellen und Prüfstand",
+      "<p>Geprüft am <time datetime=\"2026-11-25\">25. November 2026</time>: <a href=\"https://www.instagram.com/p/DgFPlPJoqt-/\" rel=\"noopener\">Originalankündigung des Restaurantaccounts</a>, <a href=\"https://www.schinakl.com/\" rel=\"noopener\">Restaurantwebsite mit Adresse und Öffnungszeiten</a> sowie die dort verlinkte <a href=\"https://www.schinakl.com/wp-content/uploads/2026/10/PIZZAKARTE-2026-NEU-OHNE-PAUSE-1.pdf\" rel=\"noopener\">Pizzakarte</a>. Der Beitrag wurde aktuell gelesen, die Karte mit der Ankündigung abgeglichen. Keine persönliche Einlösung oder Testbestellung durchgeführt.</p>"
+    ]
+  ],
+  "faqs": [
+    [
+      "Kostet eine Pizza beim Schinakl nur 3,60 Euro?",
+      "Nein. Angekündigt sind 3,60 Euro weniger je Pizza, kein Gesamtpreis von 3,60 Euro und kein Rabatt von 3,6 Prozent."
+    ],
+    [
+      "Wann beginnt die Schinakl-Pizza-Aktion?",
+      "Am 1. Dezember 2026. Der Händler kündigt sie mindestens bis Ende 2026 an; ein endgültiges Enddatum ist nicht bestätigt."
+    ],
+    [
+      "Gilt die Reduktion auch für Lieferung oder Abholung?",
+      "Das ist in der Ankündigung nicht eindeutig geregelt. Den gewünschten Bestellweg und den Endpreis vorab beim Restaurant bestätigen lassen."
+    ],
+    [
+      "Wo liegt das Restaurant und wann schließt die Küche?",
+      "Laberlweg 19, 1220 Wien. Regulär endet die Küche eine Stunde vor Lokalschluss, also Montag bis Samstag um 21 Uhr und Sonntag um 19 Uhr. Frühere Schließung ist laut Betrieb möglich."
+    ]
+  ],
+  "related": [
+    [
+      "Günstig essen in Wien nach Bezirk",
+      "guenstig-essen-wien.html"
+    ],
+    [
+      "Restaurant-Gutscheine in Wien",
+      "restaurant-gutscheine-wien.html"
+    ],
+    [
+      "Angebote in Wien heute",
+      "/angebote-wien-heute.html"
+    ]
+  ]
+},
+  {
     ids: ['meta-ig-18657113116042005'], slug: 'burgermanufaktur-3-hamburger-wien-hernals', topic: 'essen',
     title: 'Burgermanufaktur Wien: 3 Hamburger um 17,34 €',
     meta: 'Burgermanufaktur in 1170 Wien: drei Hamburger um 17,34 € bei Online-Zahlung. Abholung, Liefergebühr, Preisvergleich und Adresse in Hernals.',
@@ -434,7 +520,7 @@ const guides = [...editorialGuides, ...timelyGuides, ...recentDealGuides, ...[
       ['1010', '1010 Wien: 10 Euro Restaurant-Gutschein bei Ganesha', `<p>Für indisches Essen in der <strong>Inneren Stadt</strong> führt Gutschein.at einen Ganesha-Gutschein: <strong>10 Euro Rabatt ab 50 Euro Konsumation</strong>. Das Restaurant liegt in der <strong>Eschenbachgasse 4, 1010 Wien</strong>. Bei genau 50 Euro sind das 20 Prozent Ersparnis; bei einem höheren Rechnungsbetrag bleiben es 10 Euro, nicht pauschal 20 Prozent.</p><p>Die <a href="https://www.gutschein.at/ganesha-restaurant/10-euro-gutschein" rel="noopener" data-track="deal_outbound">Gutscheinseite mit Bedingungen</a> nennt den <strong>31. Dezember 2026</strong> als Enddatum, Konsumation im Restaurant und höchstens einen Gutschein pro Bestellung und Person. Keine Barablöse. Kündige den Gutschein vor der Bestellung an und lass dir den mobilen Einlösevorgang vom Personal erklären: Die allgemeine Anleitung der Plattform erwähnt auch Lieferung, während die konkrete Bedingung das Restaurant nennt.</p><p>Mehr zur Einlösung findest du im <a href="ganesha-10-euro-gutschein-50-euro-wien.html">Ganesha-Gutschein-Guide</a>.</p><p>Für süße Mitbringsel am <strong>Neuer Markt 8a</strong> gibt es den <a href="vienna-sweets-3plus1-wien-neuer-markt.html">Vienna-Sweets-Guide zu 3+1 auf ausgewählte Süßwaren</a>, mit Kostproben und getrenntem Beutelpreisvergleich. Das ist ein Einkaufsvorteil, kein Mittagessen.</p>`],
       ['1080', '1080 Wien: Kaffee um 2,50 Euro im Café Hummel', `<p>Für einen günstigen Kaffee in der <strong>Josefstadt</strong> nennt das Café Hummel seine Early-Hummel-Aktion: <strong>Montag bis Freitag von 08:00 bis 09:00 Uhr kostet jeder Kaffee 2,50 Euro</strong>. Die Adresse lautet <strong>Josefstädter Straße 66, 1080 Wien</strong>.</p><p>Die <a href="https://cafehummel.at/" rel="noopener" data-track="deal_outbound">offizielle Café-Hummel-Seite</a> nennt kein festes Ende. Der Preis ist an das enge Zeitfenster gebunden; er gilt nicht als ganztägiger Kaffeepreis und ist kein kostenloses Frühstück. Prüfe die Aktion vor der Anfahrt erneut, besonders an Feiertagen.</p><p>Andere Aktionen, bei denen das Getränk tatsächlich kostenlos sein kann, findest du unter <a href="gratis-kaffee-wien.html">Gratis Kaffee in Wien</a>.</p>`],
       ['1110', '1110 Wien: Geburtstagsbuffet bei Watertuin', `<p>Wer am Geburtstag in <strong>Simmering</strong> essen gehen möchte, findet bei Watertuin einen bedingten Gratisvorteil. Das Lokal ist laut <a href="https://www.watertuin.at/kontakt" rel="noopener">offizieller Kontaktseite</a> in der <strong>Etrichstraße 23, 1110 Wien</strong>.</p><p>Die <a href="https://www.watertuin.at/aktionen" rel="noopener" data-track="deal_outbound">Geburtstagsaktion bei Watertuin</a> umfasst Essen und Trinken für das Geburtstagskind. Mindestens eine erwachsene Begleitperson muss den normalen Vollpreis zahlen; eine Reservierung ist verpflichtend. Fällt der Geburtstag auf einen Dienstag, nennt Watertuin als Ausnahme den folgenden Mittwoch oder Donnerstag. Die Aktion gilt bis auf Widerruf.</p><p>Für die Gruppe ist der Besuch deshalb nicht komplett kostenlos. Vergleiche den aktuellen Preis der Begleitung vor der Reservierung. Weitere Möglichkeiten für deinen Tag stehen unter <a href="geburtstag-gratis-wien.html">Geburtstag gratis in Wien: Essen und Eintritt</a>.</p>`],
-      ['1220', '1220 Wien: Kindergerichte zum halben Preis in Kagran', `<p>Im Gasthaus Napoleon am <strong>Kagraner Platz 33</strong> gibt es laut Aktionsseite montags bis freitags von 15:30 bis 17:30 Uhr <strong>50 % auf Kindergerichte für Kinder bis 12 Jahre</strong>. Im <a href="napoleon-kinder-happy-hour-wien.html">Napoleon-Guide zur Kinder-Happy-Hour</a> findest du die Beispielpreise, die U1-Anfahrt und die abweichende Endzeit auf der Kinderkarte.</p><p>Ab 16 Uhr gibt es außerdem den <a href="xxxlutz-schnitzel-happy-hour-wien.html">XXXLutz-Happy-Hour-Guide mit zwei Schnitzeln um 8 € als Abholpreis</a>, inklusive Wagramer Straße 248, Küchenzeiten und Frist bis 8. Dezember 2026. Die dort verlinkten Wiener Restaurants sind sonntags regulär geschlossen.</p>`],
+      ['1220', '1220 Wien: Kindergerichte zum halben Preis in Kagran', `<p>Im Gasthaus Napoleon am <strong>Kagraner Platz 33</strong> gibt es laut Aktionsseite montags bis freitags von 15:30 bis 17:30 Uhr <strong>50 % auf Kindergerichte für Kinder bis 12 Jahre</strong>. Im <a href="napoleon-kinder-happy-hour-wien.html">Napoleon-Guide zur Kinder-Happy-Hour</a> findest du die Beispielpreise, die U1-Anfahrt und die abweichende Endzeit auf der Kinderkarte.</p><p>Ab 16 Uhr gibt es außerdem den <a href="xxxlutz-schnitzel-happy-hour-wien.html">XXXLutz-Happy-Hour-Guide mit zwei Schnitzeln um 8 € als Abholpreis</a>, inklusive Wagramer Straße 248, Küchenzeiten und Frist bis 8. Dezember 2026. Die dort verlinkten Wiener Restaurants sind sonntags regulär geschlossen.</p><p>Ab 1. Dezember kündigt das Restaurant Zum Schinakl am Laberlweg 19 außerdem <a href="schinakl-pizza-rabatt-wien-alte-donau.html">3,60 Euro weniger je Pizza an der Alten Donau</a> an, mindestens bis Ende 2026. Der Guide trennt den festen Euro-Nachlass von einem Prozentrabatt und erklärt Küchenzeiten sowie berechnete Preisbeispiele.</p>`],
       ['kosten', 'Gratis, Rabatt oder 1+1: Was lohnt sich für dich?', `<p>Ein günstiges Essen in Wien beginnt mit dem <strong>tatsächlichen Gesamtpreis</strong>. Ein Mindestumsatz-Gutschein spart nur, wenn du diesen Betrag ohnehin ausgeben möchtest. Für einen Kaffee reicht ein zeitlich begrenzter Fixpreis; ein Geburtstagsangebot setzt dagegen den richtigen Tag und oft Begleitung voraus.</p><ul><li><strong>Allein unterwegs:</strong> Prüfe, ob ein Vorteil eine zweite zahlende Person verlangt.</li><li><strong>Zu zweit essen:</strong> Vergleiche 1+1-Angebote mit dem regulären Einzelpreis und möglichen Menü-Ausnahmen.</li><li><strong>Mittagessen oder Frühstück:</strong> Achte auf die konkrete Uhrzeit; ein Morgenangebot gilt nicht automatisch mittags.</li><li><strong>Liefern lassen:</strong> Liefer- und Servicegebühren können einen Rabatt verkleinern. Prüfe den Endbetrag, nicht nur die Prozentangabe.</li></ul><p>Für weitere Food-Aktionen vergleiche <a href="gratis-essen-wien.html">Gratis Essen in Wien</a>, <a href="restaurant-gutscheine-wien.html">Restaurant-Gutscheine in Wien</a> und <a href="eins-plus-eins-wien.html">1+1-Angebote</a>. Veraltete Eröffnungspreise sind kein Beleg für einen heutigen Deal.</p>`],
     ],
     faqs: [

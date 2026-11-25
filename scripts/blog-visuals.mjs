@@ -7,6 +7,7 @@ import { photoVisual } from './blog-photo-catalog.mjs';
 
 // Editorial subject metadata is retained for generators; images are photographs.
 export const covers = {
+  'schinakl-pizza-rabatt-wien-alte-donau': { lines: ['Schinakl Pizza'], topic: 'Pizza-Aktion an der Alten Donau', tone: 'yellow' },
   'burgermanufaktur-3-hamburger-wien-hernals': { lines: ['Burgermanufaktur'], topic: 'Drei Hamburger in Hernals', tone: 'yellow' },
   'vienna-sweets-3plus1-wien-neuer-markt': { lines: ['Vienna Sweets 3+1'], topic: 'Süße Mitbringsel am Neuer Markt', tone: 'yellow' },
   ...backfillCovers,
