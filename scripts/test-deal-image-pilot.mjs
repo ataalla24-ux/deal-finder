@@ -6,11 +6,12 @@ import path from 'node:path';
 import {fileURLToPath} from 'node:url';
 import {createDealImagePreviewCheck,prepareDealImagePreview,dealImagePreviewBlock,
   markDealImagePreviewSent,prepareApprovedDealImage} from '../scraper/deal-image-pilot.js';
-import {inspectBoundOriginalPhoto} from './original-deal-photo.mjs';
+import {inspectBoundOriginalPhoto,prepareOriginalPhoto,writePreparedOriginalPhoto} from './original-deal-photo.mjs';
 import {applyLiveDealEditsToBundle,loadLiveDealEditStore} from './live-deal-edits-lib.mjs';
 import {stampDealsFeedBundle} from './deals-feed-contract.mjs';
 import {photoDigest} from './deal-photo-contract.mjs';
 import {normalizeDealRecord} from '../scraper/deal-normalization-utils.js';
+import {DEAL_IMAGE_ASSETS,dealImageAssetKey,dealImageSubjectHash} from '../scraper/deal-image-subject.js';
 
 const repository=path.resolve(path.dirname(fileURLToPath(import.meta.url)),'..');
 const now=new Date();
@@ -52,6 +53,8 @@ test('new exact offer previews and first publication keep the same labelled byte
   const approved=approve(queued);
   const published=await prepareApprovedDealImage(approved,{root,now,enabled:true});
   assert.ok(published.photoUrl);
+  assert.equal(published.approvedDealImage.status,'locked');
+  assert.equal(published.approvedDealImage.photoUrl,published.photoUrl);
   assert.equal(published.description,base.description,'protected prose is never appended or rewritten for a disclosure');
   assert.equal(Object.hasOwn(published,'pendingDealImage'),false);
   const bound=await inspectBoundOriginalPhoto(published,{root});
@@ -70,18 +73,23 @@ test('new exact offer previews and first publication keep the same labelled byte
   assert.equal(Boolean(changed.photoUrl),false,'changed offer does not reuse the photograph');
 }));
 
-test('strict product identities accept supported motifs and leave different or unknown variants unchanged',()=>fixture(async root=>{
+test('specific product motifs and deterministic fallbacks cover every category',()=>fixture(async root=>{
   const cases=[
     ['Pizza Margherita 1+1','Zwei Pizza Margherita zum Preis von einer.','pizza'],
     ['Doppel-Smashburger für 9,90 €','Zwei Beef Patties auf einem Burger.','double-smashburger'],
-    ['Gratis Cappuccino','Ein Cappuccino gratis.',undefined],
-    ['Gratis Kaffee und Croissant','Kaffee mit Croissant im Menü.',undefined],
-    ['Zu eurem Kaffee gibt es ein Lächeln gratis','Ein Lächeln gibt es gratis dazu.',undefined],
+    ['Gratis Cappuccino','Ein Cappuccino gratis.','coffee'],
+    ['Gratis Kaffee und Croissant','Kaffee mit Croissant im Menü.','cafe-breakfast'],
+    ['Zu eurem Kaffee gibt es ein Lächeln gratis','Ein Lächeln gibt es gratis dazu.','coffee'],
     ['Kaffee für 2,50 €','Eine Tasse Kaffee für 2,50 Euro.','coffee'],
-    ['Pizza Margherita oder Salami 1+1','Wähle zwischen beiden Varianten.',undefined],
-    ['Veganer Doppel-Smashburger 1+1','Zwei Beef Style Patties.',undefined],
-    ['Gratis Donut','Ein Donut gratis.',undefined],
-    ['Kuchen 1+1','Zwei Stück Kuchen zum Preis von einem.',undefined],
+    ['Pizza Margherita oder Salami 1+1','Wähle zwischen beiden Varianten.','restaurant'],
+    ['Veganer Doppel-Smashburger 1+1','Zwei Beef Style Patties.','restaurant'],
+    ['Gratis Donut','Ein Donut gratis.','restaurant'],
+    ['Pizza Salami 1+1','Zwei Salami-Pizzen.','restaurant'],
+    ['Vegane Pizza Margherita 1+1','Zwei vegane Pizzen.','restaurant'],
+    ['Fischburger 1+1','Zwei Fischburger.','restaurant'],
+    ['Sushi 1+1','Zwei Portionen Sushi.','restaurant'],
+    ['Latte für 2 Euro','Ein Latte mit Milch.','latte'],
+    ['Kuchen 1+1','Zwei Stück Kuchen zum Preis von einem.','restaurant'],
   ];
   for(const [title,description,key] of cases) {
     const result=await preview(root,{...base,category:'essen',title,description});
@@ -89,30 +97,38 @@ test('strict product identities accept supported motifs and leave different or u
   }
   assert.ok((await preview(root,{...base,validUntil:until+'T12:00:00.000Z',validity:{...base.validity,status:'warning'}})).pendingDealImage,
     'ordinary retained queue ISO dates and warning validity are supported');
-  assert.equal((await preview(root,{...base,validUntil:'2027-02-30'})).pendingDealImage,undefined);
+  for (const [category,key] of [['fluege','ibiza'],['shopping','clothes-alternative'],['freizeit','city'],['unknown','gift']]) {
+    const staged = await preview(root,{...base,category,title:'Aktuelles Angebot',description:''});
+    assert.equal(staged.pendingDealImage.key,key);
+  }
+  assert.equal(DEAL_IMAGE_ASSETS.length,55);
+  assert.equal(new Set(DEAL_IMAGE_ASSETS.map(asset => asset.key)).size,55);
 }));
 
-test('stale, missing, rejected and edited source evidence cannot add or preserve a preview',()=>fixture(async root=>{
-  const staged=await preview(root);
-  for(const patch of [
+test('image staging works before source validation and retains delivered choices without an arbitrary image deadline',()=>fixture(async root=>{
+  for (const patch of [
+    {validity:undefined},
     {validity:{...base.validity,checkedAt:new Date(+now-86400001).toISOString()}},
-    {validity:{...base.validity,urlStatus:'HTTP 403'}},
-    {validity:{...base.validity,finalUrl:'https://merchant.example/another-offer'}},
-    {validity:{...base.validity,status:'invalid'}},
-    {validUntil:'2020-01-01'},{expires:new Date(+now-1000).toISOString()},
-    {validUntil:null,sourcePublishedAt:new Date(+now-8*86400000).toISOString()},
-    {slackTs:'already-delivered'}, {photoUrl:'already-reviewed'}, {slackEditedFields:['photoUrl']},
-    {approvalBlock:{reasons:['source unavailable']}},{pipelineLifecycle:{manualDecision:'rejected'}},
     {originSource:'community-submission',submissionId:'private'},
-  ]) assert.equal((await preview(root,{...staged,...patch})).pendingDealImage,undefined,JSON.stringify(patch));
+  ]) assert.ok((await preview(root,{...base,...patch})).pendingDealImage);
+  for (const patch of [{id:''},{title:''},{url:'http://merchant.example/kaffee'},
+    {pipelineLifecycle:{manualDecision:'rejected'}},{slackEditedFields:['photoUrl']},
+    {photoUrl:'https://unreviewed.example/product.jpg'}]) {
+    assert.equal((await preview(root,{...base,...patch})).pendingDealImage,undefined);
+  }
+  const staged=await preview(root);
+  const sent=approve(staged);
+  assert.deepEqual(await preview(root,sent,{checkPreview:async()=>assert.fail('sent image cannot be replaced')}),sent);
   assert.equal((await preview(root,staged,{enabled:false})).pendingDealImage,undefined);
   assert.equal((await preview(root,staged,{checkPreview:async()=>false})).pendingDealImage,undefined);
   assert.equal(dealImagePreviewBlock(staged,{enabled:false,now}),null);
   assert.equal(dealImagePreviewBlock({...staged,title:'Gratis Tee'},{enabled:true,now}),null);
-  assert.equal(dealImagePreviewBlock(staged,{enabled:true,now:new Date(+now+86400001)}),null);
+  assert.ok(dealImagePreviewBlock(staged,{enabled:true,now:new Date(+now+2*86400000)}));
+  assert.equal(dealImageSubjectHash(base),dealImageSubjectHash({...base,title:'Kostenloser Kaffee mit Gutschein',description:'Neue Beschreibung.'}));
+  assert.notEqual(dealImageSubjectHash(base),dealImageSubjectHash({...base,title:'Gratis Döner'}));
 }));
 
-test('approval requires the exact successfully delivered preview and never blocks an otherwise valid deal',()=>fixture(async root=>{
+test('approval promotes only the exact successfully delivered image',()=>fixture(async root=>{
   const staged=await preview(root);
   for(const deal of [staged,{...approve(staged),title:'Gratis Tee'},
     {...approve(staged),slackTs:'different-message'},
@@ -182,10 +198,10 @@ test('approval merge helper excludes already-live identities in both fast and re
   const [published]=await preparePublishedApprovedDeals([staged],{root,now,enabled:true,existingDeals:[]});
   assert.ok(published.photoUrl);
   const code=fs.readFileSync(path.join(repository,'scraper/slack-approve.js'),'utf8');
-  assert.equal((code.match(/await preparePublishedApprovedDeals\(approvedModeration.deals,\{now:publishedAt,existingDeals:existingApprovedDeals\}\)/g)||[]).length,2);
+  assert.equal((code.match(/await preparePublishedApprovedDeals\(approvedModeration.deals,\{now:publishedAt,existingDeals:existingApprovedDeals,blockedDeals:imageBlockedDeals\}\)/g)||[]).length,2);
 }));
 
-test('Slack rejects optional preview once then delivers ordinary text without marking an image as reviewed',()=>fixture(async root=>{
+test('Slack image rejection defers required image approval without sending text-only',()=>fixture(async root=>{
   const previousFetch=globalThis.fetch,previousFlag=process.env.FREEFINDER_DEAL_IMAGE_PILOT;
   process.env.FREEFINDER_DEAL_IMAGE_PILOT='1';
   try {
@@ -196,14 +212,42 @@ test('Slack rejects optional preview once then delivers ordinary text without ma
       return Response.json(payloads.length===1?{ok:false,error:'invalid_blocks'}:{ok:true,ts:'offline-message'});
     };
     const ts=await postSlackMessage('Offline fixture','offline-thread',0,staged);
-    assert.equal(ts,'offline-message');assert.equal(payloads.length,2);
+    assert.equal(ts,null);assert.equal(payloads.length,1);
     assert.equal(payloads[0].blocks.some(block=>block.type==='image'),true);
-    assert.equal((payloads[1].blocks||[]).some(block=>block.type==='image'),false);
-    assert.equal(staged.pendingDealImage,undefined);
-    markDealImagePreviewSent(staged,ts,now);
-    assert.equal(staged.pendingDealImage,undefined);
+    assert.ok(staged.pendingDealImage);
+    assert.equal(staged.pendingDealImage.slackMessageTs,undefined);
   } finally {
     globalThis.fetch=previousFetch;
     if(previousFlag===undefined)delete process.env.FREEFINDER_DEAL_IMAGE_PILOT;else process.env.FREEFINDER_DEAL_IMAGE_PILOT=previousFlag;
   }
+}));
+
+
+test('approved photo stays bound through copy improvements and waits for review on a changed product',()=>fixture(async root=>{
+  const staged=await preview(root);
+  const published=await prepareApprovedDealImage(approve(staged),{root,now,enabled:true});
+  const updated={...published,title:'Kostenloser Kaffee mit Gutschein',description:'Eine verbesserte Erklärung der Einlösung.'};
+  const asset=await inspectBoundOriginalPhoto(updated,{root});
+  assert.equal(asset.review.sha256,staged.pendingDealImage.sha256);
+  const store=loadLiveDealEditStore(path.join(root,'docs/live-deal-edits.json'));
+  const replay=applyLiveDealEditsToBundle({deals:[updated]},store).bundle.deals[0];
+  assert.equal(replay.photoUrl,published.photoUrl);
+  assert.deepEqual(replay.approvedDealImage,published.approvedDealImage);
+  await assert.rejects(inspectBoundOriginalPhoto({...updated,title:'Gratis Döner'},{root}),/review-stale/);
+}));
+
+test('a reviewed existing photo is previewed and locked without substituting an owned fallback',()=>fixture(async root=>{
+  const source=fs.readFileSync(path.join(root,'docs/assets/blog/photos/coffee.jpg'));
+  const prepared=await prepareOriginalPhoto(base,{dealId:base.id,sourceURL:'https://merchant.example/owned-product.jpg',
+    rights:'merchant-permission',rightsEvidence:'Offline reviewed permission fixture',reviewedBy:'Offline reviewer',
+    matchesOffer:true,showsActualProduct:true,cropChecked:true},source,now);
+  writePreparedOriginalPhoto(root,prepared);
+  const candidate={...base,photoUrl:prepared.review.photoUrl};
+  const staged=await preview(root,candidate);
+  assert.equal(staged.pendingDealImage.sourceKind,'bound-photo');
+  assert.equal(staged.pendingDealImage.previewURL,candidate.photoUrl);
+  const locked=await prepareApprovedDealImage(approve(staged),{root,now,enabled:true});
+  assert.equal(locked.photoUrl,candidate.photoUrl);
+  assert.equal(locked.approvedDealImage.kind,'merchant-photo');
+  assert.equal((await inspectBoundOriginalPhoto({...locked,description:'Updated copy.'},{root})).review.sha256,prepared.review.sha256);
 }));

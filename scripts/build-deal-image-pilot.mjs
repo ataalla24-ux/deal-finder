@@ -13,7 +13,8 @@ const catalog = {version:1,assets:{}};
 const label = Buffer.from('<svg xmlns="http://www.w3.org/2000/svg" width="1080" height="400"><rect x="428" y="320" width="224" height="54" rx="8" fill="white" fill-opacity="0.96"/><text x="540" y="357" text-anchor="middle" font-family="sans-serif" font-size="30" font-weight="600" fill="#161616">Symbolbild</text></svg>');
 for (const asset of DEAL_IMAGE_PILOT_ASSETS) {
   const proof = provenance.photos?.[asset.key];
-  if (proof?.kind !== 'generated-editorial-symbol-photo' || proof.subject !== asset.subject || proof.overlays !== false)
+  if (proof?.kind !== 'generated-editorial-symbol-photo' || proof.subject !== asset.subject || proof.overlays !== false
+    || proof.inputWidth < 600 || proof.inputHeight < 400)
     throw Error('Owned image provenance changed');
   const source = fs.readFileSync(path.join(root,'docs/assets/blog/photos',`${asset.key}.jpg`));
   const rendered = await sharp(source,{failOn:'warning',limitInputPixels:12_000_000}).rotate()
