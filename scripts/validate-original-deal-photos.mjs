@@ -2,11 +2,42 @@ import fs from 'node:fs';
 import path from 'node:path';
 import {fileURLToPath} from 'node:url';
 import {inspectBoundOriginalPhoto} from './original-deal-photo.mjs';
+import {approvedDealPhotoURL} from './deal-photo-contract.mjs';
 
-export async function validateOriginalDealPhotos(deals,{root=process.cwd()}={}) {
+function assertLockedPhoto(deal) {
+  if (!Object.hasOwn(deal,'approvedDealImage')) return;
+  const image = deal.approvedDealImage;
+  if (!image || image.version !== 1 || image.status !== 'locked'
+    || !approvedDealPhotoURL(image.photoUrl,deal.id) || image.photoUrl !== deal.photoUrl
+    || !/^[a-f0-9]{64}$/.test(image.sha256 || '')
+    || !image.photoUrl.endsWith(`-${image.sha256}.jpg`)
+    || typeof image.assetKey !== 'string' || !/^[a-z0-9._-]+$/.test(image.assetKey)
+    || !['merchant-photo','editorial-illustration'].includes(image.kind)
+    || typeof image.approvedAt !== 'string' || !Number.isFinite(Date.parse(image.approvedAt))) {
+    throw Error('locked-photo-binding-invalid');
+  }
+}
+
+export async function validateOriginalDealPhotos(deals,{root=process.cwd(),previousDeals=[]}={}) {
   const results=[];
-  for(const deal of deals.filter(d=>d.photoUrl)) {
-    try {await inspectBoundOriginalPhoto(deal,{root});results.push({id:deal.id,status:'verified-file-permission-and-subject'});}
+  const previousLocks = new Map(previousDeals.filter(deal => deal.approvedDealImage?.status === 'locked')
+    .map(deal => [deal.id,deal]));
+  for(const deal of deals.filter(d=>d.photoUrl || Object.hasOwn(d,'approvedDealImage') || previousLocks.has(d.id))) {
+    try {
+      const previous = previousLocks.get(deal.id);
+      if (previous && (previous.photoUrl !== deal.photoUrl
+        || ['version','status','photoUrl','sha256','assetKey','kind','approvedAt'].some(field =>
+          previous.approvedDealImage[field] !== deal.approvedDealImage?.[field]))) {
+        throw Error('locked-photo-changed-after-approval');
+      }
+      assertLockedPhoto(deal);
+      const inspected = await inspectBoundOriginalPhoto(deal,{root});
+      if (deal.approvedDealImage && (deal.approvedDealImage.sha256 !== inspected.review.sha256
+        || deal.approvedDealImage.kind !== (inspected.review.kind || 'merchant-photo'))) {
+        throw Error('locked-photo-review-mismatch');
+      }
+      results.push({id:deal.id,status:'verified-file-permission-and-subject'});
+    }
     catch(error){results.push({id:deal.id,status:'invalid',reason:error.code==='ENOENT'?'photo-review-or-file-missing':error.message});}
   }
   return {checked:results.length,errors:results.filter(r=>r.status==='invalid').length,results,

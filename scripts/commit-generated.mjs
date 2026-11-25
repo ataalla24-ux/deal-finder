@@ -679,11 +679,15 @@ async function main() {
     console.log(`Stamped deals feed ${stamped.feedVersion} (${stamped.totalDeals} deals)`);
     const photoFeed=JSON.parse(fs.readFileSync(dealsPath,'utf8'));
     const photoDeals=Array.isArray(photoFeed)?photoFeed:photoFeed.deals;
-    if(photoDeals.some(deal=>deal.photoUrl)) {
+    const previousPhotoFeed=JSON.parse(remoteFileContent(baseRef,dealsPath)?.toString('utf8') || '{"deals":[]}');
+    const previousPhotoDeals=Array.isArray(previousPhotoFeed)?previousPhotoFeed:previousPhotoFeed.deals;
+    if(photoDeals.some(deal=>deal.photoUrl || Object.hasOwn(deal,'approvedDealImage'))
+      || previousPhotoDeals.some(deal=>deal.approvedDealImage?.status === 'locked')) {
       const {validateOriginalDealPhotos}=await import('./validate-original-deal-photos.mjs');
-      const validation=await validateOriginalDealPhotos(photoDeals);
+      const validation=await validateOriginalDealPhotos(photoDeals,{previousDeals:previousPhotoDeals});
       if(validation.errors)throw Error(`Original photo verification failed: ${validation.results.filter(r=>r.status==='invalid').map(r=>`${r.id}:${r.reason}`).join(', ')}`);
-      const inputs=new Set(['docs/deals.json','docs/live-deal-edits.json','scripts/original-deal-photo.mjs','scripts/deal-photo-contract.mjs','scripts/validate-original-deal-photos.mjs']);
+      const inputs=new Set(['docs/deals.json','docs/live-deal-edits.json','scripts/original-deal-photo.mjs','scripts/deal-photo-contract.mjs','scripts/validate-original-deal-photos.mjs',
+        'scraper/deal-image-subject.js','scraper/deal-image-pilot.js']);
       for(const deal of photoDeals.filter(d=>d.photoUrl)) {
         const filename=path.basename(new URL(deal.photoUrl).pathname);
         inputs.add(`docs/assets/approved-deal-photos/${filename}`);
