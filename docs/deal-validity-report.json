@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-11-25T22:46:56.045Z",
+  "generatedAt": "2026-11-25T23:25:35.139Z",
   "summary": {
     "maxAgeDays": 7,
     "total": 265,
@@ -41,6 +41,7 @@
       "älter als 7 Tage (2009-05-01)": 1,
       "älter als 7 Tage (2014-06-07)": 1,
       "älter als 7 Tage (2025-12-30)": 1,
+      "abgelaufen (2026-11-25)": 3,
       "ausgeschlossene Quelle (TheFork)": 1,
       "älter als 7 Tage (2026-11-14)": 1,
       "Meta-Graph-Widerspruch (excluded-promotion-type)": 2,
@@ -54,7 +55,7 @@
       "Gottesdienste außerhalb Wochenlauf": 36,
       "älter als 7 Tage": 143,
       "ungültige URL": 20,
-      "abgelaufen": 15,
+      "abgelaufen": 18,
       "ausgeschlossene Quelle": 14,
       "Post-Datum in Zukunft": 3,
       "sonstiges": 3,
@@ -138,7 +139,8 @@
         "blocked": 8,
         "warnings": 0,
         "reasonCategoryCounts": {
-          "ungültige URL": 8
+          "ungültige URL": 8,
+          "abgelaufen": 3
         }
       },
       "Instagram Daily Sync v2": {
@@ -867,7 +869,7 @@
       "warnings": [
         "kein Ablaufdatum gefunden"
       ],
-      "sourceDate": "2026-11-25T22:45:07.049Z",
+      "sourceDate": "2026-11-25T23:24:36.460Z",
       "sourceDateSource": "url.publicationDate",
       "sourceAgeDays": 0,
       "expiryDate": "",
@@ -906,7 +908,6 @@
         "älter als 7 Tage (2026-02-22)"
       ],
       "warnings": [
-        "URL nicht eindeutig prüfbar (temporärer Fehler)",
         "kein Ablaufdatum gefunden"
       ],
       "sourceDate": "2026-02-22T21:13:07.698Z",
@@ -914,7 +915,7 @@
       "sourceAgeDays": 276,
       "expiryDate": "",
       "expirySource": "",
-      "urlStatus": "unklar: temporärer URL-Fehler"
+      "urlStatus": "HTTP 200"
     },
     {
       "id": "extra-32-20260222",
@@ -3381,7 +3382,8 @@
       "source": "Gutscheine.at",
       "url": "https://www.gutscheine.at/baby-walz",
       "reasons": [
-        "URL ungültig (HTTP 404)"
+        "URL ungültig (HTTP 404)",
+        "abgelaufen (2026-11-25)"
       ],
       "warnings": [],
       "sourceDate": "2026-11-25T17:30:57.578Z",
@@ -3398,7 +3400,8 @@
       "source": "Gutscheine.at",
       "url": "https://www.gutscheine.at/babymarkt",
       "reasons": [
-        "URL ungültig (HTTP 404)"
+        "URL ungültig (HTTP 404)",
+        "abgelaufen (2026-11-25)"
       ],
       "warnings": [],
       "sourceDate": "2026-11-25T17:30:57.578Z",
@@ -3415,7 +3418,8 @@
       "source": "Gutscheine.at",
       "url": "https://www.gutscheine.at/babymarkt",
       "reasons": [
-        "URL ungültig (HTTP 404)"
+        "URL ungültig (HTTP 404)",
+        "abgelaufen (2026-11-25)"
       ],
       "warnings": [],
       "sourceDate": "2026-11-25T17:30:57.578Z",
@@ -3846,7 +3850,7 @@
         "kein konkretes Angebot erkennbar"
       ],
       "warnings": [
-        "URL nicht eindeutig prüfbar (temporärer Fehler)",
+        "URL nicht eindeutig prüfbar (www.mediamarkt.at)",
         "kein Ablaufdatum gefunden"
       ],
       "sourceDate": "2026-11-25T15:52:36.196Z",
@@ -3854,7 +3858,7 @@
       "sourceAgeDays": 0,
       "expiryDate": "",
       "expirySource": "",
-      "urlStatus": "unklar: temporärer URL-Fehler"
+      "urlStatus": "unklar: www.mediamarkt.at"
     },
     {
       "id": "vpr-d8ij8a",
@@ -5412,23 +5416,16 @@
   ],
   "runProvenance": {
     "repository": "ataalla24-ux/deal-finder",
-    "runId": "45715820771",
-    "headSha": "abd96c2399538330ad0828a2a7f6bb94b4fbce6b",
-    "checkoutSha": "abd96c2399538330ad0828a2a7f6bb94b4fbce6b",
-    "triggeringRun": {
-      "runId": "45715377213",
-      "headSha": "3af9ad84f189f11abd07961cae8f14924894af26",
-      "event": "schedule",
-      "name": "Community Deal Intake",
-      "startedAt": "2026-11-25T22:41:31.000Z",
-      "url": "https://github.com/ataalla24-ux/deal-finder/actions/runs/45715377213"
-    },
-    "event": "workflow_run",
+    "runId": "45721048154",
+    "headSha": "9c8ece8653d3dd8b4b722620d499239db889a9ab",
+    "checkoutSha": "9c8ece8653d3dd8b4b722620d499239db889a9ab",
+    "triggeringRun": null,
+    "event": "workflow_dispatch",
     "runAttempt": "1",
-    "url": "https://github.com/ataalla24-ux/deal-finder/actions/runs/45715820771"
+    "url": "https://github.com/ataalla24-ux/deal-finder/actions/runs/45721048154"
   },
   "instagramDelivery": {
-    "checkedAt": "2026-11-25T22:46:56.056Z",
+    "checkedAt": "2026-11-25T23:25:35.148Z",
     "scope": "instagram-ai-agent/standard-slack-lane",
     "extractedCandidates": 4,
     "counts": {
@@ -5498,7 +5495,7 @@
     ]
   },
   "tiktokDelivery": {
-    "checkedAt": "2026-11-25T22:46:56.058Z",
+    "checkedAt": "2026-11-25T23:25:35.150Z",
     "scope": "tiktok-deals-scanner/standard-slack-lane",
     "extractedCandidates": 4,
     "counts": {
