@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-11-25T12:44:07.723Z",
+  "generatedAt": "2026-11-25T12:51:29.748Z",
   "discoveryAvailability": {
     "note": "Transport evidence, not deal yield. Retry eligibility is not recovery. Candidate counts are not Slack deliveries. No extra runs or quota resets.",
     "lanes": [
@@ -55,9 +55,9 @@
   "summary": {
     "filesConsidered": 33,
     "totalCandidates": 736,
-    "uniqueCandidates": 705,
-    "distinctCandidates": 719,
-    "duplicateClusters": 14,
+    "uniqueCandidates": 703,
+    "distinctCandidates": 718,
+    "duplicateClusters": 15,
     "topHealthySources": [
       {
         "sourceKey": "tiktok-browser",
@@ -72,16 +72,16 @@
         "totalDeals": 113
       },
       {
-        "sourceKey": "wien-combined",
-        "sourceLabel": "Wien Deals Combined Graph",
-        "healthScore": 74,
-        "totalDeals": 3
-      },
-      {
         "sourceKey": "meta-instagram",
         "sourceLabel": "Meta Instagram Graph",
         "healthScore": 68,
         "totalDeals": 87
+      },
+      {
+        "sourceKey": "wien-combined",
+        "sourceLabel": "Wien Deals Combined Graph",
+        "healthScore": 68,
+        "totalDeals": 3
       },
       {
         "sourceKey": "vienna-websites",
@@ -163,7 +163,7 @@
       {
         "sourceKey": "wien-combined",
         "sourceLabel": "Wien Deals Combined Graph",
-        "precisionScore": 84,
+        "precisionScore": 81,
         "totalDeals": 3
       },
       {
@@ -201,7 +201,7 @@
       {
         "sourceKey": "wien-combined",
         "sourceLabel": "Wien Deals Combined Graph",
-        "sourceWeightScore": 67,
+        "sourceWeightScore": 65,
         "totalDeals": 3
       },
       {
@@ -432,103 +432,13 @@
       "sourceWeightScore": 71
     },
     {
-      "sourceKey": "wien-combined",
-      "file": "deals-pending-wien-combined.json",
-      "sourceLabel": "Wien Deals Combined Graph",
-      "totalDeals": 3,
-      "uniqueDeals": 1,
-      "duplicateDeals": 2,
-      "duplicateAcrossSources": 2,
-      "fresh1dCount": 2,
-      "fresh7dCount": 3,
-      "viennaCount": 3,
-      "foodDrinkCount": 2,
-      "promoCount": 3,
-      "missingUrlCount": 0,
-      "sampleTitles": [
-        "AKTION: Böbrek-Yürek Dürüm nur €3.90 – solange der Vorrat reicht!",
-        "Dirty Lunch Deal",
-        "🎲 Bei der Würfelaktion bekommt ihr eure Bestellung mit zwei Sechsern gratis!"
-      ],
-      "lastRun": {
-        "status": "completed-with-errors",
-        "startedAt": "2026-11-25T09:00:51.787Z",
-        "finishedAt": "2026-11-25T09:02:36.697Z",
-        "durationMs": 104910,
-        "counts": {
-          "rawCandidates": 47,
-          "normalizedCandidates": 3,
-          "verifiedCandidates": 3,
-          "previousDeals": 0,
-          "acceptedDeals": 3,
-          "rejectedDeals": 39
-        },
-        "rejectedByReason": {
-          "no-concrete-offer": 28,
-          "non-offer-content": 1,
-          "missing-text": 3,
-          "weak-food-offer": 2,
-          "missing-vienna-evidence": 1,
-          "alcohol-offer": 2,
-          "general-recommendation": 2
-        },
-        "errors": [
-          "#viennaeats: Instagram scan paused: request-budget",
-          "#viennafood: Instagram scan paused: request-budget",
-          "#viennarestaurants: Instagram scan paused: request-budget"
-        ],
-        "reportFile": "deal-pipeline-last-run-wien-combined.json"
-      },
-      "uniqueRate": 0.3,
-      "duplicateRate": 0.7,
-      "fresh1dRate": 0.7,
-      "fresh7dRate": 1,
-      "viennaRate": 1,
-      "foodDrinkRate": 0.7,
-      "promoRate": 1,
-      "missingUrlRate": 0,
-      "averageQualityScore": 85.7,
-      "topCategories": [
-        {
-          "value": "essen",
-          "count": 1
-        },
-        {
-          "value": "kaffee",
-          "count": 1
-        },
-        {
-          "value": "shopping",
-          "count": 1
-        }
-      ],
-      "topTypes": [
-        {
-          "value": "rabatt",
-          "count": 2
-        },
-        {
-          "value": "gratis",
-          "count": 1
-        }
-      ],
-      "issues": [
-        "hohe Überschneidung mit anderen Quellen"
-      ],
-      "healthScore": 74,
-      "missionFitScore": 83,
-      "coverageScore": 16,
-      "precisionScore": 84,
-      "sourceWeightScore": 67
-    },
-    {
       "sourceKey": "meta-instagram",
       "file": "deals-pending-meta-instagram.json",
       "sourceLabel": "Meta Instagram Graph",
       "totalDeals": 87,
-      "uniqueDeals": 76,
-      "duplicateDeals": 11,
-      "duplicateAcrossSources": 6,
+      "uniqueDeals": 75,
+      "duplicateDeals": 12,
+      "duplicateAcrossSources": 7,
       "fresh1dCount": 7,
       "fresh7dCount": 76,
       "viennaCount": 87,
@@ -599,6 +509,96 @@
       "coverageScore": 57,
       "precisionScore": 66,
       "sourceWeightScore": 60
+    },
+    {
+      "sourceKey": "wien-combined",
+      "file": "deals-pending-wien-combined.json",
+      "sourceLabel": "Wien Deals Combined Graph",
+      "totalDeals": 3,
+      "uniqueDeals": 0,
+      "duplicateDeals": 3,
+      "duplicateAcrossSources": 3,
+      "fresh1dCount": 2,
+      "fresh7dCount": 3,
+      "viennaCount": 3,
+      "foodDrinkCount": 2,
+      "promoCount": 3,
+      "missingUrlCount": 0,
+      "sampleTitles": [
+        "AKTION: Böbrek-Yürek Dürüm nur €3.90 – solange der Vorrat reicht!",
+        "Dirty Lunch Deal",
+        "🎲 Bei der Würfelaktion bekommt ihr eure Bestellung mit zwei Sechsern gratis!"
+      ],
+      "lastRun": {
+        "status": "completed-with-errors",
+        "startedAt": "2026-11-25T09:00:51.787Z",
+        "finishedAt": "2026-11-25T09:02:36.697Z",
+        "durationMs": 104910,
+        "counts": {
+          "rawCandidates": 47,
+          "normalizedCandidates": 3,
+          "verifiedCandidates": 3,
+          "previousDeals": 0,
+          "acceptedDeals": 3,
+          "rejectedDeals": 39
+        },
+        "rejectedByReason": {
+          "no-concrete-offer": 28,
+          "non-offer-content": 1,
+          "missing-text": 3,
+          "weak-food-offer": 2,
+          "missing-vienna-evidence": 1,
+          "alcohol-offer": 2,
+          "general-recommendation": 2
+        },
+        "errors": [
+          "#viennaeats: Instagram scan paused: request-budget",
+          "#viennafood: Instagram scan paused: request-budget",
+          "#viennarestaurants: Instagram scan paused: request-budget"
+        ],
+        "reportFile": "deal-pipeline-last-run-wien-combined.json"
+      },
+      "uniqueRate": 0,
+      "duplicateRate": 1,
+      "fresh1dRate": 0.7,
+      "fresh7dRate": 1,
+      "viennaRate": 1,
+      "foodDrinkRate": 0.7,
+      "promoRate": 1,
+      "missingUrlRate": 0,
+      "averageQualityScore": 85.7,
+      "topCategories": [
+        {
+          "value": "essen",
+          "count": 1
+        },
+        {
+          "value": "kaffee",
+          "count": 1
+        },
+        {
+          "value": "shopping",
+          "count": 1
+        }
+      ],
+      "topTypes": [
+        {
+          "value": "rabatt",
+          "count": 2
+        },
+        {
+          "value": "gratis",
+          "count": 1
+        }
+      ],
+      "issues": [
+        "hohe Überschneidung mit anderen Quellen"
+      ],
+      "healthScore": 68,
+      "missionFitScore": 83,
+      "coverageScore": 16,
+      "precisionScore": 81,
+      "sourceWeightScore": 65
     },
     {
       "sourceKey": "vienna-websites",
