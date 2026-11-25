@@ -1,7 +1,7 @@
 {
-  "generatedAt": "2026-11-25T05:09:58.928Z",
+  "generatedAt": "2026-11-25T05:16:00.101Z",
   "source": "instagram-graph-cross-source-verification",
-  "status": "ok",
+  "status": "failed-preserved",
   "configured": true,
   "scannedFiles": [
     "deals-pending-church-events.json",
@@ -136,8 +136,8 @@
       "candidates": 0
     },
     "deals-pending-meta-instagram.json": {
-      "deals": 91,
-      "candidates": 0
+      "deals": 92,
+      "candidates": 1
     },
     "deals-pending-power.json": {
       "deals": 53,
@@ -172,14 +172,24 @@
       "candidates": 0
     }
   },
-  "candidatePosts": 0,
-  "candidateAccounts": 0,
+  "candidatePosts": 1,
+  "candidateAccounts": 1,
   "skippedAccountCooldowns": 0,
-  "selectedAccounts": [],
+  "selectedAccounts": [
+    {
+      "username": "austriatrendhotels",
+      "candidates": 1
+    }
+  ],
   "fetchedPosts": 0,
   "exactMatches": 0,
   "retainedEvidencePosts": 2000,
-  "errors": [],
+  "errors": [
+    {
+      "username": "austriatrendhotels",
+      "message": "Instagram shared quota paused: rolling-hour budget exhausted"
+    }
+  ],
   "accountFailures": {
     "meatmewien": {
       "count": 2,
@@ -188,22 +198,28 @@
     }
   },
   "sharedQuota": {
-    "limitPerHour": 190,
+    "limitPerHour": 260,
     "usageThreshold": 95,
     "requests": 0,
     "reserved": 0,
-    "stopped": false,
-    "reason": "",
+    "stopped": true,
+    "reason": "Instagram shared quota paused: rolling-hour budget exhausted",
     "highestUsagePercent": 0,
     "waitedMs": 0,
     "pacingMs": 0,
-    "retryAt": "",
+    "retryAt": "2026-11-25T05:59:25.337Z",
     "adaptiveSafetyCeiling": 190,
     "adaptiveIncreases": 0,
     "storageFailure": null,
-    "stopKind": ""
+    "stopKind": "budget"
+  },
+  "globalError": {
+    "username": "austriatrendhotels",
+    "status": 0,
+    "code": "SCAN_BUDGET",
+    "message": "Instagram shared quota paused: rolling-hour budget exhausted"
   },
   "blockedEvidencePosts": 72,
-  "unmatchedCandidatePosts": 0,
-  "message": "0/0 fresh cross-source Instagram candidates matched exactly via Graph API."
+  "unmatchedCandidatePosts": 1,
+  "message": "0/1 fresh cross-source Instagram candidates matched exactly via Graph API."
 }
