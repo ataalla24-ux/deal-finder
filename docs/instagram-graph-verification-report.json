@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-11-25T05:54:26.475Z",
+  "generatedAt": "2026-11-25T06:18:14.731Z",
   "source": "instagram-graph-cross-source-verification",
   "status": "failed-preserved",
   "configured": true,
@@ -136,7 +136,7 @@
       "candidates": 0
     },
     "deals-pending-meta-instagram.json": {
-      "deals": 92,
+      "deals": 91,
       "candidates": 1
     },
     "deals-pending-power.json": {
@@ -187,7 +187,7 @@
   "errors": [
     {
       "username": "austriatrendhotels",
-      "message": "Instagram shared quota paused: rolling-hour budget exhausted"
+      "message": "Instagram shared quota paused: shared cooldown"
     }
   ],
   "accountFailures": {
@@ -198,28 +198,28 @@
     }
   },
   "sharedQuota": {
-    "limitPerHour": 260,
+    "limitPerHour": 190,
     "usageThreshold": 95,
     "requests": 0,
     "reserved": 0,
     "stopped": true,
-    "reason": "Instagram shared quota paused: rolling-hour budget exhausted",
+    "reason": "Instagram shared quota paused: shared cooldown",
     "highestUsagePercent": 0,
     "waitedMs": 0,
     "pacingMs": 0,
-    "retryAt": "2026-11-25T05:59:25.337Z",
+    "retryAt": "2026-11-25T06:25:26.935Z",
     "adaptiveSafetyCeiling": 190,
     "adaptiveIncreases": 0,
     "storageFailure": null,
-    "stopKind": "budget"
+    "stopKind": "cooldown"
   },
   "globalError": {
     "username": "austriatrendhotels",
     "status": 0,
     "code": "SCAN_BUDGET",
-    "message": "Instagram shared quota paused: rolling-hour budget exhausted"
+    "message": "Instagram shared quota paused: shared cooldown"
   },
-  "blockedEvidencePosts": 72,
+  "blockedEvidencePosts": 74,
   "unmatchedCandidatePosts": 1,
   "message": "0/1 fresh cross-source Instagram candidates matched exactly via Graph API."
 }
