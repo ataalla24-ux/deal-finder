@@ -67,8 +67,10 @@ test('a lock cannot claim a different image kind or reuse revoked file permissio
 });
 
 test('legacy deals keep their existing photo verification without acquiring a lock',async t => {
-  const {root,locked} = await fixture(t);
+  const {root,locked,prepared} = await fixture(t);
   const {approvedDealImage,...legacy} = locked;
+  prepared.review.subjectHash = photoSubjectHash(legacy);
+  writePreparedOriginalPhoto(root,prepared);
   const result = await validateOriginalDealPhotos([legacy,{...deal,id:'no-photo'}],{root});
   assert.equal(result.checked,1);
   assert.equal(result.errors,0);
