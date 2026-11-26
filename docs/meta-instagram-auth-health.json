@@ -1,8 +1,8 @@
 {
-  "generatedAt": "2026-11-26T04:39:15.064Z",
+  "generatedAt": "2026-11-26T05:04:00.798Z",
   "source": "meta-instagram-auth-health",
   "graphVersion": "v26.0",
-  "status": "ok",
+  "status": "quota-deferred",
   "configured": {
     "instagramGraph": true,
     "instagramUserId": true,
@@ -22,12 +22,13 @@
     {
       "name": "token-expiry",
       "status": "ok",
-      "detail": "Provider-verified access expires at 2026-12-14T22:55:36.000Z (18.8 days remaining)."
+      "detail": "Provider-verified access expires at 2026-12-14T22:55:36.000Z (18.7 days remaining)."
     },
     {
       "name": "token-permissions",
-      "status": "ok",
-      "detail": "5 granted permission(s): pages_show_list, instagram_basic, instagram_manage_insights, pages_read_engagement, public_profile."
+      "status": "quota-deferred",
+      "detail": "Instagram shared quota paused: Meta usage headroom",
+      "code": "SCAN_BUDGET"
     },
     {
       "name": "instagram-user-id",
@@ -36,8 +37,9 @@
     },
     {
       "name": "own-media",
-      "status": "ok",
-      "detail": "Read 3 recent media row(s); timestamp/permalink fields are available."
+      "status": "quota-deferred",
+      "detail": "Instagram shared quota paused: Meta usage headroom",
+      "code": "SCAN_BUDGET"
     },
     {
       "name": "tagged-media",
@@ -46,8 +48,9 @@
     },
     {
       "name": "business-discovery",
-      "status": "ok",
-      "detail": "Business Discovery works for @ciosgrill; 1 media row(s) returned."
+      "status": "quota-deferred",
+      "detail": "Instagram shared quota paused: Meta usage headroom",
+      "code": "SCAN_BUDGET"
     },
     {
       "name": "hashtag-search",
@@ -55,13 +58,13 @@
       "detail": "Set META_INSTAGRAM_HEALTHCHECK_HASHTAG to test hashtag access; this counts toward Meta hashtag limits."
     }
   ],
-  "nextAction": "Meta Instagram Graph is ready for the deal collector.",
+  "nextAction": "Wait for the existing shared Meta cooldown or rolling-hour allowance; collection will resume on a later scheduled run.",
   "tokenExpiry": {
     "source": "meta-debug-token",
     "expiresAt": "2026-12-14T22:55:36.000Z",
     "accessTokenExpiresAt": "2026-12-14T22:55:36.000Z",
     "dataAccessExpiresAt": "2027-01-13T23:01:23.000Z",
-    "daysRemaining": 18.8,
+    "daysRemaining": 18.7,
     "status": "ok",
     "configuredExpiresAt": "2026-12-14T22:55:36.000Z"
   },
@@ -71,19 +74,12 @@
     "appId": "4332170530445850",
     "type": "USER"
   },
-  "grantedPermissions": [
-    "pages_show_list",
-    "instagram_basic",
-    "instagram_manage_insights",
-    "pages_read_engagement",
-    "public_profile"
-  ],
   "sharedQuota": {
-    "requests": 5,
-    "reserved": 5,
-    "stopped": false,
-    "reason": "",
-    "retryAt": "",
+    "requests": 2,
+    "reserved": 2,
+    "stopped": true,
+    "reason": "Instagram shared quota paused: Meta usage headroom",
+    "retryAt": "2026-11-26T05:14:03.963Z",
     "storageFailure": null
   }
 }
