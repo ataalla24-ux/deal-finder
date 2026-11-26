@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-11-26T08:24:43.073Z",
+  "generatedAt": "2026-11-26T08:52:25.536Z",
   "discoveryAvailability": {
     "note": "Transport evidence, not deal yield. Retry eligibility is not recovery. Candidate counts are not Slack deliveries. No extra runs or quota resets.",
     "lanes": [
@@ -54,7 +54,7 @@
   },
   "summary": {
     "filesConsidered": 33,
-    "totalCandidates": 733,
+    "totalCandidates": 734,
     "uniqueCandidates": 696,
     "distinctCandidates": 713,
     "duplicateClusters": 17,
@@ -78,30 +78,30 @@
         "totalDeals": 100
       },
       {
+        "sourceKey": "wien-combined",
+        "sourceLabel": "Wien Deals Combined Graph",
+        "healthScore": 63,
+        "totalDeals": 4
+      },
+      {
         "sourceKey": "vienna-websites",
         "sourceLabel": "Wiener Lokal-Angebotsseiten",
         "healthScore": 62,
         "totalDeals": 8
-      },
-      {
-        "sourceKey": "instagram-verified",
-        "sourceLabel": "Instagram",
-        "healthScore": 61,
-        "totalDeals": 6
       }
     ],
     "topMissionSources": [
+      {
+        "sourceKey": "wien-combined",
+        "sourceLabel": "Wien Deals Combined Graph",
+        "missionFitScore": 73,
+        "totalDeals": 4
+      },
       {
         "sourceKey": "joe",
         "sourceLabel": "jö Bonus Club",
         "missionFitScore": 70,
         "totalDeals": 9
-      },
-      {
-        "sourceKey": "wien-combined",
-        "sourceLabel": "Wien Deals Combined Graph",
-        "missionFitScore": 70,
-        "totalDeals": 3
       },
       {
         "sourceKey": "member-benefits",
@@ -167,16 +167,16 @@
         "totalDeals": 2
       },
       {
+        "sourceKey": "wien-combined",
+        "sourceLabel": "Wien Deals Combined Graph",
+        "precisionScore": 72,
+        "totalDeals": 4
+      },
+      {
         "sourceKey": "member-benefits",
         "sourceLabel": "Member Benefits",
         "precisionScore": 72,
         "totalDeals": 113
-      },
-      {
-        "sourceKey": "wien-combined",
-        "sourceLabel": "Wien Deals Combined Graph",
-        "precisionScore": 69,
-        "totalDeals": 3
       },
       {
         "sourceKey": "meta-instagram",
@@ -213,8 +213,8 @@
       {
         "sourceKey": "wien-combined",
         "sourceLabel": "Wien Deals Combined Graph",
-        "sourceWeightScore": 56,
-        "totalDeals": 3
+        "sourceWeightScore": 58,
+        "totalDeals": 4
       },
       {
         "sourceKey": "gastro2",
@@ -513,6 +513,93 @@
       "sourceWeightScore": 66
     },
     {
+      "sourceKey": "wien-combined",
+      "file": "deals-pending-wien-combined.json",
+      "sourceLabel": "Wien Deals Combined Graph",
+      "totalDeals": 4,
+      "uniqueDeals": 0,
+      "duplicateDeals": 4,
+      "duplicateAcrossSources": 4,
+      "fresh1dCount": 4,
+      "fresh7dCount": 4,
+      "viennaCount": 4,
+      "foodDrinkCount": 3,
+      "promoCount": 1,
+      "missingUrlCount": 0,
+      "sampleTitles": [
+        "Gemeinsam mit der TGM-Schülervertretung bieten wir euch drei exklusive Mittagsmenüs bereits ab 6,90 € an",
+        "🚨 TGM aufgepasst – eure neuen Mittagsmenüs sind da!",
+        "Nachdem TikTok mir meinen Accout „aliceentertains“ nicht wieder zurückgibt, poste ich so lange free Sachen in Wien, bis mich wer von TikTok"
+      ],
+      "lastRun": {
+        "status": "completed-with-errors",
+        "startedAt": "2026-11-26T08:49:47.188Z",
+        "finishedAt": "2026-11-26T08:51:37.407Z",
+        "durationMs": 110219,
+        "counts": {
+          "rawCandidates": 30,
+          "normalizedCandidates": 4,
+          "verifiedCandidates": 4,
+          "previousDeals": 0,
+          "acceptedDeals": 4,
+          "rejectedDeals": 25
+        },
+        "rejectedByReason": {
+          "no-concrete-offer": 18,
+          "non-offer-content": 1,
+          "excluded-promotion-type": 2,
+          "missing-text": 2,
+          "general-recommendation": 1,
+          "alcohol-offer": 1
+        },
+        "errors": [
+          "#viennafood: Instagram scan paused: request-budget",
+          "#wienergastro: Instagram scan paused: request-budget",
+          "#viennaeats: Instagram scan paused: request-budget",
+          "#viennarestaurants: Instagram scan paused: request-budget"
+        ],
+        "reportFile": "deal-pipeline-last-run-wien-combined.json"
+      },
+      "uniqueRate": 0,
+      "duplicateRate": 1,
+      "fresh1dRate": 1,
+      "fresh7dRate": 1,
+      "viennaRate": 1,
+      "foodDrinkRate": 0.8,
+      "promoRate": 0.3,
+      "missingUrlRate": 0,
+      "averageQualityScore": 83.8,
+      "topCategories": [
+        {
+          "value": "essen",
+          "count": 3
+        },
+        {
+          "value": "kultur",
+          "count": 1
+        }
+      ],
+      "topTypes": [
+        {
+          "value": "rabatt",
+          "count": 3
+        },
+        {
+          "value": "gratis",
+          "count": 1
+        }
+      ],
+      "issues": [
+        "wenige klare Gratis-/Promo-Signale",
+        "hohe Überschneidung mit anderen Quellen"
+      ],
+      "healthScore": 63,
+      "missionFitScore": 73,
+      "coverageScore": 14,
+      "precisionScore": 72,
+      "sourceWeightScore": 58
+    },
+    {
       "sourceKey": "vienna-websites",
       "file": "deals-pending-vienna-websites.json",
       "sourceLabel": "Wiener Lokal-Angebotsseiten",
@@ -637,93 +724,6 @@
       "coverageScore": 12,
       "precisionScore": 56,
       "sourceWeightScore": 45
-    },
-    {
-      "sourceKey": "wien-combined",
-      "file": "deals-pending-wien-combined.json",
-      "sourceLabel": "Wien Deals Combined Graph",
-      "totalDeals": 3,
-      "uniqueDeals": 0,
-      "duplicateDeals": 3,
-      "duplicateAcrossSources": 3,
-      "fresh1dCount": 3,
-      "fresh7dCount": 3,
-      "viennaCount": 3,
-      "foodDrinkCount": 2,
-      "promoCount": 1,
-      "missingUrlCount": 0,
-      "sampleTitles": [
-        "🚨 TGM aufgepasst – eure neuen Mittagsmenüs sind da!",
-        "Nachdem TikTok mir meinen Accout „aliceentertains“ nicht wieder zurückgibt, poste ich so lange free Sachen in Wien, bis mich wer von TikTok",
-        "Auf unserer Speisekarte findet ihr die Nudelsuppe mit Rindfleisch und BanMian mit Rindfleisch – beide für 13,90 €"
-      ],
-      "lastRun": {
-        "status": "completed-with-errors",
-        "startedAt": "2026-11-25T21:56:46.800Z",
-        "finishedAt": "2026-11-25T21:58:33.159Z",
-        "durationMs": 106359,
-        "counts": {
-          "rawCandidates": 25,
-          "normalizedCandidates": 3,
-          "verifiedCandidates": 3,
-          "previousDeals": 0,
-          "acceptedDeals": 3,
-          "rejectedDeals": 22
-        },
-        "rejectedByReason": {
-          "no-concrete-offer": 14,
-          "non-offer-content": 1,
-          "excluded-promotion-type": 2,
-          "general-recommendation": 2,
-          "missing-text": 2,
-          "alcohol-offer": 1
-        },
-        "errors": [
-          "#wienergastro: Instagram scan paused: request-budget",
-          "#viennaeats: Instagram scan paused: request-budget",
-          "#viennafood: Instagram scan paused: request-budget",
-          "#viennarestaurants: Instagram scan paused: request-budget"
-        ],
-        "reportFile": "deal-pipeline-last-run-wien-combined.json"
-      },
-      "uniqueRate": 0,
-      "duplicateRate": 1,
-      "fresh1dRate": 1,
-      "fresh7dRate": 1,
-      "viennaRate": 1,
-      "foodDrinkRate": 0.7,
-      "promoRate": 0.3,
-      "missingUrlRate": 0,
-      "averageQualityScore": 82.3,
-      "topCategories": [
-        {
-          "value": "essen",
-          "count": 2
-        },
-        {
-          "value": "kultur",
-          "count": 1
-        }
-      ],
-      "topTypes": [
-        {
-          "value": "rabatt",
-          "count": 2
-        },
-        {
-          "value": "gratis",
-          "count": 1
-        }
-      ],
-      "issues": [
-        "wenige klare Gratis-/Promo-Signale",
-        "hohe Überschneidung mit anderen Quellen"
-      ],
-      "healthScore": 61,
-      "missionFitScore": 70,
-      "coverageScore": 13,
-      "precisionScore": 69,
-      "sourceWeightScore": 56
     },
     {
       "sourceKey": "food3",
