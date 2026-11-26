@@ -1,8 +1,8 @@
 {
-  "generatedAt": "2026-11-26T05:04:00.798Z",
+  "generatedAt": "2026-11-26T06:09:24.544Z",
   "source": "meta-instagram-auth-health",
   "graphVersion": "v26.0",
-  "status": "quota-deferred",
+  "status": "ok",
   "configured": {
     "instagramGraph": true,
     "instagramUserId": true,
@@ -26,9 +26,8 @@
     },
     {
       "name": "token-permissions",
-      "status": "quota-deferred",
-      "detail": "Instagram shared quota paused: Meta usage headroom",
-      "code": "SCAN_BUDGET"
+      "status": "ok",
+      "detail": "5 granted permission(s): pages_show_list, instagram_basic, instagram_manage_insights, pages_read_engagement, public_profile."
     },
     {
       "name": "instagram-user-id",
@@ -37,9 +36,8 @@
     },
     {
       "name": "own-media",
-      "status": "quota-deferred",
-      "detail": "Instagram shared quota paused: Meta usage headroom",
-      "code": "SCAN_BUDGET"
+      "status": "ok",
+      "detail": "Read 3 recent media row(s); timestamp/permalink fields are available."
     },
     {
       "name": "tagged-media",
@@ -48,9 +46,8 @@
     },
     {
       "name": "business-discovery",
-      "status": "quota-deferred",
-      "detail": "Instagram shared quota paused: Meta usage headroom",
-      "code": "SCAN_BUDGET"
+      "status": "ok",
+      "detail": "Business Discovery works for @ciosgrill; 1 media row(s) returned."
     },
     {
       "name": "hashtag-search",
@@ -58,7 +55,7 @@
       "detail": "Set META_INSTAGRAM_HEALTHCHECK_HASHTAG to test hashtag access; this counts toward Meta hashtag limits."
     }
   ],
-  "nextAction": "Wait for the existing shared Meta cooldown or rolling-hour allowance; collection will resume on a later scheduled run.",
+  "nextAction": "Meta Instagram Graph is ready for the deal collector.",
   "tokenExpiry": {
     "source": "meta-debug-token",
     "expiresAt": "2026-12-14T22:55:36.000Z",
@@ -74,12 +71,19 @@
     "appId": "4332170530445850",
     "type": "USER"
   },
+  "grantedPermissions": [
+    "pages_show_list",
+    "instagram_basic",
+    "instagram_manage_insights",
+    "pages_read_engagement",
+    "public_profile"
+  ],
   "sharedQuota": {
-    "requests": 2,
-    "reserved": 2,
-    "stopped": true,
-    "reason": "Instagram shared quota paused: Meta usage headroom",
-    "retryAt": "2026-11-26T05:14:03.963Z",
+    "requests": 5,
+    "reserved": 5,
+    "stopped": false,
+    "reason": "",
+    "retryAt": "",
     "storageFailure": null
   }
 }
