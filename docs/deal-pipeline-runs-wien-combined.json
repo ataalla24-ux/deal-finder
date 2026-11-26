@@ -2,9 +2,85 @@
   "schemaVersion": 1,
   "sourceKey": "wien-combined",
   "sourceLabel": "Wien Deals Combined",
-  "updatedAt": "2026-11-26T08:51:37.407Z",
+  "updatedAt": "2026-11-26T21:52:19.912Z",
   "runCount": 90,
   "runs": [
+    {
+      "schemaVersion": 1,
+      "runProvenance": {
+        "repository": "ataalla24-ux/deal-finder",
+        "runId": "45900925988",
+        "headSha": "23a4bb65a648764be2125e2d08db5731617fdcce",
+        "checkoutSha": "23a4bb65a648764be2125e2d08db5731617fdcce",
+        "triggeringRun": null,
+        "event": "schedule",
+        "runAttempt": "1",
+        "url": "https://github.com/ataalla24-ux/deal-finder/actions/runs/45900925988"
+      },
+      "runId": "wien-combined-2026-11-26T21:52:19.912Z",
+      "sourceKey": "wien-combined",
+      "sourceLabel": "Wien Deals Combined",
+      "status": "completed-with-errors",
+      "startedAt": "2026-11-26T21:51:40.655Z",
+      "finishedAt": "2026-11-26T21:52:19.912Z",
+      "durationMs": 39257,
+      "outputFile": "docs/deals-pending-wien-combined.json",
+      "counts": {
+        "rawCandidates": 2,
+        "normalizedCandidates": 1,
+        "verifiedCandidates": 1,
+        "previousDeals": 0,
+        "acceptedDeals": 1,
+        "rejectedDeals": 1
+      },
+      "rejectedByReason": {
+        "no-concrete-offer": 1
+      },
+      "rejectedSamples": [
+        {
+          "reason": "no-concrete-offer",
+          "deal": {
+            "id": "18117972935583359",
+            "title": "Essen wie bei Mama 🤍 Manche Gerichte schmecken einfach nach Zuhause, nach Familie und nach Geschichten, die man am Tisch erzählt. Bei Derwisch wird so gekocht: ehrlich, herzlich u",
+            "brand": "",
+            "url": "https://www.instagram.com/reel/DgMojezzzSL/",
+            "source": "#essenwien",
+            "pubDate": "2026-11-26T08:06:16+0000",
+            "expires": "",
+            "postVerificationStatus": ""
+          }
+        }
+      ],
+      "diagnostics": {
+        "hashtags": 9,
+        "successfulSources": 2,
+        "failedSources": 0,
+        "uniquePosts": 2,
+        "budgetDeferred": true,
+        "quotaRetryAt": "2026-11-26T22:29:22.751Z",
+        "cachedGraphPosts": 0,
+        "skipImmediateDispatch": false,
+        "rescueEligible": 0,
+        "rescuedDeals": 0,
+        "mediaAnalyzed": 0,
+        "mediaAiCalls": 0,
+        "mediaVisionCalls": 0,
+        "mediaTokens": 0,
+        "graphVersion": "v26.0"
+      },
+      "constraints": {
+        "maxSocialPostAgeDays": 7
+      },
+      "errors": [
+        "#wienisst: Instagram shared quota paused: rolling-hour budget exhausted",
+        "#wienkaffee: Instagram shared quota paused: rolling-hour budget exhausted",
+        "#wienergastro: Instagram shared quota paused: rolling-hour budget exhausted",
+        "#viennaeats: Instagram shared quota paused: rolling-hour budget exhausted",
+        "#wienfood: Instagram shared quota paused: rolling-hour budget exhausted",
+        "#viennafood: Instagram shared quota paused: rolling-hour budget exhausted",
+        "#viennarestaurants: Instagram shared quota paused: rolling-hour budget exhausted"
+      ]
+    },
     {
       "schemaVersion": 1,
       "runProvenance": {
@@ -28392,62 +28468,6 @@
       "errors": [
         "#viennaeats: Meta Graph 400: HTTP 400",
         "#wien: Instagram scan paused: request-budget"
-      ]
-    },
-    {
-      "schemaVersion": 1,
-      "runId": "wien-combined-2026-10-21T21:57:29.506Z",
-      "sourceKey": "wien-combined",
-      "sourceLabel": "Wien Deals Combined",
-      "status": "completed-with-errors",
-      "startedAt": "2026-10-21T21:57:03.870Z",
-      "finishedAt": "2026-10-21T21:57:29.506Z",
-      "durationMs": 25636,
-      "outputFile": "docs/deals-pending-wien-combined.json",
-      "counts": {
-        "rawCandidates": 1,
-        "normalizedCandidates": 0,
-        "verifiedCandidates": 0,
-        "previousDeals": 0,
-        "acceptedDeals": 0,
-        "rejectedDeals": 1
-      },
-      "rejectedByReason": {
-        "no-concrete-offer": 1
-      },
-      "rejectedSamples": [
-        {
-          "reason": "no-concrete-offer",
-          "deal": {
-            "id": "17972541147176180",
-            "title": "Manche Träume beginnen klein: eine Reise, eine Idee, ein Gespräch. Und irgendwann wird daraus ein Ort, an dem Menschen zusammenkommen. Die ganze Podcast-Folge findest du auf unsere",
-            "brand": "",
-            "url": "https://www.instagram.com/reel/Dew6X35geoW/",
-            "source": "#wienergastro",
-            "pubDate": "2026-10-21T17:10:48+0000",
-            "expires": "",
-            "postVerificationStatus": ""
-          }
-        }
-      ],
-      "diagnostics": {
-        "hashtags": 10,
-        "successfulSources": 2,
-        "failedSources": 0,
-        "uniquePosts": 1,
-        "rescueEligible": 0,
-        "rescuedDeals": 0,
-        "mediaAnalyzed": 0,
-        "mediaAiCalls": 0,
-        "mediaVisionCalls": 0,
-        "mediaTokens": 0,
-        "graphVersion": "v26.0"
-      },
-      "constraints": {
-        "maxSocialPostAgeDays": 7
-      },
-      "errors": [
-        "#vienna: Instagram shared quota paused: request or quota unavailable"
       ]
     }
   ]
