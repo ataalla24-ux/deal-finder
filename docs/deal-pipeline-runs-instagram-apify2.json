@@ -2,9 +2,199 @@
   "schemaVersion": 1,
   "sourceKey": "instagram-apify2",
   "sourceLabel": "Apify 2 Vienna Food Discovery",
-  "updatedAt": "2026-11-26T01:04:28.809Z",
-  "runCount": 62,
+  "updatedAt": "2026-11-26T15:33:38.885Z",
+  "runCount": 63,
   "runs": [
+    {
+      "schemaVersion": 1,
+      "runProvenance": {
+        "repository": "ataalla24-ux/deal-finder",
+        "runId": "45849969293",
+        "headSha": "9f40dd48df0052e8bada6697153b6a2f07055eda",
+        "checkoutSha": "e702229d7e6eb942a339a565d711a5b86ce2b1da",
+        "triggeringRun": null,
+        "event": "schedule",
+        "runAttempt": "1",
+        "url": "https://github.com/ataalla24-ux/deal-finder/actions/runs/45849969293"
+      },
+      "runId": "instagram-apify2-2026-11-26T15:33:38.885Z",
+      "sourceKey": "instagram-apify2",
+      "sourceLabel": "Apify 2 Vienna Food Discovery",
+      "status": "completed",
+      "startedAt": "2026-11-26T15:32:18.044Z",
+      "finishedAt": "2026-11-26T15:33:38.885Z",
+      "durationMs": 80841,
+      "outputFile": "docs/deals-pending-instagram-apify2.json",
+      "counts": {
+        "rawCandidates": 9,
+        "normalizedCandidates": 4,
+        "verifiedCandidates": 0,
+        "previousDeals": 0,
+        "acceptedDeals": 0,
+        "rejectedDeals": 4
+      },
+      "rejectedByReason": {
+        "non-food-ad": 1,
+        "no-consumer-food-benefit": 1,
+        "business-lead-generation": 1,
+        "alcohol-offer": 1
+      },
+      "rejectedSamples": [
+        {
+          "reason": "non-food-ad",
+          "deal": {
+            "id": "",
+            "title": "",
+            "brand": "",
+            "url": "https://www.instagram.com/p/DgKnMdKIqG-/",
+            "source": "",
+            "pubDate": "",
+            "expires": "",
+            "postVerificationStatus": ""
+          }
+        },
+        {
+          "reason": "no-consumer-food-benefit",
+          "deal": {
+            "id": "",
+            "title": "",
+            "brand": "",
+            "url": "https://www.instagram.com/p/DgIAFP9Ammj/",
+            "source": "",
+            "pubDate": "",
+            "expires": "",
+            "postVerificationStatus": ""
+          }
+        },
+        {
+          "reason": "business-lead-generation",
+          "deal": {
+            "id": "",
+            "title": "",
+            "brand": "",
+            "url": "https://www.instagram.com/p/DgFYNGzIpZO/",
+            "source": "",
+            "pubDate": "",
+            "expires": "",
+            "postVerificationStatus": ""
+          }
+        },
+        {
+          "reason": "alcohol-offer",
+          "deal": {
+            "id": "",
+            "title": "",
+            "brand": "",
+            "url": "https://www.instagram.com/p/DgK6Twsxwlo/",
+            "source": "",
+            "pubDate": "",
+            "expires": "",
+            "postVerificationStatus": ""
+          }
+        }
+      ],
+      "diagnostics": {
+        "pendingDeals": 1,
+        "unchangedPosts": 2,
+        "providerErrors": 0,
+        "emptySourceRecords": 0,
+        "batchErrors": [],
+        "ocrCalls": 2,
+        "sources": [
+          {
+            "key": "profile:m2_laromana",
+            "lastAttemptAt": "2026-11-26T15:32:18.044Z",
+            "postsReturned": 1,
+            "status": "posts-returned",
+            "consecutiveFailures": 0,
+            "consecutiveEmpty": 0,
+            "retryAt": ""
+          },
+          {
+            "key": "profile:maisonnayavienna",
+            "lastAttemptAt": "2026-11-26T15:32:18.044Z",
+            "postsReturned": 1,
+            "status": "posts-returned",
+            "consecutiveFailures": 0,
+            "consecutiveEmpty": 0,
+            "retryAt": ""
+          },
+          {
+            "key": "profile:dahabdoener",
+            "lastAttemptAt": "2026-11-26T15:32:18.044Z",
+            "postsReturned": 1,
+            "status": "posts-returned",
+            "consecutiveFailures": 0,
+            "consecutiveEmpty": 0,
+            "retryAt": ""
+          },
+          {
+            "key": "profile:hongkongcafewien",
+            "lastAttemptAt": "2026-11-26T15:32:18.044Z",
+            "postsReturned": 1,
+            "status": "posts-returned",
+            "consecutiveFailures": 0,
+            "consecutiveEmpty": 0,
+            "retryAt": ""
+          },
+          {
+            "key": "profile:papa.duck.at",
+            "lastAttemptAt": "2026-11-26T15:32:18.044Z",
+            "postsReturned": 1,
+            "status": "posts-returned",
+            "consecutiveFailures": 0,
+            "consecutiveEmpty": 0,
+            "retryAt": ""
+          },
+          {
+            "key": "hashtag:wienfood",
+            "lastAttemptAt": "2026-11-26T15:32:18.044Z",
+            "postsReturned": 1,
+            "status": "posts-returned",
+            "consecutiveFailures": 0,
+            "retryAt": "",
+            "consecutiveEmpty": 0
+          },
+          {
+            "key": "hashtag:wienpizza",
+            "lastAttemptAt": "2026-11-26T15:32:18.044Z",
+            "postsReturned": 1,
+            "status": "posts-returned",
+            "consecutiveEmpty": 0,
+            "retryAt": "",
+            "consecutiveFailures": 0
+          },
+          {
+            "key": "hashtag:gratiswien",
+            "lastAttemptAt": "2026-11-26T15:32:18.044Z",
+            "postsReturned": 1,
+            "status": "posts-returned",
+            "consecutiveFailures": 0,
+            "consecutiveEmpty": 0,
+            "retryAt": ""
+          },
+          {
+            "key": "hashtag:viennafood",
+            "lastAttemptAt": "2026-11-26T15:32:18.044Z",
+            "postsReturned": 1,
+            "status": "posts-returned",
+            "consecutiveFailures": 0,
+            "retryAt": "",
+            "consecutiveEmpty": 0
+          }
+        ]
+      },
+      "constraints": {
+        "profiles": 22,
+        "hashtags": 4,
+        "perSource": 1,
+        "posts": 26,
+        "ocrPosts": 8,
+        "dailyUsd": 0.15,
+        "cycleUsd": 4.65
+      },
+      "errors": []
+    },
     {
       "schemaVersion": 1,
       "runProvenance": {
