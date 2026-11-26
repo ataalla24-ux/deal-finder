@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-11-26T21:51:01.667Z",
+  "generatedAt": "2026-11-26T21:53:00.425Z",
   "discoveryAvailability": {
     "note": "Transport evidence, not deal yield. Retry eligibility is not recovery. Candidate counts are not Slack deliveries. No extra runs or quota resets.",
     "lanes": [
@@ -54,10 +54,10 @@
   },
   "summary": {
     "filesConsidered": 33,
-    "totalCandidates": 803,
-    "uniqueCandidates": 771,
+    "totalCandidates": 800,
+    "uniqueCandidates": 772,
     "distinctCandidates": 785,
-    "duplicateClusters": 14,
+    "duplicateClusters": 13,
     "topHealthySources": [
       {
         "sourceKey": "tiktok-browser",
@@ -84,13 +84,19 @@
         "totalDeals": 8
       },
       {
-        "sourceKey": "instagram-verified",
-        "sourceLabel": "Instagram",
-        "healthScore": 61,
-        "totalDeals": 6
+        "sourceKey": "wien-combined",
+        "sourceLabel": "Wien Deals Combined Graph",
+        "healthScore": 62,
+        "totalDeals": 1
       }
     ],
     "topMissionSources": [
+      {
+        "sourceKey": "wien-combined",
+        "sourceLabel": "Wien Deals Combined Graph",
+        "missionFitScore": 72,
+        "totalDeals": 1
+      },
       {
         "sourceKey": "joe",
         "sourceLabel": "jö Bonus Club",
@@ -108,12 +114,6 @@
         "sourceLabel": "TikTok Browser",
         "missionFitScore": 61,
         "totalDeals": 2
-      },
-      {
-        "sourceKey": "wien-combined",
-        "sourceLabel": "Wien Deals Combined Graph",
-        "missionFitScore": 58,
-        "totalDeals": 4
       },
       {
         "sourceKey": "vienna-websites",
@@ -173,16 +173,16 @@
         "totalDeals": 113
       },
       {
+        "sourceKey": "wien-combined",
+        "sourceLabel": "Wien Deals Combined Graph",
+        "precisionScore": 70,
+        "totalDeals": 1
+      },
+      {
         "sourceKey": "meta-instagram",
         "sourceLabel": "Meta Instagram Graph",
         "precisionScore": 66,
         "totalDeals": 96
-      },
-      {
-        "sourceKey": "wien-combined",
-        "sourceLabel": "Wien Deals Combined Graph",
-        "precisionScore": 63,
-        "totalDeals": 4
       },
       {
         "sourceKey": "joe",
@@ -211,16 +211,16 @@
         "totalDeals": 96
       },
       {
+        "sourceKey": "wien-combined",
+        "sourceLabel": "Wien Deals Combined Graph",
+        "sourceWeightScore": 57,
+        "totalDeals": 1
+      },
+      {
         "sourceKey": "gastro2",
         "sourceLabel": "Firecrawl Key 1 - Gastro",
         "sourceWeightScore": 53,
         "totalDeals": 118
-      },
-      {
-        "sourceKey": "joe",
-        "sourceLabel": "jö Bonus Club",
-        "sourceWeightScore": 52,
-        "totalDeals": 9
       }
     ],
     "topSourcesToFix": [
@@ -437,9 +437,9 @@
       "file": "deals-pending-meta-instagram.json",
       "sourceLabel": "Meta Instagram Graph",
       "totalDeals": 96,
-      "uniqueDeals": 84,
-      "duplicateDeals": 12,
-      "duplicateAcrossSources": 8,
+      "uniqueDeals": 85,
+      "duplicateDeals": 11,
+      "duplicateAcrossSources": 5,
       "fresh1dCount": 8,
       "fresh7dCount": 86,
       "viennaCount": 96,
@@ -577,6 +577,81 @@
       "coverageScore": 12,
       "precisionScore": 57,
       "sourceWeightScore": 48
+    },
+    {
+      "sourceKey": "wien-combined",
+      "file": "deals-pending-wien-combined.json",
+      "sourceLabel": "Wien Deals Combined Graph",
+      "totalDeals": 1,
+      "uniqueDeals": 0,
+      "duplicateDeals": 1,
+      "duplicateAcrossSources": 1,
+      "fresh1dCount": 1,
+      "fresh7dCount": 1,
+      "viennaCount": 1,
+      "foodDrinkCount": 1,
+      "promoCount": 0,
+      "missingUrlCount": 0,
+      "sampleTitles": [
+        "„Kannst du das kurz fürs Marketing halten?“ 😅📸 Das Marketing: 👇 🍗 AKTIONSMENÜ DER WOCHE 1/2 Backhendl + Pommes oder Salat + 1 Getränk na"
+      ],
+      "lastRun": {
+        "status": "completed-with-errors",
+        "startedAt": "2026-11-26T21:51:40.655Z",
+        "finishedAt": "2026-11-26T21:52:19.912Z",
+        "durationMs": 39257,
+        "counts": {
+          "rawCandidates": 2,
+          "normalizedCandidates": 1,
+          "verifiedCandidates": 1,
+          "previousDeals": 0,
+          "acceptedDeals": 1,
+          "rejectedDeals": 1
+        },
+        "rejectedByReason": {
+          "no-concrete-offer": 1
+        },
+        "errors": [
+          "#wienisst: Instagram shared quota paused: rolling-hour budget exhausted",
+          "#wienkaffee: Instagram shared quota paused: rolling-hour budget exhausted",
+          "#wienergastro: Instagram shared quota paused: rolling-hour budget exhausted",
+          "#viennaeats: Instagram shared quota paused: rolling-hour budget exhausted",
+          "#wienfood: Instagram shared quota paused: rolling-hour budget exhausted",
+          "#viennafood: Instagram shared quota paused: rolling-hour budget exhausted",
+          "#viennarestaurants: Instagram shared quota paused: rolling-hour budget exhausted"
+        ],
+        "reportFile": "deal-pipeline-last-run-wien-combined.json"
+      },
+      "uniqueRate": 0,
+      "duplicateRate": 1,
+      "fresh1dRate": 1,
+      "fresh7dRate": 1,
+      "viennaRate": 1,
+      "foodDrinkRate": 1,
+      "promoRate": 0,
+      "missingUrlRate": 0,
+      "averageQualityScore": 78,
+      "topCategories": [
+        {
+          "value": "essen",
+          "count": 1
+        }
+      ],
+      "topTypes": [
+        {
+          "value": "rabatt",
+          "count": 1
+        }
+      ],
+      "issues": [
+        "wenige klare Gratis-/Promo-Signale",
+        "hohe Überschneidung mit anderen Quellen"
+      ],
+      "healthScore": 62,
+      "missionFitScore": 72,
+      "coverageScore": 11,
+      "precisionScore": 70,
+      "sourceWeightScore": 57
     },
     {
       "sourceKey": "instagram-verified",
@@ -1008,93 +1083,6 @@
       "coverageScore": 27,
       "precisionScore": 48,
       "sourceWeightScore": 46
-    },
-    {
-      "sourceKey": "wien-combined",
-      "file": "deals-pending-wien-combined.json",
-      "sourceLabel": "Wien Deals Combined Graph",
-      "totalDeals": 4,
-      "uniqueDeals": 0,
-      "duplicateDeals": 4,
-      "duplicateAcrossSources": 4,
-      "fresh1dCount": 1,
-      "fresh7dCount": 4,
-      "viennaCount": 4,
-      "foodDrinkCount": 3,
-      "promoCount": 1,
-      "missingUrlCount": 0,
-      "sampleTitles": [
-        "Gemeinsam mit der TGM-Schülervertretung bieten wir euch drei exklusive Mittagsmenüs bereits ab 6,90 € an",
-        "🚨 TGM aufgepasst – eure neuen Mittagsmenüs sind da!",
-        "Nachdem TikTok mir meinen Accout „aliceentertains“ nicht wieder zurückgibt, poste ich so lange free Sachen in Wien, bis mich wer von TikTok"
-      ],
-      "lastRun": {
-        "status": "completed-with-errors",
-        "startedAt": "2026-11-26T08:49:47.188Z",
-        "finishedAt": "2026-11-26T08:51:37.407Z",
-        "durationMs": 110219,
-        "counts": {
-          "rawCandidates": 30,
-          "normalizedCandidates": 4,
-          "verifiedCandidates": 4,
-          "previousDeals": 0,
-          "acceptedDeals": 4,
-          "rejectedDeals": 25
-        },
-        "rejectedByReason": {
-          "no-concrete-offer": 18,
-          "non-offer-content": 1,
-          "excluded-promotion-type": 2,
-          "missing-text": 2,
-          "general-recommendation": 1,
-          "alcohol-offer": 1
-        },
-        "errors": [
-          "#viennafood: Instagram scan paused: request-budget",
-          "#wienergastro: Instagram scan paused: request-budget",
-          "#viennaeats: Instagram scan paused: request-budget",
-          "#viennarestaurants: Instagram scan paused: request-budget"
-        ],
-        "reportFile": "deal-pipeline-last-run-wien-combined.json"
-      },
-      "uniqueRate": 0,
-      "duplicateRate": 1,
-      "fresh1dRate": 0.3,
-      "fresh7dRate": 1,
-      "viennaRate": 1,
-      "foodDrinkRate": 0.8,
-      "promoRate": 0.3,
-      "missingUrlRate": 0,
-      "averageQualityScore": 83.8,
-      "topCategories": [
-        {
-          "value": "essen",
-          "count": 3
-        },
-        {
-          "value": "kultur",
-          "count": 1
-        }
-      ],
-      "topTypes": [
-        {
-          "value": "rabatt",
-          "count": 3
-        },
-        {
-          "value": "gratis",
-          "count": 1
-        }
-      ],
-      "issues": [
-        "wenige klare Gratis-/Promo-Signale",
-        "hohe Überschneidung mit anderen Quellen"
-      ],
-      "healthScore": 53,
-      "missionFitScore": 58,
-      "coverageScore": 12,
-      "precisionScore": 63,
-      "sourceWeightScore": 48
     },
     {
       "sourceKey": "instagram-ai",
