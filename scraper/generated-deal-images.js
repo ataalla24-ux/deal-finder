@@ -12,6 +12,7 @@ const version='specific-deal-photo-v1';
 const maxPerRun=2;
 const hour=3600000;
 const batches=new Map();
+const accessChecks=new Map();
 const clean=value=>String(value??'').replace(/\s+/g,' ').trim();
 const hash=value=>photoDigest(typeof value==='string'||Buffer.isBuffer(value)?value:JSON.stringify(value));
 const hex=value=>typeof value==='string'&&/^[a-f0-9]{64}$/.test(value);
@@ -46,6 +47,18 @@ function safeRead(root,relative,max) {
 
 export function generatedDealImageKey(deal) {
   return hash([version,DEAL_IMAGE_GENERATION_MODEL,generatedPhotoInputHash(deal)]);
+}
+
+function reusableBrief(cache,inputHash,dealHash) {
+  for(const [key,previous] of Object.entries(cache.entries)) {
+    if(previous.inputHash!==inputHash||previous.dealHash!==dealHash||previous.status!=='brief-ready'
+      ||previous.generatedDealImage||previous.stagingFile||previous.sha256) continue;
+    try {
+      const brief=validateBrief(previous.brief);
+      if(brief.eligible) return {brief,visualSubject:clean(brief.visualSubject),briefReusedFromGeneration:key};
+    } catch {}
+  }
+  return null;
 }
 
 const briefSchema={type:'object',additionalProperties:false,properties:{
@@ -91,15 +104,30 @@ function validateBrief(brief) {
   return brief;
 }
 
+export async function generatedImageModelAvailable(apiKey,request=fetch) {
+  try {
+    const response=await request('https://api.openai.com/v1/models',{method:'GET',redirect:'error',
+      signal:AbortSignal.timeout(15000),headers:{authorization:`Bearer ${apiKey}`}});
+    if(!response.ok) return false;
+    const data=await response.json();
+    return Array.isArray(data.data)&&data.data.some(model=>model?.id===DEAL_IMAGE_GENERATION_MODEL);
+  } catch {return false;}
+}
+
+function cachedImageAccess(apiKey) {
+  if(!accessChecks.has(apiKey)) accessChecks.set(apiKey,generatedImageModelAvailable(apiKey));
+  return accessChecks.get(apiKey);
+}
+
 export async function prepareGeneratedDealImagePreview(deal,{root=process.cwd(),now=new Date(),checkPreview,
-  request=freeCreditOpenAiFetch,apiKey=process.env.OPENAI_API_KEY,batch}={}) {
+  request=freeCreditOpenAiFetch,apiKey=process.env.OPENAI_API_KEY,batch,checkModelAccess=cachedImageAccess}={}) {
   if(deal.slackTs||deal.pendingDealImage?.slackMessageTs||deal.approvedDealImage?.status==='locked') return deal;
   const {pendingDealImage:oldPreview,imagePreparationState:oldState,...base}=deal;
   const deferred=state=>({...base,imageApprovalRequired:true,imagePreparationState:state});
   if(!clean(deal.id)||!clean(deal.title)||!deal.category||!Number.isFinite(+now)) return deferred('review-held');
   const generationKey=generatedDealImageKey(deal),inputHash=generatedPhotoInputHash(deal);
-  let row;
-  try {row=readCache(root).entries[generationKey];} catch {return deferred('storage-unavailable');}
+  let row,cache;
+  try {cache=readCache(root);row=cache.entries[generationKey];} catch {return deferred('storage-unavailable');}
   if(row?.status==='ready') {
     try {
       const bound=readBoundPhotoSnapshot({...deal,photoUrl:row.photoUrl,generatedDealImage:row.generatedDealImage},{root});
@@ -117,6 +145,7 @@ export async function prepareGeneratedDealImagePreview(deal,{root=process.cwd(),
   if(process.env.APPROVAL_COPY_CACHE_ONLY==='1') return deferred('budget-paused');
   if(row?.nextAttemptAt&&Date.parse(row.nextAttemptAt)>+now) return deferred(row.reason==='budget-paused'?'budget-paused':'waiting-generation');
   if(!apiKey) return deferred('budget-paused');
+  if(!await checkModelAccess(apiKey)) return deferred('model-access-unavailable');
   if(!batch) {
     if(!batches.has(root)) batches.set(root,{used:0,paused:false});
     batch=batches.get(root);
@@ -125,6 +154,10 @@ export async function prepareGeneratedDealImagePreview(deal,{root=process.cwd(),
   batch.used++;
   row=row||{generationKey,inputHash,dealHash:hash(deal.id),model:DEAL_IMAGE_GENERATION_MODEL,status:'new'};
   try {
+    if(!row.brief) {
+      const prior=reusableBrief(cache,inputHash,hash(deal.id));
+      if(prior) row=saveRow(root,generationKey,{...row,...prior,status:'brief-ready'});
+    }
     if(!row.brief) {
       const input=JSON.stringify({title:deal.title,brand:deal.brand,description:deal.description,category:deal.category});
       if(Buffer.byteLength(input)>24000) return deferred('review-held');

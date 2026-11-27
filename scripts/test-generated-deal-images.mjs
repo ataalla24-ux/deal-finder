@@ -4,15 +4,15 @@ import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
 import sharp from 'sharp';
-import {prepareGeneratedDealImagePreview,generatedDealImageKey,validatePreparedGeneratedImages,GENERATED_IMAGE_CACHE} from '../scraper/generated-deal-images.js';
-import {DEAL_IMAGE_GENERATION_URL} from '../scraper/ai-credit-budget.js';
+import {prepareGeneratedDealImagePreview,generatedDealImageKey,validatePreparedGeneratedImages,GENERATED_IMAGE_CACHE,generatedImageModelAvailable} from '../scraper/generated-deal-images.js';
+import {DEAL_IMAGE_GENERATION_URL,DEAL_IMAGE_GENERATION_MODEL} from '../scraper/ai-credit-budget.js';
 
 const now=new Date('2026-11-27T20:00:00Z');
 const deal={id:'specific-donut',title:'Gratis Donut',brand:'Fixture Bakery',category:'essen',url:'https://example.test/donut',description:'Ein Donut gratis, einmal pro Person.'};
 const checks=['matchesSubject','specificEnough','noContradictions','cropComplete','labelReadable','notMisleading'];
 const image=await sharp({create:{width:1536,height:1024,channels:3,background:'#b79472'}}).jpeg().toBuffer();
 const read=root=>JSON.parse(fs.readFileSync(path.join(root,GENERATED_IMAGE_CACHE)));
-const options=root=>({root,now,apiKey:'offline-fixture',batch:{used:0,paused:false},checkPreview:async()=>false});
+const options=root=>({root,now,apiKey:'offline-fixture',batch:{used:0,paused:false},checkPreview:async()=>false,checkModelAccess:async()=>true});
 const fixture=fn=>async()=>{const root=fs.mkdtempSync(path.join(os.tmpdir(),'specific-image-'));try{await fn(root);}finally{fs.rmSync(root,{recursive:true,force:true});}};
 
 function provider({rejectVision=false,pauseVision=false}={}) {
@@ -115,4 +115,40 @@ test('cached-only approval never starts image preparation',fixture(async root=>{
     if(previous===undefined) delete process.env.APPROVAL_COPY_CACHE_ONLY;
     else process.env.APPROVAL_COPY_CACHE_ONLY=previous;
   }
+}));
+
+test('a model-access repair reuses only a brief bound to the identical offer',fixture(async root=>{
+  const first=provider();
+  await prepareGeneratedDealImagePreview(deal,{...options(root),request:async(url,init,opts)=>
+    url===DEAL_IMAGE_GENERATION_URL ? new Response('{}',{status:403}) : first.request(url,init,opts)});
+  const cache=read(root),key=generatedDealImageKey(deal),oldKey='e'.repeat(64);
+  cache.entries[oldKey]={...cache.entries[key],generationKey:oldKey};
+  delete cache.entries[key];
+  fs.writeFileSync(path.join(root,GENERATED_IMAGE_CACHE),JSON.stringify(cache));
+  const repaired=provider();
+  const result=await prepareGeneratedDealImagePreview(deal,{...options(root),request:repaired.request});
+  assert.equal(result.imagePreparationState,'waiting-publication');
+  assert.equal(repaired.calls.length,2);
+  assert.equal(repaired.calls[0].url,DEAL_IMAGE_GENERATION_URL);
+  assert.equal(read(root).entries[key].briefReusedFromGeneration,oldKey);
+  let firstRequest;
+  await prepareGeneratedDealImagePreview({...deal,description:'Ein Schoko-Donut gratis.'},{
+    ...options(root),request:async(_url,init)=>{firstRequest=JSON.parse(init.body);throw Error('offline-stop');},
+  });
+  assert.equal(firstRequest.response_format.json_schema.name,'deal_photo_brief','a changed offer needs a new brief');
+}));
+
+test('missing image-model access stops before any paid briefing or image call',fixture(async root=>{
+  const result=await prepareGeneratedDealImagePreview(deal,{...options(root),checkModelAccess:async()=>false,
+    request:async()=>assert.fail('no paid call without image access')});
+  assert.equal(result.imagePreparationState,'model-access-unavailable');
+  assert.equal(fs.existsSync(path.join(root,GENERATED_IMAGE_CACHE)),false);
+  const calls=[];
+  const access=await generatedImageModelAvailable('fixture-key',async(url,init)=>{
+    calls.push({url,method:init.method});
+    return Response.json({data:[{id:'gpt-6.2-astra'}]});
+  });
+  assert.equal(access,false);
+  assert.deepEqual(calls,[{url:'https://api.openai.com/v1/models',method:'GET'}]);
+  assert.equal(await generatedImageModelAvailable('fixture-key',async()=>Response.json({data:[{id:DEAL_IMAGE_GENERATION_MODEL}]})),true);
 }));
