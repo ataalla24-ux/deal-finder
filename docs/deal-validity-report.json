@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-11-27T13:10:18.527Z",
+  "generatedAt": "2026-11-27T13:34:07.018Z",
   "summary": {
     "maxAgeDays": 7,
     "total": 328,
@@ -10,12 +10,11 @@
       "kein konkretes Angebot erkennbar": 254,
       "Gottesdienste nur im Wochenlauf": 36,
       "älter als 7 Tage (2020-04-25)": 1,
-      "älter als 7 Tage (2026-02-22)": 79,
+      "älter als 7 Tage (2026-02-22)": 80,
       "URL ungültig (fehlende Ziel-URL)": 2,
       "älter als 7 Tage (2017-04-20)": 1,
       "älter als 7 Tage (2026-11-09)": 1,
       "älter als 7 Tage (2026-11-10)": 1,
-      "älter als 7 Tage (2025-07-30)": 1,
       "URL ungültig (HTTP 404)": 11,
       "nicht eindeutig in Wien": 12,
       "relative Kurz-Aktion abgelaufen (2026-11-22)": 1,
@@ -675,17 +674,18 @@
       "reasons": [
         "kein konkretes Angebot erkennbar",
         "Gottesdienste nur im Wochenlauf",
-        "älter als 7 Tage (2025-07-30)"
+        "älter als 7 Tage (2026-02-22)"
       ],
       "warnings": [
+        "URL nicht eindeutig prüfbar (HTTP 502)",
         "kein Ablaufdatum gefunden"
       ],
-      "sourceDate": "2025-07-30T05:18:47.000Z",
-      "sourceDateSource": "url.publicationDate",
-      "sourceAgeDays": 485,
+      "sourceDate": "2026-02-22T21:13:07.698Z",
+      "sourceDateSource": "deal.pubDate",
+      "sourceAgeDays": 278,
       "expiryDate": "",
       "expirySource": "",
-      "urlStatus": "HTTP 200"
+      "urlStatus": "unklar: HTTP 502"
     },
     {
       "id": "extra-21-20260222",
@@ -867,7 +867,7 @@
       "warnings": [
         "kein Ablaufdatum gefunden"
       ],
-      "sourceDate": "2026-11-27T13:08:07.405Z",
+      "sourceDate": "2026-11-27T13:33:07.033Z",
       "sourceDateSource": "url.publicationDate",
       "sourceAgeDays": 0,
       "expiryDate": "",
@@ -1809,16 +1809,14 @@
         "abgelaufen (2026-11-01)"
       ],
       "warnings": [
-        "Inhalt prüfen: Titel zu lang; Angebot kurz benennen, Bedingungen in den Details behalten",
-        "URL nicht eindeutig prüfbar (temporärer Fehler)",
-        "kein Quell-/Post-Datum gefunden"
+        "Inhalt prüfen: Titel zu lang; Angebot kurz benennen, Bedingungen in den Details behalten"
       ],
-      "sourceDate": "",
-      "sourceDateSource": "",
-      "sourceAgeDays": null,
+      "sourceDate": "2026-11-25T22:52:06.000Z",
+      "sourceDateSource": "url.publicationDate",
+      "sourceAgeDays": 2,
       "expiryDate": "2026-11-01",
       "expirySource": "deal.expires",
-      "urlStatus": "unklar: temporärer URL-Fehler"
+      "urlStatus": "HTTP 200"
     },
     {
       "id": "g2-tzgesx",
@@ -6736,16 +6734,23 @@
   ],
   "runProvenance": {
     "repository": "ataalla24-ux/deal-finder",
-    "runId": "46004598103",
-    "headSha": "944a2229502c1117ff53c98c9bd08cdd6cccaf66",
-    "checkoutSha": "944a2229502c1117ff53c98c9bd08cdd6cccaf66",
-    "triggeringRun": null,
-    "event": "workflow_dispatch",
+    "runId": "46008026241",
+    "headSha": "7d8729779f8dc74fafdf7912050f9f2bcee586c7",
+    "checkoutSha": "7d8729779f8dc74fafdf7912050f9f2bcee586c7",
+    "triggeringRun": {
+      "runId": "46007701658",
+      "headSha": "8b6edfa6ee58f3e73a5704c0ee298bb63c5662fc",
+      "event": "schedule",
+      "name": "Firecrawl Key 5 - Instagram Gastro",
+      "startedAt": "2026-11-27T13:30:34.000Z",
+      "url": "https://github.com/ataalla24-ux/deal-finder/actions/runs/46007701658"
+    },
+    "event": "workflow_run",
     "runAttempt": "1",
-    "url": "https://github.com/ataalla24-ux/deal-finder/actions/runs/46004598103"
+    "url": "https://github.com/ataalla24-ux/deal-finder/actions/runs/46008026241"
   },
   "instagramDelivery": {
-    "checkedAt": "2026-11-27T13:10:18.536Z",
+    "checkedAt": "2026-11-27T13:34:07.028Z",
     "scope": "instagram-ai-agent/standard-slack-lane",
     "extractedCandidates": 3,
     "counts": {
@@ -6800,7 +6805,7 @@
     ]
   },
   "tiktokDelivery": {
-    "checkedAt": "2026-11-27T13:10:18.539Z",
+    "checkedAt": "2026-11-27T13:34:07.030Z",
     "scope": "tiktok-deals-scanner/standard-slack-lane",
     "extractedCandidates": 3,
     "counts": {
