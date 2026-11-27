@@ -7,6 +7,7 @@ const apiKey = 'tvly-offline-budget-fixture';
 const firstNovemberScan = new Date('2026-11-01T05:15:00Z');
 const video = 'https://www.tiktok.com/@food.wien/video/7711008298236988694';
 const otherVideo = 'https://www.tiktok.com/@food.wien/video/7709134021703339286';
+const instagramPost = 'https://www.instagram.com/p/CafeWien123/';
 
 function usage(account = {}, key = {}) {
   return { account: { current_plan: 'Researcher', plan_limit: 1000, plan_usage: 0,
@@ -14,13 +15,14 @@ function usage(account = {}, key = {}) {
 }
 
 function fixture({
-  now = firstNovemberScan, accountUsage = usage(), previous = {}, getUsage = () => Response.json(accountUsage),
+  now = firstNovemberScan, accountUsage = usage(), previous = {}, instagramIndex,
+  getUsage = () => Response.json(accountUsage),
   search = () => Response.json({ results: [], usage: { credits: 1 } }),
 } = {}) {
   const requests = [];
   const waits = [];
   const run = () => discoverTikTokLinksViaTavily({
-    enabled: true, freePlanConfirmed: true, apiKey, previous, clock: () => now,
+    enabled: true, freePlanConfirmed: true, apiKey, previous, instagramIndex, clock: () => now,
     sleep: async ms => { waits.push(ms); },
     fetcher: async (url, options) => {
       assert.equal(options.redirect, 'error');
@@ -40,8 +42,8 @@ function fixture({
       assert.equal(body.auto_parameters, false);
       assert.equal(body.include_usage, true);
       assert.ok(!options.body.includes(apiKey));
-      requests.push({ url, query: body.query });
-      return search(requests.length - 1);
+      requests.push({ url, query: body.query, domains: body.include_domains });
+      return search(requests.length - 1, body);
     },
   });
   return { requests, waits, run };
@@ -90,6 +92,69 @@ test('a large remaining budget never sends more than the distinct current query 
   assert.equal(result.attemptedQueries, uniqueQueries.length);
   assert.deepEqual(f.requests.slice(1).map(row => row.query), uniqueQueries);
   assert.equal(result.nextQueryIndex, 0);
+});
+
+test('Instagram replaces one existing keyed slot and never enters the TikTok result set or cursor', async () => {
+  const f = fixture({ instagramIndex: { enabled: true, previous: {} }, search: (index, body) =>
+    Response.json({ results: body.include_domains[0] === 'instagram.com'
+      ? [{ url: instagramPost + '?igsh=fixture', content: apiKey }, { url: video }, { url: 'https://instagram.com/tv/CafeWien123/' }]
+      : index === 1 ? [{ url: video }, { url: instagramPost }] : [], usage: { credits: 1 } }),
+  });
+  const result = await f.run();
+  assert.equal(result.budget.plannedQueries, 17);
+  assert.equal(result.usageChecks, 1);
+  assert.equal(result.attemptedQueries, 17);
+  assert.equal(result.reportedSearchCredits, 17);
+  assert.deepEqual(result.links, [video]);
+  assert.equal(result.indexRows, 2);
+  assert.equal(result.nextQueryIndex, 16);
+  assert.deepEqual(f.requests.slice(1, -1).map(req => req.domains), Array(16).fill(['tiktok.com']));
+  assert.deepEqual(f.requests.at(-1).domains, ['instagram.com']);
+  assert.deepEqual(result.instagramIndex.links, [instagramPost]);
+  assert.equal(result.instagramIndex.attemptedQueries, 1);
+  assert.ok(!JSON.stringify(result).includes(apiKey));
+  const narrow = fixture({ accountUsage: usage({ plan_usage: 999 }), instagramIndex: { enabled: true, previous: {} } });
+  assert.equal((await narrow.run()).attemptedQueries, 1);
+  assert.deepEqual(narrow.requests.at(-1).domains, ['tiktok.com']);
+});
+
+test('Instagram diagnostics makes exactly one guarded query and shares provider holds', async () => {
+  const instagramIndex = { probe: true, previous: {} };
+  const f = fixture({ previous: { nextQueryIndex: 7 }, instagramIndex,
+    search: () => Response.json({ class: 'throttle' }, { status: 429, headers: { 'Retry-After': '7200' } }) });
+  const result = await f.run();
+  assert.equal(result.budget.remainingCredits, 1000);
+  assert.equal(result.attemptedQueries, 1);
+  assert.equal(result.instagramIndex.attemptedQueries, 1);
+  assert.equal(result.nextQueryIndex, 7);
+  assert.deepEqual(f.requests[1].domains, ['instagram.com']);
+  assert.equal(f.requests.length, 2);
+  assert.equal(result.nextRetryAt, '2026-11-01T07:15:00.000Z');
+  const held = fixture({ instagramIndex: { enabled: true, previous: { nextRetryAt: result.nextRetryAt } } });
+  assert.equal((await held.run()).status, 'cooldown');
+  assert.equal(held.requests.length, 0);
+  const replay = fixture({ instagramIndex: { probe: true, previous: { lastProbeAt: firstNovemberScan.toISOString() } } });
+  assert.equal((await replay.run()).status, 'probe-already-attempted');
+  assert.equal(replay.requests.length, 0);
+  const invalid = fixture({ instagramIndex, accountUsage: usage({ paygo_limit: 1 }) });
+  assert.equal((await invalid.run()).status, 'free-plan-unverified');
+  assert.equal(invalid.requests.length, 1);
+  assert.equal((await discoverTikTokLinksViaTavily({ enabled: true, instagramIndex,
+    fetcher: async () => assert.fail('diagnostics cannot fall back to keyless') })).status, 'key-missing');
+});
+
+test('a refused Instagram slot retains completed TikTok results and a shared provider deadline', async () => {
+  const f = fixture({ accountUsage: usage({ plan_usage: 900 }), instagramIndex: { enabled: true, previous: {} },
+    search: (_, body) => body.include_domains[0] === 'instagram.com'
+      ? new Response(null, { status: 429, headers: { 'Retry-After': '300' } })
+      : Response.json({ results: [{ url: video }], usage: { credits: 1 } }),
+  });
+  const result = await f.run();
+  assert.equal(result.status, 'rate-limited');
+  assert.equal(result.tikTokStatus, 'completed');
+  assert.equal(result.nextRetryAt, '2026-11-01T05:20:00.000Z');
+  assert.deepEqual(result.links, [video]);
+  assert.equal(result.nextQueryIndex, 1);
 });
 
 test('a paid, overage-enabled or unverifiable usage response cannot start a search', async () => {

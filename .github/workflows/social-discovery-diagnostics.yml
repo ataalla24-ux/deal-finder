@@ -3,9 +3,9 @@ on:
   workflow_dispatch:
     inputs:
       lane:
-        description: TikTok search, Instagram profile read, or one Instagram public search query
+        description: TikTok search, Instagram profile read, or one Instagram public index query
         type: choice
-        options: [tiktok, tiktok-direct, tiktok-routes, tiktok-public-ui, instagram, instagram-search]
+        options: [tiktok, tiktok-direct, tiktok-routes, tiktok-public-ui, instagram, instagram-search, instagram-api-search]
         default: tiktok
 permissions:
   contents: read
@@ -105,6 +105,44 @@ jobs:
         with:
           name: instagram-search-diagnostics
           path: output/social-discovery/instagram-search.json
+          retention-days: 7
+
+  instagram-api-search:
+    if: ${{ inputs.lane == 'instagram-api-search' && github.ref == 'refs/heads/main' }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 6
+    concurrency:
+      group: tiktok-deal-scan
+      cancel-in-progress: false
+      queue: max
+    permissions:
+      contents: write
+    env:
+      SENTRY_DISABLED: '1'
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: npm ci --no-audit --no-fund
+      - name: Verify the shared free index budget and cache offline
+        run: node --test scripts/test-tavily-free-budget.mjs scripts/test-instagram-tavily-index.mjs
+      - name: Check one public Instagram query with the shared free budget
+        id: index
+        env:
+          TIKTOK_TAVILY_FREE_PLAN_CONFIRMED: ${{ vars.TIKTOK_TAVILY_FREE_PLAN_CONFIRMED }}
+          TAVILY_API_KEY: ${{ secrets.TAVILY_API_KEY || secrets.TAVIILY_API_KEY }}
+        run: node scripts/check-instagram-tavily-index.mjs
+      - name: Persist the Instagram index and shared retry state
+        if: ${{ always() && steps.index.outputs.cache_changed == 'true' }}
+        run: node scripts/commit-generated.mjs --message "Record guarded Instagram public index search [skip ci]" --files source-state/instagram-tavily-index.json
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: instagram-tavily-index-diagnostics
+          path: output/social-discovery/instagram-tavily-index.json
           retention-days: 7
 
   tiktok-direct:

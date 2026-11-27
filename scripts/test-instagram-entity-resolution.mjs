@@ -76,4 +76,28 @@ const suspiciousShortHandle = resolveInstagramPostEntities({
 });
 assert.equal(suspiciousShortHandle.merchantUsername, '');
 
+const sentenceEnding = resolveInstagramPostEntities({
+  caption: 'Beauty-Aktion in Wien. Nicht mit anderen Aktionen kombinierbar. #wien',
+});
+assert.equal(sentenceEnding.merchantUsername, '');
+assert.deepEqual(sentenceEnding.bareMerchantUsernames, []);
+const pollutedRoleIndex = buildInstagramRoleIndex([{ username: 'kombinierbar.', accountType: 'merchant', viennaVerified: true }]);
+assert.equal(resolveInstagramPostEntities({
+  caption: 'Beauty-Aktion in Wien. Nicht mit anderen Aktionen kombinierbar. #wien',
+  roleIndex: pollutedRoleIndex,
+}).merchantUsername, '', 'past false positives in the learned account index cannot revive the sentence word');
+assert.equal(resolveInstagramPostEntities({
+  caption: 'Rabatt für Mitglieder. Auf andere Personen nicht übertragbar. #aktion',
+}).merchantUsername, '');
+assert.equal(resolveInstagramPostEntities({
+  ownerUsername: 'shaysfoodblog',
+  caption: 'Heute 20 % bei salon.beauty.at. #aktion',
+  roleIndex,
+}).merchantUsername, 'salon.beauty.at');
+assert.equal(resolveInstagramPostEntities({
+  ownerUsername: 'shaysfoodblog',
+  caption: 'Neuer Spot in Wien - ramen.makotoya. #ramen',
+  roleIndex,
+}).merchantUsername, 'ramen.makotoya');
+
 console.log('instagram entity resolution tests passed');

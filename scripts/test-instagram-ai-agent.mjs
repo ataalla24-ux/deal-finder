@@ -67,6 +67,7 @@ const timedOut = await classifyWithOpenAi(modelCandidates, {
 assert.equal(timedOutCalls, 1, 'a timed-out reserved request must stop without another dispatch');
 assert.deepEqual(timedOut.health, {
   status: 'unavailable',
+  requestMode: 'background',
   httpStatus: null,
   code: 'request-timeout',
   retryable: false,
@@ -82,6 +83,7 @@ const retryDeadline = new AbortController();
 let retryCalls = 0;
 const timedOutDuringRetryWait = await classifyWithOpenAi(modelCandidates, {
   ...modelFixture,
+  background: false,
   signal: retryDeadline.signal,
   async fetchImpl() {
     retryCalls += 1;
@@ -91,6 +93,20 @@ const timedOutDuringRetryWait = await classifyWithOpenAi(modelCandidates, {
 });
 assert.equal(retryCalls, 1, 'the existing transient retry must stop if its wait crosses the deadline');
 assert.equal(timedOutDuringRetryWait.health.code, 'request-timeout');
+
+let backgroundPosts = 0;
+const backgroundFailure = await classifyWithOpenAi(modelCandidates, {
+  ...modelFixture,
+  sleepImpl: () => assert.fail('background submissions never retry a POST'),
+  async fetchImpl(_url, _init, budgetOptions) {
+    assert.equal(budgetOptions.background, true);
+    backgroundPosts++;
+    return new Response('{}', { status: 503, headers: { 'Retry-After': '0' } });
+  },
+});
+assert.equal(backgroundPosts, 1);
+assert.equal(backgroundFailure.health.httpStatus, 503);
+assert.equal(backgroundFailure.health.completedCandidates, 0);
 
 const invalid = await classifyWithOpenAi(modelCandidates.slice(0, 1), {
   ...modelFixture,

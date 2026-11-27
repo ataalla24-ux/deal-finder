@@ -24,7 +24,7 @@ const BARE_HANDLE_STOPWORDS = new Set([
   'angebot', 'angebote', 'aktion', 'anzeige', 'app', 'austria', 'bei', 'code', 'deal', 'deals',
   'der', 'die', 'das', 'dem', 'den', 'dies', 'diese', 'diesem', 'diesen', 'dieser', 'dieses',
   'ein', 'eine', 'einem', 'einer', 'essen', 'food', 'from', 'gratis', 'heute', 'instagram',
-  'jegliche', 'jeglichem', 'jeglichen', 'jeglicher', 'mit', 'neu', 'new', 'nur', 'rabatt',
+  'jegliche', 'jeglichem', 'jeglichen', 'jeglicher', 'kombinierbar', 'mit', 'neu', 'new', 'nur', 'rabatt',
   'the', 'und', 'unserem', 'unseren', 'unserer', 'vienna', 'von', 'wien', 'www',
 ]);
 
@@ -81,7 +81,7 @@ export function extractInstagramMentionUsernames(value) {
 }
 
 function plausibleBareMerchantUsername(value) {
-  const username = normalizeInstagramUsername(value);
+  const username = normalizeInstagramUsername(value).replace(/\.+$/, '');
   if (username.length < 4 || BARE_HANDLE_STOPWORDS.has(username)) return '';
   if ((username.match(/[a-z]/g) || []).length < 2) return '';
   if (/^(?:https?|instagram|facebook|tiktok|youtu|www\d*)$/i.test(username)) return '';
@@ -100,33 +100,27 @@ export function extractInstagramBareMerchantUsernames(value, roleIndex = new Map
     const username = plausibleBareMerchantUsername(valueToAdd);
     if (username) usernames.add(username);
   };
+  const addCaptionCandidate = (raw) => {
+    const username = plausibleBareMerchantUsername(raw);
+    if (!username) return;
+    const known = roleIndex instanceof Map && roleIndex.has(username);
+    const separated = /[._]/.test(username);
+    // A full stop after an unregistered plain word is punctuation, not part
+    // of a handle. Preserve genuine separated handles before a full stop.
+    if (!known && raw.endsWith('.') && !separated) return;
+    if (known || separated || MERCHANT_USERNAME_PATTERN.test(username)
+      || /(?:wien|vienna|austria|official)$/.test(username)) usernames.add(username);
+  };
 
   for (const username of roleIndex instanceof Map ? roleIndex.keys() : []) {
     if (captionContainsUsername(caption, username)) add(username);
   }
 
   const relationPattern = /\b(?:bei|at|from|von|mit|by|für|fuer|through|via)\s+(?:(?:der|dem|den|einem|einer|the)\s+)?@?([a-z0-9][a-z0-9._]{2,29})(?![a-z0-9._äöüß])/gi;
-  for (const match of caption.matchAll(relationPattern)) {
-    const rawUsername = match[1];
-    const username = plausibleBareMerchantUsername(rawUsername);
-    if (!username) continue;
-    const known = roleIndex instanceof Map && roleIndex.has(username);
-    const handleShaped = /[._]/.test(username)
-      || MERCHANT_USERNAME_PATTERN.test(username)
-      || /(?:wien|vienna|austria|official)$/.test(username);
-    if (known || handleShaped) usernames.add(username);
-  }
+  for (const match of caption.matchAll(relationPattern)) addCaptionCandidate(match[1]);
 
   const standalonePattern = /(?:^|[\s:|\-–—])@?([a-z0-9][a-z0-9._]{2,29})(?![a-z0-9._äöüß])(?=\s*(?:📍|#|\*(?:anzeige|einladung)|$))/gi;
-  for (const match of caption.matchAll(standalonePattern)) {
-    const username = plausibleBareMerchantUsername(match[1]);
-    if (!username) continue;
-    const known = roleIndex instanceof Map && roleIndex.has(username);
-    const handleShaped = /[._]/.test(username)
-      || MERCHANT_USERNAME_PATTERN.test(username)
-      || /(?:wien|vienna|austria|official)$/.test(username);
-    if (known || handleShaped) usernames.add(username);
-  }
+  for (const match of caption.matchAll(standalonePattern)) addCaptionCandidate(match[1]);
 
   return [...usernames].slice(0, 12);
 }

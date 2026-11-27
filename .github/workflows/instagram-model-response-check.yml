@@ -1,0 +1,62 @@
+name: Instagram Model Response Check
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - 'scraper/openai-background-response.js'
+      - 'scripts/check-instagram-model-response.mjs'
+      - 'scripts/test-instagram-model-response.mjs'
+      - '.github/workflows/instagram-model-response-check.yml'
+permissions:
+  contents: read
+jobs:
+  offline:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    env:
+      SENTRY_DISABLED: '1'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+      - run: npm ci --no-audit --no-fund
+      - run: node --test scripts/test-instagram-model-response.mjs scripts/test-ai-credit-budget.mjs
+      - run: node scripts/test-instagram-ai-agent.mjs
+  one-cached-batch:
+    if: github.event_name == 'workflow_dispatch' && github.ref == 'refs/heads/main' && github.run_attempt == 1
+    needs: offline
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    concurrency:
+      group: instagram-ai-scan
+      cancel-in-progress: false
+      queue: max
+    permissions:
+      contents: write
+    env:
+      SENTRY_DISABLED: '1'
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+      - run: npm ci --no-audit --no-fund
+      - name: Verify one cached classification batch within the existing credit policy
+        env:
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+          GH_TOKEN: ${{ github.token }}
+          FREEFINDER_ASTRA_ENRICHMENT: '0'
+          INSTAGRAM_MODEL_DIAGNOSTIC: '1'
+        run: node scripts/check-instagram-model-response.mjs --run
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: instagram-model-response
+          path: output/instagram-model-response/report.json
+          retention-days: 7

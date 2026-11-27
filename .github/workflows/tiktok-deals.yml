@@ -64,7 +64,7 @@ jobs:
       - name: Test TikTok scanner
         run: |
           npm run test:tiktok-deal-scanner
-          node --test scripts/test-tiktok-known-links.mjs scripts/test-social-search-reliability.mjs scripts/test-tiktok-opening-merchant.mjs scripts/test-tavily-free-budget.mjs
+          node --test scripts/test-tiktok-known-links.mjs scripts/test-social-search-reliability.mjs scripts/test-tiktok-opening-merchant.mjs scripts/test-tavily-free-budget.mjs scripts/test-instagram-tavily-index.mjs
 
       - name: Install Playwright Chromium
         run: npx playwright install --with-deps chromium chromium-headless-shell
@@ -108,7 +108,7 @@ jobs:
       - name: Commit TikTok scanner state
         if: always()
         run: |
-          node scripts/commit-generated.mjs --skip-conflicts --message "TikTok deals $(date +%Y-%m-%d)" --files docs/deals-pending-tiktok.json docs/tiktok-scanner-report.json docs/tiktok-media-evidence-cache.json
+          node scripts/commit-generated.mjs --skip-conflicts --message "TikTok deals $(date +%Y-%m-%d)" --files docs/deals-pending-tiktok.json docs/tiktok-scanner-report.json docs/tiktok-media-evidence-cache.json source-state/instagram-tavily-index.json
 
   import-browser-posts:
     if: ${{ github.event_name == 'workflow_dispatch' && github.ref == 'refs/heads/main' && inputs.browsed_posts != '' }}

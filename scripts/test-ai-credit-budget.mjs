@@ -2,6 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import { createCreditBudget, creditPeriodExposure, dailyCreditExposureUsd, isAstraEnrichmentActive, loadAiCreditPolicy, meteredUsageUsd, modelForTask, prepareBudgetedRequest, prepareFreeCreditCall, validateCreditPolicy, DEAL_IMAGE_GENERATION_MODEL, DEAL_IMAGE_GENERATION_URL, meteredImageUsageUsd } from '../scraper/ai-credit-budget.js';
+import { OPENAI_BACKGROUND_TIMEOUT_MS } from '../scraper/ai-credit-budget.js';
 import { reconcileKnownOverrun } from './reconcile-openai-budget-20261120.mjs';
 import { requestOpenAi } from '../scraper/instagram-media-evidence.js';
 import { githubQuotaStore } from '../scraper/instagram-shared-quota.js';
@@ -27,6 +28,246 @@ function memory(initial) {
 const successful = () => Response.json({ status: 'completed',
   output: [{ type: 'message', content: [{ type: 'output_text', text: '{"ok":true}' }] }],
   usage: { input_tokens: 20, output_tokens: 5, total_tokens: 25 } });
+
+const responsesUrl = 'https://api.openai.com/v1/responses';
+const backgroundId = 'resp_fixture123';
+const receipt = { input_tokens: 20, output_tokens: 5, total_tokens: 25 };
+const backgroundState = (status, extra = {}) => Response.json({
+  id: backgroundId, model: 'gpt-6.2-sol', status, ...extra,
+});
+const backgroundResult = { usage: receipt,
+  output: [{ type: 'message', content: [{ type: 'output_text', text: '{"deals":[]}' }] }] };
+
+function backgroundFixture(transport, grant = policy) {
+  let time = now;
+  const calls = [];
+  const store = memory();
+  const request = async (target, options) => {
+    calls.push({ target, options, time });
+    assert.equal(options.redirect, 'error');
+    assert.equal(options.signal.aborted, false);
+    assert.equal(store.state.reservations.length, 1);
+    assert.equal(store.state.reservations[0].status, 'reserved');
+    return transport(target, options, time, calls.length);
+  };
+  const fetch = createCreditBudget({ store, policy: grant, clock: () => time,
+    sleep: async delay => { time += delay; }, request });
+  return { fetch, store, calls };
+}
+
+test('one internally enabled Background reservation can complete beyond 110 seconds with bounded polls', async () => {
+  const fixture = backgroundFixture((target, options, time) => {
+    if (target === responsesUrl) {
+      assert.equal(options.method, 'POST');
+      const body = JSON.parse(options.body);
+      assert.deepEqual(body.reasoning, { effort: 'max', mode: 'pro' });
+      assert.equal(body.service_tier, 'default');
+      assert.equal(body.max_output_tokens, 8192);
+      assert.equal(body.store, false);
+      assert.equal(body.background, true);
+      assert.deepEqual(body.background_options, { completion_window: 'soonest' });
+      return backgroundState('queued');
+    }
+    assert.equal(target, responsesUrl + '/' + backgroundId);
+    assert.equal(options.method, 'GET');
+    assert.equal(options.body, undefined);
+    assert.equal(options.headers.get('authorization'), 'Bearer fixture');
+    assert.equal(options.headers.get('openai-project'), 'fixture-project');
+    assert.equal(options.headers.get('x-untrusted'), null);
+    return time - now >= 120_000 ? backgroundState('completed', backgroundResult) : backgroundState('in_progress');
+  });
+  const response = await fixture.fetch(url, { ...init(),
+    headers: { Authorization: 'Bearer fixture', 'OpenAI-Project': 'fixture-project', 'X-Untrusted': 'ignored' },
+  }, { background: true });
+  const result = await response.json();
+  assert.equal(result.choices[0].finish_reason, 'stop');
+  assert.equal(result.choices[0].message.content, '{"deals":[]}');
+  assert.equal(result.usage.total_tokens, 25);
+  assert(!JSON.stringify(result).includes(backgroundId));
+  assert.equal(fixture.calls.filter(({ options }) => options.method === 'POST').length, 1);
+  assert(fixture.calls.length > 2 && fixture.calls.length <= 61);
+  assert(fixture.calls.slice(1).every(({ time }, index) => time - fixture.calls[index].time >= 5_000));
+  const [row] = fixture.store.state.reservations;
+  assert.equal(row.status, 'settled');
+  assert.equal(row.usd, meteredUsageUsd('gpt-6.2-sol', 20, 5));
+  assert(!JSON.stringify(fixture.store.state).includes(backgroundId));
+});
+
+test('Background submission preserves admission rules and cannot be enabled in request JSON', async () => {
+  const fixture = backgroundFixture(() => assert.fail('invalid or out-of-period input must not be sent'));
+  for (const changes of [{ background: true }, { background: false }, { stream: true }, { tools: [] },
+    { tools: [{ type: 'web_search' }] }, { background_options: { completion_window: '8h' } }]) {
+    await assert.rejects(fixture.fetch(url, init('gpt-6.2-sol', changes), { background: true }), /unbounded-or-unpriced-request/);
+  }
+  await assert.rejects(fixture.fetch(url, init('gpt-6.2-astra'), { background: true }), /model-outside-active-profile/);
+  assert.equal(fixture.store.state.reservations.length, 0);
+  const early = backgroundFixture(() => assert.fail('no dispatch near grant expiry'),
+    { ...policy, astraEnrichment: undefined, expiresAt: new Date(now + OPENAI_BACKGROUND_TIMEOUT_MS - 1).toISOString() });
+  await assert.rejects(early.fetch(url, init(), { background: true }), /background-period-ending/);
+  assert.equal(early.store.state.reservations.length, 0);
+  const expired = backgroundFixture(() => assert.fail('no dispatch after grant expiry'),
+    { ...policy, expiresAt: new Date(now - 1).toISOString() });
+  await assert.rejects(expired.fetch(url, init(), { background: true }), /unverified-expired-or-unsafe-credit-policy/);
+  assert.equal(expired.store.state.reservations.length, 0);
+  const store = memory({ version: 1, creditPeriod: policy.periodId, pausedUntil: 0,
+    reservations: [{ id: 'historical', at: now - 30_000, usd: policy.periodLimitUsd - 0.99,
+      status: 'settled', creditPeriod: policy.periodId }] });
+  const funded = createCreditBudget({ store, policy, clock: () => now, request: () => assert.fail('no uncovered POST') });
+  await assert.rejects(funded(url, init(), { background: true }), /shared-spend-limit/);
+  assert.equal(store.state.reservations.length, 1);
+});
+
+test('Background rejects unknown status, unsafe or mismatched response IDs, and model changes without settling', async () => {
+  for (const [initial, polled, expectedCalls] of [
+    [{ id: 'resp_fixture/../../wrong' }, {}, 1],
+    [{ status: 'future-status' }, {}, 1],
+    [{ model: 'gpt-6.2-astra' }, {}, 1],
+    [{}, { id: 'resp_other' }, 2],
+    [{}, { model: 'gpt-6.2-sol-2026-11-05' }, 2],
+    [{}, { status: 'future-status' }, 2],
+  ]) {
+    const fixture = backgroundFixture((target, _options) => target === responsesUrl
+      ? backgroundState('queued', initial) : backgroundState('completed', { ...backgroundResult, ...polled }));
+    await assert.rejects(fixture.fetch(url, init(), { background: true }), error => {
+      assert.equal(error.budgetReason, 'background-response-invalid');
+      assert.doesNotMatch(error.message, /resp_|future-status/);
+      return true;
+    });
+    assert.equal(fixture.calls.length, expectedCalls);
+    assert.equal(fixture.store.state.reservations[0].status, 'reserved');
+    assert.equal(fixture.store.state.reservations[0].usd, policy.requestLimitUsd);
+  }
+});
+
+test('Background terminal failure settles only complete receipts and never returns partial content', async () => {
+  for (const [status, usage, settled] of [
+    ['incomplete', receipt, true], ['failed', receipt, true], ['cancelled', receipt, true],
+    ['cancelled', { input_tokens: 20, output_tokens: 0, total_tokens: 20 }, true],
+    ['failed', null, false], ['failed', { ...receipt, total_tokens: 12 }, false],
+  ]) {
+    const fixture = backgroundFixture(target => target === responsesUrl ? backgroundState('queued')
+      : backgroundState(status, { ...backgroundResult, usage, error: { message: 'PRIVATE PROVIDER DATA' } }));
+    await assert.rejects(fixture.fetch(url, init(), { background: true }), error => {
+      assert.equal(error.budgetReason, 'background-response-unavailable');
+      assert.doesNotMatch(error.message, /PRIVATE|deals|resp_/);
+      return true;
+    });
+    assert.equal(fixture.store.state.reservations[0].status, settled ? 'settled' : 'reserved');
+    await assert.rejects(fixture.fetch(url, init(), { background: true }), /runner-paused/);
+    assert.equal(fixture.calls.length, 2);
+  }
+});
+
+test('Background completed output needs a positive, safe and consistent metering receipt', async () => {
+  for (const usage of [undefined, { input_tokens: 10, output_tokens: 10, total_tokens: 200 },
+    { input_tokens: 0, output_tokens: 0, total_tokens: 0 },
+    { input_tokens: 20, output_tokens: 0, total_tokens: 20 },
+    { input_tokens: Number.MAX_SAFE_INTEGER + 2, output_tokens: 2, total_tokens: Number.MAX_SAFE_INTEGER + 4 }]) {
+    const fixture = backgroundFixture(target => target === responsesUrl
+      ? backgroundState('queued') : backgroundState('completed', { ...backgroundResult, usage }));
+    await assert.rejects(fixture.fetch(url, init(), { background: true }), error => {
+      assert.equal(error.budgetReason, 'background-response-invalid');
+      assert.doesNotMatch(error.message, /resp_|deals/);
+      return true;
+    });
+    const [row] = fixture.store.state.reservations;
+    // A positive input-only receipt can be charged on terminal failure, but a
+    // completed text result with zero output tokens cannot substantiate usage.
+    assert.equal(row.status, 'reserved');
+    assert.equal(row.usd, policy.requestLimitUsd);
+    await assert.rejects(fixture.fetch(url, init(), { background: true }), /runner-paused/);
+    assert.equal(fixture.calls.length, 2);
+  }
+});
+
+test('Background partial assistant items keep the completed job from publishing but settle real usage', async () => {
+  for (const status of ['incomplete', 'in_progress', 'failed']) {
+    const fixture = backgroundFixture(target => target === responsesUrl ? backgroundState('queued')
+      : backgroundState('completed', { usage: receipt, output: [
+        { type: 'message', role: 'assistant', status, content: [{ type: 'output_text', text: 'PRIVATE PARTIAL TEXT' }] },
+        { type: 'message', role: 'assistant', status: 'completed', content: backgroundResult.output[0].content },
+      ] }));
+    await assert.rejects(fixture.fetch(url, init(), { background: true }), error => {
+      assert.equal(error.budgetReason, 'background-response-invalid');
+      assert.doesNotMatch(error.message, /resp_|PRIVATE PARTIAL TEXT/);
+      return true;
+    });
+    const [row] = fixture.store.state.reservations;
+    assert.equal(row.status, 'settled');
+    assert.equal(row.usd, meteredUsageUsd('gpt-6.2-sol', 20, 5));
+    await assert.rejects(fixture.fetch(url, init(), { background: true }), /runner-paused/);
+    assert.equal(fixture.calls.length, 2);
+  }
+});
+
+test('Background poll respects Retry-After and later completion uses the original response', async () => {
+  const fixture = backgroundFixture((_target, _options, _time, count) => {
+    if (count === 1) return backgroundState('queued');
+    if (count === 2) return new Response('{}', { status: 429, headers: { 'Retry-After': '35' } });
+    return backgroundState('completed', backgroundResult);
+  });
+  await fixture.fetch(url, init(), { background: true });
+  assert.equal(fixture.calls[2].time - fixture.calls[1].time, 35_000);
+  assert.equal(fixture.calls[1].target, fixture.calls[2].target);
+  assert.equal(fixture.store.state.reservations.length, 1);
+});
+
+test('Background deadline cancels a known response once, retaining usage and never publishing a raced completion', async () => {
+  const fixture = backgroundFixture((target, options) => {
+    if (target.endsWith('/cancel')) {
+      assert.equal(target, responsesUrl + '/' + backgroundId + '/cancel');
+      assert.equal(options.method, 'POST');
+      assert.equal(options.body, undefined);
+      return backgroundState('completed', backgroundResult);
+    }
+    return backgroundState('queued');
+  });
+  await assert.rejects(fixture.fetch(url, init(), { background: true }), /background-timeout/);
+  const cancellation = fixture.calls.at(-1);
+  assert.equal(cancellation.time - now, OPENAI_BACKGROUND_TIMEOUT_MS);
+  assert(cancellation.target.endsWith('/cancel'));
+  const polls = fixture.calls.filter(({ options }) => options.method === 'GET');
+  assert(polls.length <= 60);
+  assert(fixture.calls.slice(1, -1).every(({ options }) => options.method === 'GET'));
+  assert.equal(fixture.store.state.reservations[0].status, 'settled');
+});
+
+test('Background neither cancels via an explicit provider wait nor resubmits failed POSTs', async () => {
+  const held = backgroundFixture((target, _options, _time, count) => {
+    if (count === 1) return backgroundState('in_progress');
+    assert.equal(target, responsesUrl + '/' + backgroundId);
+    return new Response('{}', { status: 429, headers: { 'retry-after': '3600' } });
+  });
+  await assert.rejects(held.fetch(url, init(), { background: true }), /background-timeout/);
+  assert.equal(held.calls.length, 2);
+  assert.equal(held.store.state.reservations[0].status, 'reserved');
+  assert.equal(held.store.state.pausedUntil, held.calls[1].time + 3_600_000);
+  const restarted = createCreditBudget({ store: held.store, policy,
+    clock: () => now + OPENAI_BACKGROUND_TIMEOUT_MS + 1,
+    request: () => assert.fail('a new worker must not submit inside the persisted provider hold') });
+  await assert.rejects(restarted(url, init(), { background: true }), /storage-or-provider-pause/);
+  assert.equal(held.store.state.reservations.length, 1);
+
+  const rejected = backgroundFixture(() => Response.json({ error: { message: 'PRIVATE PROVIDER DATA' } }, { status: 503 }));
+  const response = await rejected.fetch(url, init(), { background: true });
+  assert.equal(response.status, 503);
+  assert(!JSON.stringify(await response.json()).includes('PRIVATE'));
+  assert.equal(rejected.calls.length, 1);
+  assert.equal(rejected.store.state.reservations.length, 1);
+});
+
+test('Background poll persists its provider deadline without shortening a concurrent hold', async () => {
+  const existingHold = now + 7_200_000;
+  const fixture = backgroundFixture(async (_target, _options, _time, count) => {
+    if (count === 1) return backgroundState('queued');
+    const { state, revision } = await fixture.store.read();
+    await fixture.store.compareAndSwap(revision, { ...state, pausedUntil: existingHold });
+    return new Response('{}', { status: 429, headers: { 'retry-after': '3600' } });
+  });
+  await assert.rejects(fixture.fetch(url, init(), { background: true }), /background-timeout/);
+  assert.equal(fixture.store.state.pausedUntil, existingHold);
+  assert.equal(fixture.calls.length, 2);
+});
 
 test('Instagram full-description classification uses small bounded batches and stops after a partial failure', async () => {
   const candidates = Array.from({ length: 14 }, (_, index) => ({ url: `https://www.instagram.com/p/Synthetic${index}/`,
