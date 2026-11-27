@@ -1,11 +1,11 @@
 {
-  "generatedAt": "2026-11-27T21:50:18.647Z",
+  "generatedAt": "2026-11-27T22:05:18.560Z",
   "discoveryAvailability": {
     "note": "Transport evidence, not deal yield. Retry eligibility is not recovery. Candidate counts are not Slack deliveries. No extra runs or quota resets.",
     "lanes": [
       {
         "name": "instagram-search",
-        "observedAt": "2026-11-27T09:47:49.681Z",
+        "observedAt": "2026-11-27T22:03:58.206Z",
         "status": "paused",
         "reason": "search-cooldown",
         "retryAt": "2026-11-27T22:18:47.753Z",
@@ -15,7 +15,7 @@
       },
       {
         "name": "instagram-profiles",
-        "observedAt": "2026-11-27T09:47:49.681Z",
+        "observedAt": "2026-11-27T22:03:58.206Z",
         "status": "no-block-reported",
         "reason": "",
         "retryAt": "",
@@ -24,11 +24,11 @@
       },
       {
         "name": "instagram-previews",
-        "observedAt": "2026-11-27T09:47:49.681Z",
+        "observedAt": "2026-11-27T22:03:58.206Z",
         "status": "no-block-reported",
         "reason": "",
         "retryAt": "",
-        "attempted": 50,
+        "attempted": 38,
         "deliveredToSlack": null
       },
       {
@@ -54,9 +54,9 @@
   },
   "summary": {
     "filesConsidered": 33,
-    "totalCandidates": 755,
-    "uniqueCandidates": 732,
-    "distinctCandidates": 743,
+    "totalCandidates": 756,
+    "uniqueCandidates": 733,
+    "distinctCandidates": 744,
     "duplicateClusters": 11,
     "topHealthySources": [
       {
@@ -802,6 +802,65 @@
       "sourceWeightScore": 45
     },
     {
+      "sourceKey": "instagram-ai",
+      "file": "deals-pending-instagram-ai.json",
+      "sourceLabel": "Instagram AI Agent",
+      "totalDeals": 4,
+      "uniqueDeals": 2,
+      "duplicateDeals": 2,
+      "duplicateAcrossSources": 2,
+      "fresh1dCount": 1,
+      "fresh7dCount": 4,
+      "viennaCount": 4,
+      "foodDrinkCount": 3,
+      "promoCount": 0,
+      "missingUrlCount": 0,
+      "sampleTitles": [
+        "🎁 Reveal your prize and get a voucher for your next visit!",
+        "17:00 Uhr 5 Gänge um 49 € (vegetarisch 44 €) Das ganze Menü, nur früher",
+        "Mit Sauce Tartare, Blattsalat und Gemüsecremesuppe um € 9,90, Montag im Lercherl Kürbis, aber gebacken. Außen"
+      ],
+      "lastRun": null,
+      "uniqueRate": 0.5,
+      "duplicateRate": 0.5,
+      "fresh1dRate": 0.3,
+      "fresh7dRate": 1,
+      "viennaRate": 1,
+      "foodDrinkRate": 0.8,
+      "promoRate": 0,
+      "missingUrlRate": 0,
+      "averageQualityScore": 76,
+      "topCategories": [
+        {
+          "value": "essen",
+          "count": 2
+        },
+        {
+          "value": "kaffee",
+          "count": 1
+        },
+        {
+          "value": "shopping",
+          "count": 1
+        }
+      ],
+      "topTypes": [
+        {
+          "value": "rabatt",
+          "count": 4
+        }
+      ],
+      "issues": [
+        "wenige klare Gratis-/Promo-Signale",
+        "hohe Überschneidung mit anderen Quellen"
+      ],
+      "healthScore": 59,
+      "missionFitScore": 50,
+      "coverageScore": 11,
+      "precisionScore": 61,
+      "sourceWeightScore": 47
+    },
+    {
       "sourceKey": "gastro2",
       "file": "deals-pending-gastro2.json",
       "sourceLabel": "Firecrawl Key 1 - Gastro",
@@ -1392,66 +1451,6 @@
       "coverageScore": 7,
       "precisionScore": 42,
       "sourceWeightScore": 29
-    },
-    {
-      "sourceKey": "instagram-ai",
-      "file": "deals-pending-instagram-ai.json",
-      "sourceLabel": "Instagram AI Agent",
-      "totalDeals": 3,
-      "uniqueDeals": 1,
-      "duplicateDeals": 2,
-      "duplicateAcrossSources": 2,
-      "fresh1dCount": 0,
-      "fresh7dCount": 3,
-      "viennaCount": 3,
-      "foodDrinkCount": 2,
-      "promoCount": 0,
-      "missingUrlCount": 0,
-      "sampleTitles": [
-        "🎁 Reveal your prize and get a voucher for your next visit!",
-        "Mit Sauce Tartare, Blattsalat und Gemüsecremesuppe um € 9,90, Montag im Lercherl Kürbis, aber gebacken. Außen",
-        "Mittagsmenü mit Tagessuppe um € 9,90, Montag bis Freitag im Lercherl Wos gibt’s heit? Die ganze Woche in 20 Se"
-      ],
-      "lastRun": null,
-      "uniqueRate": 0.3,
-      "duplicateRate": 0.7,
-      "fresh1dRate": 0,
-      "fresh7dRate": 1,
-      "viennaRate": 1,
-      "foodDrinkRate": 0.7,
-      "promoRate": 0,
-      "missingUrlRate": 0,
-      "averageQualityScore": 76,
-      "topCategories": [
-        {
-          "value": "essen",
-          "count": 1
-        },
-        {
-          "value": "kaffee",
-          "count": 1
-        },
-        {
-          "value": "shopping",
-          "count": 1
-        }
-      ],
-      "topTypes": [
-        {
-          "value": "rabatt",
-          "count": 3
-        }
-      ],
-      "issues": [
-        "wenige Deals sind frischer als 1 Tag",
-        "wenige klare Gratis-/Promo-Signale",
-        "hohe Überschneidung mit anderen Quellen"
-      ],
-      "healthScore": 49,
-      "missionFitScore": 40,
-      "coverageScore": 10,
-      "precisionScore": 53,
-      "sourceWeightScore": 39
     },
     {
       "sourceKey": "instagram-apify2",
