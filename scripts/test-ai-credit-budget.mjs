@@ -641,6 +641,7 @@ const imageInit = (changes = {}) => ({method:'POST',headers:{},body:JSON.stringi
   model:DEAL_IMAGE_GENERATION_MODEL,prompt:'A photographic illustration of one glazed donut.',n:1,
   size:'1536x1024',quality:'high',complexity:'high',output_format:'jpeg',output_compression:95,moderation:'auto',...changes,
 })});
+const imageOptions = {imageGenerationKey:'a'.repeat(64)};
 const imageUsage = {input_tokens:1100,output_tokens:2000,total_tokens:3100,
   input_tokens_details:{text_tokens:1000,image_tokens:100}};
 const generatedImage = (usage = imageUsage) => Response.json({created:1795811302,data:[{b64_json:'offline-image'}],usage});
@@ -700,7 +701,7 @@ test('image generation reserves one dollar durably and settles its usage in the 
     assert.equal(JSON.parse(options.body).output_compression,95);
     return generatedImage();
   }});
-  const response=await request(DEAL_IMAGE_GENERATION_URL,imageInit(),{preserveDealCorrectionCapacity:true});
+  const response=await request(DEAL_IMAGE_GENERATION_URL,imageInit(),{...imageOptions,preserveDealCorrectionCapacity:true});
   assert.equal((await response.json()).data[0].b64_json,'offline-image');
   const row=store.state.reservations.at(-1);
   assert.equal(row.status,'settled');
@@ -710,6 +711,7 @@ test('image generation reserves one dollar durably and settles its usage in the 
   assert.equal(row.inputTokens,1100);
   assert.equal(row.outputTokens,2000);
   assert.equal(row.reasoningEffort,undefined);
+  assert.equal(row.imageGenerationKey,imageOptions.imageGenerationKey);
   assert.equal(calls,1);
 });
 
@@ -723,7 +725,7 @@ test('image missing usage, timeouts and malformed receipts keep the whole reserv
     const store=memory();
     let calls=0;
     const request=createCreditBudget({store,policy,clock:()=>now,request:async()=>{calls++;return transport();}});
-    await request(DEAL_IMAGE_GENERATION_URL,imageInit()).catch(error=>assert.doesNotMatch(error.message,/PRIVATE/));
+    await request(DEAL_IMAGE_GENERATION_URL,imageInit(),imageOptions).catch(error=>assert.doesNotMatch(error.message,/PRIVATE/));
     assert.equal(calls,1);
     assert.equal(store.state.reservations[0].status,'reserved');
     assert.equal(store.state.reservations[0].usd,1);
@@ -735,10 +737,10 @@ test('images honor shared caps, preserve text correction capacity, storage failu
   const transport=async()=>{calls++;return generatedImage();};
   const nearCap=usd=>memory({version:1,creditPeriod:policy.periodId,pausedUntil:0,
     reservations:[{id:'prior-text',at:now-25*3600000,usd,status:'settled',model:'gpt-6.2-sol'}]});
-  await assert.rejects(createCreditBudget({store:nearCap(37.01),policy,clock:()=>now,request:transport})(DEAL_IMAGE_GENERATION_URL,imageInit()),/shared-spend-limit/);
-  await assert.rejects(createCreditBudget({store:nearCap(36.8),policy,clock:()=>now,request:transport})(DEAL_IMAGE_GENERATION_URL,imageInit(),{preserveDealCorrectionCapacity:true}),/pending-deal-correction-priority/);
-  await assert.rejects(createCreditBudget({store:{read:async()=>{throw Error('offline');}},policy,clock:()=>now,request:transport})(DEAL_IMAGE_GENERATION_URL,imageInit()),/shared-storage-unavailable/);
-  await assert.rejects(createCreditBudget({store:memory(),policy,clock:()=>Date.parse(policy.expiresAt),request:transport})(DEAL_IMAGE_GENERATION_URL,imageInit()),/unverified-expired-or-unsafe-credit-policy/);
+  await assert.rejects(createCreditBudget({store:nearCap(37.01),policy,clock:()=>now,request:transport})(DEAL_IMAGE_GENERATION_URL,imageInit(),imageOptions),/shared-spend-limit/);
+  await assert.rejects(createCreditBudget({store:nearCap(36.8),policy,clock:()=>now,request:transport})(DEAL_IMAGE_GENERATION_URL,imageInit(),{...imageOptions,preserveDealCorrectionCapacity:true}),/pending-deal-correction-priority/);
+  await assert.rejects(createCreditBudget({store:{read:async()=>{throw Error('offline');}},policy,clock:()=>now,request:transport})(DEAL_IMAGE_GENERATION_URL,imageInit(),imageOptions),/shared-storage-unavailable/);
+  await assert.rejects(createCreditBudget({store:memory(),policy,clock:()=>Date.parse(policy.expiresAt),request:transport})(DEAL_IMAGE_GENERATION_URL,imageInit(),imageOptions),/unverified-expired-or-unsafe-credit-policy/);
   assert.equal(calls,0);
 });
 
@@ -749,12 +751,79 @@ test('an image cost overrun is settled completely and pauses further shared spen
     calls++;
     return generatedImage({...imageUsage,output_tokens:40000,total_tokens:41100});
   }});
-  await request(DEAL_IMAGE_GENERATION_URL,imageInit());
+  await request(DEAL_IMAGE_GENERATION_URL,imageInit(),imageOptions);
   assert.equal(store.state.reservations[0].usd,1.2058);
   assert.equal(store.state.reservations[0].status,'settled');
   assert.equal(store.state.pausedUntil,Date.parse(policy.expiresAt));
   assert.equal(store.state.costOverrun.model,DEAL_IMAGE_GENERATION_MODEL);
-  await assert.rejects(request(DEAL_IMAGE_GENERATION_URL,imageInit()),/runner-paused/);
+  await assert.rejects(request(DEAL_IMAGE_GENERATION_URL,imageInit(),imageOptions),/runner-paused/);
   await assert.rejects(createCreditBudget({store,policy,clock:()=>now,request:successful})(url,init()),/storage-or-provider-pause/);
   assert.equal(calls,1);
+});
+
+
+test('images require a stable dispatch identity before reserving any shared capacity', async () => {
+  const store=memory();
+  let calls=0;
+  const request=createCreditBudget({store,policy,clock:()=>now,request:async()=>{calls++;return generatedImage();}});
+  for (const key of [undefined,'','short','A'.repeat(64),{id:'not-a-hash'}]) {
+    await assert.rejects(request(DEAL_IMAGE_GENERATION_URL,imageInit(),{imageGenerationKey:key}),
+      error=>error.budgetReason==='image-generation-key-required');
+  }
+  assert.equal(store.state.reservations.length,0);
+  assert.equal(calls,0);
+});
+
+test('concurrent runners dispatch one paid generation for the same image identity', async () => {
+  const store=memory();
+  let calls=0;
+  const create=()=>createCreditBudget({store,policy,clock:()=>now,request:async()=>{
+    calls++;
+    await new Promise(resolve=>setTimeout(resolve,20));
+    return generatedImage();
+  }});
+  const results=await Promise.allSettled([create(),create()].map(request=>request(DEAL_IMAGE_GENERATION_URL,imageInit(),imageOptions)));
+  assert.equal(calls,1);
+  assert.equal(results.filter(result=>result.status==='fulfilled').length,1);
+  assert.equal(results.filter(result=>result.reason?.budgetReason==='image-generation-already-dispatched').length,1);
+  assert.equal(store.state.reservations.length,1);
+  assert.equal(store.state.reservations[0].imageGenerationKey,imageOptions.imageGenerationKey);
+});
+
+test('a missing result or settled generation holds its identity across later runners while a different image can be admitted', async () => {
+  for (const fail of [true,false]) {
+    const store=memory();
+    let calls=0;
+    const create=()=>createCreditBudget({store,policy,clock:()=>now,request:async()=>{
+      calls++;
+      if (fail && calls===1) throw Error('ambiguous generation timeout');
+      return generatedImage();
+    }});
+    await create()(DEAL_IMAGE_GENERATION_URL,imageInit(),imageOptions).catch(()=>{});
+    const original=store.state.reservations[0];
+    assert.equal(original.status,fail?'reserved':'settled');
+    await assert.rejects(create()(DEAL_IMAGE_GENERATION_URL,imageInit(),imageOptions),
+      error=>error.budgetReason==='image-generation-already-dispatched');
+    assert.equal(calls,1);
+    assert.equal(store.state.reservations.length,1);
+    await create()(DEAL_IMAGE_GENERATION_URL,imageInit(),{imageGenerationKey:'b'.repeat(64)});
+    assert.equal(calls,2);
+    assert.equal(store.state.reservations.length,2);
+    assert.deepEqual(store.state.reservations[0],original,'unknown earlier spend is retained exactly');
+  }
+});
+
+test('an image refused before reservation can retry its identity after shared storage recovers', async () => {
+  const base=memory();
+  let reads=0,calls=0;
+  const store={...base,read:async()=>{
+    if (++reads===1) throw Error('temporary storage outage');
+    return base.read();
+  }};
+  const create=()=>createCreditBudget({store,policy,clock:()=>now,request:async()=>{calls++;return generatedImage();}});
+  await assert.rejects(create()(DEAL_IMAGE_GENERATION_URL,imageInit(),imageOptions),/shared-storage-unavailable/);
+  assert.equal(base.state.reservations.length,0);
+  await create()(DEAL_IMAGE_GENERATION_URL,imageInit(),imageOptions);
+  assert.equal(calls,1);
+  assert.equal(base.state.reservations.length,1);
 });

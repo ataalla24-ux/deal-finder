@@ -281,10 +281,13 @@ export function createCreditBudget({ store, policy, clock = Date.now, request = 
     }
     throw paused('reservation-contention');
   };
-  return async (url, init, { preserveDealCorrectionCapacity = false } = {}) => {
+  return async (url, init, { preserveDealCorrectionCapacity = false, imageGenerationKey } = {}) => {
     if (stopped) throw paused('runner-paused');
     validateCreditPolicy(policy, clock());
     const prepared = prepareFreeCreditCall(url, init);
+    if (prepared.modality === 'image' && (typeof imageGenerationKey !== 'string' || !/^[a-f0-9]{64}$/.test(imageGenerationKey))) {
+      throw paused('image-generation-key-required');
+    }
     const astra = prepared.model === ASTRA;
     const profileActive = isAstraEnrichmentActive({ enabled: allowAstraEnrichment, now: clock(), policy });
     if (prepared.modality !== 'image' && astra !== profileActive) throw paused('model-outside-active-profile');
@@ -292,6 +295,9 @@ export function createCreditBudget({ store, policy, clock = Date.now, request = 
     if (prepared.reservedUsd > policy.requestLimitUsd) throw paused('request-cost-limit');
     const id = randomUUID(), at = clock();
     await update(state => {
+      if (prepared.modality === 'image' && state.reservations.some(row => row.imageGenerationKey === imageGenerationKey)) {
+        throw paused('image-generation-already-dispatched');
+      }
       if (astra && Number(state.astraPausedUntil) > at) throw paused('astra-provider-pause');
       if (state.modelPausedUntil?.[prepared.model] > at) throw paused('model-provider-pause');
       // Compare integer microdollars. A cost estimate sizes work but does not
@@ -316,7 +322,7 @@ export function createCreditBudget({ store, policy, clock = Date.now, request = 
         estimatedUsd: prepared.reservedUsd, dailyAuthorizedUsd, creditPeriod: policy.periodId,
         model: prepared.model,
         ...(prepared.modality === 'image'
-          ? {modality:'image',profile:'deal-image-generation',imageSize:'1536x1024',imageQuality:'high',imageComplexity:'high'}
+          ? {modality:'image',profile:'deal-image-generation',imageGenerationKey,imageSize:'1536x1024',imageQuality:'high',imageComplexity:'high'}
           : {reasoningEffort:'max',reasoningMode:'pro',...(astra ? {profile:ASTRA_PROFILE} : {})}),
         count: 1, expiresAt: Date.parse(policy.expiresAt), status: 'reserved' }] };
     });
