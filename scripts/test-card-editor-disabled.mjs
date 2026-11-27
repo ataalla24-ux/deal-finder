@@ -48,16 +48,29 @@ test('default is disabled and only explicit 1 enables the production switch', as
   }
 });
 
-test('production delivery drops the OpenAI secret and disables title editing only', () => {
+test('production delivery keeps title drafts and retries disabled while image preparation has its key', async () => {
   const workflow = fs.readFileSync(new URL('../.github/workflows/daily-digest.yml', import.meta.url), 'utf8');
   const delivery = workflow.split('- name: Deliver validated new deals to Slack')[1].split('- name: Mark posted community')[0];
-  assert.match(delivery, /DEAL_CARD_EDITOR_ENABLED: ['"]0['"]/);
-  assert.doesNotMatch(delivery, /OPENAI_API_KEY/);
+  const editorialFlag = /^ +DEAL_CARD_EDITOR_ENABLED: ['"]([01])['"]$/m.exec(delivery)?.[1];
+  assert.equal(editorialFlag, '0');
+  assert.match(delivery, /^ +FREEFINDER_DEAL_IMAGE_PILOT: '1'$/m);
+  assert.match(delivery, /^ +FREEFINDER_GENERATED_DEAL_PHOTOS: '1'$/m);
+  assert.match(delivery, /^ +FREEFINDER_ASTRA_ENRICHMENT: '1'$/m);
+  assert.match(delivery, /^ +OPENAI_API_KEY: \$\{\{ secrets\.OPENAI_API_KEY \}\}$/m);
+  assert.doesNotMatch(workflow.replace(delivery, ''), /^\s*OPENAI_API_KEY:/m);
   assert.match(delivery, /SLACK_BOT_TOKEN/);
   assert.match(delivery, /run: \|\s+node scripts\/community-private-state\.mjs hydrate[\s\S]*?node scraper\/slack-notify\.js/);
   const source = fs.readFileSync(new URL('../scraper/slack-notify.js', import.meta.url), 'utf8');
   assert.match(source, /const editorialEnabled = process\.env\.DEAL_CARD_EDITOR_ENABLED === '1'/);
   assert.equal((source.match(/enabled: editorialEnabled/g) || []).length, 2);
+  assert.match(source, /prepareSlackImageDeals\(lane, \{\s*editCard,/);
+
+  const enabled = editorialFlag === '1';
+  const editCard = createCardEditor({ enabled, apiKey: 'mock-image-key', request: forbidden, clock: forbidden });
+  assert.equal(await editCard(deal), deal);
+  const retried = await retryQueuedEditorial([deal], { enabled, editCard: forbidden,
+    isUntouched: forbidden, updateMessage: forbidden, persist: forbidden });
+  assert.equal(retried[0], deal);
 });
 
 test('manual paid diagnostic fails closed before credentials or network unless explicitly enabled', () => {
