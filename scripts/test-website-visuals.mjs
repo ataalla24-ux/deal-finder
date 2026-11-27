@@ -43,7 +43,7 @@ assert.match(read('home-showcase.css'), /#pro\s*\{[^}]*background:\s*#1c1c20/);
 assert.match(read('home-showcase.css'), /#pro \.plan\.featured\s*\{[^}]*#ff964a/);
 for (const file of ['index.html', 'blog/index.html', 'angebote-wien-heute.html']) {
   const html = read(file), $ = load(html);
-  assert.equal($('link[href="/visual-refresh.css?v=20261030"]').length, 1, `${file}: one presentation stylesheet`);
+  assert.equal($(`link[href="/visual-refresh.css?v=${file === 'index.html' ? '20261127' : '20261030'}"]`).length, 1, `${file}: one presentation stylesheet`);
   assert.equal(polishHtml(html, file, presentationNow), html, `${file}: presentation is idempotent`);
   if (file !== 'angebote-wien-heute.html') {
     assert.equal($('.visual-topics a').length, 6);

@@ -7,6 +7,7 @@ import { photoVisual } from './blog-photo-catalog.mjs';
 
 // Editorial subject metadata is retained for generators; images are photographs.
 export const covers = {
+  'weihnachtsmaerkte-wien': { lines: ['Weihnachtsmärkte Wien'], topic: 'Advent in Wien', tone: 'rose' },
   'dahab-doener-1plus1-wien-floridsdorf': { lines: ['Dahab Döner 1+1'], topic: 'Döner in Floridsdorf', tone: 'yellow' },
   'aura-doener-eroeffnung-299-wien-ottakring': { lines: ['Aura Döner'], topic: 'Eröffnung in Ottakring', tone: 'yellow' },
   'zushi-market-babenbergerstrasse-eroeffnung-wien': { lines: ['Zushi Market Eröffnung'], topic: 'Bowl und Buffet in der Inneren Stadt', tone: 'green' },
@@ -133,9 +134,9 @@ export function polishVisualDiscovery(html, filename) {
   const blog = /^blog\/[^/]+\.html$/.test(filename);
   if (!home && !blog && filename !== 'angebote-wien-heute.html') return html;
   html = html.replace(/\s*<link\b[^>]*href="\/visual-refresh\.css(?:\?[^"]*)?"[^>]*>/g, '');
-  html = html.replace('</head>', '  <link rel="stylesheet" href="/visual-refresh.css?v=20261030">\n</head>');
+  html = html.replace('</head>', `  <link rel="stylesheet" href="/visual-refresh.css?v=${home ? '20261127' : '20261030'}">\n</head>`);
   if (home) {
-    const band = `<section class="discovery-band" aria-labelledby="discoveryTitle"><div class="discovery-inner"><div class="discovery-heading"><h2 id="discoveryTitle">Dein Wien. Deine Entdeckungen.</h2><a href="/blog/">Alle Guides</a></div>${photoTopics()}</div></section>`;
+    const band = `<section class="discovery-band" aria-labelledby="discoveryTitle"><div class="discovery-inner"><div class="discovery-heading"><h2 id="discoveryTitle">Dein Wien. Deine Entdeckungen.</h2><a href="/blog/">Alle Guides</a></div><p class="discovery-seasonal"><a href="/blog/weihnachtsmaerkte-wien.html">Weihnachtsmärkte in Wien</a><span>Öffnungszeiten, Gratis-Tipps und Deals</span></p>${photoTopics()}</div></section>`;
     const existing = /<section class="discovery-band"[\s\S]*?<\/section>/;
     if (existing.test(html)) html = html.replace(existing, band);
     else html = html.replace(/<section class="section app-section"/, `${band}\n      <section class="section app-section"`);

@@ -131,7 +131,7 @@ for (const slug of Object.keys(covers)) {
   const jpeg = fs.readFileSync(path.join(root, 'docs', visual.src));
   assert.equal(jpeg.readUInt16BE(0), 0xffd8);
   assert.match(visual.src, /^\/assets\/blog\/photos\/[a-z-]+\.jpg$/);
-  assert.match(visual.alt, /^Symbolfoto: /);
+  assert.match(visual.alt, photoRecipes[articlePhotos[slug]]?.licensed ? /^Archivfoto: / : /^Symbolfoto: /);
   assert.ok(jpeg.length < 160000, `${slug}: compact photographic cover`);
   const webp = fs.readFileSync(path.join(root, 'docs', visual.webp));
   assert.equal(webp.toString('ascii', 8, 12), 'WEBP');

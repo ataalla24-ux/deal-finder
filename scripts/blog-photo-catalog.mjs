@@ -3,6 +3,15 @@ import { november20Guides } from './blog-backfill-20261120.mjs';
 
 // Generic editorial photographs, never evidence of a merchant's exact product.
 export const photoRecipes = {
+  'christkindlmarkt-rathausplatz': {
+    subject: 'Beleuchteter Christkindlmarkt am Wiener Rathausplatz im Dezember 2023',
+    licensed: {
+      filename: 'rathausplatz-christkindlmarkt-2023.jpg',
+      url: 'https://commons.wikimedia.org/wiki/File:Rathausplatz_Christkindlmarkt_0.jpg',
+      author: 'Geolina163',
+      license: 'https://creativecommons.org/licenses/by-sa/4.0/',
+    },
+  },
   'noodle-box': { nativeIndex: 125, outputHeight: 444, subject: 'Nudelbox mit Huhn, Gemüse und Getränk' },
   'vegetable-noodles': { nativeIndex: 134, outputHeight: 444, subject: 'Nudeln mit Gemüse' },
   'steak-kebab': { nativeIndex: 126, outputHeight: 444, subject: 'Steak-Döner im Brot' },
@@ -60,6 +69,7 @@ export const photoRecipes = {
 
 // Match the benefit, not a merchant word in the URL (Pizza Rando offers döner).
 export const articlePhotos = {
+  'weihnachtsmaerkte-wien': 'christkindlmarkt-rathausplatz',
   'dahab-doener-1plus1-wien-floridsdorf': 'kebab',
   'aura-doener-eroeffnung-299-wien-ottakring': 'kebab',
   'zushi-market-babenbergerstrasse-eroeffnung-wien': 'bowl',
@@ -177,5 +187,5 @@ export function photoVisual(slug, cover) {
   const key = articlePhotos[slug] || photoKey({ id: slug, title: cover.lines.join(' '), category: cover.topic, brand: cover.brand });
   if (!Object.hasOwn(photoRecipes, key)) throw new Error(`Missing photographic subject: ${key}`);
   return { src: `/assets/blog/photos/${key}.jpg`, webp: `/assets/blog/photos/${key}.webp`, thumbnail: `/assets/blog/photos/${key}-480.webp`,
-    alt: `Symbolfoto: ${photoRecipes[key].subject}`, width: 1200, height: photoRecipes[key].outputHeight || 630 };
+    alt: `${photoRecipes[key].licensed ? 'Archivfoto: ' : 'Symbolfoto: '}${photoRecipes[key].subject}`, width: 1200, height: photoRecipes[key].outputHeight || 630 };
 }

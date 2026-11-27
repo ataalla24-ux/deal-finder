@@ -54,6 +54,29 @@ assert.ok(lastmod >= checked, 'Archive maintenance must not predate the source r
 assert.ok(lastmod <= new Intl.DateTimeFormat('sv-SE', { timeZone: 'Europe/Vienna' }).format(new Date()), 'Sitemap must not claim a future modification');
 if (lastmod > checked) assert.ok($('body').hasClass('deal-is-expired'), 'A later lastmod reflects the visible archive publication');
 
+const adventFile = 'blog/weihnachtsmaerkte-wien.html';
+const adventHtml = read(adventFile);
+const advent = load(adventHtml);
+const home = load(read('index.html'));
+assert.equal(home(`.discovery-seasonal a[href="/${adventFile}"]`).length, 1);
+assert.equal($('.article-body a[href="weihnachtsmaerkte-wien.html"]').length, 1);
+assert.equal(advent('link[rel="canonical"]').attr('href'), `https://freefinder.at/${adventFile}`);
+const markets = advent('#maerkte').nextUntil('h2').filter('h3');
+assert.deepEqual(markets.map((_, heading) => advent(heading).attr('id')).get(),
+  ['rathausplatz', 'prater', 'spittelberg', 'favoriten', 'schoenbrunn', 'hirschstetten']);
+for (const market of markets.toArray()) {
+  const hours = advent(market).next('p');
+  assert.match(hours.text(), /\b\d{2}:\d{2}\b/);
+  assert.ok(hours.find('a[href^="https://"]').length);
+}
+assert.equal(advent('#heiligabend').next('ul').find('li').length, 4);
+assert.match(advent('#deals').nextUntil('h2').text(), /25 %.*Mitgliedskarte.*Leihschlittschuhe.*4 €.*Erwachsene zahlen/s);
+assert.ok(advent('a[rel="license"][href="https://creativecommons.org/licenses/by-sa/4.0/"]').length);
+assert.equal(index('h2 a[href="weihnachtsmaerkte-wien.html"]').length, 1);
+assert.equal(sitemap('loc').filter((_, loc) => sitemap(loc).text() === `https://freefinder.at/${adventFile}`).length, 1);
+assert.equal(polishHtml(adventHtml, adventFile, Date.parse('2026-11-27T22:00:00+01:00')), adventHtml);
+assert.match(load(polishHtml(adventHtml, adventFile, Date.parse('2027-01-07T00:00:00+01:00')))('title').text(), /Archiv/);
+
 const birthday = load(read('blog/geburtstag-gratis-wien.html'));
 assert.equal(birthday('.article-body > h2').first().attr('id'), 'ohne-begleitung');
 const solo = birthday('#ohne-begleitung').nextUntil('h2');
@@ -62,4 +85,4 @@ assert.doesNotMatch(solo.text(), /Watertuin|Starbucks/);
 assert.match(birthday('#geburtstag-mit-bedingungen').nextUntil('h2').text(), /Vollpreis.*20 € Rabatt ab 40 €.*Gold-Reward.*13\. November 2026/s);
 assert.equal(birthday('[data-birthday-window]').length, 6);
 assert.match(birthday('#zu-zweit').next('p').text(), /28\. Oktober 2026/);
-console.log('Weekend and birthday guides: dated tips, source links, archive, sitemap and preserved date planner.');
+console.log('Weekend, Advent and birthday guides: dated tips, source links, deals, archive, sitemap and preserved date planner.');

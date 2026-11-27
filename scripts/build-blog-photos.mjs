@@ -20,9 +20,9 @@ let sources = {};
 try { sources = JSON.parse(await fs.readFile(path.join(destination, 'sources.json'), 'utf8')).photos; } catch (error) { if (error.code !== 'ENOENT') throw error; }
 for (const [key, recipe] of Object.entries(photoRecipes).filter(([key]) => !selected.length || selected.includes(key))) {
   let file, crop;
-  if (recipe.generated) {
-    if (!process.env.BLOG_PHOTO_SOURCE_DIR) throw new Error('Set BLOG_PHOTO_SOURCE_DIR to the saved generated-photo directory.');
-    file = path.join(process.env.BLOG_PHOTO_SOURCE_DIR, recipe.generated);
+  if (recipe.generated || recipe.licensed) {
+    if (!process.env.BLOG_PHOTO_SOURCE_DIR) throw new Error('Set BLOG_PHOTO_SOURCE_DIR to the saved editorial-photo directory.');
+    file = path.join(process.env.BLOG_PHOTO_SOURCE_DIR, recipe.generated || recipe.licensed.filename);
   } else if (recipe.existing) file = path.join(root, 'docs', recipe.existing);
   else {
     if (!process.env.NATIVE_ASSETS_ROOT) throw new Error('Set NATIVE_ASSETS_ROOT to the existing Assets.xcassets directory.');
@@ -69,8 +69,9 @@ for (const [key, recipe] of Object.entries(photoRecipes).filter(([key]) => !sele
   await fs.writeFile(path.join(destination, `${key}.webp`), webp);
   await fs.writeFile(path.join(destination, `${key}-480.webp`), thumbnail);
   const inputMetadata = await sharp(input).metadata();
-  sources[key] = { kind: 'generated-editorial-symbol-photo', subject: recipe.subject,
-    source: recipe.generated || recipe.existing || `native-artwork-index-${recipe.nativeIndex}`,
+  sources[key] = { kind: recipe.licensed ? 'licensed-editorial-photo' : 'generated-editorial-symbol-photo', subject: recipe.subject,
+    source: recipe.licensed?.url || recipe.generated || recipe.existing || `native-artwork-index-${recipe.nativeIndex}`,
+    ...(recipe.licensed && { author: recipe.licensed.author, license: recipe.licensed.license, adaptations: 'Cropped and resized' }),
     sourceSha256: createHash('sha256').update(original).digest('hex'), nativeIndex: recipe.nativeIndex, crop,
     inputWidth: inputMetadata.width, inputHeight: inputMetadata.height,
     width: 1200, height, bytes: jpeg.length, webpBytes: webp.length, thumbnailWidth: 480, thumbnailBytes: thumbnail.length,
