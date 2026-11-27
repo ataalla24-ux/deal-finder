@@ -84,15 +84,15 @@
     "removedDeals": []
   },
   "search": {
-    "attemptedQueries": 0,
-    "stoppedReason": "search-cooldown",
-    "nextRetryAt": "2026-11-27T22:18:47.753Z",
-    "lastAttemptAt": "2026-11-26T22:18:47.487Z",
-    "nextQueryIndex": 14,
+    "attemptedQueries": 1,
+    "stoppedReason": "search-unavailable",
+    "nextRetryAt": "2026-11-28T22:19:11.133Z",
+    "lastAttemptAt": "2026-11-27T22:19:10.955Z",
+    "nextQueryIndex": 15,
     "boundedRetry": {
       "reason": "challenge-without-retry-after",
       "failures": 2,
-      "failedAt": "2026-11-26T22:18:47.753Z"
+      "failedAt": "2026-11-27T22:19:11.133Z"
     },
     "enabled": true,
     "queries": [
@@ -152,7 +152,25 @@
       "site:instagram.com \"tastyfood.vienna\" gratis OR aktion OR \"1+1\""
     ],
     "discovered": 0,
-    "errors": []
+    "errors": [
+      {
+        "query": "site:instagram.com/p wien kebab angebot",
+        "error": "Search challenge; no bypass attempted",
+        "httpStatus": 403,
+        "retryAt": "",
+        "retryAfterProvided": false
+      }
+    ],
+    "checkedBy": {
+      "repository": "ataalla24-ux/deal-finder",
+      "runId": "46075878162",
+      "headSha": "a9e45dd1f346082254dae7c8056f8c6c89f70040",
+      "checkoutSha": "a9e45dd1f346082254dae7c8056f8c6c89f70040",
+      "triggeringRun": null,
+      "event": "workflow_dispatch",
+      "runAttempt": "1",
+      "url": "https://github.com/ataalla24-ux/deal-finder/actions/runs/46075878162"
+    }
   },
   "existingCandidates": 343,
   "seedUrls": 0,
