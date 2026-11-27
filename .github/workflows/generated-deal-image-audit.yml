@@ -1,0 +1,77 @@
+name: Generated Deal Image Audit
+run-name: Generated image ${{ inputs.mode }}
+on:
+  workflow_dispatch:
+    inputs:
+      mode:
+        description: Prepare one image or verify its committed public image without model calls
+        type: choice
+        options:
+          - generate
+          - verify-public
+        default: verify-public
+        required: true
+      deal_id:
+        description: Exact existing pending deal ID
+        type: string
+        required: true
+      source_file:
+        description: Existing docs/deals-pending-*.json source queue
+        type: string
+        default: docs/deals-pending-all.json
+        required: true
+concurrency:
+  group: deal-state-writer
+  cancel-in-progress: false
+  queue: max
+permissions:
+  contents: write
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: npm ci
+      - name: Test budget, generated images and audit isolation
+        env:
+          SENTRY_DISABLED: '1'
+        run: node --test scripts/test-ai-credit-budget.mjs scripts/test-generated-deal-images.mjs scripts/test-generated-image-audit.mjs
+      - name: Prepare the requested pending deal image
+        if: inputs.mode == 'generate'
+        env:
+          GENERATED_IMAGE_AUDIT_MODE: generate
+          GENERATED_IMAGE_AUDIT_DEAL_ID: ${{ inputs.deal_id }}
+          GENERATED_IMAGE_AUDIT_SOURCE_FILE: ${{ inputs.source_file }}
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+          GH_TOKEN: ${{ github.token }}
+          FREEFINDER_ASTRA_ENRICHMENT: '1'
+          SENTRY_DISABLED: '1'
+        run: node scripts/generated-image-audit.mjs
+      - name: Save image preparation without changing deal queues or the live feed
+        if: always() && inputs.mode == 'generate'
+        env:
+          MAP_SOURCE_REQUESTS: '0'
+          MAP_GEOCODE_REQUESTS: '0'
+        run: node scripts/commit-generated.mjs --message "Prepare requested generated deal image" --files reviews/generated-deal-images.json 'docs/assets/approved-deal-photos/*.jpg' 'reviews/deal-photos/*.json' 'reviews/generated-deal-image-staging/*.jpg'
+      - name: Verify the committed public image without model calls
+        if: inputs.mode == 'verify-public'
+        env:
+          GENERATED_IMAGE_AUDIT_MODE: verify-public
+          GENERATED_IMAGE_AUDIT_DEAL_ID: ${{ inputs.deal_id }}
+          GENERATED_IMAGE_AUDIT_SOURCE_FILE: ${{ inputs.source_file }}
+          SENTRY_DISABLED: '1'
+        run: node scripts/generated-image-audit.mjs
+      - name: Preserve the sanitized image audit result
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: generated-deal-image-audit-${{ github.run_id }}-${{ inputs.mode }}
+          path: output/generated-deal-image-audit.json
+          if-no-files-found: warn
+          retention-days: 7
