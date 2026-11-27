@@ -8,6 +8,8 @@ const SOL = 'gpt-6.2-sol';
 const ASTRA_PROFILE = 'astra-deal-enrichment';
 const CHAT = 'https://api.openai.com/v1/chat/completions';
 const RESPONSES = 'https://api.openai.com/v1/responses';
+export const DEAL_IMAGE_GENERATION_URL = 'https://api.openai.com/v1/images/generations';
+export const DEAL_IMAGE_GENERATION_MODEL = 'gpt-image-2.6-sunburst';
 export const OPENAI_MODEL_TIMEOUT_MS = 110000;
 const RATES = {
   // Price all input at the maximum 30-minute cache-write rate for Standard requests.
@@ -111,7 +113,26 @@ export function validateCreditPolicy(policy, now = Date.now()) {
   return policy;
 }
 
+function prepareImageGenerationRequest(init) {
+  let body;
+  try { body = JSON.parse(init.body); } catch { throw paused('invalid-request'); }
+  const fixed = { model: DEAL_IMAGE_GENERATION_MODEL, n: 1, size: '1536x1024', quality: 'high',
+    complexity: 'high', output_format: 'jpeg', output_compression: 95, moderation: 'auto' };
+  if (init.method !== 'POST' || !body || typeof body !== 'object' || Array.isArray(body)
+    || Object.keys(body).some(key => key !== 'prompt' && !Object.hasOwn(fixed,key))
+    || Object.entries(fixed).some(([key,value]) => body[key] !== value)) {
+    throw paused('unbounded-or-unpriced-image-request');
+  }
+  if (typeof body.prompt !== 'string' || !body.prompt.trim()
+    || Buffer.byteLength(body.prompt,'utf8') > 8000) throw paused('image-prompt-limit');
+  // This fixed single-image operation holds the complete existing per-call dollar
+  // before dispatch; its actual text/image token receipt settles the same ledger.
+  return { init: {...init,body:JSON.stringify(body)}, model:DEAL_IMAGE_GENERATION_MODEL,
+    modality:'image', reservedUsd:1 };
+}
+
 export function prepareBudgetedRequest(url, init) {
+  if (String(url) === DEAL_IMAGE_GENERATION_URL) return prepareImageGenerationRequest(init);
   if (![CHAT, RESPONSES].includes(String(url))) throw paused('unsupported-endpoint');
   let body;
   try { body = JSON.parse(init.body); } catch { throw paused('invalid-request'); }
@@ -171,6 +192,17 @@ export function meteredUsageUsd(model, input, output) {
     || !Number.isSafeInteger(output) || output < 0) return null;
   const [inputRate, outputRate] = RATES[model];
   return money((input * inputRate + output * outputRate) / 1000000);
+}
+
+
+export function meteredImageUsageUsd(usage) {
+  const input = usage?.input_tokens, output = usage?.output_tokens, total = usage?.total_tokens;
+  const text = usage?.input_tokens_details?.text_tokens, image = usage?.input_tokens_details?.image_tokens;
+  if (![input,output,total,text,image].every(value => Number.isSafeInteger(value) && value >= 0)
+    || input !== text + image || total !== input + output) return null;
+  // Cached input, when present, is conservatively covered by full input rates.
+  const microdollars = text * 5 + image * 8 + output * 30;
+  return Number.isSafeInteger(microdollars) ? money(microdollars / 1000000) : null;
 }
 
 // FreeFinder's existing editors consume Chat Completions output. Responses
@@ -255,7 +287,7 @@ export function createCreditBudget({ store, policy, clock = Date.now, request = 
     const prepared = prepareFreeCreditCall(url, init);
     const astra = prepared.model === ASTRA;
     const profileActive = isAstraEnrichmentActive({ enabled: allowAstraEnrichment, now: clock(), policy });
-    if (astra !== profileActive) throw paused('model-outside-active-profile');
+    if (prepared.modality !== 'image' && astra !== profileActive) throw paused('model-outside-active-profile');
     const { adaptChat, providerUrl } = prepared;
     if (prepared.reservedUsd > policy.requestLimitUsd) throw paused('request-cost-limit');
     const id = randomUUID(), at = clock();
@@ -282,7 +314,10 @@ export function createCreditBudget({ store, policy, clock = Date.now, request = 
       const dailyAuthorizedUsd = Math.min(ceiling, dayCapacity - correction) / 1e6;
       return { ...state, reservations: [...state.reservations, { id, at, usd: policy.requestLimitUsd,
         estimatedUsd: prepared.reservedUsd, dailyAuthorizedUsd, creditPeriod: policy.periodId,
-        model: prepared.model, reasoningEffort: 'max', reasoningMode: 'pro', ...(astra ? { profile: ASTRA_PROFILE } : {}),
+        model: prepared.model,
+        ...(prepared.modality === 'image'
+          ? {modality:'image',profile:'deal-image-generation',imageSize:'1536x1024',imageQuality:'high',imageComplexity:'high'}
+          : {reasoningEffort:'max',reasoningMode:'pro',...(astra ? {profile:ASTRA_PROFILE} : {})}),
         count: 1, expiresAt: Date.parse(policy.expiresAt), status: 'reserved' }] };
     });
     // Never send an unreserved call, including after slow storage crosses expiry.
@@ -312,7 +347,7 @@ export function createCreditBudget({ store, policy, clock = Date.now, request = 
       } else if (response.ok) {
         const usage = payload.usage;
         const input = usage?.input_tokens ?? usage?.prompt_tokens, output = usage?.output_tokens ?? usage?.completion_tokens;
-        const actual = meteredUsageUsd(prepared.model, input, output);
+        const actual = prepared.modality === 'image' ? meteredImageUsageUsd(usage) : meteredUsageUsd(prepared.model, input, output);
         if (actual !== null) {
           const overrun = actual > policy.requestLimitUsd;
           if (overrun) stopped = true;
@@ -325,7 +360,10 @@ export function createCreditBudget({ store, policy, clock = Date.now, request = 
               ...(overrun ? { pausedUntil: Math.max(state.pausedUntil, Date.parse(policy.expiresAt)),
                 costOverrun: state.costOverrun || { reservationId: id, model: prepared.model, reservedUsd: policy.requestLimitUsd, actualUsd: actual } } : {}),
               reservations: state.reservations.map(row => row.id === id
-                ? { ...row, usd: actual, status: 'settled', inputTokens: input, outputTokens: output, ...(overrun ? { reservedUsd: policy.requestLimitUsd } : {}) } : row),
+                ? { ...row, usd: actual, status: 'settled', inputTokens: input, outputTokens: output,
+                  ...(prepared.modality === 'image' ? {inputTextTokens:usage.input_tokens_details.text_tokens,
+                    inputImageTokens:usage.input_tokens_details.image_tokens} : {}),
+                  ...(overrun ? { reservedUsd: policy.requestLimitUsd } : {}) } : row),
             };
           }, { dispatched: true });
         }
