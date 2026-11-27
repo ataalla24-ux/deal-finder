@@ -60,6 +60,15 @@ export const photoRecipes = {
 
 // Match the benefit, not a merchant word in the URL (Pizza Rando offers döner).
 export const articlePhotos = {
+  'dahab-doener-1plus1-wien-floridsdorf': 'kebab',
+  'aura-doener-eroeffnung-299-wien-ottakring': 'kebab',
+  'zushi-market-babenbergerstrasse-eroeffnung-wien': 'bowl',
+  'm2-la-romana-pizza-ab-850-wien-meidling': 'pizza-alternative',
+  'stroeck-bio-wiederweckerl-112-wien': 'bakery-snacks',
+  'magenta-black-week-20-prozent-handytarife-oesterreich': 'smartphone',
+  'paramount-plus-black-friday-75-prozent-oesterreich': 'cinema',
+  'aida-pink-weeks-gutschein-wien': 'cafe-breakfast',
+  'bombshell-beauty-eroeffnungsrabatt-wien': 'city',
   'schinakl-pizza-rabatt-wien-alte-donau': 'pizza',
   'burgermanufaktur-3-hamburger-wien-hernals': 'burger',
   'vienna-sweets-3plus1-wien-neuer-markt': 'gift',

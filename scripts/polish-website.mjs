@@ -103,7 +103,7 @@ export function polishHtml(source, filename, now = Date.now()) {
         card('.topic-label').text('Aktion beendet · Archiv');
       }
       card('img').attr('loading', 'lazy');
-      const priorities = ['guenstig-essen-wien.html', 'geburtstag-gratis-wien.html', 'kinodonnerstag-wien-drei.html'];
+      const priorities = ['guenstig-essen-wien.html', 'geburtstag-gratis-wien.html', 'kinodonnerstag-wien-drei.html', 'gratis-wien-wochenende.html'];
       const priority = priorities.indexOf(href);
       return { html: card('article').toString(), archived, priority: priority < 0 ? priorities.length : priority };
     }).sort((a, b) => Number(a.archived) - Number(b.archived) || a.priority - b.priority);

@@ -7,6 +7,15 @@ import { photoVisual } from './blog-photo-catalog.mjs';
 
 // Editorial subject metadata is retained for generators; images are photographs.
 export const covers = {
+  'dahab-doener-1plus1-wien-floridsdorf': { lines: ['Dahab Döner 1+1'], topic: 'Döner in Floridsdorf', tone: 'yellow' },
+  'aura-doener-eroeffnung-299-wien-ottakring': { lines: ['Aura Döner'], topic: 'Eröffnung in Ottakring', tone: 'yellow' },
+  'zushi-market-babenbergerstrasse-eroeffnung-wien': { lines: ['Zushi Market Eröffnung'], topic: 'Bowl und Buffet in der Inneren Stadt', tone: 'green' },
+  'm2-la-romana-pizza-ab-850-wien-meidling': { lines: ['M2 La Romana'], topic: 'Pizza in Meidling', tone: 'yellow' },
+  'stroeck-bio-wiederweckerl-112-wien': { lines: ['Ströck Bio-Wiederweckerl'], topic: 'Wiener Bäckerei-Aktion', tone: 'yellow' },
+  'magenta-black-week-20-prozent-handytarife-oesterreich': { lines: ['Magenta Black Week'], topic: 'Handytarife in Österreich', tone: 'yellow' },
+  'paramount-plus-black-friday-75-prozent-oesterreich': { lines: ['Paramount+ Black Friday'], topic: 'Streamingangebot in Österreich', tone: 'yellow' },
+  'aida-pink-weeks-gutschein-wien': { lines: ['AÏDA Pink Weeks'], topic: 'Kaffeehaus-Gutscheine in Wien', tone: 'rose' },
+  'bombshell-beauty-eroeffnungsrabatt-wien': { lines: ['Bombshell Beauty'], topic: 'Eröffnung am Alsergrund', tone: 'rose' },
   'schinakl-pizza-rabatt-wien-alte-donau': { lines: ['Schinakl Pizza'], topic: 'Pizza-Aktion an der Alten Donau', tone: 'yellow' },
   'burgermanufaktur-3-hamburger-wien-hernals': { lines: ['Burgermanufaktur'], topic: 'Drei Hamburger in Hernals', tone: 'yellow' },
   'vienna-sweets-3plus1-wien-neuer-markt': { lines: ['Vienna Sweets 3+1'], topic: 'Süße Mitbringsel am Neuer Markt', tone: 'yellow' },
