@@ -76,7 +76,7 @@ test('text, date and location edits that retain the same product keep the exact 
 });
 
 test('replacement retains the Community card style and clears all old attachment content',async()=>{
-  const edited={...await draft(),title:'Gratis Döner',source:'Community',originSource:'community-submission',submissionId:'fixture'};
+  const edited={...await draft(),id:'community:fixture',title:'Gratis Döner',source:'Community',originSource:'community-submission',submissionId:'fixture'};
   const f=requests();
   const result=await refreshPendingDealPhoto(edited,{root,now,request:f.request,token:'offline-token',channel:'offline-channel'});
   assert.equal(result.status,'refreshed');
