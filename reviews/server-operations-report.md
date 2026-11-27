@@ -1,13 +1,13 @@
 # FreeFinder Betriebsbericht
 
-Stand: 2026-11-27T21:48:40.769Z
+Stand: 2026-11-27T21:55:04.576Z
 
 - 109 Live-Angebote; 241 nicht-live Entwuerfe geprueft.
 - 0 neue IDs seit letzter Bestandsaufnahme; keine automatische Erfolgszuordnung.
 - 0 Entwuerfe ohne formale Pruefluecke, weiterhin menschliche Freigabe.
 - Pilot: 50 Faelle gesammelt, 0 unabhaengig bewertet, 35 regulaere Qualitaetslaeufe beobachtet. Automatische Freigabe AUS.
 - Zugestellte und veröffentlichte Angebote nach Quelle stehen unten im Abschnitt Ertrag je Quelle.
-- API: internal-ledger; 12.82397 USD intern gebucht/reserviert in 24 Stunden. Kein Anbieter-Kontostand.
+- API: internal-ledger; 12.708342 USD intern gebucht/reserviert in 24 Stunden. Kein Anbieter-Kontostand.
 
 ## Naechste Schritte
 
@@ -29,7 +29,7 @@ Stand: 2026-11-27T21:48:40.769Z
 ## Aktualitaet
 
 - Entwurfsregeln frisch und lokal geprueft, ohne Modell- oder Quellenaufruf. 241 unterschiedliche IDs in 241 Eintraegen; doppelte IDs bleiben Prueffaelle.
-- Live-/Bildpruefstand: current; letzte Pruefung 2026-11-27T21:48:39.598Z. Bei veraltetem Stand sind leere Hinweisliste und Bildzaehler KEIN Entwarnungsnachweis.
+- Live-/Bildpruefstand: current; letzte Pruefung 2026-11-27T21:55:03.658Z. Bei veraltetem Stand sind leere Hinweisliste und Bildzaehler KEIN Entwarnungsnachweis.
 
 ## Freigabe und Einloesung
 
@@ -44,75 +44,75 @@ Wartezeiten stammen aus gespeicherten Prüfdaten. Ein abgelaufener Termin beweis
 
 | ID | Aufgabe | Wartealter in Stunden | Letzter belegter Versuch | Bekannte Wiederprüfung |
 |---|---|---:|---|---|
-| fc4g-13jty2q | description · model-disabled-for-this-run · handled-by-social-evidence | 73.64 | 2026-11-25T18:47:43.811Z | 2026-11-27T20:10:56.814Z |
-| g2-1tj2ejf | description · source-unavailable · no-reviewed-source-adapter | 58.9 | unbekannt | 2026-11-25T16:54:38.959Z |
-| g2-n6s0ab | description · source-unavailable · no-reviewed-source-adapter | 58.86 | unbekannt | 2026-11-25T16:57:10.391Z |
-| g2-1r6uo4j | description · source-unavailable · no-reviewed-source-adapter | 58.83 | unbekannt | 2026-11-25T16:58:47.022Z |
-| fc4g-19clfuj | description · source-unavailable · no-reviewed-source-adapter | 51.52 | unbekannt | 2026-11-26T00:17:16.844Z |
-| fc4g-1ngdroh | description · source-unavailable · no-reviewed-source-adapter | 28.05 | unbekannt | 2026-11-26T23:45:31.094Z |
-| g2-1kg4kae | description · source-unavailable · source-access-pause | 252.56 | unbekannt | 2026-11-28T21:06:42.720Z |
-| g2-oyxgdj | description · source-unavailable · source-access-pause | 180.87 | unbekannt | 2026-11-28T21:06:42.720Z |
-| g2-acp99i | description · source-unavailable · source-cooldown | 154.08 | unbekannt | 2026-11-28T21:06:42.720Z |
-| meta-ig-18023750390950945 | map · venue-verification-needed | 62.33 | unbekannt | 2026-11-27T22:02:53.437Z |
-| fc4g-zz2f5b | approval-review-required | 1236.53 | 2026-10-07T09:16:43.127Z | unbekannt |
-| g2-17oj5vl | approval-review-required | 1224.06 | 2026-10-07T21:45:21.681Z | unbekannt |
-| fc4g-133yfhm | approval-review-required | 1220.45 | 2026-10-08T01:21:36.087Z | unbekannt |
-| g2-qtb0i6 | approval-review-required | 999.59 | 2026-10-17T06:13:05.015Z | unbekannt |
-| fc4g-1sr4zo0 | approval-review-required | 889.88 | 2026-10-21T19:56:02.650Z | unbekannt |
-| g2-17qln4f | approval-review-required | 757.08 | 2026-10-27T08:44:06.634Z | unbekannt |
-| g2-1rns6ax | source-evidence-needed | 745.23 | 2026-10-27T20:34:42.141Z | unbekannt |
-| g2-93n04l | offer-period-needed, source-evidence-needed | 0.44 | 2026-11-27T21:22:24.150Z | unbekannt |
-| g2-59z905 | source-evidence-needed | 0.44 | 2026-11-27T21:22:24.118Z | unbekannt |
-| fc4g-1569bjd | venue-evidence-needed | 153.41 | 2026-11-21T12:23:49.692Z | unbekannt |
+| fc4g-13jty2q | description · model-disabled-for-this-run · handled-by-social-evidence | 73.74 | 2026-11-25T18:47:43.811Z | 2026-11-27T20:10:56.814Z |
+| g2-1tj2ejf | description · source-unavailable · no-reviewed-source-adapter | 59.01 | unbekannt | 2026-11-25T16:54:38.959Z |
+| g2-n6s0ab | description · source-unavailable · no-reviewed-source-adapter | 58.96 | unbekannt | 2026-11-25T16:57:10.391Z |
+| g2-1r6uo4j | description · source-unavailable · no-reviewed-source-adapter | 58.94 | unbekannt | 2026-11-25T16:58:47.022Z |
+| fc4g-19clfuj | description · source-unavailable · no-reviewed-source-adapter | 51.63 | unbekannt | 2026-11-26T00:17:16.844Z |
+| fc4g-1ngdroh | description · source-unavailable · no-reviewed-source-adapter | 28.16 | unbekannt | 2026-11-26T23:45:31.094Z |
+| g2-1kg4kae | description · source-unavailable · source-access-pause | 252.66 | unbekannt | 2026-11-28T21:06:42.720Z |
+| g2-oyxgdj | description · source-unavailable · source-access-pause | 180.98 | unbekannt | 2026-11-28T21:06:42.720Z |
+| g2-acp99i | description · source-unavailable · source-cooldown | 154.18 | unbekannt | 2026-11-28T21:06:42.720Z |
+| meta-ig-18023750390950945 | map · venue-verification-needed | 62.44 | unbekannt | 2026-11-27T22:02:53.437Z |
+| fc4g-zz2f5b | approval-review-required | 1236.64 | 2026-10-07T09:16:43.127Z | unbekannt |
+| g2-17oj5vl | approval-review-required | 1224.16 | 2026-10-07T21:45:21.681Z | unbekannt |
+| fc4g-133yfhm | approval-review-required | 1220.56 | 2026-10-08T01:21:36.087Z | unbekannt |
+| g2-qtb0i6 | approval-review-required | 999.7 | 2026-10-17T06:13:05.015Z | unbekannt |
+| fc4g-1sr4zo0 | approval-review-required | 889.98 | 2026-10-21T19:56:02.650Z | unbekannt |
+| g2-17qln4f | approval-review-required | 757.18 | 2026-10-27T08:44:06.634Z | unbekannt |
+| g2-1rns6ax | source-evidence-needed | 745.34 | 2026-10-27T20:34:42.141Z | unbekannt |
+| g2-93n04l | offer-period-needed, source-evidence-needed | 0.55 | 2026-11-27T21:22:24.150Z | unbekannt |
+| g2-59z905 | source-evidence-needed | 0.55 | 2026-11-27T21:22:24.118Z | unbekannt |
+| fc4g-1569bjd | venue-evidence-needed | 153.52 | 2026-11-21T12:23:49.692Z | unbekannt |
 
 ## Quellenbetrieb
 
 Erwartete GitHub-Zeiten enthalten einen Toleranzpuffer. Ein Workflow-Erfolg bestätigt weder Quellenzugriff noch neue Angebote. Neu beobachtete Ausgangs-IDs gelten nur für den Zeitraum zwischen zwei Berichten. Slack-Zustellungen stehen im Abschnitt Ertrag.
 
-| Quelle | Zeitplan und letzter regulärer Lauf | Quellenbefund | Gelesen / neu bestätigt / im Ausgang | Neu beobachtete IDs | Bekannte Wartezeit bis |
-|---|---|---|---:|---:|---|
-| Meta Instagram · Graph und Ad Library | scheduled-run-overdue · UTC 17 * * * * · erwartet seit 2026-11-27T20:17:00.000Z · [46053368355](https://github.com/ataalla24-ux/deal-finder/actions/runs/46053368355) success 2026-11-27T18:58:46.000Z | new-candidates · ok · zuletzt gelesen 2026-11-27T20:09:43.133Z · zuletzt neu 2026-11-27T20:09:43.133Z | 352 / 1 / 102 | unbekannt | unbekannt |
-| Apify Instagram | workflow-succeeded · UTC 40 */6 * * * · erwartet seit 2026-11-27T18:40:00.000Z · [46071479048](https://github.com/ataalla24-ux/deal-finder/actions/runs/46071479048) success 2026-11-27T21:37:10.000Z | collector-ran · healthy · zuletzt gelesen 2026-11-27T21:38:11.097Z | 1 / unbekannt / 1 | unbekannt | unbekannt |
-| Apify 2 · Vienna Food | scheduled-run-overdue · UTC 25 5,17 * * * · erwartet seit 2026-11-27T17:25:00.000Z · [46024676809](https://github.com/ataalla24-ux/deal-finder/actions/runs/46024676809) success 2026-11-27T15:24:46.000Z | no-new-candidates · succeeded · zuletzt gelesen 2026-11-27T15:25:12.995Z | 10 / 0 / 1 | unbekannt | unbekannt |
-| Instagram AI · Suche und Profile | scheduled-run-overdue · UTC 15 1,7,13,19 * * * · erwartet seit 2026-11-27T19:15:00.000Z · [45975298771](https://github.com/ataalla24-ux/deal-finder/actions/runs/45975298771) success 2026-11-27T09:37:48.000Z | partially-available | unbekannt / unbekannt / 3 | unbekannt | 2026-11-27T22:18:47.753Z |
-| Instagram · Öffentliche Profile | workflow-succeeded · UTC 20 5 * * * · erwartet seit 2026-11-27T05:20:00.000Z · [46022818331](https://github.com/ataalla24-ux/deal-finder/actions/runs/46022818331) success 2026-11-27T15:12:32.000Z | collector-ran · collected · zuletzt gelesen 2026-11-27T15:14:52.713Z | 32 / unbekannt / 2 | unbekannt | unbekannt |
-| Instagram · Veraltete private Web-Route | disabled | disabled | unbekannt / unbekannt / 0 | unbekannt | unbekannt |
-| TikTok · Scanner | scheduled-run-overdue · UTC 15 5,17 * * * · erwartet seit 2026-11-27T17:15:00.000Z · [46021206130](https://github.com/ataalla24-ux/deal-finder/actions/runs/46021206130) success 2026-11-27T15:01:52.000Z | partially-available · discovery-degraded | unbekannt / unbekannt / 1 | unbekannt | unbekannt |
-| TikTok · Browser-Import | manual-only | outbox-observed | unbekannt / unbekannt / 2 | unbekannt | unbekannt |
-| Wien Deals Combined | workflow-succeeded · UTC 35 */6 * * * · erwartet seit 2026-11-27T18:35:00.000Z · [46071185001](https://github.com/ataalla24-ux/deal-finder/actions/runs/46071185001) success 2026-11-27T21:34:29.000Z | partially-available · degraded · zuletzt gelesen 2026-11-27T21:37:06.480Z | 23 / unbekannt / 0 | unbekannt | unbekannt |
-| Firecrawl Key 1 · Gastro | workflow-succeeded · UTC 0 1 * * * · erwartet seit 2026-11-27T01:00:00.000Z · [45974120070](https://github.com/ataalla24-ux/deal-finder/actions/runs/45974120070) success 2026-11-27T09:29:20.000Z | collector-ran · completed · zuletzt gelesen 2026-11-27T09:40:51.147Z | 36 / unbekannt / 116 | unbekannt | unbekannt |
-| Firecrawl Key 2 · Food | workflow-succeeded · UTC 0 2 * * * · erwartet seit 2026-11-27T02:00:00.000Z · [45983982163](https://github.com/ataalla24-ux/deal-finder/actions/runs/45983982163) success 2026-11-27T10:39:49.000Z | collector-ran · completed · zuletzt gelesen 2026-11-27T10:40:28.508Z | 5 / unbekannt / 1 | unbekannt | unbekannt |
-| Firecrawl Key 3 · Consumables | workflow-succeeded · UTC 0 3 * * * · erwartet seit 2026-11-27T03:00:00.000Z · [45991773399](https://github.com/ataalla24-ux/deal-finder/actions/runs/45991773399) success 2026-11-27T11:35:48.000Z | collector-ran · completed · zuletzt gelesen 2026-11-27T11:37:53.063Z | 6 / unbekannt / 0 | unbekannt | unbekannt |
-| Firecrawl Key 4 · Gastro Discovery | workflow-succeeded · UTC 0 7 * * * · erwartet seit 2026-11-27T07:00:00.000Z · [46040452144](https://github.com/ataalla24-ux/deal-finder/actions/runs/46040452144) success 2026-11-27T17:15:57.000Z | collector-ran · completed · zuletzt gelesen 2026-11-27T17:22:44.330Z | 18 / unbekannt / 49 | unbekannt | unbekannt |
-| Firecrawl Key 5 · Instagram Gastro | workflow-succeeded · UTC 0 4 * * * · erwartet seit 2026-11-27T04:00:00.000Z · [46007701658](https://github.com/ataalla24-ux/deal-finder/actions/runs/46007701658) success 2026-11-27T13:30:34.000Z | collector-ran · completed · zuletzt gelesen 2026-11-27T13:32:37.033Z | 4 / unbekannt / 2 | unbekannt | unbekannt |
-| Power Scraper | workflow-succeeded · UTC 30 5,13 * * * · erwartet seit 2026-11-27T13:30:00.000Z · [46024613895](https://github.com/ataalla24-ux/deal-finder/actions/runs/46024613895) success 2026-11-27T15:24:21.000Z | partially-available · zuletzt gelesen 2026-11-27T15:25:50.065Z | unbekannt / unbekannt / 45 | unbekannt | 2026-11-28T13:37:43.063Z |
-| Wiener Händlerseiten | workflow-succeeded · UTC 15 3 * * * · erwartet seit 2026-11-27T03:15:00.000Z · [45995794840](https://github.com/ataalla24-ux/deal-finder/actions/runs/45995794840) success 2026-11-27T12:05:54.000Z | outbox-observed | unbekannt / unbekannt / 8 | unbekannt | unbekannt |
-| Food Provider Discovery | scheduled-run-overdue · UTC 45 7,11,15,19 * * * · erwartet seit 2026-11-27T19:45:00.000Z · [46043552209](https://github.com/ataalla24-ux/deal-finder/actions/runs/46043552209) success 2026-11-27T17:39:29.000Z | no-eligible-inputs · skipped | unbekannt / unbekannt / 0 | unbekannt | 2026-11-29T20:35:55.602Z |
-| jö · Öffentliche Angebote und privater Zugang | workflow-succeeded · UTC 20 5 * * * · erwartet seit 2026-11-27T05:20:00.000Z · [46022818331](https://github.com/ataalla24-ux/deal-finder/actions/runs/46022818331) success 2026-11-27T15:12:32.000Z | partially-available · provider-rate-limited · degraded · zuletzt gelesen 2026-11-27T15:15:28.306Z | unbekannt / unbekannt / 9 | unbekannt | unbekannt |
-| Vienna Promo Radar · RSS-Hinweise | workflow-succeeded · UTC 20 5 * * * · erwartet seit 2026-11-27T05:20:00.000Z · [46022818331](https://github.com/ataalla24-ux/deal-finder/actions/runs/46022818331) success 2026-11-27T15:12:32.000Z | outbox-observed | unbekannt / unbekannt / 106 | unbekannt | unbekannt |
-| Mitgliedervorteile | workflow-succeeded · UTC 20 5 * * * · erwartet seit 2026-11-27T05:20:00.000Z · [46021958267](https://github.com/ataalla24-ux/deal-finder/actions/runs/46021958267) success 2026-11-27T15:06:51.000Z | partially-available | unbekannt / unbekannt / 113 | unbekannt | unbekannt |
-| Gutscheine.at | workflow-succeeded · UTC 30 6 * * * · erwartet seit 2026-11-27T06:30:00.000Z · [46037550643](https://github.com/ataalla24-ux/deal-finder/actions/runs/46037550643) success 2026-11-27T16:54:47.000Z | outbox-observed | unbekannt / unbekannt / 40 | unbekannt | unbekannt |
-| Flüge ab Wien | workflow-succeeded · UTC 0 7 * * 1 · erwartet seit 2026-11-23T07:00:00.000Z · [45243145027](https://github.com/ataalla24-ux/deal-finder/actions/runs/45243145027) success 2026-11-23T18:53:33.000Z | outbox-observed | unbekannt / unbekannt / 10 | unbekannt | unbekannt |
-| Kirchen · Verzeichnis | workflow-succeeded · UTC 0 7 * * 1 · erwartet seit 2026-11-23T07:00:00.000Z · [45243054617](https://github.com/ataalla24-ux/deal-finder/actions/runs/45243054617) success 2026-11-23T18:53:01.000Z | outbox-observed | unbekannt / unbekannt / 4 | unbekannt | unbekannt |
-| Kirchen · Gottesdienste | workflow-succeeded · UTC 0 7 * * 1 · erwartet seit 2026-11-23T07:00:00.000Z · [45243054617](https://github.com/ataalla24-ux/deal-finder/actions/runs/45243054617) success 2026-11-23T18:53:01.000Z | outbox-observed | unbekannt / unbekannt / 4 | unbekannt | unbekannt |
-| Kirchen · Veranstaltungen | workflow-succeeded · UTC 0 7 * * 1 · erwartet seit 2026-11-23T07:00:00.000Z · [45243054617](https://github.com/ataalla24-ux/deal-finder/actions/runs/45243054617) success 2026-11-23T18:53:01.000Z | outbox-observed | unbekannt / unbekannt / 4 | unbekannt | unbekannt |
-| Freikirchen · Separater Lauf | manual-only | outbox-observed | unbekannt / unbekannt / 32 | unbekannt | unbekannt |
-| Community-Einreichungen | scheduled-run-overdue · UTC 2,17,32,47 * * * * · erwartet seit 2026-11-27T20:47:00.000Z · [46019191089](https://github.com/ataalla24-ux/deal-finder/actions/runs/46019191089) success 2026-11-27T14:48:15.000Z | report-missing · Bericht älter als Lauf | unbekannt / unbekannt / unbekannt | unbekannt | unbekannt |
-| Central · Validierung und Slack-Zustellung | scheduled-run-overdue · UTC 7,22,37,52 * * * * · erwartet seit 2026-11-27T20:37:00.000Z · [46061858800](https://github.com/ataalla24-ux/deal-finder/actions/runs/46061858800) success 2026-11-27T20:11:03.000Z | collector-ran · zuletzt gelesen 2026-11-27T20:40:53.974Z | 290 / unbekannt / unbekannt | unbekannt | unbekannt |
-| Slack-Freigabe · Regulärer Nachlauf | workflow-succeeded · UTC */15 * * * * · erwartet seit 2026-11-27T20:45:00.000Z · [46069692699](https://github.com/ataalla24-ux/deal-finder/actions/runs/46069692699) success 2026-11-27T21:20:48.000Z | report-missing · Bericht älter als Lauf | unbekannt / unbekannt / unbekannt | unbekannt | unbekannt |
-| Google Places · Lokaler Lauf | manual-only | report-timestamp-unverified | unbekannt / unbekannt / 0 | unbekannt | unbekannt |
-| Telegram · Altbestand | inactive | inactive | unbekannt / unbekannt / 0 | unbekannt | unbekannt |
-| X/Twitter · Altbestand | inactive | inactive | unbekannt / unbekannt / 0 | unbekannt | unbekannt |
-| Kirchen · Archiv events | inactive | inactive | unbekannt / unbekannt / 35 | unbekannt | unbekannt |
-| Kirchen · Archiv gemeinde | inactive | inactive | unbekannt / unbekannt / 33 | unbekannt | unbekannt |
-| Kirchen · Archiv gottesdienste | inactive | inactive | unbekannt / unbekannt / 29 | unbekannt | unbekannt |
+| Quelle | Zeitplan und letzter regulärer Lauf | Quellenbefund | Belegte Kennzahlen | Neu beobachtete IDs | Bekannte Wartezeit bis |
+|---|---|---|---|---:|---|
+| Meta Instagram · Graph und Ad Library | scheduled-run-overdue · UTC 17 * * * * · erwartet seit 2026-11-27T20:17:00.000Z · [46053368355](https://github.com/ataalla24-ux/deal-finder/actions/runs/46053368355) success 2026-11-27T18:58:46.000Z | no-new-candidates · ok · letzter belegter Rücklauf 2026-11-27T21:24:56.419Z · zuletzt neu 2026-11-27T20:09:43.133Z | Abgerufene Datensätze 1045 · Neue bestätigte Kandidaten 0 · Im Ausgang 99 | 0 | unbekannt |
+| Apify Instagram | workflow-succeeded · UTC 40 */6 * * * · erwartet seit 2026-11-27T18:40:00.000Z · [46071479048](https://github.com/ataalla24-ux/deal-finder/actions/runs/46071479048) success 2026-11-27T21:37:10.000Z | collector-ran · healthy · letzter belegter Rücklauf 2026-11-27T21:38:11.097Z | Abgerufene Datensätze 1 · Geprüft 8 · Neu entdeckte Posts 0 · Akzeptiert 1 · Neue bestätigte Kandidaten unbekannt · Im Ausgang 1 | 0 | unbekannt |
+| Apify 2 · Vienna Food | scheduled-run-overdue · UTC 25 5,17 * * * · erwartet seit 2026-11-27T17:25:00.000Z · [46024676809](https://github.com/ataalla24-ux/deal-finder/actions/runs/46024676809) success 2026-11-27T15:24:46.000Z | no-new-candidates · succeeded · letzter belegter Rücklauf 2026-11-27T15:25:12.995Z | Abgerufene Datensätze 10 · Neue bestätigte Kandidaten 0 · Im Ausgang 1 | 0 | unbekannt |
+| Instagram AI · Suche und Profile | scheduled-run-overdue · UTC 15 1,7,13,19 * * * · erwartet seit 2026-11-27T19:15:00.000Z · [45975298771](https://github.com/ataalla24-ux/deal-finder/actions/runs/45975298771) success 2026-11-27T09:37:48.000Z | partially-available | Entdeckte Kandidaten 62 · Akzeptiert 3 · Neue bestätigte Kandidaten unbekannt · Im Ausgang 3 | 0 | 2026-11-27T22:18:47.753Z |
+| Instagram · Öffentliche Profile | workflow-succeeded · UTC 20 5 * * * · erwartet seit 2026-11-27T05:20:00.000Z · [46022818331](https://github.com/ataalla24-ux/deal-finder/actions/runs/46022818331) success 2026-11-27T15:12:32.000Z | collector-ran · collected · letzter belegter Rücklauf 2026-11-27T15:14:52.713Z | Abgerufene Datensätze 32 · Neue bestätigte Kandidaten unbekannt · Im Ausgang 2 | 0 | unbekannt |
+| Instagram · Veraltete private Web-Route | disabled | disabled | Neue bestätigte Kandidaten unbekannt · Im Ausgang 0 | 0 | unbekannt |
+| TikTok · Scanner | scheduled-run-overdue · UTC 15 5,17 * * * · erwartet seit 2026-11-27T17:15:00.000Z · [46021206130](https://github.com/ataalla24-ux/deal-finder/actions/runs/46021206130) success 2026-11-27T15:01:52.000Z | partially-available · discovery-degraded · letzter belegter Rücklauf 2026-11-27T15:07:58.779Z | Geprüft 25 · Akzeptiert 0 · Neue bestätigte Kandidaten unbekannt · Im Ausgang 1 | 0 | unbekannt |
+| TikTok · Browser-Import | manual-only | outbox-observed | Neue bestätigte Kandidaten unbekannt · Im Ausgang 2 | 0 | unbekannt |
+| Wien Deals Combined | workflow-succeeded · UTC 35 */6 * * * · erwartet seit 2026-11-27T18:35:00.000Z · [46071185001](https://github.com/ataalla24-ux/deal-finder/actions/runs/46071185001) success 2026-11-27T21:34:29.000Z | partially-available · degraded · letzter belegter Rücklauf 2026-11-27T21:37:06.480Z | Abgerufene Datensätze 23 · Neue bestätigte Kandidaten unbekannt · Im Ausgang 0 | 0 | unbekannt |
+| Firecrawl Key 1 · Gastro | workflow-succeeded · UTC 0 1 * * * · erwartet seit 2026-11-27T01:00:00.000Z · [45974120070](https://github.com/ataalla24-ux/deal-finder/actions/runs/45974120070) success 2026-11-27T09:29:20.000Z | collector-ran · completed · letzter belegter Rücklauf 2026-11-27T09:40:51.147Z | Abgerufene Datensätze 36 · Akzeptiert 116 · Neue bestätigte Kandidaten unbekannt · Im Ausgang 116 | 0 | unbekannt |
+| Firecrawl Key 2 · Food | workflow-succeeded · UTC 0 2 * * * · erwartet seit 2026-11-27T02:00:00.000Z · [45983982163](https://github.com/ataalla24-ux/deal-finder/actions/runs/45983982163) success 2026-11-27T10:39:49.000Z | collector-ran · completed · letzter belegter Rücklauf 2026-11-27T10:40:28.508Z | Abgerufene Datensätze 5 · Akzeptiert 2 · Neue bestätigte Kandidaten unbekannt · Im Ausgang 1 | 0 | unbekannt |
+| Firecrawl Key 3 · Consumables | workflow-succeeded · UTC 0 3 * * * · erwartet seit 2026-11-27T03:00:00.000Z · [45991773399](https://github.com/ataalla24-ux/deal-finder/actions/runs/45991773399) success 2026-11-27T11:35:48.000Z | collector-ran · completed · letzter belegter Rücklauf 2026-11-27T11:37:53.063Z | Abgerufene Datensätze 6 · Akzeptiert 0 · Neue bestätigte Kandidaten unbekannt · Im Ausgang 0 | 0 | unbekannt |
+| Firecrawl Key 4 · Gastro Discovery | workflow-succeeded · UTC 0 7 * * * · erwartet seit 2026-11-27T07:00:00.000Z · [46040452144](https://github.com/ataalla24-ux/deal-finder/actions/runs/46040452144) success 2026-11-27T17:15:57.000Z | collector-ran · completed · letzter belegter Rücklauf 2026-11-27T17:22:44.330Z | Abgerufene Datensätze 18 · Akzeptiert 49 · Neue bestätigte Kandidaten unbekannt · Im Ausgang 49 | 0 | unbekannt |
+| Firecrawl Key 5 · Instagram Gastro | workflow-succeeded · UTC 0 4 * * * · erwartet seit 2026-11-27T04:00:00.000Z · [46007701658](https://github.com/ataalla24-ux/deal-finder/actions/runs/46007701658) success 2026-11-27T13:30:34.000Z | collector-ran · completed · letzter belegter Rücklauf 2026-11-27T13:32:37.033Z | Abgerufene Datensätze 4 · Akzeptiert 2 · Neue bestätigte Kandidaten unbekannt · Im Ausgang 2 | 0 | unbekannt |
+| Power Scraper | workflow-succeeded · UTC 30 5,13 * * * · erwartet seit 2026-11-27T13:30:00.000Z · [46024613895](https://github.com/ataalla24-ux/deal-finder/actions/runs/46024613895) success 2026-11-27T15:24:21.000Z | partially-available · letzter belegter Rücklauf 2026-11-27T15:25:50.065Z | Akzeptiert 45 · Neue bestätigte Kandidaten unbekannt · Im Ausgang 45 | 0 | 2026-11-28T13:37:43.063Z |
+| Wiener Händlerseiten | workflow-succeeded · UTC 15 3 * * * · erwartet seit 2026-11-27T03:15:00.000Z · [45995794840](https://github.com/ataalla24-ux/deal-finder/actions/runs/45995794840) success 2026-11-27T12:05:54.000Z | outbox-observed | Neue bestätigte Kandidaten unbekannt · Im Ausgang 8 | 0 | unbekannt |
+| Food Provider Discovery | scheduled-run-overdue · UTC 45 7,11,15,19 * * * · erwartet seit 2026-11-27T19:45:00.000Z · [46043552209](https://github.com/ataalla24-ux/deal-finder/actions/runs/46043552209) success 2026-11-27T17:39:29.000Z | no-eligible-inputs · skipped | Neue bestätigte Kandidaten unbekannt · Im Ausgang 0 | 0 | 2026-11-29T20:35:55.602Z |
+| jö · Öffentliche Angebote und privater Zugang | workflow-succeeded · UTC 20 5 * * * · erwartet seit 2026-11-27T05:20:00.000Z · [46022818331](https://github.com/ataalla24-ux/deal-finder/actions/runs/46022818331) success 2026-11-27T15:12:32.000Z | partially-available · provider-rate-limited · degraded · letzter belegter Rücklauf 2026-11-27T15:15:28.306Z | Neue bestätigte Kandidaten unbekannt · Im Ausgang 9 | 0 | unbekannt |
+| Vienna Promo Radar · RSS-Hinweise | workflow-succeeded · UTC 20 5 * * * · erwartet seit 2026-11-27T05:20:00.000Z · [46022818331](https://github.com/ataalla24-ux/deal-finder/actions/runs/46022818331) success 2026-11-27T15:12:32.000Z | outbox-observed | Neue bestätigte Kandidaten unbekannt · Im Ausgang 106 | 0 | unbekannt |
+| Mitgliedervorteile | workflow-succeeded · UTC 20 5 * * * · erwartet seit 2026-11-27T05:20:00.000Z · [46021958267](https://github.com/ataalla24-ux/deal-finder/actions/runs/46021958267) success 2026-11-27T15:06:51.000Z | partially-available | Neue bestätigte Kandidaten unbekannt · Im Ausgang 113 | 0 | unbekannt |
+| Gutscheine.at | workflow-succeeded · UTC 30 6 * * * · erwartet seit 2026-11-27T06:30:00.000Z · [46037550643](https://github.com/ataalla24-ux/deal-finder/actions/runs/46037550643) success 2026-11-27T16:54:47.000Z | outbox-observed | Neue bestätigte Kandidaten unbekannt · Im Ausgang 40 | 0 | unbekannt |
+| Flüge ab Wien | workflow-succeeded · UTC 0 7 * * 1 · erwartet seit 2026-11-23T07:00:00.000Z · [45243145027](https://github.com/ataalla24-ux/deal-finder/actions/runs/45243145027) success 2026-11-23T18:53:33.000Z | outbox-observed | Neue bestätigte Kandidaten unbekannt · Im Ausgang 10 | 0 | unbekannt |
+| Kirchen · Verzeichnis | workflow-succeeded · UTC 0 7 * * 1 · erwartet seit 2026-11-23T07:00:00.000Z · [45243054617](https://github.com/ataalla24-ux/deal-finder/actions/runs/45243054617) success 2026-11-23T18:53:01.000Z | outbox-observed | Neue bestätigte Kandidaten unbekannt · Im Ausgang 4 | 0 | unbekannt |
+| Kirchen · Gottesdienste | workflow-succeeded · UTC 0 7 * * 1 · erwartet seit 2026-11-23T07:00:00.000Z · [45243054617](https://github.com/ataalla24-ux/deal-finder/actions/runs/45243054617) success 2026-11-23T18:53:01.000Z | outbox-observed | Neue bestätigte Kandidaten unbekannt · Im Ausgang 4 | 0 | unbekannt |
+| Kirchen · Veranstaltungen | workflow-succeeded · UTC 0 7 * * 1 · erwartet seit 2026-11-23T07:00:00.000Z · [45243054617](https://github.com/ataalla24-ux/deal-finder/actions/runs/45243054617) success 2026-11-23T18:53:01.000Z | outbox-observed | Neue bestätigte Kandidaten unbekannt · Im Ausgang 4 | 0 | unbekannt |
+| Freikirchen · Separater Lauf | manual-only | outbox-observed | Neue bestätigte Kandidaten unbekannt · Im Ausgang 32 | 0 | unbekannt |
+| Community-Einreichungen | scheduled-run-overdue · UTC 2,17,32,47 * * * * · erwartet seit 2026-11-27T20:47:00.000Z · [46019191089](https://github.com/ataalla24-ux/deal-finder/actions/runs/46019191089) success 2026-11-27T14:48:15.000Z | report-missing · Bericht älter als Lauf | Neue bestätigte Kandidaten unbekannt | unbekannt | unbekannt |
+| Central · Validierung und Slack-Zustellung | scheduled-run-overdue · UTC 7,22,37,52 * * * * · erwartet seit 2026-11-27T20:52:00.000Z · [46061858800](https://github.com/ataalla24-ux/deal-finder/actions/runs/46061858800) success 2026-11-27T20:11:03.000Z | collector-ran · letzter belegter Rücklauf 2026-11-27T20:40:53.974Z | Abgerufene Datensätze 290 · Akzeptiert 0 · Neue bestätigte Kandidaten unbekannt | unbekannt | unbekannt |
+| Slack-Freigabe · Regulärer Nachlauf | workflow-succeeded · UTC */15 * * * * · erwartet seit 2026-11-27T20:45:00.000Z · [46069692699](https://github.com/ataalla24-ux/deal-finder/actions/runs/46069692699) success 2026-11-27T21:20:48.000Z | report-missing · Bericht älter als Lauf | Neue bestätigte Kandidaten unbekannt | unbekannt | unbekannt |
+| Google Places · Lokaler Lauf | manual-only | report-timestamp-unverified | Neue bestätigte Kandidaten unbekannt · Im Ausgang 0 | unbekannt | unbekannt |
+| Telegram · Altbestand | inactive | inactive | Neue bestätigte Kandidaten unbekannt · Im Ausgang 0 | 0 | unbekannt |
+| X/Twitter · Altbestand | inactive | inactive | Neue bestätigte Kandidaten unbekannt · Im Ausgang 0 | 0 | unbekannt |
+| Kirchen · Archiv events | inactive | inactive | Neue bestätigte Kandidaten unbekannt · Im Ausgang 35 | 0 | unbekannt |
+| Kirchen · Archiv gemeinde | inactive | inactive | Neue bestätigte Kandidaten unbekannt · Im Ausgang 33 | 0 | unbekannt |
+| Kirchen · Archiv gottesdienste | inactive | inactive | Neue bestätigte Kandidaten unbekannt · Im Ausgang 29 | 0 | unbekannt |
 
 
 ## Ertrag je Quelle
 
 Jeder Deal zählt ab seiner ersten belegten Slack-Zustellung einmal. Die Freigabe zählt, sobald für die betreffende Nachricht ein menschliches Häkchen belegt ist. Die letzte Stufe zählt freigegebene Deals, die mit derselben Nachrichtenkennung im öffentlichen Feed beobachtet wurden. Kurzzeitig sichtbare Angebote zwischen zwei Beobachtungen und bereits vor der ersten Beobachtung entfernte Einträge können fehlen.
 
-Erste öffentliche Beobachtung: 2026-11-06T23:56:26.741Z. Letzte erfolgreiche Beobachtung: 2026-11-27T21:48:40.769Z.
+Erste öffentliche Beobachtung: 2026-11-06T23:56:26.741Z. Letzte erfolgreiche Beobachtung: 2026-11-27T21:55:04.576Z.
 
 ### 7 Tage
 
@@ -175,7 +175,7 @@ Erste öffentliche Beobachtung: 2026-11-06T23:56:26.741Z. Letzte erfolgreiche Be
 
 ## Händlerseiten und Cashback im Vergleich
 
-Der Test begann am 21. November 2026 um 13:06 Uhr Wiener Zeit. Das Vergleichsfenster beginnt genau zwei Wochen früher. Beide Fenster umfassen dieselben Wochentage und bisher jeweils 153.7 Stunden, höchstens 14 Tage.
+Der Test begann am 21. November 2026 um 13:06 Uhr Wiener Zeit. Das Vergleichsfenster beginnt genau zwei Wochen früher. Beide Fenster umfassen dieselben Wochentage und bisher jeweils 153.8 Stunden, höchstens 14 Tage.
 
 | Essensangebote | Slack vorher | Slack seit Start | Häkchen vorher | Häkchen seit Start | Öffentlich vorher | Öffentlich seit Start |
 |---|---:|---:|---:|---:|---:|---:|
@@ -183,5 +183,5 @@ Der Test begann am 21. November 2026 um 13:06 Uhr Wiener Zeit. Das Vergleichsfen
 | Wiener Händlerseiten | 11 | 2 | 0 | 1 | 0 | 1 |
 | Direkte marktguru-Cashbacks | 0 | 1 | 0 | 0 | 0 | 0 |
 
-Jeder Deal zählt nach seiner ersten belegten Zustellung. Freigaben und öffentliche Sichtungen werden bis zum Prüfstand nachgetragen. Ältere Nachrichten hatten mehr Zeit für ein Häkchen. Änderungen der Gesamtzahlen können auch von anderen Quellen stammen. Prüfstand 2026-11-27T21:48:40.769Z.
+Jeder Deal zählt nach seiner ersten belegten Zustellung. Freigaben und öffentliche Sichtungen werden bis zum Prüfstand nachgetragen. Ältere Nachrichten hatten mehr Zeit für ein Häkchen. Änderungen der Gesamtzahlen können auch von anderen Quellen stammen. Prüfstand 2026-11-27T21:55:04.576Z.
 
