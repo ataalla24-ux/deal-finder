@@ -1,21 +1,21 @@
 {
-  "generatedAt": "2026-11-27T09:42:11.151Z",
+  "generatedAt": "2026-11-27T09:48:48.910Z",
   "discoveryAvailability": {
     "note": "Transport evidence, not deal yield. Retry eligibility is not recovery. Candidate counts are not Slack deliveries. No extra runs or quota resets.",
     "lanes": [
       {
         "name": "instagram-search",
-        "observedAt": "2026-11-26T22:25:34.567Z",
+        "observedAt": "2026-11-27T09:47:49.681Z",
         "status": "paused",
-        "reason": "search-unavailable",
+        "reason": "search-cooldown",
         "retryAt": "2026-11-27T22:18:47.753Z",
-        "attempted": 1,
+        "attempted": 0,
         "discovered": 0,
         "deliveredToSlack": null
       },
       {
         "name": "instagram-profiles",
-        "observedAt": "2026-11-26T22:25:34.567Z",
+        "observedAt": "2026-11-27T09:47:49.681Z",
         "status": "no-block-reported",
         "reason": "",
         "retryAt": "",
@@ -24,11 +24,11 @@
       },
       {
         "name": "instagram-previews",
-        "observedAt": "2026-11-26T22:25:34.567Z",
+        "observedAt": "2026-11-27T09:47:49.681Z",
         "status": "no-block-reported",
         "reason": "",
         "retryAt": "",
-        "attempted": 46,
+        "attempted": 50,
         "deliveredToSlack": null
       },
       {
@@ -54,10 +54,10 @@
   },
   "summary": {
     "filesConsidered": 33,
-    "totalCandidates": 799,
-    "uniqueCandidates": 770,
+    "totalCandidates": 797,
+    "uniqueCandidates": 772,
     "distinctCandidates": 784,
-    "duplicateClusters": 14,
+    "duplicateClusters": 12,
     "topHealthySources": [
       {
         "sourceKey": "tiktok-browser",
@@ -175,7 +175,7 @@
       {
         "sourceKey": "meta-instagram",
         "sourceLabel": "Meta Instagram Graph",
-        "precisionScore": 66,
+        "precisionScore": 67,
         "totalDeals": 96
       },
       {
@@ -437,9 +437,9 @@
       "file": "deals-pending-meta-instagram.json",
       "sourceLabel": "Meta Instagram Graph",
       "totalDeals": 96,
-      "uniqueDeals": 86,
-      "duplicateDeals": 10,
-      "duplicateAcrossSources": 5,
+      "uniqueDeals": 88,
+      "duplicateDeals": 8,
+      "duplicateAcrossSources": 3,
       "fresh1dCount": 5,
       "fresh7dCount": 86,
       "viennaCount": 96,
@@ -453,7 +453,7 @@
       ],
       "lastRun": null,
       "uniqueRate": 0.9,
-      "duplicateRate": 0.1,
+      "duplicateRate": 0,
       "fresh1dRate": 0.1,
       "fresh7dRate": 0.9,
       "viennaRate": 1,
@@ -512,7 +512,7 @@
       "healthScore": 68,
       "missionFitScore": 50,
       "coverageScore": 52,
-      "precisionScore": 66,
+      "precisionScore": 67,
       "sourceWeightScore": 59
     },
     {
@@ -1059,73 +1059,6 @@
       "sourceWeightScore": 46
     },
     {
-      "sourceKey": "instagram-ai",
-      "file": "deals-pending-instagram-ai.json",
-      "sourceLabel": "Instagram AI Agent",
-      "totalDeals": 5,
-      "uniqueDeals": 1,
-      "duplicateDeals": 4,
-      "duplicateAcrossSources": 4,
-      "fresh1dCount": 0,
-      "fresh7dCount": 5,
-      "viennaCount": 5,
-      "foodDrinkCount": 3,
-      "promoCount": 2,
-      "missingUrlCount": 0,
-      "sampleTitles": [
-        "Tomahawk: Instagram-Deal in Wien",
-        "Von heute bis 29",
-        "🎁 Reveal your prize and get a voucher for your next visit!"
-      ],
-      "lastRun": null,
-      "uniqueRate": 0.2,
-      "duplicateRate": 0.8,
-      "fresh1dRate": 0,
-      "fresh7dRate": 1,
-      "viennaRate": 1,
-      "foodDrinkRate": 0.6,
-      "promoRate": 0.4,
-      "missingUrlRate": 0,
-      "averageQualityScore": 78.6,
-      "topCategories": [
-        {
-          "value": "essen",
-          "count": 2
-        },
-        {
-          "value": "kaffee",
-          "count": 1
-        },
-        {
-          "value": "kirche",
-          "count": 1
-        },
-        {
-          "value": "shopping",
-          "count": 1
-        }
-      ],
-      "topTypes": [
-        {
-          "value": "rabatt",
-          "count": 4
-        },
-        {
-          "value": "gratis",
-          "count": 1
-        }
-      ],
-      "issues": [
-        "wenige Deals sind frischer als 1 Tag",
-        "hohe Überschneidung mit anderen Quellen"
-      ],
-      "healthScore": 51,
-      "missionFitScore": 47,
-      "coverageScore": 11,
-      "precisionScore": 59,
-      "sourceWeightScore": 43
-    },
-    {
       "sourceKey": "joe",
       "file": "deals-pending-joe.json",
       "sourceLabel": "jö Bonus Club",
@@ -1361,6 +1294,66 @@
       "coverageScore": 7,
       "precisionScore": 42,
       "sourceWeightScore": 29
+    },
+    {
+      "sourceKey": "instagram-ai",
+      "file": "deals-pending-instagram-ai.json",
+      "sourceLabel": "Instagram AI Agent",
+      "totalDeals": 3,
+      "uniqueDeals": 1,
+      "duplicateDeals": 2,
+      "duplicateAcrossSources": 2,
+      "fresh1dCount": 0,
+      "fresh7dCount": 3,
+      "viennaCount": 3,
+      "foodDrinkCount": 2,
+      "promoCount": 0,
+      "missingUrlCount": 0,
+      "sampleTitles": [
+        "🎁 Reveal your prize and get a voucher for your next visit!",
+        "Mit Sauce Tartare, Blattsalat und Gemüsecremesuppe um € 9,90, Montag im Lercherl Kürbis, aber gebacken. Außen",
+        "Mittagsmenü mit Tagessuppe um € 9,90, Montag bis Freitag im Lercherl Wos gibt’s heit? Die ganze Woche in 20 Se"
+      ],
+      "lastRun": null,
+      "uniqueRate": 0.3,
+      "duplicateRate": 0.7,
+      "fresh1dRate": 0,
+      "fresh7dRate": 1,
+      "viennaRate": 1,
+      "foodDrinkRate": 0.7,
+      "promoRate": 0,
+      "missingUrlRate": 0,
+      "averageQualityScore": 76,
+      "topCategories": [
+        {
+          "value": "essen",
+          "count": 1
+        },
+        {
+          "value": "kaffee",
+          "count": 1
+        },
+        {
+          "value": "shopping",
+          "count": 1
+        }
+      ],
+      "topTypes": [
+        {
+          "value": "rabatt",
+          "count": 3
+        }
+      ],
+      "issues": [
+        "wenige Deals sind frischer als 1 Tag",
+        "wenige klare Gratis-/Promo-Signale",
+        "hohe Überschneidung mit anderen Quellen"
+      ],
+      "healthScore": 49,
+      "missionFitScore": 40,
+      "coverageScore": 9,
+      "precisionScore": 53,
+      "sourceWeightScore": 39
     },
     {
       "sourceKey": "instagram-apify2",
