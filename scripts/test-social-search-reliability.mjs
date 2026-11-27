@@ -315,7 +315,7 @@ test('DuckDuckGo challenge with verified absent Retry-After gets one probe after
   const repeat = await runInstagramSearchQueries(queries,{...options,now:probeAt,previousReport:{search:held}});
   assert.equal(repeat.attemptedQueries,1);
   assert.equal(repeat.boundedRetry.failures,2);
-  assert.equal(repeat.nextRetryAt,'2026-11-12T00:00:00.000Z');
+  assert.equal(repeat.nextRetryAt,'2026-11-11T12:00:00.000Z');
   const failedProbe = await runInstagramSearchQueries(queries,{...options,now:probeAt,previousReport:{search:held},
     search:async()=>{throw new Error('network unavailable');}});
   assert.equal(failedProbe.attemptedQueries,1);

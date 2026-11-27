@@ -15,12 +15,13 @@ import {
 import { normalizeCategoryForScraper } from './category-utils.js';
 import { discoveryRejection } from './deal-discovery-policy.js';
 import { requestOpenAi } from './instagram-media-evidence.js';
-import { modelForTask, OPENAI_MODEL_TIMEOUT_MS } from './ai-credit-budget.js';
+import { modelForTask, OPENAI_MODEL_TIMEOUT_MS, OPENAI_BACKGROUND_TIMEOUT_MS } from './ai-credit-budget.js';
 import { partitionInstagramAiDeals } from '../scripts/validate-instagram-ai-output.mjs';
 import { createInstagramWebAccess } from './instagram-web-access-policy.js';
 import { instagramPageHasAccessWall } from './instagram-page-access.js';
 import { githubRunProvenance } from './pipeline-run-report-utils.js';
 import { parseInstagramSearchResults, runInstagramSearchQueries } from './instagram-search-discovery.js';
+import { INSTAGRAM_TAVILY_CACHE, INSTAGRAM_TAVILY_SOURCE, getInstagramTavilyLeads, readInstagramTavilyCache } from './instagram-tavily-index.js';
 import { readPublicSearchResponse } from './public-search-response.js';
 import { planInstagramQueries } from './instagram-query-plan.js';
 import { selectInstagramFoodAccounts } from './instagram-food-source-policy.js';
@@ -2188,6 +2189,9 @@ export async function classifyWithOpenAi(candidates, options = {}) {
     result.deals.push(...batch.deals);
     result.errors.push(...batch.errors);
     for (const key of Object.keys(result.usage)) result.usage[key] += batch.usage[key] || 0;
+    if (!batch.errors.length && batch.health) result.health = {
+      ...batch.health, completedCandidates: Math.min(offset + batchSize, candidates.length), deferredCandidates: 0,
+    };
     if (batch.errors.length) {
       result.health = { ...batch.health, completedCandidates: offset, deferredCandidates: candidates.length - offset };
       break;
@@ -2269,7 +2273,8 @@ async function classifyAiBatch(candidates, options = {}) {
     ],
   };
 
-  const timeout = AbortSignal.timeout(OPENAI_MODEL_TIMEOUT_MS);
+  const background = options.background !== false;
+  const timeout = AbortSignal.timeout(background ? OPENAI_BACKGROUND_TIMEOUT_MS : OPENAI_MODEL_TIMEOUT_MS);
   const signal = options.signal ? AbortSignal.any([timeout, options.signal]) : timeout;
   let responseReceived = false;
   try {
@@ -2285,6 +2290,7 @@ async function classifyAiBatch(candidates, options = {}) {
     }, {
       fetchImpl: options.fetchImpl,
       sleepImpl: options.sleepImpl || ((ms) => waitForDelay(ms, undefined, { signal })),
+      budgetOptions: background ? { background: true } : undefined,
     });
     responseReceived = true;
     const text = await response.text();
@@ -2303,7 +2309,7 @@ async function classifyAiBatch(candidates, options = {}) {
     return {
       deals,
       errors: [],
-      health: { status: 'ok' },
+      health: { status: 'ok', requestMode: background ? 'background' : 'foreground' },
       usage: {
         inputTokens: Number(parsed.usage?.prompt_tokens || 0),
         outputTokens: Number(parsed.usage?.completion_tokens || 0),
@@ -2313,7 +2319,8 @@ async function classifyAiBatch(candidates, options = {}) {
   } catch (error) {
     const httpStatus = Number.isInteger(error?.status) ? error.status : null;
     const budgetDeferred = error?.code === 'free_credit_budget_deferred';
-    const timedOut = signal.aborted && signal.reason?.name === 'TimeoutError';
+    const timedOut = (signal.aborted && signal.reason?.name === 'TimeoutError')
+      || error?.budgetReason === 'background-timeout';
     let code = 'request-failed';
     if (httpStatus) code = error.code || 'unclassified';
     else if (timedOut) code = 'request-timeout';
@@ -2326,6 +2333,7 @@ async function classifyAiBatch(candidates, options = {}) {
       usage: emptyUsage,
       health: {
         status: 'unavailable',
+        requestMode: background ? 'background' : 'foreground',
         httpStatus,
         code,
         retryable: !/quota|billing|usage_limit|spend_limit|credit/.test(code) && (httpStatus === 429 || httpStatus >= 500),
@@ -2381,7 +2389,7 @@ function sourcePriority(candidate) {
   const source = candidate.source || '';
   if (source.includes('seed-url')) return 0;
   if (source.startsWith('profile:')) return 1;
-  if (source.includes('duckduckgo')) return 2;
+  if (source.includes('duckduckgo') || source.includes(INSTAGRAM_TAVILY_SOURCE)) return 2;
   if (source.includes('instagram')) return 3;
   return 3;
 }
@@ -2396,7 +2404,8 @@ function freshnessPriority(candidate) {
     return 6;
   }
   const source = candidate.source || '';
-  if (source.includes('seed-url') || source.startsWith('profile:') || source.includes('duckduckgo')) return 1;
+  if (source.includes('seed-url') || source.startsWith('profile:') || source.includes('duckduckgo')
+    || source.includes(INSTAGRAM_TAVILY_SOURCE)) return 1;
   return 5;
 }
 
@@ -2479,6 +2488,10 @@ async function discoverCandidates(accounts, knownPosts) {
     return { candidates: rankCandidatesForScan(remaining).slice(0, CONFIG.maxCandidates), stats };
   };
   stats.existingCandidates = collectExistingCandidates(map);
+  const index = readInstagramTavilyCache(path.join(ROOT, INSTAGRAM_TAVILY_CACHE));
+  const indexedLeads = getInstagramTavilyLeads(index);
+  for (const { url, source } of indexedLeads) addCandidate(map, makeCandidate({ url, source }));
+  stats.tavilyIndexLeads = indexedLeads.length;
   stats.profileDiscovery = await discoverProfileCandidates(accounts, map);
 
   if (!CONFIG.searchEnabled) return finish();
@@ -2708,6 +2721,7 @@ async function main() {
       errors: stats.searchErrors,
     },
     existingCandidates: stats.existingCandidates,
+    tavilyIndexLeads: stats.tavilyIndexLeads,
     seedUrls: stats.seedUrls,
     profileDiscovery: stats.profileDiscovery,
     previewErrors,

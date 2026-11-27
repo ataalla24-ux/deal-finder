@@ -500,8 +500,11 @@ function safeInputImage(value) {
 export async function requestOpenAi(url, init, options = {}) {
   const fetchImpl = options.fetchImpl || freeCreditOpenAiFetch;
   const sleep = options.sleepImpl || ((ms) => new Promise((resolve) => setTimeout(resolve, ms)));
-  for (let attempt = 0; attempt < 2; attempt += 1) {
-    const response = await fetchImpl(url, init);
+  // A submitted background job is polled by the credit wrapper. Reposting on a
+  // transient response could create a second generation for the same batch.
+  const attempts = options.budgetOptions?.background === true ? 1 : 2;
+  for (let attempt = 0; attempt < attempts; attempt += 1) {
+    const response = await fetchImpl(url, init, options.budgetOptions);
     if (response.ok) return response;
     const body = await response.json().catch(() => ({}));
     const codes = [body?.error?.code, body?.error?.type];
@@ -512,7 +515,7 @@ export async function requestOpenAi(url, init, options = {}) {
     const header = response.headers?.get?.('retry-after');
     const requestedWait = header ? (Number.isFinite(Number(header)) ? Number(header) * 1000 : Date.parse(header) - Date.now()) : 1500;
     const wait = Math.max(0, Number.isFinite(requestedWait) ? requestedWait : 1500);
-    if (transient && attempt === 0 && wait <= 5000 && !init.signal?.aborted) {
+    if (transient && attempt + 1 < attempts && wait <= 5000 && !init.signal?.aborted) {
       await sleep(wait);
       continue;
     }

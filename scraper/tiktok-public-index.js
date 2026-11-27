@@ -1,6 +1,7 @@
 import { setTimeout as wait } from 'node:timers/promises';
 import { retryAfterAt } from './source-http-policy.js';
 import { buildTavilyTikTokQueries } from './tiktok-public-index-queries.js';
+import { buildInstagramTavilyQuery, normalizeInstagramTavilyUrl } from './instagram-tavily-index.js';
 
 const DAY_MS = 86_400_000;
 const MAX_RESULTS = 20;
@@ -83,10 +84,11 @@ function getFreeSearchBudget({ account, key }, now, queryCount) {
 
 export async function discoverTikTokLinksViaTavily({
   enabled = false, previous = {}, apiKey = '', freePlanConfirmed = false,
+  instagramIndex = undefined,
   fetcher = fetch, clock = () => new Date(), sleep = wait,
 } = {}) {
   const now = clock();
-  const deadline = Date.parse(previous?.nextRetryAt);
+  const deadline = Math.max(Date.parse(previous?.nextRetryAt) || 0, Date.parse(instagramIndex?.previous?.nextRetryAt) || 0);
   const nextRetryAt = deadline > +now ? new Date(deadline).toISOString() : '';
   const cursor = previous?.nextQueryIndex;
   const nextQueryIndex = Number.isSafeInteger(cursor) && cursor >= 0 ? cursor : 0;
@@ -95,6 +97,10 @@ export async function discoverTikTokLinksViaTavily({
   const key = typeof apiKey === 'string' ? apiKey.trim() : '';
   const accessMode = freePlanConfirmed || apiKey ? 'keyed' : 'keyless';
   const indexRun = { ...result, accessMode };
+  const instagramProbe = instagramIndex?.probe === true;
+  if (instagramIndex?.previous === null) return { ...indexRun, status: 'shared-index-state-invalid' };
+  if (instagramProbe && instagramIndex.previous?.lastProbeAt) return { ...indexRun, status: 'probe-already-attempted' };
+  if (instagramProbe && accessMode !== 'keyed') return { ...indexRun, status: 'key-missing' };
   if (accessMode === 'keyed' && !freePlanConfirmed) return { ...indexRun, status: 'free-plan-unconfirmed' };
   if (freePlanConfirmed && !key) return { ...indexRun, status: 'key-missing' };
   if (nextRetryAt) return { ...indexRun, status: 'cooldown' };
@@ -121,6 +127,8 @@ export async function discoverTikTokLinksViaTavily({
     queryBudget = budget.plannedQueries;
     if (queryBudget === 0) return { ...attempt, status: 'free-credits-exhausted' };
   }
+  if (instagramProbe) queryBudget = 1;
+  const instagramSlot = instagramProbe || (key && instagramIndex?.enabled && queryBudget >= 2) ? queryBudget - 1 : -1;
   const searchOptions = {
     search_depth: 'basic',
     country: 'austria',
@@ -137,36 +145,51 @@ export async function discoverTikTokLinksViaTavily({
   const distinct = new Map();
   for (let index = 0; index < queryBudget; index++) {
     if (index > 0) await sleep(REQUEST_INTERVAL_MS);
-    const query = queries[attempt.nextQueryIndex];
+    const forInstagram = index === instagramSlot;
+    const query = forInstagram ? buildInstagramTavilyQuery(now) : queries[attempt.nextQueryIndex];
+    const instagram = forInstagram ? { attemptedQueries: 1, indexRows: 0, links: [] } : null;
+    if (instagram) {
+      attempt.instagramIndex = instagram;
+      if (!instagramProbe) attempt.tikTokStatus = 'completed';
+    }
     attempt.attemptedQueries++;
     const search = await requestTavilyJson('https://api.tavily.com/search', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', ...authorization },
-      body: JSON.stringify({ query, ...searchOptions }),
+      body: JSON.stringify({ query, ...searchOptions, ...(forInstagram ? { include_domains: ['instagram.com'] } : {}) }),
     }, { fetcher, clock, isValid: value => Array.isArray(value?.results) });
     attempt.httpStatus = search.httpStatus;
+    if (instagram) Object.assign(instagram, { status: search.status, httpStatus: search.httpStatus });
     if (search.status !== 'completed') {
       return {
         ...attempt, status: search.status, nextRetryAt: search.nextRetryAt, links: [...distinct.values()],
       };
     }
     const rows = search.payload.results;
-    attempt.indexRows += rows.length;
+    if (instagram) instagram.indexRows = rows.length;
+    else attempt.indexRows += rows.length;
     const reportedCredits = search.payload.usage?.credits;
     if (key) {
       attempt.completedQueries++;
       if (Number.isSafeInteger(reportedCredits) && reportedCredits >= 0) {
         attempt.queriesWithCreditUsage++;
         attempt.reportedSearchCredits += reportedCredits;
+        if (instagram) instagram.reportedSearchCredits = reportedCredits;
       }
     }
-    attempt.nextQueryIndex = (attempt.nextQueryIndex + 1) % queries.length;
+    if (!instagram) attempt.nextQueryIndex = (attempt.nextQueryIndex + 1) % queries.length;
     // Index result content cannot become deal evidence. Keep exact URLs only.
     for (const row of rows.slice(0, MAX_RESULTS)) {
+      if (instagram) {
+        const url = normalizeInstagramTavilyUrl(row?.url);
+        if (url && !instagram.links.includes(url)) instagram.links.push(url);
+        continue;
+      }
       const target = publicVideoTarget(row?.url);
       if (target && !distinct.has(target.id)) distinct.set(target.id, target.url);
     }
     if (key && Number.isSafeInteger(reportedCredits) && reportedCredits > 1) {
+      if (instagram) Object.assign(instagram, { status: 'unexpected-search-credit-cost', links: [] });
       return { ...attempt, status: 'unexpected-search-credit-cost',
         nextRetryAt: new Date(+clock() + DAY_MS).toISOString(), links: [...distinct.values()] };
     }

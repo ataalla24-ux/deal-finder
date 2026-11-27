@@ -1,13 +1,21 @@
 import { readFileSync } from 'node:fs';
 import { randomUUID } from 'node:crypto';
 import { githubQuotaStore } from './instagram-shared-quota.js';
+import {
+  OPENAI_BACKGROUND_TIMEOUT_MS,
+  OPENAI_RESPONSES_URL,
+  OpenAiBackgroundFailure,
+  readOpenAiBackgroundResponse,
+} from './openai-background-response.js';
+
+export { OPENAI_BACKGROUND_TIMEOUT_MS };
 
 const DAY = 86400000;
 const ASTRA = 'gpt-6.2-astra';
 const SOL = 'gpt-6.2-sol';
 const ASTRA_PROFILE = 'astra-deal-enrichment';
 const CHAT = 'https://api.openai.com/v1/chat/completions';
-const RESPONSES = 'https://api.openai.com/v1/responses';
+const RESPONSES = OPENAI_RESPONSES_URL;
 export const DEAL_IMAGE_GENERATION_URL = 'https://api.openai.com/v1/images/generations';
 export const DEAL_IMAGE_GENERATION_MODEL = 'gpt-image-2.6-sunburst';
 export const OPENAI_MODEL_TIMEOUT_MS = 110000;
@@ -132,13 +140,15 @@ function prepareImageGenerationRequest(init) {
     modality:'image', reservedUsd:1 };
 }
 
-export function prepareBudgetedRequest(url, init) {
+export function prepareBudgetedRequest(url, init, { background = false, backgroundInput = background } = {}) {
   if (String(url) === DEAL_IMAGE_GENERATION_URL) return prepareImageGenerationRequest(init);
   if (![CHAT, RESPONSES].includes(String(url))) throw paused('unsupported-endpoint');
   let body;
   try { body = JSON.parse(init.body); } catch { throw paused('invalid-request'); }
   if (!body || !Object.hasOwn(RATES, body.model) || body.tools?.length || body.functions?.length
     || body.function_call || body.previous_response_id || body.conversation || body.background || body.stream
+    || Object.hasOwn(body, 'background_options')
+    || backgroundInput && ['background', 'stream', 'tools', 'functions', 'tool_choice'].some(key => Object.hasOwn(body, key))
     || body.n && body.n !== 1 || body.service_tier && body.service_tier !== 'default') throw paused('unbounded-or-unpriced-request');
   const responses = String(url) === RESPONSES;
   const requestedOutput = Number(body.max_output_tokens ?? body.max_completion_tokens ?? body.max_tokens ?? 4096);
@@ -152,6 +162,10 @@ export function prepareBudgetedRequest(url, init) {
     body.reasoning = { effort: 'max', mode: 'pro' };
     body.prompt_cache_options = { ttl: '30m' };
     body.max_output_tokens = outputTokens;
+    if (background) {
+      body.background = true;
+      body.background_options = { completion_window: 'soonest' };
+    }
   } else {
     body.reasoning_effort = 'max';
     delete body.max_tokens;
@@ -230,11 +244,14 @@ function responsesRequest(init) {
 
 // Admission and offline batch sizing must price the identical Responses body,
 // including the serialized prompt/schema and both input-encoding passes.
-export function prepareFreeCreditCall(url, init) {
-  const original = prepareBudgetedRequest(url, init);
+export function prepareFreeCreditCall(url, init, { background = false } = {}) {
   const adaptChat = String(url) === CHAT;
   const providerUrl = adaptChat ? RESPONSES : url;
-  const prepared = adaptChat ? prepareBudgetedRequest(providerUrl, responsesRequest(original.init)) : original;
+  if (background && (![CHAT, RESPONSES].includes(String(url)) || init.method !== 'POST')) {
+    throw paused('unsupported-background-operation');
+  }
+  const original = prepareBudgetedRequest(url, init, { background: background && !adaptChat, backgroundInput: background });
+  const prepared = adaptChat ? prepareBudgetedRequest(providerUrl, responsesRequest(original.init), { background }) : original;
   return { ...prepared, adaptChat, providerUrl };
 }
 
@@ -249,7 +266,7 @@ function asChatResponse(response, result) {
       total_tokens: usage.total_tokens } } : {}) }, { status: response.status });
 }
 
-export function createCreditBudget({ store, policy, clock = Date.now, request = fetch,
+export function createCreditBudget({ store, policy, clock = Date.now, request = fetch, sleep,
   allowAstraEnrichment = false } = {}) {
   let stopped = false;
   const update = async (transform, { dispatched = false } = {}) => {
@@ -282,10 +299,14 @@ export function createCreditBudget({ store, policy, clock = Date.now, request = 
     }
     throw paused('reservation-contention');
   };
-  return async (url, init, { preserveDealCorrectionCapacity = false, imageGenerationKey } = {}) => {
+  return async (url, init, { preserveDealCorrectionCapacity = false, imageGenerationKey, background = false } = {}) => {
     if (stopped) throw paused('runner-paused');
     validateCreditPolicy(policy, clock());
-    const prepared = prepareFreeCreditCall(url, init);
+    background = background === true;
+    const grantEndsAt = Date.parse(policy.expiresAt);
+    const deadline = background ? clock() + OPENAI_BACKGROUND_TIMEOUT_MS : 0;
+    if (background && deadline >= grantEndsAt) throw paused('background-period-ending');
+    const prepared = prepareFreeCreditCall(url, init, { background });
     if (prepared.modality === 'image' && clock() + OPENAI_IMAGE_TIMEOUT_MS >= Date.parse(policy.expiresAt)) {
       throw paused('image-generation-period-ending');
     }
@@ -335,12 +356,24 @@ export function createCreditBudget({ store, policy, clock = Date.now, request = 
     if (prepared.modality === 'image' && clock() + OPENAI_IMAGE_TIMEOUT_MS >= Date.parse(policy.expiresAt)) {
       throw paused('image-generation-period-ending');
     }
+    if (background && clock() + OPENAI_BACKGROUND_TIMEOUT_MS >= grantEndsAt) throw paused('background-period-ending');
     let response, payload;
+    let backgroundReason = '';
     try {
-      response = await request(providerUrl, { ...prepared.init,
-        signal: AbortSignal.any([...(prepared.init.signal ? [prepared.init.signal] : []),
-          AbortSignal.timeout(prepared.modality === 'image' ? OPENAI_IMAGE_TIMEOUT_MS : OPENAI_MODEL_TIMEOUT_MS)]) });
-      payload = await response.clone().json().catch(() => ({}));
+      if (background) {
+        ({ response, payload, reason: backgroundReason } = await readOpenAiBackgroundResponse(prepared.init, {
+          model: prepared.model, request, clock, deadline, grantEndsAt, sleep,
+          recordProviderWait: retryAt => update(state => ({
+            ...state,
+            pausedUntil: Math.max(state.pausedUntil, retryAt),
+          }), { dispatched: true }),
+        }));
+      } else {
+        response = await request(providerUrl, { ...prepared.init,
+          signal: AbortSignal.any([...(prepared.init.signal ? [prepared.init.signal] : []),
+            AbortSignal.timeout(prepared.modality === 'image' ? OPENAI_IMAGE_TIMEOUT_MS : OPENAI_MODEL_TIMEOUT_MS)]) });
+        payload = await response.clone().json().catch(() => ({}));
+      }
       const codes = [payload.error?.code, payload.error?.type];
       if (!response.ok) console.warn(JSON.stringify({ model: prepared.model, status: response.status,
         code: codes.find(value => SAFE_ERRORS.includes(value)) || 'unclassified',
@@ -358,10 +391,18 @@ export function createCreditBudget({ store, policy, clock = Date.now, request = 
       } else if (billingFailure || authenticationFailure || response.status === 403) {
         stopped = true;
         await update(state => ({ ...state, pausedUntil: Math.max(state.pausedUntil || 0, clock() + 6 * 3600000) }), { dispatched: true });
-      } else if (response.ok) {
+      }
+      if (response.ok && (background || !billingFailure && !authenticationFailure)) {
         const usage = payload.usage;
-        const input = usage?.input_tokens ?? usage?.prompt_tokens, output = usage?.output_tokens ?? usage?.completion_tokens;
-        const actual = prepared.modality === 'image' ? meteredImageUsageUsd(usage) : meteredUsageUsd(prepared.model, input, output);
+        const input = background ? usage?.input_tokens : usage?.input_tokens ?? usage?.prompt_tokens;
+        const output = background ? usage?.output_tokens : usage?.output_tokens ?? usage?.completion_tokens;
+        const total = usage?.total_tokens;
+        const hasUsage = !background || [input, output, total].every(Number.isSafeInteger)
+          && input >= 0 && output >= 0 && total > 0 && total === input + output
+          && (payload.status !== 'completed' || input > 0 && output > 0);
+        if (background && !hasUsage && !backgroundReason) backgroundReason = 'background-response-invalid';
+        const actual = !hasUsage ? null : prepared.modality === 'image'
+          ? meteredImageUsageUsd(usage) : meteredUsageUsd(prepared.model, input, output);
         if (actual !== null) {
           const overrun = actual > policy.requestLimitUsd;
           if (overrun) stopped = true;
@@ -382,14 +423,23 @@ export function createCreditBudget({ store, policy, clock = Date.now, request = 
           }, { dispatched: true });
         }
       }
-      return adaptChat && response.ok ? asChatResponse(response, payload) : safeResponse(response, payload);
+      if (!backgroundReason) {
+        if (background && !adaptChat && response.ok) {
+          const { model, status, output, usage } = payload;
+          return Response.json({ model, status, output, usage }, { status: response.status });
+        }
+        return adaptChat && response.ok ? asChatResponse(response, payload) : safeResponse(response, payload);
+      }
     } catch (error) {
       stopped = true;
       // Ambiguous failure remains fully charged; never persist credentials or payloads.
-      if (response?.ok && adaptChat) throw paused('model-response-unavailable');
+      if (error instanceof OpenAiBackgroundFailure) throw paused(error.message);
+      if (response?.ok && (adaptChat || background)) throw paused('model-response-unavailable');
       if (response) return safeResponse(response, payload);
       throw paused('request-or-ledger-unavailable');
     }
+    stopped = true;
+    throw paused(backgroundReason);
   };
 }
 

@@ -527,8 +527,15 @@ function extractRepeatedBrandHashtag(value) {
 }
 
 function extractCaptionBrand(value) {
-  const namedVenue = cleanUiNoiseText(value).match(/\b[Bb]ei\s+([\p{Lu}][\p{L}\p{N}&' -]{1,40}?)\s+gibt es\b/u)?.[1];
+  const text = cleanUiNoiseText(value);
+  const namedVenue = text.match(/\b[Bb]ei\s+([\p{Lu}][\p{L}\p{N}&' -]{1,40}?)\s+gibt es\b/u)?.[1];
   if (namedVenue && !/\b(?:wien|vienna|uns|euch)\b/i.test(namedVenue)) return namedVenue;
+  const welcomeName = text.match(/\b[Ww]illkommen bei\s+([\p{Lu}][\p{L}&' -]{2,45}?)\s*(?=[–—.!:])/u)?.[1]?.trim();
+  if (welcomeName && isPlausibleCaptionBrand(welcomeName)) {
+    const brandKey = normalizeAscii(welcomeName).replace(/[^a-z0-9]/g, '');
+    const exactHost = new RegExp(`(?:^|[\\s(:])(?:https?://)?(?:www\\.)?${brandKey}\\.(?:at|com|wien)(?=$|[/#?\\s,)]|[.!](?=\\s|$))`, 'i');
+    if (brandKey.length >= 4 && exactHost.test(text)) return welcomeName;
+  }
   return extractPinnedCaptionBrand(value) || extractRepeatedBrandHashtag(value);
 }
 

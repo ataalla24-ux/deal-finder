@@ -272,6 +272,25 @@ assert.equal(graphCreatorMerchant.deal.scoutUsername, 'lisa.maria.b');
 assert.equal(graphCreatorMerchant.deal.merchantUsername, 'tennosushiofficial');
 assert.notEqual(graphCreatorMerchant.deal.brand, 'lisa.maria.b');
 
+const graphStoreOpening = {
+  id: '17983655247129007',
+  caption: '✨ NEU ERÖFFNET IN WIEN 1090! ✨ Willkommen bei Bombshell Beauty – feiere unsere Eröffnung mit uns! 🖤 🎉 ERÖFFNUNG × BLACK FRIDAY 🎉 🔥 50 % Rabatt auf Laser-Haarentfernung, HIFU und Gesichtsbehandlungen. ✨ 30 % Rabatt auf Head Spa, Wimpern, Nageldesign und Permanent Make-up. Entdecke deinen neuen Lieblingsplatz für Beauty und Entspannung. 💫 📍 Nußdorfer Straße 3, 1090 Wien 📲 Sichere dir deinen Termin: bombshellbeauty.at 📅 Nur bis 30.11.2026 · Nicht mit anderen Aktionen kombinierbar. #BombshellBeautyWien #NeueröffnungWien #BlackFridayWien #Wien1090 #Alsergrund',
+  permalink: 'https://www.instagram.com/reel/DgGlT_CuELj/',
+  timestamp: '2026-11-23T23:40:58.000Z',
+};
+const normalizeOpening = raw => normalizeGraphMediaItem(raw, { sourceType: 'hashtag', sourceName: '#neueröffnungwien' },
+  config, new Date('2026-11-24T08:29:52.602Z')).deal;
+const openingDeal = normalizeOpening(graphStoreOpening);
+assert.equal(openingDeal.brand, 'Bombshell Beauty');
+assert.equal(openingDeal.merchantUsername, undefined);
+assert.equal(openingDeal.evidence.entityResolution.resolutionMethod, 'unresolved-owner');
+assert.equal(openingDeal.expires, '2026-11-30T23:59:59.999Z');
+for (const destination of ['differentmerchant.at', 'bombshellbeauty.at.other.example']) {
+  assert.notEqual(normalizeOpening({ ...graphStoreOpening,
+    caption: graphStoreOpening.caption.replace('bombshellbeauty.at', destination) }).brand, 'Bombshell Beauty',
+  'the domain of a different or lookalike hostname cannot corroborate a caption name');
+}
+
 const graphPianoDiscount = normalizeGraphMediaItem({
   id: 'graph-piano-discount',
   caption: 'Schulstart = Klavierstart! Jetzt 10 % Rabatt auf alle gebrauchten Pianos & Flügel sichern! Nur von 01.09. bis 15.10.2026. 📍 Klavier Galerie | Kaiserstraße 10, 1070 Wien #KlavierGalerie #Wien',

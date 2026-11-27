@@ -69,8 +69,20 @@ const repeated = await runInstagramSearchQueries(queries, {
   now: after, search: () => challenge(after), sleep: never, previousReport: { search: beforeRetry },
 });
 assert.equal(repeated.attemptedQueries, 1);
-assert.equal(repeated.nextRetryAt, '2026-10-21T16:00:00.000Z');
+assert.equal(repeated.nextRetryAt, '2026-10-21T04:00:00.000Z');
 assert.equal(repeated.boundedRetry.failures, 2);
+const exhausted = await runInstagramSearchQueries(queries, {
+  now: new Date(repeated.nextRetryAt), search: () => challenge(new Date(repeated.nextRetryAt)), sleep: never,
+  previousReport: { search: repeated },
+});
+assert.equal(exhausted.attemptedQueries, 1);
+assert.equal(exhausted.nextRetryAt, '2026-10-22T04:00:00.000Z');
+assert.equal(exhausted.boundedRetry.failures, 2);
+const savedDailyHold = { ...repeated, nextRetryAt: '2026-10-21T16:00:00.000Z' };
+const stillHeld = await runInstagramSearchQueries(queries, {
+  now: new Date(repeated.nextRetryAt), search: never, sleep: never, previousReport: { search: savedDailyHold },
+});
+assert.equal(stillHeld.nextRetryAt, savedDailyHold.nextRetryAt, 'new local cadence does not rewrite previous deadlines');
 for (const [header, deadline] of [
   ['172800', '2026-10-22T12:00:00.000Z'],
   ['120', '2026-10-21T12:00:00.000Z'],
@@ -91,7 +103,7 @@ const repairedLegacy = await runInstagramSearchQueries(queries, {
   now: after, search: () => challenge(after), sleep: never, previousReport: { search: oldChallenge },
 });
 assert.equal(repairedLegacy.attemptedQueries, 1);
-assert.equal(repairedLegacy.nextRetryAt, '2026-10-21T16:00:00.000Z');
+assert.equal(repairedLegacy.nextRetryAt, '2026-10-21T04:00:00.000Z');
 for (const search of [
   { ...oldChallenge, errors: [] },
   { ...oldChallenge, errors: [{ ...oldChallenge.errors[0], retryAt: undefined }] },

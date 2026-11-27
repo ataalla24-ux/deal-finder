@@ -9,6 +9,7 @@ import { chromium } from 'playwright';
 import { hasTikTokSingleRequestRetry, previousTikTokSearchFailure, runTikTokApiDiscovery, selectTikTokPostVisits, tikTokDiscoveryHealth, tikTokPublicOnlyAccess, tikTokRetryAt } from './tiktok-search-discovery.js';
 import { readKnownTikTokLinks, retainUnattemptedTikTokIndexLeads, selectTikTokIndexedLeads } from './tiktok-known-links.js';
 import { discoverTikTokLinksViaTavily } from './tiktok-public-index.js';
+import { INSTAGRAM_TAVILY_CACHE, readInstagramTavilyCache, updateInstagramTavilyCache, writeInstagramTavilyCache } from './instagram-tavily-index.js';
 import { createTikTokDirectSearch, tikTokAccessRefusal } from './tiktok-browser-search.js';
 import { readPublicTikTokOriginal } from './tiktok-signed-in-browser.js';
 import { runInstagramSearchQueries } from './instagram-search-discovery.js';
@@ -46,6 +47,7 @@ const DOCS_DIR = path.join(ROOT, 'docs');
 const OUTPUT_PATH = path.join(DOCS_DIR, 'deals-pending-tiktok.json');
 const REPORT_PATH = path.join(DOCS_DIR, 'tiktok-scanner-report.json');
 const MEDIA_CACHE_PATH = path.join(DOCS_DIR, 'tiktok-media-evidence-cache.json');
+const INSTAGRAM_INDEX_PATH = path.join(ROOT, INSTAGRAM_TAVILY_CACHE);
 
 const DAY_MS = 24 * 60 * 60 * 1000;
 const CONFIG = {
@@ -1729,12 +1731,19 @@ async function main() {
         lastUpdated: previousReport.lastUpdated, search: previousWebSearch,
       } });
     }
+    const instagramIndexCache = readInstagramTavilyCache(INSTAGRAM_INDEX_PATH);
     indexDiscovery = await discoverTikTokLinksViaTavily({
       enabled: booleanEnv(process.env, 'TIKTOK_TAVILY_INDEX_ENABLED', false),
       previous: previousReport.tavilyDiscovery,
       apiKey: process.env.TAVILY_API_KEY,
       freePlanConfirmed: process.env.TIKTOK_TAVILY_FREE_PLAN_CONFIRMED === '1',
+      instagramIndex: { enabled: true, previous: instagramIndexCache },
     });
+    const nextInstagramIndex = updateInstagramTavilyCache(instagramIndexCache, indexDiscovery);
+    if (nextInstagramIndex) {
+      try { writeInstagramTavilyCache(INSTAGRAM_INDEX_PATH, nextInstagramIndex); }
+      catch { console.warn('::warning::Could not persist the Tavily Instagram index cache.'); }
+    }
     const selection = selectTikTokIndexedLeads(DOCS_DIR, {
       previous: previousReport.pendingIndexedTikTokLinks,
       duckduckgo: discovery.links,
@@ -1854,7 +1863,7 @@ async function main() {
   }
 
   const finalDeals = dedupeTikTokDeals(deals);
-  const { links: indexedVideos, ...indexStatus } = indexDiscovery;
+  const { links: indexedVideos, instagramIndex, ...indexStatus } = indexDiscovery;
   const indexVisits = publicVisits.filter(visit => visit.fromIndex);
   const pendingIndexedTikTokLinks = retainUnattemptedTikTokIndexLeads(indexedLeads, publicVisits.map(visit => visit.url));
   timings.totalScannerMs = Date.now() - scannerStartedAt;
@@ -1869,7 +1878,9 @@ async function main() {
   const report = {
     lastUpdated: payload.lastUpdated,
     runProvenance,
-    ...tikTokDiscoveryHealth(apiDiscovery, discovery, finalDeals.length, { index: indexDiscovery, publicVisits }),
+    ...tikTokDiscoveryHealth(apiDiscovery, discovery, finalDeals.length, {
+      index: { status: indexDiscovery.tikTokStatus || indexDiscovery.status }, publicVisits,
+    }),
     config: CONFIG,
     searchQueries,
     apiKeywords: TIKTOK_API_KEYWORDS,
@@ -1883,6 +1894,10 @@ async function main() {
     pendingIndexedTikTokLinks,
     tavilyDiscovery: {
       ...indexStatus, canonicalVideoLinks: indexedVideos.length, publicPageAttempts: indexVisits.length,
+      ...(instagramIndex ? { instagramSearch: {
+        status: instagramIndex.status, attemptedQueries: instagramIndex.attemptedQueries,
+        indexRows: instagramIndex.indexRows, canonicalLinks: instagramIndex.links.length,
+      } } : {}),
       publicPagesWithDatedOriginal: indexVisits.filter(visit => visit.dated).length,
       acceptedDeals: finalDeals.filter(deal => deal.collectionMode === 'tavily-public-index').length,
     },

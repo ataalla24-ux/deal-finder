@@ -4,6 +4,7 @@ import { sourceFailureFields } from './source-http-policy.js';
 
 const DAY = 86400000;
 const ONE_RECHECK_DELAY = 4 * 3600000;
+const REPEAT_RECHECK_DELAY = 12 * 3600000;
 const CHALLENGE_WITHOUT_WAIT = 'challenge-without-retry-after';
 const challenge = 'Search challenge; no bypass attempted';
 const time = value => Date.parse(value) || 0;
@@ -68,7 +69,10 @@ export async function runInstagramSearchQueries(queries, { search, previousRepor
         if (allowEarlyRecheck || previousFailures) {
           result.boundedRetry = { reason: CHALLENGE_WITHOUT_WAIT, failures: Math.min(2, previousFailures + 1), failedAt: attemptedAt.toISOString() };
         }
-        const delay = allowEarlyRecheck && previousFailures === 0 ? ONE_RECHECK_DELAY : DAY;
+        let delay = DAY;
+        if (allowEarlyRecheck && previousFailures < 2) {
+          delay = previousFailures === 0 ? ONE_RECHECK_DELAY : REPEAT_RECHECK_DELAY;
+        }
         result.stoppedReason = details.httpStatus === 429 ? 'search-rate-limited' : 'search-unavailable';
         result.nextRetryAt = new Date(Math.max(+attemptedAt + delay, time(details.retryAt))).toISOString();
         break;
