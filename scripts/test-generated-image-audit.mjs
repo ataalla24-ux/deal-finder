@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
-import {auditGeneratedDealImage} from './generated-image-audit.mjs';
+import {auditGeneratedDealImage,auditImageModelAccess} from './generated-image-audit.mjs';
 import {GENERATED_IMAGE_CACHE,generatedDealImageKey} from '../scraper/generated-deal-images.js';
 import {photoDigest} from './deal-photo-contract.mjs';
 import {createCreditBudget,loadAiCreditPolicy,DEAL_IMAGE_GENERATION_MODEL,DEAL_IMAGE_GENERATION_URL,
@@ -144,4 +144,43 @@ test('image and text calls use their separate bounded provider timeouts',async()
     assert.equal(OPENAI_IMAGE_TIMEOUT_MS,300000);
     assert.equal(OPENAI_MODEL_TIMEOUT_MS,110000);
   } finally {AbortSignal.timeout=original;}
+});
+
+
+test('model access reads the model list once and publishes only image model IDs without credentials or private metadata',async()=>{
+  let calls=0;
+  const key='fixture-key-never-publish';
+  const proof=await auditGeneratedDealImage({root:'/nonexistent-no-queue-reads',mode:'model-access',now,apiKey:key,
+    request:never,prepare:never,publicRequest:async(url,init)=>{
+      calls++;
+      assert.equal(url,'https://api.openai.com/v1/models');assert.equal(init.method,'GET');
+      assert.equal(init.redirect,'error');assert.equal(init.credentials,'omit');
+      assert.equal(init.headers.authorization,`Bearer ${key}`);
+      return Response.json({object:'list',private_account:'PRIVATE',data:[
+        {id:'gpt-image-2.6-sunburst',owned_by:'PRIVATE'}, {id:'gpt-image-1.5'}, {id:'dall-e-3'},
+        {id:'gpt-image-1.5'}, {id:'ft:private-model-name'}, {id:'gpt-6.2-astra'},
+        {id:'gpt-image-malformed/PRIVATE'}, {id:key}, {id:null},
+      ]});
+    }});
+  assert.equal(calls,1);assert.equal(proof.requests,1);assert.equal(proof.providerGenerationRequests,0);
+  assert.equal(proof.status,'model-access-verified');
+  assert.deepEqual(proof.availableImageModels,['dall-e-3','gpt-image-1.5','gpt-image-2.6-sunburst']);
+  assert.equal(JSON.stringify(proof).includes('PRIVATE'),false);
+  assert.equal(JSON.stringify(proof).includes(key),false);
+});
+
+test('denied model metadata requests return safe evidence without retries or paid calls',async()=>{
+  for (const status of [401,403,429]) {
+    let calls=0;
+    const proof=await auditImageModelAccess({apiKey:'offline-fixture',now,request:async(url,init)=>{
+      calls++;assert.equal(init.method,'GET');assert.equal(url,'https://api.openai.com/v1/models');
+      return Response.json({error:{message:'PRIVATE_ACCOUNT_AND_KEY'}},{status});
+    }});
+    assert.equal(calls,1);assert.equal(proof.requests,1);assert.equal(proof.providerGenerationRequests,0);
+    assert.equal(proof.status,'model-access-unavailable');assert.equal(proof.httpStatus,status);
+    assert.deepEqual(proof.availableImageModels,[]);assert.equal(JSON.stringify(proof).includes('PRIVATE'),false);
+  }
+  const noCredentials=await auditImageModelAccess({apiKey:'',now,request:never});
+  assert.equal(noCredentials.requests,0);
+  assert.equal(noCredentials.status,'model-access-unavailable');
 });

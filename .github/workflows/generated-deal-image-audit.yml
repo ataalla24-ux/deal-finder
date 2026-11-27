@@ -4,11 +4,12 @@ on:
   workflow_dispatch:
     inputs:
       mode:
-        description: Prepare one image or verify its committed public image without model calls
+        description: Prepare one image, verify its public file, or inspect available image models
         type: choice
         options:
           - generate
           - verify-public
+          - model-access
         default: verify-public
         required: true
       deal_id:
@@ -65,6 +66,13 @@ jobs:
           GENERATED_IMAGE_AUDIT_MODE: verify-public
           GENERATED_IMAGE_AUDIT_DEAL_ID: ${{ inputs.deal_id }}
           GENERATED_IMAGE_AUDIT_SOURCE_FILE: ${{ inputs.source_file }}
+          SENTRY_DISABLED: '1'
+        run: node scripts/generated-image-audit.mjs
+      - name: Read available image model IDs without generation
+        if: inputs.mode == 'model-access'
+        env:
+          GENERATED_IMAGE_AUDIT_MODE: model-access
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
           SENTRY_DISABLED: '1'
         run: node scripts/generated-image-audit.mjs
       - name: Preserve the sanitized image audit result

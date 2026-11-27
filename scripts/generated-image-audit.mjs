@@ -48,8 +48,43 @@ function cacheEntry(root,key) {
   return cache.entries[key] || null;
 }
 
+export async function auditImageModelAccess({request=fetch,apiKey=process.env.OPENAI_API_KEY,now=new Date()}={}) {
+  const proof = {version:1,mode:'model-access',status:'model-access-unavailable',checkedAt:now.toISOString(),
+    requests:0,providerGenerationRequests:0,availableImageModels:[],httpStatus:0};
+  if (typeof apiKey !== 'string' || !apiKey.trim()) return {...proof,error:'model-access-credentials-unavailable'};
+  try {
+    proof.requests = 1;
+    const response = await request('https://api.openai.com/v1/models',{method:'GET',redirect:'error',credentials:'omit',
+      headers:{authorization:`Bearer ${apiKey}`,accept:'application/json'},signal:AbortSignal.timeout(15000)});
+    proof.httpStatus = response.status;
+    if (!response.ok) {
+      await response.body?.cancel();
+      return {...proof,error:[401,403].includes(response.status)?'model-access-denied':'model-access-unavailable'};
+    }
+    if (!response.body) return {...proof,error:'model-list-invalid'};
+    const reader = response.body.getReader(),chunks=[];
+    let size=0;
+    while (true) {
+      const {value,done} = await reader.read();
+      if (done) break;
+      size += value.length;
+      if (size > 1_000_000) {
+        await reader.cancel();
+        return {...proof,error:'model-list-invalid'};
+      }
+      chunks.push(value);
+    }
+    const payload = JSON.parse(Buffer.concat(chunks).toString('utf8'));
+    if (!Array.isArray(payload.data) || payload.data.length > 5000) return {...proof,error:'model-list-invalid'};
+    const imageId = /^(?:gpt-image-|dall-e-)[a-zA-Z0-9._-]{1,72}$/;
+    const ids = payload.data.map(row=>row?.id).filter(id=>typeof id==='string'&&imageId.test(id));
+    return {...proof,status:'model-access-verified',availableImageModels:[...new Set(ids)].sort()};
+  } catch {return {...proof,error:'model-access-unavailable'};}
+}
+
 export async function auditGeneratedDealImage({root=process.cwd(),mode,dealId,sourceFile,now=new Date(),
   prepare=prepareGeneratedDealImagePreview,request=freeCreditOpenAiFetch,publicRequest=fetch,apiKey=process.env.OPENAI_API_KEY}={}) {
+  if (mode === 'model-access') return auditImageModelAccess({request:publicRequest,apiKey,now});
   if (!['generate','verify-public'].includes(mode)) throw Error('audit-mode-invalid');
   const {draft,sourceSha256} = readCandidate(root,sourceFile,dealId);
   const generationKey = generatedDealImageKey(draft);
@@ -88,9 +123,11 @@ if (process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.me
   try {
     proof = await auditGeneratedDealImage({mode,dealId:process.env.GENERATED_IMAGE_AUDIT_DEAL_ID,
       sourceFile:process.env.GENERATED_IMAGE_AUDIT_SOURCE_FILE});
-    if (!proof.sourceUnchanged || (mode === 'generate' ? proof.status !== 'prepared' : !proof.publiclyVerified)) process.exitCode = 1;
+    const succeeded = mode === 'model-access' ? proof.status === 'model-access-verified'
+      : proof.sourceUnchanged && (mode === 'generate' ? proof.status === 'prepared' : proof.publiclyVerified);
+    if (!succeeded) process.exitCode = 1;
   } catch {
-    proof = {version:1,mode:['generate','verify-public'].includes(mode)?mode:'invalid',status:'audit-failed',
+    proof = {version:1,mode:['generate','verify-public','model-access'].includes(mode)?mode:'invalid',status:'audit-failed',
       checkedAt:new Date().toISOString(),error:'image-audit-unavailable'};
     process.exitCode = 1;
   }
