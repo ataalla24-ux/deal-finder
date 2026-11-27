@@ -2,6 +2,8 @@ name: Approval Preparation Tests
 on:
   pull_request:
     paths:
+      - 'scripts/generated-image-audit.mjs'
+      - '.github/workflows/generated-deal-image-audit.yml'
       - 'scraper/generated-deal-images.js'
       - 'scraper/ai-credit-budget.js'
       - 'scripts/generated-deal-photo-contract.mjs'
@@ -78,6 +80,8 @@ on:
   push:
     branches: [main]
     paths:
+      - 'scripts/generated-image-audit.mjs'
+      - '.github/workflows/generated-deal-image-audit.yml'
       - 'scraper/generated-deal-images.js'
       - 'scraper/ai-credit-budget.js'
       - 'scripts/generated-deal-photo-contract.mjs'
@@ -187,3 +191,4 @@ jobs:
           scripts/test-generated-deal-images.mjs scripts/test-generated-slack-image-preflight.mjs
           scripts/test-prepared-generated-image-publication.mjs
           scripts/test-generated-photo-approval-entrypoint.mjs
+          scripts/test-generated-image-audit.mjs

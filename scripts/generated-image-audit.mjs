@@ -33,7 +33,7 @@ function readCandidate(root,sourceFile,dealId) {
   if (live.some(row => row?.id === dealId)) throw Error('audit-candidate-already-live');
   const draft = structuredClone(deal);
   for (const field of ['slackTs','slackThreadTs','pendingDealImage','approvedDealImage','generatedDealImage',
-    'approvedAt','approvalBlock','photoUrl','photoSubjectHash','pipelineLifecycle','imagePreparationState']) delete draft[field];
+    'approvedAt','approvalBlock','imageApprovalContextHash','photoUrl','photoSubjectHash','pipelineLifecycle','imagePreparationState']) delete draft[field];
   return {draft,sourceSha256:photoDigest(bytes)};
 }
 
