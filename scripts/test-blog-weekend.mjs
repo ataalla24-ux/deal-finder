@@ -70,6 +70,21 @@ for (const market of markets.toArray()) {
   assert.ok(hours.find('a[href^="https://"]').length);
 }
 assert.equal(advent('#heiligabend').next('ul').find('li').length, 4);
+const openToday = advent('#heute').nextUntil('h2').text();
+assert.match(openToday, /20\. November bis 20\. Dezember 2026.*außer am 7\. und 8\. Dezember/s);
+assert.match(openToday, /keine Live-Anzeige/);
+const punsch = advent('#punschpreise').nextUntil('h2');
+assert.equal(punsch.find('li').length, 5);
+assert.deepEqual(punsch.find('li strong:last-child').map((_, item) => advent(item).text()).get(),
+  ['7,80 € an der Kassa', '7,00 € an der Kassa', '10,00 € an der Kassa', '10,50 € an der Kassa', '10,80 € an der Kassa']);
+assert.equal(punsch.find('a[href="https://durchblicker.at/punschpreis-vergleich"]').length, 1);
+assert.match(punsch.text(), /keine Einheitspreise oder heutigen Preiszusagen/);
+assert.equal(advent('#mit-kindern').nextUntil('h2').filter('h3').length, 3);
+assert.match(advent('#nach-weihnachten').nextUntil('h2').text(), /25\. und 26\. Dezember.*6\. Jänner 2027.*Neujahrskonzert/s);
+for (const id of ['heute', 'punschpreise', 'mit-kindern', 'nach-weihnachten']) {
+  assert.equal(advent(`#${id}`).length, 1);
+  assert.ok(advent(`a[href="#${id}"]`).length);
+}
 assert.match(advent('#deals').nextUntil('h2').text(), /25 %.*Mitgliedskarte.*Leihschlittschuhe.*4 €.*Erwachsene zahlen/s);
 assert.ok(advent('a[rel="license"][href="https://creativecommons.org/licenses/by-sa/4.0/"]').length);
 assert.equal(index('h2 a[href="weihnachtsmaerkte-wien.html"]').length, 1);

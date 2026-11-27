@@ -13,11 +13,11 @@ import { applyBlogPublication, applyBlogIndexPublication, updateBlogSitemap } fr
 const dailyGuides = [
   {
     slug: 'weihnachtsmaerkte-wien', topic: 'freizeit',
-    title: 'Weihnachtsmärkte Wien 2026: Öffnungszeiten, Gratis & Deals',
-    meta: 'Sechs Weihnachtsmärkte in Wien 2026 im Vergleich: Öffnungszeiten, Heiligabend, Öffis, Gratis-Programm und bestätigte Rabatte am Riesenradplatz.',
+    title: 'Weihnachtsmärkte Wien 2026: Öffnungszeiten & Punschpreise',
+    meta: 'Sechs Weihnachtsmärkte in Wien 2026: Öffnungszeiten heute und an Feiertagen, Punschpreise mit Pfand, Gratis-Tipps für Familien und Prater-Rabatte.',
     eyebrow: 'Advent in Wien · Saison 2026/27',
     headline: 'Weihnachtsmärkte Wien 2026',
-    intro: 'Sechs Wiener Adventmärkte im Vergleich: Wo du heute hingehen kannst, welche Märkte am 24. Dezember offen haben und was rund um Punsch, Musik und Eislaufen wirklich gratis oder günstiger ist.',
+    intro: 'Sechs Weihnachtsmärkte in Wien im Vergleich: Welche Märkte haben heute offen? Was kostet ein Punsch mit Häferlpfand? Dazu Gratis-Tipps mit Kindern, geprüfte Rabatte und die Öffnungszeiten an Heiligabend und nach Weihnachten.',
     published: '2026-11-27', publishedLabel: '27. November 2026', modified: '2026-11-27', modifiedLabel: '27. November 2026',
     expires: '2027-01-06T22:00:00+01:00', cardLinkLabel: 'Adventmärkte vergleichen',
     image: '/assets/blog/photos/christkindlmarkt-rathausplatz.jpg', imageWidth: 1200, imageHeight: 630,
@@ -25,7 +25,7 @@ const dailyGuides = [
     sections: [
       ['maerkte', 'Sechs Weihnachtsmärkte im Überblick', `
         <p><small>Archivfoto: <a href="https://commons.wikimedia.org/wiki/File:Rathausplatz_Christkindlmarkt_0.jpg" rel="noopener">Geolina163 / Wikimedia Commons</a>, Dezember 2023, <a href="https://creativecommons.org/licenses/by-sa/4.0/" rel="license">CC BY-SA 4.0</a>. Für die Website zugeschnitten und verkleinert.</small></p>
-        <p><strong>Stand: <time datetime="2026-11-27">27. November 2026</time>.</strong> <a href="#heiligabend">Am 24. Dezember geöffnet</a> · <a href="#gratis">Gratis-Programm</a> · <a href="#deals">Echte Rabatte</a></p>
+        <p><strong>Stand: <time datetime="2026-11-27">27. November 2026</time>.</strong> <a href="#heute">Heute geöffnet</a> · <a href="#punschpreise">Punschpreise und Pfand</a> · <a href="#mit-kindern">Mit Kindern</a> · <a href="#heiligabend">24. Dezember</a> · <a href="#nach-weihnachten">Nach Weihnachten</a></p>
         <h3 id="rathausplatz">1010 · Christkindlmarkt am Rathausplatz</h3>
         <p><strong>13. November bis 26. Dezember:</strong> täglich 10:00–22:00 Uhr. <strong>24. Dezember:</strong> 10:00–18:30 Uhr. Rathausplatz, 1010 Wien; U2 Rathaus oder Straßenbahn 2 bis Parlament. Das <a href="#adventsingen">Adventsingen im Festsaal</a> kostet keinen Eintritt; der Eistraum hat eigene Tarife und Zeiten. <a href="https://www.christkindlmarkt.at/besuch/" rel="noopener">Zeiten und Anfahrt beim Veranstalter</a>.</p>
         <h3 id="prater">1020 · Wintermarkt am Riesenradplatz</h3>
@@ -38,6 +38,26 @@ const dailyGuides = [
         <p><strong>6. November bis 23. Dezember:</strong> täglich 10:00–21:00 Uhr. <strong>24. Dezember:</strong> 10:00–16:00 Uhr. <strong>25. Dezember bis 6. Jänner 2027:</strong> täglich 10:00–19:00 Uhr. Ehrenhof von Schloss Schönbrunn, 1130 Wien; U4 Schönbrunn oder Hietzing. Der Marktbesuch ist gratis; Schlossbesuch und Attraktionen haben eigene Tarife. <a href="https://www.weihnachtsmarkt-schoenbrunn.at/wissenswertes" rel="noopener">Zeiten, Lage und Eintritt</a>.</p>
         <h3 id="hirschstetten">1220 · Adventmarkt und Weihnachtsausstellung Hirschstetten</h3>
         <p><strong>12. November bis 20. Dezember:</strong> Do–So 10:00–20:00 Uhr. Zusätzlich <strong>7. und 8. Dezember</strong> von 10:00 bis 20:00 Uhr. Südeingang Quadenstraße 15, 1220 Wien; 95A oder 95B bis Blumengärten Hirschstetten. Der Eintritt zu den Blumengärten ist frei. <a href="https://www.wien.gv.at/freizeit/blumengaerten-hirschstetten-besucherinformationen" rel="noopener">Zeiten, Eintritt und Anfahrt bei der Stadt Wien</a>.</p>`],
+      ['heute', 'Welcher Weihnachtsmarkt in Wien hat heute offen?', `
+        <p>Bei einem spontanen Besuch im Advent zählen Wochentag und Saisonende. In der gemeinsamen Marktzeit vom <strong>20. November bis 20. Dezember 2026</strong> helfen diese drei Regeln bei der Auswahl:</p>
+        <ul>
+          <li><strong>Montag bis Mittwoch:</strong> Rathausplatz, Prater, Spittelberg, Favoriten und Schönbrunn sind regulär geöffnet. Hirschstetten ist an diesen Wochentagen zu, außer am 7. und 8. Dezember.</li>
+          <li><strong>Donnerstag bis Sonntag:</strong> Alle sechs Märkte öffnen während der gemeinsamen Saison. Am Wochenende beginnen Spittelberg und Prater schon um 11:00 Uhr; in Favoriten kannst du ab 09:00 Uhr vorbeischauen.</li>
+          <li><strong>Nach der Arbeit:</strong> Rathausplatz und Riesenradplatz haben im normalen Adventbetrieb bis 22:00 Uhr geöffnet. Am Spittelberg schließen die Stände regulär um 21:30 Uhr. Für Bühne, Eislaufen und andere Attraktionen gelten eigene Zeiten.</li>
+        </ul>
+        <p><strong>Feiertag am 8. Dezember:</strong> Der Spittelberg öffnet von 11:00 bis 21:30 Uhr, der Riesenradplatz von 11:00 bis 22:00 Uhr. Die Blumengärten Hirschstetten sind trotz Dienstag von 10:00 bis 20:00 Uhr offen. Ab 21. Dezember fällt Hirschstetten aus der Auswahl; danach entscheiden die <a href="#heiligabend">Heiligabend-Zeiten</a> und die <a href="#nach-weihnachten">Öffnungszeiten nach Weihnachten</a>.</p>
+        <p>Die Übersicht basiert auf den Betreiberzeiten und ist keine Live-Anzeige. Bei kurzfristigen Änderungen gilt der jeweils <a href="#maerkte">verlinkte Veranstalter</a>. Für den Weg hin und zurück hilft der <a href="https://www.wienmobil.at/" rel="noopener">WienMobil-Routenplaner</a>.</p>`],
+      ['punschpreise', 'Punschpreise auf Wiener Weihnachtsmärkten: Getränk und Häferlpfand', `
+        <p>Ein günstigerer Punsch kostet an der Kassa nicht immer weniger: Zum Getränk kommt oft das Häferlpfand. Fünf Preisbeispiele aus der <a href="https://durchblicker.at/punschpreis-vergleich" rel="noopener">Preiserhebung von durchblicker</a> zeigen den Unterschied. Die Redaktion hat bei den Märkten angerufen oder vor Ort nachgesehen. FreeFinder hat die veröffentlichte Erhebung geprüft, aber keine eigene Preisabfrage an den Ständen durchgeführt.</p>
+        <ul>
+          <li><strong>Spittelberg:</strong> ab 4,80 € für Punsch plus 3,00 € Pfand. Zusammen ab <strong>7,80 € an der Kassa</strong> (erhoben am 17. November).</li>
+          <li><strong>Favoritenstraße:</strong> 5,00 € für Punsch plus 2,00 € Pfand. Zusammen <strong>7,00 € an der Kassa</strong> (20. November).</li>
+          <li><strong>Schönbrunn:</strong> ab 5,00 € für Punsch plus 5,00 € Pfand. Zusammen ab <strong>10,00 € an der Kassa</strong> (17. November).</li>
+          <li><strong>Rathausplatz:</strong> ab 5,50 € für Punsch plus 5,00 € Pfand. Zusammen ab <strong>10,50 € an der Kassa</strong> (19. November).</li>
+          <li><strong>Riesenradplatz:</strong> ab 5,80 € für Punsch plus 5,00 € Pfand. Zusammen ab <strong>10,80 € an der Kassa</strong> (17. November).</li>
+        </ul>
+        <p>Das sind Stichproben aus November 2026, keine Einheitspreise oder heutigen Preiszusagen. Für Hirschstetten liegt in dieser Erhebung kein Preis vor. Frag vor dem Bestellen, wie viel Pfand anfällt und wo du das Häferl zurückgeben kannst. Wenn du es behältst, zählt der Pfandbetrag zu deinen Ausgaben. Am Spittelberg gilt laut <a href="https://www.spittelberg.at/presse/" rel="noopener">Veranstalter</a> auch bei Speisen ein Pfandsystem.</p>
+        <p><strong>Rechenbeispiel für zwei:</strong> Mit den erhobenen Spittelberg-Einstiegspreisen zahlt ihr zuerst 15,60 € für zwei Punsch. Nach der Rückgabe beider Häferl bleiben 9,60 € Getränkekosten. Der <a href="#deals">Montagsrabatt im Prater</a> gilt nur am teilnehmenden Stand; zieh ihn nicht pauschal von den erhobenen Preisen ab.</p>`],
       ['gratis', 'Gratis im Advent: Musik, Theater und Lichter', `
         <h3 id="adventsingen">Adventsingen im Rathaus</h3><p><strong>0 € Eintritt, 27. November bis 20. Dezember, Fr–So 15:30–19:00 Uhr.</strong> Eingang Lichtenfelsgasse 2 zum Festsaal. Freie Sitzplatzwahl; die vorgeschriebene Garderobe ist kostenlos. <a href="https://www.christkindlmarkt.at/adventsingen/" rel="noopener">Offizielles Chorprogramm</a>.</p>
         <h3>Puppentheater am Spittelberg</h3><p>Am <strong>2. und 9. Dezember um 16:30 Uhr</strong> gibt es im Amerlinghaus, Stiftgasse 8, eine kostenlose Vorstellung ohne Anmeldung. Das ist ein anderes Angebot als das Adventkino. <a href="https://www.spittelberg.at/programm/" rel="noopener">Kinderprogramm beim Veranstalter</a>.</p>
@@ -50,14 +70,27 @@ const dailyGuides = [
         <p><strong>Bis 14 Uhr kostet der Zugang zur Eisfläche für Kinder bis 14 Jahre 0 €.</strong> Leihschlittschuhe für diese Altersgruppe kosten 4 € pro Paar. Ab 14 Uhr kostet der Eintritt für Kinder 3 €, ab 15 Jahren 6 €. Für Gruppen bittet der Veranstalter um eine Anmeldung; verfügbare Plätze und die Zeiten der Eisfläche vor dem Besuch separat prüfen. <a href="https://www.weihnachtsmarkt-schoenbrunn.at/highlights" rel="noopener" data-track="deal_outbound">Eislaufpreise beim Veranstalter</a>.</p>
         <h3>Adventkino am Spittelberg: gratis für Kinder und Jugendliche</h3>
         <p>Bei den angekündigten Adventkino-Vorstellungen im Filmhaus, Spittelberggasse 3, ist der Eintritt laut Veranstalter <strong>für Kinder und Jugendliche bis 18 Jahre frei</strong>; Erwachsene zahlen <strong>9 €</strong>. Termin, Altersfreigabe und freie Plätze im Filmhaus prüfen. Reservierungen werden dort ungefähr eine Woche vor der jeweiligen Vorstellung freigeschaltet. <a href="https://www.filmhaus.at/special/adventkino/" rel="noopener" data-track="deal_outbound">Filme und Reservierung</a> · <a href="https://www.spittelberg.at/programm/" rel="noopener">Preis und Bedingungen beim Markt</a>.</p>`],
+      ['mit-kindern', 'Weihnachtsmarkt in Wien mit Kindern: drei Ausflüge für kleines Budget', `
+        <h3>Schönbrunn am Vormittag: Eislaufen vor dem Marktbesuch</h3>
+        <p>Beim <a href="#schoenbrunn">Schönbrunner Weihnachtsmarkt</a> zahlen zwei Kinder bis 14 Jahre vor 14:00 Uhr mit eigenen passenden Schlittschuhen 0 € Eintritt zur Eisfläche. Mit zwei Leihpaaren sind es zusammen <strong>8 € für die Schuhe</strong>, wenn verfügbar. Ein Fahrgeschäft, Einkäufe und die Anfahrt sind nicht mitgerechnet. Das <a href="https://www.weihnachtsmarkt-schoenbrunn.at/highlights" rel="noopener">Eislaufprogramm</a> vor der Abfahrt separat prüfen.</p>
+        <h3>Spittelberg am Nachmittag: Puppentheater oder Adventkino</h3>
+        <p>Wer drinnen etwas unternehmen möchte, kann das kostenlose Puppentheater am 2. oder 9. Dezember mit dem Adventmarkt in Neubau verbinden. Alternativ kostet eine Vorstellung im <a href="https://www.filmhaus.at/special/adventkino/" rel="noopener">Adventkino</a> für eine erwachsene Begleitperson und zwei berechtigte Kinder nach den veröffentlichten Tarifen zusammen <strong>9 € Eintritt</strong>. Für das Kino Termin und freie Plätze prüfen; das Puppentheater ist ein separates Gratisangebot.</p>
+        <h3>Hirschstetten am späten Nachmittag: Lichter ohne Eintritt</h3>
+        <p>Wer ohne Fixtermin losziehen möchte, kann den <a href="#hirschstetten">Lichterpfad in den Blumengärten</a> und die Ausstellung verbinden. Für den Zugang fällt kein Eintritt an. Die Stadt nennt außerdem die <a href="https://www.wien.gv.at/veranstaltungen/blumengaerten-weihnachten" rel="noopener">Weihnachtsbastelstation im Glashaus 2</a> für Kinder ab fünf Jahren während der Öffnungszeiten. Prüft das Programm vor der Fahrt; Getränke und Einkäufe sind unabhängig davon kostenpflichtig.</p>`],
       ['heiligabend', 'Welche Weihnachtsmärkte haben am 24. Dezember offen?', `
         <ul><li><a href="#favoriten">Favoriten</a>: 09:00–17:00 Uhr.</li><li><a href="#schoenbrunn">Schönbrunn</a>: 10:00–16:00 Uhr.</li><li><a href="#rathausplatz">Rathausplatz</a>: 10:00–18:30 Uhr.</li><li><a href="#prater">Riesenradplatz</a>: 11:00–17:00 Uhr.</li></ul>
-        <p><strong>Spittelberg und Hirschstetten</strong> sind an Heiligabend bereits beendet. Nach Weihnachten bleiben in dieser Auswahl der Rathausplatz bis 26. Dezember sowie Schönbrunn und der Prater bis 6. Jänner geöffnet. Die Marktzeiten sind nicht automatisch die Zeiten aller Attraktionen. Für tagesaktuelle Gratis-Tipps siehe auch den <a href="gratis-wien-wochenende.html">Wiener Wochenendguide</a>.</p>`],
+        <p><strong>Spittelberg und Hirschstetten</strong> sind an Heiligabend bereits beendet. Schau für ein konkretes Konzert oder eine Eisfläche zusätzlich in den jeweiligen Programmkalender. Für tagesaktuelle Gratis-Tipps siehe auch den <a href="gratis-wien-wochenende.html">Wiener Wochenendguide</a>.</p>`],
+      ['nach-weihnachten', 'Welche Weihnachtsmärkte in Wien bleiben nach Weihnachten offen?', `
+        <p><strong>Am 25. und 26. Dezember</strong> bleiben von diesen sechs Märkten drei offen: Rathausplatz von 10:00 bis 22:00 Uhr, Schönbrunn von 10:00 bis 19:00 Uhr und Riesenradplatz von 11:00 bis 22:00 Uhr. Favoriten, Spittelberg und Hirschstetten sind dann bereits beendet.</p>
+        <p><strong>Ab 27. Dezember bis 6. Jänner 2027:</strong> Für einen Marktbesuch kommen in dieser Auswahl nur noch <a href="#schoenbrunn">Schönbrunn</a> und der <a href="#prater">Wintermarkt im Prater</a> infrage. Der Eistraum am Rathaus ist eine eigene Veranstaltung: Er läuft länger als der Christkindlmarkt, ist aber am 31. Dezember geschlossen. <a href="https://www.christkindlmarkt.at/eislaufen/" rel="noopener">Eislaufzeiten am Rathausplatz</a>.</p>
+        <p><strong>Silvester und Neujahr im Prater:</strong> Am 31. Dezember startet der Markt um 12:00 Uhr, das Bühnenprogramm um 18:00 Uhr. Am 1. Jänner zeigt der Veranstalter ab 11:00 Uhr das Neujahrskonzert auf der Leinwand am Riesenradplatz bei freiem Eintritt. Zutrittsregeln für den Silvesterabend und aktuelle Zeiten stehen im <a href="https://www.wintermarkt.at/silvester/neujahr/" rel="noopener">Programm des Wintermarkts</a>.</p>`],
     ],
     faqs: [
       ['Welche Weihnachtsmärkte in Wien öffnen am 24. Dezember 2026?', 'Unter den sechs verglichenen Märkten öffnen Favoriten von 09:00 bis 17:00 Uhr, Schönbrunn von 10:00 bis 16:00 Uhr, der Rathausplatz von 10:00 bis 18:30 Uhr und der Wintermarkt im Prater von 11:00 bis 17:00 Uhr.'],
       ['Wo gibt es am Weihnachtsmarkt in Wien einen Rabatt auf Speisen oder Getränke?', 'Am Wintermarkt im Prater gibt es montags bis 4. Jänner 2027 mit der Vorteilsclub-Karte bei ausgewählten Ständen 25 % auf eine Speise oder ein Getränk. Das Sortiment und die Teilnahme hängen vom Stand ab.'],
       ['Welche Adventmärkte haben nach Weihnachten geöffnet?', 'In der Auswahl bleibt der Christkindlmarkt am Rathausplatz bis 26. Dezember offen. Schönbrunn und der Wintermarkt am Riesenradplatz bleiben bis 6. Jänner 2027 geöffnet.'],
+      ['Was kostet Punsch am Weihnachtsmarkt inklusive Häferlpfand?', 'In einer Erhebung vom November 2026 lag der erste Zahlbetrag bei 7,00 € in der Favoritenstraße und ab 7,80 € am Spittelberg. Das darin enthaltene Pfand sind 2,00 € beziehungsweise 3,00 €. Einzelne Stände können andere Preise verlangen.'],
+      ['Welcher Weihnachtsmarkt in Wien eignet sich mit Kindern?', 'Schönbrunn bietet vor 14 Uhr kostenlosen Eisflächen-Zugang für Kinder bis 14 Jahre; Leihschlittschuhe kosten extra. Für einen Ausflug ohne Eintritt sind der Hirschstettner Lichterpfad und die angekündigten Puppentheater-Termine am Spittelberg Alternativen.'],
     ],
     related: [['Gratis in Wien dieses Wochenende', 'gratis-wien-wochenende.html'], ['Mittagessen unter 10 € in Wien', 'guenstig-essen-wien.html#mittagessen-unter-10'], ['Aktuelle Wien-Deals', '/angebote-wien-heute.html']],
   },
