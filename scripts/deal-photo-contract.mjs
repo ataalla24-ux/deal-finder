@@ -124,6 +124,12 @@ export function validateGeneratedPhotoReceipt(deal, review, {approvedImage}={}) 
     || disclosure.label !== 'Symbolbild' || disclosure.imageSha256 !== review.sha256
     || JSON.stringify(disclosure.bounds) !== JSON.stringify(GENERATED_PHOTO_LABEL_BOUNDS)
     || review.width !== 1080 || review.height !== 400) throw Error('generated-photo-provenance-invalid');
+  const visualReview = review.generatedVisualReview;
+  if (!visualReview || visualReview.version !== 1 || !['gpt-6.2-sol','gpt-6.2-astra'].includes(visualReview.model)
+    || !validGeneratedTime(visualReview.checkedAt) || visualReview.imageSha256 !== generated.sha256
+    || visualReview.inputHash !== generated.inputHash
+    || ['matchesSubject','specificEnough','noContradictions','cropComplete','labelReadable','notMisleading']
+      .some(field => visualReview[field] !== true)) throw Error('generated-photo-visual-review-unverified');
   if (approvedImage) {
     if (approvedImage.version !== 2 || approvedImage.sourceKind !== 'generated-owned'
       || approvedImage.photoUrl !== generated.photoUrl || approvedImage.sha256 !== generated.sha256

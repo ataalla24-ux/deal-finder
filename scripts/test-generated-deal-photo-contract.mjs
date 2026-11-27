@@ -20,6 +20,10 @@ async function fixture(t) {
   t.after(()=>fs.rmSync(root,{recursive:true,force:true}));
   const input = await sharp({create:{width:1536,height:1024,channels:3,background:'#85501a'}}).png().toBuffer();
   const prepared = await prepareGeneratedPhoto(deal,details,input,now);
+  // This local verdict is a fixture for the separate production visual review.
+  prepared.review.generatedVisualReview = {version:1,model:'gpt-6.2-astra',checkedAt:now.toISOString(),
+    imageSha256:prepared.generatedDealImage.sha256,inputHash:prepared.generatedDealImage.inputHash,
+    matchesSubject:true,specificEnough:true,noContradictions:true,cropComplete:true,labelReadable:true,notMisleading:true};
   writePreparedOriginalPhoto(root,prepared);
   const approvedDealImage = generatedPhotoApproval(deal,prepared.generatedDealImage,now);
   const locked = {...deal,photoUrl:prepared.photoUrl,approvedDealImage};
@@ -108,4 +112,26 @@ test('generation rejects unbounded metadata and undersized or undecodable source
   await assert.rejects(prepareGeneratedPhoto(deal,{...details,visualSubject:''},small,now),/input-invalid/);
   await assert.rejects(prepareGeneratedPhoto(deal,{...details,promptHash:'not-a-hash'},small,now),/input-invalid/);
   await assert.rejects(prepareGeneratedPhoto(deal,details,Buffer.from('not-an-image'),now));
+});
+
+test('a generated receipt requires a successful visual review bound to these exact image bytes and inputs',async t=>{
+  const {root,prepared,locked} = await fixture(t);
+  const review = prepared.review;
+  const marker = review.generatedVisualReview;
+  const variants = [
+    undefined,null,{...marker,version:2},{...marker,model:'gpt-image-test'},
+    {...marker,checkedAt:'invalid'},{...marker,imageSha256:'a'.repeat(64)},
+    {...marker,inputHash:'b'.repeat(64)},
+    ...['matchesSubject','specificEnough','noContradictions','cropComplete','labelReadable','notMisleading']
+      .flatMap(field => [{...marker,[field]:false},{...marker,[field]:'true'},{...marker,[field]:undefined}]),
+  ];
+  for (const generatedVisualReview of variants) {
+    saveReview(root,prepared,{...review,generatedVisualReview});
+    await assert.rejects(inspectBoundOriginalPhoto(locked,{root}),/visual-review-unverified/);
+  }
+  saveReview(root,prepared,{...review,generatedVisualReview:{...marker,model:'gpt-6.2-sol'}});
+  assert.ok(await inspectBoundOriginalPhoto(locked,{root}));
+  saveReview(root,prepared,{...review,renderedDisclosure:{...review.renderedDisclosure,
+    bounds:{top:320,left:428,width:224,height:54}}});
+  await assert.rejects(inspectBoundOriginalPhoto(locked,{root}),/provenance-invalid/);
 });
