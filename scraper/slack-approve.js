@@ -1844,7 +1844,7 @@ async function main() {
 }
 
 async function refreshChangedApprovalImage(deal,now) {
-  if (!deal.imageApprovalRequired || !deal.pendingDealImage
+  if (!deal.imageApprovalRequired
     || dealImagePreviewBlock(deal,{enabled:true,now})) return {deal,status:'unchanged'};
   const {refreshPendingDealPhoto} = await import('../scripts/refresh-pending-deal-photo.mjs');
   return refreshPendingDealPhoto(deal,{root:ROOT,now});

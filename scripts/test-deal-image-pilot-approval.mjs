@@ -9,7 +9,8 @@ import {inspectBoundOriginalPhoto} from './original-deal-photo.mjs';
 import {photoDigest} from './deal-photo-contract.mjs';
 
 const repository=path.resolve(path.dirname(fileURLToPath(import.meta.url)),'..');
-for(const mode of ['targeted','regular']) for(const edited of [false,true]) test(`actual ${mode} approval ${edited ? 'requires a fresh check after a changed product preview' : 'publishes the exact preview without extra model or photo requests'}`,async()=>{
+for(const mode of ['targeted','regular']) for(const scenario of ['original','edited','orphan']) test(`actual ${mode} approval: ${scenario}`,async()=>{
+  const edited=scenario==='edited',refresh=scenario!=='original';
   const root=fs.mkdtempSync(path.join(os.tmpdir(),'owned-image-approval-'));
   const previousEnv={...process.env},previousFetch=globalThis.fetch;
   const read=file=>JSON.parse(fs.readFileSync(path.join(root,file),'utf8'));
@@ -57,7 +58,7 @@ for(const mode of ['targeted','regular']) for(const edited of [false,true]) test
     const editCommand={ts:String(Math.floor(+now/1000)+1)+'.123456',text:'edit 1 titel: Gratis Döner mit Gutschein | beschreibung: Ein Döner gratis gegen Vorlage des Gutscheins.'};
     globalThis.fetch=async(url,init={})=>{
       const target=new URL(url);
-      if(edited && target.hostname==='freefinder.at') {
+      if(refresh && target.hostname==='freefinder.at') {
         const bytes=fs.readFileSync(path.join(root,'docs',target.pathname));
         return new Response(bytes,{headers:{'content-type':'image/jpeg','content-length':String(bytes.length)}});
       }
@@ -76,14 +77,15 @@ for(const mode of ['targeted','regular']) for(const edited of [false,true]) test
       }
       assert.fail('Unexpected fixture request '+target.pathname);
     };
+    if(scenario==='orphan') delete queued.pendingDealImage;
     write('docs/deals.json',{deals:[],totalDeals:0});write('docs/deals-pending-all.json',{deals:[queued]});
     await main();
-    if(edited) {
+    if(refresh) {
       assert.equal(read('docs/deals.json').deals.length,0,'old check must not approve a new image');
       const remaining=read('docs/deals-pending-all.json').deals;
       assert.equal(remaining.length,1);
       assert.notEqual(remaining[0].slackTs,ts);
-      assert.equal(remaining[0].pendingDealImage.key,'kebab');
+      assert.equal(remaining[0].pendingDealImage.key,edited?'kebab':'coffee');
       assert.equal(remaining[0].pipelineLifecycle.manualDecision,'');
       assert.equal(posts.filter(p=>p.method.endsWith('/chat.postMessage')).length,1);
       assert.equal(external.length,0,'new preview requires its own check before source validation');
