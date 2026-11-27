@@ -105,6 +105,7 @@ function extractSlackMessageText(message) {
 
   const parts = [];
   flattenSlackNode(message?.blocks || [], parts);
+  flattenSlackNode(message?.attachments || [], parts);
   const blockText = parts.join('\n').replace(/\n{3,}/g, '\n\n').trim();
   return blockText.includes('Deal-ID:') ? blockText : direct || blockText;
 }

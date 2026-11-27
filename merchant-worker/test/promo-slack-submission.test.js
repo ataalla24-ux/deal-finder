@@ -3,7 +3,8 @@ import assert from 'node:assert/strict';
 import worker from '../src/index.js';
 import { MerchantPromoLedger } from '../src/merchant-promos.js';
 
-test('SPOTLIGHTGRATIS reaches Slack once with complete fields in an isolated ledger', async t => {
+for (const transport of ['webhook', 'bot']) {
+test(`SPOTLIGHTGRATIS reaches Slack via ${transport} once with complete fields in an isolated ledger`, async t => {
   const NodeRequest = globalThis.Request;
   t.mock.method(globalThis, 'Request', function (input, init) {
     // Node requires duplex for the streaming request forwarded by Workers.
@@ -21,13 +22,19 @@ test('SPOTLIGHTGRATIS reaches Slack once with complete fields in an isolated led
   const sent = [];
   const env = {
     MERCHANT_PROMO_ADMIN_SECRET: 'fixture-only-secret',
-    SLACK_WEBHOOK_URL: 'https://slack.test/isolated',
+    ...(transport === 'webhook' ? { SLACK_WEBHOOK_URL: 'https://slack.test/isolated' }
+      : { SLACK_BOT_TOKEN: 'fixture-only-token', SLACK_CHANNEL_ID: 'fixture-channel' }),
     MERCHANT_PROMOS: { idFromName: name => name, get: () => ledger },
   };
   t.mock.method(globalThis, 'fetch', async (url, options) => {
-    assert.equal(String(url), env.SLACK_WEBHOOK_URL, 'no payment, provider or other network call is allowed');
+    assert.equal(String(url), transport === 'webhook' ? env.SLACK_WEBHOOK_URL : 'https://slack.com/api/chat.postMessage',
+      'no payment, provider or other network call is allowed');
+    if (transport === 'bot') {
+      assert.equal(options.headers.authorization, 'Bearer fixture-only-token');
+      assert.equal(JSON.parse(options.body).channel, env.SLACK_CHANNEL_ID);
+    }
     sent.push(JSON.parse(options.body));
-    return new Response('ok');
+    return transport === 'webhook' ? new Response('ok') : Response.json({ ok: true });
   });
   const call = (path, payload, admin = false) => worker.fetch(new Request(`https://fixture.test/api/merchant/promos/${path}`, {
     method: 'POST', headers: { 'content-type': 'application/json',
@@ -55,7 +62,14 @@ test('SPOTLIGHTGRATIS reaches Slack once with complete fields in an isolated led
   assert.equal(campaign.packageId, 'spotlight');
   assert.equal(campaign.endsAt - campaign.startsAt, 3 * 86400000);
   assert.equal(sent.length, 1);
-  const message = sent[0].blocks[1].text.text;
+  assert.equal(campaign.paymentProvider, 'promo');
+  assert.equal(sent[0].attachments.length, 1);
+  assert.equal(sent[0].attachments[0].color, '#DC2626');
+  assert.equal(sent[0].attachments[0].blocks[0].text.text, 'BUSINESS-EINREICHUNG: Promo-Code eingelöst');
+  assert.equal(sent[0].text, 'BUSINESS-EINREICHUNG: Promo-Code eingelöst: Fixture Cafe &lt;!here&gt; - 2 Pizzen zum Preis von 1');
+  assert.equal(sent[0].blocks, undefined, 'all visible blocks belong inside the colored attachment');
+  assert.doesNotMatch(JSON.stringify(sent[0]), /wartet|awaiting|pending|zur Freigabe/i);
+  const message = sent[0].attachments[0].blocks[1].text.text;
   for (const text of [draft.description, draft.address, draft.offerValidityText, 'Normalpreis: 20 EUR', 'Angebotspreis: 10 EUR']) {
     assert.ok(message.includes(text), `Slack must retain ${text}`);
   }
@@ -66,3 +80,4 @@ test('SPOTLIGHTGRATIS reaches Slack once with complete fields in an isolated led
   assert.equal((await call('redeem', { ...draft, requestId: crypto.randomUUID() })).status, 409);
   assert.equal(sent.length, 1);
 });
+}

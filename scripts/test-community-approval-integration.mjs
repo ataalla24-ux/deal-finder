@@ -61,7 +61,7 @@ try {
     throw new Error(`Unexpected request: ${url}`);
   };
   const { main, validateApprovalCandidates } = await import(pathToFileURL(path.join(temp, 'scraper/slack-approve.js')));
-  const { buildSlackMessage } = await import(pathToFileURL(path.join(temp, 'scraper/slack-notify.js')));
+  const { buildSlackMessage, buildPendingDealMessage, pendingSlackPayload } = await import(pathToFileURL(path.join(temp, 'scraper/slack-notify.js')));
   write('deals.json', { deals: [], totalDeals: 0 });
   write('deals-pending-all.json', { deals: [source] });
   await main();
@@ -82,6 +82,9 @@ try {
   const literalDay = nextMonth.split('-').reverse().join('.');
   edited.expiresOriginal = `${literalDay}, 12:00 bis ${literalDay}, 15:00 Uhr`;
   edited.expirySource = 'slack.human-review';
+  const coloredCard = pendingSlackPayload(buildPendingDealMessage(edited, 1), source.slackThreadTs, edited);
+  message = { ...message, ...coloredCard, text: coloredCard.text.replace(/\n/g, ' ') };
+  assert.equal(message.attachments[0].color, '#EAB308');
   write('deals-pending-all.json', { deals: [edited] });
   process.env.APPROVAL_REQUIRE_MAP = '1';
   process.env.APPROVAL_MAP_GEOCODE_REQUESTS = '0';

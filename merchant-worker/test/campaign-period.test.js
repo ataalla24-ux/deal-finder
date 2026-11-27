@@ -2,12 +2,14 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import worker from '../src/index.js';
 
-test('paid campaign preserves offer period through storage, Slack, public feed and retry', async t => {
+for (const transport of ['webhook', 'bot']) {
+test(`paid campaign via ${transport} preserves offer period through storage, Slack, public feed and retry`, async t => {
   const records = new Map();
   const slack = [];
   const env = {
     STRIPE_SECRET_KEY: 'test-only-not-a-real-key',
-    SLACK_WEBHOOK_URL: 'https://slack.test/webhook',
+    ...(transport === 'webhook' ? { SLACK_WEBHOOK_URL: 'https://slack.test/webhook' }
+      : { SLACK_BOT_TOKEN: 'fixture-only-token', SLACK_CHANNEL_ID: 'fixture-channel' }),
     MERCHANT_CAMPAIGNS: {
       async get(key, type) {
         const value = records.get(key) ?? null;
@@ -23,9 +25,13 @@ test('paid campaign preserves offer period through storage, Slack, public feed a
         metadata: { merchant_package_id: 'starter', source: 'freefinder-web' },
         payment_status: 'paid', status: 'complete', currency: 'eur', amount_total: 2599 });
     }
-    assert.equal(String(url), env.SLACK_WEBHOOK_URL);
+    assert.equal(String(url), transport === 'webhook' ? env.SLACK_WEBHOOK_URL : 'https://slack.com/api/chat.postMessage');
+    if (transport === 'bot') {
+      assert.equal(options.headers.authorization, 'Bearer fixture-only-token');
+      assert.equal(JSON.parse(options.body).channel, env.SLACK_CHANNEL_ID);
+    }
     slack.push(JSON.parse(options.body));
-    return new Response('ok');
+    return transport === 'webhook' ? new Response('ok') : Response.json({ ok: true });
   });
   const payload = {
     platform: 'web', paymentProvider: 'stripe', packageId: 'starter', transactionId: 'pi_test_period',
@@ -53,7 +59,14 @@ test('paid campaign preserves offer period through storage, Slack, public feed a
   assert.equal(campaign.endsAt - campaign.startsAt, 86400000);
   assert.equal(slack.length, 1);
   assert.ok(JSON.stringify(slack[0]).includes(payload.offerValidityText));
-  const slackText = slack[0].blocks[1].text.text;
+  assert.equal(campaign.status, 'paid');
+  assert.equal(slack[0].attachments.length, 1);
+  assert.equal(slack[0].attachments[0].color, '#DC2626');
+  assert.equal(slack[0].attachments[0].blocks[0].text.text, 'BUSINESS-EINREICHUNG: Bezahlt');
+  assert.equal(slack[0].text, 'BUSINESS-EINREICHUNG: Bezahlt: Testlokal - Lunch um 5 Euro');
+  assert.equal(slack[0].blocks, undefined, 'all visible blocks belong inside the colored attachment');
+  assert.doesNotMatch(JSON.stringify(slack[0]), /wartet|awaiting|pending|zur Freigabe/i);
+  const slackText = slack[0].attachments[0].blocks[1].text.text;
   assert.ok(slackText.includes('Details und Bedingungen: Nur vor Ort. Ab 2 Personen; solange der Vorrat reicht. &lt;!channel&gt;'));
   assert.ok(slackText.includes('Normalpreis: 9 EUR'));
   assert.ok(slackText.includes('Angebotspreis: 5 EUR'));
@@ -76,10 +89,11 @@ test('paid campaign preserves offer period through storage, Slack, public feed a
   assert.equal(expanded.status, 201);
   const expandedCampaign = (await expanded.json()).campaign;
   assert.equal(slack.length, 2);
-  const sections = slack[1].blocks.filter(block => block.type === 'section');
+  const sections = slack[1].attachments[0].blocks.filter(block => block.type === 'section');
   assert.ok(sections.every(block => block.text.text.length <= 2800), 'escaped Slack sections must stay below the service limit');
   const combined = sections.map(block => block.text.text).join('\n');
   const escape = value => value.replaceAll('&', '&amp;').replaceAll('<', '&lt;').replaceAll('>', '&gt;');
   assert.ok(combined.includes(escape(expandedCampaign.description)));
   assert.ok(combined.includes(escape(expandedCampaign.ctaURL)));
 });
+}

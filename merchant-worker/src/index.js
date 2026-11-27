@@ -1875,20 +1875,25 @@ async function notifySlackCampaign(env, campaign) {
     }
   }
 
-  const heading = campaign.paymentProvider === 'promo' ? 'Neue Business-Anzeige: Promo-Code eingelöst' : 'Neue Business-Anzeige bezahlt';
+  const heading = campaign.paymentProvider === 'promo' ? 'BUSINESS-EINREICHUNG: Promo-Code eingelöst' : 'BUSINESS-EINREICHUNG: Bezahlt';
   const payload = {
     text: `${heading}: ${slackValue(campaign.restaurantName)} - ${slackValue(campaign.dealTitle)}`,
     unfurl_links: false,
     unfurl_media: false,
-    blocks: [
+    attachments: [
       {
-        type: "header",
-        text: { type: "plain_text", text: heading },
+        color: "#DC2626",
+        blocks: [
+          {
+            type: "header",
+            text: { type: "plain_text", text: heading },
+          },
+          ...sections.map((text) => ({
+            type: "section",
+            text: { type: "mrkdwn", text },
+          })),
+        ],
       },
-      ...sections.map((text) => ({
-        type: "section",
-        text: { type: "mrkdwn", text },
-      })),
     ],
   };
 

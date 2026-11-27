@@ -934,6 +934,19 @@ function buildFirecrawlReviewMessage(deal, index, mapContext) {
   );
 }
 
+function buildPendingDealMessage(deal, index, mapContext) {
+  return (isCommunitySubmission(deal)
+    ? '*COMMUNITY-EINSENDUNG*\n*Status: Neu – manuell prüfen*\n' : '')
+    + buildSlackMessage(deal, index, mapContext);
+}
+
+function pendingDealGroups(deals) {
+  return [
+    { deals: deals.filter(isCommunitySubmission), label: 'Community-Einsendungen', kind: 'community' },
+    { deals: deals.filter(deal => !isCommunitySubmission(deal)), label: '', kind: '' },
+  ].filter(group => group.deals.length);
+}
+
 function buildSocialFoodReviewMessage(deal, index, mapContext) {
   return buildSlackMessage(deal, index, mapContext).replace(
     '_Mit ✅ freigeben_',
@@ -981,10 +994,26 @@ function pendingEditBlocks(text, deal) {
   return mapNotes.length || image ? blocks : undefined;
 }
 
-async function postSlackMessage(text, threadTs = null, attempt = 0, deal) {
+function pendingSlackPayload(text, threadTs = null, deal, kind = '') {
   text = String(text).toWellFormed();
-  const payload = { channel: SLACK_CHANNEL_ID, text, blocks: pendingEditBlocks(text,deal) };
+  const community = kind === 'community' || isCommunitySubmission(deal);
+  const body = community ? text.replace(/^\*COMMUNITY-EINSENDUNG\*\n/, '') : text;
+  const blocks = pendingEditBlocks(body, deal);
+  const payload = { channel: SLACK_CHANNEL_ID, text };
+  if (community) {
+    payload.attachments = [{ color: '#EAB308', fallback: text, blocks: [
+      { type: 'header', text: { type: 'plain_text', text: /Deal-ID:/.test(text) ? 'COMMUNITY-EINSENDUNG' : 'COMMUNITY-EINSENDUNGEN' } },
+      ...(blocks || (body.match(/[\s\S]{1,2900}/gu) || []).map(part => ({ type: 'section', text: { type: 'mrkdwn', text: part } }))),
+    ] }];
+  } else if (blocks) payload.blocks = blocks;
   if (threadTs) payload.thread_ts = threadTs;
+  return payload;
+}
+
+async function postSlackMessage(text, threadTs = null, attempt = 0, deal, kind = '') {
+  text = String(text).toWellFormed();
+  kind = kind || (isCommunitySubmission(deal) ? 'community' : '');
+  const payload = pendingSlackPayload(text, threadTs, deal, kind);
 
   const response = await fetch('https://slack.com/api/chat.postMessage', {
     method: 'POST',
@@ -999,14 +1028,14 @@ async function postSlackMessage(text, threadTs = null, attempt = 0, deal) {
   if (data.ok) return data.ts;
   if (dealImagePreviewBlock(deal) && ['invalid_blocks','invalid_arguments','invalid_attachments','invalid_url','url_not_allowed'].includes(data.error)) {
     delete deal.pendingDealImage;
-    return postSlackMessage(text,threadTs,attempt);
+    return postSlackMessage(text,threadTs,attempt,undefined,kind);
   }
 
   if (data.error === 'ratelimited' && attempt < 5) {
     const retryMs = Math.max(1000, Number(response.headers.get('retry-after') || data.retry_after || 2) * 1000);
     console.log(`  ⏳ Rate limited, waiting ${retryMs}ms...`);
     await sleep(retryMs);
-    return postSlackMessage(text, threadTs, attempt + 1, deal);
+    return postSlackMessage(text, threadTs, attempt + 1, deal, kind);
   }
 
   console.log(`❌ Slack post failed: ${data.error || 'unknown_error'}`);
@@ -1019,15 +1048,15 @@ function deliverySummary(label, sent, total) {
     + (sent < total ? `${total - sent} Nachricht(en) konnten nicht zugestellt werden; sie bleiben fuer einen erneuten Versand vorgemerkt.` : 'Versand abgeschlossen.');
 }
 
-async function updateDeliverySummary(ts, label, sent, total, attempt = 0) {
+async function updateDeliverySummary(ts, label, sent, total, attempt = 0, kind = '') {
   const response = await fetch('https://slack.com/api/chat.update', {
     method: 'POST', headers: { Authorization: `Bearer ${SLACK_BOT_TOKEN}`, 'Content-Type': 'application/json' },
-    body: JSON.stringify({ channel: SLACK_CHANNEL_ID, ts, text: deliverySummary(label, sent, total) }),
+    body: JSON.stringify({ ...pendingSlackPayload(deliverySummary(label, sent, total), null, undefined, kind), ts }),
   });
   const result = await response.json();
   if (result.error === 'ratelimited' && attempt < 5) {
     await sleep(Math.max(1000, Number(response.headers.get('retry-after') || 2) * 1000));
-    return updateDeliverySummary(ts, label, sent, total, attempt + 1);
+    return updateDeliverySummary(ts, label, sent, total, attempt + 1, kind);
   }
   if (!result.ok) throw new Error(`Slack delivery summary failed: ${result.error || response.status}`);
 }
@@ -1135,12 +1164,11 @@ async function untouchedCommunityCard(deal, replacement) {
 async function updateEditorialMessage(deal) {
   const build = deal.socialFoodReview ? buildSocialFoodReviewMessage
     : deal.firecrawlReview ? buildFirecrawlReviewMessage : buildSlackMessage;
-  const text = (isCommunitySubmission(deal) ? '*Community-Einreichung – noch nicht geprüft*\n' : '')
-    + build(deal, deal.order || 1);
+  const text = isCommunitySubmission(deal) ? buildPendingDealMessage(deal, deal.order || 1) : build(deal, deal.order || 1);
   const response = await fetch('https://slack.com/api/chat.update', {
     method: 'POST', signal: AbortSignal.timeout(10000),
     headers: { Authorization: `Bearer ${SLACK_BOT_TOKEN}`, 'Content-Type': 'application/json' },
-    body: JSON.stringify({ channel: SLACK_CHANNEL_ID, ts: deal.slackTs, text, blocks: pendingEditBlocks(text,deal) }),
+    body: JSON.stringify({ ...pendingSlackPayload(text, null, deal), ts: deal.slackTs }),
   });
   return response.ok && (await response.json()).ok === true;
 }
@@ -2037,26 +2065,30 @@ async function main() {
 
   const postedDeals = [];
   const checkImagePreview = createDealImagePreviewCheck();
-  if (freshDeals.length > 0) {
-    const freeCount = freshDeals.filter((d) => d.type === 'gratis').length;
+  for (const group of pendingDealGroups(freshDeals)) {
+    const freeCount = group.deals.filter((d) => d.type === 'gratis').length;
     const headerTs = await postSlackMessage(
-      `🎯 *FreeFinder Wien* — Versand laeuft (${freshDeals.length} Deals vorgesehen)\n` +
-      `🆓 ${freeCount} gratis | 💰 ${freshDeals.length - freeCount} rabatt/test\n` +
-      `🧪 Gültigkeitscheck: ${validation.summary.allowed}/${validation.summary.total} prüfbar | ${validation.summary.blocked} blockiert; ältere Originalaktionen nur mit frischem Gültigkeitsbeleg\n` +
-      `Manuelle Community-Einreichungen: ${communityReviewDeals.length} (ungeprüft; Quelle, Angebot, Ort und Datum prüfen)\n` +
-      (blockedSummary ? `🚫 Blockiert: ${blockedSummary}\n` : '') +
+      (group.kind === 'community'
+        ? `*FreeFinder Wien – COMMUNITY-EINSENDUNGEN* — ${group.deals.length} neue Einsendung(en)\n*Status: Eingang – manuell prüfen*\n`
+        : `🎯 *FreeFinder Wien* — Versand laeuft (${group.deals.length} Deals vorgesehen)\n`) +
+      `🆓 ${freeCount} gratis | 💰 ${group.deals.length - freeCount} rabatt/test\n` +
+      (group.kind === 'community'
+        ? 'Von Nutzerinnen und Nutzern eingereicht. Anbieter, Angebot, Ort und Zeitraum prüfen.\n'
+        : `🧪 Gültigkeitscheck: ${validation.summary.allowed}/${validation.summary.total} prüfbar | ${validation.summary.blocked} blockiert; ältere Originalaktionen nur mit frischem Gültigkeitsbeleg\n`
+          + (blockedSummary ? `🚫 Blockiert: ${blockedSummary}\n` : '')) +
       `_Jeden Deal mit ✅ bestätigen oder mit ❌ ablehnen. Nur ✅ kann ihn in die iOS-App bringen._\n` +
       `_Bearbeiten vor Freigabe: z. B. edit 3 titel: Gratis Matcha | ort: Neubaugasse 12, 1070 Wien | ablauf: TT.MM.JJJJ_`,
+      null, 0, undefined, group.kind,
     );
 
     if (!headerTs) {
       throw new Error('Konnte Header-Nachricht nicht senden');
     }
 
-    for (let i = 0; i < freshDeals.length; i += 1) {
-      const deal = await prepareDealImagePreview(await editCard(freshDeals[i]),{root:ROOT,now:runNow,checkPreview:checkImagePreview});
-      const text = (isCommunitySubmission(deal)
-        ? '*Community-Einreichung – noch nicht geprüft*\n' : '') + buildSlackMessage(deal, i + 1);
+    let groupSent = 0;
+    for (let i = 0; i < group.deals.length; i += 1) {
+      const deal = await prepareDealImagePreview(await editCard(group.deals[i]),{root:ROOT,now:runNow,checkPreview:checkImagePreview});
+      const text = buildPendingDealMessage(deal, i + 1);
       const ts = await postSlackMessage(text, headerTs,0,deal);
       if (!ts) continue;
 
@@ -2064,6 +2096,7 @@ async function main() {
       markDealSlackSent(deal, ts, headerTs, sentAt);
       deal.order = i + 1;
       postedDeals.push(deal);
+      groupSent += 1;
       if (!isCommunitySubmission(deal)) {
         reviewFeedback = upsertReviewFeedback(reviewFeedback, deal, { slackSentAt: sentAt, at: sentAt });
         writeReviewFeedback(REVIEW_FEEDBACK_PATH, reviewFeedback);
@@ -2079,11 +2112,11 @@ async function main() {
       writeDeliveryAudit(postedDeals);
 
       if ((i + 1) % 10 === 0) {
-        console.log(`  ✅ posted ${i + 1}/${freshDeals.length}`);
+        console.log(`  ✅ posted ${i + 1}/${group.deals.length}`);
       }
       await sleep(600);
     }
-    await updateDeliverySummary(headerTs, '', postedDeals.length, freshDeals.length);
+    await updateDeliverySummary(headerTs, group.label, groupSent, group.deals.length, 0, group.kind);
   }
 
   const postedReviewDeals = [];
@@ -2213,6 +2246,9 @@ export {
   buildFirecrawlReviewMessage,
   buildSocialFoodReviewMessage,
   buildSlackMessage,
+  buildPendingDealMessage,
+  pendingDealGroups,
+  pendingSlackPayload,
   pendingEditBlocks,
   postSlackMessage,
   deliverySummary,

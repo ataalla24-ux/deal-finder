@@ -39,6 +39,7 @@ on:
       - "scripts/test-approval-map-readiness.mjs"
       - "scripts/test-approved-copy.mjs"
       - "scripts/test-community-approval-integration.mjs"
+      - "scripts/test-community-review.mjs"
       - ".github/workflows/approve-deals.yml"
       - "scraper/normalize-live-deals.js"
       - "scraper/slack-digest-utils.js"
@@ -148,6 +149,7 @@ jobs:
           node scripts/test-slack-approval-validation.mjs
           node scripts/test-approval-map-readiness.mjs
           node scripts/test-community-approval-integration.mjs
+          node scripts/test-community-review.mjs
           node --test scripts/test-approved-copy.mjs
           node scripts/test-slack-date-pipeline.mjs
           node scripts/test-expiry-normalization.mjs
