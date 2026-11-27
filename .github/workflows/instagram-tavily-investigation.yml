@@ -20,6 +20,8 @@ on:
       - '.github/workflows/instagram-tavily-investigation.yml'
 permissions:
   contents: read
+env:
+  TZ: Europe/Vienna
 concurrency:
   group: ${{ github.event_name == 'workflow_dispatch' && 'instagram-ai-scan' || format('instagram-tavily-offline-{0}', github.run_id) }}
   cancel-in-progress: false
