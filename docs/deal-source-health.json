@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-11-27T08:34:03.670Z",
+  "generatedAt": "2026-11-27T09:06:26.426Z",
   "discoveryAvailability": {
     "note": "Transport evidence, not deal yield. Retry eligibility is not recovery. Candidate counts are not Slack deliveries. No extra runs or quota resets.",
     "lanes": [
@@ -54,17 +54,11 @@
   },
   "summary": {
     "filesConsidered": 33,
-    "totalCandidates": 802,
-    "uniqueCandidates": 775,
-    "distinctCandidates": 788,
+    "totalCandidates": 801,
+    "uniqueCandidates": 774,
+    "distinctCandidates": 787,
     "duplicateClusters": 13,
     "topHealthySources": [
-      {
-        "sourceKey": "wien-combined",
-        "sourceLabel": "Wien Deals Combined Graph",
-        "healthScore": 84,
-        "totalDeals": 1
-      },
       {
         "sourceKey": "tiktok-browser",
         "sourceLabel": "TikTok Browser",
@@ -88,15 +82,15 @@
         "sourceLabel": "TikTok Scanner",
         "healthScore": 66,
         "totalDeals": 1
+      },
+      {
+        "sourceKey": "vienna-websites",
+        "sourceLabel": "Wiener Lokal-Angebotsseiten",
+        "healthScore": 62,
+        "totalDeals": 8
       }
     ],
     "topMissionSources": [
-      {
-        "sourceKey": "wien-combined",
-        "sourceLabel": "Wien Deals Combined Graph",
-        "missionFitScore": 72,
-        "totalDeals": 1
-      },
       {
         "sourceKey": "joe",
         "sourceLabel": "jö Bonus Club",
@@ -120,6 +114,12 @@
         "sourceLabel": "Wiener Lokal-Angebotsseiten",
         "missionFitScore": 53,
         "totalDeals": 8
+      },
+      {
+        "sourceKey": "meta-instagram",
+        "sourceLabel": "Meta Instagram Graph",
+        "missionFitScore": 50,
+        "totalDeals": 96
       }
     ],
     "topCoverageSources": [
@@ -161,12 +161,6 @@
     ],
     "topPrecisionSources": [
       {
-        "sourceKey": "wien-combined",
-        "sourceLabel": "Wien Deals Combined Graph",
-        "precisionScore": 78,
-        "totalDeals": 1
-      },
-      {
         "sourceKey": "tiktok-browser",
         "sourceLabel": "TikTok Browser",
         "precisionScore": 76,
@@ -189,6 +183,12 @@
         "sourceLabel": "TikTok Scanner",
         "precisionScore": 64,
         "totalDeals": 1
+      },
+      {
+        "sourceKey": "joe",
+        "sourceLabel": "jö Bonus Club",
+        "precisionScore": 62,
+        "totalDeals": 9
       }
     ],
     "topWeightedSources": [
@@ -197,12 +197,6 @@
         "sourceLabel": "Member Benefits",
         "sourceWeightScore": 69,
         "totalDeals": 113
-      },
-      {
-        "sourceKey": "wien-combined",
-        "sourceLabel": "Wien Deals Combined Graph",
-        "sourceWeightScore": 64,
-        "totalDeals": 1
       },
       {
         "sourceKey": "tiktok-browser",
@@ -221,6 +215,12 @@
         "sourceLabel": "Firecrawl Key 1 - Gastro",
         "sourceWeightScore": 53,
         "totalDeals": 118
+      },
+      {
+        "sourceKey": "joe",
+        "sourceLabel": "jö Bonus Club",
+        "sourceWeightScore": 52,
+        "totalDeals": 9
       }
     ],
     "topSourcesToFix": [
@@ -292,80 +292,6 @@
     }
   },
   "sources": [
-    {
-      "sourceKey": "wien-combined",
-      "file": "deals-pending-wien-combined.json",
-      "sourceLabel": "Wien Deals Combined Graph",
-      "totalDeals": 1,
-      "uniqueDeals": 1,
-      "duplicateDeals": 0,
-      "duplicateAcrossSources": 0,
-      "fresh1dCount": 1,
-      "fresh7dCount": 1,
-      "viennaCount": 1,
-      "foodDrinkCount": 1,
-      "promoCount": 0,
-      "missingUrlCount": 0,
-      "sampleTitles": [
-        "„Kannst du das kurz fürs Marketing halten?“ 😅📸 Das Marketing: 👇 🍗 AKTIONSMENÜ DER WOCHE 1/2 Backhendl + Pommes oder Salat + 1 Getränk na"
-      ],
-      "lastRun": {
-        "status": "completed-with-errors",
-        "startedAt": "2026-11-26T21:51:40.655Z",
-        "finishedAt": "2026-11-26T21:52:19.912Z",
-        "durationMs": 39257,
-        "counts": {
-          "rawCandidates": 2,
-          "normalizedCandidates": 1,
-          "verifiedCandidates": 1,
-          "previousDeals": 0,
-          "acceptedDeals": 1,
-          "rejectedDeals": 1
-        },
-        "rejectedByReason": {
-          "no-concrete-offer": 1
-        },
-        "errors": [
-          "#wienisst: Instagram shared quota paused: rolling-hour budget exhausted",
-          "#wienkaffee: Instagram shared quota paused: rolling-hour budget exhausted",
-          "#wienergastro: Instagram shared quota paused: rolling-hour budget exhausted",
-          "#viennaeats: Instagram shared quota paused: rolling-hour budget exhausted",
-          "#wienfood: Instagram shared quota paused: rolling-hour budget exhausted",
-          "#viennafood: Instagram shared quota paused: rolling-hour budget exhausted",
-          "#viennarestaurants: Instagram shared quota paused: rolling-hour budget exhausted"
-        ],
-        "reportFile": "deal-pipeline-last-run-wien-combined.json"
-      },
-      "uniqueRate": 1,
-      "duplicateRate": 0,
-      "fresh1dRate": 1,
-      "fresh7dRate": 1,
-      "viennaRate": 1,
-      "foodDrinkRate": 1,
-      "promoRate": 0,
-      "missingUrlRate": 0,
-      "averageQualityScore": 78,
-      "topCategories": [
-        {
-          "value": "essen",
-          "count": 1
-        }
-      ],
-      "topTypes": [
-        {
-          "value": "rabatt",
-          "count": 1
-        }
-      ],
-      "issues": [
-        "wenige klare Gratis-/Promo-Signale"
-      ],
-      "healthScore": 84,
-      "missionFitScore": 72,
-      "coverageScore": 11,
-      "precisionScore": 78,
-      "sourceWeightScore": 64
-    },
     {
       "sourceKey": "tiktok-browser",
       "file": "deals-pending-tiktok-browser.json",
@@ -1796,7 +1722,7 @@
       "duplicateDeals": 2,
       "duplicateAcrossSources": 0,
       "fresh1dCount": 0,
-      "fresh7dCount": 8,
+      "fresh7dCount": 7,
       "viennaCount": 0,
       "foodDrinkCount": 70,
       "promoCount": 29,
@@ -1810,7 +1736,7 @@
       "uniqueRate": 1,
       "duplicateRate": 0,
       "fresh1dRate": 0,
-      "fresh7dRate": 0.1,
+      "fresh7dRate": 0,
       "viennaRate": 0,
       "foodDrinkRate": 0.5,
       "promoRate": 0.2,
@@ -2291,6 +2217,67 @@
       "missingUrlCount": 0,
       "sampleTitles": [],
       "lastRun": null,
+      "uniqueRate": 0,
+      "duplicateRate": 0,
+      "fresh1dRate": 0,
+      "fresh7dRate": 0,
+      "viennaRate": 0,
+      "foodDrinkRate": 0,
+      "promoRate": 0,
+      "missingUrlRate": 0,
+      "averageQualityScore": 0,
+      "topCategories": [],
+      "topTypes": [],
+      "issues": [
+        "liefert aktuell 0 Deals"
+      ],
+      "healthScore": 0,
+      "missionFitScore": 0,
+      "coverageScore": 0,
+      "precisionScore": 0,
+      "sourceWeightScore": 0
+    },
+    {
+      "sourceKey": "wien-combined",
+      "file": "deals-pending-wien-combined.json",
+      "sourceLabel": "Wien Deals Combined Graph",
+      "totalDeals": 0,
+      "uniqueDeals": 0,
+      "duplicateDeals": 0,
+      "duplicateAcrossSources": 0,
+      "fresh1dCount": 0,
+      "fresh7dCount": 0,
+      "viennaCount": 0,
+      "foodDrinkCount": 0,
+      "promoCount": 0,
+      "missingUrlCount": 0,
+      "sampleTitles": [],
+      "lastRun": {
+        "status": "completed-with-errors",
+        "startedAt": "2026-11-27T09:00:02.700Z",
+        "finishedAt": "2026-11-27T09:00:21.069Z",
+        "durationMs": 18369,
+        "counts": {
+          "rawCandidates": 0,
+          "normalizedCandidates": 0,
+          "verifiedCandidates": 0,
+          "previousDeals": 0,
+          "acceptedDeals": 0,
+          "rejectedDeals": 0
+        },
+        "rejectedByReason": {},
+        "errors": [
+          "#essenwien: Instagram shared quota paused: rolling-hour budget exhausted",
+          "#wienisst: Instagram shared quota paused: rolling-hour budget exhausted",
+          "#wienkaffee: Instagram shared quota paused: rolling-hour budget exhausted",
+          "#wienergastro: Instagram shared quota paused: rolling-hour budget exhausted",
+          "#viennaeats: Instagram shared quota paused: rolling-hour budget exhausted",
+          "#wienfood: Instagram shared quota paused: rolling-hour budget exhausted",
+          "#viennafood: Instagram shared quota paused: rolling-hour budget exhausted",
+          "#viennarestaurants: Instagram shared quota paused: rolling-hour budget exhausted"
+        ],
+        "reportFile": "deal-pipeline-last-run-wien-combined.json"
+      },
       "uniqueRate": 0,
       "duplicateRate": 0,
       "fresh1dRate": 0,
