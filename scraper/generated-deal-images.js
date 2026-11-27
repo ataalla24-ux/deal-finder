@@ -8,7 +8,7 @@ import {writePreparedOriginalPhoto,validatePhotoPermission,normalizeOriginalPhot
 
 export const GENERATED_IMAGE_CACHE='reviews/generated-deal-images.json';
 const STAGING='reviews/generated-deal-image-staging';
-const version='specific-deal-photo-v1';
+const version='specific-deal-photo-v2';
 const maxPerRun=2;
 const hour=3600000;
 const batches=new Map();
