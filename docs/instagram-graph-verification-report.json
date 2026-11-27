@@ -1,7 +1,7 @@
 {
-  "generatedAt": "2026-11-27T21:37:45.713Z",
+  "generatedAt": "2026-11-27T21:39:18.917Z",
   "source": "instagram-graph-cross-source-verification",
-  "status": "ok",
+  "status": "failed-preserved",
   "configured": true,
   "scannedFiles": [
     "deals-pending-church-events.json",
@@ -108,7 +108,7 @@
       "candidates": 0
     },
     "deals-pending-instagram-apify.json": {
-      "deals": 0,
+      "deals": 1,
       "candidates": 0
     },
     "deals-pending-instagram-apify2.json": {
@@ -189,28 +189,39 @@
       "candidates": 1
     }
   ],
-  "fetchedPosts": 65,
-  "exactMatches": 2,
+  "fetchedPosts": 0,
+  "exactMatches": 0,
   "retainedEvidencePosts": 2000,
-  "errors": [],
+  "errors": [
+    {
+      "username": "vamoskebap",
+      "message": "Instagram shared quota paused: rolling-hour budget exhausted"
+    }
+  ],
   "accountFailures": {},
   "sharedQuota": {
     "limitPerHour": 299,
     "usageThreshold": 95,
-    "requests": 3,
-    "reserved": 5,
-    "stopped": false,
-    "reason": "",
-    "highestUsagePercent": 32,
+    "requests": 0,
+    "reserved": 0,
+    "stopped": true,
+    "reason": "Instagram shared quota paused: rolling-hour budget exhausted",
+    "highestUsagePercent": 0,
     "waitedMs": 0,
     "pacingMs": 0,
-    "retryAt": "",
+    "retryAt": "2026-11-27T22:29:21.419Z",
     "adaptiveSafetyCeiling": 190,
     "adaptiveIncreases": 0,
     "storageFailure": null,
-    "stopKind": ""
+    "stopKind": "budget"
+  },
+  "globalError": {
+    "username": "vamoskebap",
+    "status": 0,
+    "code": "SCAN_BUDGET",
+    "message": "Instagram shared quota paused: rolling-hour budget exhausted"
   },
   "blockedEvidencePosts": 75,
-  "unmatchedCandidatePosts": 1,
-  "message": "2/3 fresh cross-source Instagram candidates matched exactly via Graph API."
+  "unmatchedCandidatePosts": 3,
+  "message": "0/3 fresh cross-source Instagram candidates matched exactly via Graph API."
 }
