@@ -1,16 +1,22 @@
 {
   "mode": "owner-authorized-source-backed",
-  "checkedAt": "2026-11-27T18:23:43.574Z",
-  "beforeCount": 110,
-  "afterCount": 110,
+  "checkedAt": "2026-11-27T19:57:04.875Z",
+  "beforeCount": 112,
+  "afterCount": 112,
   "hidden": [],
   "corrected": [
     {
-      "id": "meta-ig-18144789436596678",
+      "id": "meta-ig-18379885654240780",
       "fields": [
-        "photoUrl"
+        "title"
       ],
-      "method": "reviewed-photo-subject-changed"
+      "models": {
+        "editor": "gpt-6.2-astra",
+        "review": "gpt-6.2-astra"
+      },
+      "reasoningEffort": "max",
+      "reasoningMode": "pro",
+      "method": "source-grounded-draft-and-verification"
     }
   ],
   "review": [
@@ -21,6 +27,13 @@
     {
       "id": "gs-597759",
       "reason": "source-year-or-end-not-confirmed"
+    },
+    {
+      "id": "meta-ig-18107511371456022",
+      "reason": "copy-needs-grounded-review",
+      "fields": [
+        "title"
+      ]
     },
     {
       "id": "g2-q3mjlw",
@@ -37,25 +50,18 @@
       ]
     },
     {
+      "id": "fc4g-lz0vhn",
+      "reason": "copy-needs-grounded-review",
+      "fields": [
+        "dates"
+      ]
+    },
+    {
       "id": "g2-1iazcd",
       "reason": "copy-needs-grounded-review",
       "fields": [
         "title",
         "description"
-      ]
-    },
-    {
-      "id": "tiktok-1ha3oo0",
-      "reason": "copy-needs-grounded-review",
-      "fields": [
-        "title"
-      ]
-    },
-    {
-      "id": "meta-ig-18379885654240780",
-      "reason": "copy-needs-grounded-review",
-      "fields": [
-        "title"
       ]
     },
     {
@@ -142,6 +148,13 @@
       "reason": "copy-needs-grounded-review",
       "fields": [
         "description"
+      ]
+    },
+    {
+      "id": "tiktok-1ha3oo0",
+      "reason": "copy-needs-grounded-review",
+      "fields": [
+        "title"
       ]
     },
     {
@@ -234,13 +247,13 @@
   "newHides": 0,
   "protectedManualFields": true,
   "ai": {
-    "attempted": 2,
-    "corrected": 0,
+    "attempted": 4,
+    "corrected": 1,
     "deferred": 0,
-    "readyForModel": 2,
+    "readyForModel": 4,
     "models": {
-      "editor": "gpt-6.2-sol",
-      "review": "gpt-6.2-sol"
+      "editor": "gpt-6.2-astra",
+      "review": "gpt-6.2-astra"
     },
     "reasoningEffort": "max",
     "reasoningMode": "pro"
