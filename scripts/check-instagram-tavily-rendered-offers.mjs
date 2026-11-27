@@ -11,11 +11,13 @@ import { normalizeInstagramTavilyUrl } from '../scraper/instagram-tavily-index.j
 import { verifyInstagramTavilyOffers } from './check-instagram-tavily-offers.mjs';
 
 export const RENDER_TARGETS = Object.freeze([
-  'https://www.instagram.com/reel/DgKrTGJNERZ/',
-  'https://www.instagram.com/reel/DgKbULOKwil/',
+  'https://www.instagram.com/reel/DgKMgKnB387/',
+  'https://www.instagram.com/reel/Df_mFWlNzPp/',
 ]);
 const captionLimit = 1200;
-const claimFile = 'source-state/instagram-tavily-render-verification-claim.json';
+// The first pair was conclusively read by run 46081522342. This separate claim
+// admits only the two remaining direct-HTTP200 originals, never a repeat of them.
+const claimFile = 'source-state/instagram-tavily-render-remaining-claim.json';
 const outputDirectory = 'output/social-discovery';
 const marker = path.join(outputDirectory, '.instagram-tavily-render-verification.started');
 const normalize = value => typeof value === 'string' ? value.replace(/\s+/g, ' ').trim() : '';
@@ -172,7 +174,7 @@ export async function verifyRenderedInstagramTavilyOffers({
       cookieHeader, requireSession: true, fetcher,
     });
     const report = { ...result.report, sourceReads: browserNavigations, browserNavigations,
-      stage: 'rendered-original-proof', tavilySearches: 0,
+      stage: 'rendered-original-proof-remaining', tavilySearches: 0,
       rows: result.report.rows.map(row => ({
         ...row, ...(statuses.has(row.url) ? { httpStatus: statuses.get(row.url) } : {}),
         ...(readResults.has(row.url) && row.status === 'unverified' ? { reason: readResults.get(row.url) } : {}),

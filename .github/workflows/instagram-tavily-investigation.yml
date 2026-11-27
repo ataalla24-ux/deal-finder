@@ -103,12 +103,12 @@ jobs:
           cache: npm
       - run: npm ci --no-audit --no-fund
       - run: npx playwright install --with-deps chromium
-      - name: Claim two normal browser reads of the saved HTTP200 shells
+      - name: Claim the two remaining original browser reads
         id: claim
         run: node scripts/check-instagram-tavily-rendered-offers.mjs source-state/instagram-tavily-offer-verification-result.json --claim
       - name: Persist browser verification claim before opening a post
         if: steps.claim.outputs.claimed == 'true'
-        run: node scripts/commit-generated.mjs --message "Claim two Instagram rendered original checks [skip ci]" --files source-state/instagram-tavily-render-verification-claim.json
+        run: node scripts/commit-generated.mjs --message "Claim remaining Instagram original checks [skip ci]" --files source-state/instagram-tavily-render-remaining-claim.json
       - name: Verify two originals through the ordinary browser renderer
         id: verify
         if: steps.claim.outputs.claimed == 'true'
