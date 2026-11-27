@@ -44,17 +44,18 @@ export class FoodProviderClient {
     try { response = await this.fetchImpl(url, { ...options, redirect: 'error', signal: AbortSignal.timeout(95_000) }); }
     catch { throw new ProviderError('provider-network-error'); }
     if (!response.ok) {
+      const retryAt = retryAfterAt(response.headers.get('retry-after'), new Date(this.clock()));
+      const failure = reason => Object.assign(new ProviderError(reason, response.status), { retryAt });
       // A documented per-request cost refusal is not a revoked account key.
       // Read only a bounded message and emit a fixed reason, never its contents.
       if (this.provider === 'scraperapi' && response.status === 403) {
         let message;
         try { message = await boundedText(response, 4096); }
-        catch { throw new ProviderError('provider-http-403', 403); }
-        if (/This request exceeds your max_cost\./i.test(message)) throw new ProviderError('provider-cost-limit', 403);
+        catch { throw failure('provider-http-403'); }
+        if (/This request exceeds your max_cost\./i.test(message)) throw failure('provider-cost-limit');
       }
-      if (!response.bodyUsed) await response.body?.cancel();
-      throw Object.assign(new ProviderError(`provider-http-${response.status}`, response.status),
-        { retryAt: retryAfterAt(response.headers.get('retry-after'), new Date()) });
+      if (!response.bodyUsed) await response.body?.cancel().catch(() => {});
+      throw failure(`provider-http-${response.status}`);
     }
     const text = await boundedText(response);
     return { text, headers: response.headers };

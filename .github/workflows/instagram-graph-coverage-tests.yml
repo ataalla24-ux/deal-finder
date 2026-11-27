@@ -18,6 +18,8 @@ on:
       - 'scripts/coupon-tools-preflight.mjs'
       - '.github/actions/coupon-tools/**'
       - 'scripts/test-joe-current-offers.mjs'
+      - 'scripts/validate-instagram-ai-output.mjs'
+      - 'scripts/test-validate-instagram-ai-output.mjs'
       - 'scripts/*repair-slack-queued-deal.mjs'
       - '.github/workflows/repair-slack-queued-deal.yml'
       - '.github/workflows/daily-deal-pick.yml'
@@ -88,6 +90,8 @@ on:
       - 'scripts/coupon-tools-preflight.mjs'
       - '.github/actions/coupon-tools/**'
       - 'scripts/test-joe-current-offers.mjs'
+      - 'scripts/validate-instagram-ai-output.mjs'
+      - 'scripts/test-validate-instagram-ai-output.mjs'
       - 'scripts/*repair-slack-queued-deal.mjs'
       - '.github/workflows/repair-slack-queued-deal.yml'
       - '.github/workflows/daily-deal-pick.yml'
@@ -156,6 +160,7 @@ jobs:
           node --test scripts/test-instagram-delivery-audit.mjs
           node scripts/test-instagram-search-discovery.mjs
           node scripts/test-instagram-ai-agent.mjs
+          node scripts/test-validate-instagram-ai-output.mjs
           node scripts/test-review-clarity.mjs
           node scripts/test-deal-evidence.mjs
           node scripts/test-slack-deal-quality.mjs

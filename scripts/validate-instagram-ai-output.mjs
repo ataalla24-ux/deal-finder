@@ -54,10 +54,10 @@ function parseValidityStart(value) {
   return Number.isNaN(date.getTime()) ? null : date;
 }
 
-function validateViennaEvidence(deal, label, errors) {
+function validateViennaEvidence(deal, reject) {
   const evidence = deal.evidence?.viennaEvidence;
   if (!evidence || typeof evidence !== 'object') {
-    errors.push(`${label} has no structured Vienna evidence`);
+    reject('vienna-evidence', `has no structured Vienna evidence`);
     return;
   }
 
@@ -70,31 +70,31 @@ function validateViennaEvidence(deal, label, errors) {
     'merchant-registry',
     'verified-account-watchlist',
   ].includes(source)) {
-    errors.push(`${label} has unsupported Vienna evidence source: ${source || 'missing'}`);
+    reject('vienna-evidence', `has unsupported Vienna evidence source: ${source || 'missing'}`);
   }
-  if (evidence.verified !== true) errors.push(`${label} Vienna evidence is not explicitly verified`);
-  if (!value) errors.push(`${label} has empty Vienna evidence`);
+  if (evidence.verified !== true) reject('vienna-evidence', `Vienna evidence is not explicitly verified`);
+  if (!value) reject('vienna-evidence', `has empty Vienna evidence`);
   if (['instagram-post', 'structured-location'].includes(source)
       && !/\b(?:wien|vienna|1(?:0[1-9]0|1[0-9]0|2[0-3]0))\b/i.test(value)) {
-    errors.push(`${label} post evidence does not contain a Vienna location`);
+    reject('vienna-evidence', `post evidence does not contain a Vienna location`);
   }
   if (source === 'structured-location' && !VIENNA_POSTCODE_OR_ADDRESS.test(value)) {
-    errors.push(`${label} structured Vienna evidence has no postcode or address`);
+    reject('vienna-evidence', `structured Vienna evidence has no postcode or address`);
   }
   if (!['instagram-post', 'structured-location'].includes(source)
       && !/@[a-z0-9._]{2,40}/i.test(value)) {
-    errors.push(`${label} account evidence has no Instagram username`);
+    reject('vienna-evidence', `account evidence has no Instagram username`);
   }
   if (!topLevelEvidence || typeof topLevelEvidence !== 'object' || topLevelEvidence.verified !== true) {
-    errors.push(`${label} has no verified top-level Vienna evidence`);
+    reject('vienna-evidence', `has no verified top-level Vienna evidence`);
   } else if (
     String(topLevelEvidence.source || '') !== source
     || String(topLevelEvidence.value || '') !== value
   ) {
-    errors.push(`${label} top-level Vienna evidence differs from evidence.viennaEvidence`);
+    reject('vienna-evidence', `top-level Vienna evidence differs from evidence.viennaEvidence`);
   }
   if (deal.viennaVerified !== true || !/^(?:wien|vienna)$/i.test(String(deal.city || '').trim())) {
-    errors.push(`${label} has no verified Vienna city fields`);
+    reject('vienna-evidence', `has no verified Vienna city fields`);
   }
 
   const locationSignal = [
@@ -103,15 +103,14 @@ function validateViennaEvidence(deal, label, errors) {
     deal.evidence?.textSample,
   ].filter(Boolean).join(' ');
   if (VIENNA_NEGATION.test(locationSignal)) {
-    errors.push(`${label} explicitly excludes Vienna`);
+    reject('vienna-evidence', `explicitly excludes Vienna`);
   }
   if (!String(deal.distance || '').trim()) {
-    errors.push(`${label} has no distance derived from Vienna evidence`);
+    reject('vienna-evidence', `has no distance derived from Vienna evidence`);
   }
 }
 
-function validateInstagramAiPayload(output, report = {}, options = {}) {
-  const errors = [];
+function validationContext(report, options) {
   const now = options.now instanceof Date ? options.now : new Date(options.now || Date.now());
   const moderation = options.moderation || {
     blockedIds: new Set(),
@@ -141,127 +140,162 @@ function validateInstagramAiPayload(output, report = {}, options = {}) {
     && configuredFutureSkewMinutes >= 0
     ? configuredFutureSkewMinutes
     : 10;
+  return { now, moderation, maxAgeDays, activeOfferMaxAgeDays, publicationFutureSkewMinutes };
+}
+
+function validateFinishedDeal(deal, context) {
+  const { now, moderation, maxAgeDays, activeOfferMaxAgeDays, publicationFutureSkewMinutes } = context;
+  const errors = [];
+  const reject = (code, message) => errors.push({ code, message });
+  if (!deal || typeof deal !== 'object' || Array.isArray(deal)) {
+    reject('invalid-row', 'is not a deal record');
+    return errors;
+  }
+  if (!canonicalPostKey(deal.url)) reject('invalid-identity', 'has no canonical Instagram post/reel URL');
+  if (!deal.id) reject('invalid-identity', 'has no id');
+  if (deal.rejected || deal.rejectionReason) reject('marked-rejected', 'is marked rejected but present in deals');
+
+  const pubDate = parseDate(deal.pubDate);
+  const sourcePublishedAt = parseDate(deal.sourcePublishedAt);
+  if (!pubDate) reject('publication-date', `has no valid pubDate`);
+  if (!sourcePublishedAt) reject('publication-date', `has no valid sourcePublishedAt`);
+  if (pubDate && sourcePublishedAt
+      && Math.abs(pubDate.getTime() - sourcePublishedAt.getTime()) > 1000) {
+    reject('publication-date', `pubDate differs from sourcePublishedAt`);
+  }
+
+  const pubDateSource = String(deal.pubDateSource || '');
+  const sourcePublishedAtSource = String(deal.sourcePublishedAtSource || '');
+  if (!isTrustedDateSource(pubDateSource)) {
+    reject('publication-provenance', `has untrusted pubDateSource: ${pubDateSource || 'missing'}`);
+  }
+  if (!isTrustedDateSource(sourcePublishedAtSource)) {
+    reject('publication-provenance', `has untrusted sourcePublishedAtSource: ${sourcePublishedAtSource || 'missing'}`);
+  }
+  if (pubDateSource && sourcePublishedAtSource && pubDateSource !== sourcePublishedAtSource) {
+    reject('publication-provenance', `pubDateSource differs from sourcePublishedAtSource`);
+  }
+  if (String(deal.evidence?.postDateSource || '') !== pubDateSource) {
+    reject('publication-provenance', `evidence.postDateSource differs from pubDateSource`);
+  }
+
+  if (pubDate) {
+    const sourceOfferEvidence = [
+      deal.title,
+      deal.description,
+      deal.expiryDisplayText,
+      deal.expires,
+      deal.evidence?.offerDateSignal,
+      deal.evidence?.offerTiming?.matchedText,
+      deal.evidence?.textSample,
+    ].filter(Boolean).join(' ');
+    const offerTiming = evaluateInstagramOfferTiming({
+      signal: sourceOfferEvidence,
+      pubDate,
+      now,
+      maxAgeDays,
+      activeOfferMaxAgeDays,
+      futureSkewMinutes: publicationFutureSkewMinutes,
+    });
+    const ageDays = Math.max(0, (now.getTime() - pubDate.getTime()) / DAY_MS);
+    if (ageDays > maxAgeDays && !offerTiming.eligibleByAge) {
+      reject('post-too-old', `is ${ageDays.toFixed(2)} days old; hard social-post max is ${maxAgeDays}`);
+    }
+    if (offerTiming.expired) reject('offer-expired', `has expired source offer evidence`);
+    if (offerTiming.futurePublication) reject('post-in-future', `pubDate is implausibly in the future`);
+  }
+
+  const validFromRaw = String(deal.validFrom || '').trim();
+  const validFrom = parseValidityStart(validFromRaw);
+  if (validFromRaw && !validFrom) {
+    reject('offer-date-mismatch', `has invalid validFrom`);
+  }
+
+  const explicitEnd = parseDate(deal.evidence?.explicitOfferEnd);
+  if (explicitEnd) {
+    const expires = parseDate(deal.expires);
+    if (!String(deal.evidence?.explicitOfferDateSource || '')) {
+      reject('offer-date-mismatch', `has an evidenced offer end without evidence text`);
+    }
+    if (!expires || Math.abs(expires.getTime() - explicitEnd.getTime()) > DAY_MS) {
+      reject('offer-date-mismatch', `expires does not match the evidenced offer end`);
+    }
+  }
+
+  const text = [
+    deal.brand,
+    deal.title,
+    deal.description,
+    deal.url,
+    deal.evidence?.textSample,
+  ].filter(Boolean).join(' ');
+  if (FALSE_POSITIVE.test(text)) {
+    reject('blocked-offer', `contains giveaway/shipping/guide false-positive language`);
+  }
+  if (/\bneotaste\b/i.test(text)) reject('blocked-offer', `contains blocked NeoTaste signal`);
+
+  validateViennaEvidence(deal, reject);
+
+  const moderationReason = moderationReasonForDeal(deal, moderation);
+  if (moderationReason) reject('moderated-offer', `is blocked by moderation: ${moderationReason}`);
+  return errors;
+}
+
+function partitionInstagramAiDeals(deals, report = {}, options = {}) {
+  const context = validationContext(report, options);
+  const eligible = [];
+  const quarantine = { count: 0, reasons: {} };
+  for (const deal of deals) {
+    const failures = validateFinishedDeal(deal, context);
+    if (!failures.length) {
+      eligible.push(deal);
+      continue;
+    }
+    quarantine.count += 1;
+    for (const code of new Set(failures.map((failure) => failure.code))) {
+      quarantine.reasons[code] = (quarantine.reasons[code] || 0) + 1;
+    }
+  }
+  return { deals: eligible, quarantine };
+}
+
+function validateInstagramAiPayload(output, report = {}, options = {}) {
+  const errors = [];
+  const context = validationContext(report, options);
   const deals = Array.isArray(output?.deals) ? output.deals : [];
   const rejectedRows = [
     ...(Array.isArray(report.rejected) ? report.rejected : []),
     ...(Array.isArray(report.terminalRejected) ? report.terminalRejected : []),
   ];
-  const rejectedKeys = new Set(rejectedRows.map((row) => canonicalPostKey(row.url)).filter(Boolean));
+  const rejectedKeys = new Set(rejectedRows.map((row) => canonicalPostKey(row?.url)).filter(Boolean));
   const seenKeys = new Set();
   const seenIds = new Set();
 
+  if (!Array.isArray(output?.deals)) errors.push('deals is not an array');
   if (Number(output?.totalDeals) !== deals.length) {
     errors.push(`totalDeals=${output?.totalDeals} but deals.length=${deals.length}`);
   }
 
   for (const deal of deals) {
-    const label = deal.url || deal.title || deal.id || 'unknown deal';
-    const key = canonicalPostKey(deal.url);
-    if (!key) {
-      errors.push(`${label} has no canonical Instagram post/reel URL`);
-    } else if (seenKeys.has(key)) {
-      errors.push(`${label} duplicates another Instagram post URL`);
-    } else {
+    const label = deal?.url || deal?.title || deal?.id || 'unknown deal';
+    const key = canonicalPostKey(deal?.url);
+    if (key) {
+      if (seenKeys.has(key)) errors.push(`${label} duplicates another Instagram post URL`);
       seenKeys.add(key);
     }
-
-    if (!deal.id) errors.push(`${label} has no id`);
-    else if (seenIds.has(deal.id)) errors.push(`${label} duplicates id ${deal.id}`);
-    else seenIds.add(deal.id);
-
-    if (deal.rejected || deal.rejectionReason) {
-      errors.push(`${label} is marked rejected but present in deals`);
+    if (deal?.id) {
+      if (seenIds.has(deal.id)) errors.push(`${label} duplicates id ${deal.id}`);
+      seenIds.add(deal.id);
     }
     if (key && rejectedKeys.has(key)) {
       errors.push(`${label} is present in both deals and the rejection report`);
     }
-
-    const pubDate = parseDate(deal.pubDate);
-    const sourcePublishedAt = parseDate(deal.sourcePublishedAt);
-    if (!pubDate) errors.push(`${label} has no valid pubDate`);
-    if (!sourcePublishedAt) errors.push(`${label} has no valid sourcePublishedAt`);
-    if (pubDate && sourcePublishedAt
-        && Math.abs(pubDate.getTime() - sourcePublishedAt.getTime()) > 1000) {
-      errors.push(`${label} pubDate differs from sourcePublishedAt`);
+    for (const failure of validateFinishedDeal(deal, context)) {
+      errors.push(`${label} ${failure.message}`);
     }
-
-    const pubDateSource = String(deal.pubDateSource || '');
-    const sourcePublishedAtSource = String(deal.sourcePublishedAtSource || '');
-    if (!isTrustedDateSource(pubDateSource)) {
-      errors.push(`${label} has untrusted pubDateSource: ${pubDateSource || 'missing'}`);
-    }
-    if (!isTrustedDateSource(sourcePublishedAtSource)) {
-      errors.push(`${label} has untrusted sourcePublishedAtSource: ${sourcePublishedAtSource || 'missing'}`);
-    }
-    if (pubDateSource && sourcePublishedAtSource && pubDateSource !== sourcePublishedAtSource) {
-      errors.push(`${label} pubDateSource differs from sourcePublishedAtSource`);
-    }
-    if (String(deal.evidence?.postDateSource || '') !== pubDateSource) {
-      errors.push(`${label} evidence.postDateSource differs from pubDateSource`);
-    }
-
-    if (pubDate) {
-      const sourceOfferEvidence = [
-        deal.title,
-        deal.description,
-        deal.expiryDisplayText,
-        deal.expires,
-        deal.evidence?.offerDateSignal,
-        deal.evidence?.offerTiming?.matchedText,
-        deal.evidence?.textSample,
-      ].filter(Boolean).join(' ');
-      const offerTiming = evaluateInstagramOfferTiming({
-        signal: sourceOfferEvidence,
-        pubDate,
-        now,
-        maxAgeDays,
-        activeOfferMaxAgeDays,
-        futureSkewMinutes: publicationFutureSkewMinutes,
-      });
-      const ageDays = Math.max(0, (now.getTime() - pubDate.getTime()) / DAY_MS);
-      if (ageDays > maxAgeDays && !offerTiming.eligibleByAge) {
-        errors.push(`${label} is ${ageDays.toFixed(2)} days old; hard social-post max is ${maxAgeDays}`);
-      }
-      if (offerTiming.expired) errors.push(`${label} has expired source offer evidence`);
-      if (offerTiming.futurePublication) errors.push(`${label} pubDate is implausibly in the future`);
-    }
-
-    const validFromRaw = String(deal.validFrom || '').trim();
-    const validFrom = parseValidityStart(validFromRaw);
-    if (validFromRaw && !validFrom) {
-      errors.push(`${label} has invalid validFrom`);
-    }
-
-    const explicitEnd = parseDate(deal.evidence?.explicitOfferEnd);
-    if (explicitEnd) {
-      const expires = parseDate(deal.expires);
-      if (!String(deal.evidence?.explicitOfferDateSource || '')) {
-        errors.push(`${label} has an evidenced offer end without evidence text`);
-      }
-      if (!expires || Math.abs(expires.getTime() - explicitEnd.getTime()) > DAY_MS) {
-        errors.push(`${label} expires does not match the evidenced offer end`);
-      }
-    }
-
-    const text = [
-      deal.brand,
-      deal.title,
-      deal.description,
-      deal.url,
-      deal.evidence?.textSample,
-    ].filter(Boolean).join(' ');
-    if (FALSE_POSITIVE.test(text)) {
-      errors.push(`${label} contains giveaway/shipping/guide false-positive language`);
-    }
-    if (/\bneotaste\b/i.test(text)) errors.push(`${label} contains blocked NeoTaste signal`);
-
-    validateViennaEvidence(deal, label, errors);
-
-    const moderationReason = moderationReasonForDeal(deal, moderation);
-    if (moderationReason) errors.push(`${label} is blocked by moderation: ${moderationReason}`);
   }
 
-  return { errors, deals, maxAgeDays, activeOfferMaxAgeDays };
+  return { errors, deals, maxAgeDays: context.maxAgeDays, activeOfferMaxAgeDays: context.activeOfferMaxAgeDays };
 }
 
 function runCli() {
@@ -284,5 +318,6 @@ if (process.argv[1] && path.resolve(process.argv[1]) === __filename) runCli();
 
 export {
   canonicalPostKey,
+  partitionInstagramAiDeals,
   validateInstagramAiPayload,
 };

@@ -2,7 +2,7 @@ import fs from 'node:fs/promises';
 import { pathToFileURL } from 'node:url';
 import { load } from 'cheerio';
 import { FoodProviderClient, ProviderError } from './food-provider-client.js';
-import { DAY, SCAN_PROVIDERS, freeBudget, planRequests, validateLedger, sourceAvailable, powerPageAvailable, canonicalPage, taskKey } from './food-provider-policy.js';
+import { DAY, SCAN_PROVIDERS, freeBudget, planRequests, scanTargets, validateLedger, sourceAvailable, powerPageAvailable, canonicalPage, taskKey } from './food-provider-policy.js';
 import { POWER_FOOD_SOURCES } from './power-food-sources.js';
 import { extractFoodOffers, discoverFoodLinks } from './power-food-extraction.js';
 import { fetchOfficialFoodPage, verifyOfficialFoodDeal } from './power-food-verification.js';
@@ -25,6 +25,7 @@ export function applyYieldCooldown(state, results, now) {
     const target = rows[0].url ? state.pages : state.sources;
     const entry = rows[0].url ? key : rows[0].source;
     if (rows.some(row => row.status === 'failed' || row.status === 'source-paused')) continue;
+    if (target[entry]?.failureStage && Date.parse(target[entry].retryAt) > +now) continue;
     const examined = rows.filter(row => ['fetched', 'direct-sufficient', 'direct-no-offer', 'store-selection-required'].includes(row.status));
     if (!examined.length) continue;
     if (examined.some(row => row.verifiedIncrementalCandidates > 0)) {
@@ -79,9 +80,79 @@ async function usages(providers) {
   const result = {};
   for (const provider of providers) {
     try { result[provider] = await new FoodProviderClient(provider).usage(); }
-    catch (error) { result[provider] = { provider, error: reason(error) }; }
+    catch (error) {
+      result[provider] = { provider, error: reason(error), httpStatus: Number(error.httpStatus) || 0,
+        ...(error.retryAt ? { retryAt: error.retryAt } : {}) };
+    }
   }
   return result;
+}
+
+export async function planFoodProviderRun(state, powerReport, mode, now, runId, readUsages = usages) {
+  validateLedger(state);
+  const targets = mode === 'scan' ? scanTargets(state, powerReport, now) : undefined;
+  const preflight = planRequests(state, powerReport, {}, mode, now, runId, targets);
+  const skipUsage = (mode === 'scan' && !targets.length)
+    || preflight.skipped.some(row => row.reason === 'already-reserved-no-replay')
+    || (mode === 'benchmark' && preflight.skipped.every(row => row.reason === 'no-eligible-distinct-source'));
+  const availableProviders = SCAN_PROVIDERS.filter(provider => !(Date.parse(state.providerPauses[provider]) > +now));
+  const usage = skipUsage || !availableProviders.length ? {} : await readUsages(availableProviders);
+  for (const provider of availableProviders) {
+    const account = usage[provider];
+    if (![401, 402, 403, 429].includes(account?.httpStatus)) continue;
+    state.providerPauses[provider] = failureDeadline(account.httpStatus, account.retryAt, now);
+  }
+  const plan = skipUsage ? preflight : planRequests(state, powerReport, usage, mode, now, runId, targets);
+  return { runId, mode, createdAt: now.toISOString(), usage, ...plan };
+}
+
+const hostOf = url => new URL(url).hostname.toLowerCase().replace(/^www\./, '');
+const laterDeadline = (a, b) => Date.parse(a) > Date.parse(b) ? a : b;
+const failureDeadline = (status, retryAt, at) => new Date(Math.max(Date.parse(retryAt) || 0,
+  +at + ([401, 403, 404, 410].includes(status) ? 3 * DAY : DAY))).toISOString();
+
+function recordTaskFailure(state, source, task, url, stage, error, at) {
+  const httpStatus = Number(error.httpStatus) || 0;
+  const failure = reason(error);
+  const retryAt = failureDeadline(httpStatus, error.retryAt, at);
+  const attemptedAt = at.toISOString();
+  const explicitRefusal = [401, 403, 429].includes(httpStatus);
+  const targetResponse = stage === 'direct-request' || (stage === 'provider-request' && /^target-http-/.test(failure));
+  const accountResponse = ['account-usage', 'provider-request'].includes(stage) && !targetResponse;
+  // ScrapingBee returns transparent target status codes. A render refusal with
+  // no independent attribution must keep both requests on hold.
+  const ambiguousRenderRefusal = stage === 'provider-request' && task.provider === 'scrapingbee'
+    && /^provider-http-/.test(failure) && explicitRefusal;
+  const hostRefusal = (targetResponse && explicitRefusal) || ambiguousRenderRefusal;
+  const providerRefusal = accountResponse && failure !== 'provider-cost-limit'
+    && (explicitRefusal || httpStatus === 402 || /cost/.test(failure));
+  let scope = 'page';
+  if (hostRefusal) {
+    scope = 'host';
+    const host = hostOf(url);
+    for (const affected of POWER_FOOD_SOURCES.filter(entry => entry.name === source.name || hostOf(entry.url) === host)) {
+      const prior = state.sources[affected.name];
+      state.sources[affected.name] = { ...prior, attemptedAt, retryAt: laterDeadline(prior?.retryAt, retryAt), failureStage: stage, httpStatus };
+    }
+  }
+  if (providerRefusal) {
+    scope = hostRefusal ? 'provider-and-host' : 'provider';
+    state.providerPauses[task.provider] = laterDeadline(state.providerPauses[task.provider], retryAt);
+  }
+  if (!task.url && !hostRefusal && stage !== 'account-usage' && (!providerRefusal || stage === 'provider-request')) {
+    // Historical reservations without a page could only be paused by source.
+    const prior = state.sources[source.name];
+    state.sources[source.name] = { ...prior, attemptedAt, retryAt: laterDeadline(prior?.retryAt, retryAt), failureStage: stage, httpStatus };
+    if (!providerRefusal) scope = 'source';
+  } else if (task.url && !hostRefusal && !providerRefusal && stage !== 'account-usage') {
+    state.pages ||= {};
+    const key = taskKey(task);
+    const prior = state.pages[key];
+    state.pages[key] = { ...prior, attemptedAt, retryAt: laterDeadline(prior?.retryAt, retryAt), reason: failure, failureStage: stage, httpStatus };
+  } else if (!hostRefusal && !providerRefusal) {
+    scope = 'account-usage';
+  }
+  return { status: 'failed', stage, scope, reason: failure, httpStatus, retryAt };
 }
 
 export async function collectPlan(plan, state, powerReport, {
@@ -126,9 +197,15 @@ export async function collectPlan(plan, state, powerReport, {
       results.push({ ...row, status: clock() >= deadline ? 'runtime-stopped' : 'source-paused' });
       unspent(); await save(); continue;
     }
+    if (Date.parse(state.pages?.[taskKey(task)]?.retryAt || '') > +currentTime()) {
+      results.push({ ...row, status: 'page-paused', retryAt: state.pages[taskKey(task)].retryAt });
+      unspent(); await save(); continue;
+    }
+    let stage = 'direct-request';
     try {
       if (!direct.has(url)) direct.set(url, await fetchPage(url, source));
       const baseline = direct.get(url);
+      stage = 'direct-processing';
       const parsedDirect = extractFoodOffers(baseline.html, source, { now, pageUrl: baseline.finalUrl });
       row.directCandidates = parsedDirect.deals.length;
       row.directRejected = parsedDirect.rejected;
@@ -138,6 +215,7 @@ export async function collectPlan(plan, state, powerReport, {
       if (plan.mode === 'scan' && parsedDirect.deals.length) {
         row.status = 'direct-sufficient'; row.directCandidates = parsedDirect.deals.length;
         unspent();
+        stage = 'verification';
         await confirm(parsedDirect.deals, row, new Set(parsedDirect.deals.map(d => d.id)), 'direct');
         results.push(row);
         continue;
@@ -162,6 +240,10 @@ export async function collectPlan(plan, state, powerReport, {
       if (plan.mode === 'scan' && attemptedFinalUrls.has(finalKey)) {
         results.push({ ...row, status: 'duplicate-final-url' }); unspent(); continue;
       }
+      if (Date.parse(state.providerPauses[task.provider]) > +currentTime()) {
+        results.push({ ...row, status: 'budget-stopped', reason: 'provider-paused' }); unspent(); continue;
+      }
+      stage = 'account-usage';
       if (!clients.has(task.provider)) clients.set(task.provider, clientFor(task.provider));
       const client = clients.get(task.provider);
       const usage = await client.usage();
@@ -175,7 +257,9 @@ export async function collectPlan(plan, state, powerReport, {
       }
       attemptedFinalUrls.add(finalKey);
       chargedAttempted = true;
+      stage = 'provider-request';
       const page = await client.scrape(source, baseline.finalUrl);
+      stage = 'provider-processing';
       const parsed = extractFoodOffers(page.html, source, { now, pageUrl: page.finalUrl });
       const $ = load(page.html);
       $('script,style,noscript').remove();
@@ -189,22 +273,12 @@ export async function collectPlan(plan, state, powerReport, {
       row.offerLinks = discoverFoodLinks(page.html, source, page.finalUrl, 40);
       rememberLinks(state, source, row.offerLinks, now);
       row.rejected = parsed.rejected;
+      stage = 'verification';
       await confirm(parsed.deals, row, new Set(parsedDirect.deals.map(d => d.id)), 'provider');
       results.push(row);
     } catch (error) {
       if (!chargedAttempted && !reservation.unspent?.includes(index)) unspent();
-      const status = Number(error.httpStatus) || 0;
-      const retryAt = new Date(Math.max(Date.parse(error.retryAt) || 0,
-        +now + ([401, 403, 404, 410].includes(status) ? 3 * DAY : DAY))).toISOString();
-      if (task.url && error instanceof ProviderError && error.message === 'provider-cost-limit') {
-        state.pages ||= {};
-        state.pages[taskKey(task)] = { attemptedAt: now.toISOString(), retryAt, reason: 'provider-cost-limit' };
-      } else {
-        state.sources[source.name] = { attemptedAt: now.toISOString(), retryAt };
-      }
-      if (error instanceof ProviderError && error.message !== 'provider-cost-limit' && (/cost/.test(error.message) || [401, 403, 429].includes(status)))
-        state.providerPauses[task.provider] = retryAt;
-      results.push({ ...row, status: 'failed', reason: reason(error), httpStatus: status, retryAt });
+      results.push({ ...row, ...recordTaskFailure(state, source, task, url, stage, error, currentTime()) });
     } finally {
       // Only proven pre-request skips are released. Failed, timed-out or
       // interrupted requests keep their full reservation, even if likely free.
@@ -236,8 +310,7 @@ export async function main(command = '--reserve') {
         state.benchmarkYieldApplied = true;
       }
     } catch (error) { if (error.code !== 'ENOENT') throw error; }
-    const usage = await usages(SCAN_PROVIDERS);
-    const plan = { runId, mode, createdAt: now.toISOString(), usage, ...planRequests(state, powerReport, usage, mode, now, runId) };
+    const plan = await planFoodProviderRun(state, powerReport, mode, now, runId);
     if (plan.tasks.length) state.reservations.push({ runId, mode, at: now.toISOString(), tasks: plan.tasks });
     await write(FILES.state, state);
     await write(FILES.plan, plan);

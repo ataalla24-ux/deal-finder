@@ -11,13 +11,33 @@ import { applyDealRedemptions } from './deal-redemptions.mjs';
 import { probeLiveFeed } from './check-launch-readiness.mjs';
 import { sourcePublicationYield, formatSourcePublicationYield } from './source-publication-yield.mjs';
 import { qualitySlotReceipt } from './vienna-quality-slot.mjs';
+import { formatSourceOperations, monitorSources } from './source-operations-monitor.mjs';
 
 const read = (root, file, fallback) => { try { return JSON.parse(fs.readFileSync(path.join(root, file), 'utf8')); } catch(e) { if(e.code === 'ENOENT') return fallback; throw e; } };
 const hash = data => createHash('sha256').update(JSON.stringify(data)).digest('hex');
 const rows = value => Array.isArray(value) ? value : value?.deals || [];
 const countBy = values => values.reduce((result, key) => ({ ...result, [key]: (result[key] || 0) + 1 }), {});
 
-export function buildRecoveryQueue(live, pending, { mapContext } = {}) {
+const timestamp = value => typeof value === 'string' && /^\d{4}-\d{2}-\d{2}T/.test(value)
+  && Number.isFinite(Date.parse(value)) ? new Date(value).toISOString() : null;
+const lastObservedTime = (now, ...values) => values.map(timestamp)
+  .find(value => value && Date.parse(value) <= +now) || null;
+const ageHours = (now, since) => since ? Number(((+now - Date.parse(since)) / 3600000).toFixed(2)) : null;
+const reasonCode = value => typeof value === 'string' && /^[a-z0-9][a-z0-9_-]{0,79}$/i.test(value) ? value : null;
+const queueCell = value => String(value ?? 'unbekannt').replace(/[|\r\n<>]/g, ' ');
+
+function approvalReason(reason) {
+  if (typeof reason !== 'string') return 'approval-review-required';
+  if (/bild|produktfoto/i.test(reason)) return 'photo-review-needed';
+  if (/beschreibung|inhaltspr[üu]fung/i.test(reason)) return 'copy-review-needed';
+  if (/standort|filiale|adresse|nicht eindeutig in wien/i.test(reason)) return 'venue-evidence-needed';
+  if (/aktionszeitraum|ablaufdatum|abgelaufen|noch nicht gestartet/i.test(reason)) return 'offer-period-needed';
+  if (/beleg|quelle|http \d{3}|offizielle aktion/i.test(reason)) return 'source-evidence-needed';
+  if (/grundpr[üu]fung/i.test(reason)) return 'mandatory-terms-review';
+  return 'approval-review-required';
+}
+
+export function buildRecoveryQueue(live, pending, { mapContext, now = new Date() } = {}) {
   const existing = new Set(live.map(duplicateDealKey).filter(Boolean));
   const ids = new Set(live.map(d => d.id)), seen = new Set();
   const idCounts = countBy(pending.map(deal => deal.id));
@@ -37,10 +57,69 @@ export function buildRecoveryQueue(live, pending, { mapContext } = {}) {
       : issues.includes('source-blocked') || issues.includes('excluded-offer') ? 'blocked-source'
       : issues.includes('evidence-missing') ? 'source-evidence-needed'
       : issues.includes('map-incomplete') ? 'venue-verification-needed' : 'copy-or-period-review';
+    const queuedAt = lastObservedTime(now, deal.pipelineLifecycle?.slackSentAt, deal.slackSentAt, deal.discoveredAt);
+    const lastCheckedAt = lastObservedTime(now, deal.approvalBlock?.checkedAt);
+    const blockedReasons = [...new Set((Array.isArray(deal.approvalBlock?.reasons) ? deal.approvalBlock.reasons : [])
+      .slice(0, 10).map(approvalReason))];
+    const approvalRecordedAt = deal.pipelineLifecycle?.manualDecision === 'approved'
+      ? lastObservedTime(now, deal.pipelineLifecycle.manualDecisionAt) : null;
     return { id: deal.id, title: deal.title, source: deal.originSource || deal.source || 'unknown',
-      url: deal.url, duplicateOf: duplicate || null, priority, issues,
+      url: deal.url, duplicateOf: duplicate || null, priority, issues, blockedReasons, queuedAt,
+      ageHours: ageHours(now, queuedAt), lastCheckedAt, approvalRecordedAt, approvalAgeHours: ageHours(now, approvalRecordedAt),
+      retryAt: timestamp(deal.approvalBlock?.retryAt || deal.approvalBlock?.nextRetryAt),
       fingerprint: hash([deal, audit.fingerprint, issues, key, priority]), automaticPublicationAllowed: false };
   }).sort((a,b) => Number(b.priority === 'human-review-ready') - Number(a.priority === 'human-review-ready') || a.id.localeCompare(b.id));
+}
+
+export function buildEnrichmentQueue(live, maintenance, sourceRefresh, now = new Date()) {
+  const indexed = value => new Map((Array.isArray(value) ? value : []).filter(row => typeof row?.id === 'string')
+    .map(row => [row.id, row]));
+  const maintenanceRows = indexed(maintenance?.enrichment);
+  const sourceRows = indexed(sourceRefresh?.unresolved);
+  const rows = live.filter(deal => deal.enrichmentPending === true && Array.isArray(deal.enrichmentFields))
+    .flatMap(deal => {
+      const fields = deal.enrichmentFields.filter(field => field === 'description' || field === 'map');
+      if (!fields.length) return [];
+      const queuedAt = lastObservedTime(now, deal.pipelineLifecycle?.publishedAt, deal.approvedAt);
+      const earliestEvidence = Math.max(Date.parse(queuedAt) || 0, Date.parse(deal.liveEditedAt) || 0);
+      const matching = (report, row) => {
+        const checkedAt = lastObservedTime(now, report?.checkedAt);
+        return checkedAt && Date.parse(checkedAt) >= earliestEvidence ? row : null;
+      };
+      const latestMaintenance = matching(maintenance, maintenanceRows.get(deal.id));
+      const latestSource = matching(sourceRefresh, sourceRows.get(deal.id));
+      // Copy telemetry cannot diagnose a map-only queue entry.
+      const copyReason = fields.includes('description') ? reasonCode(latestMaintenance?.reason) : null;
+      const sourceReason = fields.includes('description') ? reasonCode(latestSource?.reason) : null;
+      const copyRetry = fields.includes('description')
+        ? [latestMaintenance?.nextAttemptAt, latestSource?.nextAttemptAt].map(timestamp).filter(Boolean).sort().at(-1) : null;
+      const knownRetry = copyRetry || timestamp(deal.enrichmentNextReviewAt);
+      const status = knownRetry && Date.parse(knownRetry) > +now ? 'waiting'
+        : knownRetry ? 'retry-due' : 'needs-review';
+      return [{ id: deal.id, title: deal.title, fields, status, queuedAt, ageHours: ageHours(now, queuedAt),
+        reason: copyReason || (fields.includes('map') ? 'venue-verification-needed' : 'description-review-needed'),
+        sourceReason, nextAttemptAt: knownRetry,
+        lastAttemptAt: lastObservedTime(now, latestMaintenance?.lastAttemptAt) }];
+    }).sort((a, b) => Number(b.status !== 'waiting') - Number(a.status !== 'waiting')
+      || (b.ageHours ?? -1) - (a.ageHours ?? -1) || a.id.localeCompare(b.id));
+  return { count: rows.length, byReason: countBy(rows.map(row => row.reason)), rows };
+}
+
+function formatRecoveryQueues(sourceRecovery, enrichment) {
+  const sections = ['', '## Offene Prüfungen', '',
+    'Wartezeiten stammen aus gespeicherten Prüfdaten. Ein abgelaufener Termin beweist keinen erneuten Versuch.',
+    '', '| ID | Aufgabe | Wartealter in Stunden | Letzter belegter Versuch | Bekannte Wiederprüfung |',
+    '|---|---|---:|---|---|'];
+  const blocked = sourceRecovery.rows.filter(row => row.approvalRecordedAt || row.blockedReasons.length)
+    .sort((a, b) => (b.ageHours ?? -1) - (a.ageHours ?? -1)).slice(0, 10);
+  const visible = [...enrichment.rows.slice(0, 10).map(row => [row.id,
+    [row.fields.join(', '), row.reason, row.sourceReason].filter(Boolean).join(' · '),
+    row.ageHours, row.lastAttemptAt, row.nextAttemptAt]),
+  ...blocked.map(row => [row.id, row.blockedReasons.join(', ') || row.priority,
+    row.approvalAgeHours ?? row.ageHours, row.lastCheckedAt, row.retryAt])];
+  for (const row of visible) sections.push(`| ${row.map(queueCell).join(' | ')} |`);
+  if (!visible.length) sections.push('| — | Keine gespeicherten offenen Nachprüfungen | — | — | — |');
+  return sections.join('\n') + '\n';
 }
 
 export function updatePublicationPilot(previous, queue, { now = new Date(), event = '', runId = '', sha = '' } = {}) {
@@ -208,11 +287,11 @@ export function summarizeSourceReport(report, {file='',now=new Date()}={}) {
 }
 
 export async function writeOperationsReport({ root = process.cwd(), now = new Date(), request = fetch, apply = true,
-  event = process.env.GITHUB_EVENT_NAME, scheduledSlot = process.env.QUALITY_SLOT } = {}) {
+  event = process.env.GITHUB_EVENT_NAME, scheduledSlot = process.env.QUALITY_SLOT, sourceEnv = process.env } = {}) {
   const quality = read(root,'reviews/server-quality-audit.json',{});
   const live = rows(read(root,'docs/deals.json',{})), pending = rows(read(root,'docs/deals-pending-all.json',{}));
   const mapContext = loadDealMapReviewContext({root,now});
-  const queue = buildRecoveryQueue(live,pending,{mapContext});
+  const queue = buildRecoveryQueue(live,pending,{mapContext,now});
   const qualitySnapshot = { checkedAt:quality.checkedAt || null,
     feedMatches:quality.feedHash === hash(live), mapContextMatches:quality.mapContextHash === hash(mapContext),
     sourceEvidenceMatches:quality.sourceEvidenceHash === hash([...maintenanceEvidenceFor(live,
@@ -225,11 +304,26 @@ export async function writeOperationsReport({ root = process.cwd(), now = new Da
     {now,event,runId:process.env.GITHUB_RUN_ID,sha:process.env.GITHUB_SHA});
   const prior = read(root,'reviews/server-operations-report.json',null);
   const feedback = read(root,'docs/deal-review-feedback.json',null);
-  const publicFeed = feedback ? await probeLiveFeed(request, { includeReceipts:true }) : { status:'not-checked' };
+  const [publicFeed, sources, ledger] = await Promise.all([
+    feedback ? probeLiveFeed(request, { includeReceipts:true }) : { status:'not-checked' },
+    monitorSources({
+      readJson: file => read(root,file,null),
+      readWorkflow: file => {
+        try { return fs.readFileSync(path.join(root,'.github/workflows',file),'utf8'); }
+        catch (error) { if (error.code === 'ENOENT') return ''; throw error; }
+      },
+      previous: prior?.sources || [], now, request, env: sourceEnv,
+    }),
+    readCreditLedger(request),
+  ]);
   const baseline = read(root,'reviews/source-publication-baseline.json',null);
   const sourceYield = sourcePublicationYield(feedback, publicFeed, prior?.sourceYield, now, baseline);
   const added = prior?.liveIds ? live.filter(d => !prior.liveIds.includes(d.id)).map(d => d.id) : null;
   const maintenance = read(root,'docs/automatic-deal-maintenance-report.json',{});
+  const sourceRecovery = { total:queue.length, uniqueIds:new Set(queue.map(row=>row.id)).size,
+    auditMode:'fresh-offline-check', byPriority:countBy(queue.map(row=>row.priority)),
+    bySource:countBy(queue.map(row=>row.source)), rows:queue };
+  const enrichment = buildEnrichmentQueue(live,maintenance,read(root,'reviews/maintenance-source-report.json',{}),now);
   const reviewPack=buildPublicationReviewPack(live,pending,queue,{now});
   const mapRows=live.map(deal=>({id:deal.id,...reviewDealMap(deal,mapContext)}));
   const lastScheduledQualitySlot = qualitySlotReceipt(prior?.lastScheduledQualitySlot,
@@ -237,8 +331,7 @@ export async function writeOperationsReport({ root = process.cwd(), now = new Da
   const report = { version:1, checkedAt:now.toISOString(), lastScheduledQualitySlot, liveCount:live.length, liveIds:live.map(d=>d.id),
     addedSincePreviousObservedFeed:added, addedAreNotAttributedToThisJob:true,
     qualitySnapshot,
-    sourceRecovery:{ total:queue.length, uniqueIds:new Set(queue.map(row=>row.id)).size, auditMode:'fresh-offline-check',
-      byPriority:countBy(queue.map(r=>r.priority)), bySource:countBy(queue.map(r=>r.source)), rows:queue },
+    sourceRecovery, enrichment,
     maintenance:{ checkedAt:maintenance.checkedAt, corrected:maintenance.corrected || [], hidden:maintenance.hidden || [], ai:maintenance.ai || null },
     missingInformation:currentQuality.live?.filter(r=>r.requiresReview) || [],
     images:{ status:qualitySnapshot.status, checkedAt:qualitySnapshot.checkedAt,
@@ -254,9 +347,8 @@ export async function writeOperationsReport({ root = process.cwd(), now = new Da
       byStatus:countBy(mapRows.map(r=>r.status)),reviewNeeded:mapRows.filter(r=>!['mapped','online-only'].includes(r.status))},
     blog:{...read(root,'reviews/server-blog-report.json',{status:'not-run',automaticPublicationEnabled:false,localBlogReplacementReady:false}),
       lastPublicReceipt:read(root,'reviews/server-blog-public-receipt.json',null)},
-    sources:['apify-discovery','meta-instagram','power-scraper','instagram-ai'].map(name=>{
-      const file=`docs/${name}-report.json`;return summarizeSourceReport(read(root,file,null),{file,now});}),
-    credits:creditSnapshot(await readCreditLedger(request),loadAiCreditPolicy(),now),
+    sources,
+    credits:creditSnapshot(ledger,loadAiCreditPolicy(),now),
     routing:Object.fromEntries(['extract','vision','editor','review'].map(role=>[role,modelForTask(role)])),
     routingReasoningEffort:'max',routingReasoningMode:'pro',routingScope:'new-requests',
     sourceYield,
@@ -270,9 +362,11 @@ export async function writeOperationsReport({ root = process.cwd(), now = new Da
       ? nativeImageSummary(native)
       : '\n## Native Bilder\n\n- Aktueller Pruefstand fehlt; historische Bildzaehler werden nicht als heutiges Ergebnis ausgegeben. Keine Entwarnung oder bestaetigte Bildqualitaet.\n';
     const freshnessSummary=`\n## Aktualitaet\n\n- Entwurfsregeln frisch und lokal geprueft, ohne Modell- oder Quellenaufruf. ${report.sourceRecovery.uniqueIds} unterschiedliche IDs in ${queue.length} Eintraegen; doppelte IDs bleiben Prueffaelle.\n- Live-/Bildpruefstand: ${qualitySnapshot.status}; letzte Pruefung ${qualitySnapshot.checkedAt || 'unbekannt'}. Bei veraltetem Stand sind leere Hinweisliste und Bildzaehler KEIN Entwarnungsnachweis.\n`;
-    const readinessSummary=`\n## Freigabe und Einloesung\n\n- ${pilot.evaluation.currentSamples} Pilotfaelle aktuell, ${pilot.evaluation.archivedSamples} fruehere Pruefstaende unveraendert archiviert. Keine alten Bewertungen uebernehmen.\n- Aktueller, unbewerteter Pruefbogen: ${reviewPack.cases.length} Faelle; reviews/automatic-publication-review-pack.json. Keine unabhaengige menschliche Bewertung erfunden.\n- Quellengepruefte Einloese-/Buchungswege: ${report.redemptions.sourceReviewedRoutes} von ${live.length}; ${report.redemptions.unconfirmedReviews} ausdruecklich unbestaetigte, ${report.redemptions.missingReviews} fehlende aktuelle Einloesepruefungen. Besuchsinfos sind keine Gutscheine; ein Buchungslink bestaetigt keinen aktuellen Flugpreis.\n- Karte frisch lokal geprueft: ${JSON.stringify(report.map.byStatus)}.\n\n## Quellen\n\n${report.sources.map(s=>'- '+s.file+': '+s.status+'; '+JSON.stringify(s.counts||{})+'; Slack-Zustellungen nicht aus Kandidaten ableiten.').join('\n')}\n`;
-    fs.writeFileSync(path.join(root,'reviews/server-operations-report.md'),markdown+imageSummary+freshnessSummary+readinessSummary+formatSourcePublicationYield(sourceYield));
-    if(process.env.GITHUB_STEP_SUMMARY)fs.appendFileSync(process.env.GITHUB_STEP_SUMMARY,markdown+imageSummary+freshnessSummary+readinessSummary+formatSourcePublicationYield(sourceYield));
+    const readinessSummary=`\n## Freigabe und Einloesung\n\n- ${pilot.evaluation.currentSamples} Pilotfaelle aktuell, ${pilot.evaluation.archivedSamples} fruehere Pruefstaende unveraendert archiviert. Keine alten Bewertungen uebernehmen.\n- Aktueller, unbewerteter Pruefbogen: ${reviewPack.cases.length} Faelle; reviews/automatic-publication-review-pack.json. Keine unabhaengige menschliche Bewertung erfunden.\n- Quellengepruefte Einloese-/Buchungswege: ${report.redemptions.sourceReviewedRoutes} von ${live.length}; ${report.redemptions.unconfirmedReviews} ausdruecklich unbestaetigte, ${report.redemptions.missingReviews} fehlende aktuelle Einloesepruefungen. Besuchsinfos sind keine Gutscheine; ein Buchungslink bestaetigt keinen aktuellen Flugpreis.\n- Karte frisch lokal geprueft: ${JSON.stringify(report.map.byStatus)}.\n`;
+    const text = markdown + imageSummary + freshnessSummary + readinessSummary + formatRecoveryQueues(sourceRecovery, enrichment)
+      + formatSourceOperations(sources) + formatSourcePublicationYield(sourceYield);
+    fs.writeFileSync(path.join(root,'reviews/server-operations-report.md'),text);
+    if(process.env.GITHUB_STEP_SUMMARY)fs.appendFileSync(process.env.GITHUB_STEP_SUMMARY,text);
   }
   return report;
 }

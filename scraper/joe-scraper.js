@@ -8,6 +8,7 @@ import { cleanText, normalizeCategoryForScraper } from './category-utils.js';
 import { collectOmvPromotions, retainActiveOmvPromotions } from './omv-promotion-discovery.js';
 import { assessJoeAuthPage } from './joe-auth-health.js';
 import { buildPipelineRunReport, writePipelineRunReport } from './pipeline-run-report-utils.js';
+import { retryAfterAt } from './source-http-policy.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -16,6 +17,7 @@ const OUTPUT_DIR = process.env.JOE_OUTPUT_DIR || path.join(ROOT, 'docs');
 const DEFAULT_JOE_STORAGE_STATE = path.join(ROOT, '.secrets', 'joe.storage-state.json');
 const JOE_STORAGE_STATE = process.env.JOE_STORAGE_STATE || DEFAULT_JOE_STORAGE_STATE;
 const JOE_PRIVATE_BENEFITS_URL = 'https://www.joe-club.at/vorteile';
+const PRIVATE_RATE_LIMIT_MS = 24 * 60 * 60_000;
 
 const USER_AGENT = 'Mozilla/5.0 (compatible; FreeFinderBot/1.0; +https://freefinder.wien)';
 const TODAY = new Date();
@@ -320,12 +322,21 @@ async function openPage(browser, url) {
   return page;
 }
 
-export async function readJoeBenefits(browser, storageState, { signalsOnly = false } = {}) {
+export async function readJoeBenefits(browser, storageState, { signalsOnly = false, clock = Date.now } = {}) {
   const context = await browser.newContext({ userAgent: USER_AGENT, locale: 'de-AT', storageState });
   try {
     const page = await context.newPage();
     const technical = { documentStatus: null, bundleStatus: null, bundleMime: null, consentScriptStatus: null,
       bundleNetworkError: null, failedOwnRequests: 0, firstOwnHttpError: null, firstOwnScriptError: null };
+    let providerRetryAt = '';
+    let bundleRateLimited = false;
+    const recordWait = response => {
+      const parsed = retryAfterAt(response?.headers?.()['retry-after'], new Date(clock()));
+      if (parsed > providerRetryAt) providerRetryAt = parsed;
+    };
+    const rateLimited = () => ({ deals: [], health: { status: 'provider-rate-limited',
+      authenticated: false, readableOffers: 0, technical,
+      ...(providerRetryAt ? { retryAt: providerRetryAt } : {}) } });
     const classify = request => {
       const u = new URL(request.url());
       if (u.origin === 'https://web.cmp.usercentrics.eu' && u.pathname === '/ui/loader.js') return 'consent';
@@ -338,6 +349,10 @@ export async function readJoeBenefits(browser, storageState, { signalsOnly = fal
       if (kind === 'consent') technical.consentScriptStatus = status;
       if (kind === 'bundle') {
         technical.bundleStatus = status;
+        if (status === 429) {
+          bundleRateLimited = true;
+          recordWait(response);
+        }
         const mime = (response.headers()['content-type'] || '').toLowerCase();
         technical.bundleMime = /javascript|ecmascript/.test(mime) ? 'javascript' : mime.includes('html') ? 'html' : 'other';
       }
@@ -360,14 +375,19 @@ export async function readJoeBenefits(browser, storageState, { signalsOnly = fal
     });
     const response = await page.goto(JOE_PRIVATE_BENEFITS_URL, { waitUntil: 'domcontentloaded', timeout: 90_000 });
     technical.documentStatus = response?.status() ?? null;
+    if (technical.documentStatus === 429) {
+      recordWait(response);
+      return rateLimited();
+    }
     await page.waitForTimeout(1500);
+    if (bundleRateLimited) return rateLimited();
     const result = await extractLoggedInJoeBenefitsPage(page, { signalsOnly });
     const accessStatus = [technical.documentStatus, technical.bundleStatus];
     // A rejected entry document or bootstrap script says nothing about whether
     // the saved session is valid. A failed secondary fetch is only diagnostic.
-    if (accessStatus.includes(429) || accessStatus.includes(403) || accessStatus.some(code => code >= 500)) {
-      const status = accessStatus.includes(429) ? 'provider-rate-limited'
-        : accessStatus.includes(403) ? 'provider-access-denied' : 'provider-unavailable';
+    if (bundleRateLimited) return rateLimited();
+    if (accessStatus.includes(403) || accessStatus.some(code => code >= 500)) {
+      const status = accessStatus.includes(403) ? 'provider-access-denied' : 'provider-unavailable';
       return { deals: [], health: { status, authenticated: false, readableOffers: 0, technical, signals: result.health.signals } };
     }
     result.health.technical = technical;
@@ -871,6 +891,18 @@ function dedupeDeals(deals) {
   });
 }
 
+function savedPrivateAccessPause(previous, now) {
+  const saved = previous.privateAccessPause;
+  if (saved?.reason === 'provider-rate-limited' && Date.parse(saved.retryAt) > +now) return saved;
+  if (saved || previous.authenticatedCoverage?.status !== 'provider-rate-limited') return null;
+  const observed = Date.parse(previous.generatedAt);
+  if (!Number.isFinite(observed) || observed > +now) return null;
+  const providerDeadline = Date.parse(previous.authenticatedCoverage.retryAt);
+  const retryAt = providerDeadline > observed ? providerDeadline : observed + PRIVATE_RATE_LIMIT_MS;
+  return retryAt > +now ? { reason: 'provider-rate-limited', retryAt: new Date(retryAt).toISOString(),
+    observedAt: new Date(observed).toISOString(), providerWaitRecorded: providerDeadline > observed } : null;
+}
+
 export async function runJoeScraper(options = {}) {
   const startedAt = new Date();
   const now = options.now || startedAt;
@@ -891,6 +923,7 @@ export async function runJoeScraper(options = {}) {
     let previousDeals = [];
     try { previous = JSON.parse(fs.readFileSync(reportPath, 'utf8')); } catch {}
     try { previousDeals = JSON.parse(fs.readFileSync(outputPath, 'utf8')).deals || []; } catch {}
+    let privateAccessPause = savedPrivateAccessPause(previous, now);
     const retained = retainActiveOmvPromotions([], previousDeals, now);
     const current = await (options.collectPublic || collectOmvPromotions)({ now, previous: previous.publicDiscovery || {}, knownCampaignUrls: retained.map(deal => deal.url) });
     const publicDeals = retainActiveOmvPromotions(current.deals, retained, now);
@@ -930,13 +963,24 @@ export async function runJoeScraper(options = {}) {
       }
     }
 
-    if (authStateAvailable) {
+    if (privateAccessPause) {
+      auth = { status: 'provider-rate-limit-cooldown', authenticated: false, readableOffers: 0, retryAt: privateAccessPause.retryAt };
+    } else if (authStateAvailable) {
       try {
         console.log(`🔎 ${JOE_PRIVATE_BENEFITS_URL} (auth)`);
-        const result = await readJoeBenefits(browser, storagePath);
+        const result = await (options.readBenefits || readJoeBenefits)(browser, storagePath);
         auth = result.health;
+        if (auth.status === 'provider-rate-limited') {
+          const observedAt = options.now || new Date();
+          const providerDeadline = Date.parse(auth.retryAt);
+          const providerWaitRecorded = providerDeadline > +observedAt;
+          const retryAt = new Date(providerWaitRecorded ? providerDeadline : +observedAt + PRIVATE_RATE_LIMIT_MS).toISOString();
+          privateAccessPause = { reason: auth.status, observedAt: observedAt.toISOString(), retryAt, providerWaitRecorded };
+          auth = { ...auth, retryAt };
+        } else {
+          allDeals.push(...result.deals);
+        }
         console.log(`   ↳ ${result.deals.length} jö Auth-Deals (${auth.status})`);
-        allDeals.push(...result.deals);
       } catch {
         auth = { status: 'auth-read-error', authenticated: false, readableOffers: 0 };
       }
@@ -954,6 +998,7 @@ export async function runJoeScraper(options = {}) {
       ...(auth.status === 'authenticated-offers-read' ? [] : [`jö account coverage: ${auth.status}; readable offers: ${auth.readableOffers}`])];
     const report = { generatedAt: new Date().toISOString(), status: errors.length ? 'degraded' : 'ok',
       authenticatedCoverage: auth, publicDiscovery: current.report, sources: sourceReports,
+      ...(privateAccessPause ? { privateAccessPause } : {}),
       expired, candidates: unique.length, publicOmvCandidates: current.deals.length,
       retainedPublicCampaigns: publicDeals.filter(deal => !current.deals.some(row => row.id === deal.id)).length, errors };
     fs.mkdirSync(outputDir, { recursive: true });

@@ -140,7 +140,7 @@ export function sourceAvailable(source, powerReport, state, now) {
     && !(Date.parse(state.sources[source.name]?.retryAt || '') > +now);
 }
 
-export function planRequests(state, powerReport, usages, mode, now, runId) {
+export function planRequests(state, powerReport, usages, mode, now, runId, scanPages) {
   validateLedger(state);
   if (!['scan', 'benchmark'].includes(mode) || !/^\d+$/.test(runId)) throw new Error('invalid-run');
   if (state.reservations.some(r => r.runId === runId || mode === 'benchmark' && r.mode === 'benchmark'))
@@ -150,7 +150,9 @@ export function planRequests(state, powerReport, usages, mode, now, runId) {
     .sort((a, b) => (Date.parse(state.sources[a.name]?.attemptedAt || '') || 0) - (Date.parse(state.sources[b.name]?.attemptedAt || '') || 0));
   const tasks = [], skipped = [];
   if (mode === 'scan') {
-    const targets = scanTargets(state, powerReport, now);
+    const targets = [...(scanPages || scanTargets(state, powerReport, now))];
+    const eligiblePages = targets.length;
+    if (!eligiblePages) return { tasks, skipped: [{ reason: 'no-eligible-pages' }], eligiblePages };
     const allocated = Object.fromEntries(SCAN_PROVIDERS.map(p => [p, 0]));
     const blocked = new Set();
     while (targets.length && tasks.length < MAX_SCAN_TASKS) {
@@ -166,7 +168,7 @@ export function planRequests(state, powerReport, usages, mode, now, runId) {
       }
       if (!added) break;
     }
-    return { tasks, skipped, eligiblePages: scanTargets(state, powerReport, now).length };
+    return { tasks, skipped, eligiblePages };
   }
   for (const provider of mode === 'benchmark' ? ['scraperapi', 'scrapingbee', 'zyte'] : SCAN_PROVIDERS) {
     // Expiring trial credits get first choice, but never duplicate a page across

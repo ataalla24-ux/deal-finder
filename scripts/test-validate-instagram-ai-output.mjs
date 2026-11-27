@@ -1,6 +1,8 @@
 import assert from 'node:assert/strict';
 
-import { validateInstagramAiPayload } from './validate-instagram-ai-output.mjs';
+import * as validator from './validate-instagram-ai-output.mjs';
+
+const { validateInstagramAiPayload } = validator;
 
 const HOUR_MS = 60 * 60 * 1000;
 const DAY_MS = 24 * HOUR_MS;
@@ -256,5 +258,71 @@ const rejectedClockSkew = baseDeal({
   sourcePublishedAt: beyondClockSkew,
 });
 assert.ok(validate([rejectedClockSkew]).some((error) => /implausibly in the future/.test(error)));
+
+// Run 45792101432 rolled back six finished rows after an expiry error for this
+// post. Its exact Graph caption and timestamp survived, but the rejected file
+// did not. Reconstruct the reported failure with one conflicting finished field.
+const failedRunNow = new Date('2026-11-26T09:38:35.136Z');
+const sourcePostTime = '2026-11-25T18:53:03.000Z';
+const exactOfferSignal = 'Nur EINEN TAG lang gibt es unsere unschlagbaren Eröffnungsangebote: 🥙 Hühnerdöner – nur 2,99 € 🥙 Kalbsdöner – nur 3,99 € 🍕 Jede Pizzaschnitte – nur 1 € (Standardsorten) 🥤 Pepsi & Ayran – je nur 1 € 📅 Samstag, 28.11.2026 ⏰ 12:00–22:00 Uhr 📍 Koppstraße 68, 1160 Wien';
+const failedRunOptions = { now: failedRunNow, moderation: emptyModeration };
+const originalAuraDeal = baseDeal({
+  id: 'aura-doener-replay',
+  brand: 'Aura Döner',
+  title: 'Aura Döner Eröffnung in Wien',
+  url: 'https://www.instagram.com/p/DgLN3hogldf/',
+  pubDate: sourcePostTime,
+  sourcePublishedAt: sourcePostTime,
+  pubDateSource: 'instagram-graph-timestamp',
+  sourcePublishedAtSource: 'instagram-graph-timestamp',
+  validFrom: '2026-11-28',
+  validUntil: '2026-11-28',
+  expires: '2026-11-28T23:59:59.999Z',
+  evidence: {
+    ...baseDeal().evidence,
+    postDateSource: 'instagram-graph-timestamp',
+    offerDateSignal: exactOfferSignal,
+  },
+});
+const conflictingAuraDeal = {
+  ...originalAuraDeal,
+  expiryDisplayText: 'Gültig bis 25.11.2026',
+  qualityScore: 99,
+};
+const fiveValidControls = Array.from({ length: 5 }, (_, index) => baseDeal({
+  id: `failed-run-control-${index}`,
+  url: `https://www.instagram.com/reel/FailedRunControl${index}/`,
+  pubDate: sourcePostTime,
+  sourcePublishedAt: sourcePostTime,
+}));
+const failedRunDeals = [conflictingAuraDeal, ...fiveValidControls];
+assert.deepEqual(
+  validateInstagramAiPayload({ totalDeals: 6, deals: failedRunDeals }, {}, failedRunOptions).errors,
+  ['https://www.instagram.com/p/DgLN3hogldf/ has expired source offer evidence'],
+);
+const admission = validator.partitionInstagramAiDeals(failedRunDeals, {}, failedRunOptions);
+assert.deepEqual(admission.deals, fiveValidControls);
+assert.deepEqual(admission.quarantine, { count: 1, reasons: { 'offer-expired': 1 } });
+assert.deepEqual(
+  validateInstagramAiPayload({ totalDeals: 5, deals: admission.deals }, {}, failedRunOptions).errors,
+  [],
+);
+const withValidOriginal = validator.partitionInstagramAiDeals(
+  [conflictingAuraDeal, originalAuraDeal, ...fiveValidControls],
+  {},
+  failedRunOptions,
+);
+assert.deepEqual(withValidOriginal.deals, [originalAuraDeal, ...fiveValidControls]);
+assert.deepEqual(
+  validateInstagramAiPayload({ totalDeals: 6, deals: withValidOriginal.deals }, {}, failedRunOptions).errors,
+  [],
+);
+assert.ok(validate([baseDeal(), baseDeal()]).some((error) => /duplicates another Instagram post URL/.test(error)));
+assert.ok(validate([baseDeal(), baseDeal({ url: 'https://www.instagram.com/p/UniqueOther/' })])
+  .some((error) => /duplicates id/.test(error)));
+assert.ok(validateInstagramAiPayload({ totalDeals: 6, deals: admission.deals }, {}, failedRunOptions)
+  .errors.some((error) => /totalDeals=6 but deals.length=5/.test(error)));
+assert.ok(validateInstagramAiPayload({ totalDeals: 0, deals: null }).errors
+  .some((error) => /deals is not an array/.test(error)));
 
 console.log('Instagram AI output validator invariants: ok');

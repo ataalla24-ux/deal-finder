@@ -426,6 +426,21 @@ try {
       headers: { "content-type": "application/pdf" },
     });
   await assert.rejects(fetchOfficialFoodPage(ikea.url, ikea), /Not HTML/);
+
+  let cancellations = 0;
+  const retryAfter = new Date(Date.now() + 10 * 86_400_000).toUTCString();
+  globalThis.fetch = async () => new Response(new ReadableStream({
+    cancel() {
+      cancellations++;
+      throw new Error("response-cleanup-failed");
+    },
+  }), { status: 429, headers: { "retry-after": retryAfter } });
+  await assert.rejects(fetchOfficialFoodPage(ikea.url, ikea), error => {
+    assert.equal(error.httpStatus, 429);
+    assert.equal(error.retryAt, new Date(retryAfter).toISOString());
+    return true;
+  });
+  assert.equal(cancellations, 1);
 } finally {
   globalThis.fetch = originalFetch;
 }

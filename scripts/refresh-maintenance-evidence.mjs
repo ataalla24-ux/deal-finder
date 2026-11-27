@@ -7,6 +7,7 @@ import { extractIamstudentApprovalSourceEvidence, isSupportedIamstudentApprovalU
 import { extractMarktguruCashbackEvidence, isSupportedMarktguruUrl, reviewedMarktguruCopy } from '../scraper/marktguru-cashback-evidence.js';
 import { isReviewedDeliveryMenu, matchesDeliveryOffer, extractDeliveryOffer } from '../scraper/delivery-menu-evidence.js';
 import { needsSourceBackedTitle } from '../scraper/offer-title-utils.js';
+import { canonicalInstagramPostKey } from '../scraper/deal-evidence-utils.js';
 
 const read = (root, file, fallback) => { try { return JSON.parse(fs.readFileSync(path.join(root, file), 'utf8')); } catch (e) { if (e.code === 'ENOENT') return fallback; throw e; } };
 const digest = value => createHash('sha256').update(value).digest('hex');
@@ -157,6 +158,11 @@ export async function refreshMaintenanceEvidence({ root = process.cwd(), now = n
     .sort((a, b) => Number(dueDescription(b, now)) - Number(dueDescription(a, now))
       || (requireSameDay ? Number(b.category === 'essen') - Number(a.category === 'essen') : 0)
       || (Date.parse(cache.entries[a.url]?.checkedAt) || 0) - (Date.parse(cache.entries[b.url]?.checkedAt) || 0));
+  const deferred = new Map();
+  const note = (deal, reason, deadlines = []) => {
+    const times = deadlines.map(Date.parse).filter(value => Number.isFinite(value) && value > +now);
+    deferred.set(deal.id, { reason, nextAttemptAt: times.length ? new Date(Math.max(...times)).toISOString() : null });
+  };
   let requests = checkedRouteUrls.length;
   for (const deal of selected) {
     const previous = cache.entries[deal.url];
@@ -164,10 +170,10 @@ export async function refreshMaintenanceEvidence({ root = process.cwd(), now = n
       && Number.isFinite(Date.parse(previous.checkedAt)) && localDay(new Date(previous.checkedAt)) !== localDay(now);
     const delivery = isReviewedDeliveryMenu(deal);
     const parserVersion = delivery ? 1 : publicSupported(deal.url) ? 4 : 3;
-    const paused = publicSupported(deal.url) && Object.values(cache.entries).some(row => {
+    const hostPauses = publicSupported(deal.url) ? Object.values(cache.entries).filter(row => {
       try { return new URL(row.url).origin === new URL(deal.url).origin && [401, 403, 429].includes(row.httpStatus)
         && (!Number.isFinite(Date.parse(row.nextAttemptAt)) || Date.parse(row.nextAttemptAt) > +now); } catch { return false; }
-    });
+    }) : [];
     const origin = new URL(deal.url).origin;
     const routePause = cache.foodRedemptions?.pauses?.[origin];
     const routeRobots = cache.foodRedemptions?.robots?.[origin];
@@ -176,10 +182,19 @@ export async function refreshMaintenanceEvidence({ root = process.cwd(), now = n
     const routeBlocked = Date.parse(routePause) > +now || knownRoute && Date.parse(routeRobots?.expiresAt) > +now
       && !routeRobots.paths.includes(deal.url);
     const originPause = pauseState[origin]?.retryAt;
-    if (offline || routeBlocked || checkedRouteUrls.includes(deal.url) || requests >= 4 || sourceRequests >= 5 || paused
-      || originPause && (!Number.isFinite(Date.parse(originPause)) || Date.parse(originPause) > +now)
-      || previous?.parserVersion === parserVersion && Date.parse(previous?.nextAttemptAt) > +now && !freshDayNeeded) continue;
-    if (delivery && !await allowDeliveryPage(deal.url)) continue;
+    if (offline) { note(deal, 'offline'); continue; }
+    if (hostPauses.length || originPause && (!Number.isFinite(Date.parse(originPause)) || Date.parse(originPause) > +now)) {
+      note(deal, 'host-pause', [...hostPauses.map(row => row.nextAttemptAt), originPause]); continue;
+    }
+    if (routeBlocked) { note(deal, 'source-access-pause', [routePause, routeRobots?.expiresAt]); continue; }
+    if (checkedRouteUrls.includes(deal.url)) { note(deal, 'checked-by-redemption-refresh'); continue; }
+    if (previous?.parserVersion === parserVersion && Date.parse(previous?.nextAttemptAt) > +now && !freshDayNeeded) {
+      note(deal, 'source-cooldown', [previous.nextAttemptAt]); continue;
+    }
+    if (requests >= 4 || sourceRequests >= 5) { note(deal, 'run-request-budget'); continue; }
+    if (delivery && !await allowDeliveryPage(deal.url)) {
+      note(deal, 'source-access-pause', [cache.foodRedemptions?.pauses?.[origin], cache.foodRedemptions?.robots?.[origin]?.expiresAt]); continue;
+    }
     requests++;
     let next = { url: deal.url, parserVersion, checkedAt: now.toISOString(), nextAttemptAt: new Date(+now + 86400000).toISOString(), status: 'deferred' };
     try {
@@ -218,11 +233,20 @@ export async function refreshMaintenanceEvidence({ root = process.cwd(), now = n
     cache.entries[deal.url] = next;
   }
   const verified = maintenanceEvidenceFor(deals, cache, now);
+  const unresolvedReason = deal => {
+    if (deferred.has(deal.id)) return deferred.get(deal.id);
+    if (!editableSource(deal) || editedCopyFields(deal).includes('description')) return { reason: 'manual-copy-protected', nextAttemptAt: null };
+    if (pendingDescription(deal) && !dueDescription(deal, now)) return { reason: 'not-due', nextAttemptAt: deal.enrichmentNextReviewAt };
+    if (canonicalInstagramPostKey(deal.url)) return { reason: 'handled-by-social-evidence', nextAttemptAt: null };
+    const previous = cache.entries[deal.url];
+    const next = Date.parse(previous?.nextAttemptAt);
+    return { reason: (supported(deal.url) || isReviewedDeliveryMenu(deal)) ? previous?.reason || 'refresh-deferred' : 'no-reviewed-source-adapter',
+      nextAttemptAt: Number.isFinite(next) && next > +now ? new Date(next).toISOString() : null };
+  };
   const report = { checkedAt: now.toISOString(), missingDescriptions: missing.length, offerPageAttempts: requests,
     sourceRequests,
     verified: missing.filter(d => verified.get(d.id)?.officialText).map(d => d.id),
-    unresolved: missing.filter(d => !verified.get(d.id)?.officialText).map(d => ({ id: d.id, title: d.title,
-      reason: (supported(d.url) || isReviewedDeliveryMenu(d)) ? cache.entries[d.url]?.reason || 'refresh-deferred' : 'no-reviewed-source-adapter' })),
+    unresolved: missing.filter(d => !verified.get(d.id)?.officialText).map(d => ({ id: d.id, title: d.title, ...unresolvedReason(d) })),
     noAutomaticApproval: true };
   if (apply) for (const [file, value] of [['reviews/maintenance-source-evidence.json', cache], ['reviews/maintenance-source-report.json', report]]) {
     fs.writeFileSync(path.join(root, file), JSON.stringify(value, null, 2) + '\n');

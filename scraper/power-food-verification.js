@@ -88,8 +88,9 @@ export async function fetchOfficialFoodPage(url, source) {
       continue;
     }
     if (!response.ok) {
-      await response.body?.cancel();
-      throw sourceHttpError(response.status, response.headers.get("retry-after"));
+      const error = sourceHttpError(response.status, response.headers.get("retry-after"));
+      await response.body?.cancel().catch(() => {});
+      throw error;
     }
     if (!/html/i.test(response.headers.get("content-type") || ""))
       throw new Error("Not HTML");

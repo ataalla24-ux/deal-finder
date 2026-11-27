@@ -1,9 +1,9 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { createHash } from 'node:crypto';
-import { FoodProviderClient, usageSummary } from '../scraper/food-provider-client.js';
+import { FoodProviderClient, ProviderError, usageSummary } from '../scraper/food-provider-client.js';
 import { freeBudget, planRequests, sourceAvailable, DAY, ZYTE_TRIAL_CHECK, BEE_TRIAL_END, SCRAPER_TRIAL_END, CAPS, MAX_SCAN_TASKS, scanTargets, taskKey, validateLedger } from '../scraper/food-provider-policy.js';
-import { collectPlan, applyYieldCooldown, mergeProviderPending, rememberLinks, summarizeProviderResults } from '../scraper/food-provider-discovery.js';
+import { collectPlan, applyYieldCooldown, mergeProviderPending, rememberLinks, summarizeProviderResults, planFoodProviderRun } from '../scraper/food-provider-discovery.js';
 import { POWER_FOOD_SOURCES } from '../scraper/power-food-sources.js';
 const now = new Date('2026-10-22T21:00:00Z');
 const empty = () => ({ version: 1, reservations: [], sources: {}, providerPauses: {} });
@@ -35,6 +35,23 @@ test('audit is read-only, fixed host, no redirects and sanitized errors', async 
     } });
   await assert.rejects(client.usage(), /^Error: provider-network-error$/);
   assert.equal(calls, 1);
+});
+
+test('a failed response-stream cleanup preserves the provider’s HTTP 429 and Retry-After', async () => {
+  let cancellations = 0;
+  const client = new FoodProviderClient('scrapingbee', { env: { SCRAPINGBEE: 'fixture' }, clock: () => +now,
+    fetchImpl: async () => new Response(new ReadableStream({ cancel() {
+      cancellations++;
+      throw new Error('response-cleanup-failed');
+    } }), { status: 429, headers: { 'retry-after': '864000' } }) });
+  await assert.rejects(client.usage(), error => {
+    assert(error instanceof ProviderError);
+    assert.equal(error.message, 'provider-http-429');
+    assert.equal(error.httpStatus, 429);
+    assert.equal(error.retryAt, new Date(+now + 10 * DAY).toISOString());
+    return true;
+  });
+  assert.equal(cancellations, 1);
 });
 test('missing key cannot make a request; Zyte audit does not pretend extraction key is stats key', async () => {
   const fetchImpl = () => { throw new Error('unexpected-fetch'); };
@@ -595,4 +612,108 @@ test('a provider price limit for one page preserves other pages at the merchant'
     clientFor: () => ({ usage: async () => usages.scraperapi, scrape: (...args) => client.scrape(...args) }) });
   assert.equal(state.pages[taskKey(tasks[0])].reason, 'provider-cost-limit');
   assert.equal(state.sources[source.name].retryAt, undefined);
+});
+
+test('planned targets are checked before account reads and known provider holds survive reservation', async () => {
+  const state = empty();
+  const plan = await planFoodProviderRun(state, { ...power(), sources: [] }, 'scan', now, '810',
+    async () => assert.fail('no available page warrants an account request'));
+  assert.deepEqual(plan.tasks, []);
+  assert.equal(plan.eligiblePages, 0);
+  assert.deepEqual(plan.usage, {});
+  assert.deepEqual(plan.skipped, [{ reason: 'no-eligible-pages' }]);
+
+  const retryAt = '2026-11-03T12:00:00.000Z';
+  state.providerPauses.scrapingbee = '2026-11-02T12:00:00.000Z';
+  const available = await planFoodProviderRun(state, power(), 'scan', now, '811', async providers => {
+    assert.deepEqual(providers, ['zyte', 'scraperapi']);
+    return { scraperapi: { provider: 'scraperapi', httpStatus: 429, retryAt }, zyte: usages.zyte };
+  });
+  assert.equal(state.providerPauses.scraperapi, retryAt);
+  assert(available.tasks.length > 0);
+  assert(available.tasks.every(task => task.provider === 'zyte'));
+});
+
+test('a failed document page does not take down the same merchant’s sibling offer', async () => {
+  const state = empty();
+  const paths = ['aktion/unreadable', 'aktion/still-current'].map(route => source.url + route);
+  const tasks = paths.map(url => ({ provider: 'scraperapi', source: source.name, cap: 10, url }));
+  const report = power(), directReads = [];
+  const retryAt = '2026-10-29T08:00:00.000Z';
+  state.reservations.push({ runId: '812', mode: 'scan', at: now.toISOString(), tasks });
+  const output = await collectPlan({ runId: '812', mode: 'scan', tasks }, state, report, { now, clock: () => +now,
+    fetchPage: async url => {
+      directReads.push(url);
+      if (url === paths[0]) throw Object.assign(new Error('HTTP 404'), { httpStatus: 404, retryAt });
+      return { html: '<html><body><main><section><img alt="Aktion: Burger um 1 Euro in Wien" /></section></main></body></html>', finalUrl: url };
+    },
+    verify: async deal => ({ ok: true, deal }), clientFor: () => assert.fail('direct proof requires no paid provider'),
+  });
+  assert.deepEqual(directReads, paths);
+  assert.equal(output.results[0].stage, 'direct-request');
+  assert.equal(output.results[0].scope, 'page');
+  assert.equal(state.pages[taskKey(tasks[0])].retryAt, retryAt);
+  assert.equal(state.sources.KFC?.retryAt, undefined);
+  assert.equal(output.results[1].status, 'direct-sufficient');
+  assert.equal(output.candidates.length, 1);
+  assert.deepEqual(state.reservations[0].unspent, [0, 1]);
+});
+
+test('account rate-limit stops account and rendering requests without putting merchant pages on hold', async () => {
+  const state = empty();
+  const tasks = ['a', 'b'].map(key => ({ provider: 'scraperapi', source: source.name, cap: 10, url: `${source.url}aktion/${key}` }));
+  const retryAt = '2026-11-02T08:00:00.000Z';
+  state.reservations.push({ runId: '813', mode: 'scan', at: now.toISOString(), tasks });
+  let accountReads = 0;
+  const output = await collectPlan({ runId: '813', mode: 'scan', tasks }, state, power(), { now, clock: () => +now,
+    fetchPage: async url => ({ html: '<html><body>Welcome</body></html>', finalUrl: url }),
+    clientFor: () => ({ usage: async () => {
+      accountReads++;
+      throw Object.assign(new ProviderError('provider-http-429', 429), { retryAt });
+    }, scrape: () => assert.fail('confirmed account wait means no render') }),
+  });
+  assert.equal(accountReads, 1);
+  assert.equal(output.results[0].stage, 'account-usage');
+  assert.equal(output.results[0].scope, 'provider');
+  assert.equal(output.results[1].reason, 'provider-paused');
+  assert.equal(state.providerPauses.scraperapi, retryAt);
+  assert.equal(state.sources.KFC?.retryAt, undefined);
+  assert.equal(state.pages[taskKey(tasks[0])], undefined);
+  assert.deepEqual(state.reservations[0].unspent, [0, 1]);
+});
+
+test('ambiguous transparent ScrapingBee 403 stops both provider and alternate-provider requests for the merchant', async () => {
+  const state = empty();
+  const paths = ['aktion/refused', 'aktion/other'].map(route => source.url + route);
+  const tasks = [
+    { provider: 'scrapingbee', source: source.name, cap: 5, url: paths[0] },
+    { provider: 'scraperapi', source: source.name, cap: 10, url: paths[1] },
+  ];
+  const retryAt = '2026-11-02T08:00:00.000Z';
+  const directReads = [];
+  const bee = new FoodProviderClient('scrapingbee', { env: { SCRAPINGBEE: 'fixture' }, clock: () => +now,
+    fetchImpl: async input => {
+      assert.equal(new URL(input).searchParams.get('transparent_status_code'), 'true');
+      return new Response('Forbidden', { status: 403, headers: { 'retry-after': new Date(retryAt).toUTCString() } });
+    } });
+  state.reservations.push({ runId: '814', mode: 'scan', at: now.toISOString(), tasks });
+  const output = await collectPlan({ runId: '814', mode: 'scan', tasks }, state, power(), { now, clock: () => +now,
+    fetchPage: async url => {
+      directReads.push(url);
+      return { html: '<html><body>Welcome</body></html>', finalUrl: url };
+    },
+    clientFor: provider => {
+      assert.equal(provider, 'scrapingbee', 'unknown refusal attribution must prevent alternate transport');
+      return { usage: async () => usages.scrapingbee, scrape: (...args) => bee.scrape(...args) };
+    },
+  });
+  assert.deepEqual(directReads, [paths[0]]);
+  assert.equal(output.results[0].stage, 'provider-request');
+  assert.equal(output.results[0].scope, 'provider-and-host');
+  assert.equal(output.results[0].reason, 'provider-http-403');
+  assert.equal(output.results[1].status, 'source-paused');
+  assert.equal(state.providerPauses.scrapingbee, retryAt);
+  assert.equal(state.sources.KFC.retryAt, retryAt);
+  assert.equal(state.providerPauses.scraperapi, undefined);
+  assert.deepEqual(state.reservations[0].unspent, [1]);
 });

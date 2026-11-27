@@ -3,6 +3,7 @@ import '../sentry/instrument.mjs';
 import crypto from 'crypto';
 import fs from 'fs';
 import path from 'path';
+import { setTimeout as waitForDelay } from 'node:timers/promises';
 import { fileURLToPath } from 'url';
 import { chromium } from 'playwright';
 
@@ -15,6 +16,7 @@ import { normalizeCategoryForScraper } from './category-utils.js';
 import { discoveryRejection } from './deal-discovery-policy.js';
 import { requestOpenAi } from './instagram-media-evidence.js';
 import { modelForTask, OPENAI_MODEL_TIMEOUT_MS } from './ai-credit-budget.js';
+import { partitionInstagramAiDeals } from '../scripts/validate-instagram-ai-output.mjs';
 import { createInstagramWebAccess } from './instagram-web-access-policy.js';
 import { instagramPageHasAccessWall } from './instagram-page-access.js';
 import { githubRunProvenance } from './pipeline-run-report-utils.js';
@@ -2267,23 +2269,32 @@ async function classifyAiBatch(candidates, options = {}) {
     ],
   };
 
+  const timeout = AbortSignal.timeout(OPENAI_MODEL_TIMEOUT_MS);
+  const signal = options.signal ? AbortSignal.any([timeout, options.signal]) : timeout;
+  let responseReceived = false;
   try {
+    signal.throwIfAborted();
     const response = await requestOpenAi('https://api.openai.com/v1/chat/completions', {
       method: 'POST',
-      signal: AbortSignal.timeout(OPENAI_MODEL_TIMEOUT_MS),
+      signal,
       headers: {
         authorization: `Bearer ${apiKey}`,
         'content-type': 'application/json',
       },
       body: JSON.stringify(body),
-    }, { fetchImpl: options.fetchImpl, sleepImpl: options.sleepImpl });
+    }, {
+      fetchImpl: options.fetchImpl,
+      sleepImpl: options.sleepImpl || ((ms) => waitForDelay(ms, undefined, { signal })),
+    });
+    responseReceived = true;
     const text = await response.text();
     const parsed = JSON.parse(text);
     if (parsed.choices?.[0]?.finish_reason && parsed.choices[0].finish_reason !== 'stop') throw Error('incomplete-classification');
-    const content = parsed.choices?.[0]?.message?.content || '{}';
-    const classified = JSON.parse(content);
+    const classified = JSON.parse(parsed.choices?.[0]?.message?.content || '');
+    if (!Array.isArray(classified?.deals)) throw Error('missing-classification-rows');
     const deals = [];
-    for (const row of classified.deals || []) {
+    for (const row of classified.deals) {
+      if (!Number.isInteger(row?.index)) continue;
       const candidate = candidates[row.index];
       if (!candidate) continue;
       const deal = mergeAiDeal(candidate, row);
@@ -2300,14 +2311,29 @@ async function classifyAiBatch(candidates, options = {}) {
       },
     };
   } catch (error) {
-    const message = Number.isInteger(error?.status) ? `OpenAI HTTP ${error.status} (${error.code || 'unclassified'})`
-      : 'OpenAI classification failed (timeout-or-invalid-response)';
-    return { deals: [], errors: [message], usage: emptyUsage,
-      health: { status: 'unavailable', httpStatus: error.status || null, code: error.code || 'request-failed',
-        retryable: !/quota|billing|usage_limit|spend_limit|credit/.test(error.code || '') && (error.status === 429 || error.status >= 500),
-        billingActionRequired: /quota|billing|usage_limit|spend_limit|credit_balance/.test(error.code || ''),
-        budgetDeferred: error.code === 'free_credit_budget_deferred',
-        ...(error.budgetReason ? { budgetReason: error.budgetReason } : {}) } };
+    const httpStatus = Number.isInteger(error?.status) ? error.status : null;
+    const budgetDeferred = error?.code === 'free_credit_budget_deferred';
+    const timedOut = signal.aborted && signal.reason?.name === 'TimeoutError';
+    let code = 'request-failed';
+    if (httpStatus) code = error.code || 'unclassified';
+    else if (timedOut) code = 'request-timeout';
+    else if (responseReceived) code = 'response-invalid';
+    else if (budgetDeferred) code = 'free_credit_budget_deferred';
+    const message = httpStatus ? `OpenAI HTTP ${httpStatus} (${code})` : `OpenAI classification unavailable (${code})`;
+    return {
+      deals: [],
+      errors: [message],
+      usage: emptyUsage,
+      health: {
+        status: 'unavailable',
+        httpStatus,
+        code,
+        retryable: !/quota|billing|usage_limit|spend_limit|credit/.test(code) && (httpStatus === 429 || httpStatus >= 500),
+        billingActionRequired: /quota|billing|usage_limit|spend_limit|credit_balance/.test(code),
+        budgetDeferred,
+        ...(budgetDeferred && error.budgetReason ? { budgetReason: error.budgetReason } : {}),
+      },
+    };
   }
 }
 
@@ -2631,11 +2657,13 @@ async function main() {
 
   const heuristicDeals = filterDealsRejectedByCandidates(heuristicDealsBeforeAi, candidates);
   const candidateApprovedDeals = filterDealsRejectedByCandidates([...aiResult.deals, ...heuristicDeals], candidates);
-  const preModerationDeals = dedupeDeals(candidateApprovedDeals);
+  const outputTime = new Date();
+  const admission = partitionInstagramAiDeals(candidateApprovedDeals, { config: CONFIG }, { now: outputTime });
+  const preModerationDeals = dedupeDeals(admission.deals);
   const moderation = loadDealModeration();
   const moderationFilter = filterModeratedDeals(preModerationDeals, moderation);
   const finalDeals = moderationFilter.deals;
-  const lastUpdated = new Date().toISOString();
+  const lastUpdated = outputTime.toISOString();
   const payload = {
     lastUpdated,
     source: 'instagram-ai-agent',
@@ -2657,6 +2685,7 @@ async function main() {
     knownPostsSkipped: stats.knownPostsSkipped,
     acceptedDeals: finalDeals.length,
     acceptedBeforeModeration: preModerationDeals.length,
+    outputQuarantine: admission.quarantine,
     heuristicAccepted: heuristicDeals.length,
     heuristicAcceptedBeforeAi: heuristicDealsBeforeAi.length,
     heuristicVetoedByAi: heuristicDealsBeforeAi.length - heuristicDeals.length,

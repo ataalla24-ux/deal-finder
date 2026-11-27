@@ -162,7 +162,7 @@ test('render comparison retains only closed technical categories and never extra
     page.emit('requestfailed', { ...req, failure: () => ({ errorText: privateText }) });
     page.emit('response', { request: () => ({ url: () => 'https://api.joe-club.at/' + privateText, resourceType: () => 'xhr' }),
       status: () => 503 });
-    return { status: () => documentCode };
+    return { status: () => documentCode, headers: () => ({ 'retry-after': '7200' }) };
   };
   page.waitForTimeout = page.waitForFunction = page.waitForLoadState = async () => {};
   page.evaluate = async (_, signalsOnly) => {
@@ -188,11 +188,43 @@ test('render comparison retains only closed technical categories and never extra
   assert.notEqual(result.health.status, 'provider-unavailable', 'a failed secondary request alone is not a confirmed page outage');
   for (const [code, expected] of [[429, 'provider-rate-limited'], [403, 'provider-access-denied'], [503, 'provider-unavailable']]) {
     documentCode = code;
-    const blocked = await readJoeBenefits(browser, undefined, { signalsOnly: true });
+    const blocked = await readJoeBenefits(browser, undefined, { signalsOnly: true, clock: () => +now });
     assert.equal(blocked.health.status, expected);
     assert.equal(blocked.health.authenticated, false);
     assert.deepEqual(blocked.deals, []);
+    if (code === 429) assert.equal(blocked.health.retryAt, '2026-11-04T19:00:00.000Z');
   }
+});
+
+test('private HTTP 429 persists past restart while the public OMV lane stays available', async () => {
+  const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'joe-private-pause-'));
+  try {
+    const storageStatePath = path.join(dir, 'fixture-auth-state.json');
+    fs.writeFileSync(storageStatePath, '{}');
+    const retryAt = '2026-11-06T05:00:00.000Z';
+    let reads = 0, publicScans = 0;
+    const run = at => runJoeScraper({ now: new Date(at), outputDir: dir, sources: [], storageStatePath,
+      browserType: { launch: async () => ({ close: async () => {} }) },
+      collectPublic: async () => {
+        publicScans++;
+        return { deals: parseOmvPromotion(html, url, now).deals, report: { pages: [{ status: 'ok', url }], rejected: [], pausesByHost: {} } };
+      },
+      readBenefits: async () => ({ deals: [], health: ++reads === 1 ? { status: 'provider-rate-limited', retryAt }
+        : { status: 'authenticated-no-readable-offers', authenticated: true, readableOffers: 0 } }),
+    });
+    const first = await run(now);
+    assert.equal(first.report.privateAccessPause.retryAt, retryAt);
+    assert.equal(first.report.privateAccessPause.providerWaitRecorded, true);
+    const during = await run('2026-11-05T18:00:00.000Z');
+    assert.equal(during.report.authenticatedCoverage.status, 'provider-rate-limit-cooldown');
+    assert.deepEqual(during.report.privateAccessPause, first.report.privateAccessPause);
+    assert.equal(during.payload.deals.length, 3);
+    assert.equal(reads, 1);
+    const after = await run(retryAt);
+    assert.equal(after.report.privateAccessPause, undefined);
+    assert.equal(reads, 2);
+    assert.equal(publicScans, 3);
+  } finally { fs.rmSync(dir, { recursive: true, force: true }); }
 });
 
 test('scraper writes visible partial coverage, complete candidate and pipeline report without auth claims', async () => {

@@ -833,6 +833,7 @@ export async function maintainFeedFile({ cwd = process.cwd(), allowAi = false, a
   }
   result.report.ai = { attempted: 0, corrected: 0, deferred: 0, readyForModel: 0,
     models:{editor:editor?.model || modelForTask('editor'),review:modelForTask('review')},reasoningEffort:'max',reasoningMode:'pro' };
+  result.report.enrichment = [];
   result.state.checks ||= [];
   const verifiedTitles = new Map(result.state.corrections.filter(entry =>
     entry.method === 'source-grounded-draft-and-verification' && entry.patch?.title).map(entry => [entry.id, entry]));
@@ -856,23 +857,32 @@ export async function maintainFeedFile({ cwd = process.cwd(), allowAi = false, a
   const astra = isAstraEnrichmentActive();
   const normalReviews = Math.min(4, Math.max(0, Number(policy.maxAiCandidatesPerRun) || 0));
   const maxReviews = astra && normalReviews ? 8 : normalReviews;
+  let stoppedAfterError = false;
   for (const { index } of order) {
-      if (reviewed >= maxReviews) break;
       const deal = result.deals[index], fields = fieldsForReview(deal);
-      if (protectedDeal(deal, edits, policy) || !copyReviewReasons(deal, fields).length
-        || pendingDescription(deal) && !dueDescription(deal, now)
-        || !sourceTexts(deal, sourceEvidence.get(deal.id)).length) continue;
+      const requested = copyReviewReasons(deal, fields);
+      if (!requested.length && !pendingDescription(deal)) continue;
+      const row = { id: deal.id, fields: requested.length ? requested : ['description'], reason: 'waiting-for-model-slot', nextAttemptAt: null };
+      result.report.enrichment.push(row);
+      if (protectedDeal(deal, edits, policy) || !requested.length) { row.reason = 'protected-fields'; continue; }
+      if (pendingDescription(deal) && !dueDescription(deal, now)) {
+        row.reason = 'not-due'; row.nextAttemptAt = deal.enrichmentNextReviewAt; continue;
+      }
+      if (!sourceTexts(deal, sourceEvidence.get(deal.id)).length) { row.reason = 'source-unavailable'; continue; }
       const inputHash = maintenanceFingerprint(deal);
       const fixed = pendingDescription(deal) && !fields.has('description')
         ? reviewedIamstudentCopy(sourceEvidence.get(deal.id)?.approvalSourceEvidence)
           || reviewedMarktguruCopy(deal, sourceEvidence.get(deal.id)?.approvalSourceEvidence) : null;
       if (fixed) {
+        if (stoppedAfterError) { row.reason = 'run-stopped-after-model-error'; continue; }
+        if (reviewed >= maxReviews) continue;
         const patch = { description: fixed.description };
         const next = completeDescription({ ...deal, ...patch }, patch, now);
         result.deals[index] = next;
         result.state.corrections.push({ id: deal.id, inputHash, resultHash: maintenanceFingerprint(next), at: now.toISOString(),
           sourceHash: hash(sourceTexts(deal, sourceEvidence.get(deal.id))), patch, method: 'reviewed-source-template-v1' });
         result.report.corrected.push({ id: deal.id, fields: ['description'], method: 'reviewed-source-template-v1' });
+        row.reason = 'completed';
         result.changed = true;
         reviewed++;
         continue;
@@ -880,23 +890,33 @@ export async function maintainFeedFile({ cwd = process.cwd(), allowAi = false, a
       const checkHash = hash([inputHash, sourceTexts(deal, sourceEvidence.get(deal.id)), [...fields].sort(),
         isConditionOnlyOfferTitle(deal.title) ? 'model-reviewed-maintenance-v6' : 'model-reviewed-maintenance-v5',
         pendingDescription(deal), result.report.ai.models, 'max', 'pro']);
-      if (result.state.checks.some(row => row.hash === checkHash && (+now - Date.parse(row.at) < 24 * 3600000
-        || sourceEvidence.get(deal.id)?.deliveryOffer && row.outcome === 'no-safe-patch'))) continue;
+      const lastCheck = result.state.checks.filter(check => check.hash === checkHash)
+        .sort((a, b) => Date.parse(b.at) - Date.parse(a.at))[0];
+      if (lastCheck) row.lastAttemptAt = lastCheck.at;
+      if (lastCheck && (+now - Date.parse(lastCheck.at) < 24 * 3600000
+        || sourceEvidence.get(deal.id)?.deliveryOffer && lastCheck.outcome === 'no-safe-patch')) {
+        row.reason = sourceEvidence.get(deal.id)?.deliveryOffer && lastCheck.outcome === 'no-safe-patch'
+          ? 'unchanged-source-needs-review' : 'model-cooldown';
+        row.nextAttemptAt = row.reason === 'model-cooldown' ? new Date(Date.parse(lastCheck.at) + 24 * 3600000).toISOString() : null;
+        continue;
+      }
       const prior = result.state.corrections.find(entry => entry.id === deal.id && entry.inputHash === inputHash
         && !isConditionOnlyOfferTitle(entry.patch?.title ?? entry.title));
-      if (prior && !pendingDescription(deal)) continue;
+      if (prior && !pendingDescription(deal)) { row.reason = 'already-reviewed'; continue; }
       // Match the evidence actually admissible to the editor; deterministic
       // fixes and recent reviews have already been accounted for above.
       const admissible = admissibleEditorSources(deal, sourceEvidence.get(deal.id));
-      if (!admissible.length) continue;
-      const requested = copyReviewReasons(deal, fields);
+      if (!admissible.length) { row.reason = 'source-size-limit'; continue; }
       const hasActionableSource = requested.some(field => field === 'title' || field === 'description')
         ? admissible.some(source => source.length >= 15)
         : admissible.some(source => Object.keys(groundedDatePatch(source, admissible, deal, fields)).length > 0);
       if (hasActionableSource) result.report.ai.readyForModel++;
-      if (!(allowAi && apply && process.env.OPENAI_API_KEY)) continue;
+      if (!(allowAi && apply && process.env.OPENAI_API_KEY)) { row.reason = 'model-disabled-for-this-run'; continue; }
+      if (stoppedAfterError) { row.reason = 'run-stopped-after-model-error'; continue; }
+      if (reviewed >= maxReviews) continue;
       reviewed++;
       result.report.ai.attempted++;
+      row.lastAttemptAt = now.toISOString();
       if (pendingDescription(deal)) {
         const delay = deal.enrichmentFields.includes('map') ? 3600000 : 86400000;
         result.deals[index] = updateDealEnrichment(deal, { nextReviewAt: new Date(+now + delay).toISOString(), now });
@@ -906,7 +926,11 @@ export async function maintainFeedFile({ cwd = process.cwd(), allowAi = false, a
         const proposal = await titleProposal({ ...deal, description: stripEnrichmentNotice(deal.description) }, request, now, sourceEvidence.get(deal.id), fields, requested, editor);
         result.state.checks.push({ id:deal.id, hash:checkHash, at:now.toISOString(),
           models:result.report.ai.models,reasoningEffort:'max',reasoningMode:'pro',outcome:proposal ? 'verified-patch' : 'no-safe-patch' });
-        if (!proposal) continue;
+        if (!proposal) {
+          row.reason = sourceEvidence.get(deal.id)?.deliveryOffer ? 'unchanged-source-needs-review' : 'no-safe-patch';
+          row.nextAttemptAt = sourceEvidence.get(deal.id)?.deliveryOffer ? null : new Date(+now + 24 * 3600000).toISOString();
+          continue;
+        }
         const patch = { ...proposal.patch };
         // Publish exactly the independently reviewed patch, never append source
         // text or an old advertising title after the verifier has approved it.
@@ -923,12 +947,16 @@ export async function maintainFeedFile({ cwd = process.cwd(), allowAi = false, a
         result.report.corrected.push({ id: deal.id, fields: Object.keys(patch),
           models:proposal.models,reasoningEffort:proposal.reasoningEffort,reasoningMode:proposal.reasoningMode,method });
         result.report.ai.corrected++;
+        row.reason = 'completed';
         result.changed = true;
       } catch {
-        if (pendingDescription(deal)) result.state.checks.push({ id: deal.id, hash: checkHash, at: now.toISOString(),
+        // A transport failure affects ordinary title/copy work too. Remember it
+        // so the same first row cannot monopolize every subsequent scheduled run.
+        result.state.checks.push({ id: deal.id, hash: checkHash, at: now.toISOString(),
           models:result.report.ai.models,reasoningEffort:'max',reasoningMode:'pro',outcome: 'deferred' });
+        row.reason = 'model-deferred'; row.nextAttemptAt = new Date(+now + 24 * 3600000).toISOString();
         result.report.ai.deferred++;
-        break;
+        stoppedAfterError = true;
       }
   }
   result.state.checks = result.state.checks.slice(-2000);

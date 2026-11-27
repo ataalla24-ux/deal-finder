@@ -237,6 +237,39 @@ assert.equal(quotaDeferred.report.budgetDeferred, true);
 assert.equal(quotaDeferred.payload.meta.budgetDeferred, true);
 assert.equal(quotaDeferred.report.sources.at(-1).status, 'deferred');
 
+const original = quotaDeferred.payload.deals[0];
+const priorUnknown = {
+  ...original, id: 'previous-current', url: 'https://www.instagram.com/p/PreviousCurrent/',
+  expires: '2026-08-23T07:00:00.000Z', validUntil: '2026-08-23T07:00:00.000Z',
+  expirySource: 'short-review-ttl', expiryKind: 'review-ttl',
+  evidence: { ...original.evidence, mediaId: 'previous-current', sourceName: '#secondtag' },
+};
+const previous = { source: 'wien-combined', deals: [
+  priorUnknown,
+  { ...priorUnknown, url: 'https://instagram.com/p/PreviousCurrent/?igsh=fixture' },
+  { ...priorUnknown, url: 'https://instagram.com/p/ExpiredReview/', expires: '2026-08-22T11:59:59.000Z',
+    evidence: { ...priorUnknown.evidence, mediaId: 'expired' } },
+  { ...priorUnknown, url: 'https://instagram.com/p/StaleOriginal/', expires: '2026-08-30T00:00:00.000Z', sourcePublishedAt: '2026-08-18T12:00:00.000Z',
+    evidence: { ...priorUnknown.evidence, mediaId: 'stale' } },
+  { ...priorUnknown, url: 'https://instagram.com/p/ReplacedCurrent/', evidence: { ...priorUnknown.evidence, mediaId: 'withdrawn' } },
+  original,
+] };
+const retainedPartial = await runWienDealsCombined({ now, write: false, previousPayload: previous,
+  env: { INSTAGRAM_ACCESS_TOKEN: 'test-token', INSTAGRAM_USER_ID: '123', WIEN_COMBINED_GRAPH_HASHTAGS: 'firsttag,secondtag' },
+  fetchImpl: async url => {
+    const target = new URL(url);
+    if (target.searchParams.get('q') === 'secondtag') return Response.json({ error: { code: 4 } }, { status: 429 });
+    if (target.pathname.endsWith('/ig_hashtag_search')) return Response.json({ data: [{ id: 'firsttag' }] });
+    return Response.json({ data: [{ id: original.evidence.mediaId, permalink: original.url, timestamp: freshTimestamp,
+      caption: 'Nur in 1070 Wien: zweiter Kaffee gratis, gueltig bis 25. August 2026.' },
+    { id: 'withdrawn', permalink: 'https://instagram.com/p/WithdrawnNow/', timestamp: freshTimestamp, caption: 'Dieses Angebot wurde zurückgezogen.' }] });
+  },
+});
+assert.equal(retainedPartial.report.retainedPreviousDeals, 1);
+assert.equal(retainedPartial.payload.totalDeals, 2);
+assert.deepEqual(retainedPartial.payload.deals[1], priorUnknown, 'carry over the proven original timestamps, not a new TTL');
+assert.equal(buildWienCombinedPipelineReport(retainedPartial).counts.acceptedDeals, 1);
+
 const requestedTags = [];
 const noCallsLeft = await runWienDealsCombined({
   now, write: false,
@@ -262,6 +295,9 @@ assert.deepEqual(requestedTags, ['viennafood'], 'actual collector uses food-firs
 
 const cacheOnly = await runWienDealsCombined({
   now, write: false,
+  previousPayload: { deals: [original, { ...priorUnknown,
+    url: 'https://www.instagram.com/p/CacheNegative/', evidence: { ...priorUnknown.evidence, mediaId: 'negative' } },
+  { ...original, url: 'https://www.instagram.com/p/CacheNewDeadline/', evidence: { ...original.evidence, mediaId: 'shortened' } }] },
   env: {
     INSTAGRAM_ACCESS_TOKEN: 'test-token', INSTAGRAM_USER_ID: '123',
     WIEN_COMBINED_GRAPH_HASHTAGS: 'uncached,peerfresh',
@@ -272,6 +308,10 @@ const cacheOnly = await runWienDealsCombined({
   }, { id: 'fresh-cache-media', caption: 'Wien',
     permalink: 'https://www.instagram.com/p/CacheRescueMedia/', timestamp: freshTimestamp, media_type: 'IMAGE',
     media_url: 'https://scontent.cdninstagram.com/cached.jpg',
+  }, { id: 'negative', caption: 'Step-by-step recipe: Ingredients für Kaffee in Wien.',
+    permalink: 'https://www.instagram.com/p/CacheNegative/', timestamp: freshTimestamp,
+  }, { id: 'shortened', caption: 'Nur in 1070 Wien: zweiter Kaffee gratis, gueltig bis 23. August 2026.',
+    permalink: 'https://www.instagram.com/p/CacheNewDeadline/', timestamp: freshTimestamp,
   }] } } },
   fetchImpl: async (url) => {
     assert.equal(new URL(url).searchParams.get('q'), 'uncached');
@@ -280,7 +320,11 @@ const cacheOnly = await runWienDealsCombined({
   enrichGraphMedia: async () => assert.fail('additional reused rows must not create extra media or AI calls'),
 });
 assert.equal(cacheOnly.payload.totalDeals, 1);
-assert.equal(cacheOnly.report.cachedGraphPosts, 2);
+assert.deepEqual(cacheOnly.payload.deals, [original], 'positive cache keeps its original terms; a cached contradiction vetoes carryover');
+assert.equal(cacheOnly.report.retainedPreviousDeals, 1);
+assert(cacheOnly.rejected.some(({ deal, reason }) => deal.id === 'negative' && reason === 'non-offer-content'));
+assert(cacheOnly.rejected.some(({ deal, reason }) => deal.id === 'shortened' && reason === 'cached-source-changed'));
+assert.equal(cacheOnly.report.cachedGraphPosts, 4);
 assert.equal(cacheOnly.report.sources[1].coverage.cacheHit, true);
 assert.equal(buildWienCombinedPipelineReport(cacheOnly).diagnostics.skipImmediateDispatch, true);
 

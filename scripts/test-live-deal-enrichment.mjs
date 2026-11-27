@@ -117,6 +117,63 @@ test('a veto keeps the placeholder, schedules a bounded retry and cannot rebill 
   assert.equal(calls.length, 2);
 }));
 
+test('a failed ordinary copy review is remembered so later offers can use the next existing run', () => fixture(async ({ root, put }) => {
+  const ordinary = id => ({ ...pending(id), enrichmentPending: false, enrichmentFields: [], description: '' });
+  const first = ordinary('first'), second = ordinary('second');
+  put('docs/deals.json', { deals: [first, second] });
+  let failedCalls = 0;
+  const failed = await maintainFeedFile({ cwd: root, now, allowAi: true, request: async () => {
+    failedCalls++;
+    throw new Error('request-or-ledger-unavailable');
+  } });
+  assert.equal(failedCalls, 1, 'stop after the transport failure within this run');
+  assert.deepEqual(failed.deals, [first, second]);
+  assert.equal(failed.state.checks.filter(row => row.id === first.id && row.outcome === 'deferred').length, 1);
+  const calls = [];
+  const next = await maintainFeedFile({ cwd: root, now: new Date(+now + 3600000), allowAi: true, request: modelMock(calls) });
+  assert.equal(calls.length, 2, 'only the second offer receives a draft and independent check');
+  assert.deepEqual(next.deals[0], first);
+  assert.equal(next.deals[1].description, description);
+  assert.equal(next.report.enrichment.find(row => row.id === first.id).reason, 'model-cooldown');
+  assert.equal(next.report.enrichment.find(row => row.id === first.id).nextAttemptAt, '2026-11-15T12:00:00.000Z');
+}));
+
+test('the source retry report distinguishes a host pause from a missing adapter without moving deadlines', () => fixture(async ({ root, put }) => {
+  const publicDeal = { ...pending('vapiano'), url, brand: 'VAPIANO' };
+  const social = { ...pending('social'), url: 'https://www.instagram.com/p/fixture/', metaGraphVerified: true, metaGraphCaption: caption };
+  put('docs/deals.json', { deals: [publicDeal, social] });
+  const paused = { entries: { [url]: { url, status: 'deferred', httpStatus: 429, nextAttemptAt: '2026-11-18T12:00:00Z' } } };
+  put('reviews/maintenance-source-evidence.json', paused);
+  const result = await refreshMaintenanceEvidence({ root, now, fetchPage: () => assert.fail('no request while held') });
+  assert.deepEqual(result.cache, paused);
+  const rows = new Map(result.report.unresolved.map(row => [row.id, row]));
+  assert.equal(rows.get('vapiano').reason, 'host-pause');
+  assert.equal(rows.get('vapiano').nextAttemptAt, '2026-11-18T12:00:00.000Z');
+  assert.equal(rows.get('social').reason, 'handled-by-social-evidence');
+  assert.equal(rows.get('social').nextAttemptAt, null);
+}));
+
+test('date-only enrichment still reviews a valid offer clause embedded beside an observation date', () => fixture(async ({ root, put }) => {
+  const source = 'Veröffentlicht am 26.11.2026. Kaffee gratis in Wien. Gültig am 30.11.2026. Nur solange der Vorrat reicht.';
+  const deal = { id: 'date-only', title: 'Gratis Kaffee', description: 'Ein Kaffee gratis, solange der Vorrat reicht.',
+    metaGraphCaption: source, liveEditedFields: ['title', 'description'] };
+  put('docs/deals.json', { deals: [deal] });
+  let calls = 0;
+  const result = await maintainFeedFile({ cwd: root, now: new Date('2026-11-27T12:00:00Z'), allowAi: true,
+    request: async (_url, init) => {
+      calls++;
+      const input = JSON.parse(JSON.parse(init.body).messages[1].content);
+      if (input.requestedFields) assert.deepEqual(input.requestedFields, ['dates']);
+      const content = input.patch ? { supported: true }
+        : { title: '', quote: '', description: '', conditionsQuote: '', dateQuote: 'Gültig am 30.11.2026' };
+      return Response.json({ choices: [{ finish_reason: 'stop', message: { content: JSON.stringify(content) } }] });
+    } });
+  assert.equal(calls, 2);
+  assert.equal(result.deals[0].validOn, '2026-11-30');
+  assert.equal(result.deals[0].title, deal.title);
+  assert.equal(result.deals[0].description, deal.description);
+}));
+
 test('current Preisjaeger full-body evidence replaces its stale preview within one existing source slot', () => fixture(async ({ root, put }) => {
   const sourceUrl = 'https://www.preisjaeger.at/deals/mcdonalds-gratis-fussball-donut-zum-osterreich-match-372365';
   const source = fs.readFileSync(fileURLToPath(new URL('./fixtures/preisjaeger-donut-dom-20261114.html', import.meta.url)), 'utf8');

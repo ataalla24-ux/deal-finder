@@ -41,8 +41,73 @@ const filtered = filterKnownInstagramCandidates([...alreadyKnown,...stillNeedsRe
 assert.deepEqual(filtered.remaining,stillNeedsReview);
 assert.deepEqual(filtered.skipped,{'already-live':1,'already-queued-in-slack':1,'seen-in-slack':2});
 const emptyBatch = filterKnownInstagramCandidates(alreadyKnown,knownPosts).remaining;
-assert.deepEqual((await classifyWithOpenAi(emptyBatch,{request:()=>assert.fail('known posts must cost no model requests')})).usage,
+assert.deepEqual((await classifyWithOpenAi(emptyBatch,{fetchImpl:()=>assert.fail('known posts must cost no model requests')})).usage,
   {inputTokens:0,outputTokens:0,totalTokens:0});
+
+const modelFixture = {
+  enabled: true,
+  apiKey: 'fixture-not-a-secret',
+};
+const modelCandidates = Array.from({ length: 5 }, (_, index) => post(`ModelFailure${index}`));
+const deadline = new AbortController();
+let timedOutCalls = 0;
+const timedOut = await classifyWithOpenAi(modelCandidates, {
+  ...modelFixture,
+  signal: deadline.signal,
+  async fetchImpl(_url, init) {
+    timedOutCalls += 1;
+    deadline.abort(new DOMException('fixture credential details', 'TimeoutError'));
+    assert.equal(init.signal.aborted, true);
+    throw Object.assign(Error('fixture credential details'), {
+      code: 'free_credit_budget_deferred',
+      budgetReason: 'request-or-ledger-unavailable',
+    });
+  },
+});
+assert.equal(timedOutCalls, 1, 'a timed-out reserved request must stop without another dispatch');
+assert.deepEqual(timedOut.health, {
+  status: 'unavailable',
+  httpStatus: null,
+  code: 'request-timeout',
+  retryable: false,
+  billingActionRequired: false,
+  budgetDeferred: true,
+  budgetReason: 'request-or-ledger-unavailable',
+  completedCandidates: 0,
+  deferredCandidates: 5,
+});
+assert.doesNotMatch(JSON.stringify(timedOut), /fixture credential details/);
+
+const retryDeadline = new AbortController();
+let retryCalls = 0;
+const timedOutDuringRetryWait = await classifyWithOpenAi(modelCandidates, {
+  ...modelFixture,
+  signal: retryDeadline.signal,
+  async fetchImpl() {
+    retryCalls += 1;
+    setTimeout(() => retryDeadline.abort(new DOMException('fixture deadline', 'TimeoutError')), 0);
+    return new Response('{}', { status: 503, headers: { 'Retry-After': '1' } });
+  },
+});
+assert.equal(retryCalls, 1, 'the existing transient retry must stop if its wait crosses the deadline');
+assert.equal(timedOutDuringRetryWait.health.code, 'request-timeout');
+
+const invalid = await classifyWithOpenAi(modelCandidates.slice(0, 1), {
+  ...modelFixture,
+  fetchImpl: async () => Response.json({ choices: [{ finish_reason: 'length', message: {
+    content: 'fixture malformed or sensitive response data',
+  } }] }),
+});
+assert.equal(invalid.health.code, 'response-invalid');
+assert.equal(invalid.health.retryable, false);
+assert.doesNotMatch(JSON.stringify(invalid), /fixture malformed or sensitive response data/);
+
+const transport = await classifyWithOpenAi(modelCandidates.slice(0, 1), {
+  ...modelFixture,
+  fetchImpl: async () => { throw Object.assign(Error('fixture credential details'), { code: 'fixtureSensitiveCode' }); },
+});
+assert.equal(transport.health.code, 'request-failed');
+assert.doesNotMatch(JSON.stringify(transport), /fixture credential details|fixtureSensitiveCode/);
 
 const weightedProfileSelection = selectRotatingAccounts([
   ...Array.from({ length: 8 }, (_, index) => ({ username: `merchant${index}.cafe`, accountType: 'merchant', priority: 100 - index })),

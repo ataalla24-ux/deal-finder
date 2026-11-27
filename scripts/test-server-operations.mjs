@@ -6,7 +6,7 @@ import os from 'node:os';
 import path from 'node:path';
 import { maintenanceEvidenceFor, refreshMaintenanceEvidence } from './refresh-maintenance-evidence.mjs';
 import { buildRecoveryQueue, updatePublicationPilot, creditSnapshot, writeOperationsReport,
-  buildPublicationReviewPack, redemptionSummary, summarizeSourceReport, nativeImageSummary } from './server-operations-report.mjs';
+  buildPublicationReviewPack, redemptionSummary, summarizeSourceReport, nativeImageSummary, buildEnrichmentQueue } from './server-operations-report.mjs';
 import { auditServerQuality } from './server-quality-audit.mjs';
 import { processDeals } from '../scraper/smart-summary.js';
 import { normalizeDealRecord } from '../scraper/deal-normalization-utils.js';
@@ -306,4 +306,33 @@ test('source audit distinguishes Meta branches, retained outbox and actual candi
   const power=summarizeSourceReport({finishedAt:now.toISOString(),summary:{acceptedDeals:37},sources:[]},{now});
   assert.equal(power.counts.acceptedDeals,37);assert.equal(power.newlyDeliveredToSlack,null);
   assert.equal(summarizeSourceReport(null,{now}).status,'missing-report');
+});
+
+test('queue ages and retries come from current public deal and maintenance receipts', () => {
+  const at = '2026-11-06T10:00:00.000Z';
+  const retry = '2026-11-06T14:00:00.000Z';
+  const live = [{ ...ready, id: 'copy', approvedAt: at, enrichmentPending: true, enrichmentFields: ['description'] },
+    { ...ready, id: 'map', enrichmentPending: true, enrichmentFields: ['map'], enrichmentNextReviewAt: retry },
+    { ...ready, id: 'older', approvedAt: '2026-11-06T11:00:00Z', enrichmentPending: true, enrichmentFields: ['description'] }];
+  const maintained = { checkedAt: at, enrichment: [
+    { id: 'copy', reason: 'waiting-for-model-slot', nextAttemptAt: retry, lastAttemptAt: at },
+    { id: 'map', reason: 'model-disabled' }, { id: 'older', reason: 'model-disabled' },
+  ] };
+  const sources = { checkedAt: at, unresolved: [{ id: 'copy', reason: 'host-pause', nextAttemptAt: retry }] };
+  const report = buildEnrichmentQueue(live, maintained, sources, now);
+  const rows = Object.fromEntries(report.rows.map(row => [row.id, row]));
+  assert.equal(rows.copy.ageHours, 2);
+  assert.equal(rows.copy.status, 'waiting');
+  assert.equal(rows.copy.sourceReason, 'host-pause');
+  assert.equal(rows.copy.nextAttemptAt, retry);
+  assert.equal(rows.map.reason, 'venue-verification-needed');
+  assert.equal(rows.older.reason, 'description-review-needed');
+  const [awaiting] = buildRecoveryQueue([], [{ ...ready,
+    pipelineLifecycle: { slackSentAt: at, manualDecision: 'approved', manualDecisionAt: at, manualDecisionUser: 'private reviewer' },
+    approvalBlock: { checkedAt: at, retryAt: retry, reasons: ['Bildfreigabe ausstehend', 'fixture private text'] } }], { mapContext, now });
+  assert.deepEqual(awaiting.blockedReasons, ['photo-review-needed', 'approval-review-required']);
+  assert.equal(awaiting.approvalRecordedAt, at);
+  assert.equal(awaiting.ageHours, 2);
+  assert.equal(awaiting.retryAt, retry);
+  assert(!JSON.stringify(awaiting).includes('private'));
 });
