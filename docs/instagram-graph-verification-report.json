@@ -1,7 +1,7 @@
 {
-  "generatedAt": "2026-11-27T03:24:34.104Z",
+  "generatedAt": "2026-11-27T03:46:58.002Z",
   "source": "instagram-graph-cross-source-verification",
-  "status": "ok",
+  "status": "failed-preserved",
   "configured": true,
   "scannedFiles": [
     "deals-pending-church-events.json",
@@ -181,26 +181,37 @@
       "candidates": 1
     }
   ],
-  "fetchedPosts": 25,
+  "fetchedPosts": 0,
   "exactMatches": 0,
   "retainedEvidencePosts": 2000,
-  "errors": [],
+  "errors": [
+    {
+      "username": "tipsytuesday",
+      "message": "Instagram shared quota paused: shared cooldown"
+    }
+  ],
   "accountFailures": {},
   "sharedQuota": {
-    "limitPerHour": 445,
+    "limitPerHour": 190,
     "usageThreshold": 95,
-    "requests": 1,
-    "reserved": 5,
-    "stopped": false,
-    "reason": "",
-    "highestUsagePercent": 2,
+    "requests": 0,
+    "reserved": 0,
+    "stopped": true,
+    "reason": "Instagram shared quota paused: shared cooldown",
+    "highestUsagePercent": 0,
     "waitedMs": 0,
     "pacingMs": 0,
-    "retryAt": "",
+    "retryAt": "2026-11-27T03:49:44.021Z",
     "adaptiveSafetyCeiling": 190,
     "adaptiveIncreases": 0,
     "storageFailure": null,
-    "stopKind": ""
+    "stopKind": "cooldown"
+  },
+  "globalError": {
+    "username": "tipsytuesday",
+    "status": 0,
+    "code": "SCAN_BUDGET",
+    "message": "Instagram shared quota paused: shared cooldown"
   },
   "blockedEvidencePosts": 75,
   "unmatchedCandidatePosts": 1,
