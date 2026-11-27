@@ -101,7 +101,9 @@ test('Slack failure leaves the edited deal held and does not reuse any old appro
 
 test('legacy cards and disabled preview refresh use their existing approval path',async()=>{
   const edited = {...await draft(),title:'Gratis Döner'};
-  for (const [deal,enabled] of [[edited,false],[{...edited,imageApprovalRequired:false},true]]) {
+  for (const [deal,enabled] of [[edited,false],[{...edited,imageApprovalRequired:false},true],
+    [{...edited,approvedDealImage:{status:'locked'}},true],
+    [{...edited,pipelineLifecycle:{publishedAt:now.toISOString()}},true]]) {
     const result = await refreshPendingDealPhoto(deal,{root,now,enabled,request:async()=>assert.fail('no request allowed')});
     assert.equal(result.status,'unchanged');
   }

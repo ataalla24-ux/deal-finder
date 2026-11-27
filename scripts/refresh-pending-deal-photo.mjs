@@ -26,6 +26,7 @@ export async function refreshPendingDealPhoto(deal,{
 }={}) {
   const result = {deal,status:'unchanged'};
   if (!enabled || !deal?.imageApprovalRequired || !deal.slackTs
+    || deal.approvedDealImage?.status === 'locked' || deal.pipelineLifecycle?.publishedAt
     || dealImagePreviewBlock(deal,{enabled:true,now}) && deal.pendingDealImage.slackMessageTs === deal.slackTs) return result;
   const unavailable = reason => ({deal,status:'unavailable',reason});
   if (!token || !channel || !deal.slackThreadTs) return unavailable('slack-context-unavailable');
