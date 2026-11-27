@@ -42,7 +42,7 @@ test('Play acquisition requires the exact configured trial, never a promotional 
   }
 });
 
-test('only verified, account-bound production one-month trials qualify', () => {
+test('only verified, account-bound supported production trials qualify', () => {
   for (const [platform, raw] of [['ios', apple], ['android', play]]) {
     assert.equal(isQualifyingTrial(referralPurchase(platform, raw, account, now), now - 1000, now), true);
     assert.throws(() => referralPurchase(platform, raw, 'another-account', now));
@@ -54,7 +54,7 @@ test('only verified, account-bound production one-month trials qualify', () => {
     assert.throws(() => referralPurchase('ios', { ...apple, ...patch }, account, now));
   }
   for (const patch of [{ offerType: 3 }, { offerDiscountType: 'PAY_AS_YOU_GO' }, { transactionId: 'renewal' },
-    { expiresDate: now + 7 * DAY }, { expiresDate: now + 60 * DAY }]) {
+    { expiresDate: now + 14 * DAY }, { expiresDate: now + 60 * DAY }]) {
     assert.equal(isQualifyingTrial(referralPurchase('ios', { ...apple, ...patch }, account, now), now, now), false);
   }
   for (const patch of [{ testPurchase: {} }, { subscriptionState: 'SUBSCRIPTION_STATE_PENDING' },

@@ -136,7 +136,7 @@ ${source ? `<p><a href="${escapeHTML(source)}" rel="noopener noreferrer">Origina
 <a class="action" href="${escapeHTML(appURL)}">In FreeFinder öffnen</a>
 <a class="action secondary" href="https://apps.apple.com/app/id6758958213">Vollständige App herunterladen</a>
 <a href="${escapeHTML(target.href)}">Bisherige Webseite öffnen</a>
-${hasInvitation ? '<p>Die Vorschau allein startet kein Probeabo und erstellt keine Belohnung. Für den Probemonat gelten Anmeldung, Einladungsannahme und die Bestätigung durch den Store.</p>' : '<p>Die Bedingungen des Anbieters entscheiden über die Einlösung.</p>'}
+${hasInvitation ? '<p>Die Vorschau allein startet kein Probeabo und erstellt keine Belohnung. Für die kostenlose Testphase gelten Anmeldung, Einladungsannahme sowie die vom Store bestätigte Dauer und Berechtigung.</p>' : '<p>Die Bedingungen des Anbieters entscheiden über die Einlösung.</p>'}
 <small>Wenn du den App Clip vor der Installation geöffnet hast, kann die vollständige App gespeicherten Einladungskontext übernehmen. Die reine Installation über einen Weblink speichert keine Einladung.</small>
 <p><a href="https://freefinder.at/privacy.html">Datenschutz</a> · <a href="https://freefinder.at/support.html">Kontakt</a></p></main></body></html>`;
   return respond(request, html, 200, { 'Content-Type': 'text/html; charset=utf-8', 'X-Robots-Tag': 'noindex' });

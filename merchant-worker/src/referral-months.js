@@ -9,8 +9,8 @@ const APPLE_PRODUCTS = new Set([`${APP}.premium.monthly`, `${APP}.premium.yearly
 const PLAY_PRODUCTS = new Set(['freefinder.pro.monthly', 'freefinder.pro.yearly']);
 const PLAY_REWARD_OFFER = 'referral-earned-month';
 const PLAY_ACQUISITION_OFFERS = new Map([
-  ['freefinder.pro.monthly', ['monthly', 'flyer-month-free']],
-  ['freefinder.pro.yearly', ['yearly', 'yearly-month-free']],
+  ['freefinder.pro.monthly', ['monthly', new Set(['flyer-month-free', 'flyer-week-free'])]],
+  ['freefinder.pro.yearly', ['yearly', new Set(['yearly-month-free', 'yearly-week-free'])]],
 ]);
 const PENDING_REWARDS = ['store_pending', 'store_confirmation', 'store_subscription'];
 const SUPPORT_ACTIONS = ['support-cases', 'support-case', 'support-review'];
@@ -26,7 +26,15 @@ export async function referralHash(value) {
 function fail(message, status = 400) { throw Object.assign(new Error(message), { status }); }
 function isPlayAcquisitionOffer(product, details) {
   const expected = PLAY_ACQUISITION_OFFERS.get(product);
-  return !!expected && details?.basePlanId === expected[0] && details?.offerId === expected[1];
+  return !!expected && details?.basePlanId === expected[0] && expected[1].has(details?.offerId);
+}
+function isAcquisitionTrialPeriod(start, end) {
+  const duration = end - start;
+  // Preserve already-started calendar-month trials. A new seven-day Store
+  // period may cross a daylight-saving change; other trial lengths stay closed.
+  // This does not apply to the separate earned-month reward/redemption checks.
+  return Number.isFinite(duration) && (Math.abs(duration - 7 * DAY) <= 3600000 ||
+    duration >= 27 * DAY && duration <= 32 * DAY);
 }
 function decodeStoreJWS(value) {
   // Called ONLY with the response from Apple's authenticated server API, never a client JWS.
@@ -139,8 +147,7 @@ function validSourceEvidence(evidence, now) {
     referralEvidence(platform, { transactionId: receiptId, orderId: receiptId, key: purchaseKey,
       product: productId, account: accountId, purchasedAt, started: purchasedAt, expires: periodEnd }, now);
   } catch { return false; }
-  const days = (periodEnd - purchasedAt) / DAY;
-  return days >= 27 && days <= 32 && (platform !== 'ios' || purchaseKey === 'ios:' + receiptId);
+  return isAcquisitionTrialPeriod(purchasedAt, periodEnd) && (platform !== 'ios' || purchaseKey === 'ios:' + receiptId);
 }
 export async function reviewReferralSource(evidence, raw, now = Date.now()) {
   const result = status => ({ status, checkedAt: now });
@@ -177,9 +184,9 @@ export async function reviewReferralSource(evidence, raw, now = Date.now()) {
   return result('unverified');
 }
 export function isQualifyingTrial(purchase, acceptedAt, now = Date.now()) {
-  const days = (purchase.expires - purchase.started) / DAY;
   return purchase.trial && Number.isFinite(purchase.started) && purchase.started >= acceptedAt - 30000 &&
-    purchase.started <= now + 60000 && purchase.started - acceptedAt <= 7 * DAY && days >= 27 && days <= 32;
+    purchase.started <= now + 60000 && purchase.started - acceptedAt <= 7 * DAY &&
+    isAcquisitionTrialPeriod(purchase.started, purchase.expires);
 }
 export function isMatchingAppleRedemption(purchase, reward, now = Date.now()) {
   const days = (purchase.expires - purchase.purchasedAt) / DAY;
@@ -426,7 +433,7 @@ export class ReferralMonthsLedger {
         if (used !== account.id) fail('Dieses Probeabo wurde bereits zugeordnet.', 409);
         return this.status(account);
       }
-      if (account.purchaseKey || !isQualifyingTrial(purchase, account.acceptedAt, now)) fail('Kein neuer bestätigter Gratis-Monat für diese Einladung.', 409);
+      if (account.purchaseKey || !isQualifyingTrial(purchase, account.acceptedAt, now)) fail('Keine neue bestätigte kostenlose Testphase für diese Einladung.', 409);
       const inviter = await this.storage.get('account:' + account.referredBy);
       if (!inviter || inviter.deletedAt || inviter.purchaseKey === purchase.key) fail('Diese Einladung kann nicht bestätigt werden.', 409);
       const reward = { id: crypto.randomUUID(), createdAt: now, state: 'earned', months: 1,
