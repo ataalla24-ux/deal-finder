@@ -1,0 +1,116 @@
+name: Instagram Tavily Search Investigation
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - 'scraper/instagram-tavily-investigation.js'
+      - 'scripts/check-instagram-tavily-investigation.mjs'
+      - 'scripts/check-instagram-tavily-offers.mjs'
+      - 'scripts/test-instagram-tavily-investigation.mjs'
+      - 'scripts/test-instagram-tavily-offers.mjs'
+      - '.github/workflows/instagram-tavily-investigation.yml'
+permissions:
+  contents: read
+concurrency:
+  group: ${{ github.event_name == 'workflow_dispatch' && 'instagram-ai-scan' || format('instagram-tavily-offline-{0}', github.run_id) }}
+  cancel-in-progress: false
+  queue: max
+jobs:
+  offline:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    env:
+      SENTRY_DISABLED: '1'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+      - run: npm ci --no-audit --no-fund
+      - run: node --test scripts/test-instagram-tavily-investigation.mjs scripts/test-instagram-tavily-offers.mjs scripts/test-tavily-free-budget.mjs scripts/test-instagram-tavily-index.mjs
+  compare:
+    if: github.event_name == 'workflow_dispatch' && github.ref == 'refs/heads/main' && github.run_attempt == 1
+    needs: offline
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    concurrency:
+      group: tiktok-deal-scan
+      cancel-in-progress: false
+      queue: max
+    permissions:
+      contents: write
+    env:
+      SENTRY_DISABLED: '1'
+    outputs:
+      claimed: ${{ steps.claim.outputs.claimed }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+      - run: npm ci --no-audit --no-fund
+      - name: Claim this fixed four-query experiment once
+        id: claim
+        run: node scripts/check-instagram-tavily-investigation.mjs --claim
+      - name: Persist claim before any provider call
+        if: steps.claim.outputs.claimed == 'true'
+        run: node scripts/commit-generated.mjs --message "Claim bounded Instagram search investigation [skip ci]" --files source-state/instagram-tavily-investigation.json
+      - name: Compare search settings within the existing free allowance
+        if: steps.claim.outputs.claimed == 'true'
+        env:
+          TIKTOK_TAVILY_FREE_PLAN_CONFIRMED: ${{ vars.TIKTOK_TAVILY_FREE_PLAN_CONFIRMED }}
+          TAVILY_API_KEY: ${{ secrets.TAVILY_API_KEY || secrets.TAVIILY_API_KEY }}
+        run: node scripts/check-instagram-tavily-investigation.mjs --run
+      - name: Persist results and shared provider hold
+        if: always() && steps.claim.outputs.claimed == 'true'
+        run: node scripts/commit-generated.mjs --message "Record bounded Instagram search comparison [skip ci]" --files source-state/instagram-tavily-investigation.json source-state/instagram-tavily-index.json
+      - uses: actions/upload-artifact@v4
+        if: always() && steps.claim.outputs.claimed == 'true'
+        with:
+          name: instagram-tavily-investigation
+          path: output/social-discovery/instagram-tavily-investigation.json
+          retention-days: 7
+  verify-offers:
+    needs: compare
+    if: needs.compare.outputs.claimed == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: write
+    env:
+      SENTRY_DISABLED: '1'
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+      - run: npm ci --no-audit --no-fund
+      - uses: actions/download-artifact@v4
+        with:
+          name: instagram-tavily-investigation
+          path: output/social-discovery
+      - name: Verify up to six previously unknown posts from their original sources
+        id: verify
+        env:
+          INSTAGRAM_SESSIONID: ${{ secrets.INSTAGRAM_SESSIONID }}
+          INSTAGRAM_COOKIES: ${{ secrets.INSTAGRAM_COOKIES }}
+        run: node scripts/check-instagram-tavily-offers.mjs output/social-discovery/instagram-tavily-investigation.json
+      - name: Retain any new Instagram access hold
+        if: always() && steps.verify.outputs.web_access_changed == 'true'
+        run: node scripts/commit-generated.mjs --message "Record bounded Instagram source verification [skip ci]" --files docs/instagram-ai-report.json
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: instagram-tavily-offer-verification
+          path: |
+            output/social-discovery/instagram-tavily-offers.json
+            output/social-discovery/instagram-tavily-offers.candidates.json
+          retention-days: 7

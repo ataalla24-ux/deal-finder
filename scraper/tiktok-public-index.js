@@ -37,7 +37,7 @@ async function readTavilyJson(response) {
   return JSON.parse(Buffer.concat(chunks).toString('utf8'));
 }
 
-async function requestTavilyJson(url, options, { fetcher, clock, isValid }) {
+export async function requestTavilyJson(url, options, { fetcher, clock, isValid }) {
   let response;
   try {
     response = await fetcher(url, {
@@ -59,7 +59,7 @@ async function requestTavilyJson(url, options, { fetcher, clock, isValid }) {
   }
 }
 
-function getFreeSearchBudget({ account, key }, now, queryCount) {
+export function getFreeSearchBudget({ account, key }, now, queryCount) {
   const nonnegativeInteger = value => Number.isSafeInteger(value) && value >= 0;
   const plan = typeof account?.current_plan === 'string' ? account.current_plan.trim().toLowerCase() : '';
   if (!['researcher', 'free'].includes(plan)) return { refusal: 'account-plan-unrecognized' };
