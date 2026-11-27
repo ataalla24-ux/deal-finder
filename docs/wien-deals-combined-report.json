@@ -1,21 +1,21 @@
 {
-  "generatedAt": "2026-11-27T09:00:02.701Z",
+  "generatedAt": "2026-11-27T21:35:27.333Z",
   "status": "degraded",
   "message": "0 fresh, evidence-checked Graph hashtag deal(s) found; 0 recovered from media.",
   "hashtags": [
+    "viennarestaurants",
+    "wienfood",
+    "wienisst",
     "wienfoodie",
     "essenwien",
-    "wienisst",
     "wienkaffee",
-    "wienergastro",
-    "viennaeats",
-    "wienfood",
     "viennafood",
-    "viennarestaurants"
+    "wienergastro",
+    "viennaeats"
   ],
-  "fetchedPosts": 0,
+  "fetchedPosts": 23,
   "cachedGraphPosts": 0,
-  "uniquePosts": 0,
+  "uniquePosts": 22,
   "totalDeals": 0,
   "rescueEligible": 0,
   "rescuedDeals": 0,
@@ -37,30 +37,78 @@
     "warnings": []
   },
   "requestBudget": {
-    "requests": 6,
+    "requests": 30,
     "maxRequests": 30,
-    "highestUsagePercent": 33,
-    "stopped": false,
-    "reason": ""
+    "highestUsagePercent": 31,
+    "stopped": true,
+    "reason": "request-budget"
   },
   "budgetDeferred": true,
   "sharedQuota": {
-    "limitPerHour": 220,
+    "limitPerHour": 267,
     "usageThreshold": 95,
-    "requests": 5,
-    "reserved": 5,
-    "stopped": true,
-    "reason": "Instagram shared quota paused: rolling-hour budget exhausted",
-    "highestUsagePercent": 33,
+    "requests": 30,
+    "reserved": 30,
+    "stopped": false,
+    "reason": "",
+    "highestUsagePercent": 31,
     "waitedMs": 0,
-    "pacingMs": 9949,
-    "retryAt": "2026-11-27T09:14:21.293Z",
+    "pacingMs": 51120,
+    "retryAt": "",
     "adaptiveSafetyCeiling": 190,
     "adaptiveIncreases": 0,
     "storageFailure": null,
-    "stopKind": "budget"
+    "stopKind": ""
   },
   "sources": [
+    {
+      "hashtag": "viennarestaurants",
+      "status": "ok",
+      "coverage": {
+        "pages": 3,
+        "uniquePosts": 5,
+        "newPosts": 5,
+        "stopReason": "exhausted",
+        "incomplete": false,
+        "resumed": false
+      },
+      "fetched": 5,
+      "accepted": 0,
+      "mediaFieldMode": "full-media-with-owner",
+      "mediaLimit": 25
+    },
+    {
+      "hashtag": "wienfood",
+      "status": "ok",
+      "coverage": {
+        "pages": 3,
+        "uniquePosts": 15,
+        "newPosts": 11,
+        "stopReason": "page-limit",
+        "incomplete": true,
+        "resumed": false
+      },
+      "fetched": 15,
+      "accepted": 0,
+      "mediaFieldMode": "full-media-with-owner",
+      "mediaLimit": 25
+    },
+    {
+      "hashtag": "wienisst",
+      "status": "ok",
+      "coverage": {
+        "pages": 3,
+        "uniquePosts": 3,
+        "newPosts": 1,
+        "stopReason": "exhausted",
+        "incomplete": false,
+        "resumed": true
+      },
+      "fetched": 3,
+      "accepted": 0,
+      "mediaFieldMode": "full-media-with-owner",
+      "mediaLimit": 25
+    },
     {
       "hashtag": "wienfoodie",
       "status": "ok",
@@ -79,61 +127,683 @@
     },
     {
       "hashtag": "essenwien",
-      "status": "deferred",
+      "status": "ok",
+      "coverage": {
+        "pages": 1,
+        "uniquePosts": 0,
+        "newPosts": 0,
+        "stopReason": "exhausted",
+        "incomplete": false,
+        "resumed": false
+      },
       "fetched": 0,
       "accepted": 0,
-      "error": "Instagram shared quota paused: rolling-hour budget exhausted"
-    },
-    {
-      "hashtag": "wienisst",
-      "status": "deferred",
-      "fetched": 0,
-      "accepted": 0,
-      "error": "Instagram shared quota paused: rolling-hour budget exhausted"
+      "mediaFieldMode": "full-media-with-owner",
+      "mediaLimit": 25
     },
     {
       "hashtag": "wienkaffee",
-      "status": "deferred",
+      "status": "ok",
+      "coverage": {
+        "pages": 1,
+        "uniquePosts": 0,
+        "newPosts": 0,
+        "stopReason": "exhausted",
+        "incomplete": false,
+        "resumed": false
+      },
       "fetched": 0,
       "accepted": 0,
-      "error": "Instagram shared quota paused: rolling-hour budget exhausted"
-    },
-    {
-      "hashtag": "wienergastro",
-      "status": "deferred",
-      "fetched": 0,
-      "accepted": 0,
-      "error": "Instagram shared quota paused: rolling-hour budget exhausted"
-    },
-    {
-      "hashtag": "viennaeats",
-      "status": "deferred",
-      "fetched": 0,
-      "accepted": 0,
-      "error": "Instagram shared quota paused: rolling-hour budget exhausted"
-    },
-    {
-      "hashtag": "wienfood",
-      "status": "deferred",
-      "fetched": 0,
-      "accepted": 0,
-      "error": "Instagram shared quota paused: rolling-hour budget exhausted"
+      "mediaFieldMode": "full-media-with-owner",
+      "mediaLimit": 25
     },
     {
       "hashtag": "viennafood",
       "status": "deferred",
       "fetched": 0,
       "accepted": 0,
-      "error": "Instagram shared quota paused: rolling-hour budget exhausted"
+      "error": "Instagram scan paused: request-budget"
     },
     {
-      "hashtag": "viennarestaurants",
+      "hashtag": "wienergastro",
       "status": "deferred",
       "fetched": 0,
       "accepted": 0,
-      "error": "Instagram shared quota paused: rolling-hour budget exhausted"
+      "error": "Instagram scan paused: request-budget"
+    },
+    {
+      "hashtag": "viennaeats",
+      "status": "deferred",
+      "fetched": 0,
+      "accepted": 0,
+      "error": "Instagram scan paused: request-budget"
     }
   ],
-  "rejectionReasons": {},
-  "candidateAudit": []
+  "rejectionReasons": {
+    "alcohol-offer": 3,
+    "non-offer-content": 2,
+    "no-concrete-offer": 13,
+    "missing-vienna-evidence": 1,
+    "general-recommendation": 2,
+    "excluded-promotion-type": 1
+  },
+  "candidateAudit": [
+    {
+      "id": "17995689135118618",
+      "status": "rejected",
+      "url": "https://www.instagram.com/reel/DgQpmPVIxcB/",
+      "title": "🎅🏻 WIEN, so schmeckt Weihnachten in Italien! 🇮🇹🔥 Bei uns bringt der Weihnachtsmann keine Geschenke, sondern frischen Fisch direkt an deinen Tisch! 🐟 Unser Branzino all’Acqua ",
+      "text": "🎅🏻 WIEN, so schmeckt Weihnachten in Italien! 🇮🇹🔥 Bei uns bringt der Weihnachtsmann keine Geschenke, sondern frischen Fisch direkt an deinen Tisch! 🐟 Unser Branzino all’Acqua Pazza – frischer Wolfsbarsch mit mediterranen Aromen, nach traditionell neapolitanischer Art zubereitet und persönlich am Tisch serviert. Ein Stück Süditalien mitten in Wien. ❤️ Markiere jemanden, mit dem du dieses Gericht unbedingt probieren möchtest! 📍 I Fratelli Pulcinella – myhive Wienerberg, 1100 Wien. #Wien #ViennaFood #WienEssen #WienFood #GeheimtippWien ItalianFood WienRestaurants Branzino WeihnachtenInWien FratelliPulcinella",
+      "ownerUsername": "",
+      "ownerRole": "",
+      "scoutUsername": "",
+      "merchantUsername": "",
+      "pubDate": "2026-11-27T21:31:38+0000",
+      "rejectionReason": "no-concrete-offer",
+      "qualityScore": 0,
+      "viennaVerified": false,
+      "mediaEvidence": {
+        "analyzedAt": "",
+        "ocrText": "",
+        "assetCount": 0,
+        "imageCount": 0,
+        "videoFrameCount": 0,
+        "downloadRetries": 0,
+        "errors": [],
+        "ai": null
+      },
+      "hashtags": [
+        "wienfood"
+      ]
+    },
+    {
+      "id": "18145251598624387",
+      "status": "rejected",
+      "url": "https://www.instagram.com/reel/DgQgE3ys1N3/",
+      "title": "Burnt Ends zwischen zwei Buns. 😮‍💨 ... #bbq #wien #trixiekiddos #barbecue #wienisst",
+      "text": "Burnt Ends zwischen zwei Buns. 😮‍💨 ... #bbq #wien #trixiekiddos #barbecue #wienisst",
+      "ownerUsername": "",
+      "ownerRole": "",
+      "scoutUsername": "",
+      "merchantUsername": "",
+      "pubDate": "2026-11-27T20:10:42+0000",
+      "rejectionReason": "no-concrete-offer",
+      "qualityScore": 0,
+      "viennaVerified": false,
+      "mediaEvidence": {
+        "analyzedAt": "",
+        "ocrText": "",
+        "assetCount": 0,
+        "imageCount": 0,
+        "videoFrameCount": 0,
+        "downloadRetries": 0,
+        "errors": [],
+        "ai": null
+      },
+      "hashtags": [
+        "wienisst"
+      ]
+    },
+    {
+      "id": "18029247257864305",
+      "status": "rejected",
+      "url": "https://www.instagram.com/reel/DgQW8cuREOm/",
+      "title": "Saftig, frisch und voller Geschmack! 🤤🔥 So muss ein echter Döner schmecken. Wer bekommt da auch direkt Hunger? 🥩❤️ #Döner #WienFood #FoodTok #StreetFood #fy",
+      "text": "Saftig, frisch und voller Geschmack! 🤤🔥 So muss ein echter Döner schmecken. Wer bekommt da auch direkt Hunger? 🥩❤️ #Döner #WienFood #FoodTok #StreetFood #fy",
+      "ownerUsername": "",
+      "ownerRole": "",
+      "scoutUsername": "",
+      "merchantUsername": "",
+      "pubDate": "2026-11-27T18:48:04+0000",
+      "rejectionReason": "no-concrete-offer",
+      "qualityScore": 0,
+      "viennaVerified": false,
+      "mediaEvidence": {
+        "analyzedAt": "",
+        "ocrText": "",
+        "assetCount": 0,
+        "imageCount": 0,
+        "videoFrameCount": 0,
+        "downloadRetries": 0,
+        "errors": [],
+        "ai": null
+      },
+      "hashtags": [
+        "wienfood"
+      ]
+    },
+    {
+      "id": "18473779807189079",
+      "status": "rejected",
+      "url": "https://www.instagram.com/p/DgQW916jRMu/",
+      "title": "Draußen sibirische Kälte, drinnen die Mission: Einmal durch die Karte futtern, bitte! 🥢❄️ (Swipe nach links für unser ganzes Festmahl 👉📸) Heute haben mein Mann, meine Tochter un",
+      "text": "Draußen sibirische Kälte, drinnen die Mission: Einmal durch die Karte futtern, bitte! 🥢❄️ (Swipe nach links für unser ganzes Festmahl 👉📸) Heute haben mein Mann, meine Tochter und ich endlich unsere Sushi-Bildungslücke geschlossen und zum ersten Mal die Mei Mei Sushi Bar unsicher gemacht. Unser Vorsatz: Wir hatten wirklich Hunger. Und zum Glück wurde der voll und ganz ernst genommen! Unser absoluter Hauptdarsteller lacht euch direkt auf dem ersten Bild an: die Special Gemischte Rolls Platte! 21 (!) Stück – eine herrliche Auswahl und so unverschämt gut, dass am Tisch plötzlich verdächtige Stille herrschte, weil alle nur noch am Essen waren. 🍣🤤 Und wenn ihr weiter nach links wischt, seht ihr, was sonst noch bei unserem Familien-Schmaus gelandet ist: 🥣 Misosuppe: Die offizielle Lebensversicherung gegen die Minusgrade draußen. 🥟 Gebratene Shrimp-Gyoza: Außen knuspriger als unser Geduldsfaden bei großem Hunger, innen herrlich saftig. 🐟 Lachs Teriyaki mit Reis: So riesige Portionen, dass wir kurz überlegt haben, ob wir überhaupt noch nach Hause rollen können. Seid ihr Team „Platte teilen“ oder verteidigt ihr eure Lieblings-Rolls bis aufs Blut? Und was müssen wir beim nächsten Familienbesuch unbedingt noch probieren? 👇 #foodblog #wienfood #sushilove #meimeisushibar #esseninwien",
+      "ownerUsername": "",
+      "ownerRole": "",
+      "scoutUsername": "",
+      "merchantUsername": "",
+      "pubDate": "2026-11-27T18:47:50+0000",
+      "rejectionReason": "no-concrete-offer",
+      "qualityScore": 0,
+      "viennaVerified": false,
+      "mediaEvidence": {
+        "analyzedAt": "",
+        "ocrText": "",
+        "assetCount": 0,
+        "imageCount": 0,
+        "videoFrameCount": 0,
+        "downloadRetries": 0,
+        "errors": [],
+        "ai": null
+      },
+      "hashtags": [
+        "wienfood"
+      ]
+    },
+    {
+      "id": "18343179499277090",
+      "status": "rejected",
+      "url": "https://www.instagram.com/p/DgQU--emGP1/",
+      "title": "Wenn der Hunger auf gute Vibes und frisches Sushi kickt, bist du bei uns genau richtig. Schnapp dir deine Liebsten und gönn dir eine Auszeit mit dieser Platte. Wir warten mit den b",
+      "text": "Wenn der Hunger auf gute Vibes und frisches Sushi kickt, bist du bei uns genau richtig. Schnapp dir deine Liebsten und gönn dir eine Auszeit mit dieser Platte. Wir warten mit den besten Zutaten auf dich. 🍣✨ #wien #vienna #wienfood #wienern #österreichtagram #sushi #sushilovers #sushitime #japanesefood #sushiporn #foodie #foodporn #freshsushi #sushibar #dinnervibes #seesushiwien #viennafoodguide #sushilovervienna #viennaeats #modernsushi",
+      "ownerUsername": "",
+      "ownerRole": "",
+      "scoutUsername": "",
+      "merchantUsername": "",
+      "pubDate": "2026-11-27T18:30:38+0000",
+      "rejectionReason": "no-concrete-offer",
+      "qualityScore": 0,
+      "viennaVerified": false,
+      "mediaEvidence": {
+        "analyzedAt": "",
+        "ocrText": "",
+        "assetCount": 0,
+        "imageCount": 0,
+        "videoFrameCount": 0,
+        "downloadRetries": 0,
+        "errors": [],
+        "ai": null
+      },
+      "hashtags": [
+        "wienfood"
+      ]
+    },
+    {
+      "id": "18483064339118064",
+      "status": "rejected",
+      "url": "https://www.instagram.com/reel/DgQRhDWM4WQ/",
+      "title": "Tonkotsu 3.0? 🍜👀 Bei Kinka Ramen Bar wird Ramen nicht einfach gekocht, sondern perfektioniert! Von hausgemachten Nudeln und intensiver Brühe bis hin zu knusprigen Gyoza, Takoyaki",
+      "text": "Tonkotsu 3.0? 🍜👀 Bei Kinka Ramen Bar wird Ramen nicht einfach gekocht, sondern perfektioniert! Von hausgemachten Nudeln und intensiver Brühe bis hin zu knusprigen Gyoza, Takoyaki und Chicken Karaage - hier kommen Japan-Fans auf ihre Kosten! 🇯🇵🩵 Und das Beste? Eure nächste Ramen-Bowl gibt's direkt über Wolt! 🛵 #wolt #woltoesterreich #kinkaramen #ramen #wienfood #delivery",
+      "ownerUsername": "",
+      "ownerRole": "",
+      "scoutUsername": "",
+      "merchantUsername": "",
+      "pubDate": "2026-11-27T18:01:08+0000",
+      "rejectionReason": "no-concrete-offer",
+      "qualityScore": 0,
+      "viennaVerified": false,
+      "mediaEvidence": {
+        "analyzedAt": "",
+        "ocrText": "",
+        "assetCount": 0,
+        "imageCount": 0,
+        "videoFrameCount": 0,
+        "downloadRetries": 0,
+        "errors": [],
+        "ai": null
+      },
+      "hashtags": [
+        "wienfood"
+      ]
+    },
+    {
+      "id": "17979937725160473",
+      "status": "rejected",
+      "url": "https://www.instagram.com/p/DgQKpNtIuvJ/",
+      "title": "Gutes Essen, ein feines Glas Wein und Menschen, mit denen man gerne Zeit verbringt. ❤️ Manchmal braucht es gar nicht mehr für einen gelungenen Abend. Genau dafür gibt's das DAST. E",
+      "text": "Gutes Essen, ein feines Glas Wein und Menschen, mit denen man gerne Zeit verbringt. ❤️ Manchmal braucht es gar nicht mehr für einen gelungenen Abend. Genau dafür gibt's das DAST. Euer zweites Wohnzimmer für genussvolle Stunden. #DASTRestaurant #Wien18 #WienFood #Genussmomente #TapasMitPfiff #RestaurantWien #FoodLovers",
+      "ownerUsername": "",
+      "ownerRole": "",
+      "scoutUsername": "",
+      "merchantUsername": "",
+      "pubDate": "2026-11-27T17:00:12+0000",
+      "rejectionReason": "alcohol-offer",
+      "qualityScore": 0,
+      "viennaVerified": false,
+      "mediaEvidence": {
+        "analyzedAt": "",
+        "ocrText": "",
+        "assetCount": 0,
+        "imageCount": 0,
+        "videoFrameCount": 0,
+        "downloadRetries": 0,
+        "errors": [],
+        "ai": null
+      },
+      "hashtags": [
+        "wienfood"
+      ]
+    },
+    {
+      "id": "18144943060721624",
+      "status": "rejected",
+      "url": "https://www.instagram.com/reel/DgQHWmRpJ08/",
+      "title": "Saftiges Fleisch, frische Zutaten und richtig guter Geschmack – so muss ein Burger sein! 🍔🔥 Wer hat jetzt auch Hunger? Markiere jemanden, der dir einen Burger schuldet! 📍 La Esn",
+      "text": "Saftiges Fleisch, frische Zutaten und richtig guter Geschmack – so muss ein Burger sein! 🍔🔥 Wer hat jetzt auch Hunger? Markiere jemanden, der dir einen Burger schuldet! 📍 La Esno | Klosterneuburger Str. 110, 1200 Wien \\#laesno #wien #vienna #1200wien #wien1200 #brigittenau #20bezirk #wienfood #viennafood #foodwien #foodvienna #wienessen #wienliebe #wienstagram #wienerleben #wienerfood #burgerwien #viennaburger #burgerlover #burgerliebe #burger #streetfoodwien #streetfoodvienna #foodspotswien #wiengehtessen #esseninwien #wienentdecken #igersvienna #viennalove #österreich",
+      "ownerUsername": "",
+      "ownerRole": "",
+      "scoutUsername": "",
+      "merchantUsername": "",
+      "pubDate": "2026-11-27T16:33:51+0000",
+      "rejectionReason": "no-concrete-offer",
+      "qualityScore": 0,
+      "viennaVerified": false,
+      "mediaEvidence": {
+        "analyzedAt": "",
+        "ocrText": "",
+        "assetCount": 0,
+        "imageCount": 0,
+        "videoFrameCount": 0,
+        "downloadRetries": 0,
+        "errors": [],
+        "ai": null
+      },
+      "hashtags": [
+        "wienfood"
+      ]
+    },
+    {
+      "id": "18191965417411630",
+      "status": "rejected",
+      "url": "https://www.instagram.com/reel/DgQHfN4g9xJ/",
+      "title": "Wo braucht es noch einen Meat Me? 💭 #wienfood #zweiterstandort #wienerdöner",
+      "text": "Wo braucht es noch einen Meat Me? 💭 #wienfood #zweiterstandort #wienerdöner",
+      "ownerUsername": "",
+      "ownerRole": "",
+      "scoutUsername": "",
+      "merchantUsername": "",
+      "pubDate": "2026-11-27T16:33:03+0000",
+      "rejectionReason": "no-concrete-offer",
+      "qualityScore": 0,
+      "viennaVerified": false,
+      "mediaEvidence": {
+        "analyzedAt": "",
+        "ocrText": "",
+        "assetCount": 0,
+        "imageCount": 0,
+        "videoFrameCount": 0,
+        "downloadRetries": 0,
+        "errors": [],
+        "ai": null
+      },
+      "hashtags": [
+        "wienfood"
+      ]
+    },
+    {
+      "id": "18075179123498000",
+      "status": "rejected",
+      "url": "https://www.instagram.com/reel/DgQBR4zOw-j/",
+      "title": "Some places serve food. Others tell a story. 🇵🇹✨ senhorvinhovienna The story of Senhor Vinho begins generations ago in Torrão, in Portugal’s Alentejo region. A family history roo",
+      "text": "Some places serve food. Others tell a story. 🇵🇹✨ senhorvinhovienna The story of Senhor Vinho begins generations ago in Torrão, in Portugal’s Alentejo region. A family history rooted in the land, shaped by tradition, hard work and a love for Portuguese culture. Years later, Formoso brought that heritage to Vienna, where his sons, Nelson and Daniel, carried the family story forward. In 2004, they opened Senhor Vinho, turning their roots into a place where Portuguese cuisine, exceptional wines and genuine hospitality come together. More than a restaurant, it’s a little piece of Portugal, built on family, heritage and tradition. ❤️ . . . #vienna #viennarestaurants #portugesefood #portuguesetradition #dinewithus",
+      "ownerUsername": "",
+      "ownerRole": "",
+      "scoutUsername": "",
+      "merchantUsername": "",
+      "pubDate": "2026-11-27T15:39:05+0000",
+      "rejectionReason": "alcohol-offer",
+      "qualityScore": 0,
+      "viennaVerified": false,
+      "mediaEvidence": {
+        "analyzedAt": "",
+        "ocrText": "",
+        "assetCount": 0,
+        "imageCount": 0,
+        "videoFrameCount": 0,
+        "downloadRetries": 0,
+        "errors": [],
+        "ai": null
+      },
+      "hashtags": [
+        "viennarestaurants"
+      ]
+    },
+    {
+      "id": "18177320863483900",
+      "status": "rejected",
+      "url": "https://www.instagram.com/p/DgP6iWrmwd_/",
+      "title": "In search of the best Wiener Schnitzel in Vienna? Crisp, golden, and deeply tied to the city’s culinary identity, it’s the perfect comfort food after a snowy day spent exploring th",
+      "text": "In search of the best Wiener Schnitzel in Vienna? Crisp, golden, and deeply tied to the city’s culinary identity, it’s the perfect comfort food after a snowy day spent exploring the city’s Christmas markets. But not all schnitzel is Wiener Schnitzel. Authentic Wiener Schnitzel is made with veal. And the experience? It can vary by restaurant and recipe. Technique matters. So does the setting. And the right Austrian wine doesn’t hurt. Our new guide looks at what makes a great Wiener Schnitzel, how to order the real thing, what to drink with it, hands-on food experiences, and 7 Vienna restaurants worth your consideration. Read the full guide via the blog link in bio. Photo Credits: 1 and 4 courtesy of Zum Schwarzen Kameel, © Peter Rigaud; Photo 2 courtesy of Pichlmaiers Zum Herkner, © &Social; Photo 5, courtesy of Figlmuller; Photo 6 © Catherine Barnes #WienerSchnitzel #ViennaFood #ViennaRestaurants #ViennaTravel #VisitVienna",
+      "ownerUsername": "",
+      "ownerRole": "",
+      "scoutUsername": "",
+      "merchantUsername": "",
+      "pubDate": "2026-11-27T14:39:25+0000",
+      "rejectionReason": "alcohol-offer",
+      "qualityScore": 0,
+      "viennaVerified": false,
+      "mediaEvidence": {
+        "analyzedAt": "",
+        "ocrText": "",
+        "assetCount": 0,
+        "imageCount": 0,
+        "videoFrameCount": 0,
+        "downloadRetries": 0,
+        "errors": [],
+        "ai": null
+      },
+      "hashtags": [
+        "viennarestaurants"
+      ]
+    },
+    {
+      "id": "18022364870945516",
+      "status": "rejected",
+      "url": "https://www.instagram.com/reel/DgP5125R1No/",
+      "title": "A little piece of Nepal in the heart of Vienna! 🇳🇵✨ From beautiful traditional artwork to unique interiors and a warm, welcoming atmosphere, Yak & Yeti is a place where every cor",
+      "text": "A little piece of Nepal in the heart of Vienna! 🇳🇵✨ From beautiful traditional artwork to unique interiors and a warm, welcoming atmosphere, Yak & Yeti is a place where every corner has its own story. ❤️ Come for the beautiful ambience, enjoy the Nepali vibes and stay tuned for the food! Because there’s more to discover. 😍🍽️ 📍 Yak & Yeti, Vienna, Austria #YakAndYeti #NepaliRestaurantVienna #ViennaRestaurants #ViennaFoodGuide #explorevienna",
+      "ownerUsername": "",
+      "ownerRole": "",
+      "scoutUsername": "",
+      "merchantUsername": "",
+      "pubDate": "2026-11-27T14:38:38+0000",
+      "rejectionReason": "non-offer-content",
+      "qualityScore": 0,
+      "viennaVerified": false,
+      "mediaEvidence": {
+        "analyzedAt": "",
+        "ocrText": "",
+        "assetCount": 0,
+        "imageCount": 0,
+        "videoFrameCount": 0,
+        "downloadRetries": 0,
+        "errors": [],
+        "ai": null
+      },
+      "hashtags": [
+        "viennarestaurants"
+      ]
+    },
+    {
+      "id": "18055893056820294",
+      "status": "rejected",
+      "url": "https://www.instagram.com/p/DgP0xltig1J/",
+      "title": "Forget Black Friday shopping, we are frying here. 🔥 Während draußen alle Rabatte jagen, sorgen wir in der Küche für die richtige Temperatur in der Pfanne. Ein ehrliches Essen schl",
+      "text": "Forget Black Friday shopping, we are frying here. 🔥 Während draußen alle Rabatte jagen, sorgen wir in der Küche für die richtige Temperatur in der Pfanne. Ein ehrliches Essen schlägt jede Shopping-Ausbeute. 😉 Bist du heute im Shopping-Rausch oder gehst du es lieber gemütlich an? 👇 #waldviertlerhof #wien1050 #blackfriday #wienisst #gasthauswien #1050wien #wienfood #österreichischeküche",
+      "ownerUsername": "",
+      "ownerRole": "",
+      "scoutUsername": "",
+      "merchantUsername": "",
+      "pubDate": "2026-11-27T13:49:16+0000",
+      "rejectionReason": "no-concrete-offer",
+      "qualityScore": 0,
+      "viennaVerified": false,
+      "mediaEvidence": {
+        "analyzedAt": "",
+        "ocrText": "",
+        "assetCount": 0,
+        "imageCount": 0,
+        "videoFrameCount": 0,
+        "downloadRetries": 0,
+        "errors": [],
+        "ai": null
+      },
+      "hashtags": [
+        "wienfood",
+        "wienisst"
+      ]
+    },
+    {
+      "id": "18101034119112419",
+      "status": "rejected",
+      "url": "https://www.instagram.com/reel/DgPu6HoRdE6/",
+      "title": "This Italian restaurant in Vienna turns dinner into a little show 🇮🇹 Welcome to Alice’s Pick — Part 2, where I share the places in Vienna I genuinely think are worth discovering.",
+      "text": "This Italian restaurant in Vienna turns dinner into a little show 🇮🇹 Welcome to Alice’s Pick — Part 2, where I share the places in Vienna I genuinely think are worth discovering. Il Melograno brings a taste of Apulia to the city, with homemade pasta and signature dishes prepared right at your table — including its family-recipe tiramisù and salt-crusted sea bass. A spot to save for your next Italian dinner in Vienna. 📍 Il Melograno | ilmelograno_vienna Blumenstockgasse 5, 1010 Wien Follow miracles_alice for more of my personal Vienna picks 🤍 #AlicesPick #ViennaFood #ViennaRestaurants #ViennaFoodGuide #ItalianCuisine ItalianRestaurant ViennaEats ViennaTips",
+      "ownerUsername": "",
+      "ownerRole": "",
+      "scoutUsername": "",
+      "merchantUsername": "",
+      "pubDate": "2026-11-27T13:02:30+0000",
+      "rejectionReason": "no-concrete-offer",
+      "qualityScore": 0,
+      "viennaVerified": false,
+      "mediaEvidence": {
+        "analyzedAt": "",
+        "ocrText": "",
+        "assetCount": 0,
+        "imageCount": 0,
+        "videoFrameCount": 0,
+        "downloadRetries": 0,
+        "errors": [],
+        "ai": null
+      },
+      "hashtags": [
+        "viennarestaurants"
+      ]
+    },
+    {
+      "id": "18104353448418519",
+      "status": "rejected",
+      "url": "https://www.instagram.com/reel/DgPtxQLRQw2/",
+      "title": "Mit alles ist keine Bestellung, sondern eine Lebenseinstellung. 🥙😂 Markier deinen Bro, der niemals auf Zwiebeln verzichtet! #ciosgrill #döner #wienfood #foodie #dönerliebe Döner ",
+      "text": "Mit alles ist keine Bestellung, sondern eine Lebenseinstellung. 🥙😂 Markier deinen Bro, der niemals auf Zwiebeln verzichtet! #ciosgrill #döner #wienfood #foodie #dönerliebe Döner Wien, Kebab, Foodspots Wien, Streetfood Vienna, Halal Food, Döner mit alles, Food Humor, Essen in Wien, Vienna Food Guide, Dönerliebe, 1010 Wien",
+      "ownerUsername": "",
+      "ownerRole": "",
+      "scoutUsername": "",
+      "merchantUsername": "",
+      "pubDate": "2026-11-27T12:48:47+0000",
+      "rejectionReason": "general-recommendation",
+      "qualityScore": 0,
+      "viennaVerified": false,
+      "mediaEvidence": {
+        "analyzedAt": "",
+        "ocrText": "",
+        "assetCount": 0,
+        "imageCount": 0,
+        "videoFrameCount": 0,
+        "downloadRetries": 0,
+        "errors": [],
+        "ai": null
+      },
+      "hashtags": [
+        "wienfood"
+      ]
+    },
+    {
+      "id": "18136089652754346",
+      "status": "rejected",
+      "url": "https://www.instagram.com/p/DgPonSKjh0O/",
+      "title": "❄️ Wintermission startet: Wenn draußen alles grau wird, muss das Mittagessen sitzen. 🥗 Wir sorgen in Mariahilf für die Energie, die dich durch den Winter bringt. Im Lokal aufwärme",
+      "text": "❄️ Wintermission startet: Wenn draußen alles grau wird, muss das Mittagessen sitzen. 🥗 Wir sorgen in Mariahilf für die Energie, die dich durch den Winter bringt. Im Lokal aufwärmen oder reisefertig mitnehmen, ab 12:00. 💬 Kommentier uns: Welche Bowl wärmt dich gerade am meisten auf? 📍 Pfauengasse 8, 1060 Wien, mitten in Mariahilf 🕛 Mo bis Sa, 12:00 bis 21:00 🛵 Keine Lust auf Abholung? Bestell bei unseren Lieferpartnern und beam dir dein Essen nach Hause: Wolt: https://wolt.com/de/aut/vienna/restaurant/spacebowls-bio-streetfood Foodora: https://www.foodora.at/restaurant/kq7w/spacebowls Lieferando: https://www.lieferando.at/speisekarte/spacebowls ✨ Frisch. Bio. Hausgemacht. Für Menschen von diesem Planeten. May the taste be with you. #spacebowls #spacebowlsvienna #spacebowlsmariahilf #mutterschiff #maythetastebewithyou #winterinwien #wintermission #bowlwien #takeawaywien #wienfood #mariahilf #biofood #lunchvienna #lunchwien #mittagspause #wien #wien1060 #1060wien #vienna #viennafood #streetfoodwien #bio #biowien #bioessen #vegan #veganwien #glutenfrei #glutenfree #handgemacht #streetfood",
+      "ownerUsername": "",
+      "ownerRole": "",
+      "scoutUsername": "",
+      "merchantUsername": "",
+      "pubDate": "2026-11-27T12:03:20+0000",
+      "rejectionReason": "no-concrete-offer",
+      "qualityScore": 0,
+      "viennaVerified": false,
+      "mediaEvidence": {
+        "analyzedAt": "",
+        "ocrText": "",
+        "assetCount": 0,
+        "imageCount": 0,
+        "videoFrameCount": 0,
+        "downloadRetries": 0,
+        "errors": [],
+        "ai": null
+      },
+      "hashtags": [
+        "wienfood"
+      ]
+    },
+    {
+      "id": "18112086740340275",
+      "status": "rejected",
+      "url": "https://www.instagram.com/reel/DgPoYYYBDCw/",
+      "title": "Jede Saison inspiriert neue Geschichten auf dem Teller. 💫 Mit unserer neuen Winter Dinner Karte bringen wir die charakteristischen Aromen der kalten Jahreszeit in die Prunkräume: ",
+      "text": "Jede Saison inspiriert neue Geschichten auf dem Teller. 💫 Mit unserer neuen Winter Dinner Karte bringen wir die charakteristischen Aromen der kalten Jahreszeit in die Prunkräume: von zartem Reh über feinen Zander bis hin zu Stubenküken und weiteren saisonalen Highlights. Saisonale Zutaten, präzise Handwerkskunst und die Freude am feinen Detail prägen jedes einzelne Gericht dieser neuen Karte. Erleben Sie unser neues Menü in den Prunkräumen und buchen Sie jetzt ihren Tisch. ************************************* Every season inspires new stories on the plate. 💫 With our new winter dinner menu, we’re bringing the distinctive flavours of the cold season to the Prunkräume: from tender venison and delicate zander to free-range spring chicken and other seasonal highlights. Seasonal ingredients, precise craftsmanship and an eye for fine detail characterise every single dish on this new menu. Experience our new menu in the Prunkräume and book your table now. #Prunkraeume #PalaisCoburg #WinterMenu #FineDining #ViennaRestaurants #SeasonalFlavours #lhwtraveler",
+      "ownerUsername": "",
+      "ownerRole": "",
+      "scoutUsername": "",
+      "merchantUsername": "",
+      "pubDate": "2026-11-27T12:01:23+0000",
+      "rejectionReason": "missing-vienna-evidence",
+      "qualityScore": 0,
+      "viennaVerified": false,
+      "mediaEvidence": {
+        "analyzedAt": "",
+        "ocrText": "",
+        "assetCount": 0,
+        "imageCount": 0,
+        "videoFrameCount": 0,
+        "downloadRetries": 0,
+        "errors": [],
+        "ai": null
+      },
+      "hashtags": [
+        "viennarestaurants"
+      ]
+    },
+    {
+      "id": "18194817808409641",
+      "status": "rejected",
+      "url": "https://www.instagram.com/p/DgPa5--B5BS/",
+      "title": "Steamed or crispy? Why choose when you can have both? 🥟🤍 Außen goldbraun und knusprig, innen soft und fluffy – unsere Baozi bringen das Beste aus beiden Welten auf deinen Teller.",
+      "text": "Steamed or crispy? Why choose when you can have both? 🥟🤍 Außen goldbraun und knusprig, innen soft und fluffy – unsere Baozi bringen das Beste aus beiden Welten auf deinen Teller. Dazu ein bisschen Sauce zum Dippen und der Genuss ist perfekt. ✨ Na, welche Variante ist euer favourite? 👀 📍 Mariahilfer Straße 93 | 1060, Wien #kungfubao #baozi #wienfood #viennaeats #thefirstthought",
+      "ownerUsername": "",
+      "ownerRole": "",
+      "scoutUsername": "",
+      "merchantUsername": "",
+      "pubDate": "2026-11-27T10:03:38+0000",
+      "rejectionReason": "general-recommendation",
+      "qualityScore": 0,
+      "viennaVerified": false,
+      "mediaEvidence": {
+        "analyzedAt": "",
+        "ocrText": "",
+        "assetCount": 0,
+        "imageCount": 0,
+        "videoFrameCount": 0,
+        "downloadRetries": 0,
+        "errors": [],
+        "ai": null
+      },
+      "hashtags": [
+        "wienfood"
+      ]
+    },
+    {
+      "id": "18099373121406755",
+      "status": "rejected",
+      "url": "https://www.instagram.com/p/DgPXI16gXOL/",
+      "title": "Auf dem Bild: Purple Explosion. Unsere Tagesgerichte am 27.11. in Wien: Butter Chicken mit Basmatireis Purple Explosion (vegan) mit Basmatireis 11:30–15:00 Uhr Servitengasse 6, 109",
+      "text": "Auf dem Bild: Purple Explosion. Unsere Tagesgerichte am 27.11. in Wien: Butter Chicken mit Basmatireis Purple Explosion (vegan) mit Basmatireis 11:30–15:00 Uhr Servitengasse 6, 1090 Wien Unser Lokal in der Alser Straße 21, 1080 Wien, bleibt heute, Freitag, 27.11., wegen einer Veranstaltung leider geschlossen. Danke für euer Verständnis! Aktuelle Karte: fresh.at/speisekarte #FreshKitchenWien #MittagessenWien #WienIsst #Tagesgericht #LunchInVienna",
+      "ownerUsername": "",
+      "ownerRole": "",
+      "scoutUsername": "",
+      "merchantUsername": "",
+      "pubDate": "2026-11-27T09:30:07+0000",
+      "rejectionReason": "non-offer-content",
+      "qualityScore": 0,
+      "viennaVerified": false,
+      "mediaEvidence": {
+        "analyzedAt": "",
+        "ocrText": "",
+        "assetCount": 0,
+        "imageCount": 0,
+        "videoFrameCount": 0,
+        "downloadRetries": 0,
+        "errors": [],
+        "ai": null
+      },
+      "hashtags": [
+        "wienisst"
+      ]
+    },
+    {
+      "id": "17892566265686603",
+      "status": "rejected",
+      "url": "https://www.instagram.com/reel/DgPI9IOI_ZG/",
+      "title": "Draußen Schnee. Drinnen Palatschinken. Noch Fragen? ❄️🥞 Warum rausgehen, wenn die Palatschinken auch zu dir kommen? 🛵💨 Einfach bei foodora oder Lieferando bestellen, unter die D",
+      "text": "Draußen Schnee. Drinnen Palatschinken. Noch Fragen? ❄️🥞 Warum rausgehen, wenn die Palatschinken auch zu dir kommen? 🛵💨 Einfach bei foodora oder Lieferando bestellen, unter die Decke kuscheln und warten, bis es läutet 🔔 Nutella, Marmelade oder doch alles? 😏 Schreib uns deine Lieblingsfüllung in die Kommentare 👇 📍 Elysium Holzkohlengrill, Wien 📲 Jetzt auf foodora & Lieferando #palatschinken #wienfood #foodorawien #lieferando #schneetag",
+      "ownerUsername": "",
+      "ownerRole": "",
+      "scoutUsername": "",
+      "merchantUsername": "",
+      "pubDate": "2026-11-27T07:26:31+0000",
+      "rejectionReason": "no-concrete-offer",
+      "qualityScore": 0,
+      "viennaVerified": false,
+      "mediaEvidence": {
+        "analyzedAt": "",
+        "ocrText": "",
+        "assetCount": 0,
+        "imageCount": 0,
+        "videoFrameCount": 0,
+        "downloadRetries": 0,
+        "errors": [],
+        "ai": null
+      },
+      "hashtags": [
+        "wienfood"
+      ]
+    },
+    {
+      "id": "17929828788429647",
+      "status": "rejected",
+      "url": "https://www.instagram.com/reel/DgO4b1ftJ_O/",
+      "title": "Team Döner, Team Burger oder Team Pizza? 🥙🍔🍕 Drei Menüs, drei Meinungen – aber welches Team gewinnt? 👀 Gemeinsam mit der TGM-Schülervertretung bringen wir euch exklusive Mittag",
+      "text": "Team Döner, Team Burger oder Team Pizza? 🥙🍔🍕 Drei Menüs, drei Meinungen – aber welches Team gewinnt? 👀 Gemeinsam mit der TGM-Schülervertretung bringen wir euch exklusive Mittagsmenüs bereits ab 6,90 €! Schreibt euer Team in die Kommentare! 🔥 🎓 Exklusiv für TGM-Schüler:innen mit einem gültigen TGM-Schülerausweis.\\ 📅 Bitte beachtet: Montags haben wir Ruhetag.\\ 📍 La Esno | Klosterneuburger Str. 110, 1200 Wien \\#laesno #tgm #tgmwien #htltgm #tgmsv #tgmschüler #tgmcommunity #schülervertretung #schüleraktion #schülerrabatt #schülerangebot #schülerleben #mittagspause #mittagsmenü #wien #vienna #1200wien #wien1200 #brigittenau #20bezirk #wienfood #viennafood #foodwien #wienessen #wienliebe #wienstagram #dönerwien #burgerwien #pizzawien #streetfoodwien",
+      "ownerUsername": "",
+      "ownerRole": "",
+      "scoutUsername": "",
+      "merchantUsername": "",
+      "pubDate": "2026-11-27T05:02:15+0000",
+      "rejectionReason": "excluded-promotion-type",
+      "qualityScore": 0,
+      "viennaVerified": false,
+      "mediaEvidence": {
+        "analyzedAt": "",
+        "ocrText": "",
+        "assetCount": 0,
+        "imageCount": 0,
+        "videoFrameCount": 0,
+        "downloadRetries": 0,
+        "errors": [],
+        "ai": null
+      },
+      "hashtags": [
+        "wienfood"
+      ]
+    },
+    {
+      "id": "18668483983028076",
+      "status": "rejected",
+      "url": "https://www.instagram.com/reel/DgOSxOPoFE2/",
+      "title": "POV: Selbst bei Minusgraden können wir auf unsere Pizza nicht verzichten! 🥶🍕😂 Draußen eiskalt, im Herzen Napoli. ❤️🇮🇹 Zwei Brüder. Eine Leidenschaft. Echte neapolitanische Piz",
+      "text": "POV: Selbst bei Minusgraden können wir auf unsere Pizza nicht verzichten! 🥶🍕😂 Draußen eiskalt, im Herzen Napoli. ❤️🇮🇹 Zwei Brüder. Eine Leidenschaft. Echte neapolitanische Pizza – egal, wo wir sind! Wer würde mit uns eine Pizza im Schnee essen? ❄️🔥 📍 I FRATELLI PULCINELLA – myhive Wienerberg, Wien #Wien #Vienna #PizzaNapoletana #WienFood #WienEssen Napoli PizzaLovers FratelliPulcinella Wienerberg FürDich FYP WinterVibes",
+      "ownerUsername": "",
+      "ownerRole": "",
+      "scoutUsername": "",
+      "merchantUsername": "",
+      "pubDate": "2026-11-26T23:33:54+0000",
+      "rejectionReason": "no-concrete-offer",
+      "qualityScore": 0,
+      "viennaVerified": false,
+      "mediaEvidence": {
+        "analyzedAt": "",
+        "ocrText": "",
+        "assetCount": 0,
+        "imageCount": 0,
+        "videoFrameCount": 0,
+        "downloadRetries": 0,
+        "errors": [],
+        "ai": null
+      },
+      "hashtags": [
+        "wienfood"
+      ]
+    }
+  ]
 }
