@@ -332,6 +332,9 @@ export function createCreditBudget({ store, policy, clock = Date.now, request = 
     });
     // Never send an unreserved call, including after slow storage crosses expiry.
     validateCreditPolicy(policy, clock());
+    if (prepared.modality === 'image' && clock() + OPENAI_IMAGE_TIMEOUT_MS >= Date.parse(policy.expiresAt)) {
+      throw paused('image-generation-period-ending');
+    }
     let response, payload;
     try {
       response = await request(providerUrl, { ...prepared.init,
