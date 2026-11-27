@@ -75,6 +75,19 @@ test('text, date and location edits that retain the same product keep the exact 
   assert.deepEqual(result.deal.pendingDealImage,previous.pendingDealImage);
 });
 
+test('replacement retains the Community card style and clears all old attachment content',async()=>{
+  const edited={...await draft(),title:'Gratis Döner',source:'Community',originSource:'community-submission',submissionId:'fixture'};
+  const f=requests();
+  const result=await refreshPendingDealPhoto(edited,{root,now,request:f.request,token:'offline-token',channel:'offline-channel'});
+  assert.equal(result.status,'refreshed');
+  assert.deepEqual(f.calls[0].body.attachments,[]);
+  const posted=f.calls[1].body;
+  assert.equal(posted.channel,'offline-channel');
+  assert.match(posted.text,/COMMUNITY-EINSENDUNG/);
+  assert.equal(posted.attachments[0].color,'#EAB308');
+  assert.equal(posted.attachments[0].blocks.filter(block=>block.type==='image').length,1);
+});
+
 test('unavailable or substituted photo bytes cannot supersede the already delivered preview',async()=>{
   const edited = {...await draft(),title:'Gratis Döner'};
   const f = requests({badPhoto:true});

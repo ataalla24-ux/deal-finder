@@ -34,10 +34,11 @@ export async function refreshPendingDealPhoto(deal,{
     checkPreview:createDealImagePreviewCheck({request})});
   const image = dealImagePreviewBlock(staged,{enabled:true,now});
   if (!image) return unavailable('preview-unavailable');
-  const {buildSlackMessage,pendingEditBlocks} = await import('../scraper/slack-notify.js');
-  const text = `${buildSlackMessage(staged,deal.order || 1)}\nBitte Foto und Angebot prüfen und diese neue Nachricht mit ✅ freigeben.`.toWellFormed();
-  const blocks = pendingEditBlocks(text,staged) || (text.match(/[\s\S]{1,2900}/gu) || [])
-    .map(part => ({type:'section',text:{type:'mrkdwn',text:part}}));
+  const {buildPendingDealMessage,pendingSlackPayload} = await import('../scraper/slack-notify.js');
+  const text = `${buildPendingDealMessage(staged,deal.order || 1)}\nBitte Foto und Angebot prüfen und diese neue Nachricht mit ✅ freigeben.`.toWellFormed();
+  const {channel:_channel,...card} = pendingSlackPayload(text,deal.slackThreadTs,staged);
+  const blocks = card.attachments?.[0]?.blocks || card.blocks || (card.blocks = (text.match(/[\s\S]{1,2900}/gu) || [])
+    .map(part => ({type:'section',text:{type:'mrkdwn',text:part}})));
   if (!blocks.some(block => block.type === 'image')) blocks.push(image);
   const slack = async (method,payload) => {
     try {
@@ -50,11 +51,11 @@ export async function refreshPendingDealPhoto(deal,{
   };
   // Existing reactions belong to the previous picture. A replacement card gets
   // its own message identity so only a fresh reaction can approve the new file.
-  const superseded = await slack('chat.update',{ts:deal.slackTs,blocks:[],
+  const superseded = await slack('chat.update',{ts:deal.slackTs,blocks:[],attachments:[],
     text:'Bildvorschau nach Bearbeitung erneuert. Bitte die neue Deal-Nachricht in diesem Thread prüfen und dort ✅ setzen.',
     unfurl_links:false,unfurl_media:false});
   if (!superseded) return unavailable('slack-update-failed');
-  const posted = await slack('chat.postMessage',{thread_ts:deal.slackThreadTs,text,blocks,
+  const posted = await slack('chat.postMessage',{...card,
     client_msg_id:messageIdentity(deal.slackTs,staged.pendingDealImage.subjectHash),
     unfurl_links:false,unfurl_media:false});
   if (!posted || typeof posted.ts !== 'string' || !/^\d+\.\d+$/.test(posted.ts)) return unavailable('slack-post-failed');

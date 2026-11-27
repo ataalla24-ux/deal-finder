@@ -319,7 +319,7 @@ function parseDigestDealMessage(message, fallbackIndex = 0) {
   // A Slack delivery can succeed before its queue commit. Its image contract
   // must survive fallback reconstruction; missing preparation stays held.
   if (/Bildfreigabe: Genau dieses Foto erscheint in der App\./u.test(text)
-    || message.blocks?.some(block => block.type === 'image'
+    || [...(message.blocks || []),...(message.attachments || []).flatMap(attachment => attachment.blocks || [])].some(block => block.type === 'image'
       && /^https:\/\/freefinder\.at\/assets\/(?:deal-image-pilot|approved-deal-photos)\/[a-z0-9-]+\.jpg$/.test(block.image_url || ''))) {
     normalized.imageApprovalRequired = true;
   }
