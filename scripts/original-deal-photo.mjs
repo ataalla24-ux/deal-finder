@@ -1,6 +1,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
-import {approvedDealPhotoURL, inspectOriginalJPEG, photoDigest, photoSubjectHash} from './deal-photo-contract.mjs';
+import {approvedDealPhotoURL, inspectOriginalJPEG, photoDigest, photoSubjectHash,
+  normalizeApprovedDealImage,generatedPhotoSubjectHash,validateGeneratedPhotoReceipt} from './deal-photo-contract.mjs';
 
 function boundedRead(file, base, maximum) {
   const real = fs.realpathSync(file);
@@ -83,14 +84,20 @@ export function readBoundPhotoSnapshot(deal,{root=process.cwd()}={}) {
   const reviewDirectory = path.join(root,'reviews/deal-photos');
   const review = JSON.parse(boundedRead(path.join(reviewDirectory,filename+'.json'),reviewDirectory,20000));
   validatePhotoPermission(review);
+  let expectedSubject = photoSubjectHash(deal);
+  if (review.generation || review.renderedDisclosure?.version === 2) {
+    const approved = normalizeApprovedDealImage(deal.approvedDealImage,deal.id,deal.photoUrl);
+    const generation = validateGeneratedPhotoReceipt(deal,review,{approvedImage:approved?.version === 2 ? approved : undefined});
+    expectedSubject = generatedPhotoSubjectHash(deal,generation);
+  }
   if (review.version!==2 || review.dealId!==deal.id || review.photoUrl!==url || review.file!==filename
-    || review.subjectHash!==photoSubjectHash(deal) || !Number.isFinite(Date.parse(review.reviewedAt)))
+    || review.subjectHash!==expectedSubject || !Number.isFinite(Date.parse(review.reviewedAt)))
     throw Error('original-photo-review-stale');
   const imageDirectory = path.join(root,'docs/assets/approved-deal-photos');
   const bytes = boundedRead(path.join(imageDirectory,filename),imageDirectory,1_500_000);
   if (photoDigest(bytes)!==review.sha256 || filename!==`${photoDigest(deal.id).slice(0,16)}-${review.sha256}.jpg`)
     throw Error('original-photo-integrity-failed');
-  if (Object.hasOwn(review,'renderedDisclosure')) {
+  if (Object.hasOwn(review,'renderedDisclosure') && review.renderedDisclosure?.version !== 2) {
     const disclosure = review.renderedDisclosure;
     const previewDirectory = path.join(root,'docs/assets/deal-image-pilot');
     const catalog = JSON.parse(boundedRead(path.join(previewDirectory,'catalog.json'),previewDirectory,100_000));

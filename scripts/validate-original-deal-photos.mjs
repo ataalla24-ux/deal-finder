@@ -19,7 +19,8 @@ export async function validateOriginalDealPhotos(deals,{root=process.cwd(),previ
     try {
       const previous = previousLocks.get(deal.id);
       if (previous && (previous.photoUrl !== deal.photoUrl
-        || ['version','status','photoUrl','sha256','assetKey','kind','approvedAt'].some(field =>
+        || ['version','status','photoUrl','sha256','assetKey','kind','approvedAt','sourceKind',
+          'generationKey','draftContextHash','visualSubject'].some(field =>
           previous.approvedDealImage[field] !== deal.approvedDealImage?.[field]))) {
         throw Error('locked-photo-changed-after-approval');
       }

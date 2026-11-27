@@ -4,6 +4,7 @@ import { dealImageAssetKey, dealImageSubjectHash } from '../scraper/deal-image-s
 export const photoDigest = value => createHash('sha256').update(value).digest('hex');
 export function photoSubjectHash(deal) {
   const approved = normalizeApprovedDealImage(deal?.approvedDealImage,deal?.id,deal?.photoUrl);
+  if (approved?.version === 2) return generatedPhotoSubjectHash(deal,approved);
   if (approved && approved.assetKey === dealImageAssetKey(deal)) return dealImageSubjectHash(deal,approved.assetKey);
   return photoDigest(JSON.stringify(['original-photo-subject-v1',
     ...['id','title','brand','description','category','url'].map(field=>String(deal?.[field]||'').trim())]));
@@ -40,13 +41,99 @@ export function inspectOriginalJPEG(bytes) {
 }
 
 export function normalizeApprovedDealImage(raw, dealId, photoUrl) {
-  if (!raw || raw.version !== 1 || raw.status !== 'locked'
+  if (!raw || ![1,2].includes(raw.version) || raw.status !== 'locked'
     || !['editorial-illustration','merchant-photo'].includes(raw.kind)
     || typeof raw.assetKey !== 'string' || !/^[a-z0-9][a-z0-9-]{0,79}$/.test(raw.assetKey)
     || typeof raw.sha256 !== 'string' || !/^[a-f0-9]{64}$/.test(raw.sha256)
     || !approvedDealPhotoURL(raw.photoUrl,dealId) || raw.photoUrl !== photoUrl
     || !raw.photoUrl.endsWith(`-${raw.sha256}.jpg`)
     || typeof raw.approvedAt !== 'string' || !Number.isFinite(Date.parse(raw.approvedAt))) return null;
-  return {version:1,status:'locked',photoUrl:raw.photoUrl,sha256:raw.sha256,assetKey:raw.assetKey,
-    kind:raw.kind,approvedAt:raw.approvedAt};
+  if (raw.version === 2 && (raw.sourceKind !== 'generated-owned' || raw.kind !== 'editorial-illustration'
+    || !validGeneratedHash(raw.generationKey) || !validGeneratedHash(raw.draftContextHash)
+    || typeof raw.visualSubject !== 'string' || !raw.visualSubject.trim() || raw.visualSubject.length > 1200)) return null;
+  return {version:raw.version,status:'locked',photoUrl:raw.photoUrl,sha256:raw.sha256,assetKey:raw.assetKey,
+    kind:raw.kind,approvedAt:raw.approvedAt,...(raw.version === 2 ? {sourceKind:'generated-owned',
+      generationKey:raw.generationKey,draftContextHash:raw.draftContextHash,visualSubject:cleanGeneratedPhotoText(raw.visualSubject)} : {})};
+}
+
+const cleanGeneratedPhotoText = value => String(value ?? "").replace(/\s+/g," ").trim();
+const validGeneratedHash = value => typeof value === "string" && /^[a-f0-9]{64}$/.test(value);
+const validGeneratedTime = value => typeof value === "string" && Number.isFinite(Date.parse(value));
+const validGeneratedModel = value => typeof value === "string" && /^[a-zA-Z0-9][a-zA-Z0-9._-]{0,79}$/.test(value);
+export const GENERATED_PHOTO_LABEL_BOUNDS = Object.freeze({left:428,top:320,width:224,height:54});
+
+export function generatedPhotoInputHash(deal) {
+  return photoDigest(JSON.stringify(['generated-photo-input-v1',
+    ...['id','url','brand','category','title','description'].map(field => cleanGeneratedPhotoText(deal?.[field]))]));
+}
+
+export function generatedPhotoIdentityHash(deal) {
+  return photoDigest(JSON.stringify(['generated-photo-identity-v1',
+    ...['id','url','brand','category'].map(field => cleanGeneratedPhotoText(deal?.[field]))]));
+}
+
+export function generatedPhotoSubjectHash(deal, image) {
+  if (!validGeneratedHash(image?.generationKey) || !validGeneratedHash(image?.draftContextHash || image?.inputHash)
+    || typeof image?.visualSubject !== 'string' || !image.visualSubject.trim() || image.visualSubject.length > 1200
+    || image.assetKey !== dealImageAssetKey(deal)) return '';
+  return photoDigest(JSON.stringify(['generated-photo-subject-v1',generatedPhotoIdentityHash(deal),
+    image.assetKey,image.generationKey,image.draftContextHash || image.inputHash,cleanGeneratedPhotoText(image.visualSubject)]));
+}
+
+export function normalizeGeneratedPhotoDraft(raw, deal) {
+  if (!raw || raw.version !== 1 || raw.sourceKind !== 'generated-owned'
+    || !validGeneratedHash(raw.generationKey) || !validGeneratedHash(raw.inputHash) || !validGeneratedHash(raw.identityHash)
+    || !validGeneratedHash(raw.sha256) || !validGeneratedHash(raw.promptHash) || !validGeneratedModel(raw.model)
+    || typeof raw.visualSubject !== 'string' || !raw.visualSubject.trim() || raw.visualSubject.length > 1200
+    || typeof raw.assetKey !== 'string' || !/^[a-z0-9][a-z0-9-]{0,79}$/.test(raw.assetKey)
+    || !validGeneratedTime(raw.generatedAt) || typeof raw.photoUrl !== 'string'
+    || !/^https:\/\/freefinder\.at\/assets\/approved-deal-photos\/[a-f0-9]{16}-[a-f0-9]{64}\.jpg$/.test(raw.photoUrl)
+    || !raw.photoUrl.endsWith(`-${raw.sha256}.jpg`)) return null;
+  if (deal && (raw.identityHash !== generatedPhotoIdentityHash(deal)
+    || raw.assetKey !== dealImageAssetKey(deal)
+    || !raw.photoUrl.includes(`/${photoDigest(String(deal.id)).slice(0,16)}-`))) return null;
+  return {version:1,sourceKind:'generated-owned',generationKey:raw.generationKey,inputHash:raw.inputHash,
+    identityHash:raw.identityHash,photoUrl:raw.photoUrl,sha256:raw.sha256,assetKey:raw.assetKey,
+    visualSubject:cleanGeneratedPhotoText(raw.visualSubject),promptHash:raw.promptHash,model:raw.model,generatedAt:raw.generatedAt};
+}
+
+export function generatedPhotoDraftMatches(deal, draft) {
+  const normalized = normalizeGeneratedPhotoDraft(draft,deal);
+  return Boolean(normalized && normalized.inputHash === generatedPhotoInputHash(deal));
+}
+
+export function generatedPhotoApproval(deal, draft, approvedAt = new Date(), {allowCopyEnrichment=false}={}) {
+  const normalized = normalizeGeneratedPhotoDraft(draft,deal);
+  const at = approvedAt instanceof Date ? approvedAt.toISOString() : approvedAt;
+  if (!normalized || !validGeneratedTime(at) || !allowCopyEnrichment && !generatedPhotoDraftMatches(deal,normalized)) {
+    throw Error('generated-photo-approval-context-mismatch');
+  }
+  return {version:2,status:'locked',sourceKind:'generated-owned',photoUrl:normalized.photoUrl,
+    sha256:normalized.sha256,assetKey:normalized.assetKey,kind:'editorial-illustration',approvedAt:at,
+    generationKey:normalized.generationKey,draftContextHash:normalized.inputHash,visualSubject:normalized.visualSubject};
+}
+
+export function validateGeneratedPhotoReceipt(deal, review, {approvedImage}={}) {
+  const generated = normalizeGeneratedPhotoDraft(review.generation,deal);
+  const disclosure = review.renderedDisclosure;
+  if (!generated || generated.photoUrl !== review.photoUrl || generated.sha256 !== review.sha256
+    || review.kind !== 'editorial-illustration' || review.rights !== 'owned-original'
+    || review.showsActualProduct !== false || review.showsIllustratedProduct !== true
+    || review.sourceURL !== review.photoUrl
+    || disclosure?.version !== 2 || disclosure.sourceKind !== 'generated-owned'
+    || disclosure.label !== 'Symbolbild' || disclosure.imageSha256 !== review.sha256
+    || JSON.stringify(disclosure.bounds) !== JSON.stringify(GENERATED_PHOTO_LABEL_BOUNDS)
+    || review.width !== 1080 || review.height !== 400) throw Error('generated-photo-provenance-invalid');
+  if (approvedImage) {
+    if (approvedImage.version !== 2 || approvedImage.sourceKind !== 'generated-owned'
+      || approvedImage.photoUrl !== generated.photoUrl || approvedImage.sha256 !== generated.sha256
+      || approvedImage.assetKey !== generated.assetKey || approvedImage.generationKey !== generated.generationKey
+      || approvedImage.draftContextHash !== generated.inputHash || approvedImage.visualSubject !== generated.visualSubject) {
+      throw Error('generated-photo-approval-receipt-mismatch');
+    }
+  } else if (!generatedPhotoDraftMatches(deal,generated)) {
+    throw Error('generated-photo-draft-stale');
+  }
+  if (review.subjectHash !== generatedPhotoSubjectHash(deal,generated)) throw Error('generated-photo-subject-stale');
+  return generated;
 }
