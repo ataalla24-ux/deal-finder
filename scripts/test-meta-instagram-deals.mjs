@@ -375,6 +375,7 @@ assert.doesNotMatch(h11Graph.deal.title, /1%|\| f B/);
 assert.equal(h11Graph.deal.type, 'gratis');
 assert.equal(h11Graph.deal.category, 'essen');
 assert.equal(h11Graph.deal.description, captionWithOffer);
+assert.equal(h11Graph.deal.caption, captionWithOffer, 'Expiry retains the literal post independently of display/OCR copy');
 assert.equal(h11Graph.deal.evidence.mediaEvidence.ocrText, brokenOcr, 'Raw OCR is retained for review, never discarded');
 const imageOfferWithNoise = normalizeGraphMediaItem({
   id: 'confirmed-image-with-noisy-ocr', username: 'h11_grill',

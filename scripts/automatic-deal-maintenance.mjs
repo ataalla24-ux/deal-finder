@@ -20,6 +20,9 @@ import { reconcileReviewedApprovalExpiry } from '../scraper/approval-reviewed-so
 import { offerPeriodFields } from '../scraper/offer-period-fields.js';
 import { projectEnrichmentDeal, stripEnrichmentNotice, updateDealEnrichment } from '../scraper/deal-enrichment-state.js';
 import {photoSubjectHash} from './deal-photo-contract.mjs';
+import { readApprovedExpiryEvidence } from './approved-expiry-evidence.mjs';
+import { assessEmbeddedClockRangeEnd, hasConflictingOfferClock } from './expiry-embedded-clock-range.mjs';
+import { assessOriginalTodayEnd } from './expiry-original-today.mjs';
 export { automaticMaintenanceReviewCandidates } from './automatic-maintenance-review.mjs';
 
 const clean = value => String(value || '').replace(/\s+/g, ' ').trim();
@@ -37,8 +40,9 @@ const exactDay = value => {
   const date = new Date(`${text}T12:00:00Z`);
   return Number.isFinite(+date) && date.toISOString().slice(0, 10) === text ? text : '';
 };
-export const sourceTexts = (deal, latest) => (latest?.blockingReason || latest?.graphAccepted === false || deal.metaGraphBlockingReason
+export const sourceTexts = (deal, latest, now = new Date()) => (latest?.blockingReason || latest?.graphAccepted === false || deal.metaGraphBlockingReason
   ? [] : latest ? [latest.caption, latest.ocrText, latest.officialText] : [deal.metaGraphCaption, deal.metaGraphOcrText, deal.caption,
+  readApprovedExpiryEvidence(deal, { now })?.sourceText,
   deal.evidence?.textSample, deal.evidence?.offerDateSignal, deal.evidence?.media?.ocr?.footer,
   deal.evidence?.offerTiming?.matchedText]).map(clean).filter(Boolean);
 
@@ -105,6 +109,7 @@ const dateFields = ['validFrom', 'validOn', 'validUntil', 'expires', 'expiryKind
 const dayMs = 86400000;
 const viennaDate = new Intl.DateTimeFormat('sv-SE', { timeZone: 'Europe/Vienna', dateStyle: 'short' });
 const uncertainExpiry = /geburtstag|birthday|dauerhaft|unbefristet|bis auf weiteres|verl[aä]ngert|verlaengert|extended|voraussichtlich|ungef[aä]hr|circa/i;
+const contradictedExpiryTiming = /\b(?:nicht\s+(?:(?:nur|mehr|erst|ausschliesslich)\s+)?(?:bis|am|zum|gultig|gueltig|beendet|vorbei)|endet\s+nicht|not\s+(?:only\s+)?(?:until|on|valid|ending)|(?:alte|fruhere|bisherige|vorherige|uberholte)\s+(?:angabe|enddatum|ablaufdatum|frist)|(?:datum|frist|aktion|angabe)\s+(?:gilt|ist)\s+nicht|(?:lauft|geht)\s+weiter|(?:sondern|bleibt)\s+weiterhin|auch\s+(?:morgen|nach)|daruber hinaus|mindestens\s+bis|fruhestens\s+(?:am|bis)|at least\s+until)\b/;
 const reuseOrUnclearTiming = /\b(?:repost\w*|regram\w*|reshar\w*|throwback|ruckblick|rueckblick|archivaufnahme|flashback|letztes jahr|last year|erneut geteilt|wieder hochgeladen|jede[nmrs]?|every\s+(?:(?:other|second|third|\d+)\s+)?(?:monday|tuesday|wednesday|thursday|friday|saturday|sunday|minutes?|hours?|days?|weekdays?|weekends?|weeks?|months?|years?)|wochentlich|weekly|maybe|probably|vermutlich|eventuell|geplant|planned|tentative|teilnahmeschluss|einsendeschluss|gewinnspiel|giveaway|offnungszeiten|oeffnungszeiten)\b|#tbt\b|(?:\bnicht|\bnot)\s+(?:mehr\s+)?(?:nur|only|gultig|gueltig|valid)\b/;
 const originalDateMarker = 'nur am|ausschliesslich am|only on|gultig am|gueltig am|bis|until|ends(?: on)?';
 const dateParts = `(\\d{1,2})(?:[./](\\d{1,2})(?:[./](\\d{2,4}))?|\\.?\\s+(${Object.keys(months).join('|')})\\b\\.?(?:\\s+(\\d{2,4})(?![:.\\d]))?)(?!\\d)`;
@@ -374,8 +379,11 @@ function exactEndEvidence(deal, end, edits, latest, texts) {
   const ownedPeriod = edits.filter(edit => edit.dealId === deal.id && sameInstant(edit.expires, deal.expires))
     .flatMap(edit => [edit.expiresOriginal, edit.expiryDisplayText]).filter(Boolean);
   if (!ownedPeriod.every(value => confirmsExactEnd(value, deal, end))) return '';
-  const sourcePeriod = texts.find(value => confirmsExactEnd(value, deal, end));
-  if (sourcePeriod) return sourcePeriod;
+  for (const value of texts) {
+    if (confirmsExactEnd(value, deal, end)) return value;
+    const embedded = assessEmbeddedClockRangeEnd(deal, value);
+    if (embedded) return embedded.quote;
+  }
 
   if (latest) {
     // Discovery age does not invalidate an unchanged original. Other source
@@ -417,7 +425,7 @@ export function assessAutomaticExpiry(deal, { now = new Date(), edits = [], poli
       if (Object.hasOwn(edit, field) && clean(edit[field]).slice(0, 10) !== clean(deal[field]).slice(0, 10)) return hold('newer-manual-period-correction');
     }
   }
-  const texts = sourceTexts(deal, latestEvidence);
+  const texts = sourceTexts(deal, latestEvidence, now);
   // A later source observation always takes precedence, even when it no longer gives a date.
   const coupon = !latestEvidence && !deal.metaGraphBlockingReason && couponEndEvidence(deal, policy, now);
   if (coupon) {
@@ -432,7 +440,8 @@ export function assessAutomaticExpiry(deal, { now = new Date(), edits = [], poli
     ? clean(deal.description).replace(/\bkein fester rabatt oder dauerhaft g(?:ü|ue)ltiger preis zugesagt\b/gi, '')
     : deal.description;
   const text = clean([description, deal.expiryDisplayText, ...texts].join(' '));
-  if (uncertainExpiry.test(text)) return hold('ongoing-extended-or-uncertain');
+  if (uncertainExpiry.test(text) || end && contradictedExpiryTiming.test(normalizedDateText([text, deal.title].join(' '))))
+    return hold('ongoing-extended-or-uncertain');
   const exactPeriod = exactEndEvidence(deal, end, matchedEdits, latestEvidence, texts);
   if (exactPeriod) {
     const context = [text, deal.title, deal.metaGraphCaption, deal.metaGraphOcrText].join(' ');
@@ -441,7 +450,9 @@ export function assessAutomaticExpiry(deal, { now = new Date(), edits = [], poli
       .flatMap(value => originalDateClauses(value))
       .some(clause => clause.ambiguous || clause.monthDay !== end.slice(5)
         || (clause.year && clause.year !== end.slice(0, 4)));
-    if (contradictoryDate || uncertainExpiry.test(context) || reuseOrUnclearTiming.test(exactContext)
+    if (contradictoryDate || hasConflictingOfferClock(exactPeriod,
+      [...texts, deal.title, deal.description, deal.metaGraphCaption, deal.metaGraphOcrText])
+      || uncertainExpiry.test(context) || reuseOrUnclearTiming.test(exactContext)
       || /\b(?:am nachsten tag|am folgenden tag|uber mitternacht|lauft weiter|geht weiter|weiterhin|auch morgen|fortgesetzt)\b/.test(exactContext))
       return hold('ambiguous-exact-offer-end');
     if (+now < Date.parse(deal.expires)) return hold('not-expired-or-safety-grace');
@@ -449,15 +460,18 @@ export function assessAutomaticExpiry(deal, { now = new Date(), edits = [], poli
       expires: new Date(deal.expires).toISOString(), evidenceHash: hash([exactPeriod]), evidence: [exactPeriod] };
   }
   const merchantDay = confirmedMerchantSingleDay(deal, latestEvidence, end, now);
-  if (scheduledExpiryOnly && !merchantDay) return hold('scheduled-offer-end-not-confirmed');
+  const originalToday = !latestEvidence && !deal.metaGraphBlockingReason
+    && assessOriginalTodayEnd(deal, { now });
+  // Scheduled runs skip enrichment, not expiry evidence. Date-only campaigns
+  // must reach the same conservative source/date guards as the daily review.
   // A structured date alone can be a guessed TTL. Require literal offer wording.
   const hasExplicitEnd = end && ['end', 'range', 'single'].includes(deal.expiryKind);
-  let evidence = merchantDay ? [merchantDay.caption]
+  let evidence = originalToday ? originalToday.evidence : merchantDay ? [merchantDay.caption]
     : hasExplicitEnd ? texts.filter(value => literalSourceEnds(value, deal.expiryKind).length > 0) : [];
-  let sourceEnds = merchantDay ? [end] : evidence.flatMap(value => literalSourceEnds(value, deal.expiryKind));
-  let reason = merchantDay ? 'confirmed-original-instagram-single-day'
+  let sourceEnds = originalToday ? [originalToday.end] : merchantDay ? [end] : evidence.flatMap(value => literalSourceEnds(value, deal.expiryKind));
+  let reason = originalToday ? 'confirmed-original-social-today' : merchantDay ? 'confirmed-original-instagram-single-day'
     : coupon ? 'captured-coupon-offer-end' : 'literal-source-end-with-year';
-  let originalPostPublishedAt = merchantDay?.publishedAt;
+  let originalPostPublishedAt = originalToday?.originalPostPublishedAt || merchantDay?.publishedAt;
   if (hasExplicitEnd && (!sourceEnds.length || sourceEnds.includes('')) && sourceEnds.every(value => !value || value === end)) {
     const confirmed = deal.expiryKind === 'single' && deal.validOn === end
       && (!deal.validFrom || deal.validFrom === end)

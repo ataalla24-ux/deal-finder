@@ -1195,6 +1195,9 @@ export function buildDealFromPost(url, data, options = {}) {
       brand,
       logo,
       title,
+      // Preserve the literal post independently of the shortened reader copy.
+      // Approval binds this existing text to its confirmed offer period.
+      caption: cleanText(data.description || data.title, 12000),
       description: cleanText([
         data.description || data.title,
         media.ai?.offerText ? `Bildbeleg: ${media.ai.offerText}.` : '',

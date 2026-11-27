@@ -676,6 +676,8 @@ assert.equal(trustedVisualDeal.deal.validUntil, '2026-08-30');
 assert.equal(trustedVisualDeal.deal.ownerUsername, 'visual.cafe.wien');
 assert.equal(trustedVisualDeal.deal.evidence.mediaEvidence.ai.confidence, 0.96);
 assert.match(trustedVisualDeal.deal.description, /Bildbeleg/);
+assert.equal(trustedVisualDeal.deal.caption, trustedVisualData.description || trustedVisualData.title);
+assert.doesNotMatch(trustedVisualDeal.deal.caption, /Bildbeleg|Quelle:/, 'Expiry source never promotes generated visual or attribution copy');
 
 const personalCompensation = build(
   'https://www.tiktok.com/@assal.burger/video/7678002441849425194',

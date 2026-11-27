@@ -30,6 +30,11 @@ const SOURCE_INPUTS = [
   'reviews/automatic-maintenance-policy.json',
   'reviews/automatic-deal-maintenance-state.json',
   'scripts/automatic-deal-maintenance.mjs',
+  'scripts/approved-expiry-evidence.mjs',
+  'scripts/expiry-embedded-clock-range.mjs',
+  'scripts/expiry-original-today.mjs',
+  'scraper/explicit-offer-period.js',
+  'scraper/deal-evidence-utils.js',
   'scripts/original-social-copy.mjs',
   'scripts/expiry-fixed-flight.mjs',
   'scripts/expiry-instagram-finite-range.mjs',
@@ -238,6 +243,26 @@ test('canonical feed writer archives source-proven expiry before stamping and ma
   const archive = JSON.parse(remoteText(f, 'reviews/automatic-deal-maintenance-state.json'));
   assert.deepEqual(archive.hidden[0].originalDeal, expired);
   assert.deepEqual(JSON.parse(remoteText(f, MAP)).dealIds, ['future']);
+});
+
+test('an unchanged feed is swept for source-confirmed expiry before atomic feed/map publication', t => {
+  const f = fixture(t);
+  const expired = { id: 'elapsed-calendar', brand: 'Cafe Wien', title: 'Gratis Kaffee',
+    url: 'https://example.com/coffee', validUntil: '2025-10-01', expiryKind: 'end',
+    expires: '2025-10-01T23:59:59.999Z', metaGraphCaption: 'Gratis Kaffee. Gueltig bis 01.10.2025.' };
+  const ongoing = { id: 'ongoing', title: 'Kaffee fuer 2 Euro', votes: 17 };
+  publishRemote(f, 'reviews/automatic-maintenance-policy.json', { version: 1, enabled: true, automaticExpiry: true,
+    expiryGraceHours: 12, maxNewHidesPerRun: 5 });
+  publishRemote(f, 'docs/live-deal-edits.json', { edits: [] });
+  publishRemote(f, FEED, { deals: [expired, ongoing], totalDeals: 2 });
+  run('git', ['pull', '--ff-only', 'origin', 'main'], f.local);
+  assert.equal(run('git', ['status', '--porcelain'], f.local), '');
+  const result = generate(f, [FEED]);
+  assert.equal(result.status, 0, result.output);
+  assert.deepEqual(JSON.parse(remoteText(f, FEED)).deals.map(deal => deal.id), ['ongoing']);
+  assert.deepEqual(JSON.parse(remoteText(f, MAP)).dealIds, ['ongoing']);
+  assert.deepEqual(JSON.parse(remoteText(f, 'reviews/automatic-deal-maintenance-state.json')).hidden[0].originalDeal, expired);
+  assert.equal(JSON.parse(remoteText(f, FEED)).deals[0].votes, 17);
 });
 
 test('large unchanged source caches do not break map-only writers', t => {

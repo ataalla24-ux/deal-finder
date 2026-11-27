@@ -1271,6 +1271,8 @@ export function normalizeGraphMediaItem(raw, context, config, now = new Date()) 
       },
     },
   });
+  // Reader copy may include AI/OCR additions; expiry needs the original post.
+  deal.caption = caption;
   deal.promotionEvidence = promotion.evidence;
   if (+now - Date.parse(sourcePublishedAt) > 7 * DAY_MS) Object.assign(deal, originalRecord);
   if (promotion.lowPrice) { deal.offerKind = promotion.offerKind; deal.priceEvidence = promotion.lowPrice; }

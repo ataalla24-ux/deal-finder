@@ -12,6 +12,10 @@ on:
       - 'reviews/map-addresses.json'
       - 'reviews/map-chain-rules.json'
       - 'scripts/automatic-deal-maintenance.mjs'
+      - 'scripts/approved-expiry-evidence.mjs'
+      - 'scripts/expiry-embedded-clock-range.mjs'
+      - 'scripts/expiry-original-today.mjs'
+      - 'scraper/explicit-offer-period.js'
       - 'scripts/deal-map-*.mjs'
       - 'scripts/enrich-deal-map.mjs'
       - '.github/workflows/deal-map-sync.yml'
@@ -40,6 +44,7 @@ jobs:
       - name: Verify map safeguards
         run: |
           node --test scripts/test-automatic-maintenance.mjs
+          node --test scripts/test-approved-expiry-evidence.mjs scripts/test-expiry-embedded-clock-range.mjs scripts/test-expiry-original-today.mjs scripts/test-expiry-reliability.mjs
           node scripts/test-deal-map-enrichment.mjs
           node scripts/test-map-enrichment-reconciliation.mjs
           node scripts/test-deal-map-chain-rules.mjs
@@ -51,7 +56,7 @@ jobs:
           node scripts/test-deal-map-review.mjs
           node scripts/test-slack-business-map-review.mjs
           SENTRY_DISABLED=1 node scripts/test-community-approval-integration.mjs
-      - name: Remove deals with a confirmed elapsed end time or verified merchant day
+      - name: Remove deals with source-confirmed elapsed times and calendar ends
         env:
           AUTOMATIC_MAINTENANCE_APPLY: '1'
         run: node scripts/automatic-deal-maintenance.mjs --scheduled-expiry-only

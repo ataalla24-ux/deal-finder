@@ -36,6 +36,11 @@ const MAP_INPUT_FILES = [
   'scraper/expiry-utils.js',
   'reviews/automatic-deal-maintenance-state.json',
   'scripts/automatic-deal-maintenance.mjs',
+  'scripts/approved-expiry-evidence.mjs',
+  'scripts/expiry-embedded-clock-range.mjs',
+  'scripts/expiry-original-today.mjs',
+  'scraper/explicit-offer-period.js',
+  'scraper/deal-evidence-utils.js',
   'scripts/original-social-copy.mjs',
   'scripts/expiry-fixed-flight.mjs',
   'scripts/cheapest-city-flights.mjs',
@@ -656,6 +661,12 @@ async function main() {
       options.patterns.push(FLIGHT_ALTERNATIVES_PATH);
       if (statusChanged('docs/deal-review-feedback.json')) options.patterns.push('docs/deal-review-feedback.json');
     }
+  }
+  if (includesDealsFeed && !statusChanged(dealsPath)) {
+    // Feed writers also sweep expiry when no collector or copy update changed
+    // the feed. This path is local-only and cannot call a model or source API.
+    const { maintainFeedFile } = await import('./automatic-deal-maintenance.mjs');
+    await maintainFeedFile({ allowAi: false, apply: true, scheduledExpiryOnly: true });
   }
   if (includesDealsFeed && statusChanged(dealsPath)) {
     const manifest = 'reviews/deal-redemptions.json';

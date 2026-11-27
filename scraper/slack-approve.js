@@ -29,6 +29,7 @@ import { isCommunitySubmission, prepareCommunityApproval } from './community-rev
 import { preparePublicationTitle } from './pre-publication-title.js';
 import {prepareApprovedDealImage,dealImagePreviewBlock} from './deal-image-pilot.js';
 import { normalizeApprovedDealImage } from '../scripts/deal-photo-contract.mjs';
+import { captureApprovedExpiryEvidence, readApprovedExpiryEvidence } from '../scripts/approved-expiry-evidence.mjs';
 import { findApprovalAddresses, isApprovalMapReason, requireApprovalMap } from '../scripts/approval-map-readiness.mjs';
 import {
   loadReviewFeedback,
@@ -933,6 +934,26 @@ async function validateApprovalCandidates(deals, options = {}) {
     validation.blockedDeals = validation.results.filter(row => !row.decision.allowed).map(row => row.deal);
     validation.summary = buildSummary(validation.results, validation.summary.maxAgeDays);
     validation.report = buildReport(validation.results, validation.summary);
+  }
+  // Retain the literal source before either editor, bound to the period that
+  // actually passed approval. Descriptions are reader copy and never a fallback.
+  for (const deal of validation.allowedDeals) {
+    if (existingIds.has(deal.id)) continue;
+    delete deal.approvedExpiryEvidence;
+    if (!humanApproved(deal) || isCommunitySubmission(deal)
+      || !['single', 'range', 'end'].includes(deal.expiryKind)) continue;
+    const original = originals.get(deal.id);
+    const health = await healthCache.get(deal.url);
+    const current = sourceEvidence.get(deal.id) || health?.approvalSourceEvidence;
+    if (health && health.status !== 200 || health?.invalid || health?.transientError || health?.blockedByProtection
+      || current && (current.blockingReason || current.sourceUrl !== deal.url || !cleanText(current.caption))) continue;
+    const currentText = current?.sourceUrl === deal.url ? cleanText(current.caption) : '';
+    const originalText = cleanText(original?.caption)
+      || (original?.metaGraphVerified && original?.metaGraphAccepted ? cleanText(original.metaGraphCaption) : '');
+    const receipt = captureApprovedExpiryEvidence(deal, {
+      sourceText: currentText || originalText, sourceUrl: deal.url, verifiedAt: now.toISOString(), now,
+    });
+    if (receipt) deal.approvedExpiryEvidence = receipt;
   }
   const cacheCandidates = validation.allowedDeals.filter(deal => deal.enrichmentFields?.includes('description') && sourceEvidence.has(deal.id));
   if (cacheCandidates.length) {
@@ -1855,11 +1876,26 @@ export async function preparePublishedApprovedDeals(deals,{root=ROOT,now=new Dat
   const existingKeys = new Set(existingDeals.flatMap(getApprovedMergeKeys));
   for (const deal of deals) {
     const alreadyLive = getApprovedMergeKeys(deal).some(key=>existingKeys.has(key));
-    const prepared = await prepareApprovedDealImage(deal,{root,now,enabled:alreadyLive ? false : enabled});
+    let prepared = { ...await prepareApprovedDealImage(deal,{root,now,enabled:alreadyLive ? false : enabled}) };
     if (!alreadyLive && deal.imageApprovalRequired
       && !normalizeApprovedDealImage(prepared.approvedDealImage,prepared.id,prepared.photoUrl)) {
       blockedDeals.push(deal);
       continue;
+    }
+    if (!alreadyLive && prepared.approvedExpiryEvidence) {
+      const receipt = prepared.approvedExpiryEvidence;
+      // The real reaction merge can normalize approvedAt after validation.
+      // Rebind that approval only; period/source changes invalidate the receipt.
+      const originalApproval = { ...prepared, approvedAt: receipt.approvedAt,
+        pipelineLifecycle: { ...prepared.pipelineLifecycle, manualDecision: receipt.manualDecision,
+          manualDecisionAt: receipt.manualDecisionAt } };
+      const source = readApprovedExpiryEvidence(originalApproval, { now });
+      delete prepared.approvedExpiryEvidence;
+      if (source) {
+        const rebound = captureApprovedExpiryEvidence(prepared, { sourceText: source.sourceText,
+          sourceUrl: source.sourceUrl, verifiedAt: source.verifiedAt, now });
+        if (rebound) prepared.approvedExpiryEvidence = rebound;
+      }
     }
     published.push(redactPublishedCommunityDraft(advanceDealLifecycle(prepared,'published',{at:now})));
   }

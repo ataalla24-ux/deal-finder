@@ -132,14 +132,14 @@ test('an exact range uses the Vienna calendar day across UTC midnight and reject
     '2026-10-25T01:30:00.000Z').eligible, false);
 });
 
-test('hourly expiry removes the confirmed timed event while preserving unselected records and copy work', () => {
+test('hourly expiry removes confirmed timed and calendar ends while preserving pending copy work', () => {
   const pending = { id: 'pending-text', title: 'Gratis Getränk', description: 'Standort folgt.',
     enrichmentPending: true, enrichmentFields: ['description'] };
   const run = maintainDeals([deal, tasting, pending], {
     policy, edits: [tastingEdit], now: tastingEnd, scheduledExpiryOnly: true,
   });
-  assert.deepEqual(run.deals, [deal, pending], 'even an old date-only deal waits for the regular review');
-  assert.deepEqual(run.report.hidden.map(record => record.id), [tasting.id]);
+  assert.deepEqual(run.deals, [pending], 'source-confirmed date-only expiry is also checked hourly');
+  assert.deepEqual(run.report.hidden.map(record => record.id), [deal.id, tasting.id]);
   assert.deepEqual(run.report.corrected, []);
 });
 
@@ -197,7 +197,7 @@ function originalPost(timestamp, caption, fields = {}) {
     sourcePublishedAtSource: 'url.instagramShortcode', ...fields };
 }
 
-test('an editor-confirmed date can expire from an explicit one-day time window in the original post', () => {
+test('a complete literal one-day time window in the original post expires at the exact confirmed end', () => {
   const record = originalPost('2026-11-04T17:34:23Z',
     'Follower bekommen am 06.11.2026 von 12:00 bis 15:00 einen gratis Semmel-Döner.', {
       expiryKind: 'single', validFrom: '2026-11-06', validOn: '2026-11-06',
@@ -207,9 +207,9 @@ test('an editor-confirmed date can expire from an explicit one-day time window i
   const afterGrace = new Date('2026-11-07T12:01:00Z');
   const check = (input = record, edits = [edit], time = afterGrace, latestEvidence) =>
     assessAutomaticExpiry(input, { policy, edits, now: time, latestEvidence });
-  assert.equal(check().reason, 'editor-confirmed-single-day');
-  assert.equal(check(record, []).eligible, false);
-  assert.equal(check(record, [edit], new Date('2026-11-07T11:59:00Z')).eligible, false);
+  assert.equal(check().reason, 'confirmed-exact-offer-end');
+  assert.equal(check(record, []).eligible, true, 'the literal full-year range independently confirms the stored end');
+  assert.equal(check(record, [edit], new Date('2026-11-06T13:59:59.999Z')).eligible, false);
   assert.equal(check(record, [edit], afterGrace, { caption: 'Neue Aktion bis 08.11.2026.' }).eligible, false);
   for (const caption of [
     'Am 06.11. von 12:00 bis 15:00 gibt es ein Angebot.',
