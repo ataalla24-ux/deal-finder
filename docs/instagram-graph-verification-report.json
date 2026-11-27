@@ -1,7 +1,7 @@
 {
-  "generatedAt": "2026-11-27T13:33:18.551Z",
+  "generatedAt": "2026-11-27T13:42:18.052Z",
   "source": "instagram-graph-cross-source-verification",
-  "status": "ok",
+  "status": "failed-preserved",
   "configured": true,
   "scannedFiles": [
     "deals-pending-church-events.json",
@@ -136,7 +136,7 @@
       "candidates": 0
     },
     "deals-pending-meta-instagram.json": {
-      "deals": 94,
+      "deals": 93,
       "candidates": 0
     },
     "deals-pending-power.json": {
@@ -185,26 +185,37 @@
       "candidates": 1
     }
   ],
-  "fetchedPosts": 38,
+  "fetchedPosts": 0,
   "exactMatches": 0,
   "retainedEvidencePosts": 2000,
-  "errors": [],
+  "errors": [
+    {
+      "username": "vamoskebap",
+      "message": "Instagram shared quota paused: shared cooldown"
+    }
+  ],
   "accountFailures": {},
   "sharedQuota": {
-    "limitPerHour": 409,
+    "limitPerHour": 190,
     "usageThreshold": 95,
-    "requests": 2,
-    "reserved": 5,
-    "stopped": false,
-    "reason": "",
-    "highestUsagePercent": 12,
+    "requests": 0,
+    "reserved": 0,
+    "stopped": true,
+    "reason": "Instagram shared quota paused: shared cooldown",
+    "highestUsagePercent": 0,
     "waitedMs": 0,
     "pacingMs": 0,
-    "retryAt": "",
+    "retryAt": "2026-11-27T13:48:26.031Z",
     "adaptiveSafetyCeiling": 190,
     "adaptiveIncreases": 0,
     "storageFailure": null,
-    "stopKind": ""
+    "stopKind": "cooldown"
+  },
+  "globalError": {
+    "username": "vamoskebap",
+    "status": 0,
+    "code": "SCAN_BUDGET",
+    "message": "Instagram shared quota paused: shared cooldown"
   },
   "blockedEvidencePosts": 76,
   "unmatchedCandidatePosts": 2,
