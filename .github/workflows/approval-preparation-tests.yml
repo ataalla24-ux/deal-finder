@@ -3,6 +3,12 @@ on:
   pull_request:
     paths:
       - 'scraper/deal-image-pilot.js'
+      - 'scraper/deal-image-subject.js'
+      - 'scripts/deal-photo-contract.mjs'
+      - 'scripts/live-deal-edits-lib.mjs'
+      - 'scripts/validate-original-deal-photos.mjs'
+      - 'scripts/test-locked-photo-publication.mjs'
+      - 'scripts/test-deal-image-approval-lock.mjs'
       - 'scraper/slack-notify.js'
       - 'scripts/build-deal-image-pilot.mjs'
       - 'scripts/original-deal-photo.mjs'
@@ -57,6 +63,12 @@ on:
     branches: [main]
     paths:
       - 'scraper/deal-image-pilot.js'
+      - 'scraper/deal-image-subject.js'
+      - 'scripts/deal-photo-contract.mjs'
+      - 'scripts/live-deal-edits-lib.mjs'
+      - 'scripts/validate-original-deal-photos.mjs'
+      - 'scripts/test-locked-photo-publication.mjs'
+      - 'scripts/test-deal-image-approval-lock.mjs'
       - 'scraper/slack-notify.js'
       - 'scripts/build-deal-image-pilot.mjs'
       - 'scripts/original-deal-photo.mjs'
@@ -135,3 +147,4 @@ jobs:
           scripts/test-approval-unverified-date-recovery.mjs scripts/test-deals-feed-contract.mjs
           scripts/test-approval-reviewed-source-copy.mjs scripts/test-donut-approval-completion.mjs
           scripts/test-deal-image-pilot.mjs scripts/test-deal-image-pilot-approval.mjs
+          scripts/test-locked-photo-publication.mjs scripts/test-deal-image-approval-lock.mjs

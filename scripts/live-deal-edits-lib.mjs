@@ -426,7 +426,10 @@ function applyEditToDeal(deal, edit, checkedAt) {
     }
     if (edit.approvedDealImage) {
       const approved = normalizeApprovedDealImage(edit.approvedDealImage,next.id,edit.photoUrl);
-      if (approved) next.approvedDealImage = approved;
+      if (approved && JSON.stringify(next.approvedDealImage) !== JSON.stringify(approved)) {
+        next.approvedDealImage = approved;
+        changed.push('approvedDealImage');
+      }
     }
     const photoUrl = edit.photoSubjectHash && edit.photoSubjectHash !== photoSubjectHash({...next,photoUrl:edit.photoUrl}) ? '' : edit.photoUrl;
     if (setIfPresent(next,{photoUrl},'photoUrl',{skipEmpty:false})) changed.push('photoUrl');
