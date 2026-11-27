@@ -291,7 +291,11 @@ test('claim is persisted once and refuses another workflow run and a retry', t =
   assert.equal(report.usageChecks, 0);
   assert.equal(report.attemptedQueries, 0);
   assert.equal(report.instagramNextRetryAt, relatedHold);
-  assert.equal(JSON.parse(fs.readFileSync(file, 'utf8')).status, 'instagram-access-paused');
+  // The already-pushed claim is immutable. A separate result path avoids
+  // conflicting with that same remote claim against the pre-claim checkout.
+  assert.equal(fs.readFileSync(file, 'utf8'), original);
+  assert.deepEqual(JSON.parse(fs.readFileSync(path.join(directory,
+    'source-state/instagram-tavily-investigation-result.json'), 'utf8')), report);
   assert.equal(fs.readFileSync(path.join(directory, 'source-state/instagram-tavily-index.json'), 'utf8'), cacheBefore);
   assert.equal(invoke('--run').status, 1);
 });

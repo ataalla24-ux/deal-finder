@@ -15,6 +15,7 @@ export function claimInstagramTavilyInvestigation(previous, runId, now = new Dat
 }
 
 const read = file => JSON.parse(fs.readFileSync(file, 'utf8'));
+const resultFile = 'source-state/instagram-tavily-investigation-result.json';
 async function main() {
   if (process.env.GITHUB_REF !== 'refs/heads/main' || process.env.GITHUB_RUN_ATTEMPT !== '1') {
     throw new Error('Fresh explicit main-branch workflow required');
@@ -31,7 +32,8 @@ async function main() {
   }
   if (!process.argv.includes('--run')) throw new Error('Explicit diagnostic action required');
   const claim = read(stateFile);
-  if (claim.investigation !== INSTAGRAM_TAVILY_INVESTIGATION || claim.runId !== runId || claim.status !== 'claimed') {
+  if (claim.investigation !== INSTAGRAM_TAVILY_INVESTIGATION || claim.runId !== runId
+    || claim.status !== 'claimed' || fs.existsSync(resultFile)) {
     throw new Error('Matching durable investigation claim required');
   }
   const cache = readInstagramTavilyCache(INSTAGRAM_TAVILY_CACHE);
@@ -50,9 +52,10 @@ async function main() {
   const directory = 'output/social-discovery';
   fs.mkdirSync(directory, { recursive: true });
   fs.writeFileSync(directory + '/instagram-tavily-investigation.json', JSON.stringify(report, null, 2) + '\n');
-  fs.writeFileSync(stateFile, JSON.stringify({ ...claim, status: report.status, finishedAt: new Date().toISOString(),
-    attemptedQueries: report.attemptedQueries, reportedSearchCredits: report.reportedSearchCredits,
-    comparisons: report.comparisons, nextRetryAt: report.nextRetryAt }, null, 2) + '\n');
+  // The claim was already pushed from this checkout. Keep it immutable: the
+  // generated-state committer correctly rejects overwriting that newer remote
+  // path against the runner's pre-claim HEAD. Results have a separate path.
+  fs.writeFileSync(resultFile, JSON.stringify(report, null, 2) + '\n', { flag: 'wx' });
   const updated = updateInstagramTavilyCache(cache, { nextRetryAt: report.nextRetryAt,
     instagramIndex: { attemptedQueries: report.attemptedQueries, links: report.links } });
   if (updated) writeInstagramTavilyCache(INSTAGRAM_TAVILY_CACHE, updated);

@@ -1,4 +1,5 @@
 import fs from 'node:fs';
+import { createHash } from 'node:crypto';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { load } from 'cheerio';
@@ -9,11 +10,14 @@ import { validateDealsForSlack } from '../scraper/deal-validity-agent.js';
 import { instagramAuthSummary, instagramCookieHeader, loadInstagramCookieHints } from '../scraper/instagram-auth-utils.js';
 import { instagramPageHasAccessWall } from '../scraper/instagram-page-access.js';
 import { INSTAGRAM_TAVILY_SOURCE, normalizeInstagramTavilyUrl } from '../scraper/instagram-tavily-index.js';
+import { INSTAGRAM_TAVILY_INVESTIGATION } from '../scraper/instagram-tavily-investigation.js';
 import { createInstagramWebAccess } from '../scraper/instagram-web-access-policy.js';
 import { retryAfterAt } from '../scraper/source-http-policy.js';
 import { partitionInstagramAiDeals } from './validate-instagram-ai-output.mjs';
 
-const rootDir = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
+const claimFile = 'source-state/instagram-tavily-verification-claim.json';
+const outputDirectory = 'output/social-discovery';
+const startFile = path.join(outputDirectory, '.instagram-tavily-verification.started');
 const sourceReadCap = 6;
 const postAgeMs = 7 * 86_400_000;
 const captionLimit = 1200; // Upper bound read by the existing Instagram offer-date gate.
@@ -124,6 +128,11 @@ function knownPostInventory(inventory, now) {
   for (const key of rows(inventory.seen?.seenPostKeys)) {
     const match = typeof key === 'string' && /^instagram:(?:(?:p|reel|tv):)?([A-Za-z0-9_-]{5,20})$/.exec(key);
     if (match && !known.has('instagram:' + match[1])) known.set('instagram:' + match[1], 'previously-seen');
+  }
+  for (const post of rows(inventory.graphPosts)) {
+    const url = normalizeInstagramTavilyUrl(post?.url || post?.permalink);
+    const key = canonicalInstagramPostKey(url);
+    if (key && !known.has(key)) known.set(key, 'previously-seen-graph');
   }
   return known;
 }
@@ -274,7 +283,8 @@ function loadInventory(docs) {
   const pending = fs.readdirSync(docs).filter(name => /^deals-pending-.+\.json$/.test(name)).flatMap(readDeals);
   const indexed = readJson(path.join(docs, 'deal-candidates-index.json')).candidates;
   const seen = readJson(path.join(docs, 'slack-seen-posts.json'));
-  return { live, pending, indexed, seen };
+  const graphPosts = readJson(path.join(docs, 'instagram-graph-post-evidence.json')).posts;
+  return { live, pending, indexed, seen, graphPosts };
 }
 
 function writeJson(file, value) {
@@ -286,18 +296,46 @@ function writeJson(file, value) {
 }
 
 async function main() {
-  if (!process.argv[2] || process.env.GITHUB_REF !== 'refs/heads/main' || process.env.GITHUB_RUN_ATTEMPT !== '1') {
+  const [receiptFile, action, ...extra] = process.argv.slice(2);
+  const runId = process.env.GITHUB_RUN_ID;
+  if (!receiptFile || (action && action !== '--claim') || extra.length || !/^\d+$/.test(runId || '')
+      || process.env.GITHUB_REF !== 'refs/heads/main' || process.env.GITHUB_RUN_ATTEMPT !== '1') {
     throw new Error('A fresh explicit main-branch original verification and investigation artifact are required');
   }
-  const docs = path.join(rootDir, 'docs');
+  const raw = fs.readFileSync(receiptFile);
+  const probe = JSON.parse(raw);
+  if (probe?.investigation !== INSTAGRAM_TAVILY_INVESTIGATION || !Array.isArray(probe.links)) {
+    throw new Error('Expected the saved receipt from this investigation');
+  }
+  const receiptSha256 = createHash('sha256').update(raw).digest('hex');
+  if (action === '--claim') {
+    fs.mkdirSync(path.dirname(claimFile), { recursive: true });
+    const claim = { investigation: INSTAGRAM_TAVILY_INVESTIGATION, runId, receiptSha256,
+      claimedAt: new Date().toISOString(), maximumSourceReads: sourceReadCap };
+    try {
+      fs.writeFileSync(claimFile, JSON.stringify(claim, null, 2) + '\n', { flag: 'wx' });
+    } catch (error) {
+      if (error.code !== 'EEXIST') throw error;
+      console.log('Original verification already claimed.');
+      return;
+    }
+    fs.appendFileSync(process.env.GITHUB_OUTPUT, 'claimed=true\n');
+    return;
+  }
+  const claim = readJson(claimFile);
+  if (claim?.investigation !== INSTAGRAM_TAVILY_INVESTIGATION || claim.runId !== runId || claim.receiptSha256 !== receiptSha256) {
+    throw new Error('Matching durable original verification claim required');
+  }
+  fs.mkdirSync(outputDirectory, { recursive: true });
+  fs.writeFileSync(startFile, runId + '\n', { flag: 'wx' });
+  const docs = path.resolve('docs');
   const reportPath = path.join(docs, 'instagram-ai-report.json');
-  const probe = readJson(process.argv[2]);
   const cookies = loadInstagramCookieHints();
   const cookieHeader = instagramAuthSummary(cookies).authenticatedSession ? instagramCookieHeader(cookies) : '';
   const result = await verifyInstagramTavilyOffers({
-    links: [probe.canonicalLinks, probe.links, probe.instagramIndex?.links].find(Array.isArray) || [],
+    links: probe.links,
     inventory: loadInventory(docs),
-    moderation: loadDealModeration(),
+    moderation: loadDealModeration(path.join(docs, 'deal-moderation.json')),
     previousReport: readJson(reportPath, true),
     relatedReport: readJson(path.join(docs, 'instagram-discovery-report.json'), true),
     healthReport: readJson(path.join(docs, 'instagram-auth-health.json'), true),
@@ -317,10 +355,8 @@ async function main() {
       if (process.env.GITHUB_OUTPUT) fs.appendFileSync(process.env.GITHUB_OUTPUT, 'web_access_changed=true\n');
     }
   }
-  const directory = path.join(rootDir, 'output/social-discovery');
-  fs.mkdirSync(directory, { recursive: true });
-  writeJson(path.join(directory, 'instagram-tavily-offers.json'), result.report);
-  writeJson(path.join(directory, 'instagram-tavily-offers.candidates.json'), {
+  writeJson(path.join(outputDirectory, 'instagram-tavily-offers.json'), result.report);
+  writeJson(path.join(outputDirectory, 'instagram-tavily-offers.candidates.json'), {
     version: 1, checkedAt: result.report.checkedAt, candidates: result.candidates,
   });
   console.log(JSON.stringify(result.report));

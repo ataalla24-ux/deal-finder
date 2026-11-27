@@ -1,6 +1,13 @@
 import assert from 'node:assert/strict';
+import { spawnSync } from 'node:child_process';
+import { createHash } from 'node:crypto';
+import fs from 'node:fs';
+import os from 'node:os';
+import path from 'node:path';
 import test from 'node:test';
+import { fileURLToPath } from 'node:url';
 import { verifyInstagramTavilyOffers } from './check-instagram-tavily-offers.mjs';
+import { INSTAGRAM_TAVILY_INVESTIGATION } from '../scraper/instagram-tavily-investigation.js';
 
 const now = new Date();
 const clock = () => now;
@@ -35,15 +42,18 @@ test('no canonical results perform no source reads and produce an empty candidat
   assert.equal(result.webAccessChanged, false);
 });
 
-test('already live, pending, indexed or historically Slack-seen exact posts take no slots', async () => {
-  const keys = ['LiveOriginal', 'PendingOriginal', 'IndexedOriginal', 'SeenOriginal'];
+test('already live, pending, indexed, Slack-seen or Graph-screened exact posts take no slots', async () => {
+  const keys = ['LiveOriginal', 'PendingOriginal', 'IndexedOriginal', 'SeenOriginal', 'GraphRejected', 'GraphAccepted'];
   const result = await verify({ links: keys.map(url),
     inventory: { live: [{ url: url(keys[0]) }], pending: [{ url: url(keys[1]) }],
-      indexed: [{ postUrl: url(keys[2]) }], seen: { seenPostKeys: ['instagram:reel:' + keys[3]] } }, fetcher: forbid });
-  assert.equal(result.report.knownLinks, 4);
+      indexed: [{ postUrl: url(keys[2]) }], seen: { seenPostKeys: ['instagram:reel:' + keys[3]] },
+      graphPosts: [{ url: 'https://www.instagram.com/reel/' + keys[4] + '/', graphAccepted: false,
+        graphRejection: 'excluded-promotion-type' }, { permalink: url(keys[5]), graphAccepted: true }] }, fetcher: forbid });
+  assert.equal(result.report.knownLinks, 6);
   assert.equal(result.report.sourceReads, 0);
   assert.deepEqual(result.report.rows.map(entry => entry.reason),
-    ['already-live', 'previously-pending', 'previously-indexed', 'previously-seen']);
+    ['already-live', 'previously-pending', 'previously-indexed', 'previously-seen', 'previously-seen-graph',
+      'previously-seen-graph']);
 });
 
 test('manual redirects never follow challenges, and a blocked first response stops later originals', async () => {
@@ -151,4 +161,89 @@ test('the seventh novel canonical URL is deferred; ordinary 404 does not pause t
   assert.equal(result.report.sourceReads, 6);
   assert.deepEqual(result.report.rows.slice(6).map(entry => entry.reason), ['source-read-cap', 'source-read-cap']);
   assert.equal(result.webAccessChanged, false);
+});
+
+test('CLI claims exact receipt once and rejects every replay before another source read', t => {
+  const directory = fs.mkdtempSync(path.join(os.tmpdir(), 'instagram-tavily-verification-'));
+  t.after(() => fs.rmSync(directory, { recursive: true, force: true }));
+  const script = fileURLToPath(new URL('./check-instagram-tavily-offers.mjs', import.meta.url));
+  const claimFile = path.join(directory, 'source-state/instagram-tavily-verification-claim.json');
+  const receipt = path.join(directory, 'receipt.json');
+  const output = path.join(directory, 'github-output');
+  const fetchLog = path.join(directory, 'fetches');
+  const preload = path.join(directory, 'offline.mjs');
+  const runId = '123456';
+  const stubSession = 'offline-fixture-not-a-secret';
+  const graphOriginal = 'https://www.instagram.com/reel/GraphRejected/';
+  const input = JSON.stringify({ investigation: INSTAGRAM_TAVILY_INVESTIGATION, links: [original, graphOriginal] });
+  fs.writeFileSync(receipt, input);
+  fs.writeFileSync(preload, `
+    import fs from 'node:fs';
+    globalThis.fetch = async (target, init) => {
+      if (target !== ${JSON.stringify(original)} || init.method !== 'GET' || init.redirect !== 'manual') {
+        throw new Error('Unexpected offline request shape');
+      }
+      fs.appendFileSync(${JSON.stringify(fetchLog)}, target + '\\n');
+      return new Response(null, { status: 404 });
+    };
+  `);
+  fs.mkdirSync(path.join(directory, 'docs'));
+  for (const name of ['deals.json', 'deal-candidates-index.json', 'slack-seen-posts.json']) {
+    fs.writeFileSync(path.join(directory, 'docs', name), '{}');
+  }
+  fs.writeFileSync(path.join(directory, 'docs/instagram-graph-post-evidence.json'), JSON.stringify({
+    posts: [{ url: graphOriginal, graphAccepted: false, graphRejection: 'excluded-promotion-type' }],
+  }));
+  const invoke = (args = [], env = {}) => spawnSync(process.execPath, ['--import', preload, script, receipt, ...args], {
+    cwd: directory,
+    encoding: 'utf8',
+    env: { GITHUB_REF: 'refs/heads/main', GITHUB_RUN_ATTEMPT: '1', GITHUB_RUN_ID: runId, GITHUB_OUTPUT: output,
+      INSTAGRAM_SESSIONID: stubSession, ...env },
+  });
+  const denied = (args, env) => {
+    const result = invoke(args, env);
+    assert.equal(result.status, 1);
+    assert.doesNotMatch(result.stdout + result.stderr, new RegExp(stubSession));
+  };
+
+  denied();
+  denied(['--claim'], { GITHUB_REF: 'refs/heads/invalid' });
+  denied(['--claim'], { GITHUB_RUN_ATTEMPT: '2' });
+  denied(['--claim'], { GITHUB_RUN_ID: '../invalid' });
+  fs.writeFileSync(receipt, JSON.stringify({ investigation: 'another-investigation', links: [] }));
+  denied(['--claim']);
+  assert.equal(fs.existsSync(claimFile), false);
+  assert.equal(fs.existsSync(fetchLog), false);
+  fs.writeFileSync(receipt, input);
+  const claimRun = invoke(['--claim']);
+  assert.equal(claimRun.status, 0, claimRun.stderr);
+  const claimBytes = fs.readFileSync(claimFile, 'utf8');
+  const claim = JSON.parse(claimBytes);
+  assert.equal(claim.investigation, INSTAGRAM_TAVILY_INVESTIGATION);
+  assert.equal(claim.runId, runId);
+  assert.equal(claim.receiptSha256, createHash('sha256').update(input).digest('hex'));
+  assert.equal(claim.maximumSourceReads, 6);
+  assert.equal(fs.readFileSync(output, 'utf8'), 'claimed=true\n');
+  const secondClaim = invoke(['--claim'], { GITHUB_RUN_ID: '654321' });
+  assert.equal(secondClaim.status, 0, secondClaim.stderr);
+  assert.match(secondClaim.stdout, /already claimed/);
+  assert.equal(fs.readFileSync(output, 'utf8'), 'claimed=true\n');
+  denied([], { GITHUB_RUN_ID: '654321' });
+  denied([], { GITHUB_RUN_ATTEMPT: '2' });
+  fs.writeFileSync(receipt, input + '\n');
+  denied();
+  assert.equal(fs.existsSync(fetchLog), false);
+
+  fs.writeFileSync(receipt, input);
+  const verifyRun = invoke();
+  assert.equal(verifyRun.status, 0, verifyRun.stderr);
+  const report = JSON.parse(verifyRun.stdout);
+  assert.equal(report.sourceReads, 1);
+  assert.equal(report.knownLinks, 1);
+  assert.equal(report.rows[1].reason, 'previously-seen-graph');
+  assert.equal(report.verifiedNewOffers, 0);
+  assert.doesNotMatch(verifyRun.stdout, new RegExp(stubSession));
+  denied();
+  assert.equal(fs.readFileSync(fetchLog, 'utf8'), original + '\n');
+  assert.equal(fs.readFileSync(claimFile, 'utf8'), claimBytes);
 });
