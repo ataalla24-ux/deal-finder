@@ -916,6 +916,7 @@ function buildSlackMessage(deal, index, mapContext = loadDealMapReviewContext())
     `🧩 Ursprung intern: ${deal.originSource || deal.source || 'k.A.'}`,
     `🔗 Direktlink: ${link}`,
     `🆔 Deal-ID: ${deal.id}`,
+    ...(deal.imageApprovalRequired ? ['📷 Bildfreigabe: Genau dieses Foto erscheint in der App.'] : []),
     validationDetails,
     editorialNote,
     missingNote,

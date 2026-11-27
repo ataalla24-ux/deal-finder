@@ -4,7 +4,8 @@ import {photoDigest,photoSubjectHash,normalizeApprovedDealImage} from './deal-ph
 import {applyLiveDealEditsToBundle,normalizeLiveDealEdit} from './live-deal-edits-lib.mjs';
 import {dealImageSubjectHash} from '../scraper/deal-image-subject.js';
 import {preparePublishedApprovedDeals} from '../scraper/slack-approve.js';
-import {postSlackMessage} from '../scraper/slack-notify.js';
+import {postSlackMessage,buildSlackMessage} from '../scraper/slack-notify.js';
+import {parseDigestDealMessage} from '../scraper/slack-digest-utils.js';
 
 const now = new Date();
 const base = {id:'locked-photo-fixture',title:'Gratis Kaffee',description:'Eine Tasse Kaffee in Wien.',
@@ -45,6 +46,22 @@ test('both publication entry points hold an incomplete required image without lo
   assert.deepEqual(published,[]);
   assert.deepEqual(blockedDeals,[pending]);
   assert.equal(blockedDeals[0].pipelineLifecycle.manualDecision,'approved');
+});
+
+test('Slack recovery cannot publish an image card when its queue commit is missing', async () => {
+  const text = buildSlackMessage({...base,imageApprovalRequired:true},1);
+  for (const message of [
+    {text,ts:'1234.56'},
+    {text:buildSlackMessage(base,1),ts:'1234.56',blocks:[{type:'image',image_url:photoUrl}]},
+  ]) {
+    const parsed = parseDigestDealMessage(message);
+    assert.equal(parsed.imageApprovalRequired,true);
+    assert.equal(parsed.pendingDealImage,undefined);
+    const blockedDeals=[];
+    assert.deepEqual(await preparePublishedApprovedDeals([parsed],{now,enabled:true,blockedDeals}),[]);
+    assert.equal(blockedDeals.length,1);
+  }
+  assert.equal(parseDigestDealMessage({text:buildSlackMessage(base,1),ts:'1234.56'}).imageApprovalRequired,undefined);
 });
 
 test('a required preview rejected by Slack is retained and never resent with a substitute or text-only payload', async () => {

@@ -316,6 +316,14 @@ function parseDigestDealMessage(message, fallbackIndex = 0) {
 
   normalized.originSource = cleanText(normalized.originSource || originSource);
 
+  // A Slack delivery can succeed before its queue commit. Its image contract
+  // must survive fallback reconstruction; missing preparation stays held.
+  if (/Bildfreigabe: Genau dieses Foto erscheint in der App\./u.test(text)
+    || message.blocks?.some(block => block.type === 'image'
+      && /^https:\/\/freefinder\.at\/assets\/(?:deal-image-pilot|approved-deal-photos)\/[a-z0-9-]+\.jpg$/.test(block.image_url || ''))) {
+    normalized.imageApprovalRequired = true;
+  }
+
   if (isGenericJunkDeal(normalized)) return null;
   return normalized;
 }
