@@ -1,7 +1,7 @@
 {
-  "generatedAt": "2026-11-27T20:11:35.567Z",
+  "generatedAt": "2026-11-27T20:29:56.297Z",
   "source": "instagram-graph-cross-source-verification",
-  "status": "ok",
+  "status": "degraded",
   "configured": true,
   "scannedFiles": [
     "deals-pending-church-events.json",
@@ -136,8 +136,8 @@
       "candidates": 0
     },
     "deals-pending-meta-instagram.json": {
-      "deals": 101,
-      "candidates": 0
+      "deals": 102,
+      "candidates": 1
     },
     "deals-pending-power.json": {
       "deals": 45,
@@ -172,10 +172,14 @@
       "candidates": 0
     }
   },
-  "candidatePosts": 3,
-  "candidateAccounts": 3,
+  "candidatePosts": 4,
+  "candidateAccounts": 4,
   "skippedAccountCooldowns": 0,
   "selectedAccounts": [
+    {
+      "username": "merkundwuerdig",
+      "candidates": 1
+    },
     {
       "username": "vamoskebap",
       "candidates": 1
@@ -189,28 +193,39 @@
       "candidates": 1
     }
   ],
-  "fetchedPosts": 65,
-  "exactMatches": 2,
+  "fetchedPosts": 40,
+  "exactMatches": 1,
   "retainedEvidencePosts": 2000,
-  "errors": [],
+  "errors": [
+    {
+      "username": "sajado.bbq",
+      "message": "Instagram shared quota paused: rolling-hour budget exhausted"
+    }
+  ],
   "accountFailures": {},
   "sharedQuota": {
-    "limitPerHour": 190,
+    "limitPerHour": 267,
     "usageThreshold": 95,
-    "requests": 3,
-    "reserved": 5,
-    "stopped": false,
-    "reason": "",
-    "highestUsagePercent": 11,
+    "requests": 2,
+    "reserved": 2,
+    "stopped": true,
+    "reason": "Instagram shared quota paused: rolling-hour budget exhausted",
+    "highestUsagePercent": 12,
     "waitedMs": 0,
     "pacingMs": 0,
-    "retryAt": "",
+    "retryAt": "2026-11-27T20:44:34.815Z",
     "adaptiveSafetyCeiling": 190,
     "adaptiveIncreases": 0,
     "storageFailure": null,
-    "stopKind": ""
+    "stopKind": "budget"
+  },
+  "globalError": {
+    "username": "sajado.bbq",
+    "status": 0,
+    "code": "SCAN_BUDGET",
+    "message": "Instagram shared quota paused: rolling-hour budget exhausted"
   },
   "blockedEvidencePosts": 75,
-  "unmatchedCandidatePosts": 1,
-  "message": "2/3 fresh cross-source Instagram candidates matched exactly via Graph API."
+  "unmatchedCandidatePosts": 3,
+  "message": "1/4 fresh cross-source Instagram candidates matched exactly via Graph API."
 }
