@@ -1,13 +1,13 @@
 # FreeFinder Betriebsbericht
 
-Stand: 2026-11-27T20:03:42.569Z
+Stand: 2026-11-27T20:38:50.315Z
 
 - 112 Live-Angebote; 249 nicht-live Entwuerfe geprueft.
-- 5 neue IDs seit letzter Bestandsaufnahme; keine automatische Erfolgszuordnung.
+- 0 neue IDs seit letzter Bestandsaufnahme; keine automatische Erfolgszuordnung.
 - 0 Entwuerfe ohne formale Pruefluecke, weiterhin menschliche Freigabe.
 - Pilot: 50 Faelle gesammelt, 0 unabhaengig bewertet, 35 regulaere Qualitaetslaeufe beobachtet. Automatische Freigabe AUS.
 - Zugestellte und veröffentlichte Angebote nach Quelle stehen unten im Abschnitt Ertrag je Quelle.
-- API: internal-ledger; 13.064924 USD intern gebucht/reserviert in 24 Stunden. Kein Anbieter-Kontostand.
+- API: internal-ledger; 11.593991 USD intern gebucht/reserviert in 24 Stunden. Kein Anbieter-Kontostand.
 
 ## Naechste Schritte
 
@@ -29,11 +29,11 @@ Stand: 2026-11-27T20:03:42.569Z
 ## Aktualitaet
 
 - Entwurfsregeln frisch und lokal geprueft, ohne Modell- oder Quellenaufruf. 249 unterschiedliche IDs in 249 Eintraegen; doppelte IDs bleiben Prueffaelle.
-- Live-/Bildpruefstand: current; letzte Pruefung 2026-11-27T20:01:35.492Z. Bei veraltetem Stand sind leere Hinweisliste und Bildzaehler KEIN Entwarnungsnachweis.
+- Live-/Bildpruefstand: current; letzte Pruefung 2026-11-27T20:38:48.717Z. Bei veraltetem Stand sind leere Hinweisliste und Bildzaehler KEIN Entwarnungsnachweis.
 
 ## Freigabe und Einloesung
 
-- 50 Pilotfaelle aktuell, 1942 fruehere Pruefstaende unveraendert archiviert. Keine alten Bewertungen uebernehmen.
+- 50 Pilotfaelle aktuell, 1950 fruehere Pruefstaende unveraendert archiviert. Keine alten Bewertungen uebernehmen.
 - Aktueller, unbewerteter Pruefbogen: 50 Faelle; reviews/automatic-publication-review-pack.json. Keine unabhaengige menschliche Bewertung erfunden.
 - Quellengepruefte Einloese-/Buchungswege: 10 von 112; 0 ausdruecklich unbestaetigte, 102 fehlende aktuelle Einloesepruefungen. Besuchsinfos sind keine Gutscheine; ein Buchungslink bestaetigt keinen aktuellen Flugpreis.
 - Karte frisch lokal geprueft: {"mapped":64,"needs-review":9,"online-only":39}.
@@ -41,7 +41,7 @@ Stand: 2026-11-27T20:03:42.569Z
 ## Quellen
 
 - docs/apify-discovery-report.json: succeeded; {"fetchedRecords":10,"freshAcceptedDeals":0,"pendingDeals":1,"duplicatePosts":2,"unchangedPosts":3,"providerErrors":0}; Slack-Zustellungen nicht aus Kandidaten ableiten.
-- docs/meta-instagram-report.json: degraded; {"freshPostsFetched":950,"newDeals":4,"repeatedDeals":97,"totalDeals":101}; Slack-Zustellungen nicht aus Kandidaten ableiten.
+- docs/meta-instagram-report.json: ok; {"freshPostsFetched":352,"newDeals":1,"repeatedDeals":101,"totalDeals":102}; Slack-Zustellungen nicht aus Kandidaten ableiten.
 - docs/power-scraper-report.json: see-source-results; {"acceptedDeals":45,"healthySources":45,"failedSources":3,"deferredSources":9,"rawDeals":45}; Slack-Zustellungen nicht aus Kandidaten ableiten.
 - docs/instagram-ai-report.json: see-source-results; {"discoveredCandidates":62,"acceptedDeals":3,"aiRescueCandidates":2,"aiRescued":0}; Slack-Zustellungen nicht aus Kandidaten ableiten.
 
@@ -49,7 +49,7 @@ Stand: 2026-11-27T20:03:42.569Z
 
 Jeder Deal zählt ab seiner ersten belegten Slack-Zustellung einmal. Die Freigabe zählt, sobald für die betreffende Nachricht ein menschliches Häkchen belegt ist. Die letzte Stufe zählt freigegebene Deals, die mit derselben Nachrichtenkennung im öffentlichen Feed beobachtet wurden. Kurzzeitig sichtbare Angebote zwischen zwei Beobachtungen und bereits vor der ersten Beobachtung entfernte Einträge können fehlen.
 
-Erste öffentliche Beobachtung: 2026-11-06T23:56:26.741Z. Letzte erfolgreiche Beobachtung: 2026-11-27T20:03:42.569Z.
+Erste öffentliche Beobachtung: 2026-11-06T23:56:26.741Z. Letzte erfolgreiche Beobachtung: 2026-11-27T20:38:50.315Z.
 
 ### 7 Tage
 
@@ -112,13 +112,13 @@ Erste öffentliche Beobachtung: 2026-11-06T23:56:26.741Z. Letzte erfolgreiche Be
 
 ## Händlerseiten und Cashback im Vergleich
 
-Der Test begann am 21. November 2026 um 13:06 Uhr Wiener Zeit. Das Vergleichsfenster beginnt genau zwei Wochen früher. Beide Fenster umfassen dieselben Wochentage und bisher jeweils 152.0 Stunden, höchstens 14 Tage.
+Der Test begann am 21. November 2026 um 13:06 Uhr Wiener Zeit. Das Vergleichsfenster beginnt genau zwei Wochen früher. Beide Fenster umfassen dieselben Wochentage und bisher jeweils 152.5 Stunden, höchstens 14 Tage.
 
 | Essensangebote | Slack vorher | Slack seit Start | Häkchen vorher | Häkchen seit Start | Öffentlich vorher | Öffentlich seit Start |
 |---|---:|---:|---:|---:|---:|---:|
-| Alle Quellen | 75 | 100 | 16 | 23 | 14 | 22 |
+| Alle Quellen | 84 | 100 | 18 | 23 | 16 | 22 |
 | Wiener Händlerseiten | 11 | 2 | 0 | 1 | 0 | 1 |
 | Direkte marktguru-Cashbacks | 0 | 1 | 0 | 0 | 0 | 0 |
 
-Jeder Deal zählt nach seiner ersten belegten Zustellung. Freigaben und öffentliche Sichtungen werden bis zum Prüfstand nachgetragen. Ältere Nachrichten hatten mehr Zeit für ein Häkchen. Änderungen der Gesamtzahlen können auch von anderen Quellen stammen. Prüfstand 2026-11-27T20:03:42.569Z.
+Jeder Deal zählt nach seiner ersten belegten Zustellung. Freigaben und öffentliche Sichtungen werden bis zum Prüfstand nachgetragen. Ältere Nachrichten hatten mehr Zeit für ein Häkchen. Änderungen der Gesamtzahlen können auch von anderen Quellen stammen. Prüfstand 2026-11-27T20:38:50.315Z.
 
