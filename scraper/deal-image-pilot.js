@@ -18,9 +18,12 @@ export const DEAL_IMAGE_PILOT_ASSETS = DEAL_IMAGE_ASSETS;
 function canStageImage(deal, now) {
   if (!deal?.id || !clean(deal.title) || !deal.category || !Number.isFinite(+now)
     || deal.pipelineLifecycle?.manualDecision === 'rejected') return false;
+  // Preview selection uses owned files. Source/link requirements belong to the
+  // existing offer validator, including community submissions without a URL.
+  if (!clean(deal.url)) return true;
   try {
     const url = new URL(deal.url);
-    return url.protocol === 'https:' && !url.username && !url.password && !url.port;
+    return ['https:','http:'].includes(url.protocol) && !url.username && !url.password && !url.port;
   } catch {return false;}
 }
 

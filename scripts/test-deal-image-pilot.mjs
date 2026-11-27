@@ -110,8 +110,10 @@ test('image staging works before source validation and retains delivered choices
     {validity:undefined},
     {validity:{...base.validity,checkedAt:new Date(+now-86400001).toISOString()}},
     {originSource:'community-submission',submissionId:'private'},
+    {originSource:'community-submission',submissionId:'private',url:''},
+    {url:'http://merchant.example/kaffee'},
   ]) assert.ok((await preview(root,{...base,...patch})).pendingDealImage);
-  for (const patch of [{id:''},{title:''},{url:'http://merchant.example/kaffee'},
+  for (const patch of [{id:''},{title:''},{url:'javascript:alert(1)'},{url:'https://user:password@merchant.example/kaffee'},
     {pipelineLifecycle:{manualDecision:'rejected'}},{slackEditedFields:['photoUrl']},
     {photoUrl:'https://unreviewed.example/product.jpg'}]) {
     assert.equal((await preview(root,{...base,...patch})).pendingDealImage,undefined);

@@ -27,7 +27,7 @@ import { canonicalSocialPostKey, mergeDealEvidence, officialOmvVariantKey } from
 import { advanceDealLifecycle } from './deal-lifecycle.js';
 import { isCommunitySubmission, prepareCommunityApproval } from './community-review-utils.js';
 import { preparePublicationTitle } from './pre-publication-title.js';
-import {prepareApprovedDealImage} from './deal-image-pilot.js';
+import {prepareApprovedDealImage,dealImagePreviewBlock} from './deal-image-pilot.js';
 import { normalizeApprovedDealImage } from '../scripts/deal-photo-contract.mjs';
 import { findApprovalAddresses, isApprovalMapReason, requireApprovalMap } from '../scripts/approval-map-readiness.mjs';
 import {
@@ -1432,6 +1432,13 @@ async function runTargetedApproval({ moderation, botUserId }) {
     return true;
   }
 
+  const refreshedImage = await refreshChangedApprovalImage(dealToApprove,decisionAt);
+  if (refreshedImage.status === 'refreshed') {
+    savePendingRemaining([...remainingPending,refreshedImage.deal]);
+    console.log('📷 Updated offer has a new photo card; waiting for its own human approval');
+    return true;
+  }
+
   const manuallyApprovedDeal = advanceDealLifecycle(dealToApprove, 'manually-approved', {
     at: decisionAt,
     user: reviewDecision.user,
@@ -1699,6 +1706,11 @@ async function main() {
         at: decisionAt,
       });
     } else if (reviewDecision.decision === 'approved') {
+      const refreshedImage = await refreshChangedApprovalImage(deal,decisionAt);
+      if (refreshedImage.status === 'refreshed') {
+        unapproved.push(refreshedImage.deal);
+        continue;
+      }
       const approvedDeal = advanceDealLifecycle(deal, 'manually-approved', {
         at: decisionAt,
         user: reviewDecision.user,
@@ -1829,6 +1841,13 @@ async function main() {
 
   console.log(`✅ deals.json updated with approved-only deals: ${mergedApproved.length}`);
   console.log(`💾 pending queue updated: ${remainingPending.length} deals left`);
+}
+
+async function refreshChangedApprovalImage(deal,now) {
+  if (!deal.imageApprovalRequired || !deal.pendingDealImage
+    || dealImagePreviewBlock(deal,{enabled:true,now})) return {deal,status:'unchanged'};
+  const {refreshPendingDealPhoto} = await import('../scripts/refresh-pending-deal-photo.mjs');
+  return refreshPendingDealPhoto(deal,{root:ROOT,now});
 }
 
 export async function preparePublishedApprovedDeals(deals,{root=ROOT,now=new Date(),enabled,existingDeals=[],blockedDeals=[]}={}) {

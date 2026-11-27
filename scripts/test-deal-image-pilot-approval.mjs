@@ -9,7 +9,7 @@ import {inspectBoundOriginalPhoto} from './original-deal-photo.mjs';
 import {photoDigest} from './deal-photo-contract.mjs';
 
 const repository=path.resolve(path.dirname(fileURLToPath(import.meta.url)),'..');
-for(const mode of ['targeted','regular']) test(`actual ${mode} approval publishes the exact preview without extra model or photo requests`,async()=>{
+for(const mode of ['targeted','regular']) for(const edited of [false,true]) test(`actual ${mode} approval ${edited ? 'requires a fresh check after a changed product preview' : 'publishes the exact preview without extra model or photo requests'}`,async()=>{
   const root=fs.mkdtempSync(path.join(os.tmpdir(),'owned-image-approval-'));
   const previousEnv={...process.env},previousFetch=globalThis.fetch;
   const read=file=>JSON.parse(fs.readFileSync(path.join(root,file),'utf8'));
@@ -24,7 +24,7 @@ for(const mode of ['targeted','regular']) test(`actual ${mode} approval publishe
       'deal-map-source-addresses.mjs','approval-map-readiness.mjs','discover-vienna-merchants.mjs',
       'automatic-deal-maintenance.mjs','original-social-copy.mjs','automatic-maintenance-review.mjs','refresh-maintenance-evidence.mjs',
       'expiry-fixed-flight.mjs','expiry-instagram-finite-range.mjs','deal-photo-contract.mjs',
-      'original-deal-photo.mjs','live-deal-edits-lib.mjs'])
+      'original-deal-photo.mjs','live-deal-edits-lib.mjs','refresh-pending-deal-photo.mjs'])
       fs.copyFileSync(path.join(repository,'scripts',file),path.join(root,'scripts',file));
     fs.copyFileSync(path.join(repository,'package.json'),path.join(root,'package.json'));
     fs.symlinkSync(path.join(repository,'node_modules'),path.join(root,'node_modules'));
@@ -53,9 +53,14 @@ for(const mode of ['targeted','regular']) test(`actual ${mode} approval publishe
     const {main}=await import(pathToFileURL(path.join(root,'scraper/slack-approve.js')));
     const {buildSlackMessage}=await import(pathToFileURL(path.join(root,'scraper/slack-notify.js')));
     const message={ts,thread_ts:thread,user:'BOT',text:buildSlackMessage(queued,1)};
-    const external=[];
+    const external=[],posts=[];
+    const editCommand={ts:String(Math.floor(+now/1000)+1)+'.123456',text:'edit 1 titel: Gratis Döner mit Gutschein | beschreibung: Ein Döner gratis gegen Vorlage des Gutscheins.'};
     globalThis.fetch=async(url,init={})=>{
       const target=new URL(url);
+      if(edited && target.hostname==='freefinder.at') {
+        const bytes=fs.readFileSync(path.join(root,'docs',target.pathname));
+        return new Response(bytes,{headers:{'content-type':'image/jpeg','content-length':String(bytes.length)}});
+      }
       if(target.hostname==='cafe-fixture.example') {
         external.push(String(url));
         return new Response(`<main><h1>${original.title}</h1><p>${original.description} Gültig bis ${literal}.</p><p>Wollzeile 29, 1010 Wien</p></main>`,{status:200,headers:{'content-type':'text/html'}});
@@ -63,13 +68,27 @@ for(const mode of ['targeted','regular']) test(`actual ${mode} approval publishe
       assert.equal(target.hostname,'slack.com','only existing source validation and Slack reads are permitted in the offline fixture');
       if(target.pathname.endsWith('/auth.test'))return Response.json({ok:true,user_id:'BOT'});
       if(target.pathname.endsWith('/conversations.history'))return Response.json({ok:true,messages:[]});
-      if(target.pathname.endsWith('/conversations.replies'))return Response.json({ok:true,messages:[message]});
+      if(target.pathname.endsWith('/conversations.replies'))return Response.json({ok:true,messages:[message,...edited?[editCommand]:[]]});
       if(target.pathname.endsWith('/reactions.get'))return Response.json({ok:true,message:{...message,reactions:[{name:'white_check_mark',users:['U_OFFLINE_REVIEWER']}]}});
-      if(/\/chat\.(?:postMessage|update)$/.test(target.pathname))return Response.json({ok:true,ts:'offline-notice'});
+      if(/\/chat\.(?:postMessage|update)$/.test(target.pathname)) {
+        posts.push({method:target.pathname,payload:JSON.parse(init.body)});
+        return Response.json({ok:true,ts:String(Math.floor(+now/1000)+2)+'.123456'});
+      }
       assert.fail('Unexpected fixture request '+target.pathname);
     };
     write('docs/deals.json',{deals:[],totalDeals:0});write('docs/deals-pending-all.json',{deals:[queued]});
     await main();
+    if(edited) {
+      assert.equal(read('docs/deals.json').deals.length,0,'old check must not approve a new image');
+      const remaining=read('docs/deals-pending-all.json').deals;
+      assert.equal(remaining.length,1);
+      assert.notEqual(remaining[0].slackTs,ts);
+      assert.equal(remaining[0].pendingDealImage.key,'kebab');
+      assert.equal(remaining[0].pipelineLifecycle.manualDecision,'');
+      assert.equal(posts.filter(p=>p.method.endsWith('/chat.postMessage')).length,1);
+      assert.equal(external.length,0,'new preview requires its own check before source validation');
+      return;
+    }
     const published=read('docs/deals.json').deals[0];
     assert.ok(published,JSON.stringify(read('docs/deals-pending-all.json')));
     assert.ok(published.photoUrl,JSON.stringify(published));
