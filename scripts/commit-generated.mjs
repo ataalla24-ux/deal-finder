@@ -639,6 +639,7 @@ async function main() {
   const baseRef = cleanText(gitOutput(['rev-parse', 'HEAD']));
   let mapReadInputs;
   let photoConsistency;
+  let preparedImageConsistency;
   let redemptionConsistency;
   let flightConsistency;
   const dealsPath = 'docs/deals.json';
@@ -704,7 +705,12 @@ async function main() {
         inputs.add(`docs/assets/approved-deal-photos/${filename}`);
         inputs.add(`reviews/deal-photos/${filename}.json`);
         const review=JSON.parse(fs.readFileSync(`reviews/deal-photos/${filename}.json`,'utf8'));
-        if (review.renderedDisclosure) {
+        if (review.generation) {
+          inputs.add('reviews/generated-deal-images.json');
+          inputs.add('scraper/generated-deal-images.js');
+          inputs.add('scripts/generated-deal-photo-contract.mjs');
+        }
+        if (review.renderedDisclosure && review.renderedDisclosure.sourceKind !== 'generated-owned') {
           // Pixel disclosure is valid only for the same immutable catalogue
           // asset verified with this receipt. A concurrent source edit must
           // not invalidate that verification between assembly and push.
@@ -755,6 +761,20 @@ async function main() {
     options.patterns.push('docs/angebote-wien-heute.html');
     options.patterns.push('docs/sitemap.xml');
   }
+  const generatedImageCache = 'reviews/generated-deal-images.json';
+  const imageBatchChanged = uniqueChangedFiles(options.patterns).some(file =>
+    file === generatedImageCache || file.startsWith('docs/assets/approved-deal-photos/')
+      || file.startsWith('reviews/deal-photos/') || file.startsWith('reviews/generated-deal-image-staging/'));
+  if (imageBatchChanged && fs.existsSync(generatedImageCache)) {
+    const {validatePreparedGeneratedImages} = await import('../scraper/generated-deal-images.js');
+    const validation = await validatePreparedGeneratedImages({root:process.cwd()});
+    const inputs = new Set([generatedImageCache, ...validation.inputs,
+      'scraper/generated-deal-images.js', 'scripts/generated-deal-photo-contract.mjs',
+      'scripts/original-deal-photo.mjs', 'scripts/deal-photo-contract.mjs', 'scraper/deal-image-subject.js']);
+    preparedImageConsistency = [...inputs].map(file => ({
+      path:file, baseHash:contentHash(remoteFileContent(baseRef,file)), hash:localFileHash(file),
+    }));
+  }
   const changedFiles = uniqueChangedFiles(options.patterns);
   if (changedFiles.length === 0) {
     console.log('No generated file changes to commit');
@@ -782,7 +802,7 @@ async function main() {
       }));
       assertPublicationSafe(safeStates);
       assertNoPrivateCommunityOutput(safeStates);
-      for (const [kind, inputs] of [['Original photo', photoConsistency], ['Redemption', redemptionConsistency], ['Flight selection', flightConsistency]]) {
+      for (const [kind, inputs] of [['Original photo', photoConsistency], ['Prepared generated image', preparedImageConsistency], ['Redemption', redemptionConsistency], ['Flight selection', flightConsistency]]) {
         if (!inputs) continue;
         const retained=new Map(safeStates.map(state=>[state.path,state]));
         for(const input of inputs) {

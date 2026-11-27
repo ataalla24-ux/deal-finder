@@ -7,7 +7,7 @@ import {advanceDealLifecycle} from '../scraper/deal-lifecycle.js';
 
 function refreshedDraft(deal) {
   const next = {...deal};
-  for (const field of ['slackTs','pendingDealImage','approvedDealImage','approvedAt','approvalBlock','photoUrl']) delete next[field];
+  for (const field of ['slackTs','pendingDealImage','approvedDealImage','approvedAt','approvalBlock','photoUrl','imageApprovalContextHash','generatedDealImage','imagePreparationState']) delete next[field];
   if (next.pipelineLifecycle) {
     next.pipelineLifecycle = {...next.pipelineLifecycle,stage:'slack-sent',manualDecision:'',manualDecisionAt:'',
       manualDecisionUser:'',publishedAt:''};
@@ -22,7 +22,7 @@ function messageIdentity(previousTs, subjectHash) {
 
 export async function refreshPendingDealPhoto(deal,{
   root=process.cwd(),now=new Date(),enabled=true,request=fetch,
-  token=process.env.SLACK_BOT_TOKEN,channel=process.env.SLACK_CHANNEL_ID,
+  token=process.env.SLACK_BOT_TOKEN,channel=process.env.SLACK_CHANNEL_ID,prepareImage=prepareDealImagePreview,
 }={}) {
   const result = {deal,status:'unchanged'};
   if (!enabled || !deal?.imageApprovalRequired || !deal.slackTs
@@ -30,10 +30,14 @@ export async function refreshPendingDealPhoto(deal,{
     || dealImagePreviewBlock(deal,{enabled:true,now}) && deal.pendingDealImage.slackMessageTs === deal.slackTs) return result;
   const unavailable = reason => ({deal,status:'unavailable',reason});
   if (!token || !channel || !deal.slackThreadTs) return unavailable('slack-context-unavailable');
-  const staged = await prepareDealImagePreview(refreshedDraft(deal),{root,now,enabled:true,
+  const staged = await prepareImage(refreshedDraft(deal),{root,now,enabled:true,
     checkPreview:createDealImagePreviewCheck({request})});
   const image = dealImagePreviewBlock(staged,{enabled:true,now});
-  if (!image) return unavailable('preview-unavailable');
+  if (!image) {
+    if (staged.imagePreparationState) return {deal:{...deal,imagePreparationState:staged.imagePreparationState},
+      status:'deferred',reason:staged.imagePreparationState};
+    return unavailable('preview-unavailable');
+  }
   const {buildPendingDealMessage,pendingSlackPayload} = await import('../scraper/slack-notify.js');
   const text = `${buildPendingDealMessage(staged,deal.order || 1)}\nBitte Foto und Angebot prüfen und diese neue Nachricht mit ✅ freigeben.`.toWellFormed();
   const {channel:_channel,...card} = pendingSlackPayload(text,deal.slackThreadTs,staged);
@@ -76,7 +80,7 @@ if (process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.me
   if (index < 0) throw Error('Edited draft is no longer pending');
   const refreshed = await refreshPendingDealPhoto(document.deals[index]);
   if (refreshed.status === 'unavailable') throw Error(`Edited photo preview is pending (${refreshed.reason})`);
-  if (refreshed.status === 'refreshed') {
+  if (['refreshed','deferred'].includes(refreshed.status)) {
     document.deals[index] = refreshed.deal;
     fs.writeFileSync(file,JSON.stringify(document,null,2)+'\n');
   }

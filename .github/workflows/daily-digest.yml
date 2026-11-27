@@ -127,6 +127,7 @@ jobs:
           node --test scripts/test-deal-card-editor.mjs scripts/test-card-editor-v2.mjs scripts/test-card-editor-retry.mjs scripts/test-card-editor-disabled.mjs
           SENTRY_DISABLED=1 node --test scripts/test-community-card-enrichment.mjs
           node scripts/test-card-editor-approval.mjs
+          SENTRY_DISABLED=1 node --test scripts/test-generated-slack-image-preflight.mjs
 
       - name: Deliver validated new deals to Slack
         if: steps.wien-combined.outputs.deferred != 'true'
@@ -136,6 +137,10 @@ jobs:
           SENTRY_DISABLED: '1'
           DEAL_CARD_EDITOR_ENABLED: '0'
           FREEFINDER_DEAL_IMAGE_PILOT: '1'
+          FREEFINDER_GENERATED_DEAL_PHOTOS: '1'
+          FREEFINDER_ASTRA_ENRICHMENT: '1'
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+          GH_TOKEN: ${{ github.token }}
           SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
           DEAL_REMOVE_LINK_SECRET: ${{ secrets.DEAL_REMOVE_LINK_SECRET }}
           SLACK_CHANNEL_ID: ${{ secrets.SLACK_CHANNEL_ID }}
@@ -167,4 +172,4 @@ jobs:
       - name: Commit dispatch state
         if: ${{ always() && steps.wien-combined.outputs.deferred != 'true' }}
         run: |
-          node scripts/commit-generated.mjs --skip-conflicts --message "Central deal dispatch $(date +%Y-%m-%dT%H:%MZ)" --files docs/deals-pending-all.json docs/deals-pending-gastro2.json docs/deals-pending-food3.json docs/deals-pending-firecrawl2.json docs/deals-pending-firecrawl4.json docs/deals-pending-firecrawl5.json docs/deal-candidates-index.json docs/deal-source-health.json docs/deal-validity-report.json docs/instagram-merchant-registry.json docs/instagram-graph-post-evidence.json docs/instagram-graph-verification-report.json docs/slack-seen-posts.json docs/social-food-candidate-audit.json docs/deals-review-social-food.json docs/social-food-review-state.json docs/deal-review-feedback.json docs/deal-card-editor-cache.json docs/vienna-food-benefit-pause.json docs/carrier-benefit-pause.json
+          node scripts/commit-generated.mjs --skip-conflicts --message "Central deal dispatch $(date +%Y-%m-%dT%H:%MZ)" --files docs/deals-pending-all.json docs/deals-pending-gastro2.json docs/deals-pending-food3.json docs/deals-pending-firecrawl2.json docs/deals-pending-firecrawl4.json docs/deals-pending-firecrawl5.json docs/deal-candidates-index.json docs/deal-source-health.json docs/deal-validity-report.json docs/instagram-merchant-registry.json docs/instagram-graph-post-evidence.json docs/instagram-graph-verification-report.json docs/slack-seen-posts.json docs/social-food-candidate-audit.json docs/deals-review-social-food.json docs/social-food-review-state.json docs/deal-review-feedback.json docs/deal-card-editor-cache.json docs/vienna-food-benefit-pause.json docs/carrier-benefit-pause.json reviews/generated-deal-images.json 'docs/assets/approved-deal-photos/*.jpg' 'reviews/deal-photos/*.json' 'reviews/generated-deal-image-staging/*.jpg'

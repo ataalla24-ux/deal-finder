@@ -39,11 +39,15 @@ jobs:
           SLACK_CHANNEL_ID: ${{ secrets.SLACK_CHANNEL_ID }}
           DEAL_REMOVE_LINK_SECRET: ${{ secrets.DEAL_REMOVE_LINK_SECRET }}
           FREEFINDER_DEAL_IMAGE_PILOT: '1'
+          FREEFINDER_GENERATED_DEAL_PHOTOS: '1'
+          FREEFINDER_ASTRA_ENRICHMENT: '1'
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+          GH_TOKEN: ${{ github.token }}
           SENTRY_DISABLED: '1'
         run: node scripts/refresh-pending-deal-photo.mjs
       - name: Save refreshed Slack draft
         if: always()
-        run: node scripts/commit-generated.mjs --message "Refresh edited Slack photo preview" --files docs/deals-pending-all.json
+        run: node scripts/commit-generated.mjs --message "Refresh edited Slack photo preview" --files docs/deals-pending-all.json reviews/generated-deal-images.json 'docs/assets/approved-deal-photos/*.jpg' 'reviews/deal-photos/*.json' 'reviews/generated-deal-image-staging/*.jpg'
       - name: Confirm saved draft in Slack
         env:
           SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
@@ -58,7 +62,7 @@ jobs:
           const response = await fetch('https://slack.com/api/chat.postMessage', {
             method: 'POST', headers: {Authorization: `Bearer ${process.env.SLACK_BOT_TOKEN}`, 'Content-Type':'application/json'},
             body: JSON.stringify({channel:process.env.SLACK_CHANNEL_ID,thread_ts:deal.slackThreadTs,
-              text:`Entwurf gespeichert: ${deal.title}\nAnbieter: ${deal.brand}\nOrt: ${deal.distance}\nZeitraum: ${deal.expiryDisplayText || deal.expiresOriginal || deal.expires || 'offen'}\n${deal.description}\nDeal-ID: ${deal.id}\n${deal.pendingDealImage?.supersedesSlackMessageTs ? 'Bitte die neue Deal-Nachricht mit der aktualisierten Bildvorschau freigeben.' : 'Jetzt kann die urspruengliche Deal-Nachricht separat freigegeben werden.'}`,unfurl_links:false,unfurl_media:false})
+              text:`Entwurf gespeichert: ${deal.title}\nAnbieter: ${deal.brand}\nOrt: ${deal.distance}\nZeitraum: ${deal.expiryDisplayText || deal.expiresOriginal || deal.expires || 'offen'}\n${deal.description}\nDeal-ID: ${deal.id}\n${deal.imagePreparationState && deal.imagePreparationState !== 'ready' ? 'Das passende Bild wird vorbereitet. Die neue Bildvorschau braucht danach eine eigene Freigabe.' : deal.pendingDealImage?.supersedesSlackMessageTs ? 'Bitte die neue Deal-Nachricht mit der aktualisierten Bildvorschau freigeben.' : 'Jetzt kann die urspruengliche Deal-Nachricht separat freigegeben werden.'}`,unfurl_links:false,unfurl_media:false})
           });
           if (!(await response.json()).ok) throw new Error('Slack confirmation failed');
           JS

@@ -2,7 +2,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import {createHash} from 'node:crypto';
 import {DEAL_IMAGE_ASSETS,dealImageAssetKey,dealImageSubjectHash} from './deal-image-subject.js';
-import {approvedDealPhotoURL} from '../scripts/deal-photo-contract.mjs';
+import {approvedDealPhotoURL,normalizeGeneratedPhotoDraft,generatedPhotoApproval} from '../scripts/deal-photo-contract.mjs';
 
 const baseURL = 'https://freefinder.at/assets/deal-image-pilot/';
 const catalogPath = 'docs/assets/deal-image-pilot/catalog.json';
@@ -77,7 +77,21 @@ export function createDealImagePreviewCheck({request=fetch}={}) {
   };
 }
 
+function approvedGeneratedDraft(deal, row, now = new Date()) {
+  const draft = normalizeGeneratedPhotoDraft(row?.generatedDealImage, deal);
+  if (!draft || row.generationKey !== draft.generationKey || row.draftContextHash !== draft.inputHash
+    || row.visualSubject !== draft.visualSubject || row.key !== draft.assetKey
+    || row.sha256 !== draft.sha256 || row.previewURL !== draft.photoUrl
+    || row.offerId !== deal.id || row.sourceURL !== deal.url) return null;
+  const allowCopyEnrichment = deal.imageApprovalContextHash === draft.inputHash
+    && deal.pipelineLifecycle?.manualDecision === 'approved'
+    && Boolean(deal.slackTs) && row.slackMessageTs === deal.slackTs;
+  try {return generatedPhotoApproval(deal, draft, now.toISOString(), {allowCopyEnrichment});}
+  catch {return null;}
+}
+
 function matchesPreview(deal, row) {
+  if (row?.version === 3 && row.sourceKind === 'generated-owned') return Boolean(approvedGeneratedDraft(deal,row));
   if (![1,2].includes(row?.version) || row.offerId !== deal.id || row.sourceURL !== deal.url
     || !DEAL_IMAGE_ASSETS.some(asset=>asset.key === row.key) || !/^[a-f0-9]{64}$/.test(row.sha256 || '')) return false;
   const expectedSubject = row.version === 1 ? legacySubject(deal) : dealImageSubjectHash(deal);
@@ -89,10 +103,14 @@ function matchesPreview(deal, row) {
 export async function prepareDealImagePreview(deal,{root=process.cwd(),now=new Date(),enabled=process.env.FREEFINDER_DEAL_IMAGE_PILOT === '1',checkPreview}={}) {
   // A delivered preview is a human review input. Re-running discovery cannot
   // substitute another photograph underneath that Slack message.
-  if (deal.slackTs || deal.pendingDealImage?.slackMessageTs) return deal;
+  if (deal.slackTs || deal.pendingDealImage?.slackMessageTs || deal.approvedDealImage?.status === 'locked') return deal;
   const {pendingDealImage: old,...base} = deal;
   const cleared = Object.hasOwn(deal,'pendingDealImage') ? base : deal;
   if (!enabled) return cleared;
+  if (process.env.FREEFINDER_GENERATED_DEAL_PHOTOS === '1') {
+    const {prepareGeneratedDealImagePreview} = await import('./generated-deal-images.js');
+    return prepareGeneratedDealImagePreview(cleared,{root,now,checkPreview});
+  }
   const withoutPreview = {...cleared,imageApprovalRequired:true};
   if (!canStageImage(withoutPreview,now)) return withoutPreview;
   if ([...(deal.slackEditedFields || []),...(deal.liveEditedFields || [])].includes('photoUrl') && !deal.photoUrl) return withoutPreview;
@@ -140,22 +158,25 @@ export async function prepareApprovedDealImage(deal,{root=process.cwd(),now=new 
     const approvedAt = now.toISOString();
     const lock = (photoUrl,kind) => ({version:1,status:'locked',photoUrl,sha256:staged.sha256,
       assetKey:staged.key,kind,approvedAt});
-    if (staged.sourceKind === 'bound-photo') {
+    if (['bound-photo','generated-owned'].includes(staged.sourceKind)) {
       const {readBoundPhotoSnapshot} = await import('../scripts/original-deal-photo.mjs');
-      const bound = readBoundPhotoSnapshot(output,{root});
-      if (bound.review.sha256 !== staged.sha256 || output.photoUrl !== staged.previewURL) return output;
-      const approvedDealImage = lock(output.photoUrl,bound.review.kind || 'merchant-photo');
-      const lockedDeal = {...output,approvedDealImage};
+      const generatedLock = staged.sourceKind === 'generated-owned' ? approvedGeneratedDraft(deal,staged,now) : null;
+      if (staged.sourceKind === 'generated-owned' && !generatedLock) return output;
+      const photoDeal = generatedLock ? {...output,photoUrl:staged.previewURL,approvedDealImage:generatedLock} : output;
+      const bound = readBoundPhotoSnapshot(photoDeal,{root});
+      if (bound.review.sha256 !== staged.sha256 || photoDeal.photoUrl !== staged.previewURL) return output;
+      const approvedDealImage = generatedLock || lock(photoDeal.photoUrl,bound.review.kind || 'merchant-photo');
+      const lockedDeal = {...photoDeal,approvedDealImage};
       const {photoSubjectHash} = await import('../scripts/deal-photo-contract.mjs');
       const {writePreparedOriginalPhoto} = await import('../scripts/original-deal-photo.mjs');
       const {loadLiveDealEditStore,saveLiveDealEditStore,upsertLiveDealEdit} = await import('../scripts/live-deal-edits-lib.mjs');
       const editsPath = path.join(root,'docs/live-deal-edits.json');
       const store = loadLiveDealEditStore(editsPath);
       const existing = store.edits.find(edit=>edit.dealId === deal.id);
-      if (existing?.hidden || existing?.restoreDeal || existing && Object.hasOwn(existing,'photoUrl') && existing.photoUrl !== output.photoUrl) return output;
+      if (existing?.hidden || existing?.restoreDeal || existing && Object.hasOwn(existing,'photoUrl') && existing.photoUrl !== photoDeal.photoUrl) return output;
       const subjectHash = photoSubjectHash(lockedDeal);
       writePreparedOriginalPhoto(root,{bytes:bound.bytes,review:{...bound.review,subjectHash}});
-      saveLiveDealEditStore(editsPath,upsertLiveDealEdit(store,{...existing,dealId:deal.id,photoUrl:output.photoUrl,
+      saveLiveDealEditStore(editsPath,upsertLiveDealEdit(store,{...existing,dealId:deal.id,photoUrl:photoDeal.photoUrl,
         photoSubjectHash:subjectHash,approvedDealImage,editedBy:'FreeFinder image approval'},approvedAt),approvedAt);
       return lockedDeal;
     }

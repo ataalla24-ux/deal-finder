@@ -1011,6 +1011,19 @@ function pendingSlackPayload(text, threadTs = null, deal, kind = '') {
   return payload;
 }
 
+export async function prepareSlackImageDeals(deals, {
+  root = ROOT, now = new Date(), checkPreview,
+  editCard = async deal => deal, prepareImage = prepareDealImagePreview,
+} = {}) {
+  const ready = [], deferred = [];
+  for (const candidate of deals) {
+    const deal = await prepareImage(await editCard(candidate), { root, now, checkPreview });
+    if (deal.imageApprovalRequired && !dealImagePreviewBlock(deal, { enabled: true, now })) deferred.push(deal);
+    else ready.push(deal);
+  }
+  return { ready, deferred };
+}
+
 async function postSlackMessage(text, threadTs = null, attempt = 0, deal, kind = '') {
   text = String(text).toWellFormed();
   if (deal?.imageApprovalRequired && !dealImagePreviewBlock(deal)) {
@@ -2056,6 +2069,22 @@ async function main() {
     persist: writePendingAll, liveIds: new Set(liveDeals.map(deal => deal.id)),
   });
 
+  const checkImagePreview = createDealImagePreviewCheck();
+  const imagePreparation = {};
+  for (const lane of [freshDeals, firecrawlReviewDeals, socialFoodReviewDeals]) {
+    const prepared = await prepareSlackImageDeals(lane, {
+      editCard, root: ROOT, now: runNow, checkPreview: checkImagePreview,
+    });
+    lane.splice(0, lane.length, ...prepared.ready);
+    for (const deal of prepared.deferred) {
+      const reason = deal.imagePreparationState || 'preview-unavailable';
+      imagePreparation[reason] = (imagePreparation[reason] || 0) + 1;
+    }
+  }
+  validation.report.imagePreparationDeferred = imagePreparation;
+  writeDeliveryAudit();
+  if (Object.keys(imagePreparation).length) console.log(`Deal photo preparation deferred: ${JSON.stringify(imagePreparation)}`);
+
   if (freshDeals.length === 0 && firecrawlReviewDeals.length === 0 && socialFoodReviewDeals.length === 0) {
     if (queueChanged) {
       writePendingAll(existingQueue);
@@ -2069,7 +2098,6 @@ async function main() {
   freshDeals.sort(compareSlackDeals);
 
   const postedDeals = [];
-  const checkImagePreview = createDealImagePreviewCheck();
   for (const group of pendingDealGroups(freshDeals)) {
     const freeCount = group.deals.filter((d) => d.type === 'gratis').length;
     const headerTs = await postSlackMessage(
@@ -2092,7 +2120,7 @@ async function main() {
 
     let groupSent = 0;
     for (let i = 0; i < group.deals.length; i += 1) {
-      const deal = await prepareDealImagePreview(await editCard(group.deals[i]),{root:ROOT,now:runNow,checkPreview:checkImagePreview});
+      const deal = group.deals[i];
       const text = buildPendingDealMessage(deal, i + 1);
       const ts = await postSlackMessage(text, headerTs,0,deal);
       if (!ts) continue;
@@ -2142,7 +2170,7 @@ async function main() {
     }
 
     for (let i = 0; i < firecrawlReviewDeals.length; i += 1) {
-      const deal = await prepareDealImagePreview(await editCard(firecrawlReviewDeals[i]),{root:ROOT,now:runNow,checkPreview:checkImagePreview});
+      const deal = firecrawlReviewDeals[i];
       const ts = await postSlackMessage(buildFirecrawlReviewMessage(deal, i + 1), reviewHeaderTs,0,deal);
       if (!ts) continue;
 
@@ -2182,7 +2210,7 @@ async function main() {
     }
 
     for (let i = 0; i < socialFoodReviewDeals.length; i += 1) {
-      const deal = await prepareDealImagePreview(await editCard(socialFoodReviewDeals[i]),{root:ROOT,now:runNow,checkPreview:checkImagePreview});
+      const deal = socialFoodReviewDeals[i];
       const ts = await postSlackMessage(buildSocialFoodReviewMessage(deal, i + 1), reviewHeaderTs,0,deal);
       if (!ts) continue;
 

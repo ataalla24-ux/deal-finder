@@ -88,6 +88,7 @@ jobs:
           OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
           FREEFINDER_ASTRA_ENRICHMENT: '1'
           FREEFINDER_DEAL_IMAGE_PILOT: '1'
+          FREEFINDER_GENERATED_DEAL_PHOTOS: '1'
           APPROVAL_SOURCE_COPY_REVIEW: '1'
           APPROVAL_COPY_CACHE_ONLY: ${{ github.event.inputs.cached_review_only == 'true' && '1' || '0' }}
           APPROVE_SLACK_CHANNEL_ID: ${{ github.event.inputs.slack_channel }}
@@ -145,7 +146,7 @@ jobs:
         run: |
           DEAL_COUNT=$(cat docs/deals.json | python3 -c "import sys, json; print(json.load(sys.stdin)['totalDeals'])" 2>/dev/null || echo "?")
           TIMESTAMP=$(date -u +"%H:%M")
-          node scripts/commit-generated.mjs --message "✅ ${TIMESTAMP} - Genehmigte Deals (${DEAL_COUNT} total)" --files docs/deals.json docs/deals-pending-all.json docs/deal-review-feedback.json docs/instagram-merchant-registry.json docs/live-deal-validation-report.json docs/live-deal-review-candidates.json docs/live-deal-edit-report.json 'docs/assets/brand-logos/*.png' docs/vienna-food-benefit-pause.json docs/carrier-benefit-pause.json docs/reviewed-social-source-pause.json docs/deal-map-locations.json reviews/map-location-catalog.json reviews/map-geocode-cache.json reviews/map-source-address-cache.json reviews/approval-map-readiness.json reviews/enrichment-inputs.json reviews/maintenance-source-evidence.json docs/live-deal-edits.json 'docs/assets/approved-deal-photos/*.jpg' 'reviews/deal-photos/*.json'
+          node scripts/commit-generated.mjs --message "✅ ${TIMESTAMP} - Genehmigte Deals (${DEAL_COUNT} total)" --files docs/deals.json docs/deals-pending-all.json docs/deal-review-feedback.json docs/instagram-merchant-registry.json docs/live-deal-validation-report.json docs/live-deal-review-candidates.json docs/live-deal-edit-report.json 'docs/assets/brand-logos/*.png' docs/vienna-food-benefit-pause.json docs/carrier-benefit-pause.json docs/reviewed-social-source-pause.json docs/deal-map-locations.json reviews/map-location-catalog.json reviews/map-geocode-cache.json reviews/map-source-address-cache.json reviews/approval-map-readiness.json reviews/enrichment-inputs.json reviews/maintenance-source-evidence.json docs/live-deal-edits.json 'docs/assets/approved-deal-photos/*.jpg' 'reviews/deal-photos/*.json' 'reviews/generated-deal-image-staging/*.jpg' reviews/generated-deal-images.json
 
       - name: Persist private review changes after successful publication
         env:

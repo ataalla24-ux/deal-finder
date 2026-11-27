@@ -121,3 +121,25 @@ test('legacy cards and disabled preview refresh use their existing approval path
     assert.equal(result.status,'unchanged');
   }
 });
+
+
+test('a generated replacement waiting for publication retains its prior Slack card without a new approval',async()=>{
+  const edited = {...await draft(),title:'Gratis Döner',imageApprovalContextHash:'old-review'};
+  const f = requests();
+  let candidate;
+  const result = await refreshPendingDealPhoto(edited,{root,now,request:f.request,token:'offline-token',channel:'offline-channel',
+    prepareImage:async deal => {
+      candidate=deal;
+      return {...deal,imageApprovalRequired:true,imagePreparationState:'waiting-publication'};
+    },
+  });
+  assert.equal(result.status,'deferred');
+  assert.equal(result.reason,'waiting-publication');
+  assert.equal(result.deal.slackTs,edited.slackTs);
+  assert.equal(result.deal.imagePreparationState,'waiting-publication');
+  assert.deepEqual(result.deal.pendingDealImage,edited.pendingDealImage);
+  assert.equal(candidate.imageApprovalContextHash,undefined);
+  assert.equal(candidate.slackTs,undefined);
+  assert.equal(candidate.photoUrl,undefined);
+  assert.equal(f.calls.length,0);
+});
