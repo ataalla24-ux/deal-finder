@@ -11,11 +11,19 @@ import { articlePhotos, photoRecipes } from './blog-photo-catalog.mjs';
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const read = file => fs.readFileSync(path.join(root, file), 'utf8');
 const now = Date.parse('2026-10-07T12:00:00+02:00');
+const imprint = load(read('docs/impressum.html'));
+const operator = imprint('address strong').text();
 let pages = 0;
 for (const file of fs.readdirSync(path.join(root, 'docs'), { recursive: true }).filter(file => file.endsWith('.html'))) {
   const html = read(`docs/${file}`);
   assert.equal(polishHtml(html, file, now), html, `${file}: normalization must be idempotent`);
   const $ = load(html);
+  assert.doesNotMatch(html, /Stefan\s+Ataalla/i, `${file}: obsolete operator name`);
+  if ($('.article-byline').length) {
+    const responsible = $('.article-byline a[href="/impressum.html"]');
+    assert.equal(responsible.length, 1, `${file}: one link to the responsible operator`);
+    assert.equal(responsible.text(), operator, `${file}: operator matches legal notice`);
+  }
   assert.equal($('link[rel="icon"][href="/favicon.ico"]').length, 1, `${file}: legacy icon fallback`);
   assert.equal($('link[rel="icon"][type="image/png"]').attr('href'), '/favicon-96x96.png');
   assert.equal($('link[rel="apple-touch-icon"]').attr('href'), '/apple-touch-icon.png');
@@ -36,12 +44,14 @@ for (const file of fs.readdirSync(path.join(root, 'docs'), { recursive: true }).
     assert.equal($('[data-deal-status-banner][hidden]').length, 0);
   }
 }
-const imprint = load(read('docs/impressum.html'));
-assert.equal(imprint('address strong').text(), 'Lili Dóra Ataalla');
+assert.equal(operator, 'Lili Dóra Ataalla');
 assert.match(imprint('address').text(), /Lotte-Hass-Weg 2\/23[\s\S]*1220 Wien/);
 assert.equal(imprint('address a[href^="mailto:"]').attr('href'), 'mailto:freefinder.at@gmail.com');
 assert.equal(imprint('address a[href^="tel:"]').attr('href'), 'tel:+436604904417');
 assert.match(imprint('main').text(), /40343846/);
+const gisa = imprint('dt').filter((_, node) => imprint(node).text() === 'GISA-Zahl').next('dd');
+assert.match(gisa.text(), /^40343846\b/);
+assert.equal(gisa.find('a[href^="https://firmen.wko.at/"]').length, 1);
 assert.match(imprint('main').text(), /Sammeln und Weitergeben von allgemein zugänglichen Informationen/);
 assert.match(imprint('main').text(), /Magistratisches Bezirksamt für den 22\. Bezirk/);
 assert.doesNotMatch(imprint('main').text(), /Ankündigungsunternehmen|Anzeigenplätze|geboren/);
