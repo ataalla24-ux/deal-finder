@@ -5,7 +5,7 @@ on:
       mode:
         description: Compare once, or verify the saved comparison without another Tavily call
         type: choice
-        options: [compare, verify-saved]
+        options: [compare, verify-saved, verify-rendered]
         default: compare
   push:
     branches: [main]
@@ -15,6 +15,8 @@ on:
       - 'scripts/check-instagram-tavily-offers.mjs'
       - 'scripts/test-instagram-tavily-investigation.mjs'
       - 'scripts/test-instagram-tavily-offers.mjs'
+      - 'scripts/check-instagram-tavily-rendered-offers.mjs'
+      - 'scripts/test-instagram-tavily-rendered-offers.mjs'
       - '.github/workflows/instagram-tavily-investigation.yml'
 permissions:
   contents: read
@@ -35,9 +37,9 @@ jobs:
           node-version: '22'
           cache: npm
       - run: npm ci --no-audit --no-fund
-      - run: node --test scripts/test-instagram-tavily-investigation.mjs scripts/test-instagram-tavily-offers.mjs scripts/test-tavily-free-budget.mjs scripts/test-instagram-tavily-index.mjs
+      - run: node --test scripts/test-instagram-tavily-investigation.mjs scripts/test-instagram-tavily-offers.mjs scripts/test-instagram-tavily-rendered-offers.mjs scripts/test-tavily-free-budget.mjs scripts/test-instagram-tavily-index.mjs
   compare:
-    if: github.event_name == 'workflow_dispatch' && inputs.mode != 'verify-saved' && github.ref == 'refs/heads/main' && github.run_attempt == 1
+    if: github.event_name == 'workflow_dispatch' && inputs.mode == 'compare' && github.ref == 'refs/heads/main' && github.run_attempt == 1
     needs: offline
     runs-on: ubuntu-latest
     timeout-minutes: 12
@@ -80,6 +82,50 @@ jobs:
         with:
           name: instagram-tavily-investigation
           path: output/social-discovery/instagram-tavily-investigation.json
+          retention-days: 7
+  verify-rendered:
+    needs: offline
+    if: github.event_name == 'workflow_dispatch' && inputs.mode == 'verify-rendered' && github.ref == 'refs/heads/main' && github.run_attempt == 1
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: write
+    env:
+      SENTRY_DISABLED: '1'
+      PLAYWRIGHT_BROWSERS_PATH: '0'
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+      - run: npm ci --no-audit --no-fund
+      - run: npx playwright install --with-deps chromium
+      - name: Claim two normal browser reads of the saved HTTP200 shells
+        id: claim
+        run: node scripts/check-instagram-tavily-rendered-offers.mjs source-state/instagram-tavily-offer-verification-result.json --claim
+      - name: Persist browser verification claim before opening a post
+        if: steps.claim.outputs.claimed == 'true'
+        run: node scripts/commit-generated.mjs --message "Claim two Instagram rendered original checks [skip ci]" --files source-state/instagram-tavily-render-verification-claim.json
+      - name: Verify two originals through the ordinary browser renderer
+        id: verify
+        if: steps.claim.outputs.claimed == 'true'
+        env:
+          INSTAGRAM_SESSIONID: ${{ secrets.INSTAGRAM_SESSIONID }}
+          INSTAGRAM_COOKIES: ${{ secrets.INSTAGRAM_COOKIES }}
+        run: node scripts/check-instagram-tavily-rendered-offers.mjs source-state/instagram-tavily-offer-verification-result.json
+      - name: Retain any new Instagram access hold
+        if: always() && steps.verify.outputs.web_access_changed == 'true'
+        run: node scripts/commit-generated.mjs --message "Record bounded Instagram browser verification [skip ci]" --files docs/instagram-ai-report.json
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: instagram-tavily-rendered-offer-verification
+          path: |
+            output/social-discovery/instagram-tavily-rendered-offers.json
+            output/social-discovery/instagram-tavily-rendered-offers.candidates.json
           retention-days: 7
   verify-offers:
     needs: [offline, compare]
