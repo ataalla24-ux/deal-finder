@@ -172,7 +172,7 @@ const gitEnv={...Object.fromEntries(Object.entries(process.env).filter(([key])=>
   GIT_CONFIG_NOSYSTEM:'1',GIT_CONFIG_GLOBAL:os.devNull,GIT_ALLOW_PROTOCOL:'file',GIT_TERMINAL_PROMPT:'0'};
 function git(cwd,...args){return execFileSync('git',args,{cwd,env:gitEnv,encoding:'utf8',stdio:['ignore','pipe','pipe']}).trim();}
 function gitCommit(cwd){git(cwd,'add','.');git(cwd,'commit','-m','offline photo fixture');}
-const photoInputs=['scripts/original-deal-photo.mjs','scripts/deal-photo-contract.mjs','scripts/validate-original-deal-photos.mjs'];
+const photoInputs=['scripts/original-deal-photo.mjs','scripts/deal-photo-contract.mjs','scraper/deal-image-subject.js','scripts/validate-original-deal-photos.mjs'];
 async function photoGitFixture(root,{pilot=false}={}){
   const seed=path.join(root,'seed'),remote=path.join(root,'remote.git'),local=path.join(root,'local'),concurrent=path.join(root,'concurrent');
   fs.mkdirSync(seed);git(seed,'init','--initial-branch=main');
@@ -254,6 +254,8 @@ test('real offline importer records only reviewed fields and preserves foreign e
   for(const name of ['prepare-deal-photo.mjs','deal-photo-contract.mjs','original-deal-photo.mjs','live-deal-edits-lib.mjs']){
     const target=path.join(root,'scripts',name);fs.mkdirSync(path.dirname(target),{recursive:true});fs.copyFileSync(path.join(repository,'scripts',name),target);
   }
+  fs.mkdirSync(path.join(root,'scraper'),{recursive:true});
+  fs.copyFileSync(path.join(repository,'scraper/deal-image-subject.js'),path.join(root,'scraper/deal-image-subject.js'));
   fs.symlinkSync(path.join(repository,'node_modules'),path.join(root,'node_modules'));
   write(root,'docs/deals.json',{deals:[baseDeal]});
   write(root,'docs/live-deal-edits.json',{version:1,edits:[{dealId:baseDeal.id,description:baseDeal.description,forceKeep:true},{dealId:'hidden',hidden:true,manualRemovalApproved:true}]});

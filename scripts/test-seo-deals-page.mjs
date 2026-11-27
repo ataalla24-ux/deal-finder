@@ -12,6 +12,8 @@ const tempRoot = path.join(ROOT, 'tmp');
 fs.mkdirSync(tempRoot, { recursive: true });
 const fixtureRoot = fs.mkdtempSync(path.join(tempRoot, 'seo-deals-page-'));
 fs.mkdirSync(path.join(fixtureRoot, 'scripts'));
+fs.mkdirSync(path.join(fixtureRoot, 'scraper'));
+fs.copyFileSync(path.join(ROOT, 'scraper/deal-image-subject.js'), path.join(fixtureRoot, 'scraper/deal-image-subject.js'));
 fs.mkdirSync(path.join(fixtureRoot, 'docs'));
 fs.copyFileSync(path.join(ROOT, 'scripts/generate-seo-deals-page.mjs'), path.join(fixtureRoot, 'scripts/generate-seo-deals-page.mjs'));
 fs.copyFileSync(path.join(ROOT, 'scripts/website-deal-articles.mjs'), path.join(fixtureRoot, 'scripts/website-deal-articles.mjs'));

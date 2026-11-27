@@ -179,9 +179,9 @@ test('real topic generator retains the reviewed addition and new sitemap date on
   const root = fileURLToPath(new URL('../', import.meta.url));
   const temp = fs.mkdtempSync(path.join(os.tmpdir(), 'ff-blog-generator-'));
   try {
-    for (const dir of ['docs/blog', 'reviews', 'scripts']) fs.mkdirSync(path.join(temp, dir), { recursive: true });
+    for (const dir of ['docs/blog', 'reviews', 'scripts', 'scraper']) fs.mkdirSync(path.join(temp, dir), { recursive: true });
     const files = ['scripts/generate-topic-guides.mjs', 'scripts/polish-website.mjs', 'scripts/blog-visuals.mjs',
-      'scripts/blog-photo-catalog.mjs', 'scripts/deal-photos.mjs', 'scripts/original-deal-photo.mjs', 'scripts/deal-photo-contract.mjs', 'scripts/server-blog-content.mjs',
+      'scripts/blog-photo-catalog.mjs', 'scripts/deal-photos.mjs', 'scripts/original-deal-photo.mjs', 'scripts/deal-photo-contract.mjs', 'scraper/deal-image-subject.js', 'scripts/server-blog-content.mjs',
       'scripts/blog-backfill-20261018.mjs', 'scripts/blog-backfill-20261030.mjs', 'scripts/blog-backfill-20261105.mjs', 'scripts/blog-backfill-20261120.mjs',
       'reviews/deal-guides.json', 'docs/blog/index.html', 'docs/sitemap.xml'];
     for (const file of files) fs.copyFileSync(path.join(root, file), path.join(temp, file));
