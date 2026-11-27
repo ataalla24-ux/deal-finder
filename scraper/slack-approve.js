@@ -765,7 +765,7 @@ function normalizePendingDeal(raw) {
 }
 
 function redactPublishedCommunityDraft(deal) {
-  const { approvalCopyReview, pendingDealImage, ...publicDeal } = deal;
+  const { approvalCopyReview, pendingDealImage, imageApprovalContextHash, imagePreparationState, generatedDealImage, ...publicDeal } = deal;
   if (!isCommunitySubmission(deal)) return publicDeal;
   const { submittedContent, communityExtraction, ...published } = publicDeal;
   return published;
@@ -1464,6 +1464,7 @@ async function runTargetedApproval({ moderation, botUserId }) {
     at: decisionAt,
     user: reviewDecision.user,
   });
+  bindHumanApprovedImageContext(manuallyApprovedDeal,decisionAt);
   reviewFeedback = persistReviewDecision(reviewFeedback, manuallyApprovedDeal, 'approved', {
     user: reviewDecision.user,
     source: reviewDecision.source,
@@ -1736,6 +1737,7 @@ async function main() {
         at: decisionAt,
         user: reviewDecision.user,
       });
+      bindHumanApprovedImageContext(approvedDeal,decisionAt);
       reviewFeedback = persistReviewDecision(reviewFeedback, approvedDeal, 'approved', {
         user: reviewDecision.user,
         source: reviewDecision.source,
@@ -1866,9 +1868,17 @@ async function main() {
 
 async function refreshChangedApprovalImage(deal,now) {
   if (!deal.imageApprovalRequired
-    || dealImagePreviewBlock(deal,{enabled:true,now})) return {deal,status:'unchanged'};
+    || dealImagePreviewBlock({...deal,imageApprovalContextHash:undefined},{enabled:true,now})) return {deal,status:'unchanged'};
   const {refreshPendingDealPhoto} = await import('../scripts/refresh-pending-deal-photo.mjs');
-  return refreshPendingDealPhoto(deal,{root:ROOT,now});
+  return refreshPendingDealPhoto({...deal,imageApprovalContextHash:undefined},{root:ROOT,now});
+}
+
+function bindHumanApprovedImageContext(deal,now) {
+  delete deal.imageApprovalContextHash;
+  if (deal.pendingDealImage?.version === 3 && deal.pendingDealImage.slackMessageTs === deal.slackTs
+    && dealImagePreviewBlock(deal,{enabled:true,now})) {
+    deal.imageApprovalContextHash=deal.pendingDealImage.generatedDealImage.inputHash;
+  }
 }
 
 export async function preparePublishedApprovedDeals(deals,{root=ROOT,now=new Date(),enabled,existingDeals=[],blockedDeals=[]}={}) {

@@ -108,6 +108,7 @@ export async function prepareDealImagePreview(deal,{root=process.cwd(),now=new D
   const cleared = Object.hasOwn(deal,'pendingDealImage') ? base : deal;
   if (!enabled) return cleared;
   if (process.env.FREEFINDER_GENERATED_DEAL_PHOTOS === '1') {
+    if (!canStageImage(cleared,now)) return {...cleared,imageApprovalRequired:true,imagePreparationState:'review-held'};
     const {prepareGeneratedDealImagePreview} = await import('./generated-deal-images.js');
     return prepareGeneratedDealImagePreview(cleared,{root,now,checkPreview});
   }

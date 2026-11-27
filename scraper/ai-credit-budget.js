@@ -11,6 +11,7 @@ const RESPONSES = 'https://api.openai.com/v1/responses';
 export const DEAL_IMAGE_GENERATION_URL = 'https://api.openai.com/v1/images/generations';
 export const DEAL_IMAGE_GENERATION_MODEL = 'gpt-image-2.6-sunburst';
 export const OPENAI_MODEL_TIMEOUT_MS = 110000;
+export const OPENAI_IMAGE_TIMEOUT_MS = 300000;
 const RATES = {
   // Price all input at the maximum 30-minute cache-write rate for Standard requests.
   [SOL]: [2.5, 10],
@@ -285,6 +286,9 @@ export function createCreditBudget({ store, policy, clock = Date.now, request = 
     if (stopped) throw paused('runner-paused');
     validateCreditPolicy(policy, clock());
     const prepared = prepareFreeCreditCall(url, init);
+    if (prepared.modality === 'image' && clock() + OPENAI_IMAGE_TIMEOUT_MS >= Date.parse(policy.expiresAt)) {
+      throw paused('image-generation-period-ending');
+    }
     if (prepared.modality === 'image' && (typeof imageGenerationKey !== 'string' || !/^[a-f0-9]{64}$/.test(imageGenerationKey))) {
       throw paused('image-generation-key-required');
     }
@@ -331,7 +335,8 @@ export function createCreditBudget({ store, policy, clock = Date.now, request = 
     let response, payload;
     try {
       response = await request(providerUrl, { ...prepared.init,
-        signal: AbortSignal.any([...(prepared.init.signal ? [prepared.init.signal] : []), AbortSignal.timeout(OPENAI_MODEL_TIMEOUT_MS)]) });
+        signal: AbortSignal.any([...(prepared.init.signal ? [prepared.init.signal] : []),
+          AbortSignal.timeout(prepared.modality === 'image' ? OPENAI_IMAGE_TIMEOUT_MS : OPENAI_MODEL_TIMEOUT_MS)]) });
       payload = await response.clone().json().catch(() => ({}));
       const codes = [payload.error?.code, payload.error?.type];
       if (!response.ok) console.warn(JSON.stringify({ model: prepared.model, status: response.status,

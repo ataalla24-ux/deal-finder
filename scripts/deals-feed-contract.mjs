@@ -32,9 +32,12 @@ export function stampDealsFeedBundle(bundle, options = {}) {
     ? options.redemptionManifest : loadDealRedemptions(options.redemptionManifestPath);
   const bindingDeals = bundle.deals.map(redactPublishedCommunityDraft).map(sanitizePublicDealText).map(deal => {
     const stripNotice = deal.approvalPublicationMode === 'two-stage-v1' && deal.enrichmentFields?.includes('description');
-    if (!stripNotice && !hasReviewExpiry(deal) && !Object.hasOwn(deal,'pendingDealImage')) return deal;
+    if (!stripNotice && !hasReviewExpiry(deal) && !['pendingDealImage','imageApprovalContextHash','imagePreparationState','generatedDealImage'].some(key=>Object.hasOwn(deal,key))) return deal;
     const publicDeal = { ...deal };
     delete publicDeal.pendingDealImage;
+    delete publicDeal.imageApprovalContextHash;
+    delete publicDeal.imagePreparationState;
+    delete publicDeal.generatedDealImage;
     if (stripNotice) publicDeal.description = stripEnrichmentNotice(deal.description);
     clearReviewExpiry(publicDeal);
     return publicDeal;

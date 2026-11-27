@@ -2,6 +2,12 @@ name: Approval Preparation Tests
 on:
   pull_request:
     paths:
+      - 'scraper/generated-deal-images.js'
+      - 'scraper/ai-credit-budget.js'
+      - 'scripts/generated-deal-photo-contract.mjs'
+      - 'scripts/test-generated-*.mjs'
+      - 'scripts/test-prepared-generated-image-publication.mjs'
+      - 'scripts/test-ai-credit-budget.mjs'
       - 'scraper/deal-image-pilot.js'
       - 'scraper/deal-image-subject.js'
       - 'scripts/deal-photo-contract.mjs'
@@ -72,6 +78,12 @@ on:
   push:
     branches: [main]
     paths:
+      - 'scraper/generated-deal-images.js'
+      - 'scraper/ai-credit-budget.js'
+      - 'scripts/generated-deal-photo-contract.mjs'
+      - 'scripts/test-generated-*.mjs'
+      - 'scripts/test-prepared-generated-image-publication.mjs'
+      - 'scripts/test-ai-credit-budget.mjs'
       - 'scraper/deal-image-pilot.js'
       - 'scraper/deal-image-subject.js'
       - 'scripts/deal-photo-contract.mjs'
@@ -171,3 +183,6 @@ jobs:
           scripts/test-refresh-pending-deal-photo.mjs
           scripts/test-approved-expiry-evidence.mjs scripts/test-expiry-publication-retention.mjs
           scripts/test-expiry-embedded-clock-range.mjs scripts/test-expiry-original-today.mjs scripts/test-expiry-reliability.mjs
+          scripts/test-ai-credit-budget.mjs scripts/test-generated-deal-photo-contract.mjs
+          scripts/test-generated-deal-images.mjs scripts/test-generated-slack-image-preflight.mjs
+          scripts/test-prepared-generated-image-publication.mjs
