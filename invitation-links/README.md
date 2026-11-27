@@ -1,5 +1,33 @@
 # Invitation links
 
+## Prepared App Clip release
+
+The web changes prepare the Clip association on both hosts. They do not release
+an App Clip. Both AASA paths on `www.freefinder.at` return JSON directly; the apex
+copies retain their existing full-app association and add the Clip identifier.
+
+Short links keep their existing 302 destinations unless the Pages deployment
+has all three release values below. Never set them before the reviewed full app
+containing the Clip has been released and its experiences have been verified:
+
+```text
+APP_CLIP_RELEASE_ENABLED=1
+APP_CLIP_APPROVED_VERSION=<released app version, e.g. 1.42>
+APP_CLIP_RELEASE_VERIFIED_AT=<actual verification time in UTC ISO format>
+```
+
+Only the first value is the switch; the other two record the verified release.
+Absent or incomplete configuration fails closed to the existing redirects.
+On a supported iOS browser, an enabled `/i/` or `/d/` URL returns a small page
+with a Smart App Banner, full-app fallback, and existing public deal text when
+available. Android, desktop, iOS below 14 and legacy `?r=` links keep the old
+route. It adds no account request, database, cookie, cron or AI/provider call;
+deal resolution reuses the same bounded public feed read.
+
+The full release sequence, native identifiers, canonical invocation URLs and
+unverified Store/device checks are documented in
+[`reviews/app-clip-release-readiness-20261127.md`](../reviews/app-clip-release-readiness-20261127.md).
+
 ## Compact deal sharing
 
 `https://www.freefinder.at/d/<12-character-token>` resolves the SHA-256-derived
@@ -12,8 +40,9 @@ ambiguous IDs or unavailable feeds fail closed, never redirect to another offer.
 Native photo sharing supplies the actual card attachment and short caption.
 Link-only recipient previews are controlled by the recipient, not this redirect.
 
-The destination is the same apex URL understood by existing native apps; do not
-add `www` to associated domains without implementing native short-token parsing.
+Before Clip activation, the destination is the same apex URL understood by
+existing native apps. Adding `www` to native associated domains requires the
+full app to handle the same compact tokens and preview as the Clip.
 Run `node --test invitation-links/*.test.js` before deploying this Pages service.
 
 `https://www.freefinder.at/i/<token>` redirects to the existing

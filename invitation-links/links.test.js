@@ -55,7 +55,7 @@ test('deal context is retained without permitting open redirects or duplicate ID
 
 test('all other www paths and queries retain the existing apex redirect', () => {
   for (const path of ['/', '/privacy.html', '/support.html', '/invite.html?invite=' + code,
-    '/deal.html?deal=pizza-1', '/.well-known/apple-app-site-association', '/.well-known/assetlinks.json',
+    '/deal.html?deal=pizza-1', '/.well-known/assetlinks.json',
     '//evil.test/path', '/blog/?q=a%26b']) {
     const result = request(path);
     assert.equal(result.status, 301);

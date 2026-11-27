@@ -35,7 +35,7 @@ async function readDeals() {
   return deals;
 }
 
-export async function resolveDealLink(request, invitationCode, respond, loadDeals = readDeals) {
+export async function resolveDealLink(request, invitationCode, respond, loadDeals = readDeals, renderLanding = null) {
   const url = new URL(request.url);
   const token = url.pathname.slice(3);
   const invitation = url.searchParams.get('i');
@@ -60,6 +60,10 @@ export async function resolveDealLink(request, invitationCode, respond, loadDeal
     if (invitation) target.searchParams.set('invite', invitationCode(invitation));
     if (referral) target.searchParams.set('ref', `FF-${referral}`);
     target.searchParams.set('source', 'deal_share');
+    // The reviewed Clip release preserves the original invocation URL and can
+    // show the existing public offer without an additional downstream request.
+    // Legacy FF referrals retain the full-app route that understands them.
+    if (renderLanding && !referral) return renderLanding(request, target.href, respond, deal);
     // Existing clients understand the destination; no new native deep-link parser is required.
     return respond(request, '', 302, { Location: target.href, 'X-Robots-Tag': 'noindex' });
   } catch {

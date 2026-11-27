@@ -1,4 +1,5 @@
 import { resolveDealLink } from './deals.js';
+import { APP_ASSOCIATION, appClipLanding, supportsAppClipLanding } from './app-clip.js';
 
 const CODE = /^RM-[A-F0-9]{24}$/;
 const TOKEN = /^[A-Za-z0-9_-]{16}$/;
@@ -31,17 +32,21 @@ function response(request, body, status, headers = {}) {
 }
 
 export default {
-  fetch(request) {
+  fetch(request, env = {}) {
     if (!['GET', 'HEAD'].includes(request.method)) {
       return response(request, 'Method not allowed', 405, { Allow: 'GET, HEAD' });
     }
     const url = new URL(request.url);
+    if (['/.well-known/apple-app-site-association', '/apple-app-site-association'].includes(url.pathname)) {
+      return response(request, JSON.stringify(APP_ASSOCIATION), 200, { 'Content-Type': 'application/json' });
+    }
     if (url.pathname === '/_link-health') {
       return response(request, 'FreeFinder invitation links v2; compact-deal-v1', 200);
     }
     const destination = new URL('https://freefinder.at/');
     if (url.pathname.startsWith('/d/')) {
-      return resolveDealLink(request, invitationCode, response);
+      return resolveDealLink(request, invitationCode, response, undefined,
+        supportsAppClipLanding(request, env) ? appClipLanding : null);
     }
     if (url.pathname.startsWith('/i/')) {
       const code = invitationCode(url.pathname.slice(3));
@@ -53,6 +58,7 @@ export default {
       destination.pathname = '/invite.html';
       destination.searchParams.set('invite', code);
       if (deals.length) destination.searchParams.set('deal', deals[0]);
+      if (supportsAppClipLanding(request, env)) return appClipLanding(request, destination.href, response);
       // Redirect to the URL understood by existing apps before any account action.
       return response(request, '', 302, { Location: destination.href, 'X-Robots-Tag': 'noindex' });
     }
