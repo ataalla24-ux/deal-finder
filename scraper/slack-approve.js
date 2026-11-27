@@ -1045,7 +1045,7 @@ async function retainBlockedApproval(deal, reasons) {
 }
 
 function isApprovalRetryReason(reason) {
-  return isApprovalMapReason(reason) || /^(?:Grundprüfung|Angebotsbeleg ausstehend|Inhaltsprüfung ausstehend|Beschreibung fehlt|nicht eindeutig in Wien|noch nicht gestartet|Aktionszeitraum auf Lokal-Website unklar|Community-Aktionszeitraum unklar|Aktionszeitraum widersprüchlich|Aktionszeitraum ungültig|Ablaufdatum passt nicht zur aktuellen Couponrunde|Offizielle Aktion nicht erneut bestätigt)\b/i.test(reason);
+  return isApprovalMapReason(reason) || /^(?:Grundprüfung|Angebotsbeleg ausstehend|Bildfreigabe ausstehend|Inhaltsprüfung ausstehend|Beschreibung fehlt|nicht eindeutig in Wien|noch nicht gestartet|Aktionszeitraum auf Lokal-Website unklar|Community-Aktionszeitraum unklar|Aktionszeitraum widersprüchlich|Aktionszeitraum ungültig|Ablaufdatum passt nicht zur aktuellen Couponrunde|Offizielle Aktion nicht erneut bestätigt)\b/i.test(reason);
 }
 
 async function clearBlockedApprovalNotice(deal) {

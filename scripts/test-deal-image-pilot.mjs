@@ -175,10 +175,10 @@ test('public feed strips private preview metadata including falsy values',()=>{
 test('optional public preview check is cached, bounded and fail-closed',()=>fixture(async root=>{
   let calls=0;
   const check=createDealImagePreviewCheck({request:async(url,options)=>{
-    calls++;assert.equal(options.method,'HEAD');assert.equal(options.redirect,'error');assert.ok(options.signal);
+    calls++;assert.equal(options.method,'GET');assert.equal(options.redirect,'error');assert.ok(options.signal);
     assert.ok(url.startsWith('https://freefinder.at/assets/deal-image-pilot/'));
     const bytes=fs.readFileSync(path.join(root,'docs/assets/deal-image-pilot',path.basename(url)));
-    return new Response(null,{status:200,headers:{'content-type':'image/jpeg','content-length':String(bytes.length)}});
+    return new Response(bytes,{status:200,headers:{'content-type':'image/jpeg','content-length':String(bytes.length)}});
   }});
   assert.ok((await preview(root,base,{checkPreview:check})).pendingDealImage);
   assert.ok((await preview(root,{...base,id:'second'},{checkPreview:check})).pendingDealImage);
@@ -250,4 +250,48 @@ test('a reviewed existing photo is previewed and locked without substituting an 
   assert.equal(locked.photoUrl,candidate.photoUrl);
   assert.equal(locked.approvedDealImage.kind,'merchant-photo');
   assert.equal((await inspectBoundOriginalPhoto({...locked,description:'Updated copy.'},{root})).review.sha256,prepared.review.sha256);
+}));
+
+test('preview readiness verifies remote JPEG bytes and refuses equal-length substitutions or oversized streams',()=>fixture(async root=>{
+  const catalog=read(root,'docs/assets/deal-image-pilot/catalog.json');
+  const row=catalog.assets.coffee;
+  const bytes=fs.readFileSync(path.join(root,'docs/assets/deal-image-pilot',row.file));
+  const asset={...row,bytes,previewURL:'https://freefinder.at/assets/deal-image-pilot/'+row.file};
+  const substituted=Buffer.from(bytes);
+  substituted[substituted.length-10]^=1;
+  const wrong=createDealImagePreviewCheck({request:async()=>new Response(substituted,{
+    headers:{'content-type':'image/jpeg','content-length':String(bytes.length)},
+  })});
+  assert.equal(await wrong(asset),false,'an equal-length response cannot impersonate the approved photograph');
+  const chunked=createDealImagePreviewCheck({request:async()=>new Response(bytes,{headers:{'content-type':'image/jpeg'}})});
+  assert.equal(await chunked(asset),true,'chunked responses are checked by their actual bytes');
+  let cancelled=false;
+  const oversized=createDealImagePreviewCheck({request:async()=>new Response(new ReadableStream({
+    start(controller){controller.enqueue(Buffer.alloc(bytes.length+1));},
+    cancel(){cancelled=true;},
+  }),{headers:{'content-type':'image/jpeg'}})});
+  assert.equal(await oversized(asset),false);
+  assert.equal(cancelled,true,'an oversized response is cancelled before the remainder can be read');
+}));
+
+test('a temporarily incomplete approved image remains eligible for automatic retry with its original preview',()=>fixture(async root=>{
+  const originalFetch=globalThis.fetch;
+  const {retainBlockedApproval}=await import('../scraper/slack-approve.js');
+  const staged=approve(await preview(root));
+  let notice;
+  try {
+    globalThis.fetch=async(url,options)=>{
+      assert.equal(String(url),'https://slack.com/api/chat.postMessage');
+      notice=JSON.parse(options.body).text;
+      return Response.json({ok:true,ts:'fixture-notice'});
+    };
+    const blocked=await retainBlockedApproval(staged,['Bildfreigabe ausstehend: Lokale Bilddatei vorübergehend nicht verfügbar.']);
+    assert.equal(blocked.pipelineLifecycle.manualDecision,'approved');
+    assert.deepEqual(blocked.pendingDealImage,staged.pendingDealImage);
+    assert.match(notice,/Freigabe-Häkchen kann gesetzt bleiben/);
+    assert.match(notice,/automatisch erneut/);
+    assert.doesNotMatch(notice,/entfernen und erneut setzen/);
+    const restored=await prepareApprovedDealImage(blocked,{root,now,enabled:true});
+    assert.ok(restored.photoUrl.endsWith(`-${staged.pendingDealImage.sha256}.jpg`));
+  } finally {globalThis.fetch=originalFetch;}
 }));

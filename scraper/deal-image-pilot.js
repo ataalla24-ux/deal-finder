@@ -46,9 +46,28 @@ export function createDealImagePreviewCheck({request=fetch}={}) {
   return async asset => {
     if (!cache.has(asset.previewURL)) cache.set(asset.previewURL,(async()=>{
       try {
-        const response = await request(asset.previewURL,{method:'HEAD',redirect:'error',signal:AbortSignal.timeout(5000)});
-        return response.ok && /^image\/jpeg\b/i.test(response.headers.get('content-type') || '')
-          && Number(response.headers.get('content-length')) === asset.bytes.length;
+        const response = await request(asset.previewURL,{method:'GET',redirect:'error',signal:AbortSignal.timeout(5000)});
+        const length = response.headers.get('content-length');
+        if (!response.ok || !/^image\/jpeg\b/i.test(response.headers.get('content-type') || '')
+          || !response.body || asset.bytes.length > 1_500_000
+          || length !== null && Number(length) !== asset.bytes.length) {
+          await response.body?.cancel();
+          return false;
+        }
+        const reader = response.body.getReader();
+        const chunks = [];
+        let size = 0;
+        while (true) {
+          const {value,done} = await reader.read();
+          if (done) break;
+          size += value.length;
+          if (size > asset.bytes.length || size > 1_500_000) {
+            await reader.cancel();
+            return false;
+          }
+          chunks.push(value);
+        }
+        return size === asset.bytes.length && digest(Buffer.concat(chunks)) === asset.sha256;
       } catch {return false;}
     })());
     return cache.get(asset.previewURL);
