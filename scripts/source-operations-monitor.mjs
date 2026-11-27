@@ -233,9 +233,14 @@ function collectorSnapshot(spec, report, output) {
     failed: number(report?.summary?.failedSources, report?.failedSources),
     deferred: number(report?.summary?.deferredSources, report?.offerPagesDeferredThisRun),
   };
+  const discovered = spec.key === 'instagram-ai' ? number(report?.discoveredCandidates) : null;
+  const checked = spec.key === 'tiktok' ? number(report?.coverage?.uniqueVideosChecked)
+    : spec.key === 'instagram-apify' ? number(report?.inspectedPosts) : null;
+  const newDiscoveredPosts = spec.key === 'instagram-apify' ? number(report?.newDiscoveredPosts) : null;
   const recordedCount = Array.isArray(output?.deals) ? output.deals.length : null;
   const branch = spec.key === 'joe' ? slug(report?.authenticatedCoverage?.status) : null;
-  return { fetched, verified, accepted, attempted, newCandidates: fresh, retainedCount: previous, outboxCount: recordedCount,
+  return { fetched, discovered, checked, newDiscoveredPosts, verified, accepted, attempted, newCandidates: fresh,
+    retainedCount: previous, outboxCount: recordedCount,
     sourceCoverage, branches, ...(central ? { validationBlocked: number(central.blocked) } : {}),
     ...(branch ? { authenticatedStatus: branch, authenticatedOffers: number(report.authenticatedCoverage?.readableOffers) } : {}) };
 }
@@ -324,7 +329,7 @@ export async function monitorSources({ readJson, readWorkflow, now = new Date(),
       && run.counts?.rawCandidates > 0 && !['failed', 'deferred'].includes(run.status)) : null;
     const historicalCollection = lastRecordedCollection
       ? { at: observedAt(lastRecordedCollection), ...provenance(lastRecordedCollection, null, repository) } : null;
-    const healthy = current && (collector.fetched > 0 || collector.sourceCoverage.healthy > 0) ? current : null;
+    const healthy = current && (collector.fetched > 0 || collector.checked > 0 || collector.sourceCoverage.healthy > 0) ? current : null;
     const reportBehindWorkflow = workflow.latestScheduledRun?.conclusion === 'success'
       && (!current || Date.parse(current.at) < Date.parse(workflow.latestScheduledRun.createdAt));
     return { key: spec.key, label: spec.label, file: spec.report || spec.output, workflowFile: spec.workflow,
@@ -347,8 +352,8 @@ const formatRun = run => {
 export function formatSourceOperations(sources) {
   return ['','## Quellenbetrieb','',
     'Erwartete GitHub-Zeiten enthalten einen Toleranzpuffer. Ein Workflow-Erfolg bestätigt weder Quellenzugriff noch neue Angebote. Neu beobachtete Ausgangs-IDs gelten nur für den Zeitraum zwischen zwei Berichten. Slack-Zustellungen stehen im Abschnitt Ertrag.',
-    '', '| Quelle | Zeitplan und letzter regulärer Lauf | Quellenbefund | Gelesen / neu bestätigt / im Ausgang | Neu beobachtete IDs | Bekannte Wartezeit bis |',
-    '|---|---|---|---:|---:|---|', ...sources.map(row => {
+    '', '| Quelle | Zeitplan und letzter regulärer Lauf | Quellenbefund | Belegte Kennzahlen | Neu beobachtete IDs | Bekannte Wartezeit bis |',
+    '|---|---|---|---|---:|---|', ...sources.map(row => {
       const workflow = row.schedule;
       const when = workflow.expectedByNow || '—';
       const lastRun = workflow.latestScheduledRun;
@@ -358,9 +363,16 @@ export function formatSourceOperations(sources) {
         workflow.status === 'schedule-unverified' ? workflow.metadata : null].filter(Boolean).join(' · ');
       const outcome = [row.collectorOutcome, row.reportBehindWorkflow ? 'Bericht älter als Lauf' : null,
         row.counts.authenticatedStatus, row.reportStatus,
-        row.lastConfirmedCollection ? `zuletzt gelesen ${row.lastConfirmedCollection.at}` : null,
+        row.lastConfirmedCollection ? `letzter belegter Rücklauf ${row.lastConfirmedCollection.at}` : null,
         row.lastConfirmedNew ? `zuletzt neu ${row.lastConfirmedNew.at}` : null].filter(Boolean).map(safeCell).join(' · ');
-      const counts = [row.counts.fetched, row.counts.newCandidates, row.counts.outboxCount].map(safeCell).join(' / ');
+      const metrics = [
+        ['Abgerufene Datensätze', row.counts.fetched], ['Entdeckte Kandidaten', row.counts.discovered],
+        ['Geprüft', row.counts.checked], ['Neu entdeckte Posts', row.counts.newDiscoveredPosts],
+        ['Akzeptiert', row.counts.accepted], ['Neue bestätigte Kandidaten', row.counts.newCandidates],
+        ['Im Ausgang', row.counts.outboxCount],
+      ];
+      const counts = metrics.filter(([label, count]) => count != null || label === 'Neue bestätigte Kandidaten')
+        .map(([label, count]) => `${label} ${safeCell(count)}`).join(' · ');
       return `| ${safeCell(row.label)} | ${timing} | ${outcome} | ${counts} | ${safeCell(row.outboxObservation?.newIds)} | ${safeCell(row.nextRetryAt)} |`;
     }), ''].join('\n') + '\n';
 }

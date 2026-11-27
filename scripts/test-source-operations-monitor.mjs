@@ -168,3 +168,30 @@ test('bad source artifacts and future previous observations never become valid r
   assert.equal(healthy.runProvenance, null);
   assert(!JSON.stringify(result).includes('internal token'));
 });
+
+test('social counts distinguish checked, discovered and accepted from truly new deals', async () => {
+  const registry = ['tiktok', 'instagram-ai', 'instagram-apify', 'other'].map(key => fixture(key, 'daily.yml'));
+  const at = '2026-11-27T09:25:00.000Z';
+  const reports = {
+    'tiktok-report.json': { lastUpdated: at, coverage: { uniqueVideosChecked: 25, publicPageAttempts: 27 },
+      accepted: 0, outputPreserved: true },
+    'instagram-ai-report.json': { lastUpdated: at, discoveredCandidates: 62, acceptedDeals: 3 },
+    'instagram-apify-report.json': { updatedAt: at, inspectedPosts: 8, rawDatasetItems: 1, newDiscoveredPosts: 0, acceptedDeals: 1 },
+    'other-report.json': { updatedAt: at, coverage: { uniqueVideosChecked: 9 }, discoveredCandidates: 8,
+      inspectedPosts: 7, newDiscoveredPosts: 6 },
+    'tiktok-output.json': { lastUpdated: at, deals: [{ id: 'retained' }] },
+  };
+  const rows = await monitorSources({ now, env: {}, registry, readWorkflow: () => daily, readJson: file => reports[file] });
+  const [tiktok, ai, apify, other] = rows.map(row => row.counts);
+  assert.deepEqual([tiktok.fetched, tiktok.checked, tiktok.accepted, tiktok.outboxCount], [null, 25, 0, 1]);
+  assert.deepEqual([ai.fetched, ai.discovered, ai.checked, ai.accepted], [null, 62, null, 3]);
+  assert.deepEqual([apify.fetched, apify.checked, apify.newDiscoveredPosts, apify.accepted], [1, 8, 0, 1]);
+  assert.deepEqual([other.discovered, other.checked, other.newDiscoveredPosts], [null, null, null]);
+  assert.equal(rows[0].lastConfirmedCollection.at, at);
+  assert.equal(rows[1].lastConfirmedCollection, null);
+  assert(rows.every(row => row.counts.newCandidates === null && row.lastConfirmedNew === null));
+  const markdown = formatSourceOperations(rows);
+  assert.match(markdown, /Geprüft 25 · Akzeptiert 0 · Neue bestätigte Kandidaten unbekannt · Im Ausgang 1/);
+  assert.match(markdown, /Entdeckte Kandidaten 62 · Akzeptiert 3 · Neue bestätigte Kandidaten unbekannt/);
+  assert.match(markdown, /Abgerufene Datensätze 1 · Geprüft 8 · Neu entdeckte Posts 0 · Akzeptiert 1/);
+});
