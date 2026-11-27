@@ -1,7 +1,7 @@
 {
-  "generatedAt": "2026-11-27T16:56:11.968Z",
+  "generatedAt": "2026-11-27T17:23:25.106Z",
   "source": "instagram-graph-cross-source-verification",
-  "status": "ok",
+  "status": "failed-preserved",
   "configured": true,
   "scannedFiles": [
     "deals-pending-church-events.json",
@@ -61,7 +61,7 @@
     },
     "deals-pending-firecrawl4.json": {
       "deals": 49,
-      "candidates": 0
+      "candidates": 1
     },
     "deals-pending-firecrawl5.json": {
       "deals": 2,
@@ -172,10 +172,14 @@
       "candidates": 0
     }
   },
-  "candidatePosts": 4,
-  "candidateAccounts": 4,
+  "candidatePosts": 5,
+  "candidateAccounts": 5,
   "skippedAccountCooldowns": 0,
   "selectedAccounts": [
+    {
+      "username": "kofteci_wien",
+      "candidates": 1
+    },
     {
       "username": "vamoskebap",
       "candidates": 1
@@ -193,28 +197,39 @@
       "candidates": 1
     }
   ],
-  "fetchedPosts": 90,
-  "exactMatches": 2,
+  "fetchedPosts": 0,
+  "exactMatches": 0,
   "retainedEvidencePosts": 2000,
-  "errors": [],
+  "errors": [
+    {
+      "username": "kofteci_wien",
+      "message": "Instagram shared quota paused: shared cooldown"
+    }
+  ],
   "accountFailures": {},
   "sharedQuota": {
-    "limitPerHour": 270,
+    "limitPerHour": 190,
     "usageThreshold": 95,
-    "requests": 4,
-    "reserved": 5,
-    "stopped": false,
-    "reason": "",
-    "highestUsagePercent": 16,
+    "requests": 0,
+    "reserved": 0,
+    "stopped": true,
+    "reason": "Instagram shared quota paused: shared cooldown",
+    "highestUsagePercent": 0,
     "waitedMs": 0,
     "pacingMs": 0,
-    "retryAt": "",
+    "retryAt": "2026-11-27T17:31:27.459Z",
     "adaptiveSafetyCeiling": 190,
     "adaptiveIncreases": 0,
     "storageFailure": null,
-    "stopKind": ""
+    "stopKind": "cooldown"
+  },
+  "globalError": {
+    "username": "kofteci_wien",
+    "status": 0,
+    "code": "SCAN_BUDGET",
+    "message": "Instagram shared quota paused: shared cooldown"
   },
   "blockedEvidencePosts": 75,
-  "unmatchedCandidatePosts": 2,
-  "message": "2/4 fresh cross-source Instagram candidates matched exactly via Graph API."
+  "unmatchedCandidatePosts": 5,
+  "message": "0/5 fresh cross-source Instagram candidates matched exactly via Graph API."
 }
