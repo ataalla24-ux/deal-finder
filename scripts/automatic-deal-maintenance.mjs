@@ -7,6 +7,7 @@ import { titleClaimGuard } from '../scraper/deal-card-editor.js';
 import { createProductionCreditFetch, dealEnrichmentModelTimeoutMs, freeCreditOpenAiFetch, isAstraEnrichmentActive, modelForTask } from '../scraper/ai-credit-budget.js';
 import { canonicalInstagramPostKey, decodeInstagramShortcodeDate } from '../scraper/deal-evidence-utils.js';
 import { parseExpiryShape, parseExplicitOfferPeriod, repairObservationExpiry } from '../scraper/expiry-utils.js';
+import { viennaInstant } from '../scraper/explicit-offer-period.js';
 import { assessFixedFlightEnd } from './expiry-fixed-flight.mjs';
 import { assessInstagramFiniteRangeEnd } from './expiry-instagram-finite-range.mjs';
 import { assessOriginalSocialCopy } from './original-social-copy.mjs';
@@ -21,7 +22,11 @@ import { offerPeriodFields } from '../scraper/offer-period-fields.js';
 import { projectEnrichmentDeal, stripEnrichmentNotice, updateDealEnrichment } from '../scraper/deal-enrichment-state.js';
 import {photoSubjectHash} from './deal-photo-contract.mjs';
 import { readApprovedExpiryEvidence } from './approved-expiry-evidence.mjs';
-import { assessEmbeddedClockRangeEnd, hasConflictingOfferClock } from './expiry-embedded-clock-range.mjs';
+import { assessEmbeddedClockRangeEnd, assessOriginalEventClockEnd, assessReviewedTwoDayEventEnd,
+  assessReviewedSingleActionDayEnd, assessReviewedDailyCampaignEnd, assessReviewedOneDayWindowEnd,
+  assessReviewedWholeDayEnd,
+  assessReviewedOriginalMediaEventEnd,
+  hasConflictingOfferClock, hasContinuingOfferTiming } from './expiry-embedded-clock-range.mjs';
 import { assessOriginalTodayEnd } from './expiry-original-today.mjs';
 export { automaticMaintenanceReviewCandidates } from './automatic-maintenance-review.mjs';
 
@@ -42,9 +47,96 @@ const exactDay = value => {
 };
 export const sourceTexts = (deal, latest, now = new Date()) => (latest?.blockingReason || latest?.graphAccepted === false || deal.metaGraphBlockingReason
   ? [] : latest ? [latest.caption, latest.ocrText, latest.officialText] : [deal.metaGraphCaption, deal.metaGraphOcrText, deal.caption,
+  identifiedOriginalEventSource(deal, undefined, now, true)?.text,
   readApprovedExpiryEvidence(deal, { now })?.sourceText,
   deal.evidence?.textSample, deal.evidence?.offerDateSignal, deal.evidence?.media?.ocr?.footer,
   deal.evidence?.offerTiming?.matchedText]).map(clean).filter(Boolean);
+
+function identifiedOriginalEventSource(deal, latest, now, rawCaptionOnly = false,
+  { graphClockTolerance = 60000, reviewedLocationOnlyImage = false, reviewedReceipt = false } = {}) {
+  const key = canonicalInstagramPostKey(deal.url), decoded = decodeInstagramShortcodeDate(deal.url);
+  const original = deal.evidence?.originalPost, verification = deal.postVerification;
+  const knownUrls = [deal.evidencePostUrl, original?.url, original?.postUrl, original?.permalink,
+    verification?.originalPostUrl, verification?.finalUrl, latest?.url].filter(Boolean);
+  const owner = clean(deal.ownerUsername);
+  const stored = Date.parse(deal.sourcePublishedAt), approved = Date.parse(deal.approvedAt);
+  if (!key || !/^https:\/\/(?:www\.)?instagram\.com\/(?:p|reel|reels|tv)\/[A-Za-z0-9_-]+\/?(?:\?[^#\s]*)?$/.test(deal.url)
+    || !decoded || +decoded > +now || !/^(?:url\.instagramShortcode|instagram-graph-timestamp)$/.test(deal.sourcePublishedAtSource || '')
+    || !Number.isFinite(stored) || Math.abs(stored - +decoded) > 60000
+    || !Number.isFinite(approved) || approved < +decoded || approved > +now
+    || !/^[A-Za-z0-9._]+$/.test(owner) || deal.metaGraphBlockingReason
+    || knownUrls.some(url => canonicalInstagramPostKey(url) !== key)
+    || [deal, deal.evidence, original, latest].some(row => row && (row.isRepost || row.isReshare || row.repost
+      || row.reshare || row.repostedFrom || row.resharedFrom || row.isOriginal === false
+      || row.metaGraphIsRepost || /story|repost|reshare/i.test(row.mediaProductType || '')))) return null;
+  let text = '', verified;
+  if (!latest && clean(deal.postCaption)) {
+    const sample = clean(original?.captionSample);
+    verified = Date.parse(verification?.checkedAt);
+    if (deal.originalEvidenceAligned !== true || verification?.status !== 'verified-original-post'
+      || original?.status !== 'verified-original-post' || !original.url || !verification.originalPostUrl
+      || owner !== original.ownerUsername || owner !== verification.ownerUsername
+      || original.checkedAt !== verification.checkedAt || Date.parse(deal.lastVerifiedAt) !== verified
+      || !sample || sample.length < Math.min(80, clean(deal.postCaption).length)
+      || !clean(deal.postCaption).startsWith(sample) || approved < verified) return null;
+    text = clean(deal.postCaption);
+  } else {
+    const locationOnly = reviewedLocationOnlyImage && deal.metaGraphAccepted === false
+      && deal.metaGraphRejection === 'missing-vienna-evidence' && !deal.metaGraphBlockingReason;
+    if (rawCaptionOnly || deal.metaGraphVerified !== true || (deal.metaGraphAccepted !== true && !locationOnly)
+      || deal.sourceAccountType !== 'merchant' || deal.merchantUsername !== owner
+      || !/^\d{10,}$/.test(String(deal.metaGraphMediaId || ''))
+      || deal.id !== `meta-ig-${deal.metaGraphMediaId}`) return null;
+    verified = Date.parse(latest ? latest.verifiedAt : deal.metaGraphVerifiedAt);
+    const dateOnlyRejection = reviewedReceipt && latest?.graphAccepted === false
+      && ['offer-expired', 'post-too-old'].includes(latest.graphRejection)
+      && (!latest.blockingReason || latest.blockingReason === latest.graphRejection);
+    if (latest && ((!dateOnlyRejection && (latest.graphAccepted !== true || latest.blockingReason)) || latest.isRepost
+      || !latest.url || latest.mediaId !== deal.metaGraphMediaId || latest.ownerUsername !== owner
+      || latest.sourceAccountType !== 'merchant' || latest.sourcePublishedAtSource !== 'instagram-graph-timestamp'
+      || Math.abs(Date.parse(latest.sourcePublishedAt) - +decoded) > graphClockTolerance
+      || !Number.isFinite(Date.parse(latest.sourcePublishedAt))
+      || viennaDate.format(new Date(latest.sourcePublishedAt)) !== viennaDate.format(decoded)
+      || verified < Date.parse(deal.metaGraphVerifiedAt)
+      || clean(latest.caption) !== clean(deal.metaGraphCaption) || clean(latest.ocrText) !== clean(deal.metaGraphOcrText))) return null;
+    text = clean(latest ? latest.caption : deal.metaGraphCaption);
+  }
+  if (!text || !Number.isFinite(verified) || verified < +decoded || verified > +now
+    || approved - +decoded > 14 * 86400000 || verified - +decoded > 14 * 86400000) return null;
+  return { text, publishedAt: decoded.toISOString() };
+}
+
+function reviewedOriginalPeriod(deal, latest, now, edits) {
+  if (deal.expirySource !== 'manual') return null;
+  const receipt = readApprovedExpiryEvidence(deal, { now });
+  // Reel publication can follow its permalink allocation by a few minutes.
+  // This exception requires the reviewed receipt and the identical merchant
+  // caption; both clocks must still corroborate the same Vienna day.
+  const source = receipt && identifiedOriginalEventSource(deal, latest, now, false, {
+    // This one independently reviewed image's Graph publication follows its
+    // permalink allocation by 13m07s. Its current original page/image proof is
+    // separately bound; the clocks must still agree on the Vienna calendar day.
+    graphClockTolerance: (receipt.originalMedia ? 15 : 5) * 60000,
+    reviewedLocationOnlyImage: Boolean(receipt.originalMedia), reviewedReceipt: true,
+  });
+  if (!source || clean(receipt.sourceText) !== source.text
+    || Date.parse(receipt.verifiedAt) < Date.parse(source.publishedAt)) return null;
+  const contextTexts = [deal.title, deal.description, deal.metaGraphCaption, deal.metaGraphOcrText, latest?.ocrText,
+    ...[deal.expiresOriginal, deal.expiryDisplayText, deal.validityText,
+      ...edits.flatMap(edit => [edit.expiresOriginal, edit.expiryDisplayText, edit.validityText, edit.title, edit.description])]
+      .filter(value => value && !/^20\d{2}-\d{2}-\d{2}(?:T|$)/.test(value))];
+  const options = { publishedAt: source.publishedAt, contextTexts };
+  if (receipt.originalMedia) {
+    const period = assessReviewedOriginalMediaEventEnd(deal, receipt.sourceText, receipt.originalMedia, options);
+    return period && { ...period, originalPostPublishedAt: source.publishedAt };
+  }
+  const period = assessReviewedTwoDayEventEnd(deal, receipt.sourceText, options)
+    || assessReviewedSingleActionDayEnd(deal, receipt.sourceText, options)
+    || assessReviewedDailyCampaignEnd(deal, receipt.sourceText, options)
+    || assessReviewedOneDayWindowEnd(deal, receipt.sourceText, options)
+    || assessReviewedWholeDayEnd(deal, receipt.sourceText, options);
+  return period && { ...period, originalPostPublishedAt: source.publishedAt };
+}
 
 export function latestMaintenanceEvidence(deals, posts = [], now = new Date()) {
   const byKey = new Map(), result = new Map();
@@ -278,6 +370,9 @@ function inferOriginalPostExpiry(deal, latest, now, texts) {
 }
 export const maintenanceFingerprint = deal => hash(['id', 'url', 'brand', 'title', 'description', ...dateFields,
   'address', 'distance', 'category', 'evidence', 'metaGraphCaption', 'metaGraphOcrText', 'metaGraphBlockingReason',
+  'postCaption', 'postVerification', 'lastVerifiedAt', 'originalEvidenceAligned', 'sourcePublishedAt', 'sourcePublishedAtSource',
+  'approvedExpiryEvidence',
+  'ownerUsername', 'merchantUsername', 'sourceAccountType', 'metaGraphVerified', 'metaGraphAccepted', 'metaGraphVerifiedAt', 'metaGraphMediaId',
   'approvedAt', 'forceKeep', 'liveEditedFields', 'slackEditedFields'].map(key => [key, deal[key] ?? null]));
 
 function duplicatedMerchantBenefitBadge(deal) {
@@ -411,12 +506,17 @@ export function assessAutomaticExpiry(deal, { now = new Date(), edits = [], poli
   if (ends.some(value => !exactDay(value)) || new Set(ends).size > 1) return hold('missing-or-conflicting-explicit-end');
   let end = ends[0];
   const matchedEdits = matchingEdits(deal, edits);
+  const reviewedPeriod = reviewedOriginalPeriod(deal, latestEvidence, now, matchedEdits);
   for (const edit of matchedEdits) {
     if (edit.restoreDeal) return hold('protected-or-explicit-owner-keep');
     const cleared = (edit.clearFields || []).filter(field => /valid|expir|ablauf/i.test(field));
     const endCorrection = deal.expiryKind === 'end' && edit.dealId === deal.id && edit.validUntil === end
       && Boolean(end) && cleared.every(field => ['validOn', 'validFrom'].includes(field) && !deal[field]);
-    if (cleared.length && !endCorrection) return hold('manual-period-cleared');
+    const reviewedRangeCorrection = reviewedPeriod?.proofKind === 'two-day-event' && edit.dealId === deal.id
+      && edit.validFrom === reviewedPeriod.validFrom && edit.validUntil === reviewedPeriod.validUntil
+      && sameInstant(edit.expires, reviewedPeriod.expires) && !deal.validOn
+      && cleared.every(field => field === 'validOn');
+    if (cleared.length && !endCorrection && !reviewedRangeCorrection) return hold('manual-period-cleared');
     for (const field of ['validUntil', 'validOn', 'validFrom', 'expires']) {
       if (field === 'expires' && hasClock(edit.expires) && hasClock(deal.expires)) {
         if (!sameInstant(edit.expires, deal.expires)) return hold('newer-manual-period-correction');
@@ -440,8 +540,37 @@ export function assessAutomaticExpiry(deal, { now = new Date(), edits = [], poli
     ? clean(deal.description).replace(/\bkein fester rabatt oder dauerhaft g(?:ü|ue)ltiger preis zugesagt\b/gi, '')
     : deal.description;
   const text = clean([description, deal.expiryDisplayText, ...texts].join(' '));
-  if (uncertainExpiry.test(text) || end && contradictedExpiryTiming.test(normalizedDateText([text, deal.title].join(' '))))
+  const timingContext = normalizedDateText([text, deal.title].join(' '))
+    // A location exclusion is not a negation of the stated calendar end.
+    // Preserve the complete source in receipts, public copy and audit evidence.
+    .replace(/\bnicht gultig an autobahnraststatten\b/g, ' ');
+  if (uncertainExpiry.test(text) || hasContinuingOfferTiming([text, deal.title].join(' '))
+    || end && contradictedExpiryTiming.test(timingContext))
     return hold('ongoing-extended-or-uncertain');
+  if (reviewedPeriod) {
+    if (+now < Date.parse(reviewedPeriod.expires)) return hold('not-expired-or-safety-grace');
+    const reason = { 'two-day-event': 'reviewed-original-two-day-event-end', 'single-action-day': 'reviewed-original-single-action-day',
+      'daily-campaign': 'reviewed-original-finite-daily-campaign', 'one-day-window': 'reviewed-original-one-day-window',
+      'whole-day': 'reviewed-original-whole-action-day', 'original-media-window': 'reviewed-original-image-event-window' }[reviewedPeriod.proofKind];
+    return { eligible: true, reason,
+      validUntil: reviewedPeriod.validUntil, expires: reviewedPeriod.expires,
+      originalPostPublishedAt: reviewedPeriod.originalPostPublishedAt,
+      evidenceHash: hash([reviewedPeriod.quote, reviewedPeriod.sourceText]), evidence: [reviewedPeriod.quote, reviewedPeriod.sourceText] };
+  }
+  const eventSource = identifiedOriginalEventSource(deal, latestEvidence, now);
+  const originalEvent = eventSource && assessOriginalEventClockEnd(deal, eventSource.text, {
+    publishedAt: eventSource.publishedAt,
+    contextTexts: [...texts, deal.title, deal.description, deal.metaGraphCaption, deal.metaGraphOcrText,
+      ...[deal.expiresOriginal, deal.expiryDisplayText, deal.validityText,
+        ...matchedEdits.flatMap(edit => [edit.expiresOriginal, edit.expiryDisplayText, edit.validityText, edit.title, edit.description])]
+        .filter(value => value && !/^20\d{2}-\d{2}-\d{2}(?:T|$)/.test(value))],
+  });
+  if (originalEvent) {
+    if (+now < Date.parse(originalEvent.expires)) return hold('not-expired-or-safety-grace');
+    return { eligible: true, reason: 'confirmed-original-social-event-window', validUntil: end,
+      expires: originalEvent.expires, originalPostPublishedAt: originalEvent.originalPostPublishedAt,
+      evidenceHash: hash([originalEvent.quote, originalEvent.sourceText]), evidence: [originalEvent.quote, originalEvent.sourceText] };
+  }
   const exactPeriod = exactEndEvidence(deal, end, matchedEdits, latestEvidence, texts);
   if (exactPeriod) {
     const context = [text, deal.title, deal.metaGraphCaption, deal.metaGraphOcrText].join(' ');
@@ -515,8 +644,14 @@ export function assessAutomaticExpiry(deal, { now = new Date(), edits = [], poli
   if (deal.validFrom && (!exactDay(deal.validFrom) || deal.validFrom > end)) return hold('invalid-or-future-period');
   if (deal.expires && (!Number.isFinite(Date.parse(deal.expires)) || String(deal.expires).slice(0, 10) !== end))
     return hold(originalPostPublishedAt ? 'original-post-date-needs-manual-review' : 'conflicting-stored-end');
-  const grace = Math.max(12, Number(policy.expiryGraceHours) || 12) * 3600000;
-  if (+now < Date.parse(`${end}T23:59:59.999Z`) + grace) return hold('not-expired-or-safety-grace');
+  // Only independently confirmed ends reach this point. Honor a correctly
+  // stored Vienna end-of-day as well as the legacy UTC calendar contract.
+  // An arbitrary stored noon/clock cannot turn a calendar date into a timed end.
+  const utcEnd = Date.parse(`${end}T23:59:59.999Z`);
+  const localLastMinute = viennaInstant(end, '23:59');
+  const localEnd = localLastMinute ? Date.parse(localLastMinute) + 59999 : NaN;
+  const cutoff = Date.parse(deal.expires) === localEnd ? localEnd : utcEnd;
+  if (+now < cutoff) return hold('not-expired-or-safety-grace');
   return { eligible: true, reason, validUntil: end,
     ...(originalPostPublishedAt ? { originalPostPublishedAt } : {}),
     ...(coupon ? { sourceUrl: coupon.url } : {}), evidenceHash: hash(evidence), evidence: evidence.map(value => value.slice(0, 1600)) };

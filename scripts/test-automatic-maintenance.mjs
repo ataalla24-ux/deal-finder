@@ -34,11 +34,13 @@ test('a year in the publication label never supplies a missing action year; conf
   assert.equal(assess({ ...deal, metaGraphCaption: 'Gratis Kaffee bis 4. November 2026.' }).eligible, true);
 });
 
-test('future, today and safety grace are retained across the Vienna midnight boundary', () => {
-  for (const date of ['2026-11-04T22:59:59Z', '2026-11-05T00:01:00Z', '2026-11-05T11:59:59Z']) {
+test('confirmed date-only ends retain the stored day and expire without a twelve-hour tail', () => {
+  for (const date of ['2026-11-04T22:59:59Z', '2026-11-04T23:59:59.998Z']) {
     assert.equal(assess(deal, new Date(date)).eligible, false, date);
   }
-  assert.equal(assess(deal, new Date('2026-11-05T12:00:00Z')).eligible, true);
+  for (const date of ['2026-11-04T23:59:59.999Z', '2026-11-05T00:01:00Z', '2026-11-05T11:59:59Z']) {
+    assert.equal(assess(deal, new Date(date)).eligible, true, date);
+  }
 });
 
 // A published single-day event whose Slack form and durable edit preserve the exact local time.
@@ -265,14 +267,15 @@ const afterDahabGrace = new Date('2026-11-22T12:00:00Z');
 const assessDahab = (record, latestEvidence) =>
   assessAutomaticExpiry(record, { policy, latestEvidence, now: afterDahabGrace });
 
-test('an accepted original merchant post with a yearless one-day offer expires only after normal grace', () => {
+test('an accepted original merchant post with a yearless one-day offer expires after its confirmed day', () => {
   const sourceEvidence = latestMaintenanceEvidence([dahab], [dahabGraph], afterDahabGrace);
   const laterOffer = { id: 'other-dahab-offer', brand: dahab.brand, title: 'Drei Döner zum Preis von zwei',
     expiryKind: 'range', validFrom: '2026-11-03', validUntil: '2026-11-30' };
   const entries = [dahab, laterOffer];
-  for (const time of ['2026-11-21T20:00:00Z', '2026-11-22T11:59:59Z']) {
+  for (const time of ['2026-11-21T20:00:00Z', '2026-11-21T23:59:59.998Z']) {
     assert.deepEqual(maintainDeals(entries, { policy, now: new Date(time), sourceEvidence }).deals, entries, time);
   }
+  assert.deepEqual(maintainDeals(entries, { policy, now: new Date('2026-11-22T00:00:00Z'), sourceEvidence }).deals, [laterOffer]);
   const result = assessDahab(dahab, dahabGraph);
   assert.equal(result.validUntil, '2026-11-21');
   assert.equal(result.reason, 'confirmed-original-instagram-single-day');
