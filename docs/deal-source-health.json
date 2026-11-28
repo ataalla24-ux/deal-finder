@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-11-28T07:22:45.891Z",
+  "generatedAt": "2026-11-28T07:54:49.790Z",
   "discoveryAvailability": {
     "note": "Transport evidence, not deal yield. Retry eligibility is not recovery. Candidate counts are not Slack deliveries. No extra runs or quota resets.",
     "lanes": [
@@ -60,12 +60,6 @@
     "duplicateClusters": 11,
     "topHealthySources": [
       {
-        "sourceKey": "instagram-apify",
-        "sourceLabel": "Apify Instagram",
-        "healthScore": 78,
-        "totalDeals": 1
-      },
-      {
         "sourceKey": "tiktok-browser",
         "sourceLabel": "TikTok Browser",
         "healthScore": 76,
@@ -88,15 +82,15 @@
         "sourceLabel": "Firecrawl Key 2 - Food",
         "healthScore": 64,
         "totalDeals": 1
-      }
-    ],
-    "topMissionSources": [
+      },
       {
         "sourceKey": "instagram-apify",
         "sourceLabel": "Apify Instagram",
-        "missionFitScore": 85,
+        "healthScore": 64,
         "totalDeals": 1
-      },
+      }
+    ],
+    "topMissionSources": [
       {
         "sourceKey": "joe",
         "sourceLabel": "jö Bonus Club",
@@ -112,6 +106,12 @@
       {
         "sourceKey": "food3",
         "sourceLabel": "Firecrawl Key 2 - Food",
+        "missionFitScore": 63,
+        "totalDeals": 1
+      },
+      {
+        "sourceKey": "instagram-apify",
+        "sourceLabel": "Apify Instagram",
         "missionFitScore": 63,
         "totalDeals": 1
       },
@@ -167,12 +167,6 @@
         "totalDeals": 2
       },
       {
-        "sourceKey": "instagram-apify",
-        "sourceLabel": "Apify Instagram",
-        "precisionScore": 72,
-        "totalDeals": 1
-      },
-      {
         "sourceKey": "member-benefits",
         "sourceLabel": "Member Benefits",
         "precisionScore": 72,
@@ -189,6 +183,12 @@
         "sourceLabel": "jö Bonus Club",
         "precisionScore": 62,
         "totalDeals": 9
+      },
+      {
+        "sourceKey": "instagram-ai",
+        "sourceLabel": "Instagram AI Agent",
+        "precisionScore": 61,
+        "totalDeals": 4
       }
     ],
     "topWeightedSources": [
@@ -197,12 +197,6 @@
         "sourceLabel": "Member Benefits",
         "sourceWeightScore": 72,
         "totalDeals": 113
-      },
-      {
-        "sourceKey": "instagram-apify",
-        "sourceLabel": "Apify Instagram",
-        "sourceWeightScore": 66,
-        "totalDeals": 1
       },
       {
         "sourceKey": "meta-instagram",
@@ -221,6 +215,12 @@
         "sourceLabel": "Firecrawl Key 1 - Gastro",
         "sourceWeightScore": 55,
         "totalDeals": 116
+      },
+      {
+        "sourceKey": "food3",
+        "sourceLabel": "Firecrawl Key 2 - Food",
+        "sourceWeightScore": 52,
+        "totalDeals": 1
       }
     ],
     "topSourcesToFix": [
@@ -291,54 +291,6 @@
     }
   },
   "sources": [
-    {
-      "sourceKey": "instagram-apify",
-      "file": "deals-pending-instagram-apify.json",
-      "sourceLabel": "Apify Instagram",
-      "totalDeals": 1,
-      "uniqueDeals": 1,
-      "duplicateDeals": 0,
-      "duplicateAcrossSources": 0,
-      "fresh1dCount": 1,
-      "fresh7dCount": 1,
-      "viennaCount": 0,
-      "foodDrinkCount": 1,
-      "promoCount": 1,
-      "missingUrlCount": 0,
-      "sampleTitles": [
-        "Gratis Döner + Getränk in Wien - *Empfehlung 📍Franz-Josefs-Kai 27, 1010 Wien Heute am 27.11.26 15-19 Uhr so l"
-      ],
-      "lastRun": null,
-      "uniqueRate": 1,
-      "duplicateRate": 0,
-      "fresh1dRate": 1,
-      "fresh7dRate": 1,
-      "viennaRate": 0,
-      "foodDrinkRate": 1,
-      "promoRate": 1,
-      "missingUrlRate": 0,
-      "averageQualityScore": 95,
-      "topCategories": [
-        {
-          "value": "essen",
-          "count": 1
-        }
-      ],
-      "topTypes": [
-        {
-          "value": "gratis",
-          "count": 1
-        }
-      ],
-      "issues": [
-        "Wien-Signal ist zu schwach"
-      ],
-      "healthScore": 78,
-      "missionFitScore": 85,
-      "coverageScore": 11,
-      "precisionScore": 72,
-      "sourceWeightScore": 66
-    },
     {
       "sourceKey": "tiktok-browser",
       "file": "deals-pending-tiktok-browser.json",
@@ -615,6 +567,55 @@
       "topTypes": [
         {
           "value": "bogo",
+          "count": 1
+        }
+      ],
+      "issues": [
+        "wenige Deals sind frischer als 1 Tag",
+        "Wien-Signal ist zu schwach"
+      ],
+      "healthScore": 64,
+      "missionFitScore": 63,
+      "coverageScore": 11,
+      "precisionScore": 60,
+      "sourceWeightScore": 52
+    },
+    {
+      "sourceKey": "instagram-apify",
+      "file": "deals-pending-instagram-apify.json",
+      "sourceLabel": "Apify Instagram",
+      "totalDeals": 1,
+      "uniqueDeals": 1,
+      "duplicateDeals": 0,
+      "duplicateAcrossSources": 0,
+      "fresh1dCount": 0,
+      "fresh7dCount": 1,
+      "viennaCount": 0,
+      "foodDrinkCount": 1,
+      "promoCount": 1,
+      "missingUrlCount": 0,
+      "sampleTitles": [
+        "Gratis Döner + Getränk in Wien - *Empfehlung 📍Franz-Josefs-Kai 27, 1010 Wien Heute am 27.11.26 15-19 Uhr so l"
+      ],
+      "lastRun": null,
+      "uniqueRate": 1,
+      "duplicateRate": 0,
+      "fresh1dRate": 0,
+      "fresh7dRate": 1,
+      "viennaRate": 0,
+      "foodDrinkRate": 1,
+      "promoRate": 1,
+      "missingUrlRate": 0,
+      "averageQualityScore": 95,
+      "topCategories": [
+        {
+          "value": "essen",
+          "count": 1
+        }
+      ],
+      "topTypes": [
+        {
+          "value": "gratis",
           "count": 1
         }
       ],
@@ -1112,63 +1113,6 @@
       "sourceWeightScore": 47
     },
     {
-      "sourceKey": "instagram-discovery",
-      "file": "deals-pending-instagram-discovery.json",
-      "sourceLabel": "Daily Sync Instagram Discovery",
-      "totalDeals": 2,
-      "uniqueDeals": 2,
-      "duplicateDeals": 0,
-      "duplicateAcrossSources": 0,
-      "fresh1dCount": 1,
-      "fresh7dCount": 2,
-      "viennaCount": 0,
-      "foodDrinkCount": 1,
-      "promoCount": 1,
-      "missingUrlCount": 0,
-      "sampleTitles": [
-        "Gratis Döner bei Mahnoor",
-        "Mahnoor: Rabatt"
-      ],
-      "lastRun": null,
-      "uniqueRate": 1,
-      "duplicateRate": 0,
-      "fresh1dRate": 0.5,
-      "fresh7dRate": 1,
-      "viennaRate": 0,
-      "foodDrinkRate": 0.5,
-      "promoRate": 0.5,
-      "missingUrlRate": 0,
-      "averageQualityScore": 88,
-      "topCategories": [
-        {
-          "value": "essen",
-          "count": 1
-        },
-        {
-          "value": "shopping",
-          "count": 1
-        }
-      ],
-      "topTypes": [
-        {
-          "value": "gratis",
-          "count": 1
-        },
-        {
-          "value": "rabatt",
-          "count": 1
-        }
-      ],
-      "issues": [
-        "Wien-Signal ist zu schwach"
-      ],
-      "healthScore": 53,
-      "missionFitScore": 43,
-      "coverageScore": 7,
-      "precisionScore": 43,
-      "sourceWeightScore": 39
-    },
-    {
       "sourceKey": "joe",
       "file": "deals-pending-joe.json",
       "sourceLabel": "jö Bonus Club",
@@ -1475,6 +1419,64 @@
       "coverageScore": 6,
       "precisionScore": 38,
       "sourceWeightScore": 33
+    },
+    {
+      "sourceKey": "instagram-discovery",
+      "file": "deals-pending-instagram-discovery.json",
+      "sourceLabel": "Daily Sync Instagram Discovery",
+      "totalDeals": 2,
+      "uniqueDeals": 2,
+      "duplicateDeals": 0,
+      "duplicateAcrossSources": 0,
+      "fresh1dCount": 0,
+      "fresh7dCount": 2,
+      "viennaCount": 0,
+      "foodDrinkCount": 1,
+      "promoCount": 1,
+      "missingUrlCount": 0,
+      "sampleTitles": [
+        "Gratis Döner bei Mahnoor",
+        "Mahnoor: Rabatt"
+      ],
+      "lastRun": null,
+      "uniqueRate": 1,
+      "duplicateRate": 0,
+      "fresh1dRate": 0,
+      "fresh7dRate": 1,
+      "viennaRate": 0,
+      "foodDrinkRate": 0.5,
+      "promoRate": 0.5,
+      "missingUrlRate": 0,
+      "averageQualityScore": 88,
+      "topCategories": [
+        {
+          "value": "essen",
+          "count": 1
+        },
+        {
+          "value": "shopping",
+          "count": 1
+        }
+      ],
+      "topTypes": [
+        {
+          "value": "gratis",
+          "count": 1
+        },
+        {
+          "value": "rabatt",
+          "count": 1
+        }
+      ],
+      "issues": [
+        "wenige Deals sind frischer als 1 Tag",
+        "Wien-Signal ist zu schwach"
+      ],
+      "healthScore": 46,
+      "missionFitScore": 32,
+      "coverageScore": 6,
+      "precisionScore": 37,
+      "sourceWeightScore": 32
     },
     {
       "sourceKey": "vienna-promo-radar",
