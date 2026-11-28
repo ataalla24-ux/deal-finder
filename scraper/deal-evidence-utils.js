@@ -138,7 +138,11 @@ function semanticPromotionOfferKey(deal = {}, options = {}) {
   if (!brand || !context) return '';
   // Grouped amounts are ambiguous here. Never match only a prefix/tail such as
   // €1 or 234.50eur inside “€1 234,50”; leave that offer for explicit review.
-  if (/\b\d{1,3}(?:[ .]\d{3})+(?:[.,]\d{1,2})?(?![\d.,])/.test(context)) return '';
+  // Require an adjacent monetary/percent unit, not an ISO timestamp's .000Z,
+  // and do not treat numeric URL components as offer amounts.
+  const amountContext = context.replace(/\bhttps?:\/\/\S+/g, ' ');
+  const groupedAmount = '\\d{1,3}(?:[ .]\\d{3})+(?:[.,]\\d{1,2})?';
+  if (new RegExp(`(?:€|\\beuros?\\b|\\beur\\b)\\s*${groupedAmount}(?![\\d.,])|(?<![\\d.,])${groupedAmount}\\s*(?:€|eur\\b|euros?\\b|%|prozent\\b)`).test(amountContext)) return '';
 
   const extractMarkers = (text) => {
     const markers = [];

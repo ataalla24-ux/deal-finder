@@ -106,6 +106,7 @@ function fixture(t, { optionalInputs = false, largeCache = false, integrity = fa
     write(seed, 'reviews/automatic-maintenance-policy.json', { version: 1, enabled: true,
       automaticExpiry: true, automaticLocalCopy: false, maxNewHidesPerRun: 5, maxAiCandidatesPerRun: 0 });
     write(seed, 'docs/live-deal-edits.json', { edits: [] });
+    write(seed, 'docs/instagram-graph-post-evidence.json', { posts: [], padding: 'x'.repeat(2 * 1024 * 1024) });
   }
 
   // Local hooks deliberately have no network or live-data dependencies. The map
@@ -198,6 +199,15 @@ test('a report-only integrity sweep cannot publish a fresh status for a concurre
   const head = remoteHead(f), result = generate(f, [FEED], ['--skip-conflicts', '--replace-conflicts']);
   assert.equal(result.status, 1, result.output);
   assert.match(result.output, /Live integrity consistency failed: remote changed docs\/deals.json/);
+  assert.equal(remoteHead(f), head);
+});
+
+test('large unchanged API evidence is retained, but a concurrent large evidence change still blocks publication', t => {
+  const f = fixture(t, { integrity: true });
+  publishRemote(f, 'docs/instagram-graph-post-evidence.json', { posts: [], padding: 'y'.repeat(2 * 1024 * 1024) });
+  const head = remoteHead(f), result = generate(f, [FEED]);
+  assert.equal(result.status, 1, result.output);
+  assert.match(result.output, /Live integrity consistency failed: remote changed docs\/instagram-graph-post-evidence.json/);
   assert.equal(remoteHead(f), head);
 });
 

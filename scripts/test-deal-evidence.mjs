@@ -152,6 +152,19 @@ assert.equal(
   'concrete offer evidence in a caption deduplicates an older generic title',
 );
 
+const datedPizza = { brand: 'Pizza Example', title: 'Pizza für 8,50 €',
+  validFrom: '2026-11-28T12:00:00.000Z', validUntil: '2026-11-30T12:00:00.000Z' };
+const datedPizzaKey = semanticCrossPlatformOfferKey(datedPizza);
+assert.match(datedPizzaKey, /8\.50eur/, 'ISO milliseconds are a date, not an ambiguous monetary amount');
+assert.equal(datedPizzaKey, semanticCrossPlatformOfferKey({ ...datedPizza,
+  description: 'Details: https://example.com/price/1.234eur und https://example.com/1.234percent',
+}), 'numbers inside source links do not reject an otherwise clear offer');
+for (const title of ['Pizza für €1 234.50', 'Pizza für 1 234,50 EUR', 'Pizza für 1.234,50 €',
+  'Pizza für €1\u202f234,50', '1 234,50 % Rabatt auf Pizza']) {
+  assert.equal(semanticCrossPlatformOfferKey({ ...datedPizza, title }), '',
+    'a grouped monetary/percent token remains ambiguous and must never match its prefix or tail');
+}
+
 assert.notEqual(crossPlatformWebsite, semanticCrossPlatformOfferKey({
   brand: 'Cafe Roma',
   title: 'Zweiter Kaffee gratis',

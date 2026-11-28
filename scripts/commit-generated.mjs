@@ -92,6 +92,7 @@ function runGit(args, options = {}) {
     },
     input: options.input,
     encoding: options.binary ? null : 'utf8',
+    ...(options.maxBuffer ? { maxBuffer: options.maxBuffer } : {}),
   });
   return result;
 }
@@ -250,7 +251,8 @@ function pathChangedBetween(baseRef, headRef, filePath) {
 }
 
 function remoteFileContent(ref, filePath) {
-  const result = runGit(['show', `${ref}:${filePath}`], { binary: true });
+  const result = runGit(['show', `${ref}:${filePath}`], { binary: true, maxBuffer: 64 * 1024 * 1024 });
+  if (result.error) throw Error(`Cannot read generated-state input ${filePath}: ${result.error.code || 'git-read-error'}`);
   if (result.status !== 0) return null;
   return Buffer.from(result.stdout);
 }
@@ -265,9 +267,9 @@ function contentHash(content) {
   return content === null ? null : cleanText(gitOutput(['hash-object', '--stdin'], { input: content }));
 }
 
-function mapInputHashes(ref) {
-  const hashes = new Map(MAP_INPUT_FILES.map(file => [file, null]));
-  const entries = gitOutput(['ls-tree', '-z', ref, '--', ...MAP_INPUT_FILES]);
+function mapInputHashes(ref, files = MAP_INPUT_FILES) {
+  const hashes = new Map(files.map(file => [file, null]));
+  const entries = gitOutput(['ls-tree', '-z', ref, '--', ...files]);
   for (const entry of entries.split('\0').filter(Boolean)) {
     const match = entry.match(/^\d{6} blob ([0-9a-f]+)\t(.+)$/);
     if (!match || !hashes.has(match[2])) throw new Error(`Invalid map input tree entry at ${ref}: ${entry}`);
@@ -783,11 +785,15 @@ async function main() {
     finalizeIntegrityStatus();
     // Even a report-only sweep must not publish a clean status over a newer
     // feed, source observation, policy, owner edit, or recovery decision.
-    integrityConsistency = [...new Set([...MAP_INPUT_FILES, ...INTEGRITY_OUTPUTS,
+    const integrityPaths = [...new Set([...MAP_INPUT_FILES, ...INTEGRITY_OUTPUTS,
       'scripts/live-deal-edits-lib.mjs', 'scraper/source-backed-quality.js',
       'scraper/approval-two-stage.js', 'scraper/approval-reviewed-source-copy.js',
-      'scraper/pre-publication-title.js', 'scraper/deal-card-editor.js'])].map(file => ({
-      path:file, baseHash:contentHash(remoteFileContent(baseRef, file)), hash:localFileHash(file),
+      'scraper/pre-publication-title.js', 'scraper/deal-card-editor.js'])];
+    // Source evidence is larger than spawnSync's output buffer. Read Git blob
+    // identities directly; a buffered `git show` failure is never absence.
+    const baseHashes = mapInputHashes(baseRef, integrityPaths);
+    integrityConsistency = integrityPaths.map(file => ({
+      path:file, baseHash:baseHashes.get(file), hash:localFileHash(file),
     }));
   }
   const generatedImageCache = 'reviews/generated-deal-images.json';
@@ -834,8 +840,9 @@ async function main() {
       for (const [kind, inputs] of [['Original photo', photoConsistency], ['Prepared generated image', preparedImageConsistency], ['Redemption', redemptionConsistency], ['Flight selection', flightConsistency], ['Live integrity', integrityConsistency]]) {
         if (!inputs) continue;
         const retained=new Map(safeStates.map(state=>[state.path,state]));
+        const integrityHashes=kind==='Live integrity'?mapInputHashes(headRef,inputs.map(input=>input.path)):null;
         for(const input of inputs) {
-          const remoteHash=contentHash(remoteFileContent(headRef,input.path));
+          const remoteHash=integrityHashes?integrityHashes.get(input.path):contentHash(remoteFileContent(headRef,input.path));
           if(remoteHash!==input.baseHash)throw Error(`${kind} consistency failed: remote changed ${input.path}`);
           const state=retained.get(input.path);
           const actual=state?contentHash(state.exists?state.content:null):remoteHash;
