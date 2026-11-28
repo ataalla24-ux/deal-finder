@@ -1,7 +1,7 @@
 {
-  "generatedAt": "2026-11-27T21:35:27.333Z",
+  "generatedAt": "2026-11-28T08:20:21.250Z",
   "status": "degraded",
-  "message": "0 fresh, evidence-checked Graph hashtag deal(s) found; 0 recovered from media.",
+  "message": "0 evidence-checked Graph deal(s) from this scan, 0 retained from earlier runs, 0 recovered from media.",
   "hashtags": [
     "viennarestaurants",
     "wienfood",
@@ -10,13 +10,14 @@
     "essenwien",
     "wienkaffee",
     "viennafood",
-    "wienergastro",
-    "viennaeats"
+    "viennaeats",
+    "wienergastro"
   ],
-  "fetchedPosts": 23,
+  "fetchedPosts": 21,
   "cachedGraphPosts": 0,
-  "uniquePosts": 22,
+  "uniquePosts": 20,
   "totalDeals": 0,
+  "retainedPreviousDeals": 0,
   "rescueEligible": 0,
   "rescuedDeals": 0,
   "mediaEvidence": {
@@ -39,21 +40,21 @@
   "requestBudget": {
     "requests": 30,
     "maxRequests": 30,
-    "highestUsagePercent": 31,
+    "highestUsagePercent": 42,
     "stopped": true,
     "reason": "request-budget"
   },
   "budgetDeferred": true,
   "sharedQuota": {
-    "limitPerHour": 267,
+    "limitPerHour": 470,
     "usageThreshold": 95,
     "requests": 30,
     "reserved": 30,
     "stopped": false,
     "reason": "",
-    "highestUsagePercent": 31,
+    "highestUsagePercent": 42,
     "waitedMs": 0,
-    "pacingMs": 51120,
+    "pacingMs": 44624,
     "retryAt": "",
     "adaptiveSafetyCeiling": 190,
     "adaptiveIncreases": 0,
@@ -67,7 +68,7 @@
       "coverage": {
         "pages": 3,
         "uniquePosts": 5,
-        "newPosts": 5,
+        "newPosts": 0,
         "stopReason": "exhausted",
         "incomplete": false,
         "resumed": false
@@ -82,13 +83,13 @@
       "status": "ok",
       "coverage": {
         "pages": 3,
-        "uniquePosts": 15,
-        "newPosts": 11,
+        "uniquePosts": 12,
+        "newPosts": 0,
         "stopReason": "page-limit",
         "incomplete": true,
         "resumed": false
       },
-      "fetched": 15,
+      "fetched": 12,
       "accepted": 0,
       "mediaFieldMode": "full-media-with-owner",
       "mediaLimit": 25
@@ -98,13 +99,13 @@
       "status": "ok",
       "coverage": {
         "pages": 3,
-        "uniquePosts": 3,
+        "uniquePosts": 4,
         "newPosts": 1,
-        "stopReason": "exhausted",
-        "incomplete": false,
-        "resumed": true
+        "stopReason": "page-limit",
+        "incomplete": true,
+        "resumed": false
       },
-      "fetched": 3,
+      "fetched": 4,
       "accepted": 0,
       "mediaFieldMode": "full-media-with-owner",
       "mediaLimit": 25
@@ -165,14 +166,14 @@
       "error": "Instagram scan paused: request-budget"
     },
     {
-      "hashtag": "wienergastro",
+      "hashtag": "viennaeats",
       "status": "deferred",
       "fetched": 0,
       "accepted": 0,
       "error": "Instagram scan paused: request-budget"
     },
     {
-      "hashtag": "viennaeats",
+      "hashtag": "wienergastro",
       "status": "deferred",
       "fetched": 0,
       "accepted": 0,
@@ -182,12 +183,39 @@
   "rejectionReasons": {
     "alcohol-offer": 3,
     "non-offer-content": 2,
-    "no-concrete-offer": 13,
+    "no-concrete-offer": 12,
     "missing-vienna-evidence": 1,
-    "general-recommendation": 2,
-    "excluded-promotion-type": 1
+    "general-recommendation": 2
   },
   "candidateAudit": [
+    {
+      "id": "18113360891186454",
+      "status": "rejected",
+      "url": "https://www.instagram.com/p/DgQwyheCL6x/",
+      "title": "Ein paar Tage gibt’s bei uns in Ottakring noch knusprige Gansl mit Erdäpfelknödel und Apfel-Preislbeer-Rotkraut 🪿 Danach heißt es wieder warten bis nächsten Herbst 🍂 #ganslessen ",
+      "text": "Ein paar Tage gibt’s bei uns in Ottakring noch knusprige Gansl mit Erdäpfelknödel und Apfel-Preislbeer-Rotkraut 🪿 Danach heißt es wieder warten bis nächsten Herbst 🍂 #ganslessen #ganslzeit #wienisst #ottakring",
+      "ownerUsername": "",
+      "ownerRole": "",
+      "scoutUsername": "",
+      "merchantUsername": "",
+      "pubDate": "2026-11-27T22:33:29+0000",
+      "rejectionReason": "no-concrete-offer",
+      "qualityScore": 0,
+      "viennaVerified": false,
+      "mediaEvidence": {
+        "analyzedAt": "",
+        "ocrText": "",
+        "assetCount": 0,
+        "imageCount": 0,
+        "videoFrameCount": 0,
+        "downloadRetries": 0,
+        "errors": [],
+        "ai": null
+      },
+      "hashtags": [
+        "wienisst"
+      ]
+    },
     {
       "id": "17995689135118618",
       "status": "rejected",
@@ -719,90 +747,6 @@
       },
       "hashtags": [
         "wienisst"
-      ]
-    },
-    {
-      "id": "17892566265686603",
-      "status": "rejected",
-      "url": "https://www.instagram.com/reel/DgPI9IOI_ZG/",
-      "title": "Draußen Schnee. Drinnen Palatschinken. Noch Fragen? ❄️🥞 Warum rausgehen, wenn die Palatschinken auch zu dir kommen? 🛵💨 Einfach bei foodora oder Lieferando bestellen, unter die D",
-      "text": "Draußen Schnee. Drinnen Palatschinken. Noch Fragen? ❄️🥞 Warum rausgehen, wenn die Palatschinken auch zu dir kommen? 🛵💨 Einfach bei foodora oder Lieferando bestellen, unter die Decke kuscheln und warten, bis es läutet 🔔 Nutella, Marmelade oder doch alles? 😏 Schreib uns deine Lieblingsfüllung in die Kommentare 👇 📍 Elysium Holzkohlengrill, Wien 📲 Jetzt auf foodora & Lieferando #palatschinken #wienfood #foodorawien #lieferando #schneetag",
-      "ownerUsername": "",
-      "ownerRole": "",
-      "scoutUsername": "",
-      "merchantUsername": "",
-      "pubDate": "2026-11-27T07:26:31+0000",
-      "rejectionReason": "no-concrete-offer",
-      "qualityScore": 0,
-      "viennaVerified": false,
-      "mediaEvidence": {
-        "analyzedAt": "",
-        "ocrText": "",
-        "assetCount": 0,
-        "imageCount": 0,
-        "videoFrameCount": 0,
-        "downloadRetries": 0,
-        "errors": [],
-        "ai": null
-      },
-      "hashtags": [
-        "wienfood"
-      ]
-    },
-    {
-      "id": "17929828788429647",
-      "status": "rejected",
-      "url": "https://www.instagram.com/reel/DgO4b1ftJ_O/",
-      "title": "Team Döner, Team Burger oder Team Pizza? 🥙🍔🍕 Drei Menüs, drei Meinungen – aber welches Team gewinnt? 👀 Gemeinsam mit der TGM-Schülervertretung bringen wir euch exklusive Mittag",
-      "text": "Team Döner, Team Burger oder Team Pizza? 🥙🍔🍕 Drei Menüs, drei Meinungen – aber welches Team gewinnt? 👀 Gemeinsam mit der TGM-Schülervertretung bringen wir euch exklusive Mittagsmenüs bereits ab 6,90 €! Schreibt euer Team in die Kommentare! 🔥 🎓 Exklusiv für TGM-Schüler:innen mit einem gültigen TGM-Schülerausweis.\\ 📅 Bitte beachtet: Montags haben wir Ruhetag.\\ 📍 La Esno | Klosterneuburger Str. 110, 1200 Wien \\#laesno #tgm #tgmwien #htltgm #tgmsv #tgmschüler #tgmcommunity #schülervertretung #schüleraktion #schülerrabatt #schülerangebot #schülerleben #mittagspause #mittagsmenü #wien #vienna #1200wien #wien1200 #brigittenau #20bezirk #wienfood #viennafood #foodwien #wienessen #wienliebe #wienstagram #dönerwien #burgerwien #pizzawien #streetfoodwien",
-      "ownerUsername": "",
-      "ownerRole": "",
-      "scoutUsername": "",
-      "merchantUsername": "",
-      "pubDate": "2026-11-27T05:02:15+0000",
-      "rejectionReason": "excluded-promotion-type",
-      "qualityScore": 0,
-      "viennaVerified": false,
-      "mediaEvidence": {
-        "analyzedAt": "",
-        "ocrText": "",
-        "assetCount": 0,
-        "imageCount": 0,
-        "videoFrameCount": 0,
-        "downloadRetries": 0,
-        "errors": [],
-        "ai": null
-      },
-      "hashtags": [
-        "wienfood"
-      ]
-    },
-    {
-      "id": "18668483983028076",
-      "status": "rejected",
-      "url": "https://www.instagram.com/reel/DgOSxOPoFE2/",
-      "title": "POV: Selbst bei Minusgraden können wir auf unsere Pizza nicht verzichten! 🥶🍕😂 Draußen eiskalt, im Herzen Napoli. ❤️🇮🇹 Zwei Brüder. Eine Leidenschaft. Echte neapolitanische Piz",
-      "text": "POV: Selbst bei Minusgraden können wir auf unsere Pizza nicht verzichten! 🥶🍕😂 Draußen eiskalt, im Herzen Napoli. ❤️🇮🇹 Zwei Brüder. Eine Leidenschaft. Echte neapolitanische Pizza – egal, wo wir sind! Wer würde mit uns eine Pizza im Schnee essen? ❄️🔥 📍 I FRATELLI PULCINELLA – myhive Wienerberg, Wien #Wien #Vienna #PizzaNapoletana #WienFood #WienEssen Napoli PizzaLovers FratelliPulcinella Wienerberg FürDich FYP WinterVibes",
-      "ownerUsername": "",
-      "ownerRole": "",
-      "scoutUsername": "",
-      "merchantUsername": "",
-      "pubDate": "2026-11-26T23:33:54+0000",
-      "rejectionReason": "no-concrete-offer",
-      "qualityScore": 0,
-      "viennaVerified": false,
-      "mediaEvidence": {
-        "analyzedAt": "",
-        "ocrText": "",
-        "assetCount": 0,
-        "imageCount": 0,
-        "videoFrameCount": 0,
-        "downloadRetries": 0,
-        "errors": [],
-        "ai": null
-      },
-      "hashtags": [
-        "wienfood"
       ]
     }
   ]
