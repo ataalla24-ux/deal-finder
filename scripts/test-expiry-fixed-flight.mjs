@@ -30,10 +30,11 @@ test('an exact itinerary expires on its outbound day independently of the fare s
   }), '2026-11-14');
 });
 
-test('maintenance keeps the same grace period and rejects conflicting source timing', () => {
+test('maintenance expires a proven itinerary after its outbound day and rejects conflicting source timing', () => {
   const now = new Date('2026-11-16T12:00:00Z');
   assert.equal(assessAutomaticExpiry(deal, { now }).reason, 'confirmed-fixed-flight-itinerary');
-  assert.equal(assessAutomaticExpiry(deal, { now: new Date('2026-11-15T10:00:00Z') }).eligible, false);
+  assert.equal(assessAutomaticExpiry(deal, { now: new Date('2026-11-14T23:59:59.998Z') }).eligible, false);
+  assert.equal(assessAutomaticExpiry(deal, { now: new Date('2026-11-15T00:00:00Z') }).eligible, true);
   assert.equal(assessAutomaticExpiry({ ...deal, evidence: { offerTiming: { matchedText: 'Gültig bis 18.11.2026' } } }, { now }).eligible, false);
   assert.equal(assessAutomaticExpiry({ ...deal, evidence: { offerTiming: { matchedText: 'Die Aktion wurde verlängert.' } } }, { now }).eligible, false);
   assert.equal(assessAutomaticExpiry(deal, { now, edits: [{ dealId: deal.id, forceKeep: true }] }).eligible, false);
