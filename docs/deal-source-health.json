@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-11-28T09:32:09.801Z",
+  "generatedAt": "2026-11-28T10:03:52.326Z",
   "discoveryAvailability": {
     "note": "Transport evidence, not deal yield. Retry eligibility is not recovery. Candidate counts are not Slack deliveries. No extra runs or quota resets.",
     "lanes": [
@@ -284,6 +284,7 @@
       "reportedSources": 9,
       "failedSources": [],
       "completedWithErrors": [
+        "food3",
         "joe",
         "power",
         "wien-combined"
@@ -531,22 +532,23 @@
         "Travel Shack Vienna: Bier, Wein, Longdrinks und Cocktails; außerdem Captain-Morgan- und Gin-Longdrinks"
       ],
       "lastRun": {
-        "status": "completed",
-        "startedAt": "2026-11-27T10:40:06.256Z",
-        "finishedAt": "2026-11-27T10:40:28.508Z",
-        "durationMs": 22252,
+        "status": "completed-with-errors",
+        "startedAt": "2026-11-28T09:58:49.670Z",
+        "finishedAt": "2026-11-28T10:03:01.223Z",
+        "durationMs": 251553,
         "counts": {
-          "rawCandidates": 5,
-          "normalizedCandidates": 5,
-          "verifiedCandidates": 2,
-          "previousDeals": 2,
-          "acceptedDeals": 2,
-          "rejectedDeals": 5
+          "rawCandidates": 0,
+          "normalizedCandidates": 0,
+          "verifiedCandidates": 1,
+          "previousDeals": 1,
+          "acceptedDeals": 1,
+          "rejectedDeals": 0
         },
-        "rejectedByReason": {
-          "post-verification-rejected": 5
-        },
-        "errors": [],
+        "rejectedByReason": {},
+        "errors": [
+          "https://www.instagram.com/explore/tags/lunchdealwien/: Refusal: Die angegebene Instagram-Hashtag-Seite ist in diesem Durchlauf nicht zugänglich: Instagram zeigt ausschließlich die Login-Seite und liefert keine Hashtag-Posts, Postdaten, Handles oder direkten Originalpost-Links. Daher kann ich keine Angebote ausschließlich aus dieser Quelle verlässlich extrahieren.",
+          "https://www.instagram.com/explore/tags/neueröffnungwien/: Firecrawl Agent nach 120s abgebrochen"
+        ],
         "reportFile": "deal-pipeline-last-run-food3.json"
       },
       "uniqueRate": 1,
