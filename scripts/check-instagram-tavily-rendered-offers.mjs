@@ -52,9 +52,13 @@ function readRenderedCaption(page, url, limit) {
     };
     const meta = name => document.querySelector('meta[property="' + name + '"]')?.getAttribute('content') || '';
     const identities = [meta('og:url'), document.querySelector('link[rel="canonical"]')?.getAttribute('href')].filter(Boolean);
-    if (!identities.every(value => exact(value))) return null;
+    if (!identities.every(value => exact(value))) return { blocked: true };
     const raw = meta('og:description');
     const value = raw.replace(/\s+/g, ' ').trim();
+    const restricted = /this account is private|dieses konto ist privat|shared with close friends|mit engen freunden geteilt|only visible to followers|nur für follower sichtbar/i;
+    if (restricted.test(value) || restricted.test(document.querySelector('main, [role="main"]')?.innerText || '')) {
+      return { blocked: true };
+    }
     // Strip only Instagram's recognized Open Graph author/engagement prefix.
     const quoted = value.match(/^[\d.,]+\s+likes?(?:,\s*[\d.,]+\s+comments?)?\s*[-–]\s*[^:"“]+:\s*["“]([\s\S]+)["”]\s*\.?$/i)?.[1];
     const caption = quoted || value;
@@ -93,13 +97,18 @@ function proofResponse(url, title, caption, date) {
     + json + '</script>', { headers: { 'content-type': 'text/html' } });
 }
 
-export async function verifyRenderedInstagramTavilyOffers({
-  directReport, inventory, now = new Date(), clock = () => new Date(), moderation,
+export async function verifyRenderedInstagramTavilyOffers({ directReport, ...options } = {}) {
+  return verifyRenderedInstagramTavilyLinks({ ...options, urls: renderedTargetsFromDirectReport(directReport),
+    maxSourceReads: RENDER_TARGETS.length, stage: 'rendered-original-proof-remaining', boundRenderProof: false });
+}
+
+export async function verifyRenderedInstagramTavilyLinks({
+  urls, maxSourceReads = 4, stage = 'rendered-new-original-proof', boundRenderProof = true,
+  inventory, now = new Date(), clock = () => new Date(), moderation,
   previousReport, relatedReport, healthReport, cookies = [], browserType = chromium,
   fetchRendered = fetchRenderedInstagramPreview, readLinkedDate = readInstagramPostLinkedDate,
   readCaption = readRenderedCaption,
 } = {}) {
-  const urls = renderedTargetsFromDirectReport(directReport);
   const cookieHeader = instagramAuthSummary(cookies).authenticatedSession ? instagramCookieHeader(cookies) : '';
   const readResults = new Map();
   const statuses = new Map();
@@ -109,10 +118,10 @@ export async function verifyRenderedInstagramTavilyOffers({
   let browserNavigations = 0;
 
   const fetcher = async url => {
-    if (!urls.includes(url) || browserNavigations >= RENDER_TARGETS.length) throw new Error('Unexpected rendered original');
+    if (!urls.includes(url) || browserNavigations >= maxSourceReads) throw new Error('Unexpected rendered original');
     if (setupFailed) {
       readResults.set(url, 'rendered-session-setup-failed');
-      throw new Error('Unusable browser session');
+      return new Response(null, { status: 204 });
     }
     if (!context) {
       let pendingContext;
@@ -127,10 +136,16 @@ export async function verifyRenderedInstagramTavilyOffers({
         setupFailed = true;
         readResults.set(url, 'rendered-session-setup-failed');
         await pendingContext?.close().catch(() => {});
-        throw new Error('Unusable browser session');
+        return new Response(null, { status: 204 });
       }
     }
-    const page = await context.newPage();
+    let page;
+    try { page = await context.newPage(); }
+    catch {
+      setupFailed = true;
+      readResults.set(url, 'rendered-session-setup-failed');
+      return new Response(null, { status: 204 });
+    }
     browserNavigations++;
     try {
       const preview = await fetchRendered(page, url);
@@ -157,8 +172,9 @@ export async function verifyRenderedInstagramTavilyOffers({
       const publishedAt = exactDate(await readLinkedDate(page, url));
       if (!publishedAt) return unverified('rendered-bound-publication-unproven');
       const proof = await readCaption(page, url, captionLimit);
+      if (proof?.blocked) return unverified('rendered-complete-caption-unproven');
       let caption = normalize(proof?.caption);
-      if (isInstagramOpenGraphHeaderOnly(caption) && preview.captionEvidence === 'exact-original-caption') {
+      if ((!caption || isInstagramOpenGraphHeaderOnly(caption)) && preview.captionEvidence === 'exact-original-caption') {
         caption = normalize(preview.description) || caption;
       }
       if (isInstagramOpenGraphHeaderOnly(caption)) return unverified('open-graph-header-only');
@@ -175,10 +191,10 @@ export async function verifyRenderedInstagramTavilyOffers({
   try {
     const result = await verifyInstagramTavilyOffers({
       links: urls, inventory, now, clock, moderation, previousReport, relatedReport, healthReport,
-      cookieHeader, requireSession: true, fetcher,
+      cookieHeader, requireSession: true, fetcher, maxSourceReads, boundRenderProof,
     });
     const report = { ...result.report, sourceReads: browserNavigations, browserNavigations,
-      stage: 'rendered-original-proof-remaining', tavilySearches: 0,
+      stage, tavilySearches: 0,
       rows: result.report.rows.map(row => ({
         ...row, ...(statuses.has(row.url) ? { httpStatus: statuses.get(row.url) } : {}),
         ...(readResults.has(row.url) && row.status === 'unverified' ? { reason: readResults.get(row.url) } : {}),
@@ -195,7 +211,7 @@ export async function verifyRenderedInstagramTavilyOffers({
 }
 
 const readJson = file => JSON.parse(fs.readFileSync(file, 'utf8'));
-function loadInventory(docs) {
+export function loadRenderedTavilyInventory(docs) {
   const read = name => readJson(path.join(docs, name));
   const deals = name => {
     const payload = read(name);
@@ -244,7 +260,7 @@ async function main() {
   const docs = 'docs';
   const reportPath = path.join(docs, 'instagram-ai-report.json');
   const result = await verifyRenderedInstagramTavilyOffers({
-    directReport, cookies: loadInstagramCookieHints(), inventory: loadInventory(docs),
+    directReport, cookies: loadInstagramCookieHints(), inventory: loadRenderedTavilyInventory(docs),
     moderation: loadDealModeration(), previousReport: readJson(reportPath),
     relatedReport: readJson(path.join(docs, 'instagram-discovery-report.json')),
     healthReport: readJson(path.join(docs, 'instagram-auth-health.json')),

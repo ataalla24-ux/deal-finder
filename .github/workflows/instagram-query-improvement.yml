@@ -1,0 +1,130 @@
+name: Instagram Query Improvement
+on:
+  workflow_dispatch:
+    inputs:
+      mode:
+        description: Compare six cache-only Tavily queries or verify originals from the saved result
+        type: choice
+        options: [compare, verify-new]
+        default: compare
+      comparison_run_id:
+        description: GitHub run ID of the saved comparison (verify-new only)
+        type: string
+        default: ''
+      receipt_sha256:
+        description: SHA-256 of the saved comparison receipt (verify-new only)
+        type: string
+        default: ''
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/instagram-query-improvement.yml'
+      - 'scraper/instagram-query-improvement.js'
+      - 'scripts/check-instagram-query-*.mjs'
+      - 'scripts/test-instagram-query-*.mjs'
+permissions:
+  contents: read
+env:
+  SENTRY_DISABLED: '1'
+  TZ: Europe/Vienna
+jobs:
+  offline:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: npm ci --no-audit --no-fund
+      - run: node --test scripts/test-instagram-query-improvement.mjs scripts/test-instagram-query-offers.mjs scripts/test-tavily-free-budget.mjs
+  compare:
+    if: github.event_name == 'workflow_dispatch' && github.ref == 'refs/heads/main' && github.run_attempt == 1 && inputs.mode == 'compare'
+    needs: offline
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    concurrency:
+      group: tiktok-deal-scan
+      cancel-in-progress: false
+      queue: max
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: npm ci --no-audit --no-fund
+      - name: Claim this bounded comparison once
+        id: claim
+        run: node scripts/check-instagram-query-improvement.mjs --claim
+      - name: Persist claim before any provider request
+        if: steps.claim.outputs.claimed == 'true'
+        run: node scripts/commit-generated.mjs --message "Claim bounded Instagram query comparison [skip ci]" --files source-state/instagram-query-improvement-claim.json
+      - name: Compare within the verified free search allowance
+        if: steps.claim.outputs.claimed == 'true'
+        env:
+          TIKTOK_TAVILY_FREE_PLAN_CONFIRMED: ${{ vars.TIKTOK_TAVILY_FREE_PLAN_CONFIRMED }}
+          TAVILY_API_KEY: ${{ secrets.TAVILY_API_KEY || secrets.TAVIILY_API_KEY }}
+        run: node scripts/check-instagram-query-improvement.mjs --run
+      - name: Persist the separate receipt and any shared provider hold
+        if: always() && steps.claim.outputs.claimed == 'true'
+        run: node scripts/commit-generated.mjs --message "Record bounded Instagram query comparison [skip ci]" --files source-state/instagram-query-improvement-result.json source-state/instagram-tavily-index.json
+      - uses: actions/upload-artifact@v4
+        if: always() && steps.claim.outputs.claimed == 'true'
+        with:
+          name: instagram-query-improvement
+          path: |
+            output/social-discovery/instagram-query-improvement.json
+            output/social-discovery/instagram-query-improvement.hints.json
+          retention-days: 7
+  verify-new:
+    if: github.event_name == 'workflow_dispatch' && github.ref == 'refs/heads/main' && github.run_attempt == 1 && inputs.mode == 'verify-new'
+    needs: offline
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    concurrency:
+      group: instagram-ai-scan
+      cancel-in-progress: false
+      queue: max
+    permissions:
+      contents: write
+    env:
+      PLAYWRIGHT_BROWSERS_PATH: '0'
+      COMPARE_RUN_ID: ${{ inputs.comparison_run_id }}
+      RECEIPT_SHA256: ${{ inputs.receipt_sha256 }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: npm ci --no-audit --no-fund
+      - run: npx playwright install --with-deps chromium chromium-headless-shell
+      - name: Claim original-source verification for the pinned comparison receipt
+        id: claim
+        run: node scripts/check-instagram-query-offers.mjs --claim "$COMPARE_RUN_ID" "$RECEIPT_SHA256"
+      - name: Persist the claim before any Instagram navigation
+        if: steps.claim.outputs.claimed == 'true'
+        run: node scripts/commit-generated.mjs --message "Claim bounded Instagram query original verification [skip ci]" --files source-state/instagram-query-offers-claim.json
+      - name: Verify up to four unseen results from ordinary Instagram originals
+        id: verify
+        if: steps.claim.outputs.claimed == 'true'
+        env:
+          INSTAGRAM_SESSIONID: ${{ secrets.INSTAGRAM_SESSIONID }}
+          INSTAGRAM_COOKIES: ${{ secrets.INSTAGRAM_COOKIES }}
+        run: node scripts/check-instagram-query-offers.mjs --run "$COMPARE_RUN_ID" "$RECEIPT_SHA256"
+      - name: Preserve an observed Instagram website access hold
+        if: always() && steps.verify.outputs.web_access_changed == 'true'
+        run: node scripts/commit-generated.mjs --message "Retain Instagram query verification access hold [skip ci]" --files docs/instagram-ai-report.json
+      - uses: actions/upload-artifact@v4
+        if: always() && steps.claim.outputs.claimed == 'true'
+        with:
+          name: instagram-query-offer-verification
+          path: |
+            output/social-discovery/instagram-query-offers.json
+            output/social-discovery/instagram-query-offers.candidates.json
+          retention-days: 7

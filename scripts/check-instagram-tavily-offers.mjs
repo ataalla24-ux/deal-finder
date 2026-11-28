@@ -121,6 +121,7 @@ function knownPostInventory(inventory, now) {
   for (const [reason, candidates] of [
     ['previously-pending', rows(inventory.pending)],
     ['previously-indexed', rows(inventory.indexed)],
+    ['previously-reviewed-instagram-original', rows(inventory.reviewedPosts)],
   ]) {
     for (const candidate of candidates) {
       const key = canonicalInstagramPostKey(candidate?.url || candidate?.postUrl || candidate?.post_url);
@@ -142,7 +143,11 @@ function knownPostInventory(inventory, now) {
 export async function verifyInstagramTavilyOffers({
   links = [], inventory = {}, now = new Date(), clock = () => new Date(), fetcher = fetch,
   previousReport = {}, relatedReport = {}, healthReport = {}, moderation = {}, cookieHeader = '', requireSession = false,
+  maxSourceReads = sourceReadCap, boundRenderProof = false,
 } = {}) {
+  if (!Number.isInteger(maxSourceReads) || maxSourceReads < 1 || maxSourceReads > sourceReadCap) {
+    throw new Error('Invalid Instagram original read cap');
+  }
   const access = createInstagramWebAccess({ previousReport, relatedReport, healthReport, now: clock });
   const initialAccess = access.snapshot();
   const known = knownPostInventory(inventory, now);
@@ -167,7 +172,7 @@ export async function verifyInstagramTavilyOffers({
       continue;
     }
     const paused = access.pause();
-    if (paused || requireSession && !cookieHeader || report.sourceReads >= sourceReadCap) {
+    if (paused || requireSession && !cookieHeader || report.sourceReads >= maxSourceReads) {
       const reason = paused ? 'web-access-cooldown' : !cookieHeader && requireSession ? 'ordinary-session-unavailable' : 'source-read-cap';
       Object.assign(entry, { status: 'deferred', reason,
         ...(paused ? { nextRetryAt: paused.nextRetryAt } : {}) });
@@ -222,6 +227,11 @@ export async function verifyInstagramTavilyOffers({
       continue;
     }
     if (proof.reason) { entry.reason = proof.reason; continue; }
+    if (boundRenderProof) {
+      proof.pubDateSource = 'instagram-rendered-time-datetime';
+      entry.sourceEvidence = { title: proof.title, caption: proof.description,
+        sourcePublishedAt: proof.pubDate, sourcePublishedAtSource: proof.pubDateSource };
+    }
     entry.sourcePublishedAt = proof.pubDate;
     const age = +now - Date.parse(proof.pubDate);
     if (age < 0 || age > postAgeMs) {
@@ -229,8 +239,13 @@ export async function verifyInstagramTavilyOffers({
       continue;
     }
     const candidate = makeCandidate({ url, source: INSTAGRAM_TAVILY_SOURCE });
-    candidate.preview = { ...proof, status: 200, loginWall: false, finalUrl: url };
+    candidate.preview = { ...proof, status: 200, loginWall: false, finalUrl: url,
+      ...(boundRenderProof ? { captionEvidence: 'exact-original-caption' } : {}) };
     const deal = buildHeuristicDeal(candidate);
+    if (boundRenderProof) entry.productionTextCheck = {
+      captionEvidence: candidate.preview.captionEvidence, accepted: Boolean(deal),
+      reason: candidate.rejectionReason, score: candidate.score, sourcePublishedAt: proof.pubDate,
+    };
     if (!deal) {
       Object.assign(entry, { status: 'rejected', reason: clean(candidate.rejectionReason, 180) || 'offer-evidence-insufficient' });
       continue;
