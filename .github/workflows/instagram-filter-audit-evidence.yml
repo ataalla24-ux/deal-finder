@@ -1,0 +1,75 @@
+name: Instagram Filter Audit Evidence
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - 'scripts/check-instagram-filter-audit-evidence.mjs'
+      - 'scripts/test-instagram-filter-audit-evidence.mjs'
+      - '.github/workflows/instagram-filter-audit-evidence.yml'
+
+permissions:
+  contents: read
+concurrency:
+  group: ${{ github.event_name == 'workflow_dispatch' && 'instagram-ai-scan' || format('instagram-filter-evidence-offline-{0}', github.run_id) }}
+  cancel-in-progress: false
+  queue: max
+env:
+  SENTRY_DISABLED: '1'
+  TZ: Europe/Vienna
+
+jobs:
+  offline:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+      - run: npm ci --no-audit --no-fund
+      - run: node --test scripts/test-instagram-filter-audit-evidence.mjs scripts/test-instagram-tavily-rendered-offers.mjs
+  capture:
+    needs: offline
+    if: github.event_name == 'workflow_dispatch' && github.ref == 'refs/heads/main' && github.run_attempt == 1
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: write
+    env:
+      PLAYWRIGHT_BROWSERS_PATH: '0'
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+      - run: npm ci --no-audit --no-fund
+      - run: npx playwright install --with-deps chromium
+      - name: Claim the exact saved public filter-audit originals
+        id: claim
+        run: node scripts/check-instagram-filter-audit-evidence.mjs --claim
+      - name: Persist the one-time claim before any original navigation
+        if: steps.claim.outputs.claimed == 'true'
+        run: node scripts/commit-generated.mjs --message "Claim exact Instagram filter evidence audit [skip ci]" --files source-state/instagram-filter-audit-evidence-claim.json
+      - name: Capture three rendered originals and one exact retained Graph proof
+        id: capture
+        if: steps.claim.outputs.claimed == 'true'
+        env:
+          INSTAGRAM_SESSIONID: ${{ secrets.INSTAGRAM_SESSIONID }}
+          INSTAGRAM_COOKIES: ${{ secrets.INSTAGRAM_COOKIES }}
+        run: node scripts/check-instagram-filter-audit-evidence.mjs --run
+      - name: Persist any new shared Instagram access hold
+        if: always() && steps.capture.outputs.web_access_changed == 'true'
+        run: node scripts/commit-generated.mjs --message "Record bounded Instagram filter audit access hold [skip ci]" --files docs/instagram-ai-report.json
+      - uses: actions/upload-artifact@v4
+        if: always() && steps.claim.outputs.claimed == 'true'
+        with:
+          name: instagram-filter-audit-evidence
+          path: output/instagram-filter-audit/evidence.json
+          if-no-files-found: error
+          retention-days: 7
