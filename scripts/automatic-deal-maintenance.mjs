@@ -180,7 +180,10 @@ function literalSourceEnds(value, kind, confirmedDay = '') {
     return exactDay(value);
   });
 }
-const matchingEdits = (deal, edits) => edits.filter(edit => edit.dealId === deal.id || deal.url && edit.url === deal.url);
+// Match the live-edit applier: an explicit ID selects one offer even when a
+// merchant homepage hosts several campaigns. Keep the legacy URL-only fallback.
+const matchingEdits = (deal, edits) => edits.filter(edit => clean(edit.dealId)
+  ? clean(edit.dealId) === clean(deal.id) : Boolean(deal.url && edit.url === deal.url));
 export const protectedFields = (deal, edits) => {
   const matched = matchingEdits(deal, edits);
   return new Set([...(deal.liveEditedFields || []), ...(deal.slackEditedFields || []),

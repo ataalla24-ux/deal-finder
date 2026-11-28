@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
-import { assessAutomaticExpiry, maintainDeals, maintainFeedFile, groundedMaintenanceTitle, automaticMaintenanceReviewCandidates, latestMaintenanceEvidence } from './automatic-deal-maintenance.mjs';
+import { assessAutomaticExpiry, maintainDeals, maintainFeedFile, groundedMaintenanceTitle, automaticMaintenanceReviewCandidates, latestMaintenanceEvidence, protectedFields } from './automatic-deal-maintenance.mjs';
 
 const now = new Date('2026-11-06T12:00:00Z');
 const policy = { version: 1, enabled: true, automaticExpiry: true, automaticLocalCopy: true,
@@ -12,6 +12,20 @@ const deal = { id: 'old', title: 'Gratis Kaffee', description: 'Gratis Kaffee be
   url: 'https://www.instagram.com/p/test/', expiryKind: 'end', validUntil: '2026-11-04',
   expires: '2026-11-04T23:59:59.999Z', metaGraphCaption: 'Gratis Kaffee in Wien. Angebot gueltig bis 04.11.2026.' };
 const assess = (record, date = now) => assessAutomaticExpiry(record, { policy, now: date });
+
+test('manual edits with an explicit deal ID cannot protect or clear another offer on the same homepage', () => {
+  const offer = { ...deal, id: 'one-official-offer', url: 'https://www.mcdonalds.at/' };
+  const other = { dealId: 'another-official-offer', url: offer.url, description: 'Other campaign copy',
+    clearFields: ['validUntil'], forceKeep: true };
+  assert.deepEqual([...protectedFields(offer, [other])], []);
+  assert.equal(assessAutomaticExpiry(offer, { now, policy, edits: [other] }).eligible, true);
+  const sameId = { ...other, dealId: offer.id };
+  assert.ok(protectedFields(offer, [sameId]).has('description'));
+  assert.equal(assessAutomaticExpiry(offer, { now, policy, edits: [sameId] }).eligible, false);
+  const legacyUrlOnly = { url: offer.url, description: 'Legacy reviewed copy', clearFields: ['validUntil'] };
+  assert.ok(protectedFields(offer, [legacyUrlOnly]).has('description'));
+  assert.equal(assessAutomaticExpiry(offer, { now, policy, edits: [legacyUrlOnly] }).eligible, false);
+});
 
 test('literal end date and year are required; old publication or a guessed structured TTL is insufficient', () => {
   assert.equal(assess(deal).eligible, true);
