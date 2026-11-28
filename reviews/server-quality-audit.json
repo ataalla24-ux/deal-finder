@@ -1,8 +1,8 @@
 {
   "version": 1,
-  "checkedAt": "2026-11-28T10:22:18.863Z",
-  "feedHash": "f29e41dc0ef4753e4e14380a730508ecc7735eddc50f5aee73818216c5c069fc",
-  "mapContextHash": "a6cda10c3e6831e1120b167accf4256deafaed8c5b0eaad6df51cd5555cf564e",
+  "checkedAt": "2026-11-28T18:59:02.123Z",
+  "feedHash": "facf86db045167851b662c481602b8e0f5f30fe99c137c53242cc96b2a7cd46d",
+  "mapContextHash": "25d552fc3b046e9b8f300fc0ccbca447d0ba3bac7948203bdd7fa01c8cd8e648",
   "sourceEvidenceHash": "e02bec21d173d7313bacaea739418dbbe4b6425a966e97e1a77f36a44cb67afb",
   "liveCount": 104,
   "checks": {
@@ -40,7 +40,6 @@
     "reviewedPlatformImages": 0,
     "lowResolutionDeals": [],
     "reviewedPrimaryPhotoDeals": [
-      "g2-1gbztrr",
       "fc4g-1r04rhe",
       "power-food-18b3d86d8172",
       "meta-ig-18190492012418024",
@@ -54,6 +53,7 @@
       "gs-17514",
       "gs-91769",
       "g2-31pd49",
+      "g2-1gbztrr",
       "benefit-drei-plus-1g2bha9",
       "benefit-drei-plus-1ivo36q",
       "g2-ezkkws",
@@ -70,9 +70,9 @@
     "sharedAssignments": [],
     "caveat": "Current compiled selection and bounded asset/crop review; changed feeds need a fresh observation. No installed-version or recipient UI certification."
   },
-  "modelCalls": 0,
+  "modelCalls": 4,
   "photoDeferred": 0,
-  "visionModel": "gpt-6.2-sol",
+  "visionModel": "gpt-6.2-astra",
   "reasoningEffort": "max",
   "reasoningMode": "pro",
   "automaticPublicationEnabled": false,
@@ -99,61 +99,20 @@
       "websitePhoto": {
         "src": "/assets/blog/photos/restaurant-buffet.webp",
         "key": "restaurant-buffet",
-        "status": "not-reviewed"
+        "matchesProduct": true,
+        "emptyTableOrPackaging": false,
+        "uncertain": false,
+        "status": "symbolic-match",
+        "checkedAt": "2026-11-28T18:59:02.123Z",
+        "model": "gpt-6.2-astra",
+        "reasoningEffort": "max",
+        "reasoningMode": "pro",
+        "provesMerchantPhoto": false,
+        "automaticReplacement": false
       },
       "nativePhoto": {
         "status": "feed-changed-recheck-required",
         "originalPhoto": null
-      }
-    },
-    {
-      "id": "g2-1gbztrr",
-      "issues": [
-        {
-          "code": "upstream-validity-review",
-          "label": "Vorhandene Validierungshinweise vor Freigabe erneut pruefen."
-        },
-        {
-          "code": "evidence-missing",
-          "label": "Kein gespeicherter Originaltext fuer automatische Korrektur."
-        }
-      ],
-      "requiresReview": true,
-      "publicationMode": "human-approval",
-      "automaticPublicationAllowed": false,
-      "fingerprint": "307ecd6561e9f4e777c4619af093741b5ee4c6b1740924306a0282ffa5a53ba9",
-      "map": {
-        "status": "mapped",
-        "reason": "verified-address-reuse",
-        "locationIds": [
-          "address-63d09b8ed8d949f2"
-        ]
-      },
-      "websitePhoto": {
-        "src": "/assets/approved-deal-photos/602f2a64dbd57290-2d30092d343e8ac3aac6b1be7ac70a7290687e8aa95c25764ff1ebfd7c9cf43a.jpg",
-        "key": "bound-g2-1gbztrr",
-        "status": "not-reviewed"
-      },
-      "nativePhoto": {
-        "status": "feed-changed-recheck-required",
-        "originalPhoto": {
-          "status": "not-reviewed",
-          "url": "https://freefinder.at/assets/approved-deal-photos/602f2a64dbd57290-2d30092d343e8ac3aac6b1be7ac70a7290687e8aa95c25764ff1ebfd7c9cf43a.jpg",
-          "permissionStatus": "documented",
-          "bindingStatus": "current",
-          "imageKind": "editorial-illustration",
-          "fullSha256": "2d30092d343e8ac3aac6b1be7ac70a7290687e8aa95c25764ff1ebfd7c9cf43a",
-          "cardSha256": "78332a471061beaccd62571f96ed87fa493bc8dcb11dc055ecdf13f4b19ef15d",
-          "crop": {
-            "left": 0,
-            "top": 134,
-            "width": 1730,
-            "height": 640
-          },
-          "provesMerchantPhoto": false,
-          "automaticReplacement": false,
-          "recipientUiTest": false
-        }
       }
     },
     {
@@ -184,7 +143,16 @@
       "websitePhoto": {
         "src": "/assets/blog/photos/family-lunch.webp",
         "key": "family-lunch",
-        "status": "not-reviewed"
+        "matchesProduct": false,
+        "emptyTableOrPackaging": false,
+        "uncertain": true,
+        "status": "needs-review",
+        "checkedAt": "2026-11-28T18:59:02.123Z",
+        "model": "gpt-6.2-astra",
+        "reasoningEffort": "max",
+        "reasoningMode": "pro",
+        "provesMerchantPhoto": false,
+        "automaticReplacement": false
       },
       "nativePhoto": {
         "status": "feed-changed-recheck-required",
@@ -217,7 +185,16 @@
       "websitePhoto": {
         "src": "/assets/blog/photos/family-lunch.webp",
         "key": "family-lunch",
-        "status": "not-reviewed"
+        "matchesProduct": false,
+        "emptyTableOrPackaging": false,
+        "uncertain": false,
+        "status": "needs-review",
+        "checkedAt": "2026-11-28T18:59:02.123Z",
+        "model": "gpt-6.2-astra",
+        "reasoningEffort": "max",
+        "reasoningMode": "pro",
+        "provesMerchantPhoto": false,
+        "automaticReplacement": false
       },
       "nativePhoto": {
         "status": "feed-changed-recheck-required",
@@ -256,7 +233,17 @@
       "websitePhoto": {
         "src": "/assets/blog/photos/pizza.webp",
         "key": "pizza",
-        "status": "not-reviewed"
+        "matchesProduct": true,
+        "emptyTableOrPackaging": false,
+        "uncertain": false,
+        "status": "symbolic-match",
+        "checkedAt": "2026-11-26T20:16:27.933Z",
+        "model": "gpt-6.2-astra",
+        "reasoningEffort": "max",
+        "reasoningMode": "pro",
+        "provesMerchantPhoto": false,
+        "automaticReplacement": false,
+        "cached": true
       },
       "nativePhoto": {
         "status": "feed-changed-recheck-required",
@@ -287,7 +274,16 @@
       "websitePhoto": {
         "src": "/assets/blog/photos/pizza.webp",
         "key": "pizza",
-        "status": "not-reviewed"
+        "matchesProduct": true,
+        "emptyTableOrPackaging": false,
+        "uncertain": false,
+        "status": "symbolic-match",
+        "checkedAt": "2026-11-28T18:59:02.123Z",
+        "model": "gpt-6.2-astra",
+        "reasoningEffort": "max",
+        "reasoningMode": "pro",
+        "provesMerchantPhoto": false,
+        "automaticReplacement": false
       },
       "nativePhoto": {
         "status": "feed-changed-recheck-required",
@@ -322,7 +318,17 @@
       "websitePhoto": {
         "src": "/assets/deal-photos/espresso.webp",
         "key": "espresso",
-        "status": "not-reviewed"
+        "matchesProduct": true,
+        "emptyTableOrPackaging": false,
+        "uncertain": false,
+        "status": "symbolic-match",
+        "checkedAt": "2026-11-26T20:16:27.933Z",
+        "model": "gpt-6.2-astra",
+        "reasoningEffort": "max",
+        "reasoningMode": "pro",
+        "provesMerchantPhoto": false,
+        "automaticReplacement": false,
+        "cached": true
       },
       "nativePhoto": {
         "status": "feed-changed-recheck-required",
@@ -344,7 +350,7 @@
       "requiresReview": true,
       "publicationMode": "human-approval",
       "automaticPublicationAllowed": false,
-      "fingerprint": "f0ecd4594edc9745f4d79113f497e56f86a9166d2f4f47b507d4d35234948dc3",
+      "fingerprint": "e0c8149bedd2af50b03033938157d1bbfd232e92a7471b82035aa04cff5bc20d",
       "map": {
         "status": "needs-review",
         "reason": "missing-exact-address",
@@ -353,6 +359,46 @@
       "websitePhoto": {
         "src": "/assets/blog/photos/family-lunch.webp",
         "key": "family-lunch",
+        "status": "not-reviewed"
+      },
+      "nativePhoto": {
+        "status": "feed-changed-recheck-required",
+        "originalPhoto": null
+      }
+    },
+    {
+      "id": "joe-omv-current-5044fa7c7e98-299871f8c80c",
+      "issues": [],
+      "requiresReview": false,
+      "publicationMode": "human-approval",
+      "automaticPublicationAllowed": false,
+      "fingerprint": "ebf2a7832f5163d91d5668c4d68ddf45c4cd1dcb2418dd5d8f6a8ec837eff08a",
+      "map": {
+        "status": "mapped",
+        "reason": "reviewed-chain-campaign",
+        "locationIds": [
+          "omv-at-7005-8",
+          "omv-at-7501-8",
+          "omv-at-7505-8",
+          "omv-at-7513-8",
+          "omv-at-7514-8",
+          "omv-at-7529-8",
+          "omv-at-7542-8",
+          "omv-at-7546-8",
+          "omv-at-7547-8",
+          "omv-at-7548-8",
+          "omv-at-7550-8",
+          "omv-at-7554-8",
+          "omv-at-7556-8",
+          "omv-at-7560-8",
+          "omv-at-7575-8",
+          "omv-at-7583-8",
+          "omv-at-7666-8"
+        ]
+      },
+      "websitePhoto": {
+        "src": "/assets/blog/photos/cherry-latte.webp",
+        "key": "cherry-latte",
         "status": "not-reviewed"
       },
       "nativePhoto": {
@@ -371,7 +417,7 @@
       "requiresReview": true,
       "publicationMode": "human-approval",
       "automaticPublicationAllowed": false,
-      "fingerprint": "da4a7a3a9528c86fb574471f4eed5674686e0dd53e0b39af0b32b08be523e555",
+      "fingerprint": "a818328843a2c00558867ca5a64c00b4b24f6fe0bc507ab7e1f9668ef7152a0e",
       "map": {
         "status": "mapped",
         "reason": "verified-address-reuse",
@@ -417,7 +463,17 @@
       "websitePhoto": {
         "src": "/assets/blog/photos/family-lunch.webp",
         "key": "family-lunch",
-        "status": "not-reviewed"
+        "matchesProduct": false,
+        "emptyTableOrPackaging": false,
+        "uncertain": true,
+        "status": "needs-review",
+        "checkedAt": "2026-11-25T20:31:07.163Z",
+        "model": "gpt-6.2-astra",
+        "reasoningEffort": "max",
+        "reasoningMode": "pro",
+        "provesMerchantPhoto": false,
+        "automaticReplacement": false,
+        "cached": true
       },
       "nativePhoto": {
         "status": "feed-changed-recheck-required",
@@ -444,7 +500,17 @@
       "websitePhoto": {
         "src": "/assets/blog/photos/gift.webp",
         "key": "gift",
-        "status": "not-reviewed"
+        "matchesProduct": false,
+        "emptyTableOrPackaging": true,
+        "uncertain": false,
+        "status": "needs-review",
+        "checkedAt": "2026-11-25T20:31:07.163Z",
+        "model": "gpt-6.2-astra",
+        "reasoningEffort": "max",
+        "reasoningMode": "pro",
+        "provesMerchantPhoto": false,
+        "automaticReplacement": false,
+        "cached": true
       },
       "nativePhoto": {
         "status": "feed-changed-recheck-required",
@@ -471,7 +537,17 @@
       "websitePhoto": {
         "src": "/assets/blog/photos/gift.webp",
         "key": "gift",
-        "status": "not-reviewed"
+        "matchesProduct": false,
+        "emptyTableOrPackaging": true,
+        "uncertain": false,
+        "status": "needs-review",
+        "checkedAt": "2026-11-25T20:31:07.163Z",
+        "model": "gpt-6.2-astra",
+        "reasoningEffort": "max",
+        "reasoningMode": "pro",
+        "provesMerchantPhoto": false,
+        "automaticReplacement": false,
+        "cached": true
       },
       "nativePhoto": {
         "status": "feed-changed-recheck-required",
@@ -846,7 +922,17 @@
       "websitePhoto": {
         "src": "/assets/blog/photos/burger.webp",
         "key": "burger",
-        "status": "not-reviewed"
+        "matchesProduct": true,
+        "emptyTableOrPackaging": false,
+        "uncertain": false,
+        "status": "symbolic-match",
+        "checkedAt": "2026-11-24T21:11:45.608Z",
+        "model": "gpt-6.2-astra",
+        "reasoningEffort": "max",
+        "reasoningMode": "pro",
+        "provesMerchantPhoto": false,
+        "automaticReplacement": false,
+        "cached": true
       },
       "nativePhoto": {
         "status": "feed-changed-recheck-required",
@@ -904,7 +990,17 @@
       "websitePhoto": {
         "src": "/assets/blog/photos/family-lunch.webp",
         "key": "family-lunch",
-        "status": "not-reviewed"
+        "matchesProduct": false,
+        "emptyTableOrPackaging": false,
+        "uncertain": false,
+        "status": "needs-review",
+        "checkedAt": "2026-11-21T18:00:36.282Z",
+        "model": "gpt-6.2-astra",
+        "reasoningEffort": "max",
+        "reasoningMode": "pro",
+        "provesMerchantPhoto": false,
+        "automaticReplacement": false,
+        "cached": true
       },
       "nativePhoto": {
         "status": "feed-changed-recheck-required",
@@ -939,7 +1035,17 @@
       "websitePhoto": {
         "src": "/assets/blog/photos/family-lunch.webp",
         "key": "family-lunch",
-        "status": "not-reviewed"
+        "matchesProduct": false,
+        "emptyTableOrPackaging": false,
+        "uncertain": true,
+        "status": "needs-review",
+        "checkedAt": "2026-11-21T18:00:36.282Z",
+        "model": "gpt-6.2-astra",
+        "reasoningEffort": "max",
+        "reasoningMode": "pro",
+        "provesMerchantPhoto": false,
+        "automaticReplacement": false,
+        "cached": true
       },
       "nativePhoto": {
         "status": "feed-changed-recheck-required",
@@ -966,7 +1072,17 @@
       "websitePhoto": {
         "src": "/assets/blog/photos/gift.webp",
         "key": "gift",
-        "status": "not-reviewed"
+        "matchesProduct": false,
+        "emptyTableOrPackaging": true,
+        "uncertain": false,
+        "status": "needs-review",
+        "checkedAt": "2026-11-20T19:06:40.621Z",
+        "model": "gpt-6.2-astra",
+        "reasoningEffort": "max",
+        "reasoningMode": "pro",
+        "provesMerchantPhoto": false,
+        "automaticReplacement": false,
+        "cached": true
       },
       "nativePhoto": {
         "status": "feed-changed-recheck-required",
@@ -1038,7 +1154,17 @@
       "websitePhoto": {
         "src": "/assets/blog/photos/family-lunch.webp",
         "key": "family-lunch",
-        "status": "not-reviewed"
+        "matchesProduct": false,
+        "emptyTableOrPackaging": false,
+        "uncertain": true,
+        "status": "needs-review",
+        "checkedAt": "2026-11-20T14:19:37.734Z",
+        "model": "gpt-6.2-astra",
+        "reasoningEffort": "max",
+        "reasoningMode": "pro",
+        "provesMerchantPhoto": false,
+        "automaticReplacement": false,
+        "cached": true
       },
       "nativePhoto": {
         "status": "feed-changed-recheck-required",
@@ -1069,7 +1195,17 @@
       "websitePhoto": {
         "src": "/assets/blog/photos/gift.webp",
         "key": "gift",
-        "status": "not-reviewed"
+        "matchesProduct": false,
+        "emptyTableOrPackaging": true,
+        "uncertain": false,
+        "status": "needs-review",
+        "checkedAt": "2026-11-20T14:19:37.734Z",
+        "model": "gpt-6.2-astra",
+        "reasoningEffort": "max",
+        "reasoningMode": "pro",
+        "provesMerchantPhoto": false,
+        "automaticReplacement": false,
+        "cached": true
       },
       "nativePhoto": {
         "status": "feed-changed-recheck-required",
@@ -1100,7 +1236,17 @@
       "websitePhoto": {
         "src": "/assets/blog/photos/gift.webp",
         "key": "gift",
-        "status": "not-reviewed"
+        "matchesProduct": false,
+        "emptyTableOrPackaging": true,
+        "uncertain": false,
+        "status": "needs-review",
+        "checkedAt": "2026-11-20T19:06:40.621Z",
+        "model": "gpt-6.2-astra",
+        "reasoningEffort": "max",
+        "reasoningMode": "pro",
+        "provesMerchantPhoto": false,
+        "automaticReplacement": false,
+        "cached": true
       },
       "nativePhoto": {
         "status": "feed-changed-recheck-required",
@@ -1233,7 +1379,17 @@
       "websitePhoto": {
         "src": "/assets/blog/photos/schnitzel.webp",
         "key": "schnitzel",
-        "status": "not-reviewed"
+        "matchesProduct": true,
+        "emptyTableOrPackaging": false,
+        "uncertain": false,
+        "status": "symbolic-match",
+        "checkedAt": "2026-11-22T18:30:34.523Z",
+        "model": "gpt-6.2-astra",
+        "reasoningEffort": "max",
+        "reasoningMode": "pro",
+        "provesMerchantPhoto": false,
+        "automaticReplacement": false,
+        "cached": true
       },
       "nativePhoto": {
         "status": "feed-changed-recheck-required",
@@ -1396,6 +1552,37 @@
       }
     },
     {
+      "id": "flight-102r4v2",
+      "issues": [
+        {
+          "code": "upstream-validity-review",
+          "label": "Vorhandene Validierungshinweise vor Freigabe erneut pruefen."
+        },
+        {
+          "code": "evidence-missing",
+          "label": "Kein gespeicherter Originaltext fuer automatische Korrektur."
+        }
+      ],
+      "requiresReview": true,
+      "publicationMode": "human-approval",
+      "automaticPublicationAllowed": false,
+      "fingerprint": "ee84f2d9ee3cfbaa0074c20410ccf90438458e1db9b6ef19edd1c04776a6ee3b",
+      "map": {
+        "status": "online-only",
+        "reason": "online-only",
+        "locationIds": []
+      },
+      "websitePhoto": {
+        "src": "/assets/blog/photos/gift.webp",
+        "key": "gift",
+        "status": "not-reviewed"
+      },
+      "nativePhoto": {
+        "status": "feed-changed-recheck-required",
+        "originalPhoto": null
+      }
+    },
+    {
       "id": "flight-npa749",
       "issues": [
         {
@@ -1442,37 +1629,6 @@
       "publicationMode": "human-approval",
       "automaticPublicationAllowed": false,
       "fingerprint": "563990fb772099b019c79c75bbe7add3bc3fbaeb9b777e148988bec82a50c8ed",
-      "map": {
-        "status": "online-only",
-        "reason": "online-only",
-        "locationIds": []
-      },
-      "websitePhoto": {
-        "src": "/assets/blog/photos/gift.webp",
-        "key": "gift",
-        "status": "not-reviewed"
-      },
-      "nativePhoto": {
-        "status": "feed-changed-recheck-required",
-        "originalPhoto": null
-      }
-    },
-    {
-      "id": "flight-102r4v2",
-      "issues": [
-        {
-          "code": "upstream-validity-review",
-          "label": "Vorhandene Validierungshinweise vor Freigabe erneut pruefen."
-        },
-        {
-          "code": "evidence-missing",
-          "label": "Kein gespeicherter Originaltext fuer automatische Korrektur."
-        }
-      ],
-      "requiresReview": true,
-      "publicationMode": "human-approval",
-      "automaticPublicationAllowed": false,
-      "fingerprint": "ee84f2d9ee3cfbaa0074c20410ccf90438458e1db9b6ef19edd1c04776a6ee3b",
       "map": {
         "status": "online-only",
         "reason": "online-only",
@@ -1539,7 +1695,17 @@
       "websitePhoto": {
         "src": "/assets/blog/photos/burger.webp",
         "key": "burger",
-        "status": "not-reviewed"
+        "matchesProduct": false,
+        "emptyTableOrPackaging": false,
+        "uncertain": false,
+        "status": "needs-review",
+        "checkedAt": "2026-11-23T22:39:38.683Z",
+        "model": "gpt-6.2-astra",
+        "reasoningEffort": "max",
+        "reasoningMode": "pro",
+        "provesMerchantPhoto": false,
+        "automaticReplacement": false,
+        "cached": true
       },
       "nativePhoto": {
         "status": "feed-changed-recheck-required",
@@ -1835,11 +2001,16 @@
     },
     {
       "id": "g2-1hlgnly",
-      "issues": [],
-      "requiresReview": false,
+      "issues": [
+        {
+          "code": "long-title",
+          "label": "Titel lang; Bedingungen erhalten, nicht abschneiden."
+        }
+      ],
+      "requiresReview": true,
       "publicationMode": "human-approval",
       "automaticPublicationAllowed": false,
-      "fingerprint": "82d771bfebc2bf629765824a6dd079f2b1050356647c980ad800e358389c83b6",
+      "fingerprint": "17ad88f4dc7a5d8cf627501b5eb85d2e2c9876f594ad330743be1f90529af876",
       "map": {
         "status": "mapped",
         "reason": "verified-address-reuse",
@@ -2231,46 +2402,6 @@
       "websitePhoto": {
         "src": "/assets/blog/photos/kebab.webp",
         "key": "kebab",
-        "status": "not-reviewed"
-      },
-      "nativePhoto": {
-        "status": "feed-changed-recheck-required",
-        "originalPhoto": null
-      }
-    },
-    {
-      "id": "joe-omv-current-5044fa7c7e98-299871f8c80c",
-      "issues": [],
-      "requiresReview": false,
-      "publicationMode": "human-approval",
-      "automaticPublicationAllowed": false,
-      "fingerprint": "ebf2a7832f5163d91d5668c4d68ddf45c4cd1dcb2418dd5d8f6a8ec837eff08a",
-      "map": {
-        "status": "mapped",
-        "reason": "reviewed-chain-campaign",
-        "locationIds": [
-          "omv-at-7005-8",
-          "omv-at-7501-8",
-          "omv-at-7505-8",
-          "omv-at-7513-8",
-          "omv-at-7514-8",
-          "omv-at-7529-8",
-          "omv-at-7542-8",
-          "omv-at-7546-8",
-          "omv-at-7547-8",
-          "omv-at-7548-8",
-          "omv-at-7550-8",
-          "omv-at-7554-8",
-          "omv-at-7556-8",
-          "omv-at-7560-8",
-          "omv-at-7575-8",
-          "omv-at-7583-8",
-          "omv-at-7666-8"
-        ]
-      },
-      "websitePhoto": {
-        "src": "/assets/blog/photos/cherry-latte.webp",
-        "key": "cherry-latte",
         "status": "not-reviewed"
       },
       "nativePhoto": {
@@ -3380,6 +3511,76 @@
       }
     },
     {
+      "id": "g2-1gbztrr",
+      "issues": [
+        {
+          "code": "upstream-validity-review",
+          "label": "Vorhandene Validierungshinweise vor Freigabe erneut pruefen."
+        },
+        {
+          "code": "evidence-missing",
+          "label": "Kein gespeicherter Originaltext fuer automatische Korrektur."
+        }
+      ],
+      "requiresReview": true,
+      "publicationMode": "human-approval",
+      "automaticPublicationAllowed": false,
+      "fingerprint": "307ecd6561e9f4e777c4619af093741b5ee4c6b1740924306a0282ffa5a53ba9",
+      "map": {
+        "status": "mapped",
+        "reason": "verified-address-reuse",
+        "locationIds": [
+          "address-63d09b8ed8d949f2"
+        ]
+      },
+      "websitePhoto": {
+        "src": "/assets/approved-deal-photos/602f2a64dbd57290-2d30092d343e8ac3aac6b1be7ac70a7290687e8aa95c25764ff1ebfd7c9cf43a.jpg",
+        "key": "bound-g2-1gbztrr",
+        "matchesProduct": true,
+        "emptyTableOrPackaging": false,
+        "uncertain": false,
+        "status": "symbolic-match",
+        "checkedAt": "2026-11-27T20:01:35.492Z",
+        "model": "gpt-6.2-astra",
+        "reasoningEffort": "max",
+        "reasoningMode": "pro",
+        "provesMerchantPhoto": false,
+        "automaticReplacement": false,
+        "cached": true
+      },
+      "nativePhoto": {
+        "status": "feed-changed-recheck-required",
+        "originalPhoto": {
+          "matchesProduct": true,
+          "emptyTableOrPackaging": false,
+          "cropKeepsProduct": true,
+          "visuallyClear": true,
+          "uncertain": false,
+          "status": "visual-match",
+          "model": "gpt-6.2-astra",
+          "reasoningEffort": "max",
+          "reasoningMode": "pro",
+          "checkedAt": "2026-11-27T20:01:35.492Z",
+          "cached": true,
+          "url": "https://freefinder.at/assets/approved-deal-photos/602f2a64dbd57290-2d30092d343e8ac3aac6b1be7ac70a7290687e8aa95c25764ff1ebfd7c9cf43a.jpg",
+          "permissionStatus": "documented",
+          "bindingStatus": "current",
+          "imageKind": "editorial-illustration",
+          "fullSha256": "2d30092d343e8ac3aac6b1be7ac70a7290687e8aa95c25764ff1ebfd7c9cf43a",
+          "cardSha256": "78332a471061beaccd62571f96ed87fa493bc8dcb11dc055ecdf13f4b19ef15d",
+          "crop": {
+            "left": 0,
+            "top": 134,
+            "width": 1730,
+            "height": 640
+          },
+          "provesMerchantPhoto": false,
+          "automaticReplacement": false,
+          "recipientUiTest": false
+        }
+      }
+    },
+    {
       "id": "benefit-drei-plus-1m300u0",
       "issues": [
         {
@@ -4081,8 +4282,8 @@
     }
   ],
   "pending": {
-    "count": 235,
-    "reviewNeeded": 235,
+    "count": 239,
+    "reviewNeeded": 239,
     "rows": [
       {
         "id": "fc4g-zz2f5b",
@@ -4448,64 +4649,6 @@
         "publicationMode": "human-approval",
         "automaticPublicationAllowed": false,
         "fingerprint": "83548e0aa73c57dfd7a3f11ba08557e9ab689f03f63444753d4b9351cbbbd0c9"
-      },
-      {
-        "id": "meta-ig-17918092029541448",
-        "issues": [
-          {
-            "code": "long-title",
-            "label": "Titel lang; Bedingungen erhalten, nicht abschneiden."
-          },
-          {
-            "code": "period-unconfirmed",
-            "label": "Aktionszeitraum oder dauerhafte Gueltigkeit pruefen."
-          },
-          {
-            "code": "source-blocked",
-            "label": "Bestehende Quellensperre bleibt wirksam."
-          },
-          {
-            "code": "upstream-validity-review",
-            "label": "Vorhandene Validierungshinweise vor Freigabe erneut pruefen."
-          },
-          {
-            "code": "map-incomplete",
-            "label": "Einloesestandorte sind noch nicht vollstaendig bestaetigt."
-          }
-        ],
-        "requiresReview": true,
-        "publicationMode": "human-approval",
-        "automaticPublicationAllowed": false,
-        "fingerprint": "bf345fb89b41583ec76c21323a71d33663fc4b8f4371bb190603575aff9dc3cb"
-      },
-      {
-        "id": "fc3-8havgc",
-        "issues": [
-          {
-            "code": "long-title",
-            "label": "Titel lang; Bedingungen erhalten, nicht abschneiden."
-          },
-          {
-            "code": "period-unconfirmed",
-            "label": "Aktionszeitraum oder dauerhafte Gueltigkeit pruefen."
-          },
-          {
-            "code": "upstream-validity-review",
-            "label": "Vorhandene Validierungshinweise vor Freigabe erneut pruefen."
-          },
-          {
-            "code": "map-incomplete",
-            "label": "Einloesestandorte sind noch nicht vollstaendig bestaetigt."
-          },
-          {
-            "code": "evidence-missing",
-            "label": "Kein gespeicherter Originaltext fuer automatische Korrektur."
-          }
-        ],
-        "requiresReview": true,
-        "publicationMode": "human-approval",
-        "automaticPublicationAllowed": false,
-        "fingerprint": "698835845b6f0bafce83472d10d9ce0a4d25325303fd9895edcf794b545c67b4"
       },
       {
         "id": "meta-ig-18102016520553040",
@@ -8477,6 +8620,86 @@
         "fingerprint": "6e7f48918c8a88eb0743bb749a39d5e08a9d18af0492a53aa312eb6d1c732d77"
       },
       {
+        "id": "social-food-review-1vbs9hn",
+        "issues": [
+          {
+            "code": "invalid-date",
+            "label": "Datumsfeld ungueltig; nicht automatisch raten."
+          },
+          {
+            "code": "map-incomplete",
+            "label": "Einloesestandorte sind noch nicht vollstaendig bestaetigt."
+          }
+        ],
+        "requiresReview": true,
+        "publicationMode": "human-approval",
+        "automaticPublicationAllowed": false,
+        "fingerprint": "8aa4ba3c55a1fc247c181f14b85ff1fd05f0a9c87856137c1eb8a24fa3414f0a"
+      },
+      {
+        "id": "g2-117lavd",
+        "issues": [
+          {
+            "code": "long-title",
+            "label": "Titel lang; Bedingungen erhalten, nicht abschneiden."
+          },
+          {
+            "code": "upstream-validity-review",
+            "label": "Vorhandene Validierungshinweise vor Freigabe erneut pruefen."
+          },
+          {
+            "code": "evidence-missing",
+            "label": "Kein gespeicherter Originaltext fuer automatische Korrektur."
+          }
+        ],
+        "requiresReview": true,
+        "publicationMode": "human-approval",
+        "automaticPublicationAllowed": false,
+        "fingerprint": "843f1d77a8add23f243e20cfd2fca06219a0c3e872d92887a3326502acb2e244"
+      },
+      {
+        "id": "g2-1bd6u9e",
+        "issues": [
+          {
+            "code": "long-title",
+            "label": "Titel lang; Bedingungen erhalten, nicht abschneiden."
+          },
+          {
+            "code": "upstream-validity-review",
+            "label": "Vorhandene Validierungshinweise vor Freigabe erneut pruefen."
+          },
+          {
+            "code": "map-incomplete",
+            "label": "Einloesestandorte sind noch nicht vollstaendig bestaetigt."
+          }
+        ],
+        "requiresReview": true,
+        "publicationMode": "human-approval",
+        "automaticPublicationAllowed": false,
+        "fingerprint": "178a16ac9be66fd26445e3ed01f8869fae5f5004733f9aad0d6706cdc1ba029e"
+      },
+      {
+        "id": "meta-ig-18105063734649106",
+        "issues": [
+          {
+            "code": "invalid-date",
+            "label": "Datumsfeld ungueltig; nicht automatisch raten."
+          },
+          {
+            "code": "upstream-validity-review",
+            "label": "Vorhandene Validierungshinweise vor Freigabe erneut pruefen."
+          },
+          {
+            "code": "map-incomplete",
+            "label": "Einloesestandorte sind noch nicht vollstaendig bestaetigt."
+          }
+        ],
+        "requiresReview": true,
+        "publicationMode": "human-approval",
+        "automaticPublicationAllowed": false,
+        "fingerprint": "e07df28f8a0e4b6dbeea40bbcdf8fb50fd6ad741285993e49d0f1210605be8cb"
+      },
+      {
         "id": "meta-ig-18124269200318872",
         "issues": [
           {
@@ -9253,23 +9476,6 @@
         "fingerprint": "b51407e4d400770f8b4d0abd90dede31ad589b8098d9f16260a87d724d11ae8b"
       },
       {
-        "id": "social-food-review-1vbs9hn",
-        "issues": [
-          {
-            "code": "invalid-date",
-            "label": "Datumsfeld ungueltig; nicht automatisch raten."
-          },
-          {
-            "code": "map-incomplete",
-            "label": "Einloesestandorte sind noch nicht vollstaendig bestaetigt."
-          }
-        ],
-        "requiresReview": true,
-        "publicationMode": "human-approval",
-        "automaticPublicationAllowed": false,
-        "fingerprint": "8aa4ba3c55a1fc247c181f14b85ff1fd05f0a9c87856137c1eb8a24fa3414f0a"
-      },
-      {
         "id": "g2-59z905",
         "issues": [
           {
@@ -9332,6 +9538,35 @@
         "fingerprint": "d4b39b74eaedf639a081e68e817c861959ed85fe0170e80094360d4ac9defd32"
       },
       {
+        "id": "g2-q3mjlw",
+        "issues": [
+          {
+            "code": "long-title",
+            "label": "Titel lang; Bedingungen erhalten, nicht abschneiden."
+          },
+          {
+            "code": "invalid-date",
+            "label": "Datumsfeld ungueltig; nicht automatisch raten."
+          },
+          {
+            "code": "source-blocked",
+            "label": "Bestehende Quellensperre bleibt wirksam."
+          },
+          {
+            "code": "map-incomplete",
+            "label": "Einloesestandorte sind noch nicht vollstaendig bestaetigt."
+          },
+          {
+            "code": "evidence-missing",
+            "label": "Kein gespeicherter Originaltext fuer automatische Korrektur."
+          }
+        ],
+        "requiresReview": true,
+        "publicationMode": "human-approval",
+        "automaticPublicationAllowed": false,
+        "fingerprint": "61aba74a1d594259637cac25eb6f4b1114f5a5d0dd07a4220c9dbdc2a0a3999c"
+      },
+      {
         "id": "g2-tdtn5e",
         "issues": [
           {
@@ -9361,57 +9596,19 @@
         "fingerprint": "75c99ff63a7794ebe59f37a5ea27c2e8026d75a9bf5fd9a2e46dad9c2858c4dd"
       },
       {
-        "id": "meta-ig-18105063734649106",
+        "id": "g2-12dzbps",
         "issues": [
+          {
+            "code": "missing-conditions",
+            "label": "Beschreibung und Einloesebedingungen fehlen."
+          },
           {
             "code": "invalid-date",
             "label": "Datumsfeld ungueltig; nicht automatisch raten."
           },
           {
-            "code": "upstream-validity-review",
-            "label": "Vorhandene Validierungshinweise vor Freigabe erneut pruefen."
-          },
-          {
-            "code": "map-incomplete",
-            "label": "Einloesestandorte sind noch nicht vollstaendig bestaetigt."
-          }
-        ],
-        "requiresReview": true,
-        "publicationMode": "human-approval",
-        "automaticPublicationAllowed": false,
-        "fingerprint": "e07df28f8a0e4b6dbeea40bbcdf8fb50fd6ad741285993e49d0f1210605be8cb"
-      },
-      {
-        "id": "g2-1bd6u9e",
-        "issues": [
-          {
-            "code": "long-title",
-            "label": "Titel lang; Bedingungen erhalten, nicht abschneiden."
-          },
-          {
-            "code": "upstream-validity-review",
-            "label": "Vorhandene Validierungshinweise vor Freigabe erneut pruefen."
-          },
-          {
-            "code": "map-incomplete",
-            "label": "Einloesestandorte sind noch nicht vollstaendig bestaetigt."
-          }
-        ],
-        "requiresReview": true,
-        "publicationMode": "human-approval",
-        "automaticPublicationAllowed": false,
-        "fingerprint": "178a16ac9be66fd26445e3ed01f8869fae5f5004733f9aad0d6706cdc1ba029e"
-      },
-      {
-        "id": "g2-117lavd",
-        "issues": [
-          {
-            "code": "long-title",
-            "label": "Titel lang; Bedingungen erhalten, nicht abschneiden."
-          },
-          {
-            "code": "upstream-validity-review",
-            "label": "Vorhandene Validierungshinweise vor Freigabe erneut pruefen."
+            "code": "source-blocked",
+            "label": "Bestehende Quellensperre bleibt wirksam."
           },
           {
             "code": "evidence-missing",
@@ -9421,7 +9618,79 @@
         "requiresReview": true,
         "publicationMode": "human-approval",
         "automaticPublicationAllowed": false,
-        "fingerprint": "843f1d77a8add23f243e20cfd2fca06219a0c3e872d92887a3326502acb2e244"
+        "fingerprint": "a358d864412ebb5101c420fa496a1a5c1905caabe9ac10e8b2f43ea591631268"
+      },
+      {
+        "id": "meta-ig-18375996091245222",
+        "issues": [
+          {
+            "code": "upstream-validity-review",
+            "label": "Vorhandene Validierungshinweise vor Freigabe erneut pruefen."
+          },
+          {
+            "code": "map-incomplete",
+            "label": "Einloesestandorte sind noch nicht vollstaendig bestaetigt."
+          }
+        ],
+        "requiresReview": true,
+        "publicationMode": "human-approval",
+        "automaticPublicationAllowed": false,
+        "fingerprint": "f66557174c602510866e3afecd0609533fe1af069255ed1d3e6101e9df28fe30"
+      },
+      {
+        "id": "meta-ig-18006072641808356",
+        "issues": [
+          {
+            "code": "long-title",
+            "label": "Titel lang; Bedingungen erhalten, nicht abschneiden."
+          },
+          {
+            "code": "invalid-date",
+            "label": "Datumsfeld ungueltig; nicht automatisch raten."
+          }
+        ],
+        "requiresReview": true,
+        "publicationMode": "human-approval",
+        "automaticPublicationAllowed": false,
+        "fingerprint": "7d0f7f385cb3a801097d47904abc5821b55d376e10673eadbfaab53b671f6c9e"
+      },
+      {
+        "id": "meta-ig-18219299326362399",
+        "issues": [
+          {
+            "code": "long-title",
+            "label": "Titel lang; Bedingungen erhalten, nicht abschneiden."
+          },
+          {
+            "code": "period-unconfirmed",
+            "label": "Aktionszeitraum oder dauerhafte Gueltigkeit pruefen."
+          },
+          {
+            "code": "upstream-validity-review",
+            "label": "Vorhandene Validierungshinweise vor Freigabe erneut pruefen."
+          },
+          {
+            "code": "map-incomplete",
+            "label": "Einloesestandorte sind noch nicht vollstaendig bestaetigt."
+          }
+        ],
+        "requiresReview": true,
+        "publicationMode": "human-approval",
+        "automaticPublicationAllowed": false,
+        "fingerprint": "549944a3ed4e9a67086c55bdb27db6c1b839a94b7a4f49f307fb965dd62a430f"
+      },
+      {
+        "id": "gs-615006",
+        "issues": [
+          {
+            "code": "evidence-missing",
+            "label": "Kein gespeicherter Originaltext fuer automatische Korrektur."
+          }
+        ],
+        "requiresReview": true,
+        "publicationMode": "human-approval",
+        "automaticPublicationAllowed": false,
+        "fingerprint": "f4f9ab88baeb4068051ac3adf4269bfbfff8c9b32670374a4eda004cbe15ffd3"
       }
     ]
   },
@@ -9492,9 +9761,9 @@
         "flight-132eet5",
         "flight-wyj1bp",
         "flight-iuo7cg",
+        "flight-102r4v2",
         "flight-npa749",
         "flight-rvimqp",
-        "flight-102r4v2",
         "flight-1hb51wy",
         "gs-585940",
         "benefit-drei-plus-b23e1ae26ce0bac1",
