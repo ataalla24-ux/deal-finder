@@ -19,6 +19,7 @@ const cityAliases = new Map([
   ['milano','milan'], ['mailand','milan'], ['venezia','venice'], ['venedig','venice'],
 ]);
 const invalidStatuses = new Set(['blocked', 'expired', 'invalid', 'withdrawn', 'rejected']);
+const archiveQuoteMaxAgeMs = 24 * 60 * 60 * 1000;
 
 function exactDay(value) {
   if (!/^20\d{2}-\d{2}-\d{2}$/.test(value ?? '')) return '';
@@ -51,6 +52,15 @@ function isActive(deal, flight, now, day, minute) {
   const endsAt = /T\d{2}:\d{2}/.test(expires) ? Date.parse(expires) : NaN;
   if (flight.departure < day || lastDay && lastDay < day || legacyDay && legacyDay < day || endsAt <= +now) return false;
   return flight.departure !== day || !flight.departureTime || flight.departureTime > minute;
+}
+
+function hasRecentArchiveQuote(deal, now) {
+  const checkedAt = deal.flight.price?.checkedAt;
+  if (typeof checkedAt !== 'string') return false;
+  const timestamp = Date.parse(checkedAt);
+  if (!Number.isFinite(timestamp) || new Date(timestamp).toISOString() !== checkedAt) return false;
+  const age = +now - timestamp;
+  return age >= 0 && age <= archiveQuoteMaxAgeMs;
 }
 
 function pickCityWinners(candidates, visibleIds) {
@@ -94,7 +104,7 @@ export function reconcileCityFlights(live, alternatives, {
   const existingEdits = (edits.edits || []).filter(edit => byId.has(edit.dealId));
   const patched = applyLiveDealEditsToBundle([...byId.values()], { edits:existingEdits },
     { checkedAt:now.toISOString(), allowRemovals:true }).bundle;
-  const candidates = [], scheduled = [];
+  const candidates = [], scheduled = [], awaitingQuote = [];
   const inactive = new Set(byId.keys());
   const unsupported = new Map();
   const inputIds = new Set(live.map(deal => deal.id));
@@ -108,6 +118,13 @@ export function reconcileCityFlights(live, alternatives, {
     if (!isActive(deal, flight, now, day, minute)) continue;
     if (exactDay(deal.validFrom) > day || exactDay(deal.validOn) > day) {
       scheduled.push(deal);
+      continue;
+    }
+    // A saved fare is not a current quote. Keep stale alternatives available for
+    // explicit revalidation without treating them as expired or fetching here.
+    // Input membership also includes new approvals absent from visibleIds (HEAD).
+    if (!inputIds.has(deal.id) && !hasRecentArchiveQuote(deal, now)) {
+      awaitingQuote.push(deal);
       continue;
     }
     inactive.delete(deal.id);
@@ -127,7 +144,7 @@ export function reconcileCityFlights(live, alternatives, {
     if (!emitted.has(winner.id)) output.push(winner);
   }
   const alternativesToKeep = candidates.filter(row => winners.get(row.deal.id) !== row.deal).map(row => row.deal);
-  const retained = [...scheduled, ...alternativesToKeep]
+  const retained = [...scheduled, ...awaitingQuote, ...alternativesToKeep]
     .map(deal => sanitizePublicDealText(redactPublishedCommunityDraft(deal)))
     .sort((a,b) => a.id.localeCompare(b.id, 'en'));
   return { deals: output, alternatives: retained };
