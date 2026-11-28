@@ -1,17 +1,17 @@
 {
-  "lastUpdated": "2026-11-28T00:38:59.634Z",
+  "lastUpdated": "2026-11-28T14:14:45.415Z",
   "runProvenance": {
     "repository": "ataalla24-ux/deal-finder",
-    "runId": "46088383146",
-    "headSha": "f11fbbba3c39dcc662490cf9ec211190c72c77d9",
-    "checkoutSha": "f11fbbba3c39dcc662490cf9ec211190c72c77d9",
+    "runId": "46153215067",
+    "headSha": "7fb8008f194fcc75d94c49a927a53de3c787d2c4",
+    "checkoutSha": "7fb8008f194fcc75d94c49a927a53de3c787d2c4",
     "triggeringRun": null,
     "event": "schedule",
     "runAttempt": "1",
-    "url": "https://github.com/ataalla24-ux/deal-finder/actions/runs/46088383146"
+    "url": "https://github.com/ataalla24-ux/deal-finder/actions/runs/46153215067"
   },
-  "status": "completed",
-  "outputPreserved": false,
+  "status": "discovery-degraded",
+  "outputPreserved": true,
   "config": {
     "maxAgeDays": 7,
     "maxPostsToVisit": 120,
@@ -119,7 +119,7 @@
     "tastyfoodvienna gratis",
     "dishthedirt vienna free"
   ],
-  "discovered": 10,
+  "discovered": 0,
   "apiCandidates": 0,
   "apiDiscovery": {
     "errors": [],
@@ -153,13 +153,26 @@
     "publicVideoLinks": 0
   },
   "searchDiscovery": {
-    "errors": [],
+    "errors": [
+      {
+        "query": "site:tiktok.com wien opening free food",
+        "error": "Search challenge; no bypass attempted",
+        "httpStatus": 403,
+        "retryAt": "",
+        "retryAfterProvided": false
+      }
+    ],
     "attemptedQueries": 1,
-    "stoppedReason": "",
-    "nextRetryAt": "",
-    "lastAttemptAt": "2026-11-28T00:32:40.121Z",
-    "nextQueryIndex": 16,
-    "parsedResultLinks": 10,
+    "stoppedReason": "search-unavailable",
+    "nextRetryAt": "2026-11-28T18:10:12.274Z",
+    "lastAttemptAt": "2026-11-28T14:10:12.082Z",
+    "nextQueryIndex": 17,
+    "boundedRetry": {
+      "reason": "challenge-without-retry-after",
+      "failures": 1,
+      "failedAt": "2026-11-28T14:10:12.274Z"
+    },
+    "parsedResultLinks": 0,
     "linkStateUnavailable": false,
     "deferredPostVisits": 0,
     "knownPostLinks": {
@@ -168,68 +181,64 @@
       "visited": 1,
       "accepted": 0,
       "deferredByAccess": 0,
-      "nextIndex": 0
+      "nextIndex": 1
     }
   },
   "pendingIndexedTikTokLinks": [],
   "tavilyDiscovery": {
     "status": "completed",
     "nextRetryAt": "",
-    "nextQueryIndex": 79,
-    "attemptedQueries": 66,
-    "indexRows": 94,
+    "nextQueryIndex": 12,
+    "attemptedQueries": 64,
+    "indexRows": 55,
     "accessMode": "keyed",
-    "queryIndex": 14,
+    "queryIndex": 79,
     "usageChecks": 1,
     "usageHttpStatus": 200,
-    "completedQueries": 66,
-    "queriesWithCreditUsage": 66,
-    "reportedSearchCredits": 66,
+    "completedQueries": 64,
+    "queriesWithCreditUsage": 64,
+    "reportedSearchCredits": 64,
     "budget": {
-      "remainingCredits": 461,
-      "remainingRunSlots": 7,
-      "plannedQueries": 66
+      "remainingCredits": 384,
+      "remainingRunSlots": 6,
+      "plannedQueries": 64
     },
     "httpStatus": 200,
     "tikTokStatus": "completed",
-    "canonicalVideoLinks": 37,
-    "publicPageAttempts": 36,
+    "canonicalVideoLinks": 20,
+    "publicPageAttempts": 18,
     "instagramSearch": {
       "status": "completed",
       "attemptedQueries": 1,
-      "indexRows": 0,
-      "canonicalLinks": 0
+      "indexRows": 3,
+      "canonicalLinks": 3,
+      "productionQueryId": "vienna-bogo-restaurant-coffee",
+      "productionQueryPlanVersion": 1,
+      "nextProductionQueryCursor": {
+        "version": 1,
+        "nextTopicId": "vienna-opening-benefits"
+      }
     },
-    "publicPagesWithDatedOriginal": 32,
+    "publicPagesWithDatedOriginal": 18,
     "acceptedDeals": 0
   },
   "coverage": {
     "directRowsChecked": 0,
     "uniqueDirectVideosChecked": 0,
-    "publicPageAttempts": 47,
-    "publicPagesWithOriginal": 40,
-    "publicPagesWithDatedOriginal": 40,
-    "uniquePublicVideosChecked": 40,
-    "uniqueVideosChecked": 40
+    "publicPageAttempts": 19,
+    "publicPagesWithOriginal": 19,
+    "publicPagesWithDatedOriginal": 19,
+    "uniquePublicVideosChecked": 19,
+    "uniqueVideosChecked": 19
   },
   "accepted": 0,
-  "initialRejected": 47,
-  "finalRejected": 47,
+  "initialRejected": 19,
+  "finalRejected": 19,
   "rejectionReasons": {
-    "kein eindeutiges Wien-Signal": 23,
-    "kein echtes TikTok-Post-Datum gefunden": 7,
-    "kein starkes Gratis-/Deal-Signal": 6,
-    "TikTok-Post älter als 7 Tage (2026-07-06)": 1,
-    "TikTok-Post älter als 7 Tage (2026-10-23)": 1,
-    "TikTok-Post älter als 7 Tage (2026-10-30)": 1,
-    "TikTok-Post älter als 7 Tage (2026-04-30)": 1,
-    "TikTok-Post älter als 7 Tage (2025-11-07)": 1,
-    "TikTok-Post älter als 7 Tage (2026-10-18)": 1,
-    "TikTok-Post älter als 7 Tage (2026-05-18)": 1,
-    "TikTok-Post älter als 7 Tage (2025-02-24)": 1,
-    "TikTok-Post älter als 7 Tage (2023-03-14)": 1,
-    "TikTok-Post älter als 7 Tage (2026-11-20)": 1,
-    "TikTok-Post älter als 7 Tage (2026-11-01)": 1
+    "kein eindeutiges Wien-Signal": 14,
+    "kein starkes Gratis-/Deal-Signal": 3,
+    "explizites/relatives Aktionsdatum ist abgelaufen": 1,
+    "TikTok-Post älter als 7 Tage (2026-11-19)": 1
   },
   "mediaConfig": {
     "maxAgeHours": 72,
@@ -247,7 +256,7 @@
   },
   "mediaEvidence": {
     "status": "disabled",
-    "rescueCandidates": 10,
+    "rescueCandidates": 0,
     "eligible": 0,
     "deduplicatedEligible": 0,
     "duplicateCandidatesSkipped": 0,
@@ -269,22 +278,96 @@
     "errors": []
   },
   "timings": {
-    "apiDiscoveryMs": 45,
-    "searchDiscoveryMs": 379358,
+    "apiDiscoveryMs": 31,
+    "searchDiscoveryMs": 273153,
     "mediaRescueMs": 1,
-    "totalScannerMs": 379815
+    "totalScannerMs": 273555
   },
-  "discoveryErrors": [],
+  "discoveryErrors": [
+    {
+      "query": "site:tiktok.com wien opening free food",
+      "error": "Search challenge; no bypass attempted",
+      "httpStatus": 403,
+      "retryAt": "",
+      "retryAfterProvided": false
+    }
+  ],
   "apiErrors": [],
   "rejected": [
     {
-      "url": "https://www.tiktok.com/@asmin.kebap.haus7/video/7711432365679152417",
+      "url": "https://www.tiktok.com/@liveland_editz/video/7712944504969547038",
       "keyword": "",
       "reason": "kein eindeutiges Wien-Signal",
-      "title": "#asminkebaphaus #döner #sinsheim #angebot",
-      "description": "#asminkebaphaus #döner #sinsheim #angebot",
-      "ownerUsername": "asmin.kebap.haus7",
-      "pubDate": "2026-11-23T18:16:05.000Z",
+      "title": "#shtpost || How I feel being in the sotr fandom and the spn fandom 🐿️#deanwinchester #supernatural #sunriseonthereaping #ampertlatier",
+      "description": "#shtpost || How I feel being in the sotr fandom and the spn fandom 🐿️#deanwinchester #supernatural #sunriseonthereaping #ampertlatier",
+      "ownerUsername": "liveland_editz",
+      "pubDate": "2026-11-27T20:04:08.000Z",
+      "pubDateSource": "time.datetime",
+      "mediaType": "VIDEO"
+    },
+    {
+      "url": "https://www.tiktok.com/@varajuice/video/7711776984623369486",
+      "keyword": "",
+      "reason": "kein eindeutiges Wien-Signal",
+      "title": "Celebrate the season with our BUY 3, GET 1 FREE promotion! Stock up, save more, and enjoy an extra on us.💚 Don’t miss out — shop now while this offer lasts! #VaraJuice #B3G1 #thanksgiving",
+      "description": "Celebrate the season with our BUY 3, GET 1 FREE promotion! Stock up, save more, and enjoy an extra on us.💚 Don’t miss out — shop now while this offer lasts! #VaraJuice #B3G1 #thanksgiving",
+      "ownerUsername": "varajuice",
+      "pubDate": "2026-11-24T16:33:33.000Z",
+      "pubDateSource": "time.datetime",
+      "mediaType": "VIDEO"
+    },
+    {
+      "url": "https://www.tiktok.com/@iluvyousomuchbrysonnnnnn/video/7711947661548604685",
+      "keyword": "",
+      "reason": "kein eindeutiges Wien-Signal",
+      "title": "Our meat hall from Boones butcher shop being portioned out #savings #meat #butcher #fyp #broke @Mommy's_Handsome$Man @kentucky",
+      "description": "Our meat hall from Boones butcher shop being portioned out #savings #meat #butcher #fyp #broke @Mommy's_Handsome$Man @kentucky",
+      "ownerUsername": "iluvyousomuchbrysonnnnnn",
+      "pubDate": "2026-11-25T03:36:03.000Z",
+      "pubDateSource": "time.datetime",
+      "mediaType": "VIDEO"
+    },
+    {
+      "url": "https://www.tiktok.com/@dclhausa/video/7712099896450501910",
+      "keyword": "",
+      "reason": "kein eindeutiges Wien-Signal",
+      "title": "Takaitattun labaran DCL Hausa: 25/11/2026",
+      "description": "Takaitattun labaran DCL Hausa: 25/11/2026",
+      "ownerUsername": "dclhausa",
+      "pubDate": "2026-11-25T13:26:30.000Z",
+      "pubDateSource": "time.datetime",
+      "mediaType": "VIDEO"
+    },
+    {
+      "url": "https://www.tiktok.com/@ndutaswonderland/video/7710944836370599189",
+      "keyword": "",
+      "reason": "kein eindeutiges Wien-Signal",
+      "title": "Cocacola Christmas carnival incase you missed it😝 #kenyantiktok🇰🇪 #fypシ #xyzbca #muturaisafruit",
+      "description": "Cocacola Christmas carnival incase you missed it😝 #kenyantiktok🇰🇪 #fypシ #xyzbca #muturaisafruit",
+      "ownerUsername": "ndutaswonderland",
+      "pubDate": "2026-11-22T10:44:13.000Z",
+      "pubDateSource": "time.datetime",
+      "mediaType": "VIDEO"
+    },
+    {
+      "url": "https://www.tiktok.com/@foodiewien/video/7712096579708259607",
+      "keyword": "",
+      "reason": "kein starkes Gratis-/Deal-Signal",
+      "title": "Neu in Wien - Burgermeister *Anzeige 📍Wien Mitte The Mall #burger #vienna #cheese",
+      "description": "Neu in Wien - Burgermeister *Anzeige 📍Wien Mitte The Mall #burger #vienna #cheese",
+      "ownerUsername": "foodiewien",
+      "pubDate": "2026-11-25T13:13:39.000Z",
+      "pubDateSource": "time.datetime",
+      "mediaType": "VIDEO"
+    },
+    {
+      "url": "https://www.tiktok.com/@ak2027.3/video/7712149137151610151",
+      "keyword": "",
+      "reason": "kein eindeutiges Wien-Signal",
+      "title": "@leaxleoprint @𝐉𝐚𝐬𝐦𝟏𝐧.𝐗 @𝑴𝒂𝒋𝒆𝒍𝒍𝒂 @𝓢𝓮𝓬𝓻𝓮𝓽ꨄ︎ #klassenarbeit #garmischpartenkirchen #ak27 #abschlussfahrt #fyp",
+      "description": "@leaxleoprint @𝐉𝐚𝐬𝐦𝟏𝐧.𝐗 @𝑴𝒂𝒋𝒆𝒍𝒍𝒂 @𝓢𝓮𝓬𝓻𝓮𝓽ꨄ︎ #klassenarbeit #garmischpartenkirchen #ak27 #abschlussfahrt #fyp",
+      "ownerUsername": "ak2027.3",
+      "pubDate": "2026-11-25T16:37:32.000Z",
       "pubDateSource": "time.datetime",
       "mediaType": "VIDEO"
     },
@@ -300,57 +383,68 @@
       "mediaType": "VIDEO"
     },
     {
-      "url": "https://www.tiktok.com/@hojamuludunbeckcity/video/7712367425714703619",
+      "url": "https://www.tiktok.com/@drtmusicsa/video/7713133471912201490",
       "keyword": "",
       "reason": "kein eindeutiges Wien-Signal",
-      "title": "Nextweek Friday /Saturday make it a date with us at Panseke skating ground ✅over 80 wholesales vendor wil b exhibiting live at the hojbusinessexhibition season 5 ,let’s handle your Xmas 🎅 shopping #500kviews🙏please🙂viral🦋🙉 #goviral #fypシ゚viral🖤tiktok #hojbusinessexhibition #hojbusinessexhibition2026",
-      "description": "Nextweek Friday /Saturday make it a date with us at Panseke skating ground ✅over 80 wholesales vendor wil b exhibiting live at the hojbusinessexhibition season 5 ,let’s handle your Xmas 🎅 shopping #500kviews🙏please🙂viral🦋🙉 #goviral #fypシ゚viral🖤tiktok #hojbusinessexhibition #hojbusinessexhibition2026",
-      "ownerUsername": "hojamuludunbeckcity",
-      "pubDate": "2026-11-26T06:44:50.000Z",
+      "title": "📍Leeuwfontein let's Clean up the Ghetto on the 20 December at @HOUSE 31 Lipi'sPlace. Tickets 🎟 available at Shoprite, Usave, Checkers or Computicket online",
+      "description": "📍Leeuwfontein let's Clean up the Ghetto on the 20 December at @HOUSE 31 Lipi'sPlace. Tickets 🎟 available at Shoprite, Usave, Checkers or Computicket online",
+      "ownerUsername": "drtmusicsa",
+      "pubDate": "2026-11-28T08:17:25.000Z",
       "pubDateSource": "time.datetime",
       "mediaType": "VIDEO"
     },
     {
-      "url": "https://www.tiktok.com/@ciiosgrill/video/7711068102523571459",
-      "keyword": "",
-      "reason": "kein starkes Gratis-/Deal-Signal",
-      "title": "Das Orginal Adana Kebap nur bei Cio‘s Schwedenplatz 🥰 #cios #adanakebap #wien #food #grill",
-      "description": "Das Orginal Adana Kebap nur bei Cio‘s Schwedenplatz 🥰 #cios #adanakebap #wien #food #grill",
-      "ownerUsername": "ciiosgrill",
-      "pubDate": "2026-11-22T18:42:35.000Z",
-      "pubDateSource": "time.datetime",
-      "mediaType": "VIDEO"
-    },
-    {
-      "url": "https://www.tiktok.com/@vienna_honest_testing/video/7712069054789405974",
-      "keyword": "",
-      "reason": "kein starkes Gratis-/Deal-Signal",
-      "title": "#wien #gratis #döner #kebap #viral @VAMOS | Austria",
-      "description": "#wien #gratis #döner #kebap #viral @VAMOS | Austria",
-      "ownerUsername": "vienna_honest_testing",
-      "pubDate": "2026-11-25T11:26:50.000Z",
-      "pubDateSource": "time.datetime",
-      "mediaType": "VIDEO"
-    },
-    {
-      "url": "https://www.tiktok.com/@hau1lan/video/7710983950834863392",
+      "url": "https://www.tiktok.com/@ballyfoods_limited/video/7712122566642519316",
       "keyword": "",
       "reason": "kein eindeutiges Wien-Signal",
-      "title": "15.11",
-      "description": "15.11",
-      "ownerUsername": "hau1lan",
-      "pubDate": "2026-11-22T13:16:02.000Z",
+      "title": "#errandserviceinmile12 #mile12shopper #errandvendorinmile12 #mile12marketupdate",
+      "description": "#errandserviceinmile12 #mile12shopper #errandvendorinmile12 #mile12marketupdate",
+      "ownerUsername": "ballyfoods_limited",
+      "pubDate": "2026-11-25T14:54:27.000Z",
       "pubDateSource": "time.datetime",
       "mediaType": "VIDEO"
     },
     {
-      "url": "https://www.tiktok.com/@mcdonaldsmauritius/video/7712548791882190101",
+      "url": "https://www.tiktok.com/@grillhaus.stich.4/video/7711357896608451873",
       "keyword": "",
       "reason": "kein eindeutiges Wien-Signal",
-      "title": "🔥 BLACK FRIDAY JUST GOT BETTER! 🍔 One Large Spicy Chicken Fillet Meal = One FREE Spicy Chicken Fillet Burger! 👀 Dishtee knows how to make the most of Black Friday! 😍 📅 From 26 to 29 November 📲 Grab this exclusive deal on the McDonald’s app! Download now 👉 https://onelink.to/47b854 Discover more deals 👉 https://www.mcdonalds.mu/deals-promotions/ #McDonaldsMauritius #BlackFriday #McDonaldsApp",
-      "description": "🔥 BLACK FRIDAY JUST GOT BETTER! 🍔 One Large Spicy Chicken Fillet Meal = One FREE Spicy Chicken Fillet Burger! 👀 Dishtee knows how to make the most of Black Friday! 😍 📅 From 26 to 29 November 📲 Grab this exclusive deal on the McDonald’s app! Download now 👉 https://onelink.to/47b854 Discover more deals 👉 https://www.mcdonalds.mu/deals-promotions/ #McDonaldsMauritius #BlackFriday #McDonaldsApp",
-      "ownerUsername": "mcdonaldsmauritius",
-      "pubDate": "2026-11-26T18:28:25.000Z",
+      "title": "🔥🎉 HEUTE IST MONTAG – UNSERE NEUEN JUBILÄUMSANGEBOTE SIND DA! 🎉🔥 ❤️ Wir starten mit leckeren Angeboten in die neue Woche! Feiert mit uns 20 Jahre Grillhaus Stich und genießt unsere Spezialitäten zu tollen Preisen! 😍 🎊 UNSERE AKTIONSANGEBOTE VOM 23.11. BIS 29.11.2026: 🥩 Gyros-Platte – nur 11,99 € 🥗 Krabben-Salat – nur 9,99 € 🥙 Gyros-Tasche – nur 6,99 € 🍝 Tortellini mit Rahmhackfleischsauce, mit Käse überbacken – nur 7,99 € 🍽️ UND HEUTE IST MONTAG = SCHNITZEL-TAG! 🔥 🥩 Jägerschweinesch",
+      "description": "🔥🎉 HEUTE IST MONTAG – UNSERE NEUEN JUBILÄUMSANGEBOTE SIND DA! 🎉🔥 ❤️ Wir starten mit leckeren Angeboten in die neue Woche! Feiert mit uns 20 Jahre Grillhaus Stich und genießt unsere Spezialitäten zu tollen Preisen! 😍 🎊 UNSERE AKTIONSANGEBOTE VOM 23.11. BIS 29.11.2026: 🥩 Gyros-Platte – nur 11,99 € 🥗 Krabben-Salat – nur 9,99 € 🥙 Gyros-Tasche – nur 6,99 € 🍝 Tortellini mit Rahmhackfleischsauce, mit Käse überbacken – nur 7,99 € 🍽️ UND HEUTE IST MONTAG = SCHNITZEL-TAG! 🔥 🥩 Jägerschweineschnitzel mit Pommes & Salat – nur 9,90 €! 😋 💥 Frisch zubereitet, voller Geschmack und zu tollen Preisen! ⏳ Unsere Jubiläumsangebote gelten nur bis zum 29.11. – nicht verpassen! 📍 Grillhaus Stich – Stich 49, 52249 Eschweiler 📞 02403 – 70 49 46 🕒 Täglich geöffnet von 11:30 bis 22:00 Uhr ❤️ Kommt vorbei und startet lecker in die neue Woche! Wir freuen uns auf euch! #GrillhausStich #Eschweiler #Montag #Jägerschnitzel #SchnitzelTag",
+      "ownerUsername": "grillhaus.stich.4",
+      "pubDate": "2026-11-23T13:27:11.000Z",
+      "pubDateSource": "time.datetime",
+      "mediaType": "VIDEO"
+    },
+    {
+      "url": "https://www.tiktok.com/@foodiewien/video/7712752660923043075",
+      "keyword": "",
+      "reason": "explizites/relatives Aktionsdatum ist abgelaufen",
+      "title": "Gratis Döner + Getränk in Wien - Vamos *Empfehlung 📍Franz-Josefs-Kai 27, 1010 Wien Heute am 27.11.26 15-19 Uhr so lange der Vorrat reicht✨ #döner #vienna #new #steak",
+      "description": "Gratis Döner + Getränk in Wien - Vamos *Empfehlung 📍Franz-Josefs-Kai 27, 1010 Wien Heute am 27.11.26 15-19 Uhr so lange der Vorrat reicht✨ #döner #vienna #new #steak",
+      "ownerUsername": "foodiewien",
+      "pubDate": "2026-11-27T07:39:41.000Z",
+      "pubDateSource": "time.datetime",
+      "mediaType": "VIDEO"
+    },
+    {
+      "url": "https://www.tiktok.com/@hornbachat/video/7711666715960053014",
+      "keyword": "",
+      "reason": "kein eindeutiges Wien-Signal",
+      "title": "Unsere Knock-out-Methode gegen Werbetricks: Dauertiefpreis. Immer günstig. Immer ehrlich. #HORNBACH #blackfriday #blackmonth #rabattaktion",
+      "description": "Unsere Knock-out-Methode gegen Werbetricks: Dauertiefpreis. Immer günstig. Immer ehrlich. #HORNBACH #blackfriday #blackmonth #rabattaktion",
+      "ownerUsername": "hornbachat",
+      "pubDate": "2026-11-24T09:25:37.000Z",
+      "pubDateSource": "time.datetime",
+      "mediaType": "VIDEO"
+    },
+    {
+      "url": "https://www.tiktok.com/@foodiewien/video/7711753850406980886",
+      "keyword": "",
+      "reason": "kein eindeutiges Wien-Signal",
+      "title": "24H Hype Spots auf Londoner Food Märkte✨🍓🍫 #london #food #chips #strawberry",
+      "description": "24H Hype Spots auf Londoner Food Märkte✨🍓🍫 #london #food #chips #strawberry",
+      "ownerUsername": "foodiewien",
+      "pubDate": "2026-11-24T15:03:43.000Z",
       "pubDateSource": "time.datetime",
       "mediaType": "VIDEO"
     },
@@ -366,138 +460,6 @@
       "mediaType": "VIDEO"
     },
     {
-      "url": "https://www.tiktok.com/@foodiewien/video/7659336150611496214",
-      "keyword": "",
-      "reason": "TikTok-Post älter als 7 Tage (2026-07-06)",
-      "title": "Small Market in Wien 📍Mariahilfer Straße vor der Kirche Geöffnet Mo, Mi, Fr & Sa✨ #chocolate #flower #vienna #juice",
-      "description": "Small Market in Wien 📍Mariahilfer Straße vor der Kirche Geöffnet Mo, Mi, Fr & Sa✨ #chocolate #flower #vienna #juice",
-      "ownerUsername": "foodiewien",
-      "pubDate": "2026-07-06T08:56:21.000Z",
-      "pubDateSource": "time.datetime",
-      "mediaType": "VIDEO"
-    },
-    {
-      "url": "https://www.tiktok.com/@voolehome/video/7688066984847609110",
-      "keyword": "",
-      "reason": "kein echtes TikTok-Post-Datum gefunden",
-      "title": "",
-      "description": "",
-      "ownerUsername": "",
-      "pubDate": "",
-      "pubDateSource": "",
-      "mediaType": ""
-    },
-    {
-      "url": "https://www.tiktok.com/@voolehome/video/7695775980543036694",
-      "keyword": "",
-      "reason": "kein echtes TikTok-Post-Datum gefunden",
-      "title": "",
-      "description": "",
-      "ownerUsername": "",
-      "pubDate": "",
-      "pubDateSource": "",
-      "mediaType": ""
-    },
-    {
-      "url": "https://www.tiktok.com/@spicy.snacks1150/video/7699781874486447383",
-      "keyword": "",
-      "reason": "TikTok-Post älter als 7 Tage (2026-10-23)",
-      "title": "الكل رح ينصدم من السعر ‼️‼️ 📌فرعنا الوحيد Westbahnstraße 39, 1070 Wien 📲 0681 81188102 #spicysnacksw#wienfoodv#viennafoodw#wien1070v#viennafoodies",
-      "description": "الكل رح ينصدم من السعر ‼️‼️ 📌فرعنا الوحيد Westbahnstraße 39, 1070 Wien 📲 0681 81188102 #spicysnacksw#wienfoodv#viennafoodw#wien1070v#viennafoodies",
-      "ownerUsername": "spicy.snacks1150",
-      "pubDate": "2026-10-23T08:46:16.000Z",
-      "pubDateSource": "time.datetime",
-      "mediaType": "VIDEO"
-    },
-    {
-      "url": "https://www.tiktok.com/@kseniainvienna/video/7702418554901024022",
-      "keyword": "",
-      "reason": "TikTok-Post älter als 7 Tage (2026-10-30)",
-      "title": "❄️ THINGS TO DO IN VIENNA THIS NOVEMBER 🎄 Vienna Christmas Markets Opening 📍 6, 13 & 20 Nov | Various locations Christmas markets are opening across Vienna! Enjoy festive lights and winter treats. 🛍️ Blickfang Vienna – Design Market 📍 6–8 Nov | MAK, 1010 Wien Shop unique fashion, jewelry and home accessories from independent designers. 🎨 Vienna Art Week 📍 6–13 Nov | Various locations Explore exhibitions, open studios and creative events across Vienna. 🌟 Your Creator Era – Content Creator ",
-      "description": "❄️ THINGS TO DO IN VIENNA THIS NOVEMBER 🎄 Vienna Christmas Markets Opening 📍 6, 13 & 20 Nov | Various locations Christmas markets are opening across Vienna! Enjoy festive lights and winter treats. 🛍️ Blickfang Vienna – Design Market 📍 6–8 Nov | MAK, 1010 Wien Shop unique fashion, jewelry and home accessories from independent designers. 🎨 Vienna Art Week 📍 6–13 Nov | Various locations Explore exhibitions, open studios and creative events across Vienna. 🌟 Your Creator Era – Content Creator Event 📍 7 Nov, 16:00–19:00 | Fortyplusone Hotel, 1050 Wien Connect with creators, get personalized feedback and grow your content skills! 🏛️ ART&ANTIQUE Hofburg 📍 12–16 Nov | Hofburg, 1010 Wien Discover fine art, antiques, jewelry and design. 🌱 Vegan Planet Vienna 📍 21–22 Nov | MAK, 1010 Wien Vegan street food, innovative products, fashion and cooking shows. 🖼️ Kunstsupermarkt – Original Art Market 📍 Throughout Nov | Mariahilfer Straße 103, 1060 Wien Browse thousands of original artworks at affordable prices. 🎮 Vienna Comic Con 2026 📍 21–22 Nov | Messe Wien, 1020 Wien Cosplay, anime, gaming, comics and pop-culture stars! 🎼 Wien Modern – Music Festival 📍 Until 30 Nov | Various loca",
-      "ownerUsername": "kseniainvienna",
-      "pubDate": "2026-10-30T11:17:59.000Z",
-      "pubDateSource": "time.datetime",
-      "mediaType": "VIDEO"
-    },
-    {
-      "url": "https://www.tiktok.com/@cool_nyc_finds/video/7711956358123244831",
-      "keyword": "",
-      "reason": "kein eindeutiges Wien-Signal",
-      "title": "FREE Coca-Cola Pop-Up in Times Square! 🥤🎄 Get free merch, take pics, and enjoy some soda! Catch the Coca-Cola Holiday Truck at other locations across New York #timesquare #cocacola #nycpopup #freebies #nycfood",
-      "description": "FREE Coca-Cola Pop-Up in Times Square! 🥤🎄 Get free merch, take pics, and enjoy some soda! Catch the Coca-Cola Holiday Truck at other locations across New York #timesquare #cocacola #nycpopup #freebies #nycfood",
-      "ownerUsername": "cool_nyc_finds",
-      "pubDate": "2026-11-25T04:09:35.000Z",
-      "pubDateSource": "time.datetime",
-      "mediaType": "VIDEO"
-    },
-    {
-      "url": "https://www.tiktok.com/@mega.tel.nbg/video/7712086089883831591",
-      "keyword": "",
-      "reason": "kein eindeutiges Wien-Signal",
-      "title": "Blackfriday Aktion #breite Gasse 50 90402 Nürnberg #nürnberg #nürnberg🇩🇪❤️",
-      "description": "Blackfriday Aktion #breite Gasse 50 90402 Nürnberg #nürnberg #nürnberg🇩🇪❤️",
-      "ownerUsername": "mega.tel.nbg",
-      "pubDate": "2026-11-25T12:32:55.000Z",
-      "pubDateSource": "time.datetime",
-      "mediaType": "VIDEO"
-    },
-    {
-      "url": "https://www.tiktok.com/@shoppi_tivoli/video/7712024652482202913",
-      "keyword": "",
-      "reason": "kein eindeutiges Wien-Signal",
-      "title": "POV: Die Black Friday Deals im Shoppi Tivoli sind einfach zu gut! 💃🔥 Über 150 Shops und Restaurants warten mit starken Rabatten auf dich! 🛍️😍Alle Deals findest du auf unserer Website unter «Offers». Die Liste wird laufend aktualisiert – also check sie vor deinem Besuch nochmals aus! 👀 #ShoppiTivoli #BlackFriday #BlackFridayDeals #Deals",
-      "description": "POV: Die Black Friday Deals im Shoppi Tivoli sind einfach zu gut! 💃🔥 Über 150 Shops und Restaurants warten mit starken Rabatten auf dich! 🛍️😍Alle Deals findest du auf unserer Website unter «Offers». Die Liste wird laufend aktualisiert – also check sie vor deinem Besuch nochmals aus! 👀 #ShoppiTivoli #BlackFriday #BlackFridayDeals #Deals",
-      "ownerUsername": "shoppi_tivoli",
-      "pubDate": "2026-11-25T08:34:16.000Z",
-      "pubDateSource": "time.datetime",
-      "mediaType": "VIDEO"
-    },
-    {
-      "url": "https://www.tiktok.com/@wiedetravels/video/7711049797469310241",
-      "keyword": "",
-      "reason": "kein eindeutiges Wien-Signal",
-      "title": "Weihnachtsmarkt vs. Nachtmarkt in Thailand: Was kostet ein Abend 2026? Fast 2,5-mal so viel – plus Pfand 👇 Die Weihnachtsmärkte haben wieder offen, und Glühwein kostet 2026 im Schnitt 4,60 € pro Tasse. Ich habe einen typischen Abend auf dem Weihnachtsmarkt in Deutschland mit einem Abend auf dem Nachtmarkt in Thailand verglichen. 📌 Zum Speichern: 🍷 2 Glühwein: ca. 9,20 € vs. 2 Chang-Bier: ca. 3,70 € 🌭 Bratwurst ca. 5 € vs. 4 Satay-Spieße ca. 2 € 🥞 Crêpe ca. 5 € vs. Bananen-Roti ca. 1,60 € 🥭",
-      "description": "Weihnachtsmarkt vs. Nachtmarkt in Thailand: Was kostet ein Abend 2026? Fast 2,5-mal so viel – plus Pfand 👇 Die Weihnachtsmärkte haben wieder offen, und Glühwein kostet 2026 im Schnitt 4,60 € pro Tasse. Ich habe einen typischen Abend auf dem Weihnachtsmarkt in Deutschland mit einem Abend auf dem Nachtmarkt in Thailand verglichen. 📌 Zum Speichern: 🍷 2 Glühwein: ca. 9,20 € vs. 2 Chang-Bier: ca. 3,70 € 🌭 Bratwurst ca. 5 € vs. 4 Satay-Spieße ca. 2 € 🥞 Crêpe ca. 5 € vs. Bananen-Roti ca. 1,60 € 🥭 Gebrannte Mandeln ca. 4,50 € vs. Mango Sticky Rice ca. 2 € ☕ Tassenpfand: meist 3 € – in Thailand gibt’s keins 🌡️ 2 °C vs. 28 °C Ehrlich gesagt: Auf die Stimmung am Weihnachtsmarkt würde ich trotzdem nicht verzichten. Aber die Rechnung ist schon krass. Quelle: Glühwein-Durchschnittspreis laut Coupons.de-Erhebung 2026, übrige Werte sind Durchschnitts- und Erfahrungswerte (große deutsche Weihnachtsmärkte vs. Nachtmärkte in Bangkok/Pattaya), Kurs ca. 37,5 THB pro Euro. 🎥 Folg mir für mehr Inhalte @wiedetravels @wiedetravels Was zahlst du dieses Jahr für deinen Glühwein? Schick das deinem Glühwein-Buddy 🍷 Teil 1 von 2 – folge für Teil 2: Silvester in Deutschland vs. Thailand 🎆 #weihnachtsma",
-      "ownerUsername": "wiedetravels",
-      "pubDate": "2026-11-22T17:31:31.000Z",
-      "pubDateSource": "time.datetime",
-      "mediaType": "VIDEO"
-    },
-    {
-      "url": "https://www.tiktok.com/@collab.denmark/video/7706086074010946838",
-      "keyword": "",
-      "reason": "kein eindeutiges Wien-Signal",
-      "title": "Eneste rigtige måde at komme igennem dagen på! 🥤⚡️#gettingtroughtheday #collab #energydrink #collagen",
-      "description": "Eneste rigtige måde at komme igennem dagen på! 🥤⚡️#gettingtroughtheday #collab #energydrink #collagen",
-      "ownerUsername": "collab.denmark",
-      "pubDate": "2026-11-21T07:45:00.000Z",
-      "pubDateSource": "time.datetime",
-      "mediaType": "VIDEO"
-    },
-    {
-      "url": "https://www.tiktok.com/@carpesol_badrothenfelde/video/7712464434085563687",
-      "keyword": "",
-      "reason": "kein eindeutiges Wien-Signal",
-      "title": "Hättest du auch wie Marie-Theres reagiert? Schreib's in die Kommentare 😅 ach ja... Die VIP Tickets für das Sauna Event MScarpesol am 12.12. sind tatsächlich seit Freitag ausverkauft #carpesol #sauna #viral",
-      "description": "Hättest du auch wie Marie-Theres reagiert? Schreib's in die Kommentare 😅 ach ja... Die VIP Tickets für das Sauna Event MScarpesol am 12.12. sind tatsächlich seit Freitag ausverkauft #carpesol #sauna #viral",
-      "ownerUsername": "carpesol_badrothenfelde",
-      "pubDate": "2026-11-26T13:01:03.000Z",
-      "pubDateSource": "time.datetime",
-      "mediaType": "VIDEO"
-    },
-    {
-      "url": "https://www.tiktok.com/@bokuvienna/video/7711406132861930774",
-      "keyword": "",
-      "reason": "kein starkes Gratis-/Deal-Signal",
-      "title": "Deine Einladung zu einer magischen Ballnacht in Wien. ✨💃 Am 8. Jänner 2027 heißt es beim BOKU-Ball im Wiener Rathaus wieder: Alles Walzer! Unter dem Motto „Flügel entfalten - Morgen beginnt heute“ freuen wir uns darauf, mit euch die Nacht durchzutanzen. Organisiert wird der Ball von der ÖH BOKU. 🪽 🎟️ Der Ticketverkauf startet morgen, 24. November, um 13:00 Uhr auf bokuball.at. In der ersten Verkaufswelle keine Tickets ergattert? Am 9. Dezember um 13:00 Uhr gibt’s beim Restkartenverkauf eine z",
-      "description": "Deine Einladung zu einer magischen Ballnacht in Wien. ✨💃 Am 8. Jänner 2027 heißt es beim BOKU-Ball im Wiener Rathaus wieder: Alles Walzer! Unter dem Motto „Flügel entfalten - Morgen beginnt heute“ freuen wir uns darauf, mit euch die Nacht durchzutanzen. Organisiert wird der Ball von der ÖH BOKU. 🪽 🎟️ Der Ticketverkauf startet morgen, 24. November, um 13:00 Uhr auf bokuball.at. In der ersten Verkaufswelle keine Tickets ergattert? Am 9. Dezember um 13:00 Uhr gibt’s beim Restkartenverkauf eine zweite Chance! Mit wem möchtest du übers Parkett schweben? Markiere deine Ballbegleitung! 💚 … Your invitation to a magical night in Vienna. ✨💃 On 8 January 2027, the BOKU Ball returns to Vienna City Hall! Under this year’s motto, “Spread Your Wings - Tomorrow Begins Today”, we can’t wait to dance the night away with you. The ball is organised by ÖH BOKU, BOKU’s Students’ Union. 🪽 🎟️ Tickets go on sale tomorrow, 24 November, at 1 pm CET at bokuball.at. Missed out on the first ticket release? You’ll have another chance on 9 December at 1 pm CET, when the remaining tickets go on sale! Who’s coming with you? Tag your ball date! 💚 #BOKUBall #Vienna #Wien #BallSeason #ViennaNights",
-      "ownerUsername": "bokuvienna",
-      "pubDate": "2026-11-23T16:34:20.000Z",
-      "pubDateSource": "time.datetime",
-      "mediaType": "VIDEO"
-    },
-    {
       "url": "https://www.tiktok.com/@messecretsdenana/video/7712401565071478055",
       "keyword": "",
       "reason": "kein eindeutiges Wien-Signal",
@@ -509,288 +471,35 @@
       "mediaType": "VIDEO"
     },
     {
-      "url": "https://www.tiktok.com/@unknown.xclusive_2/video/7710859879052856607",
+      "url": "https://www.tiktok.com/@bayfestsd/video/7711907694935821582",
       "keyword": "",
       "reason": "kein eindeutiges Wien-Signal",
-      "title": "WE are all eating burgers onb 🤤🤤😍😂😂 #enhypen #jokes #burger #makethisviral #fyppp",
-      "description": "WE are all eating burgers onb 🤤🤤😍😂😂 #enhypen #jokes #burger #makethisviral #fyppp",
-      "ownerUsername": "unknown.xclusive_2",
-      "pubDate": "2026-11-22T05:14:43.000Z",
+      "title": "POV: it's November and you're still thinking about Bayfest 🌊 Bring the vibes home: 50% off EVERYTHING starts TOMORROW. 👉 Send this to who you're going with next year. 🎶 Rebelution, live at Bayfest 2026 🛒 merchsd.com/bayfest #MissionBayfest #Bayfest #SanDiego #BlackFriday #POV",
+      "description": "POV: it's November and you're still thinking about Bayfest 🌊 Bring the vibes home: 50% off EVERYTHING starts TOMORROW. 👉 Send this to who you're going with next year. 🎶 Rebelution, live at Bayfest 2026 🛒 merchsd.com/bayfest #MissionBayfest #Bayfest #SanDiego #BlackFriday #POV",
+      "ownerUsername": "bayfestsd",
+      "pubDate": "2026-11-25T01:00:44.000Z",
       "pubDateSource": "time.datetime",
       "mediaType": "VIDEO"
     },
     {
-      "url": "https://www.tiktok.com/@kseniainvienna/video/7712385672111328534",
+      "url": "https://www.tiktok.com/@ciiosgrill/video/7711068102523571459",
       "keyword": "",
       "reason": "kein starkes Gratis-/Deal-Signal",
-      "title": "The snowy Vienna we all woke up to today looks so magical ❄️ makes the cold weather worth it #viennaspots #viennathingstodo #whattodoinvienna #vienna",
-      "description": "The snowy Vienna we all woke up to today looks so magical ❄️ makes the cold weather worth it #viennaspots #viennathingstodo #whattodoinvienna #vienna",
-      "ownerUsername": "kseniainvienna",
-      "pubDate": "2026-11-26T07:55:36.000Z",
+      "title": "Das Orginal Adana Kebap nur bei Cio‘s Schwedenplatz 🥰 #cios #adanakebap #wien #food #grill",
+      "description": "Das Orginal Adana Kebap nur bei Cio‘s Schwedenplatz 🥰 #cios #adanakebap #wien #food #grill",
+      "ownerUsername": "ciiosgrill",
+      "pubDate": "2026-11-22T18:42:35.000Z",
       "pubDateSource": "time.datetime",
       "mediaType": "VIDEO"
     },
     {
-      "url": "https://www.tiktok.com/@valleybabescafe/video/7711114381626543373",
+      "url": "https://www.tiktok.com/@lisa.maria.b/video/7709847423333584150",
       "keyword": "",
-      "reason": "kein eindeutiges Wien-Signal",
-      "title": "▪︎《Everyone's favorite energy can never go wrong this Christmas season▪︎》🎄🎁#valleybabes#energydrinks#fypシ゚viral#cafe#christmas",
-      "description": "▪︎《Everyone's favorite energy can never go wrong this Christmas season▪︎》🎄🎁#valleybabes#energydrinks#fypシ゚viral#cafe#christmas",
-      "ownerUsername": "valleybabescafe",
-      "pubDate": "2026-11-22T21:42:33.000Z",
-      "pubDateSource": "time.datetime",
-      "mediaType": "VIDEO"
-    },
-    {
-      "url": "https://www.tiktok.com/@aussietravelgal/video/7712259569908550918",
-      "keyword": "",
-      "reason": "kein echtes TikTok-Post-Datum gefunden",
-      "title": "",
-      "description": "",
-      "ownerUsername": "",
-      "pubDate": "",
-      "pubDateSource": "",
-      "mediaType": ""
-    },
-    {
-      "url": "https://www.tiktok.com/@krlssi/video/7711380156002176289",
-      "keyword": "",
-      "reason": "kein eindeutiges Wien-Signal",
-      "title": "📍 Globetrotter,Richmodstraße 10, 50667 Köln ⏰ Sa. 28 Nov 10-19 Uhr",
-      "description": "📍 Globetrotter,Richmodstraße 10, 50667 Köln ⏰ Sa. 28 Nov 10-19 Uhr",
-      "ownerUsername": "krlssi",
-      "pubDate": "2026-11-23T14:53:31.000Z",
-      "pubDateSource": "time.datetime",
-      "mediaType": "VIDEO"
-    },
-    {
-      "url": "https://www.tiktok.com/@k53memos/video/7711042396351368500",
-      "keyword": "",
-      "reason": "kein eindeutiges Wien-Signal",
-      "title": "Updated November 2026 K53 memos. Practise free at www.k-53.co.za #k53 #k53memos #learnerslicence #k53test #southafrica",
-      "description": "Updated November 2026 K53 memos. Practise free at www.k-53.co.za #k53 #k53memos #learnerslicence #k53test #southafrica",
-      "ownerUsername": "k53memos",
-      "pubDate": "2026-11-22T17:02:50.000Z",
-      "pubDateSource": "time.datetime",
-      "mediaType": "VIDEO"
-    },
-    {
-      "url": "https://www.tiktok.com/@yourfriendmyfriend.ie/video/7710962973933620502",
-      "keyword": "",
-      "reason": "kein echtes TikTok-Post-Datum gefunden",
-      "title": "",
-      "description": "",
-      "ownerUsername": "",
-      "pubDate": "",
-      "pubDateSource": "",
-      "mediaType": ""
-    },
-    {
-      "url": "https://www.tiktok.com/@canadian.savers/video/7711420057816976658",
-      "keyword": "",
-      "reason": "kein eindeutiges Wien-Signal",
-      "title": "TELUS customers can get the free 2027 Critter Calendar 🐾 One per customer, limited quantities, ships from December. #telus #freecalendar #freestuffcanada #canadiansavers",
-      "description": "TELUS customers can get the free 2027 Critter Calendar 🐾 One per customer, limited quantities, ships from December. #telus #freecalendar #freestuffcanada #canadiansavers",
-      "ownerUsername": "canadian.savers",
-      "pubDate": "2026-11-23T17:28:26.000Z",
-      "pubDateSource": "time.datetime",
-      "mediaType": "VIDEO"
-    },
-    {
-      "url": "https://www.tiktok.com/@rubanokus/video/7710810458575441183",
-      "keyword": "",
-      "reason": "kein eindeutiges Wien-Signal",
-      "title": "Blaze orange weekend, deep blue sky. Only in Wisconsin in November 🧡💙 real-time drive #fyp #pov #blazeorange #wisconsinfall #deepbluesky",
-      "description": "Blaze orange weekend, deep blue sky. Only in Wisconsin in November 🧡💙 real-time drive #fyp #pov #blazeorange #wisconsinfall #deepbluesky",
-      "ownerUsername": "rubanokus",
-      "pubDate": "2026-11-22T02:02:57.000Z",
-      "pubDateSource": "time.datetime",
-      "mediaType": "VIDEO"
-    },
-    {
-      "url": "https://www.tiktok.com/@christina_mp4/video/7712759711078108468",
-      "keyword": "",
-      "reason": "kein eindeutiges Wien-Signal",
-      "title": "My go-to Christmas recipe: Blueberry Brie Cheese Toastie made with @EmborgAsia 🧀🫐 Emborg's Kitchen of Joy Contest: 1. From 1st Nov - 31 Dec 2026, spend min. $15 on Emborg in a single receipt at FairPrice, Sheng Siong, Cold Storage, Giant, or RedMart to join. 3. Visit emborg.com/sg/kitchen-of-joy-contest to submit your entry! 4. Win prizes from Smeg and Ninja in the monthly draws on 30 Nov and 31 Dec 2026! #EmborgKitchenOfJoy #recipe #emborgcheese #blueberrybrie #cooking",
-      "description": "My go-to Christmas recipe: Blueberry Brie Cheese Toastie made with @EmborgAsia 🧀🫐 Emborg's Kitchen of Joy Contest: 1. From 1st Nov - 31 Dec 2026, spend min. $15 on Emborg in a single receipt at FairPrice, Sheng Siong, Cold Storage, Giant, or RedMart to join. 3. Visit emborg.com/sg/kitchen-of-joy-contest to submit your entry! 4. Win prizes from Smeg and Ninja in the monthly draws on 30 Nov and 31 Dec 2026! #EmborgKitchenOfJoy #recipe #emborgcheese #blueberrybrie #cooking",
-      "ownerUsername": "christina_mp4",
-      "pubDate": "2026-11-27T08:07:21.000Z",
-      "pubDateSource": "time.datetime",
-      "mediaType": "VIDEO"
-    },
-    {
-      "url": "https://www.tiktok.com/@berlin.wanderlust/video/7710540902984322336",
-      "keyword": "",
-      "reason": "kein eindeutiges Wien-Signal",
-      "title": "✨ Christmas Garden Berlin is OPEN! 🎄 Experience a magical Christmas light show at Berlin’s Botanical Garden, featuring over 30 illuminated installations, sparkling light displays and a beautiful 2 km walking trail. 📍 Address: Königin-Luise-Straße 6, 14195 Berlin 📅 Dates: 18 November 2026 – 10 January 2027 🎟️ Tickets: From €16.90 adults, €12.90 children. Book online at christmas-garden.de 🕒 Opening hours: • Sunday–Thursday: 16:20–21:00 • Friday–Saturday: 16:20–22:00 #ChristmasGardenBerlin #B",
-      "description": "✨ Christmas Garden Berlin is OPEN! 🎄 Experience a magical Christmas light show at Berlin’s Botanical Garden, featuring over 30 illuminated installations, sparkling light displays and a beautiful 2 km walking trail. 📍 Address: Königin-Luise-Straße 6, 14195 Berlin 📅 Dates: 18 November 2026 – 10 January 2027 🎟️ Tickets: From €16.90 adults, €12.90 children. Book online at christmas-garden.de 🕒 Opening hours: • Sunday–Thursday: 16:20–21:00 • Friday–Saturday: 16:20–22:00 #ChristmasGardenBerlin #BerlinChristmas #BerlinEvents #ChristmasLights #ThingsToDoInBerlin",
-      "ownerUsername": "berlin.wanderlust",
-      "pubDate": "2026-11-21T08:36:49.000Z",
-      "pubDateSource": "time.datetime",
-      "mediaType": "VIDEO"
-    },
-    {
-      "url": "https://www.tiktok.com/@monashomeviyana/video/7711118405662674198",
-      "keyword": "",
-      "reason": "kein starkes Gratis-/Deal-Signal",
-      "title": "Große Eröffnung morgen 23.11.2026! AB SOFORT GÜLTIG – BIS SAMSTAG 28.11.2026! Grillgasse 6, 1110 Wien U3 Enkplatz Station📍#viyana #turke #viral #fyp",
-      "description": "Große Eröffnung morgen 23.11.2026! AB SOFORT GÜLTIG – BIS SAMSTAG 28.11.2026! Grillgasse 6, 1110 Wien U3 Enkplatz Station📍#viyana #turke #viral #fyp",
-      "ownerUsername": "monashomeviyana",
-      "pubDate": "2026-11-22T21:57:49.000Z",
-      "pubDateSource": "time.datetime",
-      "mediaType": "VIDEO"
-    },
-    {
-      "url": "https://www.tiktok.com/@jan_ki_jan36/video/7712850696013450503",
-      "keyword": "",
-      "reason": "kein eindeutiges Wien-Signal",
-      "title": "new trend tha guys complete kar liya ma na b #onemillionviews #viralvideo #outfitideas #trending #foryoupage",
-      "description": "new trend tha guys complete kar liya ma na b #onemillionviews #viralvideo #outfitideas #trending #foryoupage",
-      "ownerUsername": "jan_ki_jan36",
-      "pubDate": "2026-11-27T14:00:04.000Z",
-      "pubDateSource": "time.datetime",
-      "mediaType": "VIDEO"
-    },
-    {
-      "url": "https://www.tiktok.com/@messestadt24/video/7711396743673285921",
-      "keyword": "",
-      "reason": "kein eindeutiges Wien-Signal",
-      "title": "Es ist so schööööön!☃️☃️ #messestadt #weihnachtsmarkt #weihnachten #münchen #fy",
-      "description": "Es ist so schööööön!☃️☃️ #messestadt #weihnachtsmarkt #weihnachten #münchen #fy",
-      "ownerUsername": "messestadt24",
-      "pubDate": "2026-11-23T15:57:51.000Z",
-      "pubDateSource": "time.datetime",
-      "mediaType": "VIDEO"
-    },
-    {
-      "url": "https://www.tiktok.com/@bizxbliss/video/7711476930465369366",
-      "keyword": "",
-      "reason": "kein eindeutiges Wien-Signal",
-      "title": "Stockholm, your next cute afternoon plans are sorted! 🎨👩🏻‍🎨 Imagine painting your own canvas, enjoying fika and meeting new people in one of Stockholm’s prettiest cafés! No painting experience needed. Come solo, bring a friend or make new ones! 📍 Dirty Coco, Stockholm 🗓️ December 9 | 16:30–19:30 🎟️ Tickets from 249 SEK ✨ All painting supplies included Food & drinks are purchased separately. Limited spots available! Book through our Instagram @bizxbliss. #ThingsToDoInStockholm #StockholmEv",
-      "description": "Stockholm, your next cute afternoon plans are sorted! 🎨👩🏻‍🎨 Imagine painting your own canvas, enjoying fika and meeting new people in one of Stockholm’s prettiest cafés! No painting experience needed. Come solo, bring a friend or make new ones! 📍 Dirty Coco, Stockholm 🗓️ December 9 | 16:30–19:30 🎟️ Tickets from 249 SEK ✨ All painting supplies included Food & drinks are purchased separately. Limited spots available! Book through our Instagram @bizxbliss. #ThingsToDoInStockholm #StockholmEvents #FikaAndPaint #MeetNewPeople #StockholmActivities @angelinahyacinth @Dirty Coco",
-      "ownerUsername": "bizxbliss",
-      "pubDate": "2026-11-23T21:09:04.000Z",
-      "pubDateSource": "time.datetime",
-      "mediaType": "VIDEO"
-    },
-    {
-      "url": "https://www.tiktok.com/@wienerkebapmehmetusta/video/7634477563196525846",
-      "keyword": "",
-      "reason": "TikTok-Post älter als 7 Tage (2026-04-30)",
-      "title": "#wienerkebapmehmetusta #wien #kesfetteyiz #österreich🇦🇹 #wienerkebapmehmetusta",
-      "description": "#wienerkebapmehmetusta #wien #kesfetteyiz #österreich🇦🇹 #wienerkebapmehmetusta",
-      "ownerUsername": "wienerkebapmehmetusta",
-      "pubDate": "2026-04-30T09:12:17.000Z",
-      "pubDateSource": "time.datetime",
-      "mediaType": "VIDEO"
-    },
-    {
-      "url": "https://www.tiktok.com/@eatinvienna/video/7569993722344066326",
-      "keyword": "",
-      "reason": "TikTok-Post älter als 7 Tage (2025-11-07)",
-      "title": "Gratis Burger 🍔🔥 Am Dienstag, 11. November, von 16 bis 20 Uhr bei Grillbox Wien @GRILLBOX – jeder bekommt einen Classic Smashburger for free! Der Burger ist richtig saftig, mehr Fleisch als üblich und schmeckt einfach brutal gut 😍 📍Simmeringer Hauptstraße 68, 1110 Wien",
-      "description": "Gratis Burger 🍔🔥 Am Dienstag, 11. November, von 16 bis 20 Uhr bei Grillbox Wien @GRILLBOX – jeder bekommt einen Classic Smashburger for free! Der Burger ist richtig saftig, mehr Fleisch als üblich und schmeckt einfach brutal gut 😍 📍Simmeringer Hauptstraße 68, 1110 Wien",
-      "ownerUsername": "eatinvienna",
-      "pubDate": "2025-11-07T14:41:57.000Z",
-      "pubDateSource": "time.datetime",
-      "mediaType": "VIDEO"
-    },
-    {
-      "url": "https://www.tiktok.com/@mehmet.ozer12/video/7674173418023046433",
-      "keyword": "",
-      "reason": "kein echtes TikTok-Post-Datum gefunden",
-      "title": "",
-      "description": "",
-      "ownerUsername": "",
-      "pubDate": "",
-      "pubDateSource": "",
-      "mediaType": ""
-    },
-    {
-      "url": "https://www.tiktok.com/@bahnkebab/video/7697977619203083542",
-      "keyword": "",
-      "reason": "TikTok-Post älter als 7 Tage (2026-10-18)",
-      "title": "Schmecht aber natürlich nir halb so gut ohne sie ❤️ 📍Bahn Kebab & Pizza, Favoritenstraße 74, 1040 Wien❤️ #döner #pizza #kebab #wien #germany",
-      "description": "Schmecht aber natürlich nir halb so gut ohne sie ❤️ 📍Bahn Kebab & Pizza, Favoritenstraße 74, 1040 Wien❤️ #döner #pizza #kebab #wien #germany",
-      "ownerUsername": "bahnkebab",
-      "pubDate": "2026-10-18T12:04:52.000Z",
-      "pubDateSource": "time.datetime",
-      "mediaType": "VIDEO"
-    },
-    {
-      "url": "https://www.tiktok.com/@foodiewien/video/7570663175230704918",
-      "keyword": "",
-      "reason": "kein echtes TikTok-Post-Datum gefunden",
-      "title": "",
-      "description": "",
-      "ownerUsername": "",
-      "pubDate": "",
-      "pubDateSource": "",
-      "mediaType": ""
-    },
-    {
-      "url": "https://www.tiktok.com/@bahnkebab/video/7641272020918996246",
-      "keyword": "",
-      "reason": "TikTok-Post älter als 7 Tage (2026-05-18)",
-      "title": "Bahn Kebab & Pizza | Favoritenstraße 74, 1040 Wien 🧡 . Wir setzen alle Karten auf Frische, Qualität und Geschmack 🧡 . Überzeug dich selbst von unserem authentischen Streetfood und vergiss nicht dein Follow dazulassen denn in Zukunft werden noch viele coole Gewinnspiele folgen wir werden Essengutscheine, Shonninggutscheine und viel mehr verlosen also bleibt gespannt!🧡 . Wir freuen uns schon auf dich 🧡🫶🏻",
-      "description": "Bahn Kebab & Pizza | Favoritenstraße 74, 1040 Wien 🧡 . Wir setzen alle Karten auf Frische, Qualität und Geschmack 🧡 . Überzeug dich selbst von unserem authentischen Streetfood und vergiss nicht dein Follow dazulassen denn in Zukunft werden noch viele coole Gewinnspiele folgen wir werden Essengutscheine, Shonninggutscheine und viel mehr verlosen also bleibt gespannt!🧡 . Wir freuen uns schon auf dich 🧡🫶🏻",
-      "ownerUsername": "bahnkebab",
-      "pubDate": "2026-05-18T16:38:11.000Z",
-      "pubDateSource": "time.datetime",
-      "mediaType": "VIDEO"
-    },
-    {
-      "url": "https://www.tiktok.com/@dishthedirt.vienna/video/7474960756832734486",
-      "keyword": "",
-      "reason": "TikTok-Post älter als 7 Tage (2025-02-24)",
-      "title": "⚠️ Das ist keine Übung, es gibt gratis Pizza in Wien!! 🚨🍕☺️ Zur Eröffnung der @neapolis_pizzeria gibt es am 26. Februar Pizza to go absolut kostenlos! 🥳 Lass dir das nicht entgehen, sondern lass es dir schmecken! 💸😋 📍Taborstraße 21a, 1020 Wien *Anzeige #neueröffnung #new #viennafood #wien #viennaeats #pizza #foodie",
-      "description": "⚠️ Das ist keine Übung, es gibt gratis Pizza in Wien!! 🚨🍕☺️ Zur Eröffnung der @neapolis_pizzeria gibt es am 26. Februar Pizza to go absolut kostenlos! 🥳 Lass dir das nicht entgehen, sondern lass es dir schmecken! 💸😋 📍Taborstraße 21a, 1020 Wien *Anzeige #neueröffnung #new #viennafood #wien #viennaeats #pizza #foodie",
-      "ownerUsername": "dishthedirt.vienna",
-      "pubDate": "2025-02-24T12:25:30.000Z",
-      "pubDateSource": "time.datetime",
-      "mediaType": "VIDEO"
-    },
-    {
-      "url": "https://www.tiktok.com/@foodbrother_wien/video/7210478549424164101",
-      "keyword": "",
-      "reason": "TikTok-Post älter als 7 Tage (2023-03-14)",
-      "title": "Replying to @🐋 so kommst du zur gratis Burger Aktion in Wien - nur solange der Vorrat reicht! #burger #wien #foodbrother",
-      "description": "Replying to @🐋 so kommst du zur gratis Burger Aktion in Wien - nur solange der Vorrat reicht! #burger #wien #foodbrother",
-      "ownerUsername": "foodbrother_wien",
-      "pubDate": "2023-03-14T18:59:24.000Z",
-      "pubDateSource": "time.datetime",
-      "mediaType": "VIDEO"
-    },
-    {
-      "url": "https://www.tiktok.com/@theoxzuzu/video/7691370213144677654",
-      "keyword": "",
-      "reason": "kein echtes TikTok-Post-Datum gefunden",
-      "title": "",
-      "description": "",
-      "ownerUsername": "",
-      "pubDate": "",
-      "pubDateSource": "",
-      "mediaType": ""
-    },
-    {
-      "url": "https://www.tiktok.com/@valizadhe12/video/7710281516491836705",
-      "keyword": "",
-      "reason": "TikTok-Post älter als 7 Tage (2026-11-20)",
-      "title": "Adresse:Schönbrunner Straße 283 ‚1120wien 😋🍕@Lovero Kebab & 🍕",
-      "description": "Adresse:Schönbrunner Straße 283 ‚1120wien 😋🍕@Lovero Kebab & 🍕",
-      "ownerUsername": "valizadhe12",
-      "pubDate": "2026-11-20T15:50:11.000Z",
-      "pubDateSource": "time.datetime",
-      "mediaType": "VIDEO"
-    },
-    {
-      "url": "https://www.tiktok.com/@vienna_honest_testing/video/7703259921176972566",
-      "keyword": "",
-      "reason": "TikTok-Post älter als 7 Tage (2026-11-01)",
-      "title": "#wien #pizza #döner #foodspot #eat Anzeige",
-      "description": "#wien #pizza #döner #foodspot #eat Anzeige",
-      "ownerUsername": "vienna_honest_testing",
-      "pubDate": "2026-11-01T17:42:52.000Z",
+      "reason": "TikTok-Post älter als 7 Tage (2026-11-19)",
+      "title": "anzeige bis zu -40% Rabatt mit den Lieferando Super Deals 🤝 @Lieferando Österreich @ciosgrill 📍Franz-Josefs-Kai 15, 1010 Wien",
+      "description": "anzeige bis zu -40% Rabatt mit den Lieferando Super Deals 🤝 @Lieferando Österreich @ciosgrill 📍Franz-Josefs-Kai 15, 1010 Wien",
+      "ownerUsername": "lisa.maria.b",
+      "pubDate": "2026-11-19T11:45:47.000Z",
       "pubDateSource": "time.datetime",
       "mediaType": "VIDEO"
     }
