@@ -1,7 +1,7 @@
 {
-  "runId": "46096855092",
+  "runId": "46165053355",
   "mode": "scan",
-  "createdAt": "2026-11-28T02:12:01.741Z",
+  "createdAt": "2026-11-28T16:25:32.645Z",
   "usage": {
     "scrapingbee": {
       "provider": "scrapingbee",
@@ -46,25 +46,31 @@
   "tasks": [
     {
       "source": "NORDSEE",
-      "url": "https://www.nordsee.com/at/coupons/pazifisches_schollen__filet_vom_grill__beilage__softdrink_02l__garnelenspie?pdf=true",
+      "url": "https://www.nordsee.com/at/coupons/alaska_seelachsfilet_11",
+      "provider": "scraperapi",
+      "cap": 10
+    },
+    {
+      "source": "McDonald's",
+      "url": "https://www.mcdonalds.at/",
       "provider": "scraperapi",
       "cap": 10
     },
     {
       "source": "NORDSEE",
-      "url": "https://www.nordsee.com/at/coupons/2_classic_fish_burger__pommes_frites__1_softdrink_05l_pet?pdf=true",
+      "url": "https://www.nordsee.com/at/coupons/mix_box",
       "provider": "scraperapi",
       "cap": 10
     },
     {
       "source": "NORDSEE",
-      "url": "https://www.nordsee.com/at/coupons/groer_hunger?pdf=true",
+      "url": "https://www.nordsee.com/at/coupons/2_fish__chips",
       "provider": "scraperapi",
       "cap": 10
     },
     {
       "source": "NORDSEE",
-      "url": "https://www.nordsee.com/at/coupons/garnelen_box?pdf=true",
+      "url": "https://www.nordsee.com/at/coupons/premium_men___lachsfilet_auf_der_haut_gebraten",
       "provider": "scraperapi",
       "cap": 10
     }
@@ -79,74 +85,221 @@
       "reason": "zyte-trial-guard-unverified-or-expired"
     }
   ],
-  "eligiblePages": 4,
-  "finishedAt": "2026-11-28T02:12:08.242Z",
-  "status": "partial",
+  "eligiblePages": 5,
+  "finishedAt": "2026-11-28T16:27:33.014Z",
+  "status": "completed",
   "results": [
     {
       "provider": "scraperapi",
       "source": "NORDSEE",
-      "url": "https://www.nordsee.com/at/coupons/pazifisches_schollen__filet_vom_grill__beilage__softdrink_02l__garnelenspie?pdf=true",
+      "url": "https://www.nordsee.com/at/coupons/alaska_seelachsfilet_11",
       "reserved": 10,
-      "status": "failed",
-      "stage": "direct-request",
-      "scope": "page",
-      "reason": "source-or-processing-error",
-      "httpStatus": 0,
-      "retryAt": "2026-11-29T02:12:05.332Z"
+      "directCandidates": 0,
+      "directRejected": [],
+      "directVisibleTextCharacters": 133,
+      "status": "fetched",
+      "bytes": 122501,
+      "visibleTextCharacters": 8482,
+      "reportedCredits": 10,
+      "extractedCandidates": 0,
+      "incrementalCandidates": 0,
+      "offerLinks": [
+        "https://www.nordsee.com/at/coupons/alaska_seelachsfilet_11?pdf=true"
+      ],
+      "rejected": [],
+      "verifiedCandidates": 0,
+      "verifiedIncrementalCandidates": 0,
+      "unverifiedCandidates": 0,
+      "candidates": []
+    },
+    {
+      "provider": "scraperapi",
+      "source": "McDonald's",
+      "url": "https://www.mcdonalds.at/",
+      "reserved": 10,
+      "directCandidates": 2,
+      "directRejected": [
+        {
+          "reason": "no-concrete-benefit",
+          "title": "A warm & nice welcome!",
+          "text": "A warm & nice welcome! Abwarten und Tee trinken?! Wir haben da was Besseres für die kalte Jahreszeit. Ab jetzt bekommen die beliebten Beverages aus dem McCafé Verstärkung: entweder wohlig warm, zum Beispiel mit dem Pump"
+        },
+        {
+          "reason": "no-concrete-benefit",
+          "title": "Kühler Kopf und warme Füße? Ready für die Eis Mission!",
+          "text": "Kühler Kopf und warme Füße? Ready für die Eis Mission ! Erspiele dir ab 30.11. wieder Gutscheine bei der MyMcDonald’s Eis Mission ! Charlotte Schneemaus macht sich bald auf den Weg, um die Eismaschine zu reparieren – und"
+        },
+        {
+          "reason": "no-concrete-benefit",
+          "title": "Find your Heat Level!",
+          "text": "Find your Heat Level ! Ein bissi Spice geht immer. Für alle, die’s nicht zu scharf wollen gibt’s die perfekte Balance aus Heat und Geschmack: der Creamy Hot Beef und die würzigen Garlic Pepper Nuggets, bringen Spice, ohn"
+        },
+        {
+          "reason": "no-concrete-benefit",
+          "title": "Voll Nice: die Nice Price Menüs!",
+          "text": "Voll Nice: die Nice Price Menüs! Einfach nice: Nimm dir dein Nice Price Menü genau so wie du willst! Mittlere Pommes + mittleres Kaltgetränk + Cheese- oder Chickenburger für 5€* bzw. mit Double Cheese- oder Chickenburger"
+        },
+        {
+          "reason": "not-food-drink",
+          "title": "Freude bringen, Spende geben: mit Knuffel!",
+          "text": "Freude bringen, Spende geben: mit Knuffel! Knuffel ist nicht nur ein süßes Stofftier, sondern auch etwas für die richtig gute Sache! Denn mit jedem bei McDonald’s gekauften Knuffel gehen € 3,10 direkt an Ronald McDonald "
+        },
+        {
+          "reason": "no-concrete-benefit",
+          "title": "3 Spicy Dips created by Rose May Alaba",
+          "text": "3 Spicy Dips created by Rose May Alaba So viel Heat gab es bei Mäcci noch nie. Drei Dips, drei Heat Levels und eine Challenge: Wie scharf kannst du gehen? Probier dich durch die von Rose May Alaba entwickelten Saucen und"
+        },
+        {
+          "reason": "no-concrete-benefit",
+          "title": "Frühstück fertig, los!",
+          "text": "Frühstück fertig, los! Ob für einen großen Tag oder einfach den perfekten Start in den Morgen: Mit unserem Frühstück bist du bestens versorgt. Genieße einen McMuffin Fresh Avocado, einen McToast Schinken Käse oder einen "
+        },
+        {
+          "reason": "no-concrete-benefit",
+          "title": "Neu im Team: McCrispy Homestyle",
+          "text": "Neu im Team: McCrispy Homestyle Neben 100 % Hühnerbrustfilet, frischen Tomaten und Rucola, knackigem Salat, Zwiebeln und zartschmelzendem Käse überzeugt der McCrispy Homestyle mit herrlich würziger Kräuter Creme-Fraiche-"
+        },
+        {
+          "reason": "not-food-drink",
+          "title": "1+1=1",
+          "text": "1+1=1 Ja, das haben wir in der Volksschule eigentlich anders gelernt. Doch Foodora schreibt die Rechenregeln neu und verrechnet aktuell bei zwei bestellten Produkten trotzdem nur einen!** Also ab auf die Couch, Lieblings"
+        },
+        {
+          "reason": "no-concrete-benefit",
+          "title": "Voll Nice: die Nice Price Menüs!",
+          "text": "Voll Nice: die Nice Price Menüs! Einfach nice: Nimm dir dein Nice Price Menü genau so wie du willst! Mittlere Pommes + mittleres Kaltgetränk + Cheese- oder Chickenburger für 5€*** bzw. mit Double Cheese- oder Chickenburg"
+        },
+        {
+          "reason": "not-food-drink",
+          "title": "Jetzt entspannt in der App bestellen!",
+          "text": "Jetzt entspannt in der App bestellen! Egal wo du gerade bist: Mit der McDonald’s App kannst du deine Lieblingsprodukte ganz easy bestellen, gleich bezahlen und deine frisch zubereitete Bestellung im Restaurant oder McDri"
+        },
+        {
+          "reason": "no-concrete-benefit",
+          "title": "McDonald’s bringt’s.",
+          "text": "McDonald’s bringt’s. Snack zwischendurch, keine Lust zu kochen oder einfach wieder mal richtig gönnen – es gibt viele Gründe für McDelivery Mac Delivery . Wähle einfach deine Lieblingsprodukte aus und lass sie dir bequem"
+        },
+        {
+          "reason": "no-concrete-benefit",
+          "title": "Refresh your day!",
+          "text": "Refresh your day! Mit den neuen McCafé Drinks bringst du Abwechslung in deinen Alltag, egal ob mit Iced Matcha Strawberry oder einem unserer fruchtigen Refresher . Und für ein Sweet Treat zwischendurch warten ofenfrische"
+        },
+        {
+          "reason": "not-food-drink",
+          "title": "Mehr McDonald’s entdecken",
+          "text": "Mehr McDonald’s entdecken"
+        }
+      ],
+      "directVisibleTextCharacters": 6799,
+      "status": "direct-sufficient",
+      "verifiedCandidates": 2,
+      "verifiedIncrementalCandidates": 0,
+      "unverifiedCandidates": 0,
+      "candidates": [
+        {
+          "id": "power-food-5b071aabb7af",
+          "title": "1+1 Frühstück bei McDonald's über foodora",
+          "confirmed": true,
+          "reason": ""
+        },
+        {
+          "id": "power-food-da7a84c52284",
+          "title": "1+1 Big Mac, McChicken, Filet-o-Fish, Crispy Veggie Burger oder McPops über foodora",
+          "confirmed": true,
+          "reason": ""
+        }
+      ]
     },
     {
       "provider": "scraperapi",
       "source": "NORDSEE",
-      "url": "https://www.nordsee.com/at/coupons/2_classic_fish_burger__pommes_frites__1_softdrink_05l_pet?pdf=true",
+      "url": "https://www.nordsee.com/at/coupons/mix_box",
       "reserved": 10,
-      "status": "failed",
-      "stage": "direct-request",
-      "scope": "page",
-      "reason": "source-or-processing-error",
-      "httpStatus": 0,
-      "retryAt": "2026-11-29T02:12:06.724Z"
+      "directCandidates": 0,
+      "directRejected": [],
+      "directVisibleTextCharacters": 116,
+      "status": "fetched",
+      "bytes": 122484,
+      "visibleTextCharacters": 8465,
+      "reportedCredits": 10,
+      "extractedCandidates": 0,
+      "incrementalCandidates": 0,
+      "offerLinks": [
+        "https://www.nordsee.com/at/coupons/mix_box?pdf=true"
+      ],
+      "rejected": [],
+      "verifiedCandidates": 0,
+      "verifiedIncrementalCandidates": 0,
+      "unverifiedCandidates": 0,
+      "candidates": []
     },
     {
       "provider": "scraperapi",
       "source": "NORDSEE",
-      "url": "https://www.nordsee.com/at/coupons/groer_hunger?pdf=true",
+      "url": "https://www.nordsee.com/at/coupons/2_fish__chips",
       "reserved": 10,
-      "status": "failed",
-      "stage": "direct-request",
-      "scope": "page",
-      "reason": "source-or-processing-error",
-      "httpStatus": 0,
-      "retryAt": "2026-11-29T02:12:07.398Z"
+      "directCandidates": 0,
+      "directRejected": [],
+      "directVisibleTextCharacters": 123,
+      "status": "fetched",
+      "bytes": 122495,
+      "visibleTextCharacters": 8472,
+      "reportedCredits": 10,
+      "extractedCandidates": 0,
+      "incrementalCandidates": 0,
+      "offerLinks": [
+        "https://www.nordsee.com/at/coupons/2_fish__chips?pdf=true"
+      ],
+      "rejected": [],
+      "verifiedCandidates": 0,
+      "verifiedIncrementalCandidates": 0,
+      "unverifiedCandidates": 0,
+      "candidates": []
     },
     {
       "provider": "scraperapi",
       "source": "NORDSEE",
-      "url": "https://www.nordsee.com/at/coupons/garnelen_box?pdf=true",
+      "url": "https://www.nordsee.com/at/coupons/premium_men___lachsfilet_auf_der_haut_gebraten",
       "reserved": 10,
-      "status": "failed",
-      "stage": "direct-request",
-      "scope": "page",
-      "reason": "source-or-processing-error",
-      "httpStatus": 0,
-      "retryAt": "2026-11-29T02:12:08.197Z"
+      "directCandidates": 0,
+      "directRejected": [],
+      "directVisibleTextCharacters": 156,
+      "status": "fetched",
+      "bytes": 122525,
+      "visibleTextCharacters": 8505,
+      "reportedCredits": 10,
+      "extractedCandidates": 0,
+      "incrementalCandidates": 0,
+      "offerLinks": [
+        "https://www.nordsee.com/at/coupons/premium_men___lachsfilet_auf_der_haut_gebraten?pdf=true"
+      ],
+      "rejected": [],
+      "verifiedCandidates": 0,
+      "verifiedIncrementalCandidates": 0,
+      "unverifiedCandidates": 0,
+      "candidates": []
     }
   ],
   "funnel": {
     "pagesBySource": {
-      "NORDSEE": 4
+      "NORDSEE": 4,
+      "McDonald's": 1
     },
     "statuses": {
-      "failed": 4
+      "fetched": 4,
+      "direct-sufficient": 1
     },
-    "rejectionReasons": {},
+    "rejectionReasons": {
+      "no-concrete-benefit": 10,
+      "not-food-drink": 4
+    },
     "verificationReasons": {},
-    "directCandidates": 0,
+    "directCandidates": 2,
     "renderedCandidates": 0,
-    "verifiedCandidates": 0
+    "verifiedCandidates": 2
   },
-  "uniqueVerifiedCandidates": 0,
-  "alreadyKnown": 0,
+  "uniqueVerifiedCandidates": 2,
+  "alreadyKnown": 2,
   "newPendingCandidates": 0,
   "pendingCandidates": 0,
   "slackMessagesSent": 0,
