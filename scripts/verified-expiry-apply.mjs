@@ -40,9 +40,10 @@ export function expiryFingerprint(deal) {
 export function protectedExpiryDeal(deal, edits = []) {
   return Boolean(deal.forceKeep || deal.isBusinessAdvertisement || deal.campaignId ||
     /business|merchant|promo-campaign/i.test(`${deal.source || ''} ${deal.originSource || ''}`) ||
-    edits.some(edit => edit.hidden !== true && (
-      String(edit.dealId || edit.id || edit.restoreDeal?.id || '') === String(deal.id) ||
-      (deal.url && edit.url === deal.url))));
+    edits.some(edit => {
+      const editId = [edit.dealId, edit.id, edit.restoreDeal?.id].map(clean).find(Boolean);
+      return edit.hidden !== true && (editId ? editId === clean(deal.id) : Boolean(deal.url && edit.url === deal.url));
+    }));
 }
 
 export function assessStructuredExpiry(deal, response, { now = new Date(), edits = [] } = {}) {

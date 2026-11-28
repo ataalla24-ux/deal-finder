@@ -159,12 +159,12 @@ const alreadyLiveFallback = filterAlreadyLiveFallbackDeals([
 ]);
 assert.deepEqual(
   alreadyLiveFallback.deals.map((deal) => deal.slackTs),
-  ['1784550000.300', '1784550000.400'],
-  'exact duplicates are skipped, while explicit edits and genuinely changed campaigns remain eligible',
+  ['1784550000.300', '1784550000.400', '1784550000.500'],
+  'exact IDs are skipped; edits, changed campaigns and unproven cross-post similarities remain eligible',
 );
-assert.equal(alreadyLiveFallback.removed.length, 3, 'an identical cross-platform title and merchant is already live');
+assert.equal(alreadyLiveFallback.removed.length, 2, 'a matching title and merchant alone is not duplicate proof');
 
-const [preferredCrossPost] = dedupeApprovedDeals([
+const [preferredCrossPost, incompleteCrossPost] = dedupeApprovedDeals([
   {
     ...parsedRoundTrip,
     id: 'complete-existing-post',
@@ -189,8 +189,9 @@ const [preferredCrossPost] = dedupeApprovedDeals([
 assert.equal(
   preferredCrossPost.id,
   'complete-existing-post',
-  'semantic cross-post dedupe must preserve stronger evidence instead of blindly preferring a newer approval',
+  'an incomplete cross-post must not overwrite the existing source-backed record',
 );
+assert.equal(incompleteCrossPost.id, 'newer-incomplete-cross-post', 'uncertain cross-post similarity remains separate for review');
 
 const normalizedPending = normalizeApprovalDeal({
   id: 'pending-without-approval',

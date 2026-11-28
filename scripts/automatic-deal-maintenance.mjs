@@ -660,15 +660,30 @@ export function assessAutomaticExpiry(deal, { now = new Date(), edits = [], poli
     ...(coupon ? { sourceUrl: coupon.url } : {}), evidenceHash: hash(evidence), evidence: evidence.map(value => value.slice(0, 1600)) };
 }
 
+const expiryAssessmentReport = (mode, assessments, assessedCount = assessments.length) => ({
+  mode, assessedCount,
+  confirmedExpiredCount: assessments.filter(row => row.eligible).length,
+  removedCount: assessments.filter(row => row.action === 'removed').length,
+  deferredCount: assessments.filter(row => row.action === 'deferred').length,
+  keptCount: assessments.filter(row => row.action !== 'removed').length,
+  assessments,
+});
+
 export function maintainDeals(deals, { policy = {}, state = {}, edits = [], now = new Date(), sourceEvidence = new Map(),
-  scheduledExpiryOnly = false } = {}) {
-  if (policy.version !== 1 || policy.enabled !== true) return { deals, state, changed: false, report: { mode: 'disabled', hidden: [], corrected: [], review: [] } };
+  scheduledExpiryOnly = false, confirmedExpirySweep = false } = {}) {
+  if (policy.version !== 1 || policy.enabled !== true) return { deals, state, changed: false,
+    report: { mode: 'disabled', hidden: [], corrected: [], review: [],
+      expiry: expiryAssessmentReport('disabled', deals.map(deal => ({ id: deal.id, eligible: false,
+        action: 'retained', reason: 'maintenance-disabled' })), 0) } };
   const nextState = structuredClone(state);
   nextState.version = 1;
   nextState.hidden ||= [];
   nextState.corrections ||= [];
-  const result = [], hidden = [], corrected = [], review = [];
-  const maxHides = Math.min(5, Math.max(0, Number(policy.maxNewHidesPerRun) || 0));
+  const result = [], hidden = [], corrected = [], review = [], expiryAssessments = [];
+  // Only the explicitly requested complete audit bypasses the per-call batch
+  // size. Every offer still passes the same source, period and owner guards.
+  const completeExpirySweep = confirmedExpirySweep === true;
+  const maxHides = completeExpirySweep ? deals.length : Math.min(5, Math.max(0, Number(policy.maxNewHidesPerRun) || 0));
   let newHides = 0;
   for (const original of deals) {
     let deal = original;
@@ -701,7 +716,17 @@ export function maintainDeals(deals, { policy = {}, state = {}, edits = [], now 
     const fingerprint = maintenanceFingerprint(deal);
     const expiry = assessAutomaticExpiry(deal, { policy, edits, now, latestEvidence, scheduledExpiryOnly });
     const previousHide = nextState.hidden.find(entry => entry.id === deal.id && entry.fingerprint === fingerprint);
-    if (policy.automaticExpiry === true && expiry.eligible && (previousHide || newHides < maxHides)) {
+    const removalEnabled = policy.automaticExpiry === true;
+    const action = expiry.eligible && removalEnabled
+      ? previousHide || newHides < maxHides ? 'removed' : 'deferred' : 'retained';
+    expiryAssessments.push({ id: deal.id, eligible: expiry.eligible, action, reason: expiry.reason,
+      ...(expiry.eligible && !removalEnabled ? { constraintReason: 'automatic-expiry-disabled' }
+        : action === 'deferred' ? { constraintReason: 'new-hide-cap' } : {}),
+      ...(expiry.validUntil ? { validUntil: expiry.validUntil } : {}),
+      ...(expiry.expires ? { expires: expiry.expires } : {}),
+      ...(expiry.evidenceHash ? { evidenceHash: expiry.evidenceHash } : {}),
+    });
+    if (action === 'removed') {
       if (!previousHide) {
         nextState.hidden.push({ id: deal.id, fingerprint, hiddenAt: now.toISOString(), ...expiry, originalDeal: deal });
         newHides++;
@@ -772,7 +797,8 @@ export function maintainDeals(deals, { policy = {}, state = {}, edits = [], now 
   }
   return { deals: result, state: nextState, changed: JSON.stringify(result) !== JSON.stringify(deals),
     report: { mode: 'owner-authorized-source-backed', checkedAt: now.toISOString(), beforeCount: deals.length,
-      afterCount: result.length, hidden, corrected, review, newHides, protectedManualFields: true } };
+      afterCount: result.length, hidden, corrected, review, newHides, protectedManualFields: true,
+      expiry: expiryAssessmentReport(completeExpirySweep ? 'complete-confirmed' : 'bounded', expiryAssessments) } };
 }
 
 export function groundedMaintenanceTitle(title, quote, evidence) {
@@ -923,14 +949,14 @@ export async function reviewApprovedCopy(deals, { cwd, now = new Date(), request
 }
 
 export async function maintainFeedFile({ cwd = process.cwd(), allowAi = false, apply = true, request = freeCreditOpenAiFetch, now = new Date(),
-  targetDealId = '', editor = null, scheduledExpiryOnly = false } = {}) {
+  targetDealId = '', editor = null, scheduledExpiryOnly = false, confirmedExpirySweep = false, includeSourceEvidence = false } = {}) {
   const policy = read(path.join(cwd, 'reviews/automatic-maintenance-policy.json'), {});
   const feedPath = path.join(cwd, 'docs/deals.json'), statePath = path.join(cwd, 'reviews/automatic-deal-maintenance-state.json');
   const feed = read(feedPath, null), fullFeed = Array.isArray(feed) ? feed : feed?.deals;
   if (!Array.isArray(fullFeed)) throw Error('Invalid maintenance feed');
   const deals = targetDealId ? fullFeed.filter(row => row.id === targetDealId) : fullFeed;
   if (targetDealId && deals.length !== 1) throw Error('Target must identify exactly one live deal');
-  if (policy.version !== 1 || policy.enabled !== true) return maintainDeals(deals, { policy, now });
+  if (policy.version !== 1 || policy.enabled !== true) return maintainDeals(deals, { policy, now, confirmedExpirySweep });
   const edits = read(path.join(cwd, 'docs/live-deal-edits.json'), {}).edits || [];
   const sourceEvidence = latestMaintenanceEvidence(deals, read(path.join(cwd, 'docs/instagram-graph-post-evidence.json'), {}).posts || [], now);
   for (const [id, evidence] of maintenanceEvidenceFor(deals, read(path.join(cwd, 'reviews/maintenance-source-evidence.json'), {}), now)) {
@@ -953,7 +979,8 @@ export async function maintainFeedFile({ cwd = process.cwd(), allowAi = false, a
     sourceEvidence.set(deal.id, { blockingReason: 'newer-coupon-listing-needs-review' });
   }
   const beforeState = read(statePath, {});
-  const result = maintainDeals(deals, { policy, edits, state: beforeState, now, sourceEvidence, scheduledExpiryOnly });
+  const result = maintainDeals(deals, { policy, edits, state: beforeState, now, sourceEvidence, scheduledExpiryOnly, confirmedExpirySweep });
+  if (includeSourceEvidence) result.sourceEvidence = sourceEvidence;
   if (targetDealId && (result.deals.length !== 1 || result.deals[0].id !== targetDealId || result.report.hidden.length)) {
     throw Error('Target deal is no longer eligible for copy review');
   }

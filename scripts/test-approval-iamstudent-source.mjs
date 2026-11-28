@@ -344,7 +344,7 @@ test('targeted and ordinary approval runners prepare source copy before publishi
     for (const file of ['deal-map-review.mjs', 'deal-map-enrichment.mjs', 'deal-map-chain-rules.mjs',
       'deal-map-source-addresses.mjs', 'approval-map-readiness.mjs', 'discover-vienna-merchants.mjs',
       'automatic-deal-maintenance.mjs', 'original-social-copy.mjs', 'automatic-maintenance-review.mjs', 'refresh-maintenance-evidence.mjs',
-      'approved-expiry-evidence.mjs', 'expiry-embedded-clock-range.mjs', 'expiry-original-today.mjs',
+      'live-deal-duplicates.mjs', 'approved-expiry-evidence.mjs', 'expiry-embedded-clock-range.mjs', 'expiry-original-today.mjs',
       'expiry-fixed-flight.mjs', 'expiry-instagram-finite-range.mjs',
       'expiry-embedded-clock-range.mjs', 'expiry-original-today.mjs', 'approved-expiry-evidence.mjs', 'deal-photo-contract.mjs']) copyFileSync(join(root, 'scripts', file), join(temp, 'scripts', file));
     copyFileSync(join(root, 'package.json'), join(temp, 'package.json'));

@@ -48,3 +48,17 @@ test('runner preserves original records and isolates fetch failures', async () =
   assert.equal(report.entries[1].status, 'protected');
   assert.deepEqual(report.entries[0].originalDeal, deal);
 });
+test('an explicit edit ID protects only its offer, with legacy URL-only protection retained', async () => {
+  for (const foreign of [{ dealId: 'other' }, { id: 'other' }, { restoreDeal: { id: 'other' } }]) {
+    let reads = 0;
+    const result = await buildReview([deal], [{ ...foreign, url: deal.url }], { now,
+      inspect: async () => { reads++; return health('Gültig bis 30.09.2026'); } });
+    assert.equal(reads, 1);
+    assert.equal(result.entries[0].status, 'expiry_candidate');
+  }
+  for (const edit of [{ dealId: ` ${deal.id} `, url: 'https://example.com/elsewhere' },
+    { id: deal.id }, { restoreDeal: { id: deal.id } }, { url: deal.url }, { dealId: ' ', url: deal.url }]) {
+    const result = await buildReview([deal], [edit], { now, inspect: async () => assert.fail('Owner-protected offer must not fetch') });
+    assert.equal(result.entries[0].status, 'protected');
+  }
+});

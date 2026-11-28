@@ -19,6 +19,14 @@ on:
       - "scripts/test-deal-map-*.mjs"
       - "scripts/test-slack-business-map-review.mjs"
       - "scripts/commit-generated.mjs"
+      - "scripts/live-deal-integrity.mjs"
+      - "scripts/live-deal-duplicates.mjs"
+      - "scripts/live-deal-source-consistency.mjs"
+      - "scripts/test-live-deal-integrity.mjs"
+      - "scripts/test-live-deal-duplicates.mjs"
+      - "scripts/test-live-deal-source-consistency.mjs"
+      - "scripts/test-confirmed-expiry-sweep.mjs"
+      - "reviews/live-deal-integrity-policy.json"
       - "scripts/*public-state*.mjs"
       - "scripts/community-public-boundary.mjs"
       - "scraper/deal-review-feedback.js"
@@ -185,6 +193,9 @@ jobs:
           node --test scripts/test-firecrawl-sdk-compatibility.mjs
           node scripts/test-firecrawl-instagram-direct4.mjs
           node scripts/test-firecrawl-post-verifier.mjs
+
+      - name: Verify complete API evidence audit and publication safeguards
+        run: node --test scripts/test-live-deal-integrity.mjs scripts/test-live-deal-duplicates.mjs scripts/test-live-deal-source-consistency.mjs scripts/test-confirmed-expiry-sweep.mjs
 
       - name: Validate production feed and derived data
         run: npm run test:production-feed

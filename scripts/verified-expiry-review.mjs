@@ -79,10 +79,10 @@ export async function buildReview(deals, edits = [], { inspect = inspectDealUrlH
   const entries = [];
   for (const deal of deals) {
     const source = sourceURL(deal);
-    const protectedByEdit = edits.some(edit => edit.hidden !== true && (
-      String(edit.dealId || edit.id || edit.restoreDeal?.id || '') === String(deal.id)
-      || (edit.url && edit.url === deal.url)
-    ));
+    const protectedByEdit = edits.some(edit => {
+      const editId = [edit.dealId, edit.id, edit.restoreDeal?.id].map(text).find(Boolean);
+      return edit.hidden !== true && (editId ? editId === text(deal.id) : Boolean(edit.url && edit.url === deal.url));
+    });
     let health;
     try {
       if (source && !protectedByEdit && !deal.forceKeep) health = await inspect(source, { timeoutMs: 7000 });

@@ -12,6 +12,7 @@ import { inspectSourceBackedQuality } from '../scraper/source-backed-quality.js'
 import { reviewPhoto } from './server-quality-audit.mjs';
 import { sourceTexts } from './automatic-deal-maintenance.mjs';
 import { verifyPublicQuality } from './verify-server-quality-public.mjs';
+import { computeDealsFeedVersion } from './deals-feed-contract.mjs';
 import { artworkInputHash,nativeContractStatus } from './native-contract-observation.mjs';
 
 const now = new Date('2026-11-06T12:00:00Z');
@@ -63,6 +64,27 @@ test('public verification returns failure evidence before the workflow timeout',
   assert.equal(result.status,'publication-not-confirmed');
   assert.equal(calls,3);
   assert(result.checks.some(row=>row.error==='verification-deadline'));
+}));
+
+test('public API audit status must be fresh and bound to the actual published deal content',()=>fixture(async({cwd,put})=>{
+  const deals=[{id:'one',title:'Kaffee für 3 €'}], instant=Date.now();
+  put('docs/deals.json',{deals}); put('docs/deal-map-locations.json',{locations:[]});
+  put('docs/deal-of-the-day.json',{});put('docs/deal-of-the-week.json',{});
+  put('reviews/live-deal-integrity-policy.json',{version:1,enabled:true});
+  const request=async url=>new Response(fs.readFileSync(path.join(cwd,'docs',new URL(url).pathname)));
+  await assert.rejects(verifyPublicQuality({root:cwd,request,attempts:1}),/no published API status/);
+  const status={version:1,checkedAt:new Date(instant).toISOString(),staleAfter:new Date(instant+7200000).toISOString(),
+    publishedFeedVersion:computeDealsFeedVersion(deals),liveCount:1,assessedCount:1,reviewRequired:1};
+  put('docs/deal-integrity-status.json',status);
+  const good=await verifyPublicQuality({root:cwd,request,attempts:1,clock:()=>instant});
+  assert.equal(good.status,'publicly-verified');assert.equal(good.checks.length,5);
+  put('docs/deal-integrity-status.json',{...status,publishedFeedVersion:'wrong'});
+  const changed=await verifyPublicQuality({root:cwd,request,attempts:1,clock:()=>instant});
+  assert.deepEqual(changed.integrity.errors,['integrity-status-does-not-match-live-feed']);
+  put('docs/deal-integrity-status.json',status);
+  const stale=await verifyPublicQuality({root:cwd,request,attempts:1,clock:()=>instant+7200001});
+  assert.equal(stale.status,'publication-not-confirmed');
+  assert.deepEqual(stale.integrity.errors,['integrity-audit-stale-or-invalid']);
 }));
 
 test('50-character target never truncates protected or condition-bearing titles', () => {

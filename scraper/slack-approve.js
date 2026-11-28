@@ -4,6 +4,7 @@ import { curatedMerchantTask } from './merchant-offer-discovery.js';
 import { basicCopyHold, contradictedOfferPriceHold, prepareTwoStagePublication } from './approval-two-stage.js';
 import { captureMapEnrichmentInput, projectEnrichmentDeal } from './deal-enrichment-state.js';
 import { officialFoodOfferKey } from './power-food-sources.js';
+import { canMergeApprovedDealRecords, preferredDuplicateKeeper } from '../scripts/live-deal-duplicates.mjs';
 import '../sentry/instrument.mjs';
 import fs from 'fs';
 import { isViennaFlight } from './vienna-flight-offer.js';
@@ -377,13 +378,7 @@ function normalizeBrandSignature(value) {
 }
 
 function getCanonicalUrlBrandKey(deal) {
-  const variantKey = getSameUrlVariantKey(deal);
-  if (variantKey) return variantKey;
-
-  const brand = normalizeBrandSignature(deal?.brand);
-  const url = normalizeUrl(deal?.url).toLowerCase();
-  if (!brand || !url) return '';
-  return `${brand}|${url}`;
+  return getSameUrlVariantKey(deal);
 }
 
 function getSameUrlVariantKey(deal) {
@@ -410,10 +405,6 @@ function getSameUrlVariantKey(deal) {
   return `${brand}|${url}|${title}`;
 }
 
-function isSameUrlVariantDeal(deal) {
-  return Boolean(getSameUrlVariantKey(deal));
-}
-
 function getApprovedMergeKeys(deal) {
   const keys = [
     getCanonicalSocialPostKey(deal),
@@ -421,26 +412,11 @@ function getApprovedMergeKeys(deal) {
     cleanText(deal?.id),
   ];
 
-  if (!isSameUrlVariantDeal(deal)) {
-    keys.push(normalizeUrl(deal?.url));
-  }
-
   return keys.filter(Boolean);
 }
 
 function isExactLiveDuplicate(deal, liveDeal) {
-  const socialKey = getCanonicalSocialPostKey(deal);
-  if (socialKey && socialKey === getCanonicalSocialPostKey(liveDeal)) return true;
-
-  const id = cleanText(deal?.id).toLowerCase();
-  const liveId = cleanText(liveDeal?.id).toLowerCase();
-  if (id && id === liveId) return true;
-
-  const title = normalizeLooseText(deal?.title);
-  const liveTitle = normalizeLooseText(liveDeal?.title);
-  const brand = normalizeBrandSignature(deal?.brand);
-  const liveBrand = normalizeBrandSignature(liveDeal?.brand);
-  return Boolean(title && title === liveTitle && brand && brand === liveBrand);
+  return canMergeApprovedDealRecords(deal, liveDeal);
 }
 
 function getLiveFallbackKeys(deal) {
@@ -479,9 +455,8 @@ function filterAlreadyLiveFallbackDeals(deals, queuedDeals, liveDeals) {
       || ensureArray(queuedDeal?.slackEditedFields).length > 0;
     if (explicitlyEdited) return true;
 
-    // A shared landing page can host a genuinely changed campaign. Exact post
-    // IDs, source IDs, or unchanged title+brand are safe to suppress.
-    if (queuedDeal && !liveMatches.some((liveDeal) => isExactLiveDuplicate(deal, liveDeal))) {
+    // A title, post or landing page can contain multiple offers or periods.
+    if (!liveMatches.some((liveDeal) => isExactLiveDuplicate(deal, liveDeal))) {
       return true;
     }
 
@@ -624,8 +599,14 @@ function dedupeApprovedDeals(deals) {
       existingIndex = bySemanticKey.get(semanticKey);
     }
 
+    const sameId = deduped.findIndex(existing => cleanText(existing.id) && existing.id === deal.id);
+    if (sameId >= 0) existingIndex = sameId;
+    if (existingIndex >= 0 && !canMergeApprovedDealRecords(deduped[existingIndex], deal)) existingIndex = -1;
+
     if (existingIndex >= 0) {
-      const merged = pickBetterDeal(deduped[existingIndex], { ...deduped[existingIndex], ...deal });
+      const current = deduped[existingIndex];
+      const merged = current.id === deal.id ? pickBetterDeal(current, { ...current, ...deal })
+        : preferredDuplicateKeeper(current, deal);
       deduped[existingIndex] = merged;
 
       const mergedSocialPostKey = getCanonicalSocialPostKey(merged);
@@ -1336,9 +1317,11 @@ function mergeApprovedDeals(existingDeals, newlyApproved) {
     if (keys.length === 0) continue;
     const existingIndex = keys
       .map((key) => indexByKey.get(key))
-      .find((value) => Number.isInteger(value));
+      .find((value) => Number.isInteger(value) && canMergeApprovedDealRecords(merged[value], deal));
     if (Number.isInteger(existingIndex)) {
-      merged[existingIndex] = pickBetterDeal(merged[existingIndex], { ...merged[existingIndex], ...deal });
+      const current = merged[existingIndex];
+      merged[existingIndex] = current.id === deal.id ? pickBetterDeal(current, { ...current, ...deal })
+        : preferredDuplicateKeeper(current, deal);
       const mergedDeal = merged[existingIndex];
       for (const key of getApprovedMergeKeys(mergedDeal)) {
         indexByKey.set(key, existingIndex);
@@ -1883,9 +1866,8 @@ function bindHumanApprovedImageContext(deal,now) {
 
 export async function preparePublishedApprovedDeals(deals,{root=ROOT,now=new Date(),enabled,existingDeals=[],blockedDeals=[]}={}) {
   const published = [];
-  const existingKeys = new Set(existingDeals.flatMap(getApprovedMergeKeys));
   for (const deal of deals) {
-    const alreadyLive = getApprovedMergeKeys(deal).some(key=>existingKeys.has(key));
+    const alreadyLive = existingDeals.some(existing => canMergeApprovedDealRecords(existing, deal, { now }));
     let prepared = { ...await prepareApprovedDealImage(deal,{root,now,enabled:alreadyLive ? false : enabled}) };
     if (!alreadyLive && deal.imageApprovalRequired
       && !normalizeApprovedDealImage(prepared.approvedDealImage,prepared.id,prepared.photoUrl)) {

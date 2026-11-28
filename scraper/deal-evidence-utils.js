@@ -56,6 +56,7 @@ function normalizeFingerprintText(value) {
     .replace(/[\u0300-\u036f]/g, '')
     .replace(/ß/g, 'ss')
     .toLowerCase()
+    .replace(/(\d),(?=\d)/g, '$1.')
     .replace(/[^a-z0-9%€+:./-]+/g, ' ')
     .replace(/\s+/g, ' ')
     .trim();
@@ -135,11 +136,14 @@ function semanticPromotionOfferKey(deal = {}, options = {}) {
   const signal = semanticOfferSignal(deal);
   const context = semanticOfferContext(deal);
   if (!brand || !context) return '';
+  // Grouped amounts are ambiguous here. Never match only a prefix/tail such as
+  // €1 or 234.50eur inside “€1 234,50”; leave that offer for explicit review.
+  if (/\b\d{1,3}(?:[ .]\d{3})+(?:[.,]\d{1,2})?(?![\d.,])/.test(context)) return '';
 
   const extractMarkers = (text) => {
     const markers = [];
-    markers.push(...uniqueMatches(text, /\b(\d{1,2})\s*(?:%|prozent\b)/g, (match) => `${match[1]}pct`));
-    markers.push(...uniqueMatches(text, /(?:€\s*(\d{1,3}(?:[.,]\d{1,2})?)\b|\b(\d{1,3}(?:[.,]\d{1,2})?)\s*(?:€|eur\b|euro\b))/g,
+    markers.push(...uniqueMatches(text, /(?<![\d.,])(\d{1,3}(?:[.,]\d{1,2})?)\s*(?:%|prozent\b)/g, (match) => `${match[1]}pct`));
+    markers.push(...uniqueMatches(text, /(?:€\s*(\d{1,6}(?:[.,]\d{1,2})?)(?![\d.,/-])|(?<![\d.,])(\d{1,6}(?:[.,]\d{1,2})?)\s*(?:€|eur\b|euro\b))/g,
       (match) => `${String(match[1] || match[2]).replace(',', '.')}eur`));
     if (/\b(?:1\s*\+\s*1|2\s*(?:fuer|for)\s*1|bogo|(?:zweite[rsn]?|2\.)\s+[a-z0-9-]+(?:\s+[a-z0-9-]+){0,3}\s+(?:gratis|kostenlos|free))\b/.test(text)) markers.push('bogo');
     if (/\ball[ -]+you[ -]+can\b/.test(text)) markers.push('all-you-can');

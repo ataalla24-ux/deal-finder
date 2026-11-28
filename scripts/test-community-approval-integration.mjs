@@ -16,7 +16,7 @@ try {
   for (const file of ['deal-map-review.mjs', 'deal-map-enrichment.mjs', 'deal-map-chain-rules.mjs',
     'deal-map-source-addresses.mjs', 'approval-map-readiness.mjs', 'discover-vienna-merchants.mjs',
     'automatic-deal-maintenance.mjs', 'original-social-copy.mjs', 'automatic-maintenance-review.mjs', 'refresh-maintenance-evidence.mjs',
-    'approved-expiry-evidence.mjs', 'expiry-embedded-clock-range.mjs', 'expiry-original-today.mjs',
+    'live-deal-duplicates.mjs', 'approved-expiry-evidence.mjs', 'expiry-embedded-clock-range.mjs', 'expiry-original-today.mjs',
     'expiry-fixed-flight.mjs', 'expiry-instagram-finite-range.mjs',
     'deal-photo-contract.mjs']) {
     fs.copyFileSync(path.join(root, 'scripts', file), path.join(temp, 'scripts', file));

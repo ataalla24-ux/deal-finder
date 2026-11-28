@@ -36,6 +36,11 @@ const MAP_INPUT_FILES = [
   'scraper/expiry-utils.js',
   'reviews/automatic-deal-maintenance-state.json',
   'scripts/automatic-deal-maintenance.mjs',
+  'reviews/live-deal-integrity-policy.json',
+  'reviews/live-deal-integrity-state.json',
+  'scripts/live-deal-integrity.mjs',
+  'scripts/live-deal-duplicates.mjs',
+  'scripts/live-deal-source-consistency.mjs',
   'scripts/approved-expiry-evidence.mjs',
   'scripts/expiry-embedded-clock-range.mjs',
   'scripts/expiry-original-today.mjs',
@@ -642,6 +647,8 @@ async function main() {
   let preparedImageConsistency;
   let redemptionConsistency;
   let flightConsistency;
+  let integrityConsistency;
+  let integrity;
   const dealsPath = 'docs/deals.json';
   const includesDealsFeed = options.patterns
     .map(normalizeRepoPath)
@@ -663,7 +670,15 @@ async function main() {
       if (statusChanged('docs/deal-review-feedback.json')) options.patterns.push('docs/deal-review-feedback.json');
     }
   }
-  if (includesDealsFeed && !statusChanged(dealsPath)) {
+  if (includesDealsFeed && fs.existsSync('reviews/live-deal-integrity-policy.json')) {
+    const { runLiveDealIntegrity, INTEGRITY_OUTPUTS } = await import('./live-deal-integrity.mjs');
+    integrity = await runLiveDealIntegrity();
+    if (integrity.enabled) {
+      options.patterns.push(...INTEGRITY_OUTPUTS, 'reviews/automatic-deal-maintenance-state.json');
+      console.log(`Live integrity: ${integrity.report.assessedCount} checked, ${integrity.report.expired.length} expired, ${integrity.report.quarantined.length} quarantined, ${integrity.report.reviewIds.length} need source review`);
+    }
+  }
+  if (includesDealsFeed && !integrity?.enabled && !statusChanged(dealsPath)) {
     // Feed writers also sweep expiry when no collector or copy update changed
     // the feed. This path is local-only and cannot call a model or source API.
     const { maintainFeedFile } = await import('./automatic-deal-maintenance.mjs');
@@ -677,9 +692,11 @@ async function main() {
     redemptionConsistency = routeInputs.map(file => ({
       path:file, baseHash:contentHash(remoteFileContent(baseRef, file)), hash:localFileHash(file),
     }));
-    const { maintainFeedFile } = await import('./automatic-deal-maintenance.mjs');
-    const maintenance = await maintainFeedFile({ allowAi: false, apply: true });
-    if (maintenance.changed) console.log(`Source-backed maintenance: ${maintenance.report.hidden.length} expired, ${maintenance.report.corrected.length} corrected`);
+    if (!integrity?.enabled) {
+      const { maintainFeedFile } = await import('./automatic-deal-maintenance.mjs');
+      const maintenance = await maintainFeedFile({ allowAi: false, apply: true });
+      if (maintenance.changed) console.log(`Source-backed maintenance: ${maintenance.report.hidden.length} expired, ${maintenance.report.corrected.length} corrected`);
+    }
     options.patterns.push('reviews/automatic-deal-maintenance-state.json');
     const guideSync = spawnSync(process.execPath, ['scripts/sync-deal-guides.mjs'], {
       cwd: process.cwd(), env: process.env, encoding: 'utf8',
@@ -761,6 +778,18 @@ async function main() {
     options.patterns.push('docs/angebote-wien-heute.html');
     options.patterns.push('docs/sitemap.xml');
   }
+  if (integrity?.enabled) {
+    const { finalizeIntegrityStatus, INTEGRITY_OUTPUTS } = await import('./live-deal-integrity.mjs');
+    finalizeIntegrityStatus();
+    // Even a report-only sweep must not publish a clean status over a newer
+    // feed, source observation, policy, owner edit, or recovery decision.
+    integrityConsistency = [...new Set([...MAP_INPUT_FILES, ...INTEGRITY_OUTPUTS,
+      'scripts/live-deal-edits-lib.mjs', 'scraper/source-backed-quality.js',
+      'scraper/approval-two-stage.js', 'scraper/approval-reviewed-source-copy.js',
+      'scraper/pre-publication-title.js', 'scraper/deal-card-editor.js'])].map(file => ({
+      path:file, baseHash:contentHash(remoteFileContent(baseRef, file)), hash:localFileHash(file),
+    }));
+  }
   const generatedImageCache = 'reviews/generated-deal-images.json';
   const imageBatchChanged = uniqueChangedFiles(options.patterns).some(file =>
     file === generatedImageCache || file.startsWith('docs/assets/approved-deal-photos/')
@@ -802,7 +831,7 @@ async function main() {
       }));
       assertPublicationSafe(safeStates);
       assertNoPrivateCommunityOutput(safeStates);
-      for (const [kind, inputs] of [['Original photo', photoConsistency], ['Prepared generated image', preparedImageConsistency], ['Redemption', redemptionConsistency], ['Flight selection', flightConsistency]]) {
+      for (const [kind, inputs] of [['Original photo', photoConsistency], ['Prepared generated image', preparedImageConsistency], ['Redemption', redemptionConsistency], ['Flight selection', flightConsistency], ['Live integrity', integrityConsistency]]) {
         if (!inputs) continue;
         const retained=new Map(safeStates.map(state=>[state.path,state]));
         for(const input of inputs) {

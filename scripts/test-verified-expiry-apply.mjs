@@ -58,6 +58,15 @@ test('manual edits, recurring benefits, protected records and business campaigns
   for (const edit of [{ dealId: deal.id }, { url: deal.url }]) assert.equal(assessStructuredExpiry(deal, response(), { now, edits: [edit] }).status, 'review');
   assert.equal(assess({ extra: '<p>Die Aktion wurde verlängert.</p>' }).status, 'review');
 });
+test('structured expiry edit protection gives explicit IDs precedence over shared offer URLs', () => {
+  for (const foreign of [{ dealId: 'other' }, { id: 'other' }, { restoreDeal: { id: 'other' } }]) {
+    assert.equal(assessStructuredExpiry(deal, response(), { now, edits: [{ ...foreign, url: deal.url }] }).status, 'candidate');
+  }
+  for (const edit of [{ dealId: ` ${deal.id} `, url: 'https://example.com/elsewhere' },
+    { id: deal.id }, { restoreDeal: { id: deal.id } }, { url: deal.url }, { dealId: ' ', url: deal.url }]) {
+    assert.equal(assessStructuredExpiry(deal, response(), { now, edits: [edit] }).status, 'review');
+  }
+});
 
 test('a social page or our own guide cannot prove automatic expiry', () => {
   for (const url of ['https://www.instagram.com/p/offer/', 'https://freefinder.at/deal/example', 'https://www.thefork.at/aktion']) {

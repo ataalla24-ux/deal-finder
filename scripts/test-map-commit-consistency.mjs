@@ -30,6 +30,7 @@ const SOURCE_INPUTS = [
   'reviews/automatic-maintenance-policy.json',
   'reviews/automatic-deal-maintenance-state.json',
   'scripts/automatic-deal-maintenance.mjs',
+  'scripts/live-deal-duplicates.mjs',
   'scripts/approved-expiry-evidence.mjs',
   'scripts/expiry-embedded-clock-range.mjs',
   'scripts/expiry-original-today.mjs',
@@ -79,7 +80,7 @@ function commit(directory, message) {
   return run('git', ['commit', '-m', message], directory);
 }
 
-function fixture(t, { optionalInputs = false, largeCache = false } = {}) {
+function fixture(t, { optionalInputs = false, largeCache = false, integrity = false } = {}) {
   const root = fs.mkdtempSync(path.join(os.tmpdir(), 'map-commit-consistency-'));
   t.after(() => fs.rmSync(root, { recursive: true, force: true }));
   const seed = path.join(root, 'seed');
@@ -98,6 +99,14 @@ function fixture(t, { optionalInputs = false, largeCache = false } = {}) {
   if (optionalInputs) for (const file of OPTIONAL_OUTPUTS) write(seed, file, {});
   if (largeCache) write(seed, 'reviews/map-source-address-cache.json', { fixture: 'x'.repeat(2 * 1024 * 1024) });
   for (const file of SOURCE_INPUTS) write(seed, file, file.startsWith('reviews/automatic-') || file === 'docs/instagram-graph-post-evidence.json' ? {} : '// Map source version 1\n');
+  if (integrity) {
+    write(seed, 'reviews/live-deal-integrity-policy.json', { version: 1, enabled: true,
+      confirmedExpirySweep: true, confirmedDuplicateRemoval: true, confirmedSourceConflictQuarantine: true,
+      sourceBackedCorrections: true, expectedCheckIntervalMinutes: 60 });
+    write(seed, 'reviews/automatic-maintenance-policy.json', { version: 1, enabled: true,
+      automaticExpiry: true, automaticLocalCopy: false, maxNewHidesPerRun: 5, maxAiCandidatesPerRun: 0 });
+    write(seed, 'docs/live-deal-edits.json', { edits: [] });
+  }
 
   // Local hooks deliberately have no network or live-data dependencies. The map
   // hook records the exact feed bytes it read, including stamping/sanitization.
@@ -169,6 +178,28 @@ function expectRejected(f, result, previousHead, file) {
 function changeMap(f, files = [MAP, COVERAGE]) {
   for (const file of files) write(f.local, file, { generated: 'local' });
 }
+
+test('a report-only integrity sweep publishes every assessed ID and preserves unrelated concurrent work', t => {
+  const f = fixture(t, { integrity: true });
+  publishRemote(f, 'README.md', 'Concurrent documentation stays intact\n');
+  const result = generate(f, [FEED]);
+  assert.equal(result.status, 0, result.output);
+  const report = JSON.parse(remoteText(f, 'reviews/live-deal-integrity-report.json'));
+  assert.deepEqual(report.assessedIds, ['base']);
+  assert.equal(report.source.length, 1);
+  const status = JSON.parse(remoteText(f, 'docs/deal-integrity-status.json'));
+  assert.equal(status.assessedCount, 1); assert.equal(status.liveCount, 1);
+  assert.equal(remoteText(f, 'README.md'), 'Concurrent documentation stays intact');
+});
+
+test('a report-only integrity sweep cannot publish a fresh status for a concurrently changed feed', t => {
+  const f = fixture(t, { integrity: true });
+  publishRemote(f, FEED, { deals: [{ id: 'base', title: 'Different actual offer' }] });
+  const head = remoteHead(f), result = generate(f, [FEED], ['--skip-conflicts', '--replace-conflicts']);
+  assert.equal(result.status, 1, result.output);
+  assert.match(result.output, /Live integrity consistency failed: remote changed docs\/deals.json/);
+  assert.equal(remoteHead(f), head);
+});
 
 const conflictModes = [[], ['--skip-conflicts'], ['--replace-conflicts'], ['--skip-conflicts', '--replace-conflicts']];
 for (const flags of conflictModes) {

@@ -189,16 +189,23 @@ test('optional public preview check is cached, bounded and fail-closed',()=>fixt
   assert.equal((await preview(root,base,{checkPreview:unavailable})).pendingDealImage,undefined);
 }));
 
-test('approval merge helper excludes already-live identities in both fast and regular publication',()=>fixture(async root=>{
+test('approval merge helper distinguishes an existing ID from an unproven shared-page alias in both publication paths',()=>fixture(async root=>{
   const {preparePublishedApprovedDeals}=await import('../scraper/slack-approve.js');
   const staged=approve(await preview(root));
-  for(const existing of [{...base},{...base,id:'alias-existing-id'}]) {
-    const [published]=await preparePublishedApprovedDeals([staged],{root,now,enabled:true,existingDeals:[existing]});
-    assert.equal(published.photoUrl,undefined);
-    assert.equal(published.pendingDealImage,undefined);
-  }
-  const [published]=await preparePublishedApprovedDeals([staged],{root,now,enabled:true,existingDeals:[]});
-  assert.ok(published.photoUrl);
+  const [existingId]=await preparePublishedApprovedDeals([staged],{root,now,enabled:true,existingDeals:[{...base}]});
+  assert.equal(existingId.photoUrl,undefined);
+  assert.equal(existingId.pendingDealImage,undefined);
+  const alias={...base,id:'alias-existing-id'};
+  const [published]=await preparePublishedApprovedDeals([staged],{root,now,enabled:true,existingDeals:[alias]});
+  assert.ok(published.photoUrl,'an unproven same-page alias cannot skip the new offer’s reviewed photo');
+  assert.equal(published.approvedDealImage.status,'locked');
+  assert.equal(published.approvedDealImage.photoUrl,published.photoUrl);
+  const bound=await inspectBoundOriginalPhoto(published,{root});
+  assert.equal(photoDigest(bound.bytes),staged.pendingDealImage.sha256);
+  const incomplete={...staged,imageApprovalRequired:true};delete incomplete.pendingDealImage;
+  const blockedDeals=[];
+  assert.deepEqual(await preparePublishedApprovedDeals([incomplete],{root,now,enabled:true,existingDeals:[alias],blockedDeals}),[]);
+  assert.equal(blockedDeals.length,1,'a matching URL/title never exempts an incomplete new image approval');
   const code=fs.readFileSync(path.join(repository,'scraper/slack-approve.js'),'utf8');
   assert.equal((code.match(/await preparePublishedApprovedDeals\(approvedModeration.deals,\{now:publishedAt,existingDeals:existingApprovedDeals,blockedDeals:imageBlockedDeals\}\)/g)||[]).length,2);
 }));

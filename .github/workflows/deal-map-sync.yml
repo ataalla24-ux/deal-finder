@@ -12,6 +12,14 @@ on:
       - 'reviews/map-addresses.json'
       - 'reviews/map-chain-rules.json'
       - 'scripts/automatic-deal-maintenance.mjs'
+      - 'scripts/live-deal-integrity.mjs'
+      - 'scripts/live-deal-duplicates.mjs'
+      - 'scripts/live-deal-source-consistency.mjs'
+      - 'scripts/test-live-deal-integrity.mjs'
+      - 'scripts/test-live-deal-duplicates.mjs'
+      - 'scripts/test-live-deal-source-consistency.mjs'
+      - 'scripts/test-confirmed-expiry-sweep.mjs'
+      - 'reviews/live-deal-integrity-policy.json'
       - 'scripts/approved-expiry-evidence.mjs'
       - 'scripts/expiry-embedded-clock-range.mjs'
       - 'scripts/expiry-original-today.mjs'
@@ -47,6 +55,7 @@ jobs:
       - run: npm ci
       - name: Verify map safeguards
         run: |
+          node --test scripts/test-live-deal-integrity.mjs scripts/test-live-deal-duplicates.mjs scripts/test-live-deal-source-consistency.mjs scripts/test-confirmed-expiry-sweep.mjs
           node --test scripts/test-automatic-maintenance.mjs
           node --test scripts/test-approved-expiry-evidence.mjs scripts/test-expiry-embedded-clock-range.mjs scripts/test-expiry-original-today.mjs scripts/test-expiry-reliability.mjs
           node scripts/test-deal-map-enrichment.mjs
@@ -60,10 +69,10 @@ jobs:
           node scripts/test-deal-map-review.mjs
           node scripts/test-slack-business-map-review.mjs
           SENTRY_DISABLED=1 node scripts/test-community-approval-integration.mjs
-      - name: Remove deals with source-confirmed elapsed times and calendar ends
+      - name: Audit every live deal against captured API evidence
         env:
-          AUTOMATIC_MAINTENANCE_APPLY: '1'
-        run: node scripts/automatic-deal-maintenance.mjs --scheduled-expiry-only
+          SENTRY_DISABLED: '1'
+        run: node scripts/live-deal-integrity.mjs --read-only
       - name: Reconcile published deals and active business campaigns
         env:
           MAP_REFRESH_BUSINESS: '1'
@@ -74,9 +83,20 @@ jobs:
         run: |
           node scripts/validate-deal-map-locations.mjs
           node scripts/validate-map-coverage.mjs
-      - name: Publish verified map and enrichment updates
+      - name: Apply full integrity audit and publish verified feed and map
         run: >-
           node scripts/commit-generated.mjs --message "Reconcile verified deal map locations"
           --files docs/deals.json docs/deal-map-locations.json reviews/map-location-catalog.json
           reviews/map-geocode-cache.json reviews/map-source-address-cache.json
           reviews/map-business-campaigns.json reviews/map-coverage.json reviews/automatic-deal-maintenance-state.json
+          reviews/live-deal-integrity-state.json reviews/live-deal-integrity-report.json docs/deal-integrity-status.json
+      - name: Preserve complete integrity audit
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: live-deal-integrity-${{ github.run_id }}
+          path: |
+            reviews/live-deal-integrity-report.json
+            docs/deal-integrity-status.json
+          if-no-files-found: error
+          retention-days: 30

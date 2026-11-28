@@ -30,7 +30,7 @@ for (const mode of ['targeted','regular']) for (const productEdited of [false,tr
       for (const file of ['deal-map-review.mjs','deal-map-enrichment.mjs','deal-map-chain-rules.mjs',
         'deal-map-source-addresses.mjs','approval-map-readiness.mjs','discover-vienna-merchants.mjs',
         'automatic-deal-maintenance.mjs','original-social-copy.mjs','automatic-maintenance-review.mjs','refresh-maintenance-evidence.mjs',
-        'expiry-fixed-flight.mjs','expiry-instagram-finite-range.mjs','approved-expiry-evidence.mjs','deal-photo-contract.mjs','generated-deal-photo-contract.mjs',
+        'expiry-fixed-flight.mjs','expiry-instagram-finite-range.mjs','live-deal-duplicates.mjs', 'approved-expiry-evidence.mjs','deal-photo-contract.mjs','generated-deal-photo-contract.mjs',
         'original-deal-photo.mjs','live-deal-edits-lib.mjs','refresh-pending-deal-photo.mjs']) {
         fs.copyFileSync(path.join(repository,'scripts',file),path.join(root,'scripts',file));
       }
