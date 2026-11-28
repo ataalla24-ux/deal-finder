@@ -1897,6 +1897,9 @@ async function main() {
       ...(instagramIndex ? { instagramSearch: {
         status: instagramIndex.status, attemptedQueries: instagramIndex.attemptedQueries,
         indexRows: instagramIndex.indexRows, canonicalLinks: instagramIndex.links.length,
+        productionQueryId: instagramIndex.productionQueryId,
+        productionQueryPlanVersion: instagramIndex.productionQueryPlanVersion,
+        nextProductionQueryCursor: instagramIndex.nextProductionQueryCursor,
       } } : {}),
       publicPagesWithDatedOriginal: indexVisits.filter(visit => visit.dated).length,
       acceptedDeals: finalDeals.filter(deal => deal.collectionMode === 'tavily-public-index').length,

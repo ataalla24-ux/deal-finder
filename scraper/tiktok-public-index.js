@@ -1,7 +1,9 @@
 import { setTimeout as wait } from 'node:timers/promises';
 import { retryAfterAt } from './source-http-policy.js';
 import { buildTavilyTikTokQueries } from './tiktok-public-index-queries.js';
-import { buildInstagramTavilyQuery, normalizeInstagramTavilyUrl } from './instagram-tavily-index.js';
+import {
+  buildInstagramTavilyQuery, normalizeInstagramTavilyUrl, selectInstagramTavilyProductionQuery,
+} from './instagram-tavily-index.js';
 
 const DAY_MS = 86_400_000;
 const MAX_RESULTS = 20;
@@ -146,11 +148,16 @@ export async function discoverTikTokLinksViaTavily({
   for (let index = 0; index < queryBudget; index++) {
     if (index > 0) await sleep(REQUEST_INTERVAL_MS);
     const forInstagram = index === instagramSlot;
-    const query = forInstagram ? buildInstagramTavilyQuery(now) : queries[attempt.nextQueryIndex];
+    const productionQuery = forInstagram && !instagramProbe ? selectInstagramTavilyProductionQuery(instagramIndex.previous) : null;
+    const query = forInstagram ? productionQuery?.query || buildInstagramTavilyQuery(now) : queries[attempt.nextQueryIndex];
     const instagram = forInstagram ? { attemptedQueries: 1, indexRows: 0, links: [] } : null;
     if (instagram) {
       attempt.instagramIndex = instagram;
-      if (!instagramProbe) attempt.tikTokStatus = 'completed';
+      if (productionQuery) {
+        attempt.tikTokStatus = 'completed';
+        instagram.productionQueryId = productionQuery.id;
+        instagram.productionQueryPlanVersion = productionQuery.version;
+      }
     }
     attempt.attemptedQueries++;
     const search = await requestTavilyJson('https://api.tavily.com/search', {
@@ -169,6 +176,7 @@ export async function discoverTikTokLinksViaTavily({
     if (instagram) instagram.indexRows = rows.length;
     else attempt.indexRows += rows.length;
     const reportedCredits = search.payload.usage?.credits;
+    if (productionQuery && reportedCredits === 1) instagram.nextProductionQueryCursor = productionQuery.nextCursor;
     if (key) {
       attempt.completedQueries++;
       if (Number.isSafeInteger(reportedCredits) && reportedCredits >= 0) {

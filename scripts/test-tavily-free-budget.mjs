@@ -2,6 +2,9 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import { discoverTikTokLinksViaTavily } from '../scraper/tiktok-public-index.js';
 import { buildTavilyTikTokQueries } from '../scraper/tiktok-public-index-queries.js';
+import {
+  buildInstagramTavilyQuery, selectInstagramTavilyProductionQuery, updateInstagramTavilyCache,
+} from '../scraper/instagram-tavily-index.js';
 
 const apiKey = 'tvly-offline-budget-fixture';
 const firstNovemberScan = new Date('2026-11-01T05:15:00Z');
@@ -116,6 +119,72 @@ test('Instagram replaces one existing keyed slot and never enters the TikTok res
   const narrow = fixture({ accountUsage: usage({ plan_usage: 999 }), instagramIndex: { enabled: true, previous: {} } });
   assert.equal((await narrow.run()).attemptedQueries, 1);
   assert.deepEqual(narrow.requests.at(-1).domains, ['tiktok.com']);
+});
+
+test('two successful ordinary Instagram slots on the same UTC day advance a separate persistent plan', async () => {
+  const accountUsage = usage({ plan_usage: 900 });
+  const ordinary = (previous, now = firstNovemberScan) => fixture({ now, accountUsage,
+    previous: { nextQueryIndex: 7 }, instagramIndex: { enabled: true, previous } });
+  const initial = { version: 1, nextRetryAt: '', lastProbeAt: '2026-10-30T13:50:00.000Z', links: [] };
+  const first = ordinary(initial);
+  const firstResult = await first.run();
+  const firstState = updateInstagramTavilyCache(initial, firstResult, { now: firstNovemberScan });
+  const evening = new Date('2026-11-01T17:15:00Z');
+  const second = ordinary(firstState, evening);
+  const secondResult = await second.run();
+  const secondState = updateInstagramTavilyCache(firstState, secondResult, { now: evening });
+  assert.equal(first.requests.at(-1).query, 'Wien Instagram öffentliche Beiträge oder Reels 1+1 Rabatt Restaurant Kaffee');
+  assert.equal(second.requests.at(-1).query, 'Wien Instagram öffentliche Beiträge oder Reels gratis Essen und Getränke Neueröffnung');
+  assert.equal(firstResult.instagramIndex.productionQueryId, 'vienna-bogo-restaurant-coffee');
+  assert.equal(secondResult.instagramIndex.productionQueryId, 'vienna-opening-benefits');
+  assert.equal(firstResult.instagramIndex.productionQueryPlanVersion, 1);
+  assert.deepEqual(firstResult.instagramIndex.nextProductionQueryCursor, firstState.productionQueryCursor);
+  assert.deepEqual(secondState.productionQueryCursor, { version: 1, nextTopicId: 'vienna-bogo-restaurant-coffee' });
+  assert.equal(selectInstagramTavilyProductionQuery(secondState).query, first.requests.at(-1).query);
+  assert.equal(secondState.lastProbeAt, initial.lastProbeAt);
+  for (const [f, result] of [[first, firstResult], [second, secondResult]]) {
+    assert.equal(f.requests.filter(row => row.domains?.[0] === 'instagram.com').length, 1);
+    assert.equal(result.attemptedQueries, result.budget.plannedQueries);
+    assert.equal(f.requests.length, 1 + result.budget.plannedQueries);
+    assert.equal(result.reportedSearchCredits, result.budget.plannedQueries);
+    assert.equal(result.nextQueryIndex, 7 + result.budget.plannedQueries - 1);
+    assert.equal(result.instagramIndex.indexRows, 0);
+  }
+  assert.deepEqual(first.requests.slice(1, -1), second.requests.slice(1, -1), 'only the Instagram query rotates');
+});
+
+test('ordinary refusal, missing receipt, exhausted slot and legacy probe do not advance the Instagram plan', async () => {
+  const cached = { version: 1, links: [], nextRetryAt: '', productionQueryCursor: { version: 1, nextTopicId: 'vienna-opening-benefits' } };
+  for (const response of [
+    () => new Response(null, { status: 429, headers: { 'Retry-After': '300' } }),
+    () => Response.json({ results: [] }),
+    () => Response.json({ results: [], usage: { credits: '1' } }),
+    () => Response.json({ results: [], usage: { credits: 0 } }),
+    () => Response.json({ results: [], usage: { credits: 2 } }),
+  ]) {
+    const f = fixture({ accountUsage: usage({ plan_usage: 900 }), instagramIndex: { enabled: true, previous: cached },
+      search: (_, body) => body.include_domains[0] === 'instagram.com' ? response() : Response.json({ results: [], usage: { credits: 1 } }) });
+    const outcome = await f.run();
+    assert.equal(outcome.instagramIndex.productionQueryId, 'vienna-opening-benefits');
+    assert.equal(outcome.instagramIndex.nextProductionQueryCursor, undefined);
+    assert.equal(f.requests.filter(row => row.domains?.[0] === 'instagram.com').length, 1);
+    assert.deepEqual(updateInstagramTavilyCache(cached, outcome, { now: firstNovemberScan }).productionQueryCursor,
+      cached.productionQueryCursor);
+  }
+  const narrow = fixture({ accountUsage: usage({ plan_usage: 999 }), instagramIndex: { enabled: true, previous: cached } });
+  const narrowResult = await narrow.run();
+  assert.equal(narrowResult.instagramIndex, undefined);
+  assert.equal(updateInstagramTavilyCache(cached, narrowResult, { now: firstNovemberScan }), null);
+  const probe = fixture({ instagramIndex: { probe: true, previous: cached } });
+  const probeResult = await probe.run();
+  assert.equal(probe.requests[1].query, buildInstagramTavilyQuery(firstNovemberScan));
+  assert.equal(probeResult.instagramIndex.productionQueryId, undefined);
+  const probeState = updateInstagramTavilyCache(cached, probeResult, { now: firstNovemberScan, probe: true });
+  assert.deepEqual(probeState.productionQueryCursor, cached.productionQueryCursor);
+  assert.equal(probeState.lastProbeAt, firstNovemberScan.toISOString());
+  const malformed = fixture({ instagramIndex: { enabled: true, previous: null } });
+  assert.equal((await malformed.run()).status, 'shared-index-state-invalid');
+  assert.equal(malformed.requests.length, 0);
 });
 
 test('Instagram diagnostics makes exactly one guarded query and shares provider holds', async () => {

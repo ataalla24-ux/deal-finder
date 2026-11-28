@@ -8,10 +8,30 @@ export const INSTAGRAM_TAVILY_SOURCE = 'tavily-public-index';
 const DAY_MS = 86_400_000;
 const MAX_LEADS = 20;
 const QUERY_TOPICS = ['gratis Essen und Getränke Neueröffnung', '1+1 Rabatt Restaurant Kaffee', 'Gratis Pizza Burger Kebab Angebot'];
+const PRODUCTION_QUERY_PLAN_VERSION = 1;
+const PRODUCTION_QUERY_PLAN = [
+  { id: 'vienna-bogo-restaurant-coffee', query: 'Wien Instagram öffentliche Beiträge oder Reels 1+1 Rabatt Restaurant Kaffee' },
+  { id: 'vienna-opening-benefits', query: 'Wien Instagram öffentliche Beiträge oder Reels gratis Essen und Getränke Neueröffnung' },
+];
 
 export function buildInstagramTavilyQuery(now) {
   const index = Math.floor(+now / DAY_MS) % QUERY_TOPICS.length;
   return `Wien Instagram öffentliche Beiträge oder Reels ${QUERY_TOPICS[index]}`;
+}
+
+function validProductionQueryCursor(value) {
+  if (value?.version !== PRODUCTION_QUERY_PLAN_VERSION || !PRODUCTION_QUERY_PLAN.some(topic => topic.id === value.nextTopicId)) {
+    return null;
+  }
+  return { version: value.version, nextTopicId: value.nextTopicId };
+}
+
+export function selectInstagramTavilyProductionQuery(previous) {
+  const cursor = validProductionQueryCursor(previous?.productionQueryCursor);
+  const index = cursor ? PRODUCTION_QUERY_PLAN.findIndex(topic => topic.id === cursor.nextTopicId) : 0;
+  const nextTopic = PRODUCTION_QUERY_PLAN[(index + 1) % PRODUCTION_QUERY_PLAN.length];
+  return { ...PRODUCTION_QUERY_PLAN[index], version: PRODUCTION_QUERY_PLAN_VERSION,
+    nextCursor: { version: PRODUCTION_QUERY_PLAN_VERSION, nextTopicId: nextTopic.id } };
 }
 
 export function normalizeInstagramTavilyUrl(value) {
@@ -39,6 +59,9 @@ export function readInstagramTavilyCache(file) {
     if (value?.version !== 1 || !Array.isArray(value.links) || typeof value.nextRetryAt !== 'string') return null;
     if (value.nextRetryAt && !Number.isFinite(Date.parse(value.nextRetryAt))) return null;
     if (value.lastProbeAt !== undefined && !Number.isFinite(Date.parse(value.lastProbeAt))) return null;
+    const cursor = validProductionQueryCursor(value.productionQueryCursor);
+    if (cursor) value.productionQueryCursor = cursor;
+    else delete value.productionQueryCursor;
     return value;
   } catch (error) {
     return error.code === 'ENOENT' ? {} : null;
@@ -58,8 +81,16 @@ export function updateInstagramTavilyCache(previous, result, { probe = false, no
   const fresh = (index?.links || []).filter(url => !existing.has(canonicalInstagramPostKey(url)))
     .map(url => ({ url, source: INSTAGRAM_TAVILY_SOURCE, indexedAt }));
   const links = getInstagramTavilyLeads({ links: [...fresh, ...previousLeads] }, now);
-  const probeAt = probe && index?.attemptedQueries ? indexedAt : previous?.lastProbeAt;
-  return { version: 1, updatedAt: indexedAt, nextRetryAt, ...(probeAt ? { lastProbeAt: probeAt } : {}), links };
+  const probeAt = previous?.lastProbeAt || (probe && index?.attemptedQueries ? indexedAt : '');
+  let cursor = validProductionQueryCursor(previous?.productionQueryCursor);
+  if (!probe && index?.attemptedQueries === 1 && index.status === 'completed' && index.reportedSearchCredits === 1) {
+    const selected = selectInstagramTavilyProductionQuery(previous);
+    const next = validProductionQueryCursor(index.nextProductionQueryCursor);
+    if (index.productionQueryId === selected.id && index.productionQueryPlanVersion === selected.version
+      && next?.nextTopicId === selected.nextCursor.nextTopicId) cursor = next;
+  }
+  return { version: 1, updatedAt: indexedAt, nextRetryAt, ...(probeAt ? { lastProbeAt: probeAt } : {}),
+    ...(cursor ? { productionQueryCursor: cursor } : {}), links };
 }
 
 export function writeInstagramTavilyCache(file, cache, fileSystem = fs) {

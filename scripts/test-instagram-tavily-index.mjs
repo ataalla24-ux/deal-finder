@@ -6,7 +6,7 @@ import test from 'node:test';
 import { buildHeuristicDeal, enrichPreviews, enrichRenderedPreviews } from '../scraper/instagram-ai-agent.js';
 import { createInstagramWebAccess } from '../scraper/instagram-web-access-policy.js';
 import { getInstagramTavilyLeads, INSTAGRAM_TAVILY_SOURCE, readInstagramTavilyCache,
-  updateInstagramTavilyCache, writeInstagramTavilyCache } from '../scraper/instagram-tavily-index.js';
+  selectInstagramTavilyProductionQuery, updateInstagramTavilyCache, writeInstagramTavilyCache } from '../scraper/instagram-tavily-index.js';
 
 const day = 86_400_000;
 const now = new Date('2026-11-27T22:30:00Z');
@@ -47,6 +47,51 @@ test('an interrupted cache replacement keeps the last committed links and retry 
   assert.equal(readInstagramTavilyCache(file), null);
   fs.writeFileSync(file, '{malformed');
   assert.equal(readInstagramTavilyCache(file), null);
+});
+
+test('plan wrap and stale lead expiry leave the versioned cursor independent of observations', () => {
+  let state = { ...cache, nextRetryAt: '', lastProbeAt: '2026-11-27T00:00:00.000Z' };
+  const ids = [];
+  for (let index = 0; index < 2; index++) {
+    const selected = selectInstagramTavilyProductionQuery(state);
+    ids.push(selected.id);
+    state = updateInstagramTavilyCache(state, { instagramIndex: {
+      attemptedQueries: 1, status: 'completed', reportedSearchCredits: 1,
+      productionQueryId: selected.id, productionQueryPlanVersion: selected.version,
+      nextProductionQueryCursor: selected.nextCursor, links: [],
+    } }, { now });
+  }
+  assert.deepEqual(ids, ['vienna-bogo-restaurant-coffee', 'vienna-opening-benefits']);
+  assert.equal(state.productionQueryCursor.nextTopicId, ids[0]);
+  const otherDiagnostic = updateInstagramTavilyCache(state, {
+    instagramIndex: { attemptedQueries: 1, links: [] },
+  }, { now: new Date(+now + 8 * day), probe: true });
+  assert.deepEqual(otherDiagnostic.links, []);
+  assert.deepEqual(otherDiagnostic.productionQueryCursor, state.productionQueryCursor);
+  assert.equal(otherDiagnostic.lastProbeAt, state.lastProbeAt);
+});
+
+test('invalid cursor metadata resets just the selector, while a malformed cooldown blocks the full cache', t => {
+  const directory = fs.mkdtempSync(path.join(os.tmpdir(), 'instagram-tavily-rotation-'));
+  t.after(() => fs.rmSync(directory, { recursive: true, force: true }));
+  const file = path.join(directory, 'state.json');
+  const persisted = { ...cache, nextRetryAt: '' };
+  const initial = selectInstagramTavilyProductionQuery(persisted);
+  for (const invalid of [null, {}, { version: 2, nextTopicId: initial.nextCursor.nextTopicId },
+    { version: 1, nextTopicId: 'fictitious' }, { version: '1', nextTopicId: initial.nextCursor.nextTopicId }]) {
+    fs.writeFileSync(file, JSON.stringify({ ...persisted, productionQueryCursor: invalid }));
+    assert.deepEqual(readInstagramTavilyCache(file), persisted);
+    assert.deepEqual(selectInstagramTavilyProductionQuery(readInstagramTavilyCache(file)), initial);
+  }
+  fs.writeFileSync(file, JSON.stringify({ ...persisted, nextRetryAt: 'invalid', productionQueryCursor: initial.nextCursor }));
+  assert.equal(readInstagramTavilyCache(file), null);
+  const advanced = { ...persisted, productionQueryCursor: initial.nextCursor };
+  const repeat = updateInstagramTavilyCache(advanced, { instagramIndex: {
+    attemptedQueries: 1, status: 'completed', reportedSearchCredits: 1,
+    productionQueryId: initial.id, productionQueryPlanVersion: initial.version,
+    nextProductionQueryCursor: initial.nextCursor,
+  } }, { now });
+  assert.deepEqual(repeat.productionQueryCursor, advanced.productionQueryCursor);
 });
 
 test('index leads cannot bypass Instagram preview/render pauses or act as dated offer proof', async () => {
