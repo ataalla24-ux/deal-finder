@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-11-28T00:18:17.881Z",
+  "generatedAt": "2026-11-28T00:40:10.662Z",
   "discoveryAvailability": {
     "note": "Transport evidence, not deal yield. Retry eligibility is not recovery. Candidate counts are not Slack deliveries. No extra runs or quota resets.",
     "lanes": [
@@ -33,7 +33,7 @@
       },
       {
         "name": "tiktok-public-search",
-        "observedAt": "2026-11-27T15:07:58.779Z",
+        "observedAt": "2026-11-28T00:38:59.634Z",
         "status": "recovery-not-yet-proven",
         "reason": "public-only",
         "retryAt": "",
@@ -43,20 +43,20 @@
       },
       {
         "name": "tiktok-web-search",
-        "observedAt": "2026-11-27T15:07:58.779Z",
-        "status": "awaiting-post-cooldown-run",
-        "reason": "search-unavailable",
-        "retryAt": "2026-11-27T19:02:33.274Z",
-        "attempted": 2,
+        "observedAt": "2026-11-28T00:38:59.634Z",
+        "status": "no-block-reported",
+        "reason": "",
+        "retryAt": "",
+        "attempted": 1,
         "deliveredToSlack": null
       }
     ]
   },
   "summary": {
     "filesConsidered": 33,
-    "totalCandidates": 756,
-    "uniqueCandidates": 733,
-    "distinctCandidates": 744,
+    "totalCandidates": 755,
+    "uniqueCandidates": 732,
+    "distinctCandidates": 743,
     "duplicateClusters": 11,
     "topHealthySources": [
       {
@@ -84,9 +84,9 @@
         "totalDeals": 99
       },
       {
-        "sourceKey": "tiktok",
-        "sourceLabel": "TikTok Scanner",
-        "healthScore": 66,
+        "sourceKey": "food3",
+        "sourceLabel": "Firecrawl Key 2 - Food",
+        "healthScore": 64,
         "totalDeals": 1
       }
     ],
@@ -135,7 +135,7 @@
         "sourceLabel": "Meta Instagram Graph",
         "coverageScore": 70,
         "totalDeals": 99,
-        "fresh1dCount": 14
+        "fresh1dCount": 13
       },
       {
         "sourceKey": "gastro2",
@@ -185,10 +185,10 @@
         "totalDeals": 99
       },
       {
-        "sourceKey": "tiktok",
-        "sourceLabel": "TikTok Scanner",
-        "precisionScore": 64,
-        "totalDeals": 1
+        "sourceKey": "joe",
+        "sourceLabel": "jö Bonus Club",
+        "precisionScore": 62,
+        "totalDeals": 9
       }
     ],
     "topWeightedSources": [
@@ -271,8 +271,8 @@
         "sampleTitles": []
       },
       {
-        "sourceKey": "twitter",
-        "sourceLabel": "twitter",
+        "sourceKey": "tiktok",
+        "sourceLabel": "TikTok Scanner",
         "healthScore": 0,
         "issues": [
           "liefert aktuell 0 Deals"
@@ -487,7 +487,7 @@
       "uniqueDeals": 91,
       "duplicateDeals": 8,
       "duplicateAcrossSources": 3,
-      "fresh1dCount": 14,
+      "fresh1dCount": 13,
       "fresh7dCount": 90,
       "viennaCount": 99,
       "foodDrinkCount": 69,
@@ -560,55 +560,6 @@
       "coverageScore": 70,
       "precisionScore": 69,
       "sourceWeightScore": 64
-    },
-    {
-      "sourceKey": "tiktok",
-      "file": "deals-pending-tiktok.json",
-      "sourceLabel": "TikTok Scanner",
-      "totalDeals": 1,
-      "uniqueDeals": 1,
-      "duplicateDeals": 0,
-      "duplicateAcrossSources": 0,
-      "fresh1dCount": 0,
-      "fresh7dCount": 1,
-      "viennaCount": 1,
-      "foodDrinkCount": 0,
-      "promoCount": 1,
-      "missingUrlCount": 0,
-      "sampleTitles": [
-        "Eintritt: KOSTENLOS"
-      ],
-      "lastRun": null,
-      "uniqueRate": 1,
-      "duplicateRate": 0,
-      "fresh1dRate": 0,
-      "fresh7dRate": 1,
-      "viennaRate": 1,
-      "foodDrinkRate": 0,
-      "promoRate": 1,
-      "missingUrlRate": 0,
-      "averageQualityScore": 62,
-      "topCategories": [
-        {
-          "value": "shopping",
-          "count": 1
-        }
-      ],
-      "topTypes": [
-        {
-          "value": "gratis",
-          "count": 1
-        }
-      ],
-      "issues": [
-        "wenige Deals sind frischer als 1 Tag",
-        "geringe Food-/Drink-Relevanz"
-      ],
-      "healthScore": 66,
-      "missionFitScore": 43,
-      "coverageScore": 11,
-      "precisionScore": 64,
-      "sourceWeightScore": 47
     },
     {
       "sourceKey": "food3",
@@ -1473,9 +1424,9 @@
       ],
       "lastRun": {
         "status": "completed",
-        "startedAt": "2026-11-27T15:25:12.995Z",
-        "finishedAt": "2026-11-27T15:26:33.854Z",
-        "durationMs": 80859,
+        "startedAt": "2026-11-28T00:36:58.016Z",
+        "finishedAt": "2026-11-28T00:38:20.917Z",
+        "durationMs": 82901,
         "counts": {
           "rawCandidates": 10,
           "normalizedCandidates": 5,
@@ -1485,8 +1436,9 @@
           "rejectedDeals": 5
         },
         "rejectedByReason": {
-          "no-consumer-food-benefit": 3,
-          "non-food-ad": 2
+          "non-food-ad": 3,
+          "no-consumer-food-benefit": 1,
+          "post-older-than-seven-days": 1
         },
         "errors": [],
         "reportFile": "deal-pipeline-last-run-instagram-apify2.json"
@@ -2181,6 +2133,42 @@
       "sourceKey": "telegram",
       "file": "deals-pending-telegram.json",
       "sourceLabel": "telegram",
+      "totalDeals": 0,
+      "uniqueDeals": 0,
+      "duplicateDeals": 0,
+      "duplicateAcrossSources": 0,
+      "fresh1dCount": 0,
+      "fresh7dCount": 0,
+      "viennaCount": 0,
+      "foodDrinkCount": 0,
+      "promoCount": 0,
+      "missingUrlCount": 0,
+      "sampleTitles": [],
+      "lastRun": null,
+      "uniqueRate": 0,
+      "duplicateRate": 0,
+      "fresh1dRate": 0,
+      "fresh7dRate": 0,
+      "viennaRate": 0,
+      "foodDrinkRate": 0,
+      "promoRate": 0,
+      "missingUrlRate": 0,
+      "averageQualityScore": 0,
+      "topCategories": [],
+      "topTypes": [],
+      "issues": [
+        "liefert aktuell 0 Deals"
+      ],
+      "healthScore": 0,
+      "missionFitScore": 0,
+      "coverageScore": 0,
+      "precisionScore": 0,
+      "sourceWeightScore": 0
+    },
+    {
+      "sourceKey": "tiktok",
+      "file": "deals-pending-tiktok.json",
+      "sourceLabel": "TikTok Scanner",
       "totalDeals": 0,
       "uniqueDeals": 0,
       "duplicateDeals": 0,
