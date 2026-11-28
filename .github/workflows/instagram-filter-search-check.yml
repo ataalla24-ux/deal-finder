@@ -1,0 +1,65 @@
+name: Instagram Filter Search Check
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/instagram-filter-search-check.yml'
+      - 'scripts/check-instagram-filter-search.mjs'
+      - 'scripts/test-instagram-filter-search.mjs'
+permissions:
+  contents: read
+env:
+  SENTRY_DISABLED: '1'
+  TZ: Europe/Vienna
+jobs:
+  offline:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: npm ci --no-audit --no-fund
+      - run: node --test scripts/test-instagram-filter-search.mjs scripts/test-tavily-free-budget.mjs
+  check:
+    if: github.event_name == 'workflow_dispatch' && github.ref == 'refs/heads/main' && github.run_attempt == 1
+    needs: offline
+    runs-on: ubuntu-latest
+    timeout-minutes: 7
+    concurrency:
+      group: tiktok-deal-scan
+      cancel-in-progress: false
+      queue: max
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: npm ci --no-audit --no-fund
+      - name: Claim one explicit cache-only search
+        id: claim
+        run: node scripts/check-instagram-filter-search.mjs --claim
+      - name: Persist the one-shot claim before the provider request
+        if: steps.claim.outputs.claimed == 'true'
+        run: node scripts/commit-generated.mjs --message "Claim one guarded Instagram filter search [skip ci]" --files source-state/instagram-filter-search-check-claim.json
+      - name: Run one production-shaped Instagram index query
+        if: steps.claim.outputs.claimed == 'true'
+        env:
+          TIKTOK_TAVILY_FREE_PLAN_CONFIRMED: ${{ vars.TIKTOK_TAVILY_FREE_PLAN_CONFIRMED }}
+          TAVILY_API_KEY: ${{ secrets.TAVILY_API_KEY || secrets.TAVIILY_API_KEY }}
+        run: node scripts/check-instagram-filter-search.mjs --run
+      - name: Persist the separate search receipt and cache
+        if: always() && steps.claim.outputs.claimed == 'true'
+        run: node scripts/commit-generated.mjs --message "Record one guarded Instagram filter search [skip ci]" --files source-state/instagram-filter-search-check-result.json source-state/instagram-tavily-index.json
+      - uses: actions/upload-artifact@v4
+        if: always() && steps.claim.outputs.claimed == 'true'
+        with:
+          name: instagram-filter-search-check
+          path: output/social-discovery/instagram-filter-search-check.json
+          retention-days: 7

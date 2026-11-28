@@ -6,7 +6,7 @@ import { chromium } from 'playwright';
 import { fetchRenderedInstagramPreview } from '../scraper/instagram-ai-agent.js';
 import { applyInstagramCookies, instagramAuthSummary, instagramCookieHeader, loadInstagramCookieHints } from '../scraper/instagram-auth-utils.js';
 import { loadDealModeration } from '../scraper/deal-moderation-utils.js';
-import { readInstagramPostLinkedDate } from '../scraper/instagram-page-access.js';
+import { isInstagramOpenGraphHeaderOnly, readInstagramPostLinkedDate } from '../scraper/instagram-page-access.js';
 import { normalizeInstagramTavilyUrl } from '../scraper/instagram-tavily-index.js';
 import { verifyInstagramTavilyOffers } from './check-instagram-tavily-offers.mjs';
 
@@ -157,7 +157,11 @@ export async function verifyRenderedInstagramTavilyOffers({
       const publishedAt = exactDate(await readLinkedDate(page, url));
       if (!publishedAt) return unverified('rendered-bound-publication-unproven');
       const proof = await readCaption(page, url, captionLimit);
-      const caption = normalize(proof?.caption);
+      let caption = normalize(proof?.caption);
+      if (isInstagramOpenGraphHeaderOnly(caption) && preview.captionEvidence === 'exact-original-caption') {
+        caption = normalize(preview.description) || caption;
+      }
+      if (isInstagramOpenGraphHeaderOnly(caption)) return unverified('open-graph-header-only');
       if (!caption || caption.length > captionLimit || /(?:…|\.\.\.)\s*$/.test(caption)) {
         return unverified('rendered-complete-caption-unproven');
       }

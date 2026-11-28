@@ -18,7 +18,11 @@ import { requestOpenAi } from './instagram-media-evidence.js';
 import { modelForTask, OPENAI_MODEL_TIMEOUT_MS, OPENAI_BACKGROUND_TIMEOUT_MS } from './ai-credit-budget.js';
 import { partitionInstagramAiDeals } from '../scripts/validate-instagram-ai-output.mjs';
 import { createInstagramWebAccess } from './instagram-web-access-policy.js';
-import { instagramPageHasAccessWall } from './instagram-page-access.js';
+import {
+  instagramAbsoluteDate, instagramDocumentSnapshot, instagramPageHasAccessWall, isInstagramOpenGraphHeaderOnly,
+  normalizeInstagramPublicPostUrl, readInstagramBoundStructuredCaption, readInstagramBoundVisibleCaption,
+  readInstagramPostLinkedDate,
+} from './instagram-page-access.js';
 import { githubRunProvenance } from './pipeline-run-report-utils.js';
 import { parseInstagramSearchResults, runInstagramSearchQueries } from './instagram-search-discovery.js';
 import { INSTAGRAM_TAVILY_CACHE, INSTAGRAM_TAVILY_SOURCE, getInstagramTavilyLeads, readInstagramTavilyCache } from './instagram-tavily-index.js';
@@ -80,6 +84,8 @@ const HOUR_MS = 60 * 60 * 1000;
 const FRESH_PRIORITY_HOURS = 72;
 const ABSOLUTE_MAX_POST_AGE_DAYS = 7;
 const MAX_FUTURE_CLOCK_SKEW_MS = 10 * 60 * 1000;
+const CAPTION_METADATA_ONLY = 'open-graph-header-only';
+const CAPTION_EXACT_ORIGINAL = 'exact-original-caption';
 const USER_AGENT = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0 Safari/537.36';
 const INSTAGRAM_SHORTCODE_ALPHABET = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-_';
 
@@ -847,6 +853,7 @@ function trustedStructuredViennaEvidence(sourceDeal = {}) {
 
 function resolveViennaEvidence(candidate) {
   const primarySignal = postSignal(candidate);
+  if (candidate.preview?.captionEvidence === CAPTION_METADATA_ONLY && !primarySignal) return null;
   if (hasNegatedViennaLocation(primarySignal) || hasExplicitNonViennaLocation(primarySignal)) return null;
 
   const explicitLocation = extractViennaLocation(primarySignal);
@@ -1254,10 +1261,19 @@ export async function fetchInstagramPreview(url, options = {}) {
     preview.title = metaContent(html, 'og:title') || metaContent(html, 'twitter:title') || stripTags(html.match(/<title[^>]*>([\s\S]*?)<\/title>/i)?.[1] || '');
     preview.description = metaContent(html, 'og:description') || metaContent(html, 'description') || metaContent(html, 'twitter:description');
     preview.image = metaContent(html, 'og:image') || metaContent(html, 'twitter:image');
-    preview.jsonLdText = extractJsonLdText(html);
-    const postDate = extractDateFromHtml(html);
-    preview.pubDate = postDate.date;
-    preview.pubDateSource = postDate.source;
+    if (isInstagramOpenGraphHeaderOnly(preview.description)) {
+      const samePost = normalizeInstagramPublicPostUrl(finalUrl) === normalizeInstagramPublicPostUrl(url);
+      const structured = samePost ? readInstagramBoundStructuredCaption(html, url) : null;
+      preview.captionEvidence = structured ? CAPTION_EXACT_ORIGINAL : CAPTION_METADATA_ONLY;
+      preview.description = structured?.caption || '';
+      preview.pubDate = structured?.date || '';
+      preview.pubDateSource = structured?.date ? `instagram-public-html-${structured.dateField}` : '';
+    } else {
+      preview.jsonLdText = extractJsonLdText(html);
+      const postDate = extractDateFromHtml(html);
+      preview.pubDate = postDate.date;
+      preview.pubDateSource = postDate.source;
+    }
   }
 
   return preview;
@@ -1306,14 +1322,42 @@ export async function fetchRenderedInstagramPreview(page, url) {
     };
   });
 
-  const postDate = extractRenderedPostDate(data);
+  let finalUrl = data.finalUrl;
+  let loginWall = instagramPageHasAccessWall(data);
+  const metadataOnly = isInstagramOpenGraphHeaderOnly(data.ogDescription);
+  let caption = metadataOnly ? '' : cleanText(data.ogDescription, 2200);
+  let captionEvidence = caption ? 'preview-caption' : '';
+  let postDate = metadataOnly ? null : extractRenderedPostDate(data);
+  if (metadataOnly) {
+    captionEvidence = CAPTION_METADATA_ONLY;
+    const original = normalizeInstagramPublicPostUrl(url);
+    if (!loginWall && original && normalizeInstagramPublicPostUrl(data.finalUrl) === original) {
+      const visible = await readInstagramBoundVisibleCaption(page, url).catch(() => '');
+      const document = await instagramDocumentSnapshot(page).catch(() => null);
+      if (document) {
+        finalUrl = document.finalUrl;
+        loginWall = instagramPageHasAccessWall(document);
+      }
+      if (document && !loginWall && normalizeInstagramPublicPostUrl(document.finalUrl) === original) {
+        const structured = readInstagramBoundStructuredCaption(document.html, url);
+        caption = structured?.caption || visible;
+        if (caption) captionEvidence = CAPTION_EXACT_ORIGINAL;
+        const linkedDate = instagramAbsoluteDate(await readInstagramPostLinkedDate(page, url).catch(() => ''));
+        if (linkedDate) postDate = { date: new Date(linkedDate), source: 'instagram-rendered-time-datetime' };
+        else if (structured?.date) postDate = {
+          date: new Date(structured.date), source: `instagram-public-html-${structured.dateField}`,
+        };
+      }
+    }
+  }
   return {
     status,
     retryAfter,
-    finalUrl: data.finalUrl,
-    loginWall: instagramPageHasAccessWall(data),
+    finalUrl,
+    loginWall,
     title: cleanText(data.ogTitle || data.title, 1200),
-    description: cleanText(data.ogDescription, 2200),
+    description: caption,
+    ...(captionEvidence ? { captionEvidence } : {}),
     image: cleanText(data.image, 1200),
     jsonLdText: '',
     bodyText: cleanText(data.bodyText, 2500),
@@ -1326,6 +1370,7 @@ export async function fetchRenderedInstagramPreview(page, url) {
 function candidateSignal(candidate) {
   const deal = candidate.sourceDeal || {};
   const preview = candidate.preview || {};
+  if ([CAPTION_METADATA_ONLY, CAPTION_EXACT_ORIGINAL].includes(preview.captionEvidence)) return postSignal(candidate);
   return [
     candidate.title,
     candidate.snippet,
@@ -1353,36 +1398,41 @@ function trustedSourceDealExpirySignal(deal = {}) {
   return /(?:caption|ocr|content[- ]?date|original[- ]?post|manual)/i.test(provenance) ? value : '';
 }
 
-function postSignal(candidate) {
+function postSignal(candidate, maxPartLength = 1800) {
   const preview = candidate.preview || {};
   const sourceDeal = candidate.sourceDeal || {};
   const sourceDate = trustedSourceDealPostDate(sourceDeal);
+  const scoped = [CAPTION_METADATA_ONLY, CAPTION_EXACT_ORIGINAL].includes(preview.captionEvidence);
+  const postKey = scoped ? canonicalInstagramPostKey(candidate.url) : '';
+  const exactSource = postKey && postKey === canonicalInstagramPostKey(sourceDeal.url || sourceDeal.postUrl || sourceDeal.post_url);
   const structuredSource = /(?:apify instagram|meta instagram|instagram[-_ ]?graph)/i.test([
     sourceDeal.originSource,
     sourceDeal.source,
     sourceDeal.pubDateSource,
   ].filter(Boolean).join(' '));
-  const structuredCaption = sourceDate
+  const structuredCaption = sourceDate && (!scoped || exactSource)
     ? [
       sourceDeal.caption,
       sourceDeal.postCaption,
       sourceDeal.rawCaption,
+      ...(scoped ? [sourceDeal.metaGraphCaption] : []),
       sourceDeal.media?.caption,
       ...(structuredSource ? [sourceDeal.title, sourceDeal.description] : []),
     ]
     : [];
-  return [
-    preview.title,
-    preview.description,
-    preview.jsonLdText,
-    preview.bodyText,
-    ...structuredCaption,
-  ].map((part) => cleanText(part, 1800)).filter(Boolean).join(' ');
+  const previewParts = scoped
+    ? preview.captionEvidence === CAPTION_EXACT_ORIGINAL ? [preview.description] : []
+    : [preview.title, preview.description, preview.jsonLdText, preview.bodyText];
+  return [...previewParts, ...structuredCaption].map((part) => cleanText(part, maxPartLength))
+    .filter(part => part && (!scoped || !isInstagramOpenGraphHeaderOnly(part))).join(' ');
 }
 
 function offerDateSignal(candidate) {
   const preview = candidate.preview || {};
   const deal = candidate.sourceDeal || {};
+  if ([CAPTION_METADATA_ONLY, CAPTION_EXACT_ORIGINAL].includes(preview.captionEvidence)) {
+    return cleanText(postSignal(candidate, 4000), 4000);
+  }
   return [
     candidate.title,
     candidate.snippet,
@@ -1827,6 +1877,9 @@ function buildQualityScore(candidate, signal) {
 
 function getRejectionReason(candidate, signal, score) {
   const primarySignal = postSignal(candidate) || signal;
+  if (candidate.preview?.captionEvidence === CAPTION_METADATA_ONLY && !postSignal(candidate)) {
+    return 'Originalbeschreibung des Instagram-Posts nicht lesbar';
+  }
   if (isSelfSyndicatedPost(candidate, primarySignal)) return 'selbst syndizierter FreeFinder-Post';
   const policy = discoveryRejection(primarySignal);
   if (policy) return policy;
@@ -2618,6 +2671,11 @@ export async function enrichRenderedPreviews(candidates, options = {}) {
           candidate.preview = {
             ...(candidate.preview || {}),
             ...rendered,
+            ...((rendered.captionEvidence === CAPTION_METADATA_ONLY || !rendered.description)
+              && candidate.preview?.captionEvidence === CAPTION_EXACT_ORIGINAL ? {
+                captionEvidence: CAPTION_EXACT_ORIGINAL, description: candidate.preview.description,
+                pubDate: candidate.preview.pubDate, pubDateSource: candidate.preview.pubDateSource,
+              } : {}),
             loginWall: rendered.loginWall,
           };
         }

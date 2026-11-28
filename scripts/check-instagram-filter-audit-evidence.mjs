@@ -5,7 +5,7 @@ import { fileURLToPath } from 'node:url';
 import { chromium } from 'playwright';
 import { fetchRenderedInstagramPreview } from '../scraper/instagram-ai-agent.js';
 import { applyInstagramCookies, instagramAuthSummary, loadInstagramCookieHints } from '../scraper/instagram-auth-utils.js';
-import { normalizeInstagramPublicPostUrl, readInstagramPostLinkedDate } from '../scraper/instagram-page-access.js';
+import { isInstagramOpenGraphHeaderOnly, normalizeInstagramPublicPostUrl, readInstagramPostLinkedDate } from '../scraper/instagram-page-access.js';
 import { createInstagramWebAccess } from '../scraper/instagram-web-access-policy.js';
 import { retryAfterAt } from '../scraper/source-http-policy.js';
 
@@ -215,7 +215,14 @@ export async function captureInstagramFilterAudit({
           continue;
         }
         const proof = await capturePost(page, url);
-        const caption = text(proof?.caption, captionLimit);
+        let caption = text(proof?.caption, captionLimit);
+        if (isInstagramOpenGraphHeaderOnly(caption) && preview.captionEvidence === 'exact-original-caption') {
+          caption = text(preview.description, captionLimit) || caption;
+        }
+        if (isInstagramOpenGraphHeaderOnly(caption)) {
+          row.reason = 'open-graph-header-only';
+          continue;
+        }
         if (!caption || normalizeInstagramPublicPostUrl(page.url()) !== url) {
           row.reason = proof?.reason || 'complete-public-caption-unproven';
           continue;

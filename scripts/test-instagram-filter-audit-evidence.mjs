@@ -129,3 +129,14 @@ test('browser cookie setup failure never opens an original or launches a second 
   assert.equal(report.browserNavigations, 0);
   assert.equal(report.cachedGraphCaptures, 1);
 });
+
+test('the observed engagement-only Open Graph header is an unreadable caption, even with an exact post and date', async () => {
+  const browser = browsers({ capture: url => url === AUDIT_TARGETS[0]
+    ? { caption: '314 likes, 10 comments - satansbratan am November 25, 2026' } : {} });
+  const { report } = await browser.run();
+  assert.equal(report.capturedCount, 3);
+  assert.equal(report.rows[0].status, 'unverified');
+  assert.equal(report.rows[0].reason, 'open-graph-header-only');
+  assert.equal(report.rows[0].caption, undefined);
+  assert.equal(report.rows[0].sourcePublishedAt, dates[0]);
+});

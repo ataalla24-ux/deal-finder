@@ -120,6 +120,7 @@ test('foreign identity, unbound caption, truncated caption and impossible date c
     [{ canonical: second }, date, 'rendered-complete-caption-unproven'],
     [{ og: null, articleText: 'A different original, with another caption elsewhere on the page.' }, date, 'rendered-complete-caption-unproven'],
     [{ caption: caption + '…' }, date, 'rendered-complete-caption-unproven'],
+    [{ caption: '314 likes, 10 comments - satansbratan am November 25, 2026' }, date, 'open-graph-header-only'],
     [{}, '2026-02-30T12:00:00Z', 'rendered-bound-publication-unproven'],
   ]) {
     const mock = fixture({ documentFor: () => settings, linkedDate: () => dateValue });

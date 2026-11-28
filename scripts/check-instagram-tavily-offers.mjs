@@ -8,7 +8,7 @@ import { canonicalInstagramPostKey, semanticCrossPlatformOfferKey } from '../scr
 import { filterModeratedDeals, loadDealModeration } from '../scraper/deal-moderation-utils.js';
 import { validateDealsForSlack } from '../scraper/deal-validity-agent.js';
 import { instagramAuthSummary, instagramCookieHeader, loadInstagramCookieHints } from '../scraper/instagram-auth-utils.js';
-import { instagramPageHasAccessWall } from '../scraper/instagram-page-access.js';
+import { instagramPageHasAccessWall, isInstagramOpenGraphHeaderOnly } from '../scraper/instagram-page-access.js';
 import { INSTAGRAM_TAVILY_SOURCE, normalizeInstagramTavilyUrl } from '../scraper/instagram-tavily-index.js';
 import { INSTAGRAM_TAVILY_INVESTIGATION } from '../scraper/instagram-tavily-investigation.js';
 import { createInstagramWebAccess } from '../scraper/instagram-web-access-policy.js';
@@ -78,7 +78,8 @@ function exactPostProof(html, url) {
       recordDate(entry.datePublished, 'instagram-public-html-datePublished');
       recordDate(entry.uploadDate, 'instagram-public-html-uploadDate');
       postTitle ||= clean(entry.headline || entry.name, 500);
-      postCaption ||= normalizeText(entry.caption || entry.description || entry.articleBody);
+      const caption = normalizeText(entry.caption || entry.description || entry.articleBody);
+      if (caption && !isInstagramOpenGraphHeaderOnly(caption)) postCaption ||= caption;
     }
   });
   $('main time[datetime],[role="main"] time[datetime]').slice(0, 30).each((_, node) => {
@@ -91,6 +92,7 @@ function exactPostProof(html, url) {
   const [[pubDate, pubDateSource]] = dated;
   const title = postTitle || (identities.length ? clean(meta('og:title'), 500) : '');
   const description = postCaption || (identities.length ? normalizeText(meta('og:description')) : '');
+  if (isInstagramOpenGraphHeaderOnly(description)) return { reason: 'open-graph-header-only' };
   if (!description) return { reason: 'missing-original-caption' };
   if (description.length > captionLimit) return { reason: 'original-caption-over-limit' };
   return { title, description, pubDate, pubDateSource };

@@ -6,7 +6,14 @@ on:
     branches: [main]
     paths:
       - 'scripts/check-instagram-filter-audit-evidence.mjs'
+      - 'scripts/check-instagram-tavily-rendered-offers.mjs'
+      - 'scripts/check-instagram-tavily-offers.mjs'
+      - 'scraper/instagram-page-access.js'
+      - 'scraper/instagram-ai-agent.js'
       - 'scripts/test-instagram-filter-audit-evidence.mjs'
+      - 'scripts/test-instagram-ai-agent-acceptance.mjs'
+      - 'scripts/test-instagram-tavily-rendered-offers.mjs'
+      - 'scripts/test-instagram-tavily-offers.mjs'
       - '.github/workflows/instagram-filter-audit-evidence.yml'
 
 permissions:
@@ -30,7 +37,7 @@ jobs:
           node-version: '22'
           cache: npm
       - run: npm ci --no-audit --no-fund
-      - run: node --test scripts/test-instagram-filter-audit-evidence.mjs scripts/test-instagram-tavily-rendered-offers.mjs
+      - run: node --test scripts/test-instagram-filter-audit-evidence.mjs scripts/test-instagram-tavily-rendered-offers.mjs scripts/test-instagram-tavily-offers.mjs scripts/test-instagram-ai-agent-acceptance.mjs
   capture:
     needs: offline
     if: github.event_name == 'workflow_dispatch' && github.ref == 'refs/heads/main' && github.run_attempt == 1

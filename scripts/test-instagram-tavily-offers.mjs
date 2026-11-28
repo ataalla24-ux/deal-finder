@@ -142,6 +142,16 @@ test('a concrete new public offer preserves the exact source clock and original 
   assert.equal(deal.slackTs, undefined);
 });
 
+test('an exact timestamp and metadata header do not certify the surrounding page as the original caption', async () => {
+  const header = '314 likes, 10 comments - satansbratan am November 25, 2026';
+  const result = await verify({ links: [original],
+    fetcher: async () => html(page(original, { captionText: '', extra: '<p>' + caption + '</p>' })
+      .replace('</head>', '<meta property="og:description" content="' + header + '"></head>')) });
+  assert.equal(result.report.rows[0].reason, 'open-graph-header-only');
+  assert.equal(result.report.verifiedNewOffers, 0);
+  assert.deepEqual(result.candidates, []);
+});
+
 test('an over-limit original caption is held instead of cutting off mandatory conditions', async () => {
   const longCaption = caption + ' Zusätzlicher Text.'.repeat(100) + ' Nur bei Kauf eines zweiten Produkts.';
   const result = await verify({ links: [original], fetcher: async () => html(page(original, { captionText: longCaption })) });

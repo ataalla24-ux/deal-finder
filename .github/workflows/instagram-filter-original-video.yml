@@ -1,0 +1,83 @@
+name: Instagram Filter Original Video
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - 'scripts/check-instagram-filter-original-video.mjs'
+      - 'scripts/test-instagram-filter-original-video.mjs'
+      - '.github/workflows/instagram-filter-original-video.yml'
+
+permissions:
+  contents: read
+concurrency:
+  group: ${{ github.event_name == 'workflow_dispatch' && 'instagram-ai-scan' || format('instagram-filter-original-video-offline-{0}', github.run_id) }}
+  cancel-in-progress: false
+  queue: max
+env:
+  SENTRY_DISABLED: '1'
+  TZ: Europe/Vienna
+
+jobs:
+  offline:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+      - run: npm ci --no-audit --no-fund
+      - run: node --test scripts/test-instagram-filter-original-video.mjs
+  capture:
+    needs: offline
+    if: github.event_name == 'workflow_dispatch' && github.ref == 'refs/heads/main' && github.run_attempt == 1
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      actions: read
+      contents: write
+    env:
+      PLAYWRIGHT_BROWSERS_PATH: '0'
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+      - run: npm ci --no-audit --no-fund
+      - name: Read the fixed earlier original evidence artifact
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh run download 46126728769 --repo "$GITHUB_REPOSITORY" --name instagram-filter-audit-evidence --dir output/instagram-filter-original-prior
+      - name: Claim the single exact original
+        id: claim
+        run: node scripts/check-instagram-filter-original-video.mjs --claim
+      - name: Persist the one-time claim before original navigation
+        if: steps.claim.outputs.claimed == 'true'
+        run: node scripts/commit-generated.mjs --message "Claim single Instagram original proof [skip ci]" --files source-state/instagram-filter-original-video-claim.json
+      - if: steps.claim.outputs.claimed == 'true'
+        run: npx playwright install --with-deps chromium
+      - name: Capture exact public original caption and frames
+        id: capture
+        if: steps.claim.outputs.claimed == 'true'
+        env:
+          INSTAGRAM_SESSIONID: ${{ secrets.INSTAGRAM_SESSIONID }}
+          INSTAGRAM_COOKIES: ${{ secrets.INSTAGRAM_COOKIES }}
+        run: node scripts/check-instagram-filter-original-video.mjs --run
+      - name: Persist any genuine new shared Instagram access hold
+        if: always() && steps.capture.outputs.web_access_changed == 'true'
+        run: node scripts/commit-generated.mjs --message "Record exact Instagram original access hold [skip ci]" --files docs/instagram-ai-report.json
+      - uses: actions/upload-artifact@v4
+        if: always() && steps.claim.outputs.claimed == 'true'
+        with:
+          name: instagram-filter-original-video
+          path: |
+            output/instagram-filter-original-video/evidence.json
+            output/instagram-filter-original-video/frame-*.jpg
+          if-no-files-found: error
+          retention-days: 7
