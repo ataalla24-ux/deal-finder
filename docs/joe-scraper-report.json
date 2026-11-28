@@ -1,31 +1,11 @@
 {
-  "generatedAt": "2026-11-27T15:15:28.305Z",
+  "generatedAt": "2026-11-28T14:20:09.556Z",
   "status": "degraded",
   "authenticatedCoverage": {
-    "status": "provider-rate-limited",
+    "status": "provider-rate-limit-cooldown",
     "authenticated": false,
     "readableOffers": 0,
-    "technical": {
-      "documentStatus": 429,
-      "bundleStatus": null,
-      "bundleMime": null,
-      "consentScriptStatus": null,
-      "bundleNetworkError": null,
-      "failedOwnRequests": 0,
-      "firstOwnHttpError": null,
-      "firstOwnScriptError": null
-    },
-    "signals": {
-      "rootMounted": false,
-      "bundleDeclared": false,
-      "onBenefitsPage": true,
-      "readablePage": false,
-      "benefitsHeading": false,
-      "loginButton": false,
-      "accountMenu": false,
-      "guestPrompt": false,
-      "accessDenied": false
-    }
+    "retryAt": "2026-11-28T15:15:28.305Z"
   },
   "publicDiscovery": {
     "pages": [
@@ -114,11 +94,17 @@
       "candidates": 0
     }
   ],
+  "privateAccessPause": {
+    "reason": "provider-rate-limited",
+    "retryAt": "2026-11-28T15:15:28.305Z",
+    "observedAt": "2026-11-27T15:15:28.305Z",
+    "providerWaitRecorded": false
+  },
   "expired": [],
   "candidates": 9,
   "publicOmvCandidates": 3,
   "retainedPublicCampaigns": 0,
   "errors": [
-    "jö account coverage: provider-rate-limited; readable offers: 0"
+    "jö account coverage: provider-rate-limit-cooldown; readable offers: 0"
   ]
 }
